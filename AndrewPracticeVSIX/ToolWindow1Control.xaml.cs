@@ -1,6 +1,12 @@
 ﻿namespace AndrewPracticeVSIX
 {
+    using CloudFoundry.CloudController.V2;
+    using CloudFoundry.CloudController.V2.Client;
+    using CloudFoundry.CloudController.V2.Client.Data;
+    using CloudFoundry.UAA;
+    using System;
     using System.Diagnostics.CodeAnalysis;
+    using System.Threading;
     using System.Windows;
     using System.Windows.Controls;
 
@@ -18,17 +24,36 @@
         }
 
         /// <summary>
-        /// Handles click on the button by displaying a message box.
+        /// Login to a CF instance and print app names to the console
         /// </summary>
-        /// <param name="sender">The event sender.</param>
-        /// <param name="e">The event args.</param>
-        [SuppressMessage("Microsoft.Globalization", "CA1300:SpecifyMessageBoxOptions", Justification = "Sample code")]
-        [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1300:ElementMustBeginWithUpperCaseLetter", Justification = "Default event handler naming pattern")]
-        private void button1_Click(object sender, RoutedEventArgs e)
+        private async void GetCFInfo_ClickAsync(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show(
-                string.Format(System.Globalization.CultureInfo.CurrentUICulture, "Invoked '{0}'", this.ToString()),
-                "ToolWindow1");
+            Uri target = new Uri("REDACTED");
+            Uri httpProxy = null;
+            bool skipSsl = true;
+
+            CloudFoundryClient v3client = new CloudFoundryClient(target, new System.Threading.CancellationToken(), httpProxy, skipSsl);
+            AuthenticationContext refreshToken = null;
+
+            CloudCredentials credentials = new CloudCredentials();
+            credentials.User = "REDACTED";
+            credentials.Password = "REDACTED";
+
+            try
+            {
+                refreshToken = await v3client.Login(credentials);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+
+            PagedResponseCollection<ListAllAppsResponse> apps = await v3client.Apps.ListAllApps();
+            foreach (ListAllAppsResponse app in apps)
+            {
+                Console.WriteLine(app.Name);
+            }
         }
+
     }
 }
