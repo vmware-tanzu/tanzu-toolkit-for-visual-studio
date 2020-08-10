@@ -1,12 +1,9 @@
 ﻿namespace AndrewPracticeVSIX
 {
-    using CloudFoundry.CloudController.V2;
     using CloudFoundry.CloudController.V2.Client;
     using CloudFoundry.CloudController.V2.Client.Data;
     using CloudFoundry.UAA;
     using System;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Threading;
     using System.Windows;
     using System.Windows.Controls;
 
@@ -26,18 +23,18 @@
         /// <summary>
         /// Login to a CF instance and print app names to the console
         /// </summary>
-        private async void GetCFInfo_ClickAsync(object sender, RoutedEventArgs e)
+        private async void ConnectToCFAsync(object sender, RoutedEventArgs e)
         {
-            Uri target = new Uri("REDACTED");
+            Uri target = new Uri(this.tbUrl.Text);
             Uri httpProxy = null;
-            bool skipSsl = true;
+            bool skipSsl = (bool)this.cbIgnoreSSK.IsChecked;
 
             CloudFoundryClient v3client = new CloudFoundryClient(target, new System.Threading.CancellationToken(), httpProxy, skipSsl);
             AuthenticationContext refreshToken = null;
 
             CloudCredentials credentials = new CloudCredentials();
-            credentials.User = "REDACTED";
-            credentials.Password = "REDACTED";
+            credentials.User = this.tbUsername.Text;
+            credentials.Password = this.pbPassword.Password;
 
             try
             {
