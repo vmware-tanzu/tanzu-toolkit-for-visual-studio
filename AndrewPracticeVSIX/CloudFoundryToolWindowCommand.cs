@@ -12,7 +12,7 @@ namespace AndrewPracticeVSIX
     /// <summary>
     /// Command handler
     /// </summary>
-    internal sealed class ToolWindow1Command
+    internal sealed class CloudFoundryToolWindowCommand
     {
         /// <summary>
         /// Command ID.
@@ -30,12 +30,12 @@ namespace AndrewPracticeVSIX
         private readonly AsyncPackage package;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ToolWindow1Command"/> class.
+        /// Initializes a new instance of the <see cref="CloudFoundryToolWindowCommand"/> class.
         /// Adds our command handlers for menu (commands must exist in the command table file)
         /// </summary>
         /// <param name="package">Owner package, not null.</param>
         /// <param name="commandService">Command service to add command to, not null.</param>
-        private ToolWindow1Command(AsyncPackage package, OleMenuCommandService commandService)
+        private CloudFoundryToolWindowCommand(AsyncPackage package, OleMenuCommandService commandService)
         {
             this.package = package ?? throw new ArgumentNullException(nameof(package));
             commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
@@ -48,7 +48,7 @@ namespace AndrewPracticeVSIX
         /// <summary>
         /// Gets the instance of the command.
         /// </summary>
-        public static ToolWindow1Command Instance
+        public static CloudFoundryToolWindowCommand Instance
         {
             get;
             private set;
@@ -76,7 +76,7 @@ namespace AndrewPracticeVSIX
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
 
             OleMenuCommandService commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
-            Instance = new ToolWindow1Command(package, commandService);
+            Instance = new CloudFoundryToolWindowCommand(package, commandService);
         }
 
         /// <summary>

@@ -10,12 +10,12 @@
     /// <summary>
     /// Interaction logic for ToolWindow1Control.
     /// </summary>
-    public partial class ToolWindow1Control : UserControl
+    public partial class CloudFoundryToolWindowControl : UserControl
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ToolWindow1Control"/> class.
         /// </summary>
-        public ToolWindow1Control()
+        public CloudFoundryToolWindowControl()
         {
             this.InitializeComponent();
         }

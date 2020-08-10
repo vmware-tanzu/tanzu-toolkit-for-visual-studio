@@ -48,9 +48,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AndrewPracticeVSIXPackage.cs" />
     <Compile Include="CloudFoundryToolWindow.cs" />
-    <Compile Include="ToolWindow1Command.cs" />
-    <Compile Include="ToolWindow1Control.xaml.cs">
-      <DependentUpon>ToolWindow1Control.xaml</DependentUpon>
+    <Compile Include="CloudFoundryToolWindowCommand.cs" />
+    <Compile Include="CloudFoundryToolWindowControl.xaml.cs">
+      <DependentUpon>CloudFoundryToolWindowControl.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -84,7 +84,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="ToolWindow1Control.xaml">
+    <Page Include="CloudFoundryToolWindowControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
