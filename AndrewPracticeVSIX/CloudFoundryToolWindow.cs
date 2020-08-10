@@ -16,12 +16,12 @@
     /// </para>
     /// </remarks>
     [Guid("3d369352-09bf-4671-8cdc-21df11ea3ac7")]
-    public class ToolWindow1 : ToolWindowPane
+    public class CloudFoundryToolWindow : ToolWindowPane
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ToolWindow1"/> class.
+        /// Initializes a new instance of the <see cref="CloudFoundryToolWindow"/> class.
         /// </summary>
-        public ToolWindow1() : base(null)
+        public CloudFoundryToolWindow() : base(null)
         {
             this.Caption = "ToolWindow1";
 

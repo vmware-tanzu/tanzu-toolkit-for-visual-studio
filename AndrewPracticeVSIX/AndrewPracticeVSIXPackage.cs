@@ -26,7 +26,7 @@ namespace AndrewPracticeVSIX
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [Guid(AndrewPracticeVSIXPackage.PackageGuidString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
-    [ProvideToolWindow(typeof(ToolWindow1))]
+    [ProvideToolWindow(typeof(CloudFoundryToolWindow))]
     public sealed class AndrewPracticeVSIXPackage : AsyncPackage
     {
         /// <summary>
