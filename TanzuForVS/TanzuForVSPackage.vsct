@@ -22,7 +22,7 @@
 
   <!--The Commands section is where commands, menus, and menu groups are defined.
       This section uses a Guid to identify the package that provides the command defined inside it. -->
-  <Commands package="guidAndrewPracticeVSIXPackage">
+  <Commands package="guidTanzuForVSPackage">
     <!-- Inside this section we have different sub-sections: one for the menus, another
     for the menu groups, one for the buttons (the actual commands), one for the combos
     and the last one for the bitmaps used. Each element is identified by a command id that
@@ -42,7 +42,7 @@
               <CommandFlag>DefaultInvisible</CommandFlag>
               <CommandFlag>DynamicVisibility</CommandFlag>
           If you do not want an image next to your command, remove the Icon node /> -->
-      <Button guid="guidAndrewPracticeVSIXPackageCmdSet" id="ToolWindow1CommandId" priority="0x0100" type="Button">
+      <Button guid="guidTanzuForVSPackageCmdSet" id="ToolWindow1CommandId" priority="0x0100" type="Button">
         <Parent guid="guidSHLMainMenu" id="IDG_VS_MM_TOOLSADDINS"/>
         <Icon guid="guidImages" id="bmpPic1" />
         <Strings>
@@ -64,10 +64,10 @@
 
   <Symbols>
     <!-- This is the package guid. -->
-    <GuidSymbol name="guidAndrewPracticeVSIXPackage" value="{660b7c11-e2ed-45df-8121-9d5e2634035e}" />
+    <GuidSymbol name="guidTanzuForVSPackage" value="{660b7c11-e2ed-45df-8121-9d5e2634035e}" />
 
     <!-- This is the guid used to group the menu commands together -->
-    <GuidSymbol name="guidAndrewPracticeVSIXPackageCmdSet" value="{6030e9c1-e9cc-40c3-a15a-11bf7b47bf93}">
+    <GuidSymbol name="guidTanzuForVSPackageCmdSet" value="{6030e9c1-e9cc-40c3-a15a-11bf7b47bf93}">
       <IDSymbol name="ToolWindow1CommandId" value="0x0100" />
     </GuidSymbol>
 

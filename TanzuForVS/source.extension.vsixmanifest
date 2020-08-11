@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="AndrewPracticeVSIX.26580d20-50af-411b-9bd1-fb4982e7d408" Version="1.0" Language="en-US" Publisher="HP Inc." />
-    <DisplayName>AndrewPracticeVSIX</DisplayName>
+    <Identity Id="TanzuForVS.26580d20-50af-411b-9bd1-fb4982e7d408" Version="1.0" Language="en-US" Publisher="HP Inc." />
+    <DisplayName>TanzuForVS</DisplayName>
     <Description>Empty VSIX Project.</Description>
   </Metadata>
   <Installation>

@@ -4,7 +4,7 @@ using System.Threading;
 using Microsoft.VisualStudio.Shell;
 using Task = System.Threading.Tasks.Task;
 
-namespace AndrewPracticeVSIX
+namespace TanzuForVS
 {
     /// <summary>
     /// This is the class that implements the package exposed by this assembly.
@@ -24,13 +24,13 @@ namespace AndrewPracticeVSIX
     /// </para>
     /// </remarks>
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
-    [Guid(AndrewPracticeVSIXPackage.PackageGuidString)]
+    [Guid(TanzuForVSPackage.PackageGuidString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [ProvideToolWindow(typeof(CloudFoundryToolWindow))]
-    public sealed class AndrewPracticeVSIXPackage : AsyncPackage
+    public sealed class TanzuForVSPackage : AsyncPackage
     {
         /// <summary>
-        /// AndrewPracticeVSIXPackage GUID string.
+        /// TanzuForVSPackage GUID string.
         /// </summary>
         public const string PackageGuidString = "660b7c11-e2ed-45df-8121-9d5e2634035e";
 

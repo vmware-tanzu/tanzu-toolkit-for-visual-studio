@@ -1,4 +1,4 @@
-﻿namespace AndrewPracticeVSIX
+﻿namespace TanzuForVS
 {
     using System;
     using System.Runtime.InteropServices;

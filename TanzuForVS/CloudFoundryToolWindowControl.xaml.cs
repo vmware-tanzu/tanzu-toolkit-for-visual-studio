@@ -1,4 +1,4 @@
-﻿namespace AndrewPracticeVSIX
+﻿namespace TanzuForVS
 {
     using CloudFoundry.CloudController.V2.Client;
     using CloudFoundry.CloudController.V2.Client.Data;
