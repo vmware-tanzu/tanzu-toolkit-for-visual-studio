@@ -12,7 +12,7 @@ namespace TanzuForVS
     /// <summary>
     /// Command handler
     /// </summary>
-    internal sealed class CloudFoundryToolWindowCommand
+    internal sealed class CFExplorerCommand
     {
         /// <summary>
         /// Command ID.
@@ -30,12 +30,12 @@ namespace TanzuForVS
         private readonly AsyncPackage package;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CloudFoundryToolWindowCommand"/> class.
+        /// Initializes a new instance of the <see cref="CFExplorerCommand"/> class.
         /// Adds our command handlers for menu (commands must exist in the command table file)
         /// </summary>
         /// <param name="package">Owner package, not null.</param>
         /// <param name="commandService">Command service to add command to, not null.</param>
-        private CloudFoundryToolWindowCommand(AsyncPackage package, OleMenuCommandService commandService)
+        private CFExplorerCommand(AsyncPackage package, OleMenuCommandService commandService)
         {
             this.package = package ?? throw new ArgumentNullException(nameof(package));
             commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
@@ -48,7 +48,7 @@ namespace TanzuForVS
         /// <summary>
         /// Gets the instance of the command.
         /// </summary>
-        public static CloudFoundryToolWindowCommand Instance
+        public static CFExplorerCommand Instance
         {
             get;
             private set;
@@ -76,7 +76,7 @@ namespace TanzuForVS
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
 
             OleMenuCommandService commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
-            Instance = new CloudFoundryToolWindowCommand(package, commandService);
+            Instance = new CFExplorerCommand(package, commandService);
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace TanzuForVS
             // Get the instance number 0 of this tool window. This window is single instance so this instance
             // is actually the only one.
             // The last flag is set to true so that if the tool window does not exists it will be created.
-            ToolWindowPane window = this.package.FindToolWindow(typeof(CloudFoundryToolWindow), 0, true);
+            ToolWindowPane window = this.package.FindToolWindow(typeof(CFLoginToolWindow), 0, true);
             if ((null == window) || (null == window.Frame))
             {
                 throw new NotSupportedException("Cannot create tool window");

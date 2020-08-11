@@ -25,7 +25,7 @@
         /// </summary>
         private async void ConnectToCFAsync(object sender, RoutedEventArgs e)
         {
-            Uri target = new Uri(this.tbUrl.Text);
+            Uri target = new Uri(this.tbUrl.Text); // TODO: handle a poorly formatted URI here!
             Uri httpProxy = null;
             bool skipSsl = (bool)this.cbIgnoreSSK.IsChecked;
 

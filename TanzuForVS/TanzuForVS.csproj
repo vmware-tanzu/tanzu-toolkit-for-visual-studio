@@ -47,10 +47,10 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TanzuForVSPackage.cs" />
-    <Compile Include="CloudFoundryToolWindow.cs" />
-    <Compile Include="CloudFoundryToolWindowCommand.cs" />
-    <Compile Include="CloudFoundryToolWindowControl.xaml.cs">
-      <DependentUpon>CloudFoundryToolWindowControl.xaml</DependentUpon>
+    <Compile Include="CFLoginToolWindow.cs" />
+    <Compile Include="CFExplorerCommand.cs" />
+    <Compile Include="CFLoginToolWindowControl.xaml.cs">
+      <DependentUpon>CFLoginToolWindowControl.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -84,7 +84,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="CloudFoundryToolWindowControl.xaml">
+    <Page Include="CFLoginToolWindowControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

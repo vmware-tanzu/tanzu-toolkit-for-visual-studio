@@ -16,12 +16,12 @@
     /// </para>
     /// </remarks>
     [Guid("3d369352-09bf-4671-8cdc-21df11ea3ac7")]
-    public class CloudFoundryToolWindow : ToolWindowPane
+    public class CFLoginToolWindow : ToolWindowPane
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CloudFoundryToolWindow"/> class.
+        /// Initializes a new instance of the <see cref="CFLoginToolWindow"/> class.
         /// </summary>
-        public CloudFoundryToolWindow() : base(null)
+        public CFLoginToolWindow() : base(null)
         {
             this.Caption = "Tanzu Cloud Foundry Explorer";
 
