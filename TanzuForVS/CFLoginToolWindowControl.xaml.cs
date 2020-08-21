@@ -8,14 +8,14 @@
     using System.Windows.Controls;
 
     /// <summary>
-    /// Interaction logic for ToolWindow1Control.
+    /// Interaction logic for CFLoginToolWindowControl.
     /// </summary>
-    public partial class CloudFoundryToolWindowControl : UserControl
+    public partial class CFLoginToolWindowControl : UserControl
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ToolWindow1Control"/> class.
+        /// Initializes a new instance of the <see cref="CFLoginToolWindowControl"/> class.
         /// </summary>
-        public CloudFoundryToolWindowControl()
+        public CFLoginToolWindowControl()
         {
             this.InitializeComponent();
         }
