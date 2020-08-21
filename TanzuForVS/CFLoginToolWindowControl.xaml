@@ -4,12 +4,18 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:vsshell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
+             xmlns:converters="clr-namespace:TanzuForVS.Converters"
              Background="{DynamicResource {x:Static vsshell:VsBrushes.WindowKey}}"
              Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300"
              Name="MyToolWindow">
-
+    
+    <UserControl.Resources>
+        <converters:VisibilityConverter x:Key="Visibility" />
+    </UserControl.Resources>
+    
+    
     <Grid Margin="50,0,50,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"></RowDefinition>
@@ -41,7 +47,13 @@
         <CheckBox Name="cbIgnoreSSK" Grid.Row="8" Grid.Column="1" Content="Skip SSL validation" Margin="0,5,5,5" ></CheckBox>
 
         <Button Content="Log in" Grid.Row="9" Grid.Column="0" Click="ConnectToCFAsync" Name="loginButton"/>
-        
+
+        <TextBox Grid.Row="10" Grid.Column="0" Margin="5"  IsReadOnly="True" TextWrapping="Wrap"
+                 BorderBrush="Transparent" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                 Foreground="Crimson" MinLines="3" MaxLines="3" Background="Transparent"
+                 Text="{Binding Path=ErrorMessage}" 
+                 Visibility="{Binding Path=HasErrors, Converter={StaticResource Visibility}}"/>
+
     </Grid>
 
 </UserControl>
