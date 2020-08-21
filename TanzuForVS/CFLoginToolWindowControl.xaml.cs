@@ -39,7 +39,7 @@
             {
                 Uri target = new Uri(this.tbUrl.Text); 
                 Uri httpProxy = null;
-                bool skipSsl = (bool)this.cbIgnoreSSK.IsChecked;
+                bool skipSsl = true;
 
                 CloudFoundryClient v3client = new CloudFoundryClient(target, new System.Threading.CancellationToken(), httpProxy, skipSsl);
                 AuthenticationContext refreshToken = null;
