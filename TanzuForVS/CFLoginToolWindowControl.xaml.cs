@@ -1,10 +1,9 @@
 ﻿namespace TanzuForVS
 {
-    using CloudFoundry.CloudController.V2.Client;
-    using CloudFoundry.CloudController.V2.Client.Data;
     using CloudFoundry.UAA;
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using System.Windows;
     using System.Windows.Controls;
 
@@ -13,57 +12,56 @@
     /// </summary>
     public partial class CFLoginToolWindowControl : UserControl
     {
+        ICfApiClientFactory _cfApiClientFactory;
+        public ErrorResource WindowDataContext = new ErrorResource() { ErrorMessage = null, HasErrors = false };
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CFLoginToolWindowControl"/> class.
         /// </summary>
-        public CFLoginToolWindowControl()
+        public CFLoginToolWindowControl(ICfApiClientFactory cfApiClientFactory)
         {
             this.InitializeComponent();
-            this.DataContext = new ErrorResource();
+
+            this.DataContext = WindowDataContext;
+            _cfApiClientFactory = cfApiClientFactory;
         }
 
         /// <summary>
-        /// Login to a CF instance and print app names to the console
+        /// Wrapper around async task ConnectToCFAsync
         /// </summary>
-        private async void ConnectToCFAsync(object sender, RoutedEventArgs e)
+        private async void LoginBtn_Click(object sender, RoutedEventArgs e)
         {
+            await ConnectToCFAsync(tbUrl.Text, tbUsername.Text, pbPassword.Password, "", true);
+        }
 
-            var errorResource = this.DataContext as ErrorResource;
-            if (errorResource == null)
-            {
-                throw new InvalidOperationException("Invalid DataContext");
-            }
-            errorResource.HasErrors = false;
+        /// <summary>
+        /// Tries to create a new Cloud Foundry API client & login to the target using the credentials provided.
+        /// Exceptions are caught & applied to the DataContext to be displayed on the tool window.
+        /// </summary>
+        public async Task ConnectToCFAsync(string target, string username, string password, string httpProxy, bool skipSsl)
+        {
+            WindowDataContext.HasErrors = false;
 
             try
             {
-                Uri target = new Uri(this.tbUrl.Text); 
-                Uri httpProxy = null;
-                bool skipSsl = true;
-
-                CloudFoundryClient v3client = new CloudFoundryClient(target, new System.Threading.CancellationToken(), httpProxy, skipSsl);
-                AuthenticationContext refreshToken = null;
+                Uri targetUri = new Uri(target);
+                Uri httpProxyUri = null; // TODO: un-hardcode this later
 
                 CloudCredentials credentials = new CloudCredentials();
-                credentials.User = this.tbUsername.Text;
-                credentials.Password = this.pbPassword.Password;
+                credentials.User = username;
+                credentials.Password = password;
 
-                refreshToken = await v3client.Login(credentials);
-           
-                PagedResponseCollection<ListAllAppsResponse> apps = await v3client.Apps.ListAllApps();
-                foreach (ListAllAppsResponse app in apps)
-                {
-                    Console.WriteLine(app.Name);
-                }
-            }
+                IUAA cfApiV2Client = _cfApiClientFactory.CreateCfApiV2Client(targetUri, httpProxyUri, skipSsl);
+
+                AuthenticationContext refreshToken = await cfApiV2Client.Login(credentials);
+            } 
             catch (Exception ex)
             {
                 var errorMessages = new List<string>();
                 ErrorFormatter.FormatExceptionMessage(ex, errorMessages);
-                errorResource.ErrorMessage = string.Join(Environment.NewLine, errorMessages.ToArray());
-                errorResource.HasErrors = true;
+                WindowDataContext.ErrorMessage = string.Join(Environment.NewLine, errorMessages.ToArray());
+                WindowDataContext.HasErrors = true;
             }
         }
-
     }
 }

@@ -38,20 +38,25 @@
         </Grid.ColumnDefinitions>
 
         <Label Content="Target URL" Grid.Row="2" Grid.Column="0"></Label>
-        <TextBox Name="tbUrl" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Stretch" Width="auto"></TextBox>
+        <TextBox Name="tbUrl" Grid.Row="3" Grid.Column="1" 
+                 HorizontalAlignment="Stretch" Width="auto"></TextBox>
 
         <Label Content="Username" Grid.Row="4" Grid.Column="0"></Label>
-        <TextBox Name="tbUsername" Grid.Row="5" Grid.Column="1" HorizontalAlignment="Stretch" Width="auto"></TextBox>
+        <TextBox Name="tbUsername" Grid.Row="5" Grid.Column="1" 
+                 HorizontalAlignment="Stretch" Width="auto"></TextBox>
 
         <Label Content="Password" Grid.Row="6" Grid.Column="0" ></Label>
-        <PasswordBox Name="pbPassword" Grid.Row="7" Grid.Column="1" HorizontalAlignment="Stretch" Width="auto"></PasswordBox>
+        <PasswordBox Name="pbPassword" Grid.Row="7" Grid.Column="1" 
+                     HorizontalAlignment="Stretch" Width="auto"></PasswordBox>
 
-        <Button Content="Log in (without SSL)" Grid.Row="11" Grid.Column="0" Click="ConnectToCFAsync" Name="loginButton"/>
+        <Button Content="Log in (without SSL)" Grid.Row="11" Grid.Column="0" 
+                Click="LoginBtn_Click" Name="loginButton"/>
 
-        <TextBox Grid.Row="12" Grid.Column="0" Margin="5"  IsReadOnly="True" TextWrapping="Wrap"
-                 BorderBrush="Transparent" ScrollViewer.VerticalScrollBarVisibility="Auto"
-                 Foreground="Crimson" MinLines="3" MaxLines="3" Background="Transparent"
-                 Text="{Binding Path=ErrorMessage}" 
+        <TextBox Grid.Row="12" Grid.Column="0" Margin="5"  IsReadOnly="True" 
+                 TextWrapping="Wrap" BorderBrush="Transparent" 
+                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                 Foreground="Crimson" MinLines="3" MaxLines="3" 
+                 Background="Transparent" Text="{Binding Path=ErrorMessage}" 
                  Visibility="{Binding Path=HasErrors, Converter={StaticResource Visibility}}"/>
 
     </Grid>

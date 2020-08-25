@@ -7,7 +7,7 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    internal class ErrorResource : INotifyPropertyChanged
+    public class ErrorResource : INotifyPropertyChanged
     {
         private bool hasErrors = false;
         private string errorMessage = string.Empty;
