@@ -41,6 +41,7 @@
         public async Task ConnectToCFAsync(string target, string username, string password, string httpProxy, bool skipSsl)
         {
             WindowDataContext.HasErrors = false;
+            WindowDataContext.IsLoggedIn = false;
 
             try
             {
@@ -54,6 +55,7 @@
                 IUAA cfApiV2Client = _cfApiClientFactory.CreateCfApiV2Client(targetUri, httpProxyUri, skipSsl);
 
                 AuthenticationContext refreshToken = await cfApiV2Client.Login(credentials);
+                WindowDataContext.IsLoggedIn = refreshToken.IsLoggedIn;
             } 
             catch (Exception ex)
             {

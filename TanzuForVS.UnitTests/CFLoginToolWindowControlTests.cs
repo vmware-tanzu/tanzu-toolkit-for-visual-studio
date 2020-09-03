@@ -69,7 +69,7 @@ namespace TanzuForVS.UnitTests
             string httpProxy = "doesn't matter";
             bool skipSsl = true;
             Uri targetUri = new Uri(targetStr);
-            const string fakeClientCreationErrorMessage = 
+            const string fakeClientCreationErrorMessage =
                 "(Fake message) couldn't create client";
 
             _mockCfApiClientFactory.Setup(x => x.CreateCfApiV2Client(targetUri, null, skipSsl))
@@ -105,6 +105,33 @@ namespace TanzuForVS.UnitTests
 
             Assert.IsTrue(_sut.WindowDataContext.HasErrors);
             Assert.AreEqual(fakeLoginErrorMessage, _sut.WindowDataContext.ErrorMessage);
+        }
+
+        [TestMethod()]
+        public async Task ConnectToCFAsync_DisplaysLoginSuccessMessage_WhenLogInSucceeds()
+        {
+            Assert.IsFalse(_sut.WindowDataContext.IsLoggedIn, "DataContext should not be logged in to start");
+
+            string targetStr = "http://properly.formatted.uri";
+            string httpProxy = "doesn't matter";
+            string username = "valid username";
+            string password = "valid password";
+            bool skipSsl = true;
+            Uri targetUri = new Uri(targetStr);
+
+            _mockCfApiClientFactory.Setup(x => x.CreateCfApiV2Client(targetUri, null, skipSsl))
+               .Returns(_mockCfApiClient.Object);
+
+            var fakeAuthContext = Mock.Of<AuthenticationContext>(a =>
+                a.IsLoggedIn == true
+            );
+
+            _mockCfApiClient.Setup(x => x.Login(It.IsAny<CloudCredentials>()))
+                .ReturnsAsync(fakeAuthContext);
+
+            await _sut.ConnectToCFAsync(targetStr, username, password, httpProxy, skipSsl);
+
+            Assert.IsTrue(_sut.WindowDataContext.IsLoggedIn);
         }
     }
 }

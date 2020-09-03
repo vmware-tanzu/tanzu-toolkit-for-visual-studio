@@ -58,6 +58,13 @@
                  Foreground="Crimson" MinLines="3" MaxLines="3" 
                  Background="Transparent" Text="{Binding Path=ErrorMessage}" 
                  Visibility="{Binding Path=HasErrors, Converter={StaticResource Visibility}}"/>
+        
+        <TextBox Grid.Row="12" Grid.Column="0" Margin="5"  IsReadOnly="True" 
+                 TextWrapping="Wrap" BorderBrush="Transparent" 
+                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                 Foreground="Green" MinLines="3" MaxLines="3" 
+                 Background="Transparent" Text="Successfully Logged In!" 
+                 Visibility="{Binding Path=IsLoggedIn, Converter={StaticResource Visibility}}"/>
 
     </Grid>
 

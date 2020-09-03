@@ -11,6 +11,7 @@
     {
         private bool hasErrors = false;
         private string errorMessage = string.Empty;
+        private bool isLoggedIn = false;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -39,6 +40,27 @@
             {
                 this.errorMessage = value;
                 this.RaisePropertyChangedEvent("ErrorMessage");
+            }
+        }
+
+        public bool IsLoggedIn
+        {
+            get
+            {
+                return isLoggedIn;
+            }
+
+            set
+            {
+                if (value == true && this.HasErrors == false)
+                {
+                    this.isLoggedIn = true;
+                } else
+                {
+                    this.isLoggedIn = false;
+                }
+
+                this.RaisePropertyChangedEvent("IsLoggedIn");
             }
         }
 
