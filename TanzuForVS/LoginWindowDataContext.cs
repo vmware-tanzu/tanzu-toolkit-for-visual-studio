@@ -1,13 +1,8 @@
 ﻿namespace TanzuForVS
 {
-    using System;
-    using System.Collections.Generic;
     using System.ComponentModel;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
 
-    public class ErrorResource : INotifyPropertyChanged
+    public class LoginWindowDataContext : INotifyPropertyChanged
     {
         private bool hasErrors = false;
         private string errorMessage = string.Empty;
@@ -55,7 +50,8 @@
                 if (value == true && this.HasErrors == false)
                 {
                     this.isLoggedIn = true;
-                } else
+                }
+                else
                 {
                     this.isLoggedIn = false;
                 }

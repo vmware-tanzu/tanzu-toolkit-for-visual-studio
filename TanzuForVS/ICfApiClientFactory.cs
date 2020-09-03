@@ -1,5 +1,4 @@
-﻿using CloudFoundry.CloudController.V2.Client;
-using CloudFoundry.UAA;
+﻿using CloudFoundry.UAA;
 using System;
 
 namespace TanzuForVS

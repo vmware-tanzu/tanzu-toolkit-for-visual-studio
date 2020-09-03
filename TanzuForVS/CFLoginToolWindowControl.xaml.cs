@@ -13,7 +13,7 @@
     public partial class CFLoginToolWindowControl : UserControl
     {
         ICfApiClientFactory _cfApiClientFactory;
-        public ErrorResource WindowDataContext = new ErrorResource() { ErrorMessage = null, HasErrors = false };
+        public LoginWindowDataContext WindowDataContext = new LoginWindowDataContext() { ErrorMessage = null, HasErrors = false };
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CFLoginToolWindowControl"/> class.
@@ -27,7 +27,8 @@
         }
 
         /// <summary>
-        /// Wrapper around async task ConnectToCFAsync
+        /// Wrapper around async task ConnectToCFAsync to minimize logic within this
+        /// `async void` click handler method (unhandled exceptions will crash the process)
         /// </summary>
         private async void LoginBtn_Click(object sender, RoutedEventArgs e)
         {
@@ -56,7 +57,7 @@
 
                 AuthenticationContext refreshToken = await cfApiV2Client.Login(credentials);
                 WindowDataContext.IsLoggedIn = refreshToken.IsLoggedIn;
-            } 
+            }
             catch (Exception ex)
             {
                 var errorMessages = new List<string>();
