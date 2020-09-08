@@ -53,8 +53,11 @@
     <Compile Include="TanzuForVSPackage.cs" />
     <Compile Include="CFLoginToolWindow.cs" />
     <Compile Include="CFExplorerCommand.cs" />
-    <Compile Include="CFLoginToolWindowControl.xaml.cs">
-      <DependentUpon>CFLoginToolWindowControl.xaml</DependentUpon>
+    <Compile Include="TanzuLandingWindow.xaml.cs">
+      <DependentUpon>TanzuLandingWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="LoginForm.xaml.cs">
+      <DependentUpon>LoginForm.xaml</DependentUpon>
     </Compile>
     <Compile Include="VisibilityConverter.cs" />
   </ItemGroup>
@@ -89,9 +92,13 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="CFLoginToolWindowControl.xaml">
+    <Page Include="TanzuLandingWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="LoginForm.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>
@@ -100,6 +107,7 @@
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\AddCF.png" />
     <Content Include="Resources\tanzu16.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

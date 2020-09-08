@@ -3,27 +3,32 @@ using System;
 using System.Threading.Tasks;
 using CloudFoundry.UAA;
 using Moq;
+using System.Windows.Input;
 
 namespace TanzuForVS.UnitTests
 {
     [TestClass()]
-    public class CFLoginToolWindowControlTests
+    public class LoginFormTests
     {
-        private CFLoginToolWindowControl _sut;
+        private LoginForm _sut;
+        private CloudFoundryExplorer _mainWindow;
+        private RoutedCommand _openLoginFormWindowCommand;
         private readonly Mock<ICfApiClientFactory> _mockCfApiClientFactory = new Mock<ICfApiClientFactory>();
         private readonly Mock<IUAA> _mockCfApiClient = new Mock<IUAA>();
 
         [TestInitialize]
         public void TestInit()
         {
-            _sut = new CFLoginToolWindowControl(_mockCfApiClientFactory.Object);
+            _mainWindow = new CloudFoundryExplorer(_mockCfApiClientFactory.Object);
+            _openLoginFormWindowCommand = (RoutedCommand)_mainWindow.Resources["OpenLoginWindow"];
+            _openLoginFormWindowCommand.Execute(null, _mainWindow);
+            _sut = _mainWindow.LoginForm;
         }
 
 
         [TestMethod()]
         public async Task ConnectToCFAsync_SetDataContextError_WhenTargetUriEmpty()
         {
-            Assert.IsFalse(_sut.WindowDataContext.HasErrors, "DataContext should have no errors to start");
 
             string target = "";
             string username = "doesn't matter";
@@ -31,6 +36,8 @@ namespace TanzuForVS.UnitTests
             string httpProxy = "doesn't matter";
             bool skipSsl = true;
             const string expectedErrorMessage = "Invalid URI: The URI is empty.";
+
+            Assert.IsFalse(_sut.WindowDataContext.HasErrors, "DataContext should have no errors to start");
 
             await _sut.ConnectToCFAsync(target, username, password, httpProxy, skipSsl);
 

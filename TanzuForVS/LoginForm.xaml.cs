@@ -1,27 +1,22 @@
 ﻿namespace TanzuForVS
 {
-    using CloudFoundry.UAA;
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using System.Windows;
-    using System.Windows.Controls;
+    using CloudFoundry.UAA;
 
     /// <summary>
-    /// Interaction logic for CFLoginToolWindowControl.
+    /// Interaction logic for LoginForm.xaml
     /// </summary>
-    public partial class CFLoginToolWindowControl : UserControl
+    public partial class LoginForm : Window
     {
         ICfApiClientFactory _cfApiClientFactory;
         public LoginWindowDataContext WindowDataContext = new LoginWindowDataContext() { ErrorMessage = null, HasErrors = false };
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CFLoginToolWindowControl"/> class.
-        /// </summary>
-        public CFLoginToolWindowControl(ICfApiClientFactory cfApiClientFactory)
+        public LoginForm(ICfApiClientFactory cfApiClientFactory)
         {
-            this.InitializeComponent();
-
+            InitializeComponent();
             this.DataContext = WindowDataContext;
             _cfApiClientFactory = cfApiClientFactory;
         }
@@ -66,5 +61,6 @@
                 WindowDataContext.HasErrors = true;
             }
         }
+
     }
 }

@@ -1,19 +1,19 @@
-﻿<UserControl x:Class="TanzuForVS.CFLoginToolWindowControl"
+﻿<Window 
+             x:Class="TanzuForVS.LoginForm"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:vsshell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
              xmlns:converters="clr-namespace:TanzuForVS.Converters"
-             Background="{DynamicResource {x:Static vsshell:VsBrushes.WindowKey}}"
-             Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}"
              mc:Ignorable="d"
+             Height="300"
+             Width="400"
              d:DesignHeight="300" d:DesignWidth="300"
              Name="MyToolWindow">
 
-    <UserControl.Resources>
+    <Window.Resources>
         <converters:VisibilityConverter x:Key="Visibility" />
-    </UserControl.Resources>
+    </Window.Resources>
 
     <Grid Margin="50,0,50,0">
         <Grid.RowDefinitions>
@@ -67,5 +67,5 @@
                  Visibility="{Binding Path=IsLoggedIn, Converter={StaticResource Visibility}}"/>
 
     </Grid>
-
-</UserControl>
+   
+</Window>
