@@ -2,7 +2,7 @@
 {
     using System.ComponentModel;
 
-    public class LoginWindowDataContext : INotifyPropertyChanged
+    public class ToolWindowDataContext : INotifyPropertyChanged
     {
         private bool hasErrors = false;
         private string errorMessage = string.Empty;

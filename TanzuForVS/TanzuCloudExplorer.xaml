@@ -10,6 +10,7 @@
 
     <UserControl.Resources>
         <converters:VisibilityConverter x:Key="Visibility" />
+        <converters:VisibilityConverter x:Key="InverseVisibility" Reversed="True"/>
         <RoutedCommand x:Key="OpenLoginWindow"/>
         <Style x:Key="RoundedButtonStyle" TargetType="{x:Type Button}">
             <Setter Property="Template">
@@ -45,6 +46,24 @@
             <Image Source="Resources/AddCloud.png" Stretch="None" 
                    ToolTip="Target New Cloud Foundry Instance"/>
         </Button>
+        
+        <TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" 
+                 Margin="5"  IsReadOnly="True" 
+                 TextWrapping="Wrap" BorderBrush="Transparent" 
+                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                 HorizontalAlignment="Center" VerticalAlignment="Center"
+                 Foreground="Green" MinLines="3" MaxLines="3" 
+                 Background="Transparent" Text="Successfully Logged In!" 
+                 Visibility="{Binding Path=IsLoggedIn, Converter={StaticResource Visibility}}"/>
+
+        <TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" 
+                 Margin="5"  IsReadOnly="True" 
+                 TextWrapping="Wrap" BorderBrush="Transparent" 
+                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                 HorizontalAlignment="Center" VerticalAlignment="Center"
+                 Foreground="Gray" MinLines="3" MaxLines="3" 
+                 Background="Transparent" Text="Not Yet Connected" 
+                 Visibility="{Binding Path=IsLoggedIn, Converter={StaticResource InverseVisibility}}"/>
 
     </Grid>
 

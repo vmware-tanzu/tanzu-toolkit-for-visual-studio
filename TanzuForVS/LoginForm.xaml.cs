@@ -5,20 +5,23 @@
     using System.Threading.Tasks;
     using System.Windows;
     using CloudFoundry.UAA;
+  
 
     /// <summary>
     /// Interaction logic for LoginForm.xaml
     /// </summary>
     public partial class LoginForm : Window
-    {
+    {   
         ICfApiClientFactory _cfApiClientFactory;
-        public LoginWindowDataContext WindowDataContext = new LoginWindowDataContext() { ErrorMessage = null, HasErrors = false };
+        public ToolWindowDataContext WindowDataContext = null;
 
-        public LoginForm(ICfApiClientFactory cfApiClientFactory)
+        public LoginForm(ICfApiClientFactory cfApiClientFactory, ToolWindowDataContext dc)
         {
             InitializeComponent();
-            this.DataContext = WindowDataContext;
+
             _cfApiClientFactory = cfApiClientFactory;
+            WindowDataContext = dc;
+            this.DataContext = WindowDataContext;
         }
 
         /// <summary>
@@ -52,6 +55,7 @@
 
                 AuthenticationContext refreshToken = await cfApiV2Client.Login(credentials);
                 WindowDataContext.IsLoggedIn = refreshToken.IsLoggedIn;
+                if (refreshToken.IsLoggedIn) this.Close();
             }
             catch (Exception ex)
             {
