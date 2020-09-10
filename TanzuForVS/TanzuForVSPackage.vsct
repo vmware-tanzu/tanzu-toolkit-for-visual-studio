@@ -46,7 +46,7 @@
         <Parent guid="guidSHLMainMenu" id="IDG_VS_MM_TOOLSADDINS"/>
         <Icon guid="guidImages" id="bmpPic1" />
         <Strings>
-          <ButtonText>Tanzu Cloud Foundry Explorer</ButtonText>
+          <ButtonText>Tanzu Cloud Explorer</ButtonText>
         </Strings>
       </Button>
     </Buttons>

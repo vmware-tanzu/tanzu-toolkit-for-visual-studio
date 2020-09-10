@@ -6,15 +6,15 @@
     using System.Windows.Controls;
 
     /// <summary>
-    /// Interaction logic for TanzuLandingWindow.
+    /// Interaction logic for TanzuCloudExplorer.
     /// </summary>
-    public partial class CloudFoundryExplorer : UserControl
+    public partial class TanzuCloudExplorer : UserControl
     {
         ICfApiClientFactory _cfApiClientFactory;
         public LoginWindowDataContext WindowDataContext = new LoginWindowDataContext() { ErrorMessage = null, HasErrors = false };
         public LoginForm LoginForm = null;
 
-        public CloudFoundryExplorer(ICfApiClientFactory cfApiClientFactory)
+        public TanzuCloudExplorer(ICfApiClientFactory cfApiClientFactory)
         {
             this.InitializeComponent();
 

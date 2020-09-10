@@ -11,7 +11,7 @@ namespace TanzuForVS.UnitTests
     public class LoginFormTests
     {
         private LoginForm _sut;
-        private CloudFoundryExplorer _mainWindow;
+        private TanzuCloudExplorer _mainWindow;
         private RoutedCommand _openLoginFormWindowCommand;
         private readonly Mock<ICfApiClientFactory> _mockCfApiClientFactory = new Mock<ICfApiClientFactory>();
         private readonly Mock<IUAA> _mockCfApiClient = new Mock<IUAA>();
@@ -19,7 +19,7 @@ namespace TanzuForVS.UnitTests
         [TestInitialize]
         public void TestInit()
         {
-            _mainWindow = new CloudFoundryExplorer(_mockCfApiClientFactory.Object);
+            _mainWindow = new TanzuCloudExplorer(_mockCfApiClientFactory.Object);
             _openLoginFormWindowCommand = (RoutedCommand)_mainWindow.Resources["OpenLoginWindow"];
             _openLoginFormWindowCommand.Execute(null, _mainWindow);
             _sut = _mainWindow.LoginForm;
