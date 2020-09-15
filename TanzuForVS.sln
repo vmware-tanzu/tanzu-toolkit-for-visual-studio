@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TanzuForVS", "TanzuForVS\Ta
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TanzuForVS.UnitTests", "TanzuForVS.UnitTests\TanzuForVS.UnitTests.csproj", "{42268A3D-3A05-4EC1-8A67-0717A877ED9D}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TanzuForVS.CloudFoundryApiClient", "TanzuForVS.CloudFoundryApiClient\TanzuForVS.CloudFoundryApiClient.csproj", "{3AE10A3E-DF4C-4152-8609-1CB412B86795}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TanzuForVS.CloudFoundryApiClient.UnitTests", "TanzuForVS.CloudFoundryApiClient.UnitTests\TanzuForVS.CloudFoundryApiClient.UnitTests.csproj", "{0D5CEBF4-BCDA-4802-A43D-B8188321F84D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{42268A3D-3A05-4EC1-8A67-0717A877ED9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42268A3D-3A05-4EC1-8A67-0717A877ED9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42268A3D-3A05-4EC1-8A67-0717A877ED9D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3AE10A3E-DF4C-4152-8609-1CB412B86795}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AE10A3E-DF4C-4152-8609-1CB412B86795}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AE10A3E-DF4C-4152-8609-1CB412B86795}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AE10A3E-DF4C-4152-8609-1CB412B86795}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D5CEBF4-BCDA-4802-A43D-B8188321F84D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D5CEBF4-BCDA-4802-A43D-B8188321F84D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D5CEBF4-BCDA-4802-A43D-B8188321F84D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D5CEBF4-BCDA-4802-A43D-B8188321F84D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
