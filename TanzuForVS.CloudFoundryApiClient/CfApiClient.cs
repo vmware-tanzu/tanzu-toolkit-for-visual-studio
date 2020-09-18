@@ -17,12 +17,13 @@ namespace TanzuForVS.CloudFoundryApiClient
 
         public async Task LoginAsync(string cfTarget, string cfUsername, string cfPassword)
         {
+            preventSsl(cfTarget);
             validateUriStringOrThrow(cfTarget, "Invalid target URI");
             var uaaUri = GetUaaUriFromCfTarget(cfTarget);
 
             var defaultUaaClientId = "cf";
             var defaultUaaClientSecret = "";
-            
+
             int result = await _uaaClient.RequestAccessTokenAsync(uaaUri,
                                                                   defaultUaaClientId,
                                                                   defaultUaaClientSecret,
@@ -30,6 +31,14 @@ namespace TanzuForVS.CloudFoundryApiClient
                                                                   cfPassword);
 
             if (result == (int)HttpStatusCode.OK) AccessToken = _uaaClient.Token.access_token;
+        }
+
+        private void preventSsl(string cfTarget)
+        {
+            if (cfTarget.StartsWith("https://"))
+            {
+                throw new Exception("SSL connections not supported; please use \"http://...\"");
+            }
         }
 
         private Uri GetUaaUriFromCfTarget(string cfTargetString)

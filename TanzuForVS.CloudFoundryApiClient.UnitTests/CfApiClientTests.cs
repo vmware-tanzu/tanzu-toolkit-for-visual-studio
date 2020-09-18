@@ -64,6 +64,28 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
 
             Assert.IsNotNull(expectedException);
         }
+        
+        [TestMethod()]
+        public async Task LoginAsync_ThrowsException_WhenCfTargetSchemeIsHttps()
+        {
+            Exception expectedException = null;
+
+            var mockUaaClient = new Mock<IUaaClient>();
+            var _sut = new CfApiClient(mockUaaClient.Object);
+
+            try
+            {
+                var cfTargetWithHttps = "https://some.fake.target";
+                await _sut.LoginAsync(cfTargetWithHttps, "user", "pass");
+            }
+            catch (Exception e)
+            {
+                expectedException = e;
+            }
+
+            Assert.IsNotNull(expectedException);
+            Assert.IsTrue(expectedException.Message.Contains("SSL"));
+        }
 
         [TestMethod()]
         public async Task LoginAsync_DoesNotChangeAccessToken_WhenLoginFails()
