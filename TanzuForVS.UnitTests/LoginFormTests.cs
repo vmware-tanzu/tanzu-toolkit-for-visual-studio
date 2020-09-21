@@ -1,7 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Threading.Tasks;
-using CloudFoundry.UAA;
 using Moq;
 using System.Windows.Input;
 using TanzuForVS.CloudFoundryApiClient;
