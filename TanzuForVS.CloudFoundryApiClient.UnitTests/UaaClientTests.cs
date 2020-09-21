@@ -16,7 +16,7 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
 
             var mockHttp = new MockHttpMessageHandler();
             var request = mockHttp.When("http://some.fake.url/oauth/token")
-                    .Respond("application/json", fakeJsonString); 
+                    .Respond("application/json", fakeJsonString);
 
             var mockClient = mockHttp.ToHttpClient();
             var _uaaClient = new UaaClient(mockClient);
@@ -27,13 +27,13 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             string cfUsername = null;
             string cfPassword = null;
 
-            var expectedResult = (int)HttpStatusCode.OK;
+            var expectedResult = HttpStatusCode.OK;
             var actualResult = await _uaaClient.RequestAccessTokenAsync(uaaUri, uaaClientId, uaaClientSecret, cfUsername, cfPassword);
 
             Assert.AreEqual(expectedResult, actualResult);
             Assert.AreEqual(1, mockHttp.GetMatchCount(request));
         }
-        
+
         [TestMethod()]
         public async Task RequestAccessToken_ReturnsResponseCode_WhenResponseCodeIsNot200()
         {
@@ -50,21 +50,21 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             string cfUsername = null;
             string cfPassword = null;
 
-            var expectedResult = (int)HttpStatusCode.Unauthorized;
+            var expectedResult = HttpStatusCode.Unauthorized;
             var actualResult = await _uaaClient.RequestAccessTokenAsync(uaaUri, uaaClientId, uaaClientSecret, cfUsername, cfPassword);
 
             Assert.AreEqual(expectedResult, actualResult);
             Assert.AreEqual(1, mockHttp.GetMatchCount(request));
         }
-        
+
         [TestMethod()]
-        public async Task RequestAccessToken_ReturnsNegative1_WhenAnExceptionOccurs()
+        public async Task RequestAccessToken_ThrowsException_WhenRequestErrors()
         {
-            string fakeJsonString = "this is invalid json; we should never realistically see this";
+            string fakeJsonResponse = "this is unparseable json and will cause an error";
 
             var mockHttp = new MockHttpMessageHandler();
             var request = mockHttp.When("http://some.fake.url/oauth/token")
-                    .Respond("application/json", fakeJsonString); 
+                    .Respond("application/json", fakeJsonResponse);
 
             var mockClient = mockHttp.ToHttpClient();
             var _uaaClient = new UaaClient(mockClient);
@@ -75,11 +75,20 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             string cfUsername = null;
             string cfPassword = null;
 
-            var expectedResult = -1;
-            var actualResult = await _uaaClient.RequestAccessTokenAsync(uaaUri, uaaClientId, uaaClientSecret, cfUsername, cfPassword);
+            Exception expectedException = null;
+            
+            try
+            {
+                await _uaaClient.RequestAccessTokenAsync(uaaUri, uaaClientId, uaaClientSecret, cfUsername, cfPassword);
+            }
+            catch (Exception e)
+            {
+                expectedException = e;
+            }
 
-            Assert.AreEqual(expectedResult, actualResult);
+            Assert.IsNotNull(expectedException);
             Assert.AreEqual(1, mockHttp.GetMatchCount(request));
         }
+
     }
 }

@@ -15,29 +15,38 @@ namespace TanzuForVS.CloudFoundryApiClient
             AccessToken = null;
         }
 
-        public async Task LoginAsync(string cfTarget, string cfUsername, string cfPassword)
+        /// <summary>
+        /// LoginAsync contacts the auth server for the specified cfTarget
+        /// </summary>
+        /// <param name="cfTarget"></param>
+        /// <param name="cfUsername"></param>
+        /// <param name="cfPassword"></param>
+        /// <returns>
+        /// Access Token from the auth server as a string, 
+        /// or null if auth request responded with a status code other than 200
+        /// </returns>
+        public async Task<string> LoginAsync(string cfTarget, string cfUsername, string cfPassword)
         {
-            preventSsl(cfTarget);
             validateUriStringOrThrow(cfTarget, "Invalid target URI");
             var uaaUri = GetUaaUriFromCfTarget(cfTarget);
 
             var defaultUaaClientId = "cf";
             var defaultUaaClientSecret = "";
 
-            int result = await _uaaClient.RequestAccessTokenAsync(uaaUri,
+            var result = await _uaaClient.RequestAccessTokenAsync(uaaUri,
                                                                   defaultUaaClientId,
                                                                   defaultUaaClientSecret,
                                                                   cfUsername,
                                                                   cfPassword);
 
-            if (result == (int)HttpStatusCode.OK) AccessToken = _uaaClient.Token.access_token;
-        }
-
-        private void preventSsl(string cfTarget)
-        {
-            if (cfTarget.StartsWith("https://"))
+            if (result == HttpStatusCode.OK)
             {
-                throw new Exception("SSL connections not supported; please use \"http://...\"");
+                AccessToken = _uaaClient.Token.access_token;
+                return AccessToken;
+            }
+            else
+            {
+                return null;
             }
         }
 
@@ -57,10 +66,9 @@ namespace TanzuForVS.CloudFoundryApiClient
         private Uri validateUriStringOrThrow(string uriString, string errorMessage)
         {
             Uri uriResult;
-            bool validCfUri = Uri.TryCreate(uriString, UriKind.Absolute, out uriResult)
-                && uriResult.Scheme == Uri.UriSchemeHttp;
+            Uri.TryCreate(uriString, UriKind.Absolute, out uriResult);
 
-            if (!validCfUri) throw new Exception(errorMessage);
+            if (uriResult == null) throw new Exception(errorMessage);
 
             return uriResult;
         }

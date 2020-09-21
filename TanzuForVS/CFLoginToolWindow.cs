@@ -1,8 +1,10 @@
 ﻿namespace TanzuForVS
 {
     using System;
+    using System.Net.Http;
     using System.Runtime.InteropServices;
     using Microsoft.VisualStudio.Shell;
+    using TanzuForVS.CloudFoundryApiClient;
 
     /// <summary>
     /// This class implements the tool window exposed by this package and hosts a user control.
@@ -28,7 +30,7 @@
             // This is the user control hosted by the tool window; Note that, even if this class implements IDisposable,
             // we are not calling Dispose on this object. This is because ToolWindowPane calls Dispose on
             // the object returned by the Content property.
-            this.Content = new TanzuCloudExplorer(new CfApiV2ClientFactory());
+            this.Content = new TanzuCloudExplorer(new CfApiClient(new UaaClient(new HttpClient())));
         }
     }
 }

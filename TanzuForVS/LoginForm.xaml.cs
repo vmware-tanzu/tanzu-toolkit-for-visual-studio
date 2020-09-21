@@ -4,22 +4,22 @@
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using System.Windows;
-    using CloudFoundry.UAA;
-  
+    using TanzuForVS.CloudFoundryApiClient;
+
 
     /// <summary>
     /// Interaction logic for LoginForm.xaml
     /// </summary>
     public partial class LoginForm : Window
-    {   
-        ICfApiClientFactory _cfApiClientFactory;
+    {
         public ToolWindowDataContext WindowDataContext = null;
+        private ICfApiClient _cfApiClient = null;
 
-        public LoginForm(ICfApiClientFactory cfApiClientFactory, ToolWindowDataContext dc)
+        public LoginForm(ICfApiClient apiClient, ToolWindowDataContext dc)
         {
             InitializeComponent();
 
-            _cfApiClientFactory = cfApiClientFactory;
+            _cfApiClient = apiClient;
             WindowDataContext = dc;
             this.DataContext = WindowDataContext;
         }
@@ -39,23 +39,34 @@
         /// </summary>
         public async Task ConnectToCFAsync(string target, string username, string password, string httpProxy, bool skipSsl)
         {
-            WindowDataContext.HasErrors = false;
-            WindowDataContext.IsLoggedIn = false;
-
             try
             {
-                Uri targetUri = new Uri(target);
-                Uri httpProxyUri = null; // TODO: un-hardcode this later
+                WindowDataContext.HasErrors = false;
+                WindowDataContext.IsLoggedIn = false;
+                string errorMessage = "failed to login";
 
-                CloudCredentials credentials = new CloudCredentials();
-                credentials.User = username;
-                credentials.Password = password;
+                if (target == "")
+                {
+                    throw new Exception("Empty target URI");
+                }
+                else if (!Uri.IsWellFormedUriString(target, UriKind.Absolute))
+                {
+                    throw new Exception("Invalid target URI");
+                }
 
-                IUAA cfApiV2Client = _cfApiClientFactory.CreateCfApiV2Client(targetUri, httpProxyUri, skipSsl);
 
-                AuthenticationContext refreshToken = await cfApiV2Client.Login(credentials);
-                WindowDataContext.IsLoggedIn = refreshToken.IsLoggedIn;
-                if (refreshToken.IsLoggedIn) this.Close();
+                var result = await _cfApiClient.LoginAsync(target, username, password);
+
+                if (result == null)
+                {
+                    throw new Exception(errorMessage);
+                }
+                else
+                {
+                    WindowDataContext.IsLoggedIn = true;
+                    this.Close();
+                }
+
             }
             catch (Exception ex)
             {

@@ -19,7 +19,7 @@ namespace TanzuForVS.CloudFoundryApiClient
             _httpClient = httpClient;
         }
 
-        public async Task<int> RequestAccessTokenAsync(Uri uaaUri, string uaaClientId, string uaaClientSecret, string cfUsername, string cfPassword)
+        public async Task<HttpStatusCode> RequestAccessTokenAsync(Uri uaaUri, string uaaClientId, string uaaClientSecret, string cfUsername, string cfPassword)
         {
             try
             {
@@ -31,20 +31,21 @@ namespace TanzuForVS.CloudFoundryApiClient
                         (sender, cert, chain, sslPolicyErrors) => { return true; };
                 }
 
-                var uri = new UriBuilder(uaaUri.ToString());
+                string uriString = uaaUri.ToString();
+                var uri = new UriBuilder(uriString);
                 uri.Path = "/oauth/token";
 
                 var postBody = new List<KeyValuePair<string, string>>();
                 postBody.Add(new KeyValuePair<string, string>("grant_type", "password"));
                 postBody.Add(new KeyValuePair<string, string>("username", cfUsername));
                 postBody.Add(new KeyValuePair<string, string>("password", cfPassword));
-                
+
                 var content = new FormUrlEncodedContent(postBody);
                 content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
 
                 string basicAuthStringToEncode = uaaClientId + ":" + uaaClientSecret;
                 string encodedBasicAuthString = Base64Encode(basicAuthStringToEncode);
-                
+
                 var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString());
                 request.Content = content;
                 request.Headers.Add("Accept", "application/json");
@@ -58,13 +59,13 @@ namespace TanzuForVS.CloudFoundryApiClient
                     Token = JsonConvert.DeserializeObject<Token>(resultContent);
                 }
 
-                return (int)result.StatusCode;
+                return result.StatusCode;
 
             }
             catch (Exception e)
             {
                 System.Diagnostics.Debug.WriteLine(e);
-                return -1;
+                throw new Exception("Authentication error");
             }
         }
 

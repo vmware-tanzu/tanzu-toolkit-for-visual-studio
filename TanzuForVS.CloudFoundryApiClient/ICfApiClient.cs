@@ -4,6 +4,8 @@ namespace TanzuForVS.CloudFoundryApiClient
 {
     public interface ICfApiClient
     {
-        Task LoginAsync(string cfTarget, string cfUsername, string cfPassword);
+        string AccessToken { get; }
+
+        Task<string> LoginAsync(string cfTarget, string cfUsername, string cfPassword);
     }
 }

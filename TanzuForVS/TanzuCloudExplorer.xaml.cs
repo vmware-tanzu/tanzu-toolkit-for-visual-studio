@@ -4,23 +4,24 @@
     using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
+    using TanzuForVS.CloudFoundryApiClient;
 
     /// <summary>
     /// Interaction logic for TanzuCloudExplorer.
     /// </summary>
     public partial class TanzuCloudExplorer : UserControl
     {
-        ICfApiClientFactory _cfApiClientFactory;
+        private ICfApiClient _cfApiClient;
         public LoginForm LoginForm = null;
         private ToolWindowDataContext _dataContext = new ToolWindowDataContext()
         { ErrorMessage = null, HasErrors = false, IsLoggedIn = false };
 
-        public TanzuCloudExplorer(ICfApiClientFactory cfApiClientFactory)
+        public TanzuCloudExplorer(ICfApiClient cfApiClient)
         {
             this.InitializeComponent();
 
             this.DataContext = _dataContext;
-            _cfApiClientFactory = cfApiClientFactory;
+            _cfApiClient = cfApiClient;
         }
 
         /// <summary>
@@ -28,7 +29,7 @@
         /// </summary>
         private async void OpenLoginWindow_Click(object sender, RoutedEventArgs e)
         {
-            LoginForm = new LoginForm(_cfApiClientFactory, _dataContext);
+            LoginForm = new LoginForm(_cfApiClient, _dataContext);
 
             // `Form.ShowDialog()` causes unit tests to hang, so we only call it if we're not running mstest
             if (!IsRunningMSTest())

@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using System;
+using System.Net;
 
 namespace TanzuForVS.CloudFoundryApiClient
 {
@@ -7,6 +8,6 @@ namespace TanzuForVS.CloudFoundryApiClient
     {
         Token Token { get; }
 
-        Task<int> RequestAccessTokenAsync(Uri uaaUri, string uaaClientId, string uaaClientSecret, string cfUsername, string cfPassword);
+        Task<HttpStatusCode> RequestAccessTokenAsync(Uri uaaUri, string uaaClientId, string uaaClientSecret, string cfUsername, string cfPassword);
     }
 }
