@@ -33,7 +33,7 @@ namespace TanzuForVS.UnitTests
             string password = "doesn't matter";
             string httpProxy = "doesn't matter";
             bool skipSsl = true;
-            const string expectedErrorMessage = "Empty target URI";
+            string expectedErrorMessage = LoginForm.EmptyUriMessage;
 
             Assert.IsFalse(_sut.WindowDataContext.HasErrors, "DataContext should have no errors to start");
 
@@ -53,7 +53,7 @@ namespace TanzuForVS.UnitTests
             string password = "doesn't matter";
             string httpProxy = "doesn't matter";
             bool skipSsl = true;
-            const string expectedErrorMessage = "Invalid target URI";
+            string expectedErrorMessage = LoginForm.InvalidUriMessage;
 
             await _sut.ConnectToCFAsync(target, username, password, httpProxy, skipSsl);
 
@@ -72,16 +72,16 @@ namespace TanzuForVS.UnitTests
             string httpProxy = "doesn't matter";
             bool skipSsl = true;
 
-            const string fakeClientCreationErrorMessage =
+            const string fakeErrorMessage =
                 "(Fake message) couldn't login";
 
             _mockCfApiClient.Setup(x => x.LoginAsync(targetStr, username, password))
-                .Throws(new Exception(fakeClientCreationErrorMessage));
+                .Throws(new Exception(fakeErrorMessage));
 
             await _sut.ConnectToCFAsync(targetStr, username, password, httpProxy, skipSsl);
 
             Assert.IsTrue(_sut.WindowDataContext.HasErrors);
-            Assert.AreEqual(fakeClientCreationErrorMessage, _sut.WindowDataContext.ErrorMessage);
+            Assert.AreEqual(fakeErrorMessage, _sut.WindowDataContext.ErrorMessage);
             _mockCfApiClient.VerifyAll();
         }
 
@@ -116,6 +116,7 @@ namespace TanzuForVS.UnitTests
             string username = "invalid username";
             string password = "invalid password";
             bool skipSsl = true;
+            string expectedErrorMessage = LoginForm.LoginFailureMessage;
 
             _mockCfApiClient.Setup(mock => mock.LoginAsync(targetStr, username, password)).ReturnsAsync((string)null);
 
@@ -123,7 +124,7 @@ namespace TanzuForVS.UnitTests
 
             Assert.IsFalse(_sut.WindowDataContext.IsLoggedIn);
             Assert.IsTrue(_sut.WindowDataContext.HasErrors);
-            Assert.AreEqual("failed to login", _sut.WindowDataContext.ErrorMessage);
+            Assert.AreEqual(expectedErrorMessage, _sut.WindowDataContext.ErrorMessage);
             _mockCfApiClient.VerifyAll();
         }
     }

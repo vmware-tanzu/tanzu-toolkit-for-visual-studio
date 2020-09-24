@@ -15,6 +15,10 @@
         public ToolWindowDataContext WindowDataContext = null;
         private ICfApiClient _cfApiClient = null;
 
+        public readonly static string EmptyUriMessage = "Empty target URI";
+        public readonly static string InvalidUriMessage = "Invalid target URI";
+        public readonly static string LoginFailureMessage = "Failed to login";
+
         public LoginForm(ICfApiClient apiClient, ToolWindowDataContext dc)
         {
             InitializeComponent();
@@ -43,23 +47,21 @@
             {
                 WindowDataContext.HasErrors = false;
                 WindowDataContext.IsLoggedIn = false;
-                string errorMessage = "failed to login";
 
-                if (target == "")
+                if (String.IsNullOrEmpty(target))
                 {
-                    throw new Exception("Empty target URI");
+                    throw new Exception(EmptyUriMessage);
                 }
                 else if (!Uri.IsWellFormedUriString(target, UriKind.Absolute))
                 {
-                    throw new Exception("Invalid target URI");
+                    throw new Exception(InvalidUriMessage);
                 }
-
 
                 var result = await _cfApiClient.LoginAsync(target, username, password);
 
                 if (result == null)
                 {
-                    throw new Exception(errorMessage);
+                    throw new Exception(LoginFailureMessage);
                 }
                 else
                 {
