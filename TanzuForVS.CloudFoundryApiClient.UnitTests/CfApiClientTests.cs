@@ -1,5 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Newtonsoft.Json;
+using RichardSzalay.MockHttp;
 using System;
 using System.Net;
 using System.Threading.Tasks;
@@ -9,76 +11,103 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
     [TestClass()]
     public class CfApiClientTests
     {
-        private Mock<IUaaClient> _mockUaaClient = new Mock<IUaaClient>();
         private CfApiClient _sut;
+        private Mock<IUaaClient> _mockUaaClient = new Mock<IUaaClient>();
+        private static readonly MockHttpMessageHandler _mockHttp = new MockHttpMessageHandler();
+
+        private static readonly string _fakeTargetDomain = "myfaketarget.com";
+        private static readonly string _fakeCfApiAddress = $"https://api.{_fakeTargetDomain}";
+        private static readonly string _fakeLoginAddress = $"https://login.{_fakeTargetDomain}";
+        private static readonly string _fakeUaaAddress = $"https://uaa.{_fakeTargetDomain}";
+        private static readonly string _fakeCfUsername = "user";
+        private static readonly string _fakeCfPassword = "pass";
+
+        private static readonly BasicInfoResponse _fakeResponse = new BasicInfoResponse
+        {
+            links = new Links
+            {
+                login = new Login
+                {
+                    href = _fakeLoginAddress
+                },
+                uaa = new Uaa
+                {
+                    href = _fakeUaaAddress
+                }
+            }
+        };
+        private static readonly string _fakeJsonResponse = JsonConvert.SerializeObject(_fakeResponse);
 
         [TestInitialize()]
         public void TestInit()
         {
-            _sut = new CfApiClient(_mockUaaClient.Object);
+            _mockHttp.Fallback.Throw(new InvalidOperationException("No matching mock handler"));
+        }
+
+        [TestCleanup()]
+        public void TestCleanup()
+        {
+            _mockHttp.VerifyNoOutstandingExpectation();
         }
 
         [TestMethod()]
         public async Task LoginAsync_UpdatesAndReturnsAccessToken_WhenLoginSucceeds()
         {
-            var expectedUri = new Uri("http://uaa.myfaketarget.com");
-            var testUriString = "http://api.myfaketarget.com";
-
-            var fakeUaaClientId = "cf";
-            var fakeUaaClientSecret = "";
-            var fakeCfUsername = "user";
-            var fakeCfPassword = "pass";
+            var expectedUri = new Uri(_fakeLoginAddress);
             var fakeAccessTokenContent = "fake access token";
+
+            MockedRequest cfBasicInfoRequest = _mockHttp.Expect("https://api." + _fakeTargetDomain + "/")
+               .Respond("application/json", _fakeJsonResponse);
 
             _mockUaaClient.Setup(mock => mock.RequestAccessTokenAsync(
                 expectedUri,
-                fakeUaaClientId,
-                fakeUaaClientSecret,
-                fakeCfUsername,
-                fakeCfPassword))
+                CfApiClient.defaultAuthClientId,
+                CfApiClient.defaultAuthClientSecret,
+                _fakeCfUsername,
+                _fakeCfPassword))
                 .ReturnsAsync(HttpStatusCode.OK);
 
             _mockUaaClient.SetupGet(mock => mock.Token)
                 .Returns(new Token() { access_token = fakeAccessTokenContent });
 
-            var initialAccessToken = _sut.AccessToken;
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
-            var result = await _sut.LoginAsync(testUriString, fakeCfUsername, fakeCfPassword);
+            Assert.AreNotEqual(fakeAccessTokenContent, _sut.AccessToken);
 
-            Assert.AreNotEqual(initialAccessToken, _sut.AccessToken);
+            var result = await _sut.LoginAsync(_fakeCfApiAddress, _fakeCfUsername, _fakeCfPassword);
+
             Assert.AreEqual(fakeAccessTokenContent, _sut.AccessToken);
-
             Assert.AreEqual(fakeAccessTokenContent, result);
             _mockUaaClient.VerifyAll();
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(cfBasicInfoRequest));
         }
 
         [TestMethod()]
         public async Task LoginAsync_ReturnsNull_AndDoesNotUpdateAccessToken_WhenLoginFails()
         {
-            var expectedUri = new Uri("http://uaa.myfaketarget.com");
-            var testUriString = "http://api.myfaketarget.com";
+            var expectedUri = new Uri(_fakeLoginAddress);
 
-            var fakeUaaClientId = "cf";
-            var fakeUaaClientSecret = "";
-            var fakeCfUsername = "user";
-            var fakeCfPassword = "pass";
+            MockedRequest cfBasicInfoRequest = _mockHttp.Expect("https://api." + _fakeTargetDomain + "/")
+               .Respond("application/json", _fakeJsonResponse);
 
             _mockUaaClient.Setup(mock => mock.RequestAccessTokenAsync(
                 expectedUri,
-                fakeUaaClientId,
-                fakeUaaClientSecret,
-                fakeCfUsername,
-                fakeCfPassword))
+                CfApiClient.defaultAuthClientId,
+                CfApiClient.defaultAuthClientSecret,
+                _fakeCfUsername,
+                _fakeCfPassword))
                 .ReturnsAsync(HttpStatusCode.Unauthorized);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
             var initialAccessToken = _sut.AccessToken;
 
-            var result = await _sut.LoginAsync(testUriString, fakeCfUsername, fakeCfPassword);
+            var result = await _sut.LoginAsync(_fakeCfApiAddress, _fakeCfUsername, _fakeCfPassword);
 
             Assert.IsNull(result);
-
             Assert.AreEqual(initialAccessToken, _sut.AccessToken);
             _mockUaaClient.VerifyAll();
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(cfBasicInfoRequest));
         }
 
         [TestMethod()]
@@ -86,10 +115,16 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
         {
             Exception expectedException = null;
 
+            MockedRequest cfBasicInfoRequest = _mockHttp.When("*")
+               .Respond("application/json", _fakeJsonResponse);
+
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
             try
             {
                 var malformedCfTargetString = "what-a-mess";
-                await _sut.LoginAsync(malformedCfTargetString, "user", "pass");
+                await _sut.LoginAsync(malformedCfTargetString, _fakeCfUsername, _fakeCfPassword);
             }
             catch (Exception e)
             {
@@ -104,6 +139,7 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
                     It.IsAny<string>(),
                     It.IsAny<string>(),
                     It.IsAny<string>()), Times.Never);
+            Assert.AreEqual(0, _mockHttp.GetMatchCount(cfBasicInfoRequest));
         }
     }
 }

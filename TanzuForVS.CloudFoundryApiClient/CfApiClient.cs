@@ -1,17 +1,24 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace TanzuForVS.CloudFoundryApiClient
 {
     public class CfApiClient : ICfApiClient
     {
-        private static IUaaClient _uaaClient;
         public string AccessToken { get; private set; }
+        public static readonly string defaultAuthClientId = "cf";
+        public static readonly string defaultAuthClientSecret = "";
 
-        public CfApiClient(IUaaClient uaaClient)
+        private static IUaaClient _uaaClient;
+        private static HttpClient _httpClient;
+
+        public CfApiClient(IUaaClient uaaClient, HttpClient httpClient)
         {
             _uaaClient = uaaClient;
+            _httpClient = httpClient;
             AccessToken = null;
         }
 
@@ -28,14 +35,11 @@ namespace TanzuForVS.CloudFoundryApiClient
         public async Task<string> LoginAsync(string cfTarget, string cfUsername, string cfPassword)
         {
             validateUriStringOrThrow(cfTarget, "Invalid target URI");
-            var uaaUri = GetUaaUriFromCfTarget(cfTarget);
+            var authServerUri = await GetAuthServerUriFromCfTarget(cfTarget);
 
-            var defaultUaaClientId = "cf";
-            var defaultUaaClientSecret = "";
-
-            var result = await _uaaClient.RequestAccessTokenAsync(uaaUri,
-                                                                  defaultUaaClientId,
-                                                                  defaultUaaClientSecret,
+            var result = await _uaaClient.RequestAccessTokenAsync(authServerUri,
+                                                                  defaultAuthClientId,
+                                                                  defaultAuthClientSecret,
                                                                   cfUsername,
                                                                   cfPassword);
 
@@ -50,17 +54,35 @@ namespace TanzuForVS.CloudFoundryApiClient
             }
         }
 
-        private Uri GetUaaUriFromCfTarget(string cfTargetString)
+        private async Task<Uri> GetAuthServerUriFromCfTarget(string cfTargetString)
         {
-            var cfTargetUri = new Uri(cfTargetString);
+            try
+            {
+                Uri authServerUri = null;
 
-            var uriHostMinusSubdomain = cfTargetUri.Host.Substring(cfTargetUri.Host.IndexOf('.'));
-            var uaaHost = "uaa" + uriHostMinusSubdomain;
-            var uaaTargetString = cfTargetUri.Scheme + "://" + uaaHost;
+                var uri = new UriBuilder(cfTargetString)
+                {
+                    Path = "/",
+                    Port = -1
+                };
 
-            Uri uaaTargetUri = validateUriStringOrThrow(uaaTargetString, "Unable to produce UAA URI");
+                var request = new HttpRequestMessage(HttpMethod.Get, uri.ToString());
 
-            return uaaTargetUri;
+                var response = await _httpClient.SendAsync(request);
+
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var basicInfo = JsonConvert.DeserializeObject<BasicInfoResponse>(content);
+                    authServerUri = new Uri(basicInfo.links.login.href);
+                }
+
+                return authServerUri;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private Uri validateUriStringOrThrow(string uriString, string errorMessage)

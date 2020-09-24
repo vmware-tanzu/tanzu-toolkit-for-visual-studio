@@ -30,7 +30,11 @@
             // This is the user control hosted by the tool window; Note that, even if this class implements IDisposable,
             // we are not calling Dispose on this object. This is because ToolWindowPane calls Dispose on
             // the object returned by the Content property.
-            this.Content = new TanzuCloudExplorer(new CfApiClient(new UaaClient(new HttpClient())));
+            var globalHttpClient = new HttpClient();
+            var globalUaaClient = new UaaClient(globalHttpClient);
+            var globalCfApiClient = new CfApiClient(globalUaaClient, globalHttpClient);
+
+            this.Content = new TanzuCloudExplorer(globalCfApiClient);
         }
     }
 }
