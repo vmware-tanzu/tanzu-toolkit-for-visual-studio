@@ -41,6 +41,7 @@ namespace TanzuForVS.UnitTests
 
             Assert.IsTrue(_sut.WindowDataContext.HasErrors);
             Assert.AreEqual(expectedErrorMessage, _sut.WindowDataContext.ErrorMessage);
+            _mockCfApiClient.Verify(mock => mock.LoginAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
         [TestMethod()]
@@ -59,6 +60,7 @@ namespace TanzuForVS.UnitTests
 
             Assert.IsTrue(_sut.WindowDataContext.HasErrors);
             Assert.AreEqual(expectedErrorMessage, _sut.WindowDataContext.ErrorMessage);
+            _mockCfApiClient.Verify(mock => mock.LoginAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
         [TestMethod()]

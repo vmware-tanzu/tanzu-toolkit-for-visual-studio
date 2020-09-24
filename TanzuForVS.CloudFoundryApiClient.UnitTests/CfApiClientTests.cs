@@ -97,6 +97,13 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             }
 
             Assert.IsNotNull(expectedException);
+            _mockUaaClient.Verify(mock =>
+                mock.RequestAccessTokenAsync(
+                    It.IsAny<Uri>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>()), Times.Never);
         }
     }
 }
