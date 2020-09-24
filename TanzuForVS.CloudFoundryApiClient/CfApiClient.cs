@@ -11,6 +11,8 @@ namespace TanzuForVS.CloudFoundryApiClient
         public string AccessToken { get; private set; }
         public static readonly string defaultAuthClientId = "cf";
         public static readonly string defaultAuthClientSecret = "";
+        public static readonly string AuthServerLookupFailureMessage = "Unable to locate authentication server";
+        public static readonly string InvalidTargetUriMessage = "Invalid target URI";
 
         private static IUaaClient _uaaClient;
         private static HttpClient _httpClient;
@@ -34,7 +36,7 @@ namespace TanzuForVS.CloudFoundryApiClient
         /// </returns>
         public async Task<string> LoginAsync(string cfTarget, string cfUsername, string cfPassword)
         {
-            validateUriStringOrThrow(cfTarget, "Invalid target URI");
+            validateUriStringOrThrow(cfTarget, InvalidTargetUriMessage);
             var authServerUri = await GetAuthServerUriFromCfTarget(cfTarget);
 
             var result = await _uaaClient.RequestAccessTokenAsync(authServerUri,
@@ -79,9 +81,10 @@ namespace TanzuForVS.CloudFoundryApiClient
 
                 return authServerUri;
             }
-            catch
+            catch (Exception e)
             {
-                return null;
+                throw new Exception( AuthServerLookupFailureMessage +
+                    Environment.NewLine + e.Message);
             }
         }
 

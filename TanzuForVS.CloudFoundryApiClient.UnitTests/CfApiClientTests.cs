@@ -41,6 +41,7 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
         [TestInitialize()]
         public void TestInit()
         {
+            _mockHttp.ResetExpectations();
             _mockHttp.Fallback.Throw(new InvalidOperationException("No matching mock handler"));
         }
 
@@ -115,9 +116,8 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
         {
             Exception expectedException = null;
 
-            MockedRequest cfBasicInfoRequest = _mockHttp.When("*")
-               .Respond("application/json", _fakeJsonResponse);
-
+            MockedRequest catchallRequest = _mockHttp.When("*")
+               .Throw(new Exception("Malformed uri exception should be thrown before httpClient is used"));
 
             _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
@@ -139,7 +139,42 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
                     It.IsAny<string>(),
                     It.IsAny<string>(),
                     It.IsAny<string>()), Times.Never);
-            Assert.AreEqual(0, _mockHttp.GetMatchCount(cfBasicInfoRequest));
+            Assert.AreEqual(0, _mockHttp.GetMatchCount(catchallRequest));
         }
+
+
+        [TestMethod()]
+        public async Task LoginAsync_ThrowsException_WhenBasicInfoRequestErrors()
+        {
+            Exception resultException = null;
+            var fakeHttpExceptionMessage = "(fake) http request failed";
+
+            MockedRequest cfBasicInfoRequest = _mockHttp.Expect(_fakeCfApiAddress + "/")
+               .Throw(new Exception(fakeHttpExceptionMessage));
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            try
+            {
+                await _sut.LoginAsync(_fakeCfApiAddress, _fakeCfUsername, _fakeCfPassword);
+            }
+            catch (Exception e)
+            {
+                resultException = e;
+            }
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(cfBasicInfoRequest));
+            Assert.IsNotNull(resultException);
+            Assert.IsTrue(resultException.Message.Contains(fakeHttpExceptionMessage));
+            Assert.IsTrue(resultException.Message.Contains(CfApiClient.AuthServerLookupFailureMessage));
+            _mockUaaClient.Verify(mock =>
+                mock.RequestAccessTokenAsync(
+                    It.IsAny<Uri>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>()), Times.Never);
+        }
+
     }
 }
