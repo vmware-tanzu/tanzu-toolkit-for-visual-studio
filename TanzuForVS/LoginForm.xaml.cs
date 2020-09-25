@@ -74,6 +74,7 @@
             {
                 var errorMessages = new List<string>();
                 ErrorFormatter.FormatExceptionMessage(ex, errorMessages);
+                if (ex.Data.Contains("MessageToDisplay")) errorMessages.Insert(0, ex.Data["MessageToDisplay"].ToString());
                 WindowDataContext.ErrorMessage = string.Join(Environment.NewLine, errorMessages.ToArray());
                 WindowDataContext.HasErrors = true;
             }

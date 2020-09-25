@@ -166,7 +166,12 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             Assert.AreEqual(1, _mockHttp.GetMatchCount(cfBasicInfoRequest));
             Assert.IsNotNull(resultException);
             Assert.IsTrue(resultException.Message.Contains(fakeHttpExceptionMessage));
-            Assert.IsTrue(resultException.Message.Contains(CfApiClient.AuthServerLookupFailureMessage));
+            Assert.IsTrue(
+                resultException.Message.Contains(CfApiClient.AuthServerLookupFailureMessage)
+                || (resultException.Data.Contains("MessageToDisplay")
+                    && resultException.Data["MessageToDisplay"].ToString().Contains(CfApiClient.AuthServerLookupFailureMessage))
+            );
+
             _mockUaaClient.Verify(mock =>
                 mock.RequestAccessTokenAsync(
                     It.IsAny<Uri>(),

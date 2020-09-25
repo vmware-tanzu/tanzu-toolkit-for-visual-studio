@@ -83,8 +83,8 @@ namespace TanzuForVS.CloudFoundryApiClient
             }
             catch (Exception e)
             {
-                throw new Exception( AuthServerLookupFailureMessage +
-                    Environment.NewLine + e.Message);
+                e.Data.Add("MessageToDisplay", AuthServerLookupFailureMessage);
+                throw;
             }
         }
 
