@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using Microsoft.VisualStudio.Shell;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -31,3 +32,7 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
+//[assembly: ProvideCodeBase(CodeBase = "$PackageFolder$\\Microsoft.Extensions.DependencyInjection.dll")]
+//[assembly: ProvideCodeBase(CodeBase = "$PackageFolder$\\Microsoft.Extensions.DependencyInjection.Abstractions.dll")]
+//[assembly: ProvideBindingRedirection(AssemblyName = "Microsoft.Extensions.DependencyInjection",    NewVersion = "3.1.8.0", OldVersionLowerBound = "1.0.0.0",    OldVersionUpperBound = "3.0.0.0")]
+//[assembly: ProvideBindingRedirection(AssemblyName = "Microsoft.Extensions.DependencyInjection.Abstractions", NewVersion = "3.1.8.0", OldVersionLowerBound = "1.0.0.0", OldVersionUpperBound = "3.0.0.0")]

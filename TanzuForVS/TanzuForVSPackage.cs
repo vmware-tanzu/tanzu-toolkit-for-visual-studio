@@ -1,7 +1,15 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Shell;
+using TanzuForVS.Services.CloudFoundry;
+using TanzuForVS.Services.Dialog;
+using TanzuForVS.Services.Locator;
+using TanzuForVS.ViewModels;
+using TanzuForVS.WpfViews;
+using TanzuForVS.WpfViews.Services;
+using TanzuForVS.Commands;
 using Task = System.Threading.Tasks.Task;
 
 namespace TanzuForVS
@@ -32,7 +40,15 @@ namespace TanzuForVS
         /// <summary>
         /// TanzuForVSPackage GUID string.
         /// </summary>
-        public const string PackageGuidString = "660b7c11-e2ed-45df-8121-9d5e2634035e";
+        public const string PackageGuidString = "9419e55b-9e82-4d87-8ee5-70871b01b7cc";
+
+        private IServiceProvider serviceProvider;
+
+        public TanzuForVSPackage()
+        {
+        }
+
+
 
         #region Package Members
 
@@ -51,6 +67,45 @@ namespace TanzuForVS
             await TanzuCloudExplorerCommand.InitializeAsync(this);
         }
 
+        protected override object GetService(Type serviceType)
+        {
+            if (serviceProvider == null)
+            {
+                var collection = new ServiceCollection();
+                ConfigureServices(collection);
+                serviceProvider = collection.BuildServiceProvider();
+            }
+
+            var result = serviceProvider.GetService(serviceType);
+            if (result != null)
+            {
+                return result;
+            }
+
+            return base.GetService(serviceType);
+        }
+
+        protected override WindowPane InstantiateToolWindow(Type toolWindowType)
+        {
+            return GetService(toolWindowType) as WindowPane;
+        }
+
         #endregion
+
+        private void ConfigureServices(IServiceCollection services)
+        {
+
+            services.AddSingleton<ICloudFoundryService, CloudFoundryService>();
+            services.AddSingleton<IViewLocatorService, WpfViewLocatorService>();
+            services.AddSingleton<IDialogService, WpfDialogService>();
+
+            services.AddTransient<TanzuCloudExplorerToolWindow>();
+
+            services.AddTransient<ICloudExplorerViewModel, CloudExplorerViewModel>();
+            services.AddTransient<ICloudExplorerView, CloudExplorerView>();
+
+            services.AddTransient<ILoginDialogViewModel, LoginDialogViewModel>();
+            services.AddTransient<ILoginDialogView, LoginDialogView>();
+        }
     }
 }

@@ -19,8 +19,8 @@
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
     <UseCodebase>true</UseCodebase>
     <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
-    <IncludeDebugSymbolsInVSIXContainer>false</IncludeDebugSymbolsInVSIXContainer>
-    <IncludeDebugSymbolsInLocalVSIXDeployment>false</IncludeDebugSymbolsInLocalVSIXDeployment>
+    <IncludeDebugSymbolsInVSIXContainer>true</IncludeDebugSymbolsInVSIXContainer>
+    <IncludeDebugSymbolsInLocalVSIXDeployment>true</IncludeDebugSymbolsInLocalVSIXDeployment>
     <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
     <CopyOutputSymbolsToOutputDirectory>true</CopyOutputSymbolsToOutputDirectory>
     <StartAction>Program</StartAction>
@@ -35,6 +35,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <CopyVsixExtensionFiles>False</CopyVsixExtensionFiles>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -45,19 +46,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="ErrorFormatter.cs" />
-    <Compile Include="ToolWindowDataContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TanzuForVSPackage.cs" />
-    <Compile Include="CFLoginToolWindow.cs" />
-    <Compile Include="TanzuCloudExplorerCommand.cs" />
-    <Compile Include="TanzuCloudExplorer.xaml.cs">
-      <DependentUpon>TanzuCloudExplorer.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="LoginForm.xaml.cs">
-      <DependentUpon>LoginForm.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="VisibilityConverter.cs" />
+    <Compile Include="TanzuCloudExplorerToolWindow.cs" />
+    <Compile Include="Commands\TanzuCloudExplorerCommand.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="source.extension.vsixmanifest">
@@ -78,23 +70,28 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="16.0.206" ExcludeAssets="runtime">
-      <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection">
+      <Version>3.0.0</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="16.7.3069">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
+      <Version>3.0.0</Version>
     </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="16.0.206" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="16.7.3069" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="TanzuCloudExplorer.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="LoginForm.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
+    <ProjectReference Include="..\Services\Services.csproj">
+      <Project>{743bfc55-6c1f-4d0d-8d7e-c66a2c8ed917}</Project>
+      <Name>Services</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ViewModels\ViewModels.csproj">
+      <Project>{3ca888e6-13a9-4815-ba6a-868e235c5bce}</Project>
+      <Name>ViewModels</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WpfViews\WpfViews.csproj">
+      <Project>{b29dc0f4-4e27-4bdc-af6f-fa43a7c5f264}</Project>
+      <Name>WpfViews</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <VSCTCompile Include="TanzuForVSPackage.vsct">
@@ -102,14 +99,7 @@
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\AddCloud.png" />
     <Content Include="Resources\tanzu16.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\TanzuForVS.CloudFoundryApiClient\TanzuForVS.CloudFoundryApiClient.csproj">
-      <Project>{3ae10a3e-df4c-4152-8609-1cb412b86795}</Project>
-      <Name>TanzuForVS.CloudFoundryApiClient</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />

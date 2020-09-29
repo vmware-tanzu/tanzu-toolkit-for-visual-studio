@@ -1,10 +1,13 @@
 ﻿using System;
 using System.ComponentModel.Design;
+using System.Globalization;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Task = System.Threading.Tasks.Task;
 
-namespace TanzuForVS
+namespace TanzuForVS.Commands
 {
     /// <summary>
     /// Command handler
@@ -19,7 +22,7 @@ namespace TanzuForVS
         /// <summary>
         /// Command menu group (command set GUID).
         /// </summary>
-        public static readonly Guid CommandSet = new Guid("6030e9c1-e9cc-40c3-a15a-11bf7b47bf93");
+        public static readonly Guid CommandSet = new Guid("f91c88fb-6e17-42a6-878d-f4d16ead7625");
 
         /// <summary>
         /// VS Package that provides this command, not null.
