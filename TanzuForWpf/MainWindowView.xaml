@@ -1,0 +1,25 @@
+﻿<Window x:Class="TanzuForWpf.MainWindowView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TanzuForWpf"
+        mc:Ignorable="d"
+        Name="MainWindowElement"
+        Background="Gray"
+        Title="Tanzu Tool" Height="450" Width="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Grid Margin="20,17,20,20">
+            <ListBox HorizontalContentAlignment="Stretch">
+                <ListBoxItem>
+                    <Button Content="Open Cloud Explorer" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Command ="{ Binding ElementName=MainWindowElement, Path=OpenCloudExplorerCommand }"/>
+                </ListBoxItem>
+            </ListBox>
+        </Grid>
+        <ContentControl Grid.Column="1" Content="{Binding ActiveView}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+    </Grid>
+</Window>
