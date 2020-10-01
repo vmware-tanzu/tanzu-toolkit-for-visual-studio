@@ -23,11 +23,6 @@
   <!--The Commands section is where commands, menus, and menu groups are defined.
       This section uses a Guid to identify the package that provides the command defined inside it. -->
   <Commands package="guidTanzuForVSPackage">
-    <Groups>
-      <Group guid="guidTanzuForVSPackageCmdSet" id="ToolMenuGroup" priority="0x0600">
-        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS"/>
-      </Group>
-    </Groups>
     <!-- Inside this section we have different sub-sections: one for the menus, another
     for the menu groups, one for the buttons (the actual commands), one for the combos
     and the last one for the bitmaps used. Each element is identified by a command id that
@@ -48,7 +43,7 @@
               <CommandFlag>DynamicVisibility</CommandFlag>
           If you do not want an image next to your command, remove the Icon node /> -->
       <Button guid="guidTanzuForVSPackageCmdSet" id="ToolWindow1CommandId" priority="0x0100" type="Button">
-        <Parent guid="guidTanzuForVSPackageCmdSet" id="ToolMenuGroup"/>
+        <Parent guid="guidSHLMainMenu" id="IDG_VS_MM_TOOLSADDINS"/>
         <Icon guid="guidImages" id="bmpPic1" />
         <Strings>
           <ButtonText>Tanzu Cloud Explorer</ButtonText>
@@ -73,7 +68,6 @@
 
     <!-- This is the guid used to group the menu commands together -->
     <GuidSymbol name="guidTanzuForVSPackageCmdSet" value="{f91c88fb-6e17-42a6-878d-f4d16ead7625}">
-      <IDSymbol name ="ToolMenuGroup" value="0x1020"/>
       <IDSymbol name="ToolWindow1CommandId" value="0x0100" />
     </GuidSymbol>
 
