@@ -113,7 +113,7 @@ namespace TanzuForVS.ViewModels
             }
             finally
             {
-                DialogService.CloseDialog(arg, true);
+                if (IsLoggedIn) DialogService.CloseDialog(arg, true);
             }
         }
 
