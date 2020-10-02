@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System.Security;
 
 namespace TanzuForVS.ViewModels
 {
@@ -13,7 +14,7 @@ namespace TanzuForVS.ViewModels
         }
 
         [TestMethod]
-        public void ConnectToCloudFoundry_WhenTargetUriNull()
+        public void ConnectToCloudFoundry_SetsErrorMessage_WhenTargetUriNull()
         {
             var vm = new LoginDialogViewModel(services);
             bool ErrorMessagePropertyChangedCalled = false;
@@ -21,18 +22,19 @@ namespace TanzuForVS.ViewModels
 
             vm.PropertyChanged += (s, args) =>
             {
-                Assert.AreEqual("ErrorMessage", args.PropertyName);
-                ErrorMessagePropertyChangedCalled = true;
+                if ("ErrorMessage" == args.PropertyName) ErrorMessagePropertyChangedCalled = true;
             };
 
             vm.ConnectToCloudFoundry(null);
 
             Assert.IsTrue(ErrorMessagePropertyChangedCalled);
+            Assert.IsTrue(vm.HasErrors);
             Assert.AreEqual(LoginDialogViewModel.TargetEmptyMessage, vm.ErrorMessage);
             Assert.IsFalse(vm.IsLoggedIn);
 
             mockDialogService.Verify(ds => ds.CloseDialog(It.IsAny<object>(), true), Times.Never);
             mockDialogService.Verify(ds => ds.ShowDialog(It.IsAny<string>(), null), Times.Never);
+            mockCloudFoundryService.Verify(mock => mock.ConnectToCFAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SecureString>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
         }
     }
 }

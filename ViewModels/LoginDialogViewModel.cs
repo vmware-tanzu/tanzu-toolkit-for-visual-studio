@@ -82,6 +82,7 @@ namespace TanzuForVS.ViewModels
             set
             {
                 this.errorMessage = value;
+                if (!string.IsNullOrEmpty(value)) HasErrors = true;
                 this.RaisePropertyChangedEvent("ErrorMessage");
             }
         }
@@ -97,6 +98,7 @@ namespace TanzuForVS.ViewModels
        
         public async Task ConnectToCloudFoundry(object arg)
         {
+            HasErrors = false;
             // TODO: Validate all parameters are valid
             if (!VerifyTarget())
             {
