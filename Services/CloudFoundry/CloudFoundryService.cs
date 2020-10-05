@@ -1,15 +1,23 @@
 ﻿using System;
+using System.Net.Http;
 using System.Security;
 using System.Threading.Tasks;
+using TanzuForVS.CloudFoundryApiClient;
 
 namespace TanzuForVS.Services.CloudFoundry
 {
     public class CloudFoundryService : ICloudFoundryService
     {
- 
+        private static HttpClient _httpClient;
+
+        public CloudFoundryService()
+        {
+            _httpClient = new HttpClient();
+        }
+
         public bool IsLoggedIn { get; set; } = false;
 
-        public Task<ConnectResult> ConnectToCFAsync(string target, string username, SecureString password, string httpProxy, bool skipSsl)
+        public async Task<ConnectResult> ConnectToCFAsync(string target, string username, SecureString password, string httpProxy, bool skipSsl)
         {
             if (string.IsNullOrEmpty(target))
             {
@@ -26,8 +34,23 @@ namespace TanzuForVS.Services.CloudFoundry
                 throw new ArgumentNullException(nameof(password));
             }
 
-            return Task.FromResult(new ConnectResult(false, string.Empty));
+            var UaaClient = new UaaClient(_httpClient);
+            var CfApiClient = new CfApiClient(UaaClient, _httpClient);
 
+            try
+            {
+                // TODO: don't let password be passed around as a regular string
+                // TODO: test that errors that may have been thrown in CfApiClient get passed
+                //       through to this level & get loaded into the ConnectResult.ErrorMessage
+                string AccessToken = await CfApiClient.LoginAsync(target, username, password.ToString());
+
+                if (!string.IsNullOrEmpty(AccessToken)) return new ConnectResult(true, null);
+                throw new Exception("Unable to login");
+            }
+            catch (Exception e)
+            {
+                return new ConnectResult(false, e.Message);
+            }
         }
     }
 }
