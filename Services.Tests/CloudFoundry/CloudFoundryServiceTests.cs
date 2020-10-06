@@ -35,15 +35,27 @@ namespace TanzuForVS.Services.CloudFoundry
         }
 
         [TestMethod()]
-        public async Task ConnectToCFAsync_ReturnsConnectResult_WhenParametersAreValid()
+        public async Task ConnectToCFAsync_ReturnsConnectResult_WhenLoginSucceeds()
         {
             mockCfApiClient.Setup(mock => mock.LoginAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(fakeLoginSuccessResponse);
 
             ConnectResult result = await cfService.ConnectToCFAsync(fakeValidTarget, fakeValidUsername, fakeValidPassword, fakeHttpProxy, skipSsl);
 
-            mockCfApiClient.Verify(mock => mock.LoginAsync(fakeValidTarget, fakeValidUsername, It.IsAny<string>()), Times.Once);
             Assert.IsTrue(result.IsLoggedIn);
             Assert.IsNull(result.ErrorMessage);
+            mockCfApiClient.Verify(mock => mock.LoginAsync(fakeValidTarget, fakeValidUsername, It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod()]
+        public async Task ConnectToCFAsync_ReturnsConnectResult_WhenLoginFails()
+        {
+            mockCfApiClient.Setup(mock => mock.LoginAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync((string)null);
+
+            ConnectResult result = await cfService.ConnectToCFAsync(fakeValidTarget, fakeValidUsername, fakeValidPassword, fakeHttpProxy, skipSsl);
+
+            Assert.IsFalse(result.IsLoggedIn);
+            Assert.IsTrue(result.ErrorMessage.Contains(cfService.LoginFailureMessage));
+            mockCfApiClient.Verify(mock => mock.LoginAsync(fakeValidTarget, fakeValidUsername, It.IsAny<string>()), Times.Once);
         }
 
         [TestMethod()]

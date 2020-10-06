@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Net.Http;
 using System.Windows;
+using TanzuForVS.CloudFoundryApiClient;
 using TanzuForVS.Services.CloudFoundry;
 using TanzuForVS.Services.Dialog;
 using TanzuForVS.Services.Locator;
@@ -52,6 +54,11 @@ namespace TanzuForWpf
 
             services.AddTransient<ILoginDialogViewModel, LoginDialogViewModel>();
             services.AddTransient<ILoginDialogView, LoginDialogView>();
+
+            HttpClient concreteHttpClient = new HttpClient();
+            IUaaClient concreteUaaClient = new UaaClient(concreteHttpClient);
+            services.AddSingleton<IUaaClient>(_ => concreteUaaClient);
+            services.AddSingleton<ICfApiClient>(_ => new CfApiClient(concreteUaaClient, concreteHttpClient));
         }
     }
 }
