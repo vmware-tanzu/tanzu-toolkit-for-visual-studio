@@ -43,6 +43,7 @@ namespace TanzuForVS.Services.CloudFoundry
 
             Assert.IsTrue(result.IsLoggedIn);
             Assert.IsNull(result.ErrorMessage);
+            Assert.IsTrue(cfService.IsLoggedIn);
             mockCfApiClient.Verify(mock => mock.LoginAsync(fakeValidTarget, fakeValidUsername, It.IsAny<string>()), Times.Once);
         }
 

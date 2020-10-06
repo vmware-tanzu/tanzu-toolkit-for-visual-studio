@@ -10,7 +10,7 @@ namespace TanzuForVS.Services.CloudFoundry
 {
     public class CloudFoundryService : ICloudFoundryService
     {
-        public string LoginFailureMessage { get; }  = "Login failed.";
+        public string LoginFailureMessage { get; } = "Login failed.";
         private static ICfApiClient _cfApiClient;
 
         public CloudFoundryService(IServiceProvider services)
@@ -38,7 +38,11 @@ namespace TanzuForVS.Services.CloudFoundry
 
                 string AccessToken = await _cfApiClient.LoginAsync(target, username, passwordStr);
 
-                if (!string.IsNullOrEmpty(AccessToken)) return new ConnectResult(true, null);
+                if (!string.IsNullOrEmpty(AccessToken))
+                {
+                    IsLoggedIn = true;
+                    return new ConnectResult(true, null);
+                }
                 throw new Exception(LoginFailureMessage);
             }
             catch (Exception e)
