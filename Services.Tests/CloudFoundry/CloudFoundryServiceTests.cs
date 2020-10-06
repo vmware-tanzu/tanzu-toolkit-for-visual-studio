@@ -1,17 +1,32 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using System;
+using System.Security;
 using System.Threading.Tasks;
 
 namespace TanzuForVS.Services.CloudFoundry
 {
     [TestClass()]
-    public class CloudFoundryServiceTests
+    public class CloudFoundryServiceTests : ServicesTestSupport
     {
+        ICloudFoundryService cfService;
+        string fakeValidTarget = "https://my.fake.target";
+        string fakeValidUsername = "junk";
+        SecureString fakeValidPassword = new SecureString();
+        string fakeHttpProxy = "junk";
+        bool skipSsl = true;
+        string fakeLoginSuccessResponse = "login success!";
+        string fakeLoginFailureResponse = null;
+
+        [TestInitialize()]
+        public void TestInit()
+        {
+            cfService = new CloudFoundryService(services);
+        }
+
         [TestMethod()]
         public async Task ConnectToCFAsync_ThrowsExceptions_WhenParametersAreInvalid()
         {
-            var cfService = new CloudFoundryService();
-
             await Assert.ThrowsExceptionAsync<ArgumentException>(() => cfService.ConnectToCFAsync(null, null, null, null, false));
             await Assert.ThrowsExceptionAsync<ArgumentException>(() => cfService.ConnectToCFAsync(string.Empty, null, null, null, false));
             await Assert.ThrowsExceptionAsync<ArgumentException>(() => cfService.ConnectToCFAsync("Junk", null, null, null, false));
@@ -22,14 +37,31 @@ namespace TanzuForVS.Services.CloudFoundry
         [TestMethod()]
         public async Task ConnectToCFAsync_ReturnsConnectResult_WhenParametersAreValid()
         {
-            var cfService = new CloudFoundryService();
+            mockCfApiClient.Setup(mock => mock.LoginAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(fakeLoginSuccessResponse);
 
-            // TODO: mock a "success" response from CfApiClient.LoginAsync
+            ConnectResult result = await cfService.ConnectToCFAsync(fakeValidTarget, fakeValidUsername, fakeValidPassword, fakeHttpProxy, skipSsl);
 
-            ConnectResult result = await cfService.ConnectToCFAsync(null, null, null, null, false);
-
+            mockCfApiClient.Verify(mock => mock.LoginAsync(fakeValidTarget, fakeValidUsername, It.IsAny<string>()), Times.Once);
             Assert.IsTrue(result.IsLoggedIn);
             Assert.IsNull(result.ErrorMessage);
         }
+
+        [TestMethod()]
+        public async Task ConnectToCfAsync_IncludesNestedExceptionMessages_WhenExceptionIsThrown()
+        {
+            string baseMessage = "base exception message";
+            string innerMessage = "inner exception message";
+            string outerMessage = "outer exception message";
+            Exception multilayeredException = new Exception(outerMessage, new Exception(innerMessage, new Exception(baseMessage)));
+
+            mockCfApiClient.Setup(mock => mock.LoginAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ThrowsAsync(multilayeredException);
+
+            ConnectResult result = await cfService.ConnectToCFAsync(fakeValidTarget, fakeValidUsername, fakeValidPassword, fakeHttpProxy, skipSsl);
+
+            Assert.IsTrue(result.ErrorMessage.Contains(baseMessage));
+            Assert.IsTrue(result.ErrorMessage.Contains(innerMessage));
+            Assert.IsTrue(result.ErrorMessage.Contains(outerMessage));
+        }
+
     }
 }
