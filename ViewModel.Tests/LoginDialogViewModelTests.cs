@@ -9,16 +9,27 @@ namespace TanzuForVS.ViewModels
     [TestClass]
     public class LoginDialogViewModelTests : ViewModelTestSupport
     {
+        static LoginDialogViewModel vm;
+        static readonly string fakeTarget = "http://my.fake.target";
+        static readonly string fakeUsername = "correct-username";
+        static readonly SecureString fakeSecurePw = new SecureString();
+        static readonly string fakeHttpProxy = "junk";
+        static readonly bool skipSsl = true;
 
         [TestInitialize]
         public void TestInit()
         {
+            vm = new LoginDialogViewModel(services);
+            vm.Target = fakeTarget;
+            vm.Username = fakeUsername;
+            vm.GetPassword = () => { return fakeSecurePw; };
+            vm.HttpProxy = fakeHttpProxy;
+            vm.SkipSsl = skipSsl;
         }
 
         [TestMethod]
         public void ConnectToCloudFoundry_SetsErrorMessage_WhenTargetUriNull()
         {
-            var vm = new LoginDialogViewModel(services);
             bool ErrorMessagePropertyChangedCalled = false;
             vm.Target = null;
 
@@ -42,7 +53,6 @@ namespace TanzuForVS.ViewModels
         [TestMethod]
         public async Task ConnectToCloudFoundry_SetsErrorMessage_WhenTargetUriMalformed()
         {
-            var vm = new LoginDialogViewModel(services);
             bool ErrorMessagePropertyChangedCalled = false;
             vm.Target = "some-poorly-formatted-uri";
 
@@ -66,11 +76,6 @@ namespace TanzuForVS.ViewModels
         [TestMethod]
         public async Task ConnectToCloudFoundry_SetsErrorMessage_WhenLoginRequestFails()
         {
-            var vm = new LoginDialogViewModel(services);
-            var fakeSecurePw = new SecureString();
-            vm.Target = "http://my.fake.target";
-            vm.Username = "junk";
-            vm.GetPassword = () => { return fakeSecurePw; };
             const string expectedErrorMessage = "my fake error message";
 
             mockCloudFoundryService.Setup(mock => mock.ConnectToCFAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SecureString>(), It.IsAny<string>(), It.IsAny<bool>()))
@@ -80,7 +85,22 @@ namespace TanzuForVS.ViewModels
 
             Assert.IsTrue(vm.HasErrors);
             Assert.AreEqual(expectedErrorMessage, vm.ErrorMessage);
+            mockCloudFoundryService.Verify(mock => mock.ConnectToCFAsync(fakeTarget, fakeUsername, fakeSecurePw, fakeHttpProxy, skipSsl), Times.Once);
             mockDialogService.Verify(ds => ds.CloseDialog(It.IsAny<object>(), true), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task ConnectToCloudFoundry_ClosesDialog_WhenLoginRequestSucceeds()
+        {
+            mockCloudFoundryService.Setup(mock => mock.ConnectToCFAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SecureString>(), It.IsAny<string>(), It.IsAny<bool>()))
+               .ReturnsAsync(new ConnectResult(true, null));
+
+            await vm.ConnectToCloudFoundry(null);
+
+            Assert.IsFalse(vm.HasErrors);
+            Assert.IsTrue(vm.IsLoggedIn);
+            mockCloudFoundryService.Verify(mock => mock.ConnectToCFAsync(fakeTarget, fakeUsername, fakeSecurePw, fakeHttpProxy, skipSsl), Times.Once);
+            mockDialogService.Verify(ds => ds.CloseDialog(It.IsAny<object>(), true), Times.Once);
         }
     }
 }
