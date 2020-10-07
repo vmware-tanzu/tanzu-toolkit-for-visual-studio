@@ -16,7 +16,6 @@ namespace TanzuForVS.Services.CloudFoundry
         string fakeHttpProxy = "junk";
         bool skipSsl = true;
         string fakeLoginSuccessResponse = "login success!";
-        string fakeLoginFailureResponse = null;
 
         [TestInitialize()]
         public void TestInit()

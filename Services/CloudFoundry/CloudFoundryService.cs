@@ -31,9 +31,6 @@ namespace TanzuForVS.Services.CloudFoundry
 
             try
             {
-                // TODO: don't let password be passed around as a regular string
-                // TODO: test that errors that may have been thrown in CfApiClient get passed
-                //       through to this level & get loaded into the ConnectResult.ErrorMessage
                 string passwordStr = new System.Net.NetworkCredential(string.Empty, password).Password;
 
                 string AccessToken = await _cfApiClient.LoginAsync(target, username, passwordStr);

@@ -99,7 +99,6 @@ namespace TanzuForVS.ViewModels
         public async Task ConnectToCloudFoundry(object arg)
         {
             HasErrors = false;
-            // TODO: Validate all parameters are valid
             if (!VerifyTarget())
             {
                 return;
@@ -129,7 +128,7 @@ namespace TanzuForVS.ViewModels
             {
                 var uri = new Uri(Target);
             } 
-            catch (Exception e)
+            catch
             {
                 ErrorMessage = TargetInvalidFormatMessage;
                 return false;
