@@ -10,6 +10,6 @@ namespace TanzuForVS.CloudFoundryApiClient
 
         Task<string> LoginAsync(string cfTarget, string cfUsername, string cfPassword);
 
-        Task<List<Resource>> ListOrgs(string accessToken);
+        Task<List<Resource>> ListOrgs(string cfTarget, string accessToken);
     }
 }

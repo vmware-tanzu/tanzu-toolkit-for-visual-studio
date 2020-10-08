@@ -1,8 +1,10 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using TanzuForVS.CloudFoundryApiClient.Models.BasicInfoResponse;
 using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
@@ -12,6 +14,9 @@ namespace TanzuForVS.CloudFoundryApiClient
     public class CfApiClient : ICfApiClient
     {
         public string AccessToken { get; private set; }
+
+        internal static readonly string listOrgsPath = "/v3/organizations";
+
         public static readonly string defaultAuthClientId = "cf";
         public static readonly string defaultAuthClientSecret = "";
         public static readonly string AuthServerLookupFailureMessage = "Unable to locate authentication server";
@@ -101,9 +106,61 @@ namespace TanzuForVS.CloudFoundryApiClient
             return uriResult;
         }
 
-        public Task<List<Resource>> ListOrgs(string accessToken)
+        public async Task<List<Resource>> ListOrgs(string cfTarget, string accessToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                // trust any certificate
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback +=
+                    (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+                var uri = new UriBuilder(cfTarget);
+                uri.Path = listOrgsPath;
+
+                var request = new HttpRequestMessage(HttpMethod.Get, uri.ToString());
+                request.Headers.Add("Authorization", "Bearer " + accessToken);
+
+                var response = await _httpClient.SendAsync(request);
+
+                if (!response.IsSuccessStatusCode) throw new Exception($"Response from `{listOrgsPath}` was {response.StatusCode}");
+
+                string resultContent = await response.Content.ReadAsStringAsync();
+                var orgsResponse = JsonConvert.DeserializeObject<OrgsResponse>(resultContent);
+
+                List<Resource> visibleOrgs = orgsResponse.resources.ToList();
+
+                if (orgsResponse.pagination.next != null)
+                {
+                    visibleOrgs = await GetRemainingOrgsPages(orgsResponse.pagination.next, accessToken, visibleOrgs);
+                }
+
+                return visibleOrgs;
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e);
+                return null;
+            }
+
+        }
+
+        private async Task<List<Resource>> GetRemainingOrgsPages(Href nextPageHref, string accessToken, List<Resource> resourcesList)
+        {
+            if (nextPageHref == null) return resourcesList;
+
+            var request = new HttpRequestMessage(HttpMethod.Get, nextPageHref.href);
+            request.Headers.Add("Authorization", "Bearer " + accessToken);
+
+            var response = await _httpClient.SendAsync(request);
+            if (!response.IsSuccessStatusCode) throw new Exception($"Response from `{listOrgsPath}` was {response.StatusCode}");
+
+            string resultContent = await response.Content.ReadAsStringAsync();
+            var orgsResponse = JsonConvert.DeserializeObject<OrgsResponse>(resultContent);
+
+            resourcesList.AddRange(orgsResponse.resources.ToList());
+
+            return await GetRemainingOrgsPages(orgsResponse.pagination.next, accessToken, resourcesList);
         }
     }
 }

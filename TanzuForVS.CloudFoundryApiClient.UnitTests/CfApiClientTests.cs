@@ -6,6 +6,7 @@ using System;
 using System.Net;
 using System.Threading.Tasks;
 using TanzuForVS.CloudFoundryApiClient.Models.BasicInfoResponse;
+using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
 using TanzuForVS.CloudFoundryApiClient.Models.Token;
 
 namespace TanzuForVS.CloudFoundryApiClient.UnitTests
@@ -23,8 +24,9 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
         private static readonly string _fakeUaaAddress = $"https://uaa.{_fakeTargetDomain}";
         private static readonly string _fakeCfUsername = "user";
         private static readonly string _fakeCfPassword = "pass";
+        private static readonly string _fakeAccessToken = "fakeToken";
 
-        private static readonly BasicInfoResponse _fakeResponse = new BasicInfoResponse
+        private static readonly BasicInfoResponse _fakeBasicInfoResponse = new BasicInfoResponse
         {
             links = new Models.BasicInfoResponse.Links
             {
@@ -38,7 +40,132 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
                 }
             }
         };
-        private static readonly string _fakeJsonResponse = JsonConvert.SerializeObject(_fakeResponse);
+        private static readonly string _fakeBasicInfoJsonResponse = JsonConvert.SerializeObject(_fakeBasicInfoResponse);
+
+        private static readonly string page1Identifier = "?page=1&per_page=3";
+        private static readonly string page2Identifier = "?page=2&per_page=3";
+        private static readonly string page3Identifier = "?page=3&per_page=3";
+        private static readonly string page4Identifier = "?page=4&per_page=3";
+
+        private static readonly OrgsResponse _fakeOrgsResponsePage1 = new OrgsResponse
+        {
+            pagination = new Models.OrgsResponse.Pagination
+            {
+                total_results = 10,
+                total_pages = 4,
+                first = new Href
+                {
+                    href = $"{_fakeCfApiAddress}{CfApiClient.listOrgsPath}{page1Identifier}"
+                },
+                last = new Href
+                {
+                    href = $"{_fakeCfApiAddress}{CfApiClient.listOrgsPath}{page4Identifier}"
+                },
+                next = new Href
+                {
+                    href = $"{_fakeCfApiAddress}{CfApiClient.listOrgsPath}{page2Identifier}"
+                },
+                previous = null
+            },
+            resources = new Resource[]
+            {
+                new Resource("fakeOrg1"),
+                new Resource("fakeOrg2"),
+                new Resource("fakeOrg3")
+            }
+        };
+        private static readonly string _fakeOrgsJsonResponsePage1 = JsonConvert.SerializeObject(_fakeOrgsResponsePage1);
+
+        private static readonly OrgsResponse _fakeOrgsResponsePage2 = new OrgsResponse
+        {
+            pagination = new Models.OrgsResponse.Pagination
+            {
+                total_results = 10,
+                total_pages = 4,
+                first = new Href
+                {
+                    href = $"{_fakeCfApiAddress}{CfApiClient.listOrgsPath}{page1Identifier}"
+                },
+                last = new Href
+                {
+                    href = $"{_fakeCfApiAddress}{CfApiClient.listOrgsPath}{page4Identifier}"
+                },
+                next = new Href
+                {
+                    href = $"{_fakeCfApiAddress}{CfApiClient.listOrgsPath}{page3Identifier}"
+                },
+                previous = new Href
+                {
+                    href = $"{_fakeCfApiAddress}{CfApiClient.listOrgsPath}{page1Identifier}"
+                }
+            },
+            resources = new Resource[]
+            {
+                new Resource("fakeOrg4"),
+                new Resource("fakeOrg5"),
+                new Resource("fakeOrg6")
+            }
+        };
+        private static readonly string _fakeOrgsJsonResponsePage2 = JsonConvert.SerializeObject(_fakeOrgsResponsePage2);
+
+        private static readonly OrgsResponse _fakeOrgsResponsePage3 = new OrgsResponse
+        {
+            pagination = new Models.OrgsResponse.Pagination
+            {
+                total_results = 10,
+                total_pages = 4,
+                first = new Href
+                {
+                    href = $"{_fakeCfApiAddress}{CfApiClient.listOrgsPath}{page1Identifier}"
+                },
+                last = new Href
+                {
+                    href = $"{_fakeCfApiAddress}{CfApiClient.listOrgsPath}{page4Identifier}"
+                },
+                next = new Href
+                {
+                    href = $"{_fakeCfApiAddress}{CfApiClient.listOrgsPath}{page4Identifier}"
+                },
+                previous = new Href
+                {
+                    href = $"{_fakeCfApiAddress}{CfApiClient.listOrgsPath}{page2Identifier}"
+                }
+            },
+            resources = new Resource[]
+            {
+                new Resource("fakeOrg7"),
+                new Resource("fakeOrg8"),
+                new Resource("fakeOrg9")
+            }
+        };
+        private static readonly string _fakeOrgsJsonResponsePage3 = JsonConvert.SerializeObject(_fakeOrgsResponsePage3);
+
+        private static readonly OrgsResponse _fakeOrgsResponsePage4 = new OrgsResponse
+        {
+            pagination = new Models.OrgsResponse.Pagination
+            {
+                total_results = 10,
+                total_pages = 4,
+                first = new Href
+                {
+                    href = $"{_fakeCfApiAddress}{CfApiClient.listOrgsPath}{page1Identifier}"
+                },
+                last = new Href
+                {
+                    href = $"{_fakeCfApiAddress}{CfApiClient.listOrgsPath}{page4Identifier}"
+                },
+                next = null,
+                previous = new Href
+                {
+                    href = $"{_fakeCfApiAddress}{CfApiClient.listOrgsPath}{page3Identifier}"
+                }
+            },
+            resources = new Resource[]
+            {
+                new Resource("fakeOrg10")
+            }
+        };
+        private static readonly string _fakeOrgsJsonResponsePage4 = JsonConvert.SerializeObject(_fakeOrgsResponsePage4);
 
         [TestInitialize()]
         public void TestInit()
@@ -60,7 +187,7 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             var fakeAccessTokenContent = "fake access token";
 
             MockedRequest cfBasicInfoRequest = _mockHttp.Expect("https://api." + _fakeTargetDomain + "/")
-               .Respond("application/json", _fakeJsonResponse);
+               .Respond("application/json", _fakeBasicInfoJsonResponse);
 
             _mockUaaClient.Setup(mock => mock.RequestAccessTokenAsync(
                 expectedUri,
@@ -91,7 +218,7 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             var expectedUri = new Uri(_fakeLoginAddress);
 
             MockedRequest cfBasicInfoRequest = _mockHttp.Expect("https://api." + _fakeTargetDomain + "/")
-               .Respond("application/json", _fakeJsonResponse);
+               .Respond("application/json", _fakeBasicInfoJsonResponse);
 
             _mockUaaClient.Setup(mock => mock.RequestAccessTokenAsync(
                 expectedUri,
@@ -144,7 +271,6 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             Assert.AreEqual(0, _mockHttp.GetMatchCount(catchallRequest));
         }
 
-
         [TestMethod()]
         public async Task LoginAsync_ThrowsException_WhenBasicInfoRequestErrors()
         {
@@ -181,6 +307,57 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
                     It.IsAny<string>(),
                     It.IsAny<string>(),
                     It.IsAny<string>()), Times.Never);
+        }
+
+        [TestMethod()]
+        public async Task ListOrgs_ReturnsNull_WhenStatusCodeIsNotASuccess()
+        {
+            string expectedPath = CfApiClient.listOrgsPath;
+
+            MockedRequest orgsRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond(HttpStatusCode.Unauthorized);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.ListOrgs(_fakeCfApiAddress, _fakeAccessToken);
+
+            Assert.IsNull(result);
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(orgsRequest));
+        }
+
+
+        [TestMethod()]
+        public async Task ListOrgs_ReturnsListOfAllVisibleOrgs_WhenResponseContainsMultiplePages()
+        {
+            string expectedPath = CfApiClient.listOrgsPath;
+
+            MockedRequest orgsRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond("application/json", _fakeOrgsJsonResponsePage1);
+            
+            MockedRequest orgsPage2Request = _mockHttp.Expect(_fakeCfApiAddress + expectedPath + page2Identifier)
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond("application/json", _fakeOrgsJsonResponsePage2);
+            
+            MockedRequest orgsPage3Request = _mockHttp.Expect(_fakeCfApiAddress + expectedPath + page3Identifier)
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond("application/json", _fakeOrgsJsonResponsePage3);
+            
+            MockedRequest orgsPage4Request = _mockHttp.Expect(_fakeCfApiAddress + expectedPath + page4Identifier)
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond("application/json", _fakeOrgsJsonResponsePage4);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.ListOrgs(_fakeCfApiAddress, _fakeAccessToken);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(10, result.Count);
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(orgsRequest));
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(orgsPage2Request));
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(orgsPage3Request));
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(orgsPage4Request));
         }
 
     }

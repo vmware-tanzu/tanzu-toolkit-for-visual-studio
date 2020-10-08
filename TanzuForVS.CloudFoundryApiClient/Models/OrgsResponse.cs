@@ -12,18 +12,13 @@ namespace TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse
     {
         public int total_results { get; set; }
         public int total_pages { get; set; }
-        public First first { get; set; }
-        public Last last { get; set; }
-        public object next { get; set; }
-        public object previous { get; set; }
+        public Href first { get; set; }
+        public Href last { get; set; }
+        public Href next { get; set; }
+        public Href previous { get; set; }
     }
 
-    public class First
-    {
-        public string href { get; set; }
-    }
-
-    public class Last
+    public class Href
     {
         public string href { get; set; }
     }
@@ -38,6 +33,11 @@ namespace TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse
         public Relationships relationships { get; set; }
         public Links links { get; set; }
         public Metadata metadata { get; set; }
+
+        public Resource(string orgName)
+        {
+            name = orgName;
+        }
     }
 
     public class Relationships
@@ -57,30 +57,10 @@ namespace TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse
 
     public class Links
     {
-        public Self self { get; set; }
-        public Domains domains { get; set; }
-        public Default_Domain default_domain { get; set; }
-        public Quota1 quota { get; set; }
-    }
-
-    public class Self
-    {
-        public string href { get; set; }
-    }
-
-    public class Domains
-    {
-        public string href { get; set; }
-    }
-
-    public class Default_Domain
-    {
-        public string href { get; set; }
-    }
-
-    public class Quota1
-    {
-        public string href { get; set; }
+        public Href self { get; set; }
+        public Href domains { get; set; }
+        public Href default_domain { get; set; }
+        public Href quota { get; set; }
     }
 
     public class Metadata
