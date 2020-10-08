@@ -1,6 +1,7 @@
-﻿using System.Threading.Tasks;
-using System;
+﻿using System;
 using System.Net;
+using System.Threading.Tasks;
+using TanzuForVS.CloudFoundryApiClient.Models.Token;
 
 namespace TanzuForVS.CloudFoundryApiClient
 {

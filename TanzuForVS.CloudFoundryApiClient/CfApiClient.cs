@@ -3,6 +3,7 @@ using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using TanzuForVS.CloudFoundryApiClient.Models.BasicInfoResponse;
 
 namespace TanzuForVS.CloudFoundryApiClient
 {
@@ -97,5 +98,6 @@ namespace TanzuForVS.CloudFoundryApiClient
 
             return uriResult;
         }
+
     }
 }

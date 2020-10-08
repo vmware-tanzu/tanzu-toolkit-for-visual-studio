@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TanzuForVS.CloudFoundryApiClient
+﻿namespace TanzuForVS.CloudFoundryApiClient.Models.BasicInfoResponse
 {
 
     public class BasicInfoResponse

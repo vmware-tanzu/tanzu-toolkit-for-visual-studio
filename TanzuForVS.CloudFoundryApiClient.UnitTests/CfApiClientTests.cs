@@ -5,6 +5,8 @@ using RichardSzalay.MockHttp;
 using System;
 using System.Net;
 using System.Threading.Tasks;
+using TanzuForVS.CloudFoundryApiClient.Models.BasicInfoResponse;
+using TanzuForVS.CloudFoundryApiClient.Models.Token;
 
 namespace TanzuForVS.CloudFoundryApiClient.UnitTests
 {
@@ -24,7 +26,7 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
 
         private static readonly BasicInfoResponse _fakeResponse = new BasicInfoResponse
         {
-            links = new Links
+            links = new Models.BasicInfoResponse.Links
             {
                 login = new Login
                 {
