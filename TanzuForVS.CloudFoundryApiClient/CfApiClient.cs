@@ -1,9 +1,11 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using TanzuForVS.CloudFoundryApiClient.Models.BasicInfoResponse;
+using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
 
 namespace TanzuForVS.CloudFoundryApiClient
 {
@@ -99,5 +101,9 @@ namespace TanzuForVS.CloudFoundryApiClient
             return uriResult;
         }
 
+        public Task<List<Resource>> ListOrgs(string accessToken)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
