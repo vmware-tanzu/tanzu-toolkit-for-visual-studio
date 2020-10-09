@@ -1,8 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
+using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
+using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
 
 namespace TanzuForVS.Services.CloudFoundry
 {
@@ -16,6 +18,7 @@ namespace TanzuForVS.Services.CloudFoundry
         string fakeHttpProxy = "junk";
         bool skipSsl = true;
         string fakeLoginSuccessResponse = "login success!";
+        string fakeValidAccessToken = "valid token";
 
         [TestInitialize()]
         public void TestInit()
@@ -73,6 +76,36 @@ namespace TanzuForVS.Services.CloudFoundry
             Assert.IsTrue(result.ErrorMessage.Contains(baseMessage));
             Assert.IsTrue(result.ErrorMessage.Contains(innerMessage));
             Assert.IsTrue(result.ErrorMessage.Contains(outerMessage));
+        }
+
+        [TestMethod()]
+        public async Task GetOrgNamesAsync_ReturnsListOfStrings_WhenListOrgsSuceeds()
+        {
+            const string org1Name = "org1";
+            const string org2Name = "org2";
+            const string org3Name = "org3";
+            const string org4Name = "org4";
+
+            var list = new List<Resource>();
+            list.Add(new Resource(org1Name));
+            list.Add(new Resource(org2Name));
+            list.Add(new Resource(org3Name));
+            list.Add(new Resource(org4Name));
+
+            var expectedResult = new List<string>();
+            expectedResult.Add(org1Name);
+            expectedResult.Add(org2Name);
+            expectedResult.Add(org3Name);
+            expectedResult.Add(org4Name);
+
+            mockCfApiClient.Setup(mock => mock.ListOrgs(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(list);
+
+            var result = await cfService.GetOrgNamesAsync(fakeValidTarget, fakeValidAccessToken);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(4, result.Count);
+            CollectionAssert.AreEqual(expectedResult, result);
+            mockCfApiClient.Verify(mock => mock.ListOrgs(fakeValidTarget, fakeValidAccessToken), Times.Once);
         }
 
     }

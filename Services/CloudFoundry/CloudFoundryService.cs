@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
 using TanzuForVS.CloudFoundryApiClient;
-
+using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
 
 namespace TanzuForVS.Services.CloudFoundry
 {
@@ -49,6 +49,16 @@ namespace TanzuForVS.Services.CloudFoundry
                 var errorMessage = string.Join(Environment.NewLine, errorMessages.ToArray());
                 return new ConnectResult(false, errorMessage);
             }
+        }
+
+        public async Task<List<string>> GetOrgNamesAsync(string target, string accessToken)
+        {
+            List<Resource> orgList = await _cfApiClient.ListOrgs(target, accessToken);
+
+            List<string> nameList = new List<string>();
+            orgList.ForEach(delegate (Resource org) { nameList.Add(org.name); });
+
+            return nameList;
         }
 
         public static void FormatExceptionMessage(Exception ex, List<string> message)
