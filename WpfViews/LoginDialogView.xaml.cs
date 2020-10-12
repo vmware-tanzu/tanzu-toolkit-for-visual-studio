@@ -19,7 +19,7 @@ namespace TanzuForVS.WpfViews
 
         public LoginDialogView(ILoginDialogViewModel viewModel)
         {
-            LoginCommand = new AsyncDelegatingCommand(viewModel.ConnectToCloudFoundry, viewModel.CanConnectToCloudFoundry);
+            LoginCommand = new AsyncDelegatingCommand(viewModel.AddCloudFoundryInstance, viewModel.CanAddCloudFoundryInstance);
             viewModel.GetPassword = GetPassword;
             DataContext = viewModel;
             InitializeComponent();

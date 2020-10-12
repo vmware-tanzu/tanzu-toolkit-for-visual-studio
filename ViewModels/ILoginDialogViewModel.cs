@@ -16,5 +16,7 @@ namespace TanzuForVS.ViewModels
         Func<SecureString> GetPassword { get; set; }
         Task ConnectToCloudFoundry(object arg);
         bool CanConnectToCloudFoundry(object arg);
+        bool CanAddCloudFoundryInstance(object arg);
+        Task AddCloudFoundryInstance(object arg);
     }
 }

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using TanzuForVS.Services.Models;
 
 namespace TanzuForVS.ViewModels
 {
@@ -19,6 +21,7 @@ namespace TanzuForVS.ViewModels
             var result = DialogService.ShowDialog(typeof(LoginDialogViewModel).Name);
             IsLoggedIn = CloudFoundryService.IsLoggedIn;
             InstanceName = CloudFoundryService.InstanceName;
+            CloudItems = new List<CloudItem>(CloudFoundryService.CloudItems.Values);
         }
     }
 }

@@ -144,11 +144,10 @@ namespace TanzuForVS.ViewModels
         public async Task AddCloudFoundryInstance(object arg)
         {
             // TODO: create new CloudFoundryService & record connection data
-            CloudFoundryService.InstanceName = InstanceName;
+            CloudFoundryService.AddCloudItem(InstanceName);
             // TODO: issue basic info request to target to verify connection
             //          + record connection status for icon display
-            // TODO:
-
+            DialogService.CloseDialog(arg, true);
         }
 
     }

@@ -1,9 +1,11 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using TanzuForVS.Services.CloudFoundry;
 using TanzuForVS.Services.Dialog;
 using TanzuForVS.Services.Locator;
+using TanzuForVS.Services.Models;
 
 namespace TanzuForVS.ViewModels
 {
@@ -12,6 +14,7 @@ namespace TanzuForVS.ViewModels
         private bool isLoggedIn;
         private string instanceName;
         private object activeView;
+        private List<CloudItem> cloudItems;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -65,6 +68,17 @@ namespace TanzuForVS.ViewModels
             {
                 this.instanceName = value;
                 this.RaisePropertyChangedEvent("InstanceName");
+            }
+        }
+
+        public List<CloudItem> CloudItems
+        {
+            get => cloudItems;
+
+            set
+            {
+                this.cloudItems = value;
+                this.RaisePropertyChangedEvent("CloudItems");
             }
         }
 

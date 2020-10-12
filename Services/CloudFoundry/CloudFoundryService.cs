@@ -5,6 +5,7 @@ using System.Security;
 using System.Threading.Tasks;
 using TanzuForVS.CloudFoundryApiClient;
 using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
+using TanzuForVS.Services.Models;
 
 namespace TanzuForVS.Services.CloudFoundry
 {
@@ -19,8 +20,17 @@ namespace TanzuForVS.Services.CloudFoundry
         }
 
         public bool IsLoggedIn { get; set; } = false;
-
         public string InstanceName { get; set; }
+
+        public Dictionary<string, CloudItem> CloudItems { get; private set; } = new Dictionary<string, CloudItem>();
+        public CloudItem ActiveCloud { get; set; }
+
+        public void AddCloudItem(string name)
+        {
+            CloudItems.Add(name, new CloudItem(name));
+            IsLoggedIn = true; 
+            // TODO: un-hardcode this ^; need to validate connection (via `/` endpoint?) before setting IsLoggedIn
+        }
 
         public async Task<ConnectResult> ConnectToCFAsync(string target, string username, SecureString password, string httpProxy, bool skipSsl)
         {
