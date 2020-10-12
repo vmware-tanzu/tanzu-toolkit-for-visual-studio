@@ -10,6 +10,7 @@ namespace TanzuForVS.ViewModels
     public abstract class AbstractViewModel : IViewModel, INotifyPropertyChanged
     {
         private bool isLoggedIn;
+        private string instanceName;
         private object activeView;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -53,6 +54,17 @@ namespace TanzuForVS.ViewModels
             {
                 this.isLoggedIn = value;
                 this.RaisePropertyChangedEvent("IsLoggedIn");
+            }
+        }
+
+        public string InstanceName
+        {
+            get => instanceName;
+
+            set
+            {
+                this.instanceName = value;
+                this.RaisePropertyChangedEvent("InstanceName");
             }
         }
 

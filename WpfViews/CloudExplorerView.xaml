@@ -46,15 +46,6 @@
                    ToolTip="Target New Cloud Foundry Instance"/>
         </Button>
 
-        <!--<TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" 
-                 Margin="5"  IsReadOnly="True" 
-                 TextWrapping="Wrap" BorderBrush="Transparent" 
-                 ScrollViewer.VerticalScrollBarVisibility="Auto"
-                 HorizontalAlignment="Center" VerticalAlignment="Center"
-                 Foreground="Green" MinLines="3" MaxLines="3" 
-                 Background="Transparent" Text="Successfully Logged In!" 
-                 Visibility="{Binding Path=IsLoggedIn, Converter={StaticResource Visibility}}"/>-->
-
         <TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" 
                  Margin="5"  IsReadOnly="True" 
                  TextWrapping="Wrap" BorderBrush="Transparent" 
@@ -65,7 +56,7 @@
                  Visibility="{Binding Path=IsLoggedIn, Converter={StaticResource InverseVisibility}}"/>
 
         <TreeView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Visibility="{Binding Path=IsLoggedIn, Converter={StaticResource Visibility}}">
-            <TreeViewItem Header="Jamestown">
+            <TreeViewItem Header="{Binding Path=InstanceName}">
                 <TreeViewItem Header="~~ Orgs Will Go Here ~~" >
                     <TreeViewItem Header="~~ Spaces Will Go Here ~~" >
                         <TreeViewItem Header="~~ Apps Will Go Here ~~" />

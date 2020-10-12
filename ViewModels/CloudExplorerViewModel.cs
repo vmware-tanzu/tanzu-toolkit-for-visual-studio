@@ -18,6 +18,7 @@ namespace TanzuForVS.ViewModels
         {
             var result = DialogService.ShowDialog(typeof(LoginDialogViewModel).Name);
             IsLoggedIn = CloudFoundryService.IsLoggedIn;
+            InstanceName = CloudFoundryService.InstanceName;
         }
     }
 }

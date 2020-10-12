@@ -8,7 +8,6 @@ namespace TanzuForVS.ViewModels
     {
         public const string TargetEmptyMessage = "Invalid URI: The URI is empty.";
         public const string TargetInvalidFormatMessage = "Invalid URI: The format of the URI could not be determined.";
-        private string instanceName;
         private string target;
         private string username;
         private string httpProxy;
@@ -19,17 +18,6 @@ namespace TanzuForVS.ViewModels
         public LoginDialogViewModel(IServiceProvider services)
             : base(services)
         {
-        }
-
-        public string InstanceName
-        {
-            get => instanceName;
-
-            set
-            {
-                this.instanceName = value;
-                this.RaisePropertyChangedEvent("InstanceName");
-            }
         }
 
         public string Target
@@ -116,6 +104,7 @@ namespace TanzuForVS.ViewModels
 
             try
             {
+                CloudFoundryService.InstanceName = InstanceName;
                 var result = await CloudFoundryService.ConnectToCFAsync(Target, Username, GetPassword(), HttpProxy, SkipSsl);
                 ErrorMessage = result.ErrorMessage;
                 IsLoggedIn = result.IsLoggedIn;
