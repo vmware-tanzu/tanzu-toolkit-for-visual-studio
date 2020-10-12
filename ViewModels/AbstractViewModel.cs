@@ -12,9 +12,10 @@ namespace TanzuForVS.ViewModels
     public abstract class AbstractViewModel : IViewModel, INotifyPropertyChanged
     {
         private bool isLoggedIn;
+        private bool hasCloudTargets;
         private string instanceName;
         private object activeView;
-        private List<CloudItem> cloudItems;
+        private List<CloudItem> cloudItemsList;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -71,14 +72,24 @@ namespace TanzuForVS.ViewModels
             }
         }
 
-        public List<CloudItem> CloudItems
+        public List<CloudItem> CloudItemsList
         {
-            get => cloudItems;
+            get => cloudItemsList;
 
             set
             {
-                this.cloudItems = value;
-                this.RaisePropertyChangedEvent("CloudItems");
+                this.cloudItemsList = value;
+                this.RaisePropertyChangedEvent("CloudItemsList");
+            }
+        }
+        public bool HasCloudTargets
+        {
+            get => this.hasCloudTargets;
+
+            set
+            {
+                this.hasCloudTargets = value;
+                this.RaisePropertyChangedEvent("HasCloudTargets");
             }
         }
 

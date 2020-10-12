@@ -53,23 +53,13 @@
                  HorizontalAlignment="Center" VerticalAlignment="Center"
                  Foreground="Gray" MinLines="3" MaxLines="3" 
                  Background="Transparent" Text="Not Yet Connected" 
-                 Visibility="{Binding Path=IsLoggedIn, Converter={StaticResource InverseVisibility}}"/>
+                 Visibility="{Binding Path=HasCloudTargets, Converter={StaticResource InverseVisibility}}"/>
 
-        <!--<TreeView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Visibility="{Binding Path=IsLoggedIn, Converter={StaticResource Visibility}}">
-            <TreeViewItem Header="{Binding Path=InstanceName}">
-                <TreeViewItem Header="~~ Orgs Will Go Here ~~" >
-                    <TreeViewItem Header="~~ Spaces Will Go Here ~~" >
-                        <TreeViewItem Header="~~ Apps Will Go Here ~~" />
-                    </TreeViewItem>
-                </TreeViewItem>
-            </TreeViewItem>
-        </TreeView>-->
-
-        <TreeView ItemsSource="{Binding CloudItems}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Visibility="{Binding Path=IsLoggedIn, Converter={StaticResource Visibility}}">
+        <TreeView ItemsSource="{Binding CloudItemsList}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Visibility="{Binding Path=HasCloudTargets, Converter={StaticResource Visibility}}">
             <TreeView.ItemTemplate>
-                <DataTemplate>
+                <HierarchicalDataTemplate ItemsSource="{Binding CloudItemsList}">
                     <TreeViewItem Header="{Binding Name}"/>
-                </DataTemplate>
+                </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
         </TreeView>
 

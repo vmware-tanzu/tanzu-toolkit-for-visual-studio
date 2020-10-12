@@ -6,5 +6,7 @@
 
         bool IsLoggedIn { get; set; }
 
+        bool HasCloudTargets { get; set; }
+
     }
 }
