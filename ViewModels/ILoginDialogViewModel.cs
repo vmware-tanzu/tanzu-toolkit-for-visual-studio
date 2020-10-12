@@ -6,6 +6,7 @@ namespace TanzuForVS.ViewModels
 {
     public interface ILoginDialogViewModel : IViewModel
     {
+        string InstanceName { get; set; }
         string Target { get; set; }
         string Username { get; set; }
         string HttpProxy { get; set; }

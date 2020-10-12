@@ -20,6 +20,7 @@ namespace TanzuForVS.Services.CloudFoundry
 
         public bool IsLoggedIn { get; set; } = false;
 
+        public string InstanceName { get; set; }
 
         public async Task<ConnectResult> ConnectToCFAsync(string target, string username, SecureString password, string httpProxy, bool skipSsl)
         {

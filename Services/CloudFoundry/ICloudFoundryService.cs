@@ -9,6 +9,7 @@ namespace TanzuForVS.Services.CloudFoundry
     {
         bool IsLoggedIn { get; }
         string LoginFailureMessage { get; }
+        string InstanceName { get; set; }
         Task<ConnectResult> ConnectToCFAsync(string target, string username, SecureString password, string httpProxy, bool skipSsl);
         Task<List<string>> GetOrgNamesAsync(string target, string acessToken);
     }

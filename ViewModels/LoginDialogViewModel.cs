@@ -8,6 +8,7 @@ namespace TanzuForVS.ViewModels
     {
         public const string TargetEmptyMessage = "Invalid URI: The URI is empty.";
         public const string TargetInvalidFormatMessage = "Invalid URI: The format of the URI could not be determined.";
+        private string instanceName;
         private string target;
         private string username;
         private string httpProxy;
@@ -18,6 +19,17 @@ namespace TanzuForVS.ViewModels
         public LoginDialogViewModel(IServiceProvider services)
             : base(services)
         {
+        }
+
+        public string InstanceName
+        {
+            get => instanceName;
+
+            set
+            {
+                this.instanceName = value;
+                this.RaisePropertyChangedEvent("InstanceName");
+            }
         }
 
         public string Target
@@ -94,8 +106,6 @@ namespace TanzuForVS.ViewModels
             return true;
         }
 
-
-       
         public async Task ConnectToCloudFoundry(object arg)
         {
             HasErrors = false;
@@ -127,7 +137,7 @@ namespace TanzuForVS.ViewModels
             try
             {
                 var uri = new Uri(Target);
-            } 
+            }
             catch
             {
                 ErrorMessage = TargetInvalidFormatMessage;
@@ -135,6 +145,21 @@ namespace TanzuForVS.ViewModels
             }
 
             return true;
+        }
+
+        public bool CanAddCloudFoundryInstance(object arg)
+        {
+            return true;
+        }
+
+        public async Task AddCloudFoundryInstance(object arg)
+        {
+            // TODO: create new CloudFoundryService & record connection data
+            CloudFoundryService.InstanceName = InstanceName;
+            // TODO: issue basic info request to target to verify connection
+            //          + record connection status for icon display
+            // TODO:
+
         }
 
     }

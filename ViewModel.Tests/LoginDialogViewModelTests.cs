@@ -10,6 +10,7 @@ namespace TanzuForVS.ViewModels
     public class LoginDialogViewModelTests : ViewModelTestSupport
     {
         static LoginDialogViewModel vm;
+        static readonly string fakeInstanceName = "My Fake CF";
         static readonly string fakeTarget = "http://my.fake.target";
         static readonly string fakeUsername = "correct-username";
         static readonly SecureString fakeSecurePw = new SecureString();
@@ -20,6 +21,7 @@ namespace TanzuForVS.ViewModels
         public void TestInit()
         {
             vm = new LoginDialogViewModel(services);
+            vm.InstanceName = fakeInstanceName;
             vm.Target = fakeTarget;
             vm.Username = fakeUsername;
             vm.GetPassword = () => { return fakeSecurePw; };
@@ -102,5 +104,6 @@ namespace TanzuForVS.ViewModels
             mockCloudFoundryService.Verify(mock => mock.ConnectToCFAsync(fakeTarget, fakeUsername, fakeSecurePw, fakeHttpProxy, skipSsl), Times.Once);
             mockDialogService.Verify(ds => ds.CloseDialog(It.IsAny<object>(), true), Times.Once);
         }
+
     }
 }
