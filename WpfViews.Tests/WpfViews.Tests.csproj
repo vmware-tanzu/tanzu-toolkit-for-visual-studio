@@ -72,7 +72,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LoginDialogViewTests.cs" />
+    <Compile Include="AddCloudDialogViewTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewTestSupport.cs" />
   </ItemGroup>

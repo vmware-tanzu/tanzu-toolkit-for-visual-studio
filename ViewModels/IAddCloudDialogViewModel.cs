@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace TanzuForVS.ViewModels
 {
-    public interface ILoginDialogViewModel : IViewModel
+    public interface IAddCloudDialogViewModel : IViewModel
     {
         string InstanceName { get; set; }
         string Target { get; set; }
@@ -17,6 +17,6 @@ namespace TanzuForVS.ViewModels
         Task ConnectToCloudFoundry(object arg);
         bool CanConnectToCloudFoundry(object arg);
         bool CanAddCloudFoundryInstance(object arg);
-        Task AddCloudFoundryInstance(object arg);
+        void AddCloudFoundryInstance(object arg);
     }
 }

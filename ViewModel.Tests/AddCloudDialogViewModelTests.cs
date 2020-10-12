@@ -7,9 +7,9 @@ using TanzuForVS.Services.CloudFoundry;
 namespace TanzuForVS.ViewModels
 {
     [TestClass]
-    public class LoginDialogViewModelTests : ViewModelTestSupport
+    public class AddCloudDialogViewModelTests : ViewModelTestSupport
     {
-        static LoginDialogViewModel vm;
+        static AddCloudDialogViewModel vm;
         static readonly string fakeInstanceName = "My Fake CF";
         static readonly string fakeTarget = "http://my.fake.target";
         static readonly string fakeUsername = "correct-username";
@@ -20,7 +20,7 @@ namespace TanzuForVS.ViewModels
         [TestInitialize]
         public void TestInit()
         {
-            vm = new LoginDialogViewModel(services);
+            vm = new AddCloudDialogViewModel(services);
             vm.InstanceName = fakeInstanceName;
             vm.Target = fakeTarget;
             vm.Username = fakeUsername;
@@ -44,7 +44,7 @@ namespace TanzuForVS.ViewModels
 
             Assert.IsTrue(ErrorMessagePropertyChangedCalled);
             Assert.IsTrue(vm.HasErrors);
-            Assert.AreEqual(LoginDialogViewModel.TargetEmptyMessage, vm.ErrorMessage);
+            Assert.AreEqual(AddCloudDialogViewModel.TargetEmptyMessage, vm.ErrorMessage);
             Assert.IsFalse(vm.IsLoggedIn);
 
             mockDialogService.Verify(ds => ds.CloseDialog(It.IsAny<object>(), true), Times.Never);
@@ -67,7 +67,7 @@ namespace TanzuForVS.ViewModels
 
             Assert.IsTrue(ErrorMessagePropertyChangedCalled);
             Assert.IsTrue(vm.HasErrors);
-            Assert.AreEqual(LoginDialogViewModel.TargetInvalidFormatMessage, vm.ErrorMessage);
+            Assert.AreEqual(AddCloudDialogViewModel.TargetInvalidFormatMessage, vm.ErrorMessage);
             Assert.IsFalse(vm.IsLoggedIn);
 
             mockDialogService.Verify(ds => ds.CloseDialog(It.IsAny<object>(), true), Times.Never);

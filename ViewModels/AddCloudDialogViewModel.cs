@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace TanzuForVS.ViewModels
 {
-    public class LoginDialogViewModel : AbstractViewModel, ILoginDialogViewModel
+    public class AddCloudDialogViewModel : AbstractViewModel, IAddCloudDialogViewModel
     {
         public const string TargetEmptyMessage = "Invalid URI: The URI is empty.";
         public const string TargetInvalidFormatMessage = "Invalid URI: The format of the URI could not be determined.";
@@ -15,7 +15,7 @@ namespace TanzuForVS.ViewModels
         private bool hasErrors;
         private string errorMessage;
 
-        public LoginDialogViewModel(IServiceProvider services)
+        public AddCloudDialogViewModel(IServiceProvider services)
             : base(services)
         {
         }
@@ -141,7 +141,7 @@ namespace TanzuForVS.ViewModels
             return true;
         }
 
-        public async Task AddCloudFoundryInstance(object arg)
+        public void AddCloudFoundryInstance(object arg)
         {
             // TODO: create new CloudFoundryService & record connection data
             CloudFoundryService.AddCloudItem(InstanceName);

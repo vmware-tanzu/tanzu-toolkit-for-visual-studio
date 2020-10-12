@@ -65,7 +65,7 @@
   <ItemGroup>
     <Compile Include="Commands\AsyncDelegatingCommand.cs" />
     <Compile Include="ICloudExplorerView.cs" />
-    <Compile Include="ILoginDialogView.cs" />
+    <Compile Include="IAddCloudDialogView.cs" />
     <Compile Include="Services\WpfDialogResult.cs" />
     <Compile Include="Services\WpfDialogService.cs" />
     <Compile Include="Services\WpfViewLocatorService.cs" />
@@ -73,7 +73,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="LoginDialogView.xaml">
+    <Page Include="AddCloudDialogView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -82,8 +82,8 @@
     </Compile>
     <Compile Include="Commands\DelegatingCommand.cs" />
     <Compile Include="Converters\VisibilityConverter.cs" />
-    <Compile Include="LoginDialogView.xaml.cs">
-      <DependentUpon>LoginDialogView.xaml</DependentUpon>
+    <Compile Include="AddCloudDialogView.xaml.cs">
+      <DependentUpon>AddCloudDialogView.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>

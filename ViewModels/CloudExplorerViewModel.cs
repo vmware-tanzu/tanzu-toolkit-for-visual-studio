@@ -18,7 +18,7 @@ namespace TanzuForVS.ViewModels
 
         public void OpenLoginView(object parent)
         {
-            var result = DialogService.ShowDialog(typeof(LoginDialogViewModel).Name);
+            var result = DialogService.ShowDialog(typeof(AddCloudDialogViewModel).Name);
             IsLoggedIn = CloudFoundryService.IsLoggedIn;
             InstanceName = CloudFoundryService.InstanceName;
             CloudItems = new List<CloudItem>(CloudFoundryService.CloudItems.Values);

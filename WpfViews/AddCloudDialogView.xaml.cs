@@ -7,19 +7,19 @@ using TanzuForVS.WpfViews.Commands;
 namespace TanzuForVS.WpfViews
 {
     /// <summary>
-    /// Interaction logic for LoginDialogView.xaml
+    /// Interaction logic for AddCloudDialogView.xaml
     /// </summary>
-    public partial class LoginDialogView : Window, ILoginDialogView
+    public partial class AddCloudDialogView : Window, IAddCloudDialogView
     {
-        public LoginDialogView()
+        public AddCloudDialogView()
         {
             InitializeComponent();
 
         }
 
-        public LoginDialogView(ILoginDialogViewModel viewModel)
+        public AddCloudDialogView(IAddCloudDialogViewModel viewModel)
         {
-            LoginCommand = new AsyncDelegatingCommand(viewModel.AddCloudFoundryInstance, viewModel.CanAddCloudFoundryInstance);
+            AddCloudCommand = new DelegatingCommand(viewModel.AddCloudFoundryInstance, viewModel.CanAddCloudFoundryInstance);
             viewModel.GetPassword = GetPassword;
             DataContext = viewModel;
             InitializeComponent();
@@ -30,6 +30,6 @@ namespace TanzuForVS.WpfViews
             return pbPassword.SecurePassword;
         }
 
-        public ICommand LoginCommand { get; }
+        public ICommand AddCloudCommand { get; }
     }
 }

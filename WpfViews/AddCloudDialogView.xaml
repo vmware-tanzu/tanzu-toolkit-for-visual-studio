@@ -1,4 +1,4 @@
-﻿<Window x:Class="TanzuForVS.WpfViews.LoginDialogView"
+﻿<Window x:Class="TanzuForVS.WpfViews.AddCloudDialogView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -7,7 +7,7 @@
              xmlns:converters="clr-namespace:TanzuForVS.WpfViews.Converters"
         mc:Ignorable="d"
         d:DesignHeight="300" d:DesignWidth="400"
-        Name ="LoginDialogViewElement"
+        Name ="AddCloudDialogViewElement"
         WindowStartupLocation="CenterScreen"
         Title="Login" Height="400" Width="400">
     
@@ -55,7 +55,7 @@
         <PasswordBox Name="pbPassword" Grid.Row="9" Grid.Column="1" 
                      HorizontalAlignment="Stretch" Width="auto"></PasswordBox>
 
-        <Button Content="Add Cloud Target" Grid.Row="13" Grid.Column="0" Command="{ Binding ElementName=LoginDialogViewElement, Path=LoginCommand }" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+        <Button Content="Add Cloud Target" Grid.Row="13" Grid.Column="0" Command="{ Binding ElementName=AddCloudDialogViewElement, Path=AddCloudCommand }" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
                 Name="loginButton"/>
 
 

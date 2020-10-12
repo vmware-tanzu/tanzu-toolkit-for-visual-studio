@@ -1,6 +1,6 @@
 ﻿namespace TanzuForVS.WpfViews
 {
-    public interface ILoginDialogView
+    public interface IAddCloudDialogView
     {
     }
 }

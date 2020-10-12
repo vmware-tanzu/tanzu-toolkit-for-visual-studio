@@ -25,7 +25,7 @@ namespace TanzuForVS.ViewModels
         public void OpenLoginView_CallsDialogService_ShowDialog()
         {
             vm.OpenLoginView(null);
-            mockDialogService.Verify(ds => ds.ShowDialog(typeof(LoginDialogViewModel).Name, null), Times.Once);
+            mockDialogService.Verify(ds => ds.ShowDialog(typeof(AddCloudDialogViewModel).Name, null), Times.Once);
         }
 
         [TestMethod]
