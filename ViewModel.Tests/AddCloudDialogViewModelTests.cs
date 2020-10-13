@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System;
 using System.Security;
 using System.Threading.Tasks;
 using TanzuForVS.Services.CloudFoundry;
@@ -103,6 +104,24 @@ namespace TanzuForVS.ViewModels
             Assert.IsTrue(vm.IsLoggedIn);
             mockCloudFoundryService.Verify(mock => mock.ConnectToCFAsync(fakeTarget, fakeUsername, fakeSecurePw, fakeHttpProxy, skipSsl), Times.Once);
             mockDialogService.Verify(ds => ds.CloseDialog(It.IsAny<object>(), true), Times.Once);
+        }
+
+        [TestMethod]
+        public void AddCloudFoundryInstance_SetsErrorMessage_WhenAddCloudItemThrowsException()
+        {
+            string duplicateName = "I was already added";
+            string errorMsg = "fake error message thrown by CF service";
+
+            mockCloudFoundryService.Setup(mock => mock.AddCloudItem(duplicateName))
+                .Throws(new Exception(errorMsg));
+
+            vm.InstanceName = duplicateName;
+
+            vm.AddCloudFoundryInstance(null);
+
+            Assert.IsTrue(vm.HasErrors);
+            Assert.AreEqual(errorMsg, vm.ErrorMessage);
+            mockCloudFoundryService.VerifyAll();
         }
 
     }

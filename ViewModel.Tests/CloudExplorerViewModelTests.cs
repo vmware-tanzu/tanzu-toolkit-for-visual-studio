@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using TanzuForVS.Services.CloudFoundry;
+using System.Collections.Generic;
+using TanzuForVS.Services.Models;
 
 namespace TanzuForVS.ViewModels
 {
@@ -12,6 +13,7 @@ namespace TanzuForVS.ViewModels
         [TestInitialize]
         public void TestInit()
         {
+            mockCloudFoundryService.SetupGet(mock => mock.CloudItems).Returns(new Dictionary<string, CloudItem>());
             vm = new CloudExplorerViewModel(services);
         }
 
@@ -28,15 +30,5 @@ namespace TanzuForVS.ViewModels
             mockDialogService.Verify(ds => ds.ShowDialog(typeof(AddCloudDialogViewModel).Name, null), Times.Once);
         }
 
-        [TestMethod]
-        public void OpenLoginView_UpdatesIsLoggedIn_AfterDialogCloses()
-        {
-            Assert.IsFalse(vm.IsLoggedIn);
-            mockCloudFoundryService.SetupGet(mock => mock.IsLoggedIn).Returns(true);
-
-            vm.OpenLoginView(null);
-
-            Assert.IsTrue(vm.IsLoggedIn);
-        }
     }
 }

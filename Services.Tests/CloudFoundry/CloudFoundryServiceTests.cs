@@ -108,5 +108,26 @@ namespace TanzuForVS.Services.CloudFoundry
             mockCfApiClient.Verify(mock => mock.ListOrgs(fakeValidTarget, fakeValidAccessToken), Times.Once);
         }
 
+        [TestMethod()]
+        public void AddCloudItem_ThrowsException_WhenNameAlreadyExists()
+        {
+            var duplicateName = "fake name";
+            cfService.AddCloudItem(duplicateName);
+            Exception expectedException = null;
+
+            try
+            {
+                cfService.AddCloudItem(duplicateName);
+
+            }
+            catch (Exception e)
+            {
+                expectedException = e;
+            }
+
+            Assert.IsNotNull(expectedException);
+            Assert.IsTrue(expectedException.Message.Contains(duplicateName));
+            Assert.IsTrue(expectedException.Message.Contains("already exists"));
+        }
     }
 }

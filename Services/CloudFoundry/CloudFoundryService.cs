@@ -11,22 +11,22 @@ namespace TanzuForVS.Services.CloudFoundry
 {
     public class CloudFoundryService : ICloudFoundryService
     {
-        public string LoginFailureMessage { get; } = "Login failed.";
         private static ICfApiClient _cfApiClient;
-
+        public string LoginFailureMessage { get; } = "Login failed.";
+        public bool IsLoggedIn { get; set; } = false;
+        public string InstanceName { get; set; }
+        public Dictionary<string, CloudItem> CloudItems { get; private set; } 
+        public CloudItem ActiveCloud { get; set; }
+        
         public CloudFoundryService(IServiceProvider services)
         {
             _cfApiClient = services.GetRequiredService<ICfApiClient>();
+            CloudItems = new Dictionary<string, CloudItem>();
         }
-
-        public bool IsLoggedIn { get; set; } = false;
-        public string InstanceName { get; set; }
-
-        public Dictionary<string, CloudItem> CloudItems { get; private set; } = new Dictionary<string, CloudItem>();
-        public CloudItem ActiveCloud { get; set; }
 
         public void AddCloudItem(string name)
         {
+            if (CloudItems.ContainsKey(name)) throw new Exception($"The name {name} already exists.");
             CloudItems.Add(name, new CloudItem(name));
             IsLoggedIn = true; 
             // TODO: un-hardcode this ^; need to validate connection (via `/` endpoint?) before setting IsLoggedIn

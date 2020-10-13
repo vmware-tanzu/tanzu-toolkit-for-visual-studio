@@ -143,8 +143,16 @@ namespace TanzuForVS.ViewModels
 
         public void AddCloudFoundryInstance(object arg)
         {
+            try
+            {
+                CloudFoundryService.AddCloudItem(InstanceName);
+            }
+            catch (Exception e)
+            {
+                ErrorMessage = e.Message;
+                HasErrors = true;
+            }
             // TODO: create new CloudFoundryService & record connection data
-            CloudFoundryService.AddCloudItem(InstanceName);
             // TODO: issue basic info request to target to verify connection
             //          + record connection status for icon display
             DialogService.CloseDialog(arg, true);
