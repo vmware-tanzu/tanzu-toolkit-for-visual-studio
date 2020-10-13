@@ -19,7 +19,7 @@ namespace TanzuForVS.WpfViews
 
         public AddCloudDialogView(IAddCloudDialogViewModel viewModel)
         {
-            AddCloudCommand = new DelegatingCommand(viewModel.AddCloudFoundryInstance, viewModel.CanAddCloudFoundryInstance);
+            AddCloudCommand = new AsyncDelegatingCommand(viewModel.AddCloudFoundryInstance, viewModel.CanAddCloudFoundryInstance);
             viewModel.GetPassword = GetPassword;
             DataContext = viewModel;
             InitializeComponent();

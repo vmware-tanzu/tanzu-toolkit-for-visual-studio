@@ -24,7 +24,7 @@ namespace TanzuForVS.WpfViews.Tests
             Assert.AreSame(vm, view.DataContext);
 
             // Verify Login command points to view model
-            var command = view.AddCloudCommand as DelegatingCommand;
+            var command = view.AddCloudCommand as AsyncDelegatingCommand;
             Assert.IsNotNull(command);
             Assert.AreEqual(vm, command.action.Target);
 

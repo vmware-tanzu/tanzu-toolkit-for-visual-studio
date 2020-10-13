@@ -89,30 +89,35 @@ namespace TanzuForVS.ViewModels
 
         public Func<SecureString> GetPassword { get; set; }
 
-        public bool CanConnectToCloudFoundry(object arg)
+        public bool CanAddCloudFoundryInstance(object arg)
         {
             return true;
         }
 
-        public async Task ConnectToCloudFoundry(object arg)
+        public async Task AddCloudFoundryInstance(object arg)
         {
             HasErrors = false;
-            if (!VerifyTarget())
+
+            if (!VerifyTarget()) return;
+
+            var result = await CloudFoundryService.ConnectToCFAsync(Target, Username, GetPassword(), HttpProxy, SkipSsl);
+            ErrorMessage = result.ErrorMessage;
+            IsLoggedIn = result.IsLoggedIn;
+
+            if (IsLoggedIn)
             {
-                return;
+                try
+                {
+                    CloudFoundryService.AddCloudItem(InstanceName);
+                }
+                catch (Exception e)
+                {
+                    ErrorMessage = e.Message;
+                    HasErrors = true;
+                }
             }
 
-            try
-            {
-                CloudFoundryService.InstanceName = InstanceName;
-                var result = await CloudFoundryService.ConnectToCFAsync(Target, Username, GetPassword(), HttpProxy, SkipSsl);
-                ErrorMessage = result.ErrorMessage;
-                IsLoggedIn = result.IsLoggedIn;
-            }
-            finally
-            {
-                if (IsLoggedIn) DialogService.CloseDialog(arg, true);
-            }
+            if (!HasErrors) DialogService.CloseDialog(arg, true);
         }
 
         private bool VerifyTarget()
@@ -136,27 +141,6 @@ namespace TanzuForVS.ViewModels
             return true;
         }
 
-        public bool CanAddCloudFoundryInstance(object arg)
-        {
-            return true;
-        }
-
-        public void AddCloudFoundryInstance(object arg)
-        {
-            try
-            {
-                CloudFoundryService.AddCloudItem(InstanceName);
-            }
-            catch (Exception e)
-            {
-                ErrorMessage = e.Message;
-                HasErrors = true;
-            }
-            // TODO: create new CloudFoundryService & record connection data
-            // TODO: issue basic info request to target to verify connection
-            //          + record connection status for icon display
-            DialogService.CloseDialog(arg, true);
-        }
 
     }
 }
