@@ -122,12 +122,12 @@ namespace TanzuForVS.ViewModels
             Assert.IsFalse(vm.IsLoggedIn);
             Assert.IsNotNull(vm.ErrorMessage);
             mockDialogService.Verify(mock => mock.CloseDialog(It.IsAny<object>(), It.IsAny<bool>()), Times.Never);
-            mockCloudFoundryService.Verify(mock => mock.AddCloudItem(It.IsAny<string>()), Times.Never);
+            mockCloudFoundryService.Verify(mock => mock.AddCloudFoundryInstance(It.IsAny<string>()), Times.Never);
             mockCloudFoundryService.VerifyAll();
         }
 
         [TestMethod]
-        public async Task AddCloudFoundryInstance_SetsErrorMessage_WhenAddCloudItemThrowsException()
+        public async Task AddCloudFoundryInstance_SetsErrorMessage_WhenAddCloudFoundryInstanceThrowsException()
         {
             string duplicateName = "I was already added";
             string errorMsg = "fake error message thrown by CF service";
@@ -135,7 +135,7 @@ namespace TanzuForVS.ViewModels
             mockCloudFoundryService.Setup(mock => mock.ConnectToCFAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SecureString>(), It.IsAny<string>(), It.IsAny<bool>()))
                .ReturnsAsync(new ConnectResult(true, null));
 
-            mockCloudFoundryService.Setup(mock => mock.AddCloudItem(duplicateName))
+            mockCloudFoundryService.Setup(mock => mock.AddCloudFoundryInstance(duplicateName))
                 .Throws(new Exception(errorMsg));
 
             vm.InstanceName = duplicateName;

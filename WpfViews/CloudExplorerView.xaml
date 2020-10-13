@@ -55,9 +55,9 @@
                  Background="Transparent" Text="Not Yet Connected" 
                  Visibility="{Binding Path=HasCloudTargets, Converter={StaticResource InverseVisibility}}"/>
 
-        <TreeView ItemsSource="{Binding CloudItemsList}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Visibility="{Binding Path=HasCloudTargets, Converter={StaticResource Visibility}}">
+        <TreeView ItemsSource="{Binding CloudFoundryInstancesList}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Visibility="{Binding Path=HasCloudTargets, Converter={StaticResource Visibility}}">
             <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate ItemsSource="{Binding CloudItemsList}">
+                <HierarchicalDataTemplate ItemsSource="{Binding CloudFoundryInstancesList}">
                     <TreeViewItem Header="{Binding Name}"/>
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>

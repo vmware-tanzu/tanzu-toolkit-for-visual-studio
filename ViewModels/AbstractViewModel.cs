@@ -13,7 +13,7 @@ namespace TanzuForVS.ViewModels
     {
         private bool hasCloudTargets;
         private object activeView;
-        private List<CloudItem> cloudItemsList;
+        private List<CloudFoundryInstance> cloudFoundryInstancesList;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -47,14 +47,14 @@ namespace TanzuForVS.ViewModels
             }
         }
 
-        public List<CloudItem> CloudItemsList
+        public List<CloudFoundryInstance> CloudFoundryInstancesList
         {
-            get => cloudItemsList;
+            get => cloudFoundryInstancesList;
 
             set
             {
-                this.cloudItemsList = value;
-                this.RaisePropertyChangedEvent("CloudItemsList");
+                this.cloudFoundryInstancesList = value;
+                this.RaisePropertyChangedEvent("CloudFoundryInstancesList");
             }
         }
         public bool HasCloudTargets

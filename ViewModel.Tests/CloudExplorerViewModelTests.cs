@@ -13,7 +13,7 @@ namespace TanzuForVS.ViewModels
         [TestInitialize]
         public void TestInit()
         {
-            mockCloudFoundryService.SetupGet(mock => mock.CloudItems).Returns(new Dictionary<string, CloudItem>());
+            mockCloudFoundryService.SetupGet(mock => mock.CloudFoundryInstances).Returns(new Dictionary<string, CloudFoundryInstance>());
             vm = new CloudExplorerViewModel(services);
         }
 

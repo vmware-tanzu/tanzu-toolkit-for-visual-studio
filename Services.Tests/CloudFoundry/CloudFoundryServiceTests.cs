@@ -108,15 +108,15 @@ namespace TanzuForVS.Services.CloudFoundry
         }
 
         [TestMethod()]
-        public void AddCloudItem_ThrowsException_WhenNameAlreadyExists()
+        public void AddCloudFoundryInstance_ThrowsException_WhenNameAlreadyExists()
         {
             var duplicateName = "fake name";
-            cfService.AddCloudItem(duplicateName);
+            cfService.AddCloudFoundryInstance(duplicateName);
             Exception expectedException = null;
 
             try
             {
-                cfService.AddCloudItem(duplicateName);
+                cfService.AddCloudFoundryInstance(duplicateName);
 
             }
             catch (Exception e)

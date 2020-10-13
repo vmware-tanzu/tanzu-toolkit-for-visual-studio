@@ -14,19 +14,19 @@ namespace TanzuForVS.Services.CloudFoundry
         private static ICfApiClient _cfApiClient;
         public string LoginFailureMessage { get; } = "Login failed.";
         public string InstanceName { get; set; }
-        public Dictionary<string, CloudItem> CloudItems { get; private set; } 
-        public CloudItem ActiveCloud { get; set; }
+        public Dictionary<string, CloudFoundryInstance> CloudFoundryInstances { get; private set; } 
+        public CloudFoundryInstance ActiveCloud { get; set; }
         
         public CloudFoundryService(IServiceProvider services)
         {
             _cfApiClient = services.GetRequiredService<ICfApiClient>();
-            CloudItems = new Dictionary<string, CloudItem>();
+            CloudFoundryInstances = new Dictionary<string, CloudFoundryInstance>();
         }
 
-        public void AddCloudItem(string name)
+        public void AddCloudFoundryInstance(string name)
         {
-            if (CloudItems.ContainsKey(name)) throw new Exception($"The name {name} already exists.");
-            CloudItems.Add(name, new CloudItem(name));
+            if (CloudFoundryInstances.ContainsKey(name)) throw new Exception($"The name {name} already exists.");
+            CloudFoundryInstances.Add(name, new CloudFoundryInstance(name));
         }
 
         public async Task<ConnectResult> ConnectToCFAsync(string target, string username, SecureString password, string httpProxy, bool skipSsl)

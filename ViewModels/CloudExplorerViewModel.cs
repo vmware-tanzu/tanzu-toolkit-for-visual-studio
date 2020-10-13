@@ -9,7 +9,7 @@ namespace TanzuForVS.ViewModels
         public CloudExplorerViewModel(IServiceProvider services) 
             : base(services)
         {
-            HasCloudTargets = CloudFoundryService.CloudItems.Keys.Count > 0;
+            HasCloudTargets = CloudFoundryService.CloudFoundryInstances.Keys.Count > 0;
         }
 
         public bool CanOpenLoginView(object arg)
@@ -20,8 +20,8 @@ namespace TanzuForVS.ViewModels
         public void OpenLoginView(object parent)
         {
             var result = DialogService.ShowDialog(typeof(AddCloudDialogViewModel).Name);
-            CloudItemsList = new List<CloudItem>(CloudFoundryService.CloudItems.Values);
-            HasCloudTargets = CloudItemsList.Count > 0;
+            CloudFoundryInstancesList = new List<CloudFoundryInstance>(CloudFoundryService.CloudFoundryInstances.Values);
+            HasCloudTargets = CloudFoundryInstancesList.Count > 0;
         }
     }
 }

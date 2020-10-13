@@ -2,12 +2,12 @@
 
 namespace TanzuForVS.Services.Models
 {
-    public class CloudItem
+    public class CloudFoundryInstance
     {
         private string name;
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public CloudItem(string name)
+        public CloudFoundryInstance(string name)
         {
             this.Name = name;
         }
