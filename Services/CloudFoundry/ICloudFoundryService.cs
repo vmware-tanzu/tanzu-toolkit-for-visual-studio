@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
-using TanzuForVS.Services.Models;
+using TanzuForVS.Models;
 
 namespace TanzuForVS.Services.CloudFoundry
 {
@@ -10,9 +10,8 @@ namespace TanzuForVS.Services.CloudFoundry
         CloudFoundryInstance ActiveCloud { get; set; }
         Dictionary<string, CloudFoundryInstance> CloudFoundryInstances { get; }
         string LoginFailureMessage { get; }
-        string InstanceName { get; set; }
-        void AddCloudFoundryInstance(string name);
+        void AddCloudFoundryInstance(string name, string apiAddress, string accessToken);
         Task<ConnectResult> ConnectToCFAsync(string target, string username, SecureString password, string httpProxy, bool skipSsl);
-        Task<List<string>> GetOrgNamesAsync(string target, string acessToken);
+        Task<List<string>> GetOrgNamesAsync(string target, string accessToken);
     }
 }

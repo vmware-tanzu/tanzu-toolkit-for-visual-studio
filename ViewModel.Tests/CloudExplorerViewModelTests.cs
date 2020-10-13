@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Collections.Generic;
-using TanzuForVS.Services.Models;
+using TanzuForVS.Models;
 
 namespace TanzuForVS.ViewModels
 {
@@ -28,6 +28,24 @@ namespace TanzuForVS.ViewModels
         {
             vm.OpenLoginView(null);
             mockDialogService.Verify(ds => ds.ShowDialog(typeof(AddCloudDialogViewModel).Name, null), Times.Once);
+        }
+
+        [TestMethod]
+        public void OpenLoginView_UpdatesCloudFoundryInstances_AfterDialogCloses()
+        {
+            var fakeCfsDict = new Dictionary<string, CloudFoundryInstance>
+            {
+                { "fake cf", new CloudFoundryInstance("fake cf", null, null) }
+            };
+
+            Assert.AreEqual(0, vm.CloudFoundryList.Count);
+
+            mockCloudFoundryService.SetupGet(mock => mock.CloudFoundryInstances).Returns(fakeCfsDict);
+
+            vm.OpenLoginView(null);
+
+            Assert.IsTrue(vm.HasCloudTargets);
+            Assert.AreEqual(1, vm.CloudFoundryList.Count);
         }
 
     }

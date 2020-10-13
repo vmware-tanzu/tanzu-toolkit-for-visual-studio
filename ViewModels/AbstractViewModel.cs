@@ -1,11 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using TanzuForVS.Services.CloudFoundry;
 using TanzuForVS.Services.Dialog;
 using TanzuForVS.Services.Locator;
-using TanzuForVS.Services.Models;
 
 namespace TanzuForVS.ViewModels
 {

@@ -55,17 +55,36 @@
                  Background="Transparent" Text="Not Yet Connected" 
                  Visibility="{Binding Path=HasCloudTargets, Converter={StaticResource InverseVisibility}}"/>
 
-        <TreeView ItemsSource="{Binding CloudFoundryInstancesList}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Visibility="{Binding Path=HasCloudTargets, Converter={StaticResource Visibility}}">
-            <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate ItemsSource="{Binding Path=Orgs}">
-                    <TextBlock Text="{Binding Path=InstanceName}" />
-                    <HierarchicalDataTemplate.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Path=OrgName}"/>
-                        </DataTemplate>
-                    </HierarchicalDataTemplate.ItemTemplate>
+        <TreeView ItemsSource="{Binding CloudFoundryList}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Visibility="{Binding Path=HasCloudTargets, Converter={StaticResource Visibility}}">
+            <TreeView.ItemContainerStyle>
+                <!-- This Style binds a TreeViewItem to a TreeViewItemViewModel. -->
+                <Style TargetType="{x:Type TreeViewItem}">
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                    <Setter Property="FontWeight" Value="Normal" />
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="FontWeight" Value="Bold" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </TreeView.ItemContainerStyle>
+
+            <TreeView.Resources>
+                <HierarchicalDataTemplate DataType="{x:Type ViewModels:CloudFoundryInstanceViewModel}" 
+                                          ItemsSource="{Binding Children}">
+                    
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding InstanceName}" />
+                    </StackPanel>
                 </HierarchicalDataTemplate>
-            </TreeView.ItemTemplate>
+
+                <DataTemplate DataType="{x:Type ViewModels:OrgViewModel}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding OrgName}" />
+                    </StackPanel>
+                </DataTemplate>
+            </TreeView.Resources>
         </TreeView>
 
     </Grid>

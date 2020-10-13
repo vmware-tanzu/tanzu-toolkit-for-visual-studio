@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 
@@ -12,26 +13,31 @@ namespace TanzuForVS.Services.Models
 
         public CloudFoundryInstance(string name)
         {
-            this.InstanceName = name;
-            orgs = new ObservableCollection<CloudFoundryOrganization>(new List<CloudFoundryOrganization>
-            {
-                new CloudFoundryOrganization("fake org 1"),
-                new CloudFoundryOrganization("fake org 2"),
-                new CloudFoundryOrganization("fake org 3")
-            });
+            throw new NotImplementedException();
+            //this.InstanceName = name;
+            //orgs = new ObservableCollection<CloudFoundryOrganization>(new List<CloudFoundryOrganization>
+            //{
+            //    new CloudFoundryOrganization("fake org 1"),
+            //    new CloudFoundryOrganization("fake org 2"),
+            //    new CloudFoundryOrganization("fake org 3")
+            //});
         }
 
         public string InstanceName
         {
             get
             {
-                return this.name;
+                throw new NotImplementedException();
+
+                //return this.name;
             }
 
             set
             {
-                this.name = value;
-                this.RaisePropertyChangedEvent("InstanceName");
+                throw new NotImplementedException();
+
+                //this.name = value;
+                //this.RaisePropertyChangedEvent("InstanceName");
             }
         }
 

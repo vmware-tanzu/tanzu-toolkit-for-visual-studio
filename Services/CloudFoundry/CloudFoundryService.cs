@@ -5,7 +5,7 @@ using System.Security;
 using System.Threading.Tasks;
 using TanzuForVS.CloudFoundryApiClient;
 using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
-using TanzuForVS.Services.Models;
+using TanzuForVS.Models;
 
 namespace TanzuForVS.Services.CloudFoundry
 {
@@ -13,7 +13,6 @@ namespace TanzuForVS.Services.CloudFoundry
     {
         private static ICfApiClient _cfApiClient;
         public string LoginFailureMessage { get; } = "Login failed.";
-        public string InstanceName { get; set; }
         public Dictionary<string, CloudFoundryInstance> CloudFoundryInstances { get; private set; } 
         public CloudFoundryInstance ActiveCloud { get; set; }
         
@@ -23,10 +22,10 @@ namespace TanzuForVS.Services.CloudFoundry
             CloudFoundryInstances = new Dictionary<string, CloudFoundryInstance>();
         }
 
-        public void AddCloudFoundryInstance(string name)
+        public void AddCloudFoundryInstance(string name, string apiAddress, string accessToken)
         {
             if (CloudFoundryInstances.ContainsKey(name)) throw new Exception($"The name {name} already exists.");
-            CloudFoundryInstances.Add(name, new CloudFoundryInstance(name));
+            CloudFoundryInstances.Add(name, new CloudFoundryInstance(name, apiAddress, accessToken));
         }
 
         public async Task<ConnectResult> ConnectToCFAsync(string target, string username, SecureString password, string httpProxy, bool skipSsl)
@@ -40,9 +39,9 @@ namespace TanzuForVS.Services.CloudFoundry
             try
             {
                 string passwordStr = new System.Net.NetworkCredential(string.Empty, password).Password;
-                string AccessToken = await _cfApiClient.LoginAsync(target, username, passwordStr);
+                string accessToken = await _cfApiClient.LoginAsync(target, username, passwordStr);
 
-                if (!string.IsNullOrEmpty(AccessToken)) return new ConnectResult(true, null);
+                if (!string.IsNullOrEmpty(accessToken)) return new ConnectResult(true, null, accessToken);
 
                 throw new Exception(LoginFailureMessage);
             }
@@ -51,7 +50,7 @@ namespace TanzuForVS.Services.CloudFoundry
                 var errorMessages = new List<string>();
                 FormatExceptionMessage(e, errorMessages);
                 var errorMessage = string.Join(Environment.NewLine, errorMessages.ToArray());
-                return new ConnectResult(false, errorMessage);
+                return new ConnectResult(false, errorMessage, null);
             }
         }
 

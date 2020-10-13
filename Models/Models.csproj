@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>TanzuForVS.Models</AssemblyName>
+    <RootNamespace>TanzuForVS.Models</RootNamespace>
+  </PropertyGroup>
+
+</Project>

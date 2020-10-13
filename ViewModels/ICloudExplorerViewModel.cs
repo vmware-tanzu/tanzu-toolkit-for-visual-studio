@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using TanzuForVS.Services.Models;
+using TanzuForVS.Models;
 
 namespace TanzuForVS.ViewModels
 {
@@ -7,7 +7,8 @@ namespace TanzuForVS.ViewModels
     {
         bool HasCloudTargets { get; set; }
 
-        List<CloudFoundryInstance> CloudFoundryInstancesList { get; set; }
+        //List<CloudFoundryInstance> CloudFoundryInstancesList { get; set; }
+        //CloudFoundryInstance[] CloudFoundryInstances { get; set; }
 
         bool CanOpenLoginView(object arg);
 

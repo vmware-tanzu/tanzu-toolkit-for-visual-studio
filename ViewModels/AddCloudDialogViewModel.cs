@@ -134,7 +134,7 @@ namespace TanzuForVS.ViewModels
             {
                 try
                 {
-                    CloudFoundryService.AddCloudFoundryInstance(InstanceName);
+                    CloudFoundryService.AddCloudFoundryInstance(InstanceName, Target, result.Token);
                 }
                 catch (Exception e)
                 {

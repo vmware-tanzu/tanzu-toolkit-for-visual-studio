@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Models\Models.csproj" />
     <ProjectReference Include="..\TanzuForVS.CloudFoundryApiClient\TanzuForVS.CloudFoundryApiClient.csproj" />
   </ItemGroup>
 

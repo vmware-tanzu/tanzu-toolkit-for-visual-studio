@@ -39,12 +39,13 @@ namespace TanzuForVS.Services.CloudFoundry
         [TestMethod()]
         public async Task ConnectToCFAsync_ReturnsConnectResult_WhenLoginSucceeds()
         {
-            mockCfApiClient.Setup(mock => mock.LoginAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(fakeLoginSuccessResponse);
+            mockCfApiClient.Setup(mock => mock.LoginAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(fakeValidAccessToken);
 
             ConnectResult result = await cfService.ConnectToCFAsync(fakeValidTarget, fakeValidUsername, fakeValidPassword, fakeHttpProxy, skipSsl);
 
             Assert.IsTrue(result.IsLoggedIn);
             Assert.IsNull(result.ErrorMessage);
+            Assert.AreEqual(fakeValidAccessToken, result.Token);
             mockCfApiClient.Verify(mock => mock.LoginAsync(fakeValidTarget, fakeValidUsername, It.IsAny<string>()), Times.Once);
         }
 
@@ -57,6 +58,7 @@ namespace TanzuForVS.Services.CloudFoundry
 
             Assert.IsFalse(result.IsLoggedIn);
             Assert.IsTrue(result.ErrorMessage.Contains(cfService.LoginFailureMessage));
+            Assert.IsNull(result.Token);
             mockCfApiClient.Verify(mock => mock.LoginAsync(fakeValidTarget, fakeValidUsername, It.IsAny<string>()), Times.Once);
         }
 
@@ -72,6 +74,7 @@ namespace TanzuForVS.Services.CloudFoundry
 
             ConnectResult result = await cfService.ConnectToCFAsync(fakeValidTarget, fakeValidUsername, fakeValidPassword, fakeHttpProxy, skipSsl);
 
+            Assert.IsNull(result.Token);
             Assert.IsTrue(result.ErrorMessage.Contains(baseMessage));
             Assert.IsTrue(result.ErrorMessage.Contains(innerMessage));
             Assert.IsTrue(result.ErrorMessage.Contains(outerMessage));
@@ -85,17 +88,21 @@ namespace TanzuForVS.Services.CloudFoundry
             const string org3Name = "org3";
             const string org4Name = "org4";
 
-            var list = new List<Resource>();
-            list.Add(new Resource(org1Name));
-            list.Add(new Resource(org2Name));
-            list.Add(new Resource(org3Name));
-            list.Add(new Resource(org4Name));
+            var list = new List<Resource>
+            {
+                new Resource(org1Name),
+                new Resource(org2Name),
+                new Resource(org3Name),
+                new Resource(org4Name)
+            };
 
-            var expectedResult = new List<string>();
-            expectedResult.Add(org1Name);
-            expectedResult.Add(org2Name);
-            expectedResult.Add(org3Name);
-            expectedResult.Add(org4Name);
+            var expectedResult = new List<string>
+            {
+                org1Name,
+                org2Name,
+                org3Name,
+                org4Name
+            };
 
             mockCfApiClient.Setup(mock => mock.ListOrgs(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(list);
 
@@ -111,12 +118,12 @@ namespace TanzuForVS.Services.CloudFoundry
         public void AddCloudFoundryInstance_ThrowsException_WhenNameAlreadyExists()
         {
             var duplicateName = "fake name";
-            cfService.AddCloudFoundryInstance(duplicateName);
+            cfService.AddCloudFoundryInstance(duplicateName, null, null);
             Exception expectedException = null;
 
             try
             {
-                cfService.AddCloudFoundryInstance(duplicateName);
+                cfService.AddCloudFoundryInstance(duplicateName, null, null);
 
             }
             catch (Exception e)
