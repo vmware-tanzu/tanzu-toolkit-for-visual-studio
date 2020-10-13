@@ -10,7 +10,6 @@ namespace TanzuForVS.Services.CloudFoundry
     {
         CloudItem ActiveCloud { get; set; }
         Dictionary<string, CloudItem> CloudItems { get; }
-        bool IsLoggedIn { get; }
         string LoginFailureMessage { get; }
         string InstanceName { get; set; }
         void AddCloudItem(string name);

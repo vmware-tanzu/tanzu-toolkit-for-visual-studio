@@ -14,10 +14,24 @@ namespace TanzuForVS.ViewModels
         private bool skipSsl;
         private bool hasErrors;
         private string errorMessage;
+        private bool isLoggedIn;
+        private string instanceName;
+
 
         public AddCloudDialogViewModel(IServiceProvider services)
             : base(services)
         {
+        }
+
+        public string InstanceName
+        {
+            get => instanceName;
+
+            set
+            {
+                this.instanceName = value;
+                this.RaisePropertyChangedEvent("InstanceName");
+            }
         }
 
         public string Target
@@ -89,6 +103,18 @@ namespace TanzuForVS.ViewModels
 
         public Func<SecureString> GetPassword { get; set; }
 
+        public bool IsLoggedIn
+        {
+            get => this.isLoggedIn;
+
+            private set
+            {
+                this.isLoggedIn = value;
+                this.RaisePropertyChangedEvent("IsLoggedIn");
+            }
+        }
+
+        
         public bool CanAddCloudFoundryInstance(object arg)
         {
             return true;
@@ -140,7 +166,6 @@ namespace TanzuForVS.ViewModels
 
             return true;
         }
-
 
     }
 }

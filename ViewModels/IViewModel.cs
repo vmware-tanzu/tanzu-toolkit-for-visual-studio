@@ -4,8 +4,6 @@
     {
         object ActiveView { get; set; }
 
-        bool IsLoggedIn { get; set; }
-
         bool HasCloudTargets { get; set; }
 
     }

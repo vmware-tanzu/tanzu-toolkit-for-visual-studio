@@ -13,7 +13,6 @@ namespace TanzuForVS.Services.CloudFoundry
     {
         private static ICfApiClient _cfApiClient;
         public string LoginFailureMessage { get; } = "Login failed.";
-        public bool IsLoggedIn { get; set; } = false;
         public string InstanceName { get; set; }
         public Dictionary<string, CloudItem> CloudItems { get; private set; } 
         public CloudItem ActiveCloud { get; set; }
@@ -28,8 +27,6 @@ namespace TanzuForVS.Services.CloudFoundry
         {
             if (CloudItems.ContainsKey(name)) throw new Exception($"The name {name} already exists.");
             CloudItems.Add(name, new CloudItem(name));
-            IsLoggedIn = true; 
-            // TODO: un-hardcode this ^; need to validate connection (via `/` endpoint?) before setting IsLoggedIn
         }
 
         public async Task<ConnectResult> ConnectToCFAsync(string target, string username, SecureString password, string httpProxy, bool skipSsl)
@@ -43,14 +40,10 @@ namespace TanzuForVS.Services.CloudFoundry
             try
             {
                 string passwordStr = new System.Net.NetworkCredential(string.Empty, password).Password;
-
                 string AccessToken = await _cfApiClient.LoginAsync(target, username, passwordStr);
 
-                if (!string.IsNullOrEmpty(AccessToken))
-                {
-                    IsLoggedIn = true;
-                    return new ConnectResult(true, null);
-                }
+                if (!string.IsNullOrEmpty(AccessToken)) return new ConnectResult(true, null);
+
                 throw new Exception(LoginFailureMessage);
             }
             catch (Exception e)

@@ -19,7 +19,6 @@ namespace TanzuForVS.ViewModels
             Assert.IsNotNull(vm.DialogService);
             Assert.IsNotNull(vm.ViewLocatorService);
             Assert.IsNotNull(vm.CloudFoundryService);
-            Assert.IsFalse(vm.IsLoggedIn);
             Assert.IsNull(vm.ActiveView);
         }
     }
