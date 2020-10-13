@@ -6,10 +6,35 @@ namespace TanzuForVS.ViewModels
 {
     public class CloudExplorerViewModel : AbstractViewModel, ICloudExplorerViewModel
     {
+        private bool hasCloudTargets;
+        private List<CloudFoundryInstance> cloudFoundryInstancesList;
+
         public CloudExplorerViewModel(IServiceProvider services) 
             : base(services)
         {
             HasCloudTargets = CloudFoundryService.CloudFoundryInstances.Keys.Count > 0;
+        }
+
+        public List<CloudFoundryInstance> CloudFoundryInstancesList
+        {
+            get => cloudFoundryInstancesList;
+
+            set
+            {
+                this.cloudFoundryInstancesList = value;
+                this.RaisePropertyChangedEvent("CloudFoundryInstancesList");
+            }
+        }
+
+        public bool HasCloudTargets
+        {
+            get => this.hasCloudTargets;
+
+            set
+            {
+                this.hasCloudTargets = value;
+                this.RaisePropertyChangedEvent("HasCloudTargets");
+            }
         }
 
         public bool CanOpenLoginView(object arg)

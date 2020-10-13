@@ -57,8 +57,13 @@
 
         <TreeView ItemsSource="{Binding CloudFoundryInstancesList}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Visibility="{Binding Path=HasCloudTargets, Converter={StaticResource Visibility}}">
             <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate ItemsSource="{Binding CloudFoundryInstancesList}">
-                    <TreeViewItem Header="{Binding Name}"/>
+                <HierarchicalDataTemplate ItemsSource="{Binding Path=Orgs}">
+                    <TextBlock Text="{Binding Path=InstanceName}" />
+                    <HierarchicalDataTemplate.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Path=OrgName}"/>
+                        </DataTemplate>
+                    </HierarchicalDataTemplate.ItemTemplate>
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
         </TreeView>

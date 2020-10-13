@@ -11,9 +11,7 @@ namespace TanzuForVS.ViewModels
 {
     public abstract class AbstractViewModel : IViewModel, INotifyPropertyChanged
     {
-        private bool hasCloudTargets;
         private object activeView;
-        private List<CloudFoundryInstance> cloudFoundryInstancesList;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -44,27 +42,6 @@ namespace TanzuForVS.ViewModels
             {
                 this.activeView = value;
                 this.RaisePropertyChangedEvent("ActiveView");
-            }
-        }
-
-        public List<CloudFoundryInstance> CloudFoundryInstancesList
-        {
-            get => cloudFoundryInstancesList;
-
-            set
-            {
-                this.cloudFoundryInstancesList = value;
-                this.RaisePropertyChangedEvent("CloudFoundryInstancesList");
-            }
-        }
-        public bool HasCloudTargets
-        {
-            get => this.hasCloudTargets;
-
-            set
-            {
-                this.hasCloudTargets = value;
-                this.RaisePropertyChangedEvent("HasCloudTargets");
             }
         }
 

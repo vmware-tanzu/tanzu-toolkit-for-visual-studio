@@ -4,7 +4,5 @@
     {
         object ActiveView { get; set; }
 
-        bool HasCloudTargets { get; set; }
-
     }
 }
