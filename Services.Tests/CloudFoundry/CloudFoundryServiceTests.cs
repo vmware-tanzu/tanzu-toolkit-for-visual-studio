@@ -17,7 +17,6 @@ namespace TanzuForVS.Services.CloudFoundry
         SecureString fakeValidPassword = new SecureString();
         string fakeHttpProxy = "junk";
         bool skipSsl = true;
-        string fakeLoginSuccessResponse = "login success!";
         string fakeValidAccessToken = "valid token";
 
         [TestInitialize()]
@@ -80,6 +79,21 @@ namespace TanzuForVS.Services.CloudFoundry
             Assert.IsTrue(result.ErrorMessage.Contains(outerMessage));
         }
 
+        [TestMethod()]
+        public async Task GetOrgNamesAsync_ReturnsEmptyList_WhenListOrgsFails()
+        {
+            var expectedResult = new List<string>();
+
+            mockCfApiClient.Setup(mock => mock.ListOrgs(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync((List<Resource>)null);
+
+            var result = await cfService.GetOrgNamesAsync(fakeValidTarget, fakeValidAccessToken);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count);
+            CollectionAssert.AreEqual(expectedResult, result);
+            mockCfApiClient.Verify(mock => mock.ListOrgs(fakeValidTarget, fakeValidAccessToken), Times.Once);
+        }
+        
         [TestMethod()]
         public async Task GetOrgNamesAsync_ReturnsListOfStrings_WhenListOrgsSuceeds()
         {

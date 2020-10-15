@@ -13,9 +13,9 @@ namespace TanzuForVS.Services.CloudFoundry
     {
         private static ICfApiClient _cfApiClient;
         public string LoginFailureMessage { get; } = "Login failed.";
-        public Dictionary<string, CloudFoundryInstance> CloudFoundryInstances { get; private set; } 
+        public Dictionary<string, CloudFoundryInstance> CloudFoundryInstances { get; private set; }
         public CloudFoundryInstance ActiveCloud { get; set; }
-        
+
         public CloudFoundryService(IServiceProvider services)
         {
             _cfApiClient = services.GetRequiredService<ICfApiClient>();
@@ -59,7 +59,10 @@ namespace TanzuForVS.Services.CloudFoundry
             List<Resource> orgList = await _cfApiClient.ListOrgs(target, accessToken);
 
             List<string> nameList = new List<string>();
-            orgList.ForEach(delegate (Resource org) { nameList.Add(org.name); });
+            if (orgList != null)
+            {
+                orgList.ForEach(delegate (Resource org) { nameList.Add(org.name); });
+            }
 
             return nameList;
         }
