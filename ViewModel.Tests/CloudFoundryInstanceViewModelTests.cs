@@ -24,7 +24,7 @@ namespace TanzuForVS.ViewModels
             cfivm.IsExpanded = true;
 
             Assert.AreEqual(fakeOrgsList.Count, cfivm.Children.Count);
-            mockCloudFoundryService.VerifyAll(); // TODO: call CfService in the real implementation
+            mockCloudFoundryService.VerifyAll(); 
         } 
     }
 
