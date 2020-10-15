@@ -47,7 +47,6 @@ namespace TanzuForVS.ViewModels
             Assert.IsTrue(ErrorMessagePropertyChangedCalled);
             Assert.IsTrue(vm.HasErrors);
             Assert.AreEqual(AddCloudDialogViewModel.TargetEmptyMessage, vm.ErrorMessage);
-            Assert.IsFalse(vm.IsLoggedIn);
 
             mockDialogService.Verify(ds => ds.CloseDialog(It.IsAny<object>(), true), Times.Never);
             mockDialogService.Verify(ds => ds.ShowDialog(It.IsAny<string>(), null), Times.Never);
@@ -70,7 +69,6 @@ namespace TanzuForVS.ViewModels
             Assert.IsTrue(ErrorMessagePropertyChangedCalled);
             Assert.IsTrue(vm.HasErrors);
             Assert.AreEqual(AddCloudDialogViewModel.TargetInvalidFormatMessage, vm.ErrorMessage);
-            Assert.IsFalse(vm.IsLoggedIn);
 
             mockDialogService.Verify(ds => ds.CloseDialog(It.IsAny<object>(), true), Times.Never);
             mockDialogService.Verify(ds => ds.ShowDialog(It.IsAny<string>(), null), Times.Never);
@@ -102,7 +100,6 @@ namespace TanzuForVS.ViewModels
             await vm.AddCloudFoundryInstance(null);
 
             Assert.IsFalse(vm.HasErrors);
-            Assert.IsTrue(vm.IsLoggedIn);
             mockCloudFoundryService.Verify(mock => mock.ConnectToCFAsync(fakeTarget, fakeUsername, fakeSecurePw, fakeHttpProxy, skipSsl), Times.Once);
             mockDialogService.Verify(mock => mock.CloseDialog(It.IsAny<object>(), It.IsAny<bool>()), Times.Once);
             mockDialogService.Verify(ds => ds.CloseDialog(It.IsAny<object>(), true), Times.Once);
@@ -120,7 +117,6 @@ namespace TanzuForVS.ViewModels
             vm.InstanceName = cloudName;
             await vm.AddCloudFoundryInstance(null);
 
-            Assert.IsFalse(vm.IsLoggedIn);
             Assert.IsNotNull(vm.ErrorMessage);
             mockDialogService.Verify(mock => mock.CloseDialog(It.IsAny<object>(), It.IsAny<bool>()), Times.Never);
             mockCloudFoundryService.Verify(mock => mock.AddCloudFoundryInstance(It.IsAny<string>(),It.IsAny<string>(),It.IsAny<string>()), Times.Never);

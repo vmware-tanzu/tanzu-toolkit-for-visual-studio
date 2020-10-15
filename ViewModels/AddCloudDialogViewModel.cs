@@ -14,7 +14,6 @@ namespace TanzuForVS.ViewModels
         private bool skipSsl;
         private bool hasErrors;
         private string errorMessage;
-        private bool isLoggedIn;
         private string instanceName;
 
 
@@ -103,18 +102,6 @@ namespace TanzuForVS.ViewModels
 
         public Func<SecureString> GetPassword { get; set; }
 
-        public bool IsLoggedIn
-        {
-            get => this.isLoggedIn;
-
-            private set
-            {
-                this.isLoggedIn = value;
-                this.RaisePropertyChangedEvent("IsLoggedIn");
-            }
-        }
-
-        
         public bool CanAddCloudFoundryInstance(object arg)
         {
             return true;
@@ -128,9 +115,8 @@ namespace TanzuForVS.ViewModels
 
             var result = await CloudFoundryService.ConnectToCFAsync(Target, Username, GetPassword(), HttpProxy, SkipSsl);
             ErrorMessage = result.ErrorMessage;
-            IsLoggedIn = result.IsLoggedIn;
 
-            if (IsLoggedIn)
+            if (result.IsLoggedIn)
             {
                 try
                 {
