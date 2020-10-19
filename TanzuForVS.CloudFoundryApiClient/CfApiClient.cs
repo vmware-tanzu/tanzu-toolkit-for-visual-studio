@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Runtime.Versioning;
 using System.Threading.Tasks;
+using TanzuForVS.CloudFoundryApiClient.Models;
 using TanzuForVS.CloudFoundryApiClient.Models.BasicInfoResponse;
 using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
+using TanzuForVS.CloudFoundryApiClient.Models.SpacesResponse;
 
 namespace TanzuForVS.CloudFoundryApiClient
 {
@@ -16,6 +17,7 @@ namespace TanzuForVS.CloudFoundryApiClient
         public string AccessToken { get; private set; }
 
         internal static readonly string listOrgsPath = "/v3/organizations";
+        internal static readonly string listSpacesPath = "/v3/spaces";
 
         public static readonly string defaultAuthClientId = "cf";
         public static readonly string defaultAuthClientSecret = "";
@@ -106,7 +108,7 @@ namespace TanzuForVS.CloudFoundryApiClient
             return uriResult;
         }
 
-        public async Task<List<Resource>> ListOrgs(string cfTarget, string accessToken)
+        public async Task<List<Models.OrgsResponse.Resource>> ListOrgs(string cfTarget, string accessToken)
         {
             try
             {
@@ -128,7 +130,7 @@ namespace TanzuForVS.CloudFoundryApiClient
                 string resultContent = await response.Content.ReadAsStringAsync();
                 var orgsResponse = JsonConvert.DeserializeObject<OrgsResponse>(resultContent);
 
-                List<Resource> visibleOrgs = orgsResponse.resources.ToList();
+                List<Models.OrgsResponse.Resource> visibleOrgs = orgsResponse.resources.ToList();
 
                 if (orgsResponse.pagination.next != null)
                 {
@@ -145,7 +147,46 @@ namespace TanzuForVS.CloudFoundryApiClient
 
         }
 
-        private async Task<List<Resource>> GetRemainingOrgsPages(Href nextPageHref, string accessToken, List<Resource> resourcesList)
+        public async Task<List<Models.SpacesResponse.Resource>> ListSpaces(string cfTarget, string accessToken)
+        {
+            try
+            {
+                // trust any certificate
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback +=
+                    (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+                var uri = new UriBuilder(cfTarget);
+                uri.Path = listSpacesPath;
+
+                var request = new HttpRequestMessage(HttpMethod.Get, uri.ToString());
+                request.Headers.Add("Authorization", "Bearer " + accessToken);
+
+                var response = await _httpClient.SendAsync(request);
+
+                if (!response.IsSuccessStatusCode) throw new Exception($"Response from `{listSpacesPath}` was {response.StatusCode}");
+
+                string resultContent = await response.Content.ReadAsStringAsync();
+                var spacesResponse = JsonConvert.DeserializeObject<SpacesResponse>(resultContent);
+
+                List<Models.SpacesResponse.Resource> visibleSpaces = spacesResponse.resources.ToList();
+
+                if (spacesResponse.pagination.next != null)
+                {
+                    visibleSpaces = await GetRemainingSpacesPages(spacesResponse.pagination.next, accessToken, visibleSpaces);
+                }
+
+                return visibleSpaces;
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e);
+                return null;
+            }
+
+        }
+
+        private async Task<List<Models.OrgsResponse.Resource>> GetRemainingOrgsPages(Href nextPageHref, string accessToken, List<Models.OrgsResponse.Resource> resourcesList)
         {
             if (nextPageHref == null) return resourcesList;
 
@@ -161,6 +202,24 @@ namespace TanzuForVS.CloudFoundryApiClient
             resourcesList.AddRange(orgsResponse.resources.ToList());
 
             return await GetRemainingOrgsPages(orgsResponse.pagination.next, accessToken, resourcesList);
+        }
+
+        private async Task<List<Models.SpacesResponse.Resource>> GetRemainingSpacesPages(Href nextPageHref, string accessToken, List<Models.SpacesResponse.Resource> resourcesList)
+        {
+            if (nextPageHref == null) return resourcesList;
+
+            var request = new HttpRequestMessage(HttpMethod.Get, nextPageHref.href);
+            request.Headers.Add("Authorization", "Bearer " + accessToken);
+
+            var response = await _httpClient.SendAsync(request);
+            if (!response.IsSuccessStatusCode) throw new Exception($"Response from `{listOrgsPath}` was {response.StatusCode}");
+
+            string resultContent = await response.Content.ReadAsStringAsync();
+            var spacesResponse = JsonConvert.DeserializeObject<SpacesResponse>(resultContent);
+
+            resourcesList.AddRange(spacesResponse.resources.ToList());
+
+            return await GetRemainingSpacesPages(spacesResponse.pagination.next, accessToken, resourcesList);
         }
     }
 }

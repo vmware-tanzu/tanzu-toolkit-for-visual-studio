@@ -13,5 +13,6 @@ namespace TanzuForVS.Services.CloudFoundry
         void AddCloudFoundryInstance(string name, string apiAddress, string accessToken);
         Task<ConnectResult> ConnectToCFAsync(string target, string username, SecureString password, string httpProxy, bool skipSsl);
         Task<List<string>> GetOrgNamesAsync(string target, string accessToken);
+        Task<List<string>> GetSpaceNamesAsync(string target, string accessToken);
     }
 }

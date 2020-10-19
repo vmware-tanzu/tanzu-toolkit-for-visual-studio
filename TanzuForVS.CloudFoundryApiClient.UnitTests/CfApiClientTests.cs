@@ -215,7 +215,6 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             Assert.AreEqual(1, _mockHttp.GetMatchCount(orgsRequest));
         }
 
-
         [TestMethod()]
         public async Task ListOrgs_ReturnsListOfAllVisibleOrgs_WhenResponseContainsMultiplePages()
         {
@@ -252,5 +251,21 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             Assert.AreEqual(1, _mockHttp.GetMatchCount(orgsPage4Request));
         }
 
+        [TestMethod()]
+        public async Task ListSpaces_ReturnsNull_WhenStatusCodeIsNotASuccess()
+        {
+            string expectedPath = CfApiClient.listSpacesPath;
+
+            MockedRequest spacesRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond(HttpStatusCode.Unauthorized);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.ListSpaces(_fakeCfApiAddress, _fakeAccessToken);
+
+            Assert.IsNull(result);
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(spacesRequest));
+        }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
 
 namespace TanzuForVS.CloudFoundryApiClient
 {
@@ -10,6 +9,8 @@ namespace TanzuForVS.CloudFoundryApiClient
 
         Task<string> LoginAsync(string cfTarget, string cfUsername, string cfPassword);
 
-        Task<List<Resource>> ListOrgs(string cfTarget, string accessToken);
+        Task<List<Models.OrgsResponse.Resource>> ListOrgs(string cfTarget, string accessToken);
+
+        Task<List<Models.SpacesResponse.Resource>> ListSpaces(string cfTarget, string accessToken);
     }
 }
