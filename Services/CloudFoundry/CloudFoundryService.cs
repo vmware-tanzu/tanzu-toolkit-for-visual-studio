@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
 using TanzuForVS.CloudFoundryApiClient;
+using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
+using TanzuForVS.CloudFoundryApiClient.Models.SpacesResponse;
 using TanzuForVS.Models;
 
 namespace TanzuForVS.Services.CloudFoundry
@@ -55,12 +57,12 @@ namespace TanzuForVS.Services.CloudFoundry
 
         public async Task<List<string>> GetOrgNamesAsync(string target, string accessToken)
         {
-            List<TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse.Resource> orgList = await _cfApiClient.ListOrgs(target, accessToken);
+            List<Org> orgList = await _cfApiClient.ListOrgs(target, accessToken);
 
             List<string> nameList = new List<string>();
             if (orgList != null)
             {
-                orgList.ForEach(delegate (TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse.Resource org) { nameList.Add(org.name); });
+                orgList.ForEach(delegate (Org org) { nameList.Add(org.name); });
             }
 
             return nameList;
@@ -68,12 +70,12 @@ namespace TanzuForVS.Services.CloudFoundry
 
         public async Task<List<string>> GetSpaceNamesAsync(string target, string accessToken)
         {
-            List<TanzuForVS.CloudFoundryApiClient.Models.SpacesResponse.Resource> spaceList = await _cfApiClient.ListSpaces(target, accessToken);
+            List<Space> spaceList = await _cfApiClient.ListSpaces(target, accessToken);
 
             List<string> nameList = new List<string>();
             if (spaceList != null)
             {
-                spaceList.ForEach(delegate (TanzuForVS.CloudFoundryApiClient.Models.SpacesResponse.Resource space) { nameList.Add(space.name); });
+                spaceList.ForEach(delegate (Space space) { nameList.Add(space.name); });
             }
 
             return nameList;

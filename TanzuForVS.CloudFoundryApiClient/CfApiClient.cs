@@ -108,7 +108,7 @@ namespace TanzuForVS.CloudFoundryApiClient
             return uriResult;
         }
 
-        public async Task<List<Models.OrgsResponse.Resource>> ListOrgs(string cfTarget, string accessToken)
+        public async Task<List<Org>> ListOrgs(string cfTarget, string accessToken)
         {
             try
             {
@@ -130,7 +130,7 @@ namespace TanzuForVS.CloudFoundryApiClient
                 string resultContent = await response.Content.ReadAsStringAsync();
                 var orgsResponse = JsonConvert.DeserializeObject<OrgsResponse>(resultContent);
 
-                List<Models.OrgsResponse.Resource> visibleOrgs = orgsResponse.resources.ToList();
+                List<Org> visibleOrgs = orgsResponse.Orgs.ToList();
 
                 if (orgsResponse.pagination.next != null)
                 {
@@ -147,7 +147,7 @@ namespace TanzuForVS.CloudFoundryApiClient
 
         }
 
-        public async Task<List<Models.SpacesResponse.Resource>> ListSpaces(string cfTarget, string accessToken)
+        public async Task<List<Space>> ListSpaces(string cfTarget, string accessToken)
         {
             try
             {
@@ -169,7 +169,7 @@ namespace TanzuForVS.CloudFoundryApiClient
                 string resultContent = await response.Content.ReadAsStringAsync();
                 var spacesResponse = JsonConvert.DeserializeObject<SpacesResponse>(resultContent);
 
-                List<Models.SpacesResponse.Resource> visibleSpaces = spacesResponse.resources.ToList();
+                List<Space> visibleSpaces = spacesResponse.Spaces.ToList();
 
                 if (spacesResponse.pagination.next != null)
                 {
@@ -186,7 +186,7 @@ namespace TanzuForVS.CloudFoundryApiClient
 
         }
 
-        private async Task<List<Models.OrgsResponse.Resource>> GetRemainingOrgsPages(Href nextPageHref, string accessToken, List<Models.OrgsResponse.Resource> resourcesList)
+        private async Task<List<Org>> GetRemainingOrgsPages(Href nextPageHref, string accessToken, List<Org> resourcesList)
         {
             if (nextPageHref == null) return resourcesList;
 
@@ -199,12 +199,12 @@ namespace TanzuForVS.CloudFoundryApiClient
             string resultContent = await response.Content.ReadAsStringAsync();
             var orgsResponse = JsonConvert.DeserializeObject<OrgsResponse>(resultContent);
 
-            resourcesList.AddRange(orgsResponse.resources.ToList());
+            resourcesList.AddRange(orgsResponse.Orgs.ToList());
 
             return await GetRemainingOrgsPages(orgsResponse.pagination.next, accessToken, resourcesList);
         }
 
-        private async Task<List<Models.SpacesResponse.Resource>> GetRemainingSpacesPages(Href nextPageHref, string accessToken, List<Models.SpacesResponse.Resource> resourcesList)
+        private async Task<List<Space>> GetRemainingSpacesPages(Href nextPageHref, string accessToken, List<Space> resourcesList)
         {
             if (nextPageHref == null) return resourcesList;
 
@@ -217,7 +217,7 @@ namespace TanzuForVS.CloudFoundryApiClient
             string resultContent = await response.Content.ReadAsStringAsync();
             var spacesResponse = JsonConvert.DeserializeObject<SpacesResponse>(resultContent);
 
-            resourcesList.AddRange(spacesResponse.resources.ToList());
+            resourcesList.AddRange(spacesResponse.Spaces.ToList());
 
             return await GetRemainingSpacesPages(spacesResponse.pagination.next, accessToken, resourcesList);
         }

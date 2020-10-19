@@ -84,7 +84,7 @@ namespace TanzuForVS.Services.CloudFoundry
         {
             var expectedResult = new List<string>();
 
-            mockCfApiClient.Setup(mock => mock.ListOrgs(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync((List<Resource>)null);
+            mockCfApiClient.Setup(mock => mock.ListOrgs(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync((List<Org>)null);
 
             var result = await cfService.GetOrgNamesAsync(fakeValidTarget, fakeValidAccessToken);
 
@@ -102,12 +102,12 @@ namespace TanzuForVS.Services.CloudFoundry
             const string org3Name = "org3";
             const string org4Name = "org4";
 
-            var list = new List<Resource>
+            var mockOrgsResponse = new List<Org>
             {
-                new Resource(org1Name),
-                new Resource(org2Name),
-                new Resource(org3Name),
-                new Resource(org4Name)
+                new Org(org1Name),
+                new Org(org2Name),
+                new Org(org3Name),
+                new Org(org4Name)
             };
 
             var expectedResult = new List<string>
@@ -118,7 +118,7 @@ namespace TanzuForVS.Services.CloudFoundry
                 org4Name
             };
 
-            mockCfApiClient.Setup(mock => mock.ListOrgs(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(list);
+            mockCfApiClient.Setup(mock => mock.ListOrgs(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(mockOrgsResponse);
 
             var result = await cfService.GetOrgNamesAsync(fakeValidTarget, fakeValidAccessToken);
 

@@ -1,11 +1,13 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 
 namespace TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse
 {
     public class OrgsResponse
     {
         public Pagination pagination { get; set; }
-        public Resource[] resources { get; set; }
+        [JsonProperty("resources")]
+        public Org[] Orgs { get; set; }
     }
 
     public class Pagination
@@ -18,7 +20,7 @@ namespace TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse
         public Href previous { get; set; }
     }
 
-    public class Resource
+    public class Org
     {
         public string guid { get; set; }
         public DateTime created_at { get; set; }
@@ -29,7 +31,7 @@ namespace TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse
         public Links links { get; set; }
         public Metadata metadata { get; set; }
 
-        public Resource(string orgName)
+        public Org(string orgName)
         {
             name = orgName;
         }

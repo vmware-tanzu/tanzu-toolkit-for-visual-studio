@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Newtonsoft.Json;
+using System;
 
 namespace TanzuForVS.CloudFoundryApiClient.Models.SpacesResponse
 {
@@ -8,7 +7,9 @@ namespace TanzuForVS.CloudFoundryApiClient.Models.SpacesResponse
     public class SpacesResponse
     {
         public Pagination pagination { get; set; }
-        public Resource[] resources { get; set; }
+
+        [JsonProperty("resources")]
+        public Space[] Spaces { get; set; }
     }
 
     public class Pagination
@@ -22,7 +23,7 @@ namespace TanzuForVS.CloudFoundryApiClient.Models.SpacesResponse
     }
 
 
-    public class Resource
+    public class Space
     {
         public string guid { get; set; }
         public DateTime created_at { get; set; }

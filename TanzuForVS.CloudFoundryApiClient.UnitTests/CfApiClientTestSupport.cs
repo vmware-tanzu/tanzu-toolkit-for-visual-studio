@@ -34,7 +34,7 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             var nextHref = isLastPage ? null : new Href() { href = $"{apiAddress}{CfApiClient.listOrgsPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
             var previousHref = isFirstPage ? null : new Href() { href = $"{apiAddress}{CfApiClient.listOrgsPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
 
-            pagination = new Models.OrgsResponse.Pagination
+            pagination = new Pagination
             {
                 total_results = totalResults,
                 total_pages = totalPages,
@@ -44,28 +44,28 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
                 previous = previousHref
             };
 
-            Resource[] resourcesArr;
+            Org[] orgs;
             if (isLastPage)
             {
                 int numResourcesInLastPage = totalResults % resultsPerPage;
-                resourcesArr = new Resource[numResourcesInLastPage];
+                orgs = new Org[numResourcesInLastPage];
 
                 for (int i = 0; i < numResourcesInLastPage; i++)
                 {
-                    resourcesArr[i] = new Resource($"fakeOrg{i + 1}");
+                    orgs[i] = new Org($"fakeOrg{i + 1}");
                 }
             }
             else
             {
-                resourcesArr = new Resource[resultsPerPage];
+                orgs = new Org[resultsPerPage];
 
                 for (int i = 0; i < resultsPerPage; i++)
                 {
-                    resourcesArr[i] = new Resource($"fakeOrg{i + 1}");
+                    orgs[i] = new Org($"fakeOrg{i + 1}");
                 }
             }
 
-            resources = resourcesArr;
+            Orgs = orgs;
         }
     }
 }
