@@ -33,7 +33,7 @@ namespace TanzuForVS.ViewModels
 
         protected override async Task LoadChildren()
         {
-            var spaceNames = await CloudFoundryService.GetSpaceNamesAsync(_target, _token);
+            var spaceNames = await CloudFoundryService.GetSpaceNamesAsync(_target, _token, _org.OrgId);
             foreach (string spaceName in spaceNames) base.Children.Add(new SpaceViewModel(new CloudFoundrySpace(spaceName), Services));
         }
     }

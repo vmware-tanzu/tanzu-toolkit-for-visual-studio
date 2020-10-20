@@ -20,11 +20,6 @@ namespace TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse
         public Relationships relationships { get; set; }
         public Links links { get; set; }
         public Metadata metadata { get; set; }
-
-        public Org(string orgName)
-        {
-            name = orgName;
-        }
     }
 
     public class Relationships

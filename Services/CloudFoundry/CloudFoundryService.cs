@@ -32,7 +32,7 @@ namespace TanzuForVS.Services.CloudFoundry
         public async Task<ConnectResult> ConnectToCFAsync(string target, string username, SecureString password, string httpProxy, bool skipSsl)
         {
             if (string.IsNullOrEmpty(target)) throw new ArgumentException(nameof(target));
-
+             
             if (string.IsNullOrEmpty(username)) throw new ArgumentException(nameof(username));
 
             if (password == null) throw new ArgumentNullException(nameof(password));
@@ -55,22 +55,24 @@ namespace TanzuForVS.Services.CloudFoundry
             }
         }
 
-        public async Task<List<string>> GetOrgNamesAsync(string target, string accessToken)
+        public async Task<List<CloudFoundryOrganization>> GetOrgsAsync(string target, string accessToken)
         {
-            List<Org> orgList = await _cfApiClient.ListOrgs(target, accessToken);
+            List<Org> orgsResults = await _cfApiClient.ListOrgs(target, accessToken);
 
-            List<string> nameList = new List<string>();
-            if (orgList != null)
+            var orgs = new List<CloudFoundryOrganization>();
+            if (orgsResults != null)
             {
-                orgList.ForEach(delegate (Org org) { nameList.Add(org.name); });
+                orgsResults.ForEach(delegate (Org org) { 
+                    orgs.Add(new CloudFoundryOrganization(org.name, org.guid)); 
+                });
             }
 
-            return nameList;
+            return orgs;
         }
 
-        public async Task<List<string>> GetSpaceNamesAsync(string target, string accessToken)
+        public async Task<List<string>> GetSpaceNamesAsync(string target, string accessToken, string orgId)
         {
-            List<Space> spaceList = await _cfApiClient.ListSpaces(target, accessToken);
+            List<Space> spaceList = await _cfApiClient.ListSpacesWithGuid(target, accessToken, orgId);
 
             List<string> nameList = new List<string>();
             if (spaceList != null)

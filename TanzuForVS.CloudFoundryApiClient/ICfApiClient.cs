@@ -14,5 +14,7 @@ namespace TanzuForVS.CloudFoundryApiClient
         Task<List<Org>> ListOrgs(string cfTarget, string accessToken);
 
         Task<List<Space>> ListSpaces(string cfTarget, string accessToken);
+
+        Task<List<Space>> ListSpacesWithGuid(string cfTarget, string accessToken, string orgGuid);
     }
 }

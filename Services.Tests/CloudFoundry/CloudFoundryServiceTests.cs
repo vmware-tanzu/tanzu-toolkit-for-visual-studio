@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
 using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
+using TanzuForVS.Models;
 
 namespace TanzuForVS.Services.CloudFoundry
 {
@@ -80,51 +81,78 @@ namespace TanzuForVS.Services.CloudFoundry
         }
 
         [TestMethod()]
-        public async Task GetOrgNamesAsync_ReturnsEmptyList_WhenListOrgsFails()
+        public async Task GetOrgsAsync_ReturnsEmptyList_WhenListOrgsFails()
         {
-            var expectedResult = new List<string>();
+            var expectedResult = new List<CloudFoundryOrganization>();
 
             mockCfApiClient.Setup(mock => mock.ListOrgs(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync((List<Org>)null);
 
-            var result = await cfService.GetOrgNamesAsync(fakeValidTarget, fakeValidAccessToken);
+            var result = await cfService.GetOrgsAsync(fakeValidTarget, fakeValidAccessToken);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count);
             CollectionAssert.AreEqual(expectedResult, result);
+            Assert.AreEqual(typeof(List<CloudFoundryOrganization>), result.GetType());
             mockCfApiClient.Verify(mock => mock.ListOrgs(fakeValidTarget, fakeValidAccessToken), Times.Once);
         }
-        
+
         [TestMethod()]
-        public async Task GetOrgNamesAsync_ReturnsListOfStrings_WhenListOrgsSuceeds()
+        public async Task GetOrgsAsync_ReturnsListOfStrings_WhenListOrgsSuceeds()
         {
             const string org1Name = "org1";
             const string org2Name = "org2";
             const string org3Name = "org3";
             const string org4Name = "org4";
+            const string org1Guid = "org-1-id";
+            const string org2Guid = "org-2-id";
+            const string org3Guid = "org-3-id";
+            const string org4Guid = "org-4-id";
 
             var mockOrgsResponse = new List<Org>
             {
-                new Org(org1Name),
-                new Org(org2Name),
-                new Org(org3Name),
-                new Org(org4Name)
+                new Org
+                {
+                    name = org1Name,
+                    guid = org1Guid
+                },
+                new Org
+                {
+                    name = org2Name,
+                    guid = org2Guid
+                },
+                new Org
+                {
+                    name = org3Name,
+                    guid = org3Guid
+                },
+                new Org
+                {
+                    name = org4Name,
+                    guid = org4Guid
+                }
             };
 
-            var expectedResult = new List<string>
+            var expectedResult = new List<CloudFoundryOrganization>
             {
-                org1Name,
-                org2Name,
-                org3Name,
-                org4Name
+                new CloudFoundryOrganization(org1Name, org1Guid),
+                new CloudFoundryOrganization(org2Name, org2Guid),
+                new CloudFoundryOrganization(org3Name, org3Guid),
+                new CloudFoundryOrganization(org4Name, org4Guid)
             };
 
             mockCfApiClient.Setup(mock => mock.ListOrgs(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(mockOrgsResponse);
 
-            var result = await cfService.GetOrgNamesAsync(fakeValidTarget, fakeValidAccessToken);
+            var result = await cfService.GetOrgsAsync(fakeValidTarget, fakeValidAccessToken);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(4, result.Count);
-            CollectionAssert.AreEqual(expectedResult, result);
+            Assert.AreEqual(expectedResult.Count, result.Count);
+
+            for (int i = 0; i < expectedResult.Count; i++)
+            {
+                Assert.AreEqual(expectedResult[i].OrgId, result[i].OrgId);
+                Assert.AreEqual(expectedResult[i].OrgName, result[i].OrgName);
+            }
+
             mockCfApiClient.Verify(mock => mock.ListOrgs(fakeValidTarget, fakeValidAccessToken), Times.Once);
         }
 

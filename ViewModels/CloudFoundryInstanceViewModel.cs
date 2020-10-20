@@ -26,8 +26,12 @@ namespace TanzuForVS.ViewModels
 
         protected override async Task LoadChildren()
         {
-            var orgNames = await CloudFoundryService.GetOrgNamesAsync(_cloudFoundryInstance.ApiAddress, _cloudFoundryInstance.AccessToken);
-            foreach (string orgName in orgNames) base.Children.Add(new OrgViewModel(new CloudFoundryOrganization(orgName), _cloudFoundryInstance.ApiAddress, _cloudFoundryInstance.AccessToken, Services));
+            var orgs = await CloudFoundryService.GetOrgsAsync(_cloudFoundryInstance.ApiAddress, _cloudFoundryInstance.AccessToken);
+            foreach (CloudFoundryOrganization org in orgs)
+            {
+                var newOrg = new OrgViewModel(org, _cloudFoundryInstance.ApiAddress, _cloudFoundryInstance.AccessToken, Services);
+                base.Children.Add(newOrg);
+            }
         }
     }
 }

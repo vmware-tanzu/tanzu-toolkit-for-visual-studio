@@ -221,5 +221,51 @@ namespace TanzuForVS.CloudFoundryApiClient
 
             return await GetRemainingSpacesPages(spacesResponse.pagination.next, accessToken, resourcesList);
         }
+
+        public async Task<List<Space>> ListSpacesWithGuid(string cfTarget, string accessToken, string orgGuid)
+        {
+            try
+            {
+                // trust any certificate
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback +=
+                    (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+                var uri = new UriBuilder(cfTarget)
+                {
+                    Path = listSpacesPath,
+                    Query = $"organization_guids={orgGuid}"
+                };
+
+                var request = new HttpRequestMessage(HttpMethod.Get, uri.ToString());
+                request.Headers.Add("Authorization", "Bearer " + accessToken);
+
+                var response = await _httpClient.SendAsync(request);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception($"Response from `{listSpacesPath}?organization_guids={orgGuid}` was {response.StatusCode}");
+                }
+
+                string resultContent = await response.Content.ReadAsStringAsync();
+                var spacesResponse = JsonConvert.DeserializeObject<SpacesResponse>(resultContent);
+
+                List<Space> visibleSpaces = spacesResponse.Spaces.ToList();
+
+                if (spacesResponse.pagination.next != null)
+                {
+                    visibleSpaces = await GetRemainingSpacesPages(spacesResponse.pagination.next, accessToken, visibleSpaces);
+                }
+
+                return visibleSpaces;
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e);
+                return null;
+            }
+
+        }
+
     }
 }

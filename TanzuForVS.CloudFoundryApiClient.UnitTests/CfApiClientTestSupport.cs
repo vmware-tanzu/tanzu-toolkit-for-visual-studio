@@ -52,7 +52,11 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
 
                 for (int i = 0; i < numResourcesInLastPage; i++)
                 {
-                    orgs[i] = new Org($"fakeOrg{i + 1}");
+                    orgs[i] = new Org
+                    {
+                        name = $"fakeOrg{i + 1}",
+                        guid = $"fakeOrgId-{i + 1}"
+                    };
                 }
             }
             else
@@ -61,7 +65,11 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
 
                 for (int i = 0; i < resultsPerPage; i++)
                 {
-                    orgs[i] = new Org($"fakeOrg{i + 1}");
+                    orgs[i] = new Org
+                    {
+                        name = $"fakeOrg{i + 1}",
+                        guid = $"fakeOrgId-{i + 1}"
+                    };
                 }
             }
 
