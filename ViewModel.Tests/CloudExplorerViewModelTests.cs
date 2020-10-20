@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using TanzuForVS.Services.CloudFoundry;
+using System.Collections.Generic;
+using TanzuForVS.Models;
 
 namespace TanzuForVS.ViewModels
 {
@@ -12,6 +13,7 @@ namespace TanzuForVS.ViewModels
         [TestInitialize]
         public void TestInit()
         {
+            mockCloudFoundryService.SetupGet(mock => mock.CloudFoundryInstances).Returns(new Dictionary<string, CloudFoundryInstance>());
             vm = new CloudExplorerViewModel(services);
         }
 
@@ -25,18 +27,26 @@ namespace TanzuForVS.ViewModels
         public void OpenLoginView_CallsDialogService_ShowDialog()
         {
             vm.OpenLoginView(null);
-            mockDialogService.Verify(ds => ds.ShowDialog(typeof(LoginDialogViewModel).Name, null), Times.Once);
+            mockDialogService.Verify(ds => ds.ShowDialog(typeof(AddCloudDialogViewModel).Name, null), Times.Once);
         }
 
         [TestMethod]
-        public void OpenLoginView_UpdatesIsLoggedIn_AfterDialogCloses()
+        public void OpenLoginView_UpdatesCloudFoundryInstances_AfterDialogCloses()
         {
-            Assert.IsFalse(vm.IsLoggedIn);
-            mockCloudFoundryService.SetupGet(mock => mock.IsLoggedIn).Returns(true);
+            var fakeCfsDict = new Dictionary<string, CloudFoundryInstance>
+            {
+                { "fake cf", new CloudFoundryInstance("fake cf", null, null) }
+            };
+
+            Assert.AreEqual(0, vm.CloudFoundryList.Count);
+
+            mockCloudFoundryService.SetupGet(mock => mock.CloudFoundryInstances).Returns(fakeCfsDict);
 
             vm.OpenLoginView(null);
 
-            Assert.IsTrue(vm.IsLoggedIn);
+            Assert.IsTrue(vm.HasCloudTargets);
+            Assert.AreEqual(1, vm.CloudFoundryList.Count);
         }
+
     }
 }

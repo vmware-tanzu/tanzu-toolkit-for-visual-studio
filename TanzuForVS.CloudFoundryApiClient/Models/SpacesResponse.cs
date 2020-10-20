@@ -1,22 +1,23 @@
 ﻿using Newtonsoft.Json;
 using System;
 
-namespace TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse
+namespace TanzuForVS.CloudFoundryApiClient.Models.SpacesResponse
 {
-    public class OrgsResponse
+
+    public class SpacesResponse
     {
         public Pagination pagination { get; set; }
+
         [JsonProperty("resources")]
-        public Org[] Orgs { get; set; }
+        public Space[] Spaces { get; set; }
     }
 
-    public class Org
+    public class Space
     {
         public string guid { get; set; }
         public DateTime created_at { get; set; }
         public DateTime updated_at { get; set; }
         public string name { get; set; }
-        public bool suspended { get; set; }
         public Relationships relationships { get; set; }
         public Links links { get; set; }
         public Metadata metadata { get; set; }
@@ -24,10 +25,11 @@ namespace TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse
 
     public class Relationships
     {
+        public Organization organization { get; set; }
         public Quota quota { get; set; }
     }
 
-    public class Quota
+    public class Organization
     {
         public Data data { get; set; }
     }
@@ -37,12 +39,15 @@ namespace TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse
         public string guid { get; set; }
     }
 
+    public class Quota
+    {
+        public object data { get; set; }
+    }
+
     public class Links
     {
         public Href self { get; set; }
-        public Href domains { get; set; }
-        public Href default_domain { get; set; }
-        public Href quota { get; set; }
+        public Href organization { get; set; }
     }
 
     public class Metadata

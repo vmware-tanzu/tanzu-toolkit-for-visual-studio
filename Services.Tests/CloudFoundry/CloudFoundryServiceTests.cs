@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
 using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
+using TanzuForVS.Models;
 
 namespace TanzuForVS.Services.CloudFoundry
 {
@@ -17,7 +18,6 @@ namespace TanzuForVS.Services.CloudFoundry
         SecureString fakeValidPassword = new SecureString();
         string fakeHttpProxy = "junk";
         bool skipSsl = true;
-        string fakeLoginSuccessResponse = "login success!";
         string fakeValidAccessToken = "valid token";
 
         [TestInitialize()]
@@ -39,13 +39,13 @@ namespace TanzuForVS.Services.CloudFoundry
         [TestMethod()]
         public async Task ConnectToCFAsync_ReturnsConnectResult_WhenLoginSucceeds()
         {
-            mockCfApiClient.Setup(mock => mock.LoginAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(fakeLoginSuccessResponse);
+            mockCfApiClient.Setup(mock => mock.LoginAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(fakeValidAccessToken);
 
             ConnectResult result = await cfService.ConnectToCFAsync(fakeValidTarget, fakeValidUsername, fakeValidPassword, fakeHttpProxy, skipSsl);
 
             Assert.IsTrue(result.IsLoggedIn);
             Assert.IsNull(result.ErrorMessage);
-            Assert.IsTrue(cfService.IsLoggedIn);
+            Assert.AreEqual(fakeValidAccessToken, result.Token);
             mockCfApiClient.Verify(mock => mock.LoginAsync(fakeValidTarget, fakeValidUsername, It.IsAny<string>()), Times.Once);
         }
 
@@ -58,6 +58,7 @@ namespace TanzuForVS.Services.CloudFoundry
 
             Assert.IsFalse(result.IsLoggedIn);
             Assert.IsTrue(result.ErrorMessage.Contains(cfService.LoginFailureMessage));
+            Assert.IsNull(result.Token);
             mockCfApiClient.Verify(mock => mock.LoginAsync(fakeValidTarget, fakeValidUsername, It.IsAny<string>()), Times.Once);
         }
 
@@ -73,40 +74,108 @@ namespace TanzuForVS.Services.CloudFoundry
 
             ConnectResult result = await cfService.ConnectToCFAsync(fakeValidTarget, fakeValidUsername, fakeValidPassword, fakeHttpProxy, skipSsl);
 
+            Assert.IsNull(result.Token);
             Assert.IsTrue(result.ErrorMessage.Contains(baseMessage));
             Assert.IsTrue(result.ErrorMessage.Contains(innerMessage));
             Assert.IsTrue(result.ErrorMessage.Contains(outerMessage));
         }
 
         [TestMethod()]
-        public async Task GetOrgNamesAsync_ReturnsListOfStrings_WhenListOrgsSuceeds()
+        public async Task GetOrgsAsync_ReturnsEmptyList_WhenListOrgsFails()
+        {
+            var expectedResult = new List<CloudFoundryOrganization>();
+
+            mockCfApiClient.Setup(mock => mock.ListOrgs(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync((List<Org>)null);
+
+            var result = await cfService.GetOrgsAsync(fakeValidTarget, fakeValidAccessToken);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count);
+            CollectionAssert.AreEqual(expectedResult, result);
+            Assert.AreEqual(typeof(List<CloudFoundryOrganization>), result.GetType());
+            mockCfApiClient.Verify(mock => mock.ListOrgs(fakeValidTarget, fakeValidAccessToken), Times.Once);
+        }
+
+        [TestMethod()]
+        public async Task GetOrgsAsync_ReturnsListOfStrings_WhenListOrgsSuceeds()
         {
             const string org1Name = "org1";
             const string org2Name = "org2";
             const string org3Name = "org3";
             const string org4Name = "org4";
+            const string org1Guid = "org-1-id";
+            const string org2Guid = "org-2-id";
+            const string org3Guid = "org-3-id";
+            const string org4Guid = "org-4-id";
 
-            var list = new List<Resource>();
-            list.Add(new Resource(org1Name));
-            list.Add(new Resource(org2Name));
-            list.Add(new Resource(org3Name));
-            list.Add(new Resource(org4Name));
+            var mockOrgsResponse = new List<Org>
+            {
+                new Org
+                {
+                    name = org1Name,
+                    guid = org1Guid
+                },
+                new Org
+                {
+                    name = org2Name,
+                    guid = org2Guid
+                },
+                new Org
+                {
+                    name = org3Name,
+                    guid = org3Guid
+                },
+                new Org
+                {
+                    name = org4Name,
+                    guid = org4Guid
+                }
+            };
 
-            var expectedResult = new List<string>();
-            expectedResult.Add(org1Name);
-            expectedResult.Add(org2Name);
-            expectedResult.Add(org3Name);
-            expectedResult.Add(org4Name);
+            var expectedResult = new List<CloudFoundryOrganization>
+            {
+                new CloudFoundryOrganization(org1Name, org1Guid),
+                new CloudFoundryOrganization(org2Name, org2Guid),
+                new CloudFoundryOrganization(org3Name, org3Guid),
+                new CloudFoundryOrganization(org4Name, org4Guid)
+            };
 
-            mockCfApiClient.Setup(mock => mock.ListOrgs(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(list);
+            mockCfApiClient.Setup(mock => mock.ListOrgs(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(mockOrgsResponse);
 
-            var result = await cfService.GetOrgNamesAsync(fakeValidTarget, fakeValidAccessToken);
+            var result = await cfService.GetOrgsAsync(fakeValidTarget, fakeValidAccessToken);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(4, result.Count);
-            CollectionAssert.AreEqual(expectedResult, result);
+            Assert.AreEqual(expectedResult.Count, result.Count);
+
+            for (int i = 0; i < expectedResult.Count; i++)
+            {
+                Assert.AreEqual(expectedResult[i].OrgId, result[i].OrgId);
+                Assert.AreEqual(expectedResult[i].OrgName, result[i].OrgName);
+            }
+
             mockCfApiClient.Verify(mock => mock.ListOrgs(fakeValidTarget, fakeValidAccessToken), Times.Once);
         }
 
+        [TestMethod()]
+        public void AddCloudFoundryInstance_ThrowsException_WhenNameAlreadyExists()
+        {
+            var duplicateName = "fake name";
+            cfService.AddCloudFoundryInstance(duplicateName, null, null);
+            Exception expectedException = null;
+
+            try
+            {
+                cfService.AddCloudFoundryInstance(duplicateName, null, null);
+
+            }
+            catch (Exception e)
+            {
+                expectedException = e;
+            }
+
+            Assert.IsNotNull(expectedException);
+            Assert.IsTrue(expectedException.Message.Contains(duplicateName));
+            Assert.IsTrue(expectedException.Message.Contains("already exists"));
+        }
     }
 }

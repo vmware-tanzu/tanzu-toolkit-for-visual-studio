@@ -9,7 +9,6 @@ namespace TanzuForVS.ViewModels
 {
     public abstract class AbstractViewModel : IViewModel, INotifyPropertyChanged
     {
-        private bool isLoggedIn;
         private object activeView;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -20,7 +19,6 @@ namespace TanzuForVS.ViewModels
             CloudFoundryService = services.GetRequiredService<ICloudFoundryService>();
             DialogService = services.GetRequiredService<IDialogService>();
             ViewLocatorService = services.GetRequiredService<IViewLocatorService>();
-            isLoggedIn = CloudFoundryService.IsLoggedIn;
         }
 
         public IServiceProvider Services { get; }
@@ -42,17 +40,6 @@ namespace TanzuForVS.ViewModels
             {
                 this.activeView = value;
                 this.RaisePropertyChangedEvent("ActiveView");
-            }
-        }
-
-        public bool IsLoggedIn
-        {
-            get => this.isLoggedIn;
-
-            set
-            {
-                this.isLoggedIn = value;
-                this.RaisePropertyChangedEvent("IsLoggedIn");
             }
         }
 

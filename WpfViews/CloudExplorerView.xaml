@@ -51,18 +51,48 @@
                  TextWrapping="Wrap" BorderBrush="Transparent" 
                  ScrollViewer.VerticalScrollBarVisibility="Auto"
                  HorizontalAlignment="Center" VerticalAlignment="Center"
-                 Foreground="Green" MinLines="3" MaxLines="3" 
-                 Background="Transparent" Text="Successfully Logged In!" 
-                 Visibility="{Binding Path=IsLoggedIn, Converter={StaticResource Visibility}}"/>
-
-        <TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" 
-                 Margin="5"  IsReadOnly="True" 
-                 TextWrapping="Wrap" BorderBrush="Transparent" 
-                 ScrollViewer.VerticalScrollBarVisibility="Auto"
-                 HorizontalAlignment="Center" VerticalAlignment="Center"
                  Foreground="Gray" MinLines="3" MaxLines="3" 
                  Background="Transparent" Text="Not Yet Connected" 
-                 Visibility="{Binding Path=IsLoggedIn, Converter={StaticResource InverseVisibility}}"/>
+                 Visibility="{Binding Path=HasCloudTargets, Converter={StaticResource InverseVisibility}}"/>
+
+        <TreeView ItemsSource="{Binding CloudFoundryList}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Visibility="{Binding Path=HasCloudTargets, Converter={StaticResource Visibility}}">
+            <TreeView.ItemContainerStyle>
+                <!-- This Style binds a TreeViewItem to a TreeViewItemViewModel. -->
+                <Style TargetType="{x:Type TreeViewItem}">
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                    <Setter Property="FontWeight" Value="Normal" />
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="FontWeight" Value="Bold" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </TreeView.ItemContainerStyle>
+
+            <TreeView.Resources>
+                <HierarchicalDataTemplate DataType="{x:Type ViewModels:CloudFoundryInstanceViewModel}" 
+                                          ItemsSource="{Binding Children}">
+                    
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding InstanceName}" />
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+
+                <HierarchicalDataTemplate DataType="{x:Type ViewModels:OrgViewModel}"
+                                          ItemsSource="{Binding Children}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding OrgName}" />
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+
+                <DataTemplate DataType="{x:Type ViewModels:SpaceViewModel}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding SpaceName}" />
+                    </StackPanel>
+                </DataTemplate>
+            </TreeView.Resources>
+        </TreeView>
 
     </Grid>
 </UserControl>

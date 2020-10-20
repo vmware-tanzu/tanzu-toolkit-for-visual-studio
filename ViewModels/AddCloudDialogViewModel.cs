@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace TanzuForVS.ViewModels
 {
-    public class LoginDialogViewModel : AbstractViewModel, ILoginDialogViewModel
+    public class AddCloudDialogViewModel : AbstractViewModel, IAddCloudDialogViewModel
     {
         public const string TargetEmptyMessage = "Invalid URI: The URI is empty.";
         public const string TargetInvalidFormatMessage = "Invalid URI: The format of the URI could not be determined.";
@@ -14,10 +14,23 @@ namespace TanzuForVS.ViewModels
         private bool skipSsl;
         private bool hasErrors;
         private string errorMessage;
+        private string instanceName;
 
-        public LoginDialogViewModel(IServiceProvider services)
+
+        public AddCloudDialogViewModel(IServiceProvider services)
             : base(services)
         {
+        }
+
+        public string InstanceName
+        {
+            get => instanceName;
+
+            set
+            {
+                this.instanceName = value;
+                this.RaisePropertyChangedEvent("InstanceName");
+            }
         }
 
         public string Target
@@ -89,31 +102,34 @@ namespace TanzuForVS.ViewModels
 
         public Func<SecureString> GetPassword { get; set; }
 
-        public bool CanConnectToCloudFoundry(object arg)
+        public bool CanAddCloudFoundryInstance(object arg)
         {
             return true;
         }
 
-
-       
-        public async Task ConnectToCloudFoundry(object arg)
+        public async Task AddCloudFoundryInstance(object arg)
         {
             HasErrors = false;
-            if (!VerifyTarget())
+
+            if (!VerifyTarget()) return;
+
+            var result = await CloudFoundryService.ConnectToCFAsync(Target, Username, GetPassword(), HttpProxy, SkipSsl);
+            ErrorMessage = result.ErrorMessage;
+
+            if (result.IsLoggedIn)
             {
-                return;
+                try
+                {
+                    CloudFoundryService.AddCloudFoundryInstance(InstanceName, Target, result.Token);
+                }
+                catch (Exception e)
+                {
+                    ErrorMessage = e.Message;
+                    HasErrors = true;
+                }
             }
 
-            try
-            {
-                var result = await CloudFoundryService.ConnectToCFAsync(Target, Username, GetPassword(), HttpProxy, SkipSsl);
-                ErrorMessage = result.ErrorMessage;
-                IsLoggedIn = result.IsLoggedIn;
-            }
-            finally
-            {
-                if (IsLoggedIn) DialogService.CloseDialog(arg, true);
-            }
+            if (!HasErrors) DialogService.CloseDialog(arg, true);
         }
 
         private bool VerifyTarget()
@@ -127,7 +143,7 @@ namespace TanzuForVS.ViewModels
             try
             {
                 var uri = new Uri(Target);
-            } 
+            }
             catch
             {
                 ErrorMessage = TargetInvalidFormatMessage;

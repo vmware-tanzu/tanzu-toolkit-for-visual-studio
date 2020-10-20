@@ -1,4 +1,4 @@
-﻿<Window x:Class="TanzuForVS.WpfViews.LoginDialogView"
+﻿<Window x:Class="TanzuForVS.WpfViews.AddCloudDialogView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -7,9 +7,9 @@
              xmlns:converters="clr-namespace:TanzuForVS.WpfViews.Converters"
         mc:Ignorable="d"
         d:DesignHeight="300" d:DesignWidth="400"
-        Name ="LoginDialogViewElement"
+        Name ="AddCloudDialogViewElement"
         WindowStartupLocation="CenterScreen"
-        Title="Login" Height="300" Width="400">
+        Title="Login" Height="400" Width="400">
     
     <Window.Resources>
         <converters:VisibilityConverter x:Key="Visibility" />
@@ -17,6 +17,8 @@
 
     <Grid Margin="50,0,50,0">
         <Grid.RowDefinitions>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
@@ -37,23 +39,27 @@
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <Label Content="Target URL" Grid.Row="2" Grid.Column="0"></Label>
-        <TextBox Name="tbUrl" Grid.Row="3" Grid.Column="1" x:FieldModifier="public"
+        <Label Content="Instance Name" Grid.Row="2" Grid.Column="0"></Label>
+        <TextBox Name="tbInstanceName" Grid.Row="3" Grid.Column="1" x:FieldModifier="public"
+                 HorizontalAlignment="Stretch" Width="auto" Text="{ Binding Path=InstanceName }"></TextBox>
+        
+        <Label Content="Target URL" Grid.Row="4" Grid.Column="0"></Label>
+        <TextBox Name="tbUrl" Grid.Row="5" Grid.Column="1" 
                  HorizontalAlignment="Stretch" Width="auto" Text="{ Binding Path=Target }"></TextBox>
 
-        <Label Content="Username" Grid.Row="4" Grid.Column="0"></Label>
-        <TextBox Name="tbUsername" Grid.Row="5" Grid.Column="1" 
+        <Label Content="Username" Grid.Row="6" Grid.Column="0"></Label>
+        <TextBox Name="tbUsername" Grid.Row="7" Grid.Column="1" 
                  HorizontalAlignment="Stretch" Width="auto" Text="{ Binding Path=Username }"></TextBox>
 
-        <Label Content="Password" Grid.Row="6" Grid.Column="0" ></Label>
-        <PasswordBox Name="pbPassword" Grid.Row="7" Grid.Column="1" 
+        <Label Content="Password" Grid.Row="8" Grid.Column="0" ></Label>
+        <PasswordBox Name="pbPassword" Grid.Row="9" Grid.Column="1" 
                      HorizontalAlignment="Stretch" Width="auto"></PasswordBox>
 
-        <Button Content="Log in (without SSL)" Grid.Row="11" Grid.Column="0" Command="{ Binding ElementName=LoginDialogViewElement, Path=LoginCommand }" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+        <Button Content="Add Cloud Target" Grid.Row="13" Grid.Column="0" Command="{ Binding ElementName=AddCloudDialogViewElement, Path=AddCloudCommand }" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
                 Name="loginButton"/>
 
 
-        <TextBox Grid.Row="12" Grid.Column="0" Margin="5"  IsReadOnly="True" 
+        <TextBox Grid.Row="14" Grid.Column="0" Margin="5"  IsReadOnly="True" 
                  TextWrapping="Wrap" BorderBrush="Transparent" 
                  ScrollViewer.VerticalScrollBarVisibility="Auto"
                  Foreground="Crimson" MinLines="3" MaxLines="3" 

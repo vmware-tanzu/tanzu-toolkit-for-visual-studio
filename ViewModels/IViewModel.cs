@@ -4,7 +4,5 @@
     {
         object ActiveView { get; set; }
 
-        bool IsLoggedIn { get; set; }
-
     }
 }

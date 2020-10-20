@@ -61,7 +61,7 @@ namespace TanzuForVS.WpfViews.Commands
             {
                 await action(parameter);
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 // Assume exceptions caught in view model
                 // TODO: Log when not

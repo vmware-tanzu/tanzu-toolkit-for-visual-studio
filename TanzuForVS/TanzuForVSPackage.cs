@@ -106,8 +106,8 @@ namespace TanzuForVS
             services.AddTransient<ICloudExplorerViewModel, CloudExplorerViewModel>();
             services.AddTransient<ICloudExplorerView, CloudExplorerView>();
 
-            services.AddTransient<ILoginDialogViewModel, LoginDialogViewModel>();
-            services.AddTransient<ILoginDialogView, LoginDialogView>();
+            services.AddTransient<IAddCloudDialogViewModel, AddCloudDialogViewModel>();
+            services.AddTransient<IAddCloudDialogView, AddCloudDialogView>();
 
             HttpClient concreteHttpClient = new HttpClient();
             IUaaClient concreteUaaClient = new UaaClient(concreteHttpClient);

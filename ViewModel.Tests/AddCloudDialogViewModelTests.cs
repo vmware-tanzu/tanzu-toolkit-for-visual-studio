@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System;
 using System.Security;
 using System.Threading.Tasks;
 using TanzuForVS.Services.CloudFoundry;
@@ -7,19 +8,22 @@ using TanzuForVS.Services.CloudFoundry;
 namespace TanzuForVS.ViewModels
 {
     [TestClass]
-    public class LoginDialogViewModelTests : ViewModelTestSupport
+    public class AddCloudDialogViewModelTests : ViewModelTestSupport
     {
-        static LoginDialogViewModel vm;
+        static AddCloudDialogViewModel vm;
+        static readonly string fakeInstanceName = "My Fake CF";
         static readonly string fakeTarget = "http://my.fake.target";
         static readonly string fakeUsername = "correct-username";
         static readonly SecureString fakeSecurePw = new SecureString();
         static readonly string fakeHttpProxy = "junk";
         static readonly bool skipSsl = true;
+        static readonly string fakeToken = "junk";
 
         [TestInitialize]
         public void TestInit()
         {
-            vm = new LoginDialogViewModel(services);
+            vm = new AddCloudDialogViewModel(services);
+            vm.InstanceName = fakeInstanceName;
             vm.Target = fakeTarget;
             vm.Username = fakeUsername;
             vm.GetPassword = () => { return fakeSecurePw; };
@@ -28,7 +32,7 @@ namespace TanzuForVS.ViewModels
         }
 
         [TestMethod]
-        public void ConnectToCloudFoundry_SetsErrorMessage_WhenTargetUriNull()
+        public void AddCloudFoundryInstance_SetsErrorMessage_WhenTargetUriNull()
         {
             bool ErrorMessagePropertyChangedCalled = false;
             vm.Target = null;
@@ -38,12 +42,11 @@ namespace TanzuForVS.ViewModels
                 if ("ErrorMessage" == args.PropertyName) ErrorMessagePropertyChangedCalled = true;
             };
 
-            vm.ConnectToCloudFoundry(null);
+            vm.AddCloudFoundryInstance(null);
 
             Assert.IsTrue(ErrorMessagePropertyChangedCalled);
             Assert.IsTrue(vm.HasErrors);
-            Assert.AreEqual(LoginDialogViewModel.TargetEmptyMessage, vm.ErrorMessage);
-            Assert.IsFalse(vm.IsLoggedIn);
+            Assert.AreEqual(AddCloudDialogViewModel.TargetEmptyMessage, vm.ErrorMessage);
 
             mockDialogService.Verify(ds => ds.CloseDialog(It.IsAny<object>(), true), Times.Never);
             mockDialogService.Verify(ds => ds.ShowDialog(It.IsAny<string>(), null), Times.Never);
@@ -51,7 +54,7 @@ namespace TanzuForVS.ViewModels
         }
 
         [TestMethod]
-        public async Task ConnectToCloudFoundry_SetsErrorMessage_WhenTargetUriMalformed()
+        public async Task AddCloudFoundryInstance_SetsErrorMessage_WhenTargetUriMalformed()
         {
             bool ErrorMessagePropertyChangedCalled = false;
             vm.Target = "some-poorly-formatted-uri";
@@ -61,12 +64,11 @@ namespace TanzuForVS.ViewModels
                 if ("ErrorMessage" == args.PropertyName) ErrorMessagePropertyChangedCalled = true;
             };
 
-            await vm.ConnectToCloudFoundry(null);
+            await vm.AddCloudFoundryInstance(null);
 
             Assert.IsTrue(ErrorMessagePropertyChangedCalled);
             Assert.IsTrue(vm.HasErrors);
-            Assert.AreEqual(LoginDialogViewModel.TargetInvalidFormatMessage, vm.ErrorMessage);
-            Assert.IsFalse(vm.IsLoggedIn);
+            Assert.AreEqual(AddCloudDialogViewModel.TargetInvalidFormatMessage, vm.ErrorMessage);
 
             mockDialogService.Verify(ds => ds.CloseDialog(It.IsAny<object>(), true), Times.Never);
             mockDialogService.Verify(ds => ds.ShowDialog(It.IsAny<string>(), null), Times.Never);
@@ -74,14 +76,14 @@ namespace TanzuForVS.ViewModels
         }
 
         [TestMethod]
-        public async Task ConnectToCloudFoundry_SetsErrorMessage_WhenLoginRequestFails()
+        public async Task AddCloudFoundryInstance_SetsErrorMessage_WhenLoginRequestFails()
         {
             const string expectedErrorMessage = "my fake error message";
 
             mockCloudFoundryService.Setup(mock => mock.ConnectToCFAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SecureString>(), It.IsAny<string>(), It.IsAny<bool>()))
-                .ReturnsAsync(new ConnectResult(false, expectedErrorMessage));
+                .ReturnsAsync(new ConnectResult(false, expectedErrorMessage, null));
 
-            await vm.ConnectToCloudFoundry(null);
+            await vm.AddCloudFoundryInstance(null);
 
             Assert.IsTrue(vm.HasErrors);
             Assert.AreEqual(expectedErrorMessage, vm.ErrorMessage);
@@ -90,17 +92,57 @@ namespace TanzuForVS.ViewModels
         }
 
         [TestMethod]
-        public async Task ConnectToCloudFoundry_ClosesDialog_WhenLoginRequestSucceeds()
+        public async Task AddCloudFoundryInstance_ClosesDialog_WhenLoginRequestSucceeds()
         {
             mockCloudFoundryService.Setup(mock => mock.ConnectToCFAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SecureString>(), It.IsAny<string>(), It.IsAny<bool>()))
-               .ReturnsAsync(new ConnectResult(true, null));
+               .ReturnsAsync(new ConnectResult(true, null, fakeToken));
 
-            await vm.ConnectToCloudFoundry(null);
+            await vm.AddCloudFoundryInstance(null);
 
             Assert.IsFalse(vm.HasErrors);
-            Assert.IsTrue(vm.IsLoggedIn);
             mockCloudFoundryService.Verify(mock => mock.ConnectToCFAsync(fakeTarget, fakeUsername, fakeSecurePw, fakeHttpProxy, skipSsl), Times.Once);
+            mockDialogService.Verify(mock => mock.CloseDialog(It.IsAny<object>(), It.IsAny<bool>()), Times.Once);
             mockDialogService.Verify(ds => ds.CloseDialog(It.IsAny<object>(), true), Times.Once);
         }
+
+        [TestMethod]
+        public async Task AddCloudFoundryInstance_DoesNotCloseDialog_WhenLoginRequestFails()
+        {
+            const string expectedErrorMessage = "my fake error message";
+            const string cloudName = "my fake instance name";
+
+            mockCloudFoundryService.Setup(mock => mock.ConnectToCFAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SecureString>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .ReturnsAsync(new ConnectResult(false, expectedErrorMessage, null));
+
+            vm.InstanceName = cloudName;
+            await vm.AddCloudFoundryInstance(null);
+
+            Assert.IsNotNull(vm.ErrorMessage);
+            mockDialogService.Verify(mock => mock.CloseDialog(It.IsAny<object>(), It.IsAny<bool>()), Times.Never);
+            mockCloudFoundryService.Verify(mock => mock.AddCloudFoundryInstance(It.IsAny<string>(),It.IsAny<string>(),It.IsAny<string>()), Times.Never);
+            mockCloudFoundryService.VerifyAll();
+        }
+
+        [TestMethod]
+        public async Task AddCloudFoundryInstance_SetsErrorMessage_WhenAddCloudFoundryInstanceThrowsException()
+        {
+            string duplicateName = "I was already added";
+            string errorMsg = "fake error message thrown by CF service";
+
+            mockCloudFoundryService.Setup(mock => mock.ConnectToCFAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SecureString>(), It.IsAny<string>(), It.IsAny<bool>()))
+               .ReturnsAsync(new ConnectResult(true, null, fakeToken));
+
+            mockCloudFoundryService.Setup(mock => mock.AddCloudFoundryInstance(duplicateName, fakeTarget, fakeToken))
+                .Throws(new Exception(errorMsg));
+
+            vm.InstanceName = duplicateName;
+            await vm.AddCloudFoundryInstance(null);
+
+            Assert.IsTrue(vm.HasErrors);
+            Assert.AreEqual(errorMsg, vm.ErrorMessage);
+            mockCloudFoundryService.VerifyAll();
+            mockDialogService.Verify(mock => mock.CloseDialog(It.IsAny<object>(), It.IsAny<bool>()), Times.Never);
+        }
+
     }
 }
