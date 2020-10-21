@@ -8,7 +8,7 @@ namespace TanzuForVS.ViewModels
         readonly CloudFoundrySpace _space;
 
         public SpaceViewModel(CloudFoundrySpace space, IServiceProvider services)
-            : base(null, true, services)
+            : base(null, services)
         {
             _space = space;
             this.DisplayText = _space.SpaceName;

@@ -9,7 +9,7 @@ namespace TanzuForVS.ViewModels
         readonly CloudFoundryInstance _cloudFoundryInstance;
 
         public CloudFoundryInstanceViewModel(CloudFoundryInstance cloudFoundryInstance, IServiceProvider services)
-            : base(null, true, services)
+            : base(null, services)
         {
             _cloudFoundryInstance = cloudFoundryInstance;
             this.DisplayText = _cloudFoundryInstance.InstanceName;

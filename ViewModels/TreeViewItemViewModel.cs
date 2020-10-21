@@ -11,17 +11,33 @@ namespace TanzuForVS.ViewModels
         private string _text;
         private TreeViewItemViewModel _parent;
         private ObservableCollection<TreeViewItemViewModel> _children;
-        private readonly TreeViewItemViewModel DummyChild;
 
+        // placeholder to allow this tree view item to be expandable before its children 
+        // have loaded (the presence of children causes the expansion button to appear)
+        private readonly TreeViewItemViewModel DummyChild; 
 
-        protected TreeViewItemViewModel(TreeViewItemViewModel parent, bool lazyLoadChildren, IServiceProvider services)
+        protected TreeViewItemViewModel(TreeViewItemViewModel parent, IServiceProvider services)
             : base(services)
         {
             _parent = parent;
-            _children = new ObservableCollection<TreeViewItemViewModel>();
+            _children = new ObservableCollection<TreeViewItemViewModel>
+            {
+                DummyChild
+            };
+        }
 
-            if (lazyLoadChildren)
-                _children.Add(DummyChild);
+        /// <summary>
+        /// Gets/sets the text that is displayed 
+        /// on the tree view for this item.
+        /// </summary>
+        public string DisplayText
+        {
+            get { return _text; }
+            set
+            {
+                _text = value;
+                this.RaisePropertyChangedEvent("DisplayText");
+            }
         }
 
         /// <summary>
@@ -72,6 +88,7 @@ namespace TanzuForVS.ViewModels
                 }
             }
         }
+
         public TreeViewItemViewModel Parent
         {
             get { return this._parent; }
@@ -89,16 +106,6 @@ namespace TanzuForVS.ViewModels
             {
                 _children = value;
                 this.RaisePropertyChangedEvent("Children");
-            }
-        }
-
-        public string DisplayText
-        {
-            get { return _text; }
-            set
-            {
-                _text = value;
-                this.RaisePropertyChangedEvent("DisplayText");
             }
         }
 

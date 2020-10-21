@@ -11,7 +11,7 @@ namespace TanzuForVS.ViewModels
         readonly string _token;
 
         public OrgViewModel(CloudFoundryOrganization org, string apiAddress, string accessToken, IServiceProvider services)
-            : base(null, true, services)
+            : base(null, services)
         {
             _org = org;
             _target = apiAddress;

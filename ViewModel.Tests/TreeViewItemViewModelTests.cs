@@ -17,7 +17,7 @@ namespace TanzuForVS.ViewModels
 
     class TestTreeViewItemViewModel : TreeViewItemViewModel
     {
-        public TestTreeViewItemViewModel(IServiceProvider services) : base(null, true, services)
+        public TestTreeViewItemViewModel(IServiceProvider services) : base(null, services)
         {
         }
     }
