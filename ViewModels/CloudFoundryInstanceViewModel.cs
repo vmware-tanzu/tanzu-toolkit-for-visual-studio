@@ -12,16 +12,7 @@ namespace TanzuForVS.ViewModels
             : base(null, true, services)
         {
             _cloudFoundryInstance = cloudFoundryInstance;
-        }
-
-        public string InstanceName
-        {
-            get { return _cloudFoundryInstance.InstanceName; }
-            set
-            {
-                _cloudFoundryInstance.InstanceName = value;
-                RaisePropertyChangedEvent("InstanceName");
-            }
+            this.DisplayText = _cloudFoundryInstance.InstanceName;
         }
 
         protected override async Task LoadChildren()

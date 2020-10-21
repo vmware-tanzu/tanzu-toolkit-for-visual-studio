@@ -75,20 +75,20 @@
                                           ItemsSource="{Binding Children}">
                     
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding InstanceName}" />
+                        <TextBlock Text="{Binding DisplayText}" />
                     </StackPanel>
                 </HierarchicalDataTemplate>
 
                 <HierarchicalDataTemplate DataType="{x:Type ViewModels:OrgViewModel}"
                                           ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding OrgName}" />
+                        <TextBlock Text="{Binding DisplayText}" />
                     </StackPanel>
                 </HierarchicalDataTemplate>
 
                 <DataTemplate DataType="{x:Type ViewModels:SpaceViewModel}">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding SpaceName}" />
+                        <TextBlock Text="{Binding DisplayText}" />
                     </StackPanel>
                 </DataTemplate>
             </TreeView.Resources>

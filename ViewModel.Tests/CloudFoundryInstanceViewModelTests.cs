@@ -11,23 +11,23 @@ namespace TanzuForVS.ViewModels
         private CloudFoundryInstanceViewModel cfivm;
 
         [TestMethod]
+        public void Constructor_SetsDisplayTextToInstanceName()
+        {
+            string instanceName = "junk";
+            cfivm = new CloudFoundryInstanceViewModel(new CloudFoundryInstance(instanceName, null, null), services);
+
+            Assert.AreEqual(instanceName, cfivm.DisplayText);
+        }
+
+        [TestMethod]
         public void ChildrenAreLazilyLoaded_UponViewModelExpansion()
         {
-            const string org1Name = "org1";
-            const string org2Name = "org2";
-            const string org3Name = "org3";
-            const string org4Name = "org4";
-            const string org1Guid = "org-1-id";
-            const string org2Guid = "org-2-id";
-            const string org3Guid = "org-3-id";
-            const string org4Guid = "org-4-id";
-
             var fakeOrgsList = new List<CloudFoundryOrganization>
             {
-                new CloudFoundryOrganization(org1Name, org1Guid),
-                new CloudFoundryOrganization(org2Name, org2Guid),
-                new CloudFoundryOrganization(org3Name, org3Guid),
-                new CloudFoundryOrganization(org4Name, org4Guid)
+                new CloudFoundryOrganization("org1", "org-1-id"),
+                new CloudFoundryOrganization("org2", "org-2-id"),
+                new CloudFoundryOrganization("org3", "org-3-id"),
+                new CloudFoundryOrganization("org4", "org-4-id")
             };
 
             mockCloudFoundryService.Setup(mock => mock.GetOrgsAsync(It.IsAny<string>(), It.IsAny<string>()))

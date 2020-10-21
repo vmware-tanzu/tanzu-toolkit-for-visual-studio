@@ -6,10 +6,11 @@ namespace TanzuForVS.ViewModels
 {
     public class TreeViewItemViewModel : AbstractViewModel, ITreeViewItemViewModel
     {
-        bool _isExpanded;
-        bool _isSelected;
-        TreeViewItemViewModel _parent;
-        ObservableCollection<TreeViewItemViewModel> _children;
+        private bool _isExpanded;
+        private bool _isSelected;
+        private string _text;
+        private TreeViewItemViewModel _parent;
+        private ObservableCollection<TreeViewItemViewModel> _children;
         private readonly TreeViewItemViewModel DummyChild;
 
 
@@ -88,6 +89,16 @@ namespace TanzuForVS.ViewModels
             {
                 _children = value;
                 this.RaisePropertyChangedEvent("Children");
+            }
+        }
+
+        public string DisplayText
+        {
+            get { return _text; }
+            set
+            {
+                _text = value;
+                this.RaisePropertyChangedEvent("DisplayText");
             }
         }
 

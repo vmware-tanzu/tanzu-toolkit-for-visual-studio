@@ -11,19 +11,7 @@ namespace TanzuForVS.ViewModels
             : base(null, true, services)
         {
             _space = space;
-        }
-
-        public string SpaceName
-        {
-            get
-            {
-                return _space.SpaceName;
-            }
-            set
-            {
-                _space.SpaceName = value;
-                RaisePropertyChangedEvent("SpaceName");
-            }
+            this.DisplayText = _space.SpaceName;
         }
     }
 }

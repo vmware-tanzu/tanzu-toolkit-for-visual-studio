@@ -16,19 +16,8 @@ namespace TanzuForVS.ViewModels
             _org = org;
             _target = apiAddress;
             _token = accessToken;
-        }
 
-        public string OrgName
-        {
-            get
-            {
-                return _org.OrgName;
-            }
-            set
-            {
-                _org.OrgName = value;
-                RaisePropertyChangedEvent("OrgName");
-            }
+            this.DisplayText = _org.OrgName;
         }
 
         protected override async Task LoadChildren()
