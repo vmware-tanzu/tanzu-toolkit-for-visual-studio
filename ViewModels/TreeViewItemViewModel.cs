@@ -20,6 +20,7 @@ namespace TanzuForVS.ViewModels
             : base(services)
         {
             _parent = parent;
+            _isExpanded = false;
             _children = new ObservableCollection<TreeViewItemViewModel>
             {
                 DummyChild
@@ -52,20 +53,18 @@ namespace TanzuForVS.ViewModels
                 if (value != _isExpanded)
                 {
                     _isExpanded = value;
+                    if (value == true)
+                    {
+                        // Lazy load the child items, if necessary.
+                        if (this.HasDummyChild) this.Children.Remove(DummyChild);
+                        this.LoadChildren();
+                    }
                     this.RaisePropertyChangedEvent("IsExpanded");
                 }
 
                 // Expand all the way up to the root.
                 if (_isExpanded && _parent != null)
                     _parent.IsExpanded = true;
-
-                // Lazy load the child items, if necessary.
-                if (this.HasDummyChild)
-                {
-                    this.Children.Remove(DummyChild);
-                }
-
-                if (value == true) this.LoadChildren();
             }
         }
 
