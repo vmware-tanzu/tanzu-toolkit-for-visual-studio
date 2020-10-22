@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using TanzuForVS.CloudFoundryApiClient.Models;
+using TanzuForVS.CloudFoundryApiClient.Models.AppsResponse;
 using TanzuForVS.CloudFoundryApiClient.Models.BasicInfoResponse;
 using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
 using TanzuForVS.CloudFoundryApiClient.Models.SpacesResponse;
@@ -18,6 +19,7 @@ namespace TanzuForVS.CloudFoundryApiClient
 
         internal static readonly string listOrgsPath = "/v3/organizations";
         internal static readonly string listSpacesPath = "/v3/spaces";
+        internal static readonly string listAppsPath = "/v3/apps";
 
         public static readonly string defaultAuthClientId = "cf";
         public static readonly string defaultAuthClientSecret = "";
@@ -212,7 +214,7 @@ namespace TanzuForVS.CloudFoundryApiClient
             request.Headers.Add("Authorization", "Bearer " + accessToken);
 
             var response = await _httpClient.SendAsync(request);
-            if (!response.IsSuccessStatusCode) throw new Exception($"Response from `{listOrgsPath}` was {response.StatusCode}");
+            if (!response.IsSuccessStatusCode) throw new Exception($"Response from `{listSpacesPath}` was {response.StatusCode}");
 
             string resultContent = await response.Content.ReadAsStringAsync();
             var spacesResponse = JsonConvert.DeserializeObject<SpacesResponse>(resultContent);
@@ -267,5 +269,67 @@ namespace TanzuForVS.CloudFoundryApiClient
 
         }
 
+        public async Task<List<App>> ListAppsWithGuid(string cfTarget, string accessToken, string spaceGuid)
+        {
+            try
+            {
+                // trust any certificate
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback +=
+                    (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+                var uri = new UriBuilder(cfTarget)
+                {
+                    Path = listAppsPath,
+                    Query = $"space_guids={spaceGuid}"
+                };
+
+                var request = new HttpRequestMessage(HttpMethod.Get, uri.ToString());
+                request.Headers.Add("Authorization", "Bearer " + accessToken);
+
+                var response = await _httpClient.SendAsync(request);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception($"Response from `{listAppsPath}?space_guids={spaceGuid}` was {response.StatusCode}");
+                }
+
+                string resultContent = await response.Content.ReadAsStringAsync();
+                var appsResponse = JsonConvert.DeserializeObject<AppsResponse>(resultContent);
+
+                List<App> visibleApps = appsResponse.Apps.ToList();
+
+                if (appsResponse.pagination.next != null)
+                {
+                    visibleApps = await GetRemainingAppsPages(appsResponse.pagination.next, accessToken, visibleApps);
+                }
+
+                return visibleApps;
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e);
+                return null;
+            }
+
+        }
+
+        private async Task<List<App>> GetRemainingAppsPages(Href nextPageHref, string accessToken, List<App> resourcesList)
+        {
+            if (nextPageHref == null) return resourcesList;
+
+            var request = new HttpRequestMessage(HttpMethod.Get, nextPageHref.href);
+            request.Headers.Add("Authorization", "Bearer " + accessToken);
+
+            var response = await _httpClient.SendAsync(request);
+            if (!response.IsSuccessStatusCode) throw new Exception($"Response from `{listAppsPath}` was {response.StatusCode}");
+
+            string resultContent = await response.Content.ReadAsStringAsync();
+            var appsResponse = JsonConvert.DeserializeObject<AppsResponse>(resultContent);
+
+            resourcesList.AddRange(appsResponse.Apps.ToList());
+
+            return await GetRemainingAppsPages(appsResponse.pagination.next, accessToken, resourcesList);
+        }
     }
 }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
 using TanzuForVS.CloudFoundryApiClient;
+using TanzuForVS.CloudFoundryApiClient.Models.AppsResponse;
 using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
 using TanzuForVS.CloudFoundryApiClient.Models.SpacesResponse;
 using TanzuForVS.Models;
@@ -70,17 +71,34 @@ namespace TanzuForVS.Services.CloudFoundry
             return orgs;
         }
 
-        public async Task<List<string>> GetSpaceNamesAsync(string target, string accessToken, string orgId)
+        public async Task<List<CloudFoundrySpace>> GetSpacesAsync(string target, string accessToken, string orgId)
         {
-            List<Space> spaceList = await _cfApiClient.ListSpacesWithGuid(target, accessToken, orgId);
+            List<Space> spacesResults = await _cfApiClient.ListSpacesWithGuid(target, accessToken, orgId);
 
-            List<string> nameList = new List<string>();
-            if (spaceList != null)
+            var spaces = new List<CloudFoundrySpace>();
+            if (spacesResults != null)
             {
-                spaceList.ForEach(delegate (Space space) { nameList.Add(space.name); });
+                spacesResults.ForEach(delegate (Space space) { 
+                    spaces.Add(new CloudFoundrySpace(space.name, space.guid)); 
+                });
             }
 
-            return nameList;
+            return spaces;
+        }
+
+        public async Task<List<CloudFoundryApp>> GetAppsAsync(string target, string accessToken, string spaceId)
+        {
+            List<App> appResults = await _cfApiClient.ListAppsWithGuid(target, accessToken, spaceId);
+
+            var apps = new List<CloudFoundryApp>();
+            if (appResults != null)
+            {
+                appResults.ForEach(delegate (App app) {
+                    apps.Add(new CloudFoundryApp(app.name));
+                });
+            }
+
+            return apps;
         }
 
         public static void FormatExceptionMessage(Exception ex, List<string> message)

@@ -23,14 +23,14 @@ namespace TanzuForVS.ViewModels
 
         protected override async Task LoadChildren()
         {
-            var spaceNames = await CloudFoundryService.GetSpaceNamesAsync(_target, _token, _org.OrgId);
+            var spaces = await CloudFoundryService.GetSpacesAsync(_target, _token, _org.OrgId);
 
-            if (spaceNames.Count == 0) DisplayText += " (no spaces)";
+            if (spaces.Count == 0) DisplayText += " (no spaces)";
 
             var updatedSpacesList = new ObservableCollection<TreeViewItemViewModel>();
-            foreach (string spaceName in spaceNames)
+            foreach (CloudFoundrySpace space in spaces)
             {
-                updatedSpacesList.Add(new SpaceViewModel(new CloudFoundrySpace(spaceName), Services));
+                updatedSpacesList.Add(new SpaceViewModel(new CloudFoundrySpace(space.SpaceName, space.SpaceId), _target, _token, Services));
             }
 
             Children = updatedSpacesList;

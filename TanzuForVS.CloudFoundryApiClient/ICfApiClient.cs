@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using TanzuForVS.CloudFoundryApiClient.Models.AppsResponse;
 using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
 using TanzuForVS.CloudFoundryApiClient.Models.SpacesResponse;
 
@@ -16,5 +17,8 @@ namespace TanzuForVS.CloudFoundryApiClient
         Task<List<Space>> ListSpaces(string cfTarget, string accessToken);
 
         Task<List<Space>> ListSpacesWithGuid(string cfTarget, string accessToken, string orgGuid);
+
+        Task<List<App>> ListAppsWithGuid(string cfTarget, string accessToken, string spaceGuid);
+
     }
 }

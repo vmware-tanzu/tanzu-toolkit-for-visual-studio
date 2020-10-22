@@ -252,7 +252,7 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
         }
 
         [TestMethod()]
-        public async Task ListSpaces_ReturnsNull_WhenStatusCodeIsNotASuccess()
+        public async Task ListSpacesWithGuid_ReturnsNull_WhenStatusCodeIsNotASuccess()
         {
             string expectedPath = CfApiClient.listSpacesPath;
 
@@ -262,10 +262,27 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
 
             _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
-            var result = await _sut.ListSpaces(_fakeCfApiAddress, _fakeAccessToken);
+            var result = await _sut.ListSpacesWithGuid(_fakeCfApiAddress, _fakeAccessToken, "orgGuid");
 
             Assert.IsNull(result);
             Assert.AreEqual(1, _mockHttp.GetMatchCount(spacesRequest));
+        }
+
+        [TestMethod()]
+        public async Task ListAppsWithGuid_ReturnsNull_WhenStatusCodeIsNotASuccess()
+        {
+            string expectedPath = CfApiClient.listAppsPath;
+
+            MockedRequest appsRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond(HttpStatusCode.Unauthorized);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.ListAppsWithGuid(_fakeCfApiAddress, _fakeAccessToken, "spaceGuid");
+
+            Assert.IsNull(result);
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(appsRequest));
         }
     }
 }
