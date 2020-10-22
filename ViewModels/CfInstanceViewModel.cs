@@ -4,11 +4,11 @@ using TanzuForVS.Models;
 
 namespace TanzuForVS.ViewModels
 {
-    public class CloudFoundryInstanceViewModel : TreeViewItemViewModel
+    public class CfInstanceViewModel : TreeViewItemViewModel
     {
         readonly CloudFoundryInstance _cloudFoundryInstance;
 
-        public CloudFoundryInstanceViewModel(CloudFoundryInstance cloudFoundryInstance, IServiceProvider services)
+        public CfInstanceViewModel(CloudFoundryInstance cloudFoundryInstance, IServiceProvider services)
             : base(null, services)
         {
             _cloudFoundryInstance = cloudFoundryInstance;

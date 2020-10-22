@@ -8,13 +8,13 @@ namespace TanzuForVS.ViewModels
     [TestClass]
     public class CloudFoundryInstanceViewModelTests : ViewModelTestSupport
     {
-        private CloudFoundryInstanceViewModel cfivm;
+        private CfInstanceViewModel cfivm;
 
         [TestMethod]
         public void Constructor_SetsDisplayTextToInstanceName()
         {
             string instanceName = "junk";
-            cfivm = new CloudFoundryInstanceViewModel(new CloudFoundryInstance(instanceName, null, null), services);
+            cfivm = new CfInstanceViewModel(new CloudFoundryInstance(instanceName, null, null), services);
 
             Assert.AreEqual(instanceName, cfivm.DisplayText);
         }
@@ -33,7 +33,7 @@ namespace TanzuForVS.ViewModels
             mockCloudFoundryService.Setup(mock => mock.GetOrgsAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(fakeOrgsList);
 
-            cfivm = new CloudFoundryInstanceViewModel(new CloudFoundryInstance("fake cf", null, null), services);
+            cfivm = new CfInstanceViewModel(new CloudFoundryInstance("fake cf", null, null), services);
             
             // check presence of single placeholder child *before* CfInstanceViewModel is expanded
             Assert.AreEqual(1, cfivm.Children.Count); 

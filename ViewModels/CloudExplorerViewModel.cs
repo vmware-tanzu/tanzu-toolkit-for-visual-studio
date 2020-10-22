@@ -7,7 +7,7 @@ namespace TanzuForVS.ViewModels
     public class CloudExplorerViewModel : AbstractViewModel, ICloudExplorerViewModel
     {
         private bool hasCloudTargets;
-        private List<CloudFoundryInstanceViewModel> cfs;
+        private List<CfInstanceViewModel> cfs;
         private IServiceProvider _services;
 
 
@@ -15,11 +15,11 @@ namespace TanzuForVS.ViewModels
             : base(services)
         {
             _services = services;
-            cfs = new List<CloudFoundryInstanceViewModel>();
+            cfs = new List<CfInstanceViewModel>();
             HasCloudTargets = CloudFoundryService.CloudFoundryInstances.Keys.Count > 0;
         }
 
-        public List<CloudFoundryInstanceViewModel> CloudFoundryList
+        public List<CfInstanceViewModel> CloudFoundryList
         {
             get => this.cfs;
 
@@ -56,10 +56,10 @@ namespace TanzuForVS.ViewModels
         private void UpdateCloudFoundryInstances()
         {
             var loggedInCfs = new List<CloudFoundryInstance>(CloudFoundryService.CloudFoundryInstances.Values);
-            var updatedCfInstanceViewModelList = new List<CloudFoundryInstanceViewModel>();
+            var updatedCfInstanceViewModelList = new List<CfInstanceViewModel>();
             foreach (CloudFoundryInstance cf in loggedInCfs)
             {
-                updatedCfInstanceViewModelList.Add(new CloudFoundryInstanceViewModel(cf, _services));
+                updatedCfInstanceViewModelList.Add(new CfInstanceViewModel(cf, _services));
             }
             CloudFoundryList = updatedCfInstanceViewModelList;
 

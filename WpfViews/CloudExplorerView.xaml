@@ -71,7 +71,7 @@
             </TreeView.ItemContainerStyle>
 
             <TreeView.Resources>
-                <HierarchicalDataTemplate DataType="{x:Type ViewModels:CloudFoundryInstanceViewModel}" 
+                <HierarchicalDataTemplate DataType="{x:Type ViewModels:CfInstanceViewModel}" 
                                           ItemsSource="{Binding Children}">
                     
                     <StackPanel Orientation="Horizontal">
