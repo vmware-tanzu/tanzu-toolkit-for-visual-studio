@@ -6,7 +6,7 @@ using TanzuForVS.Models;
 namespace TanzuForVS.ViewModels
 {
     [TestClass]
-    public class CloudFoundryInstanceViewModelTests : ViewModelTestSupport
+    public class CfInstanceViewModelTests : ViewModelTestSupport
     {
         private CfInstanceViewModel cfivm;
 
