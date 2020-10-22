@@ -41,9 +41,48 @@ namespace TanzuForVS.ViewModels
             Assert.AreEqual(1, ovm.Children.Count);
             Assert.AreEqual(null, ovm.Children[0]);
 
+            // expand several times to ensure children re-loaded each time
+            ovm.IsExpanded = true;
+            ovm.IsExpanded = false;
+            ovm.IsExpanded = true;
+            ovm.IsExpanded = false;
             ovm.IsExpanded = true;
 
             Assert.AreEqual(fakeSpaceNamesList.Count, ovm.Children.Count);
+            mockCloudFoundryService.Verify(mock => mock.GetSpaceNamesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(3));
+        }
+
+
+        [TestMethod]
+        public void LoadChildren_UpdatesAllSpaces()
+        {
+
+            var initialSpacesList = new System.Collections.ObjectModel.ObservableCollection<TreeViewItemViewModel>
+            {
+                new SpaceViewModel(new CloudFoundrySpace("initial space 1"), services),
+                new SpaceViewModel(new CloudFoundrySpace("initial space 2"), services),
+                new SpaceViewModel(new CloudFoundrySpace("initial space 3"), services)
+            };
+
+            ovm = new OrgViewModel(new CloudFoundryOrganization("fake org", null), null, null, services)
+            {
+                Children = initialSpacesList
+            };
+
+            var newSpacesList = new List<string>
+            {
+                "initial space 1",
+                "new space"
+            };
+
+            mockCloudFoundryService.Setup(mock => mock.GetSpaceNamesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(newSpacesList);
+
+            Assert.AreEqual(initialSpacesList.Count, ovm.Children.Count);
+            
+            ovm.IsExpanded = true;
+
+            Assert.AreEqual(newSpacesList.Count, ovm.Children.Count);
             mockCloudFoundryService.VerifyAll();
         }
     }

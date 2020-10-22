@@ -14,7 +14,7 @@ namespace TanzuForVS.ViewModels
 
         // placeholder to allow this tree view item to be expandable before its children 
         // have loaded (the presence of children causes the expansion button to appear)
-        private readonly TreeViewItemViewModel DummyChild; 
+        private readonly TreeViewItemViewModel DummyChild;
 
         protected TreeViewItemViewModel(TreeViewItemViewModel parent, IServiceProvider services)
             : base(services)
@@ -63,8 +63,9 @@ namespace TanzuForVS.ViewModels
                 if (this.HasDummyChild)
                 {
                     this.Children.Remove(DummyChild);
-                    this.LoadChildren();
                 }
+
+                if (value == true) this.LoadChildren();
             }
         }
 

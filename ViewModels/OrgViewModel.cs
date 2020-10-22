@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using TanzuForVS.Models;
 
@@ -23,8 +24,15 @@ namespace TanzuForVS.ViewModels
         protected override async Task LoadChildren()
         {
             var spaceNames = await CloudFoundryService.GetSpaceNamesAsync(_target, _token, _org.OrgId);
-            foreach (string spaceName in spaceNames) base.Children.Add(new SpaceViewModel(new CloudFoundrySpace(spaceName), Services));
+
+            var updatedSpacesList = new ObservableCollection<TreeViewItemViewModel>();
+            foreach (string spaceName in spaceNames)
+            {
+                updatedSpacesList.Add(new SpaceViewModel(new CloudFoundrySpace(spaceName), Services));
+            }
+
+            Children = updatedSpacesList;
         }
     }
-    
+
 }
