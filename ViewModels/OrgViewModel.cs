@@ -25,6 +25,8 @@ namespace TanzuForVS.ViewModels
         {
             var spaceNames = await CloudFoundryService.GetSpaceNamesAsync(_target, _token, _org.OrgId);
 
+            if (spaceNames.Count == 0) DisplayText += " (no spaces)";
+
             var updatedSpacesList = new ObservableCollection<TreeViewItemViewModel>();
             foreach (string spaceName in spaceNames)
             {

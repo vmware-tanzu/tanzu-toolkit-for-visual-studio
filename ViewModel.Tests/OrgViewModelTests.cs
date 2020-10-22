@@ -85,6 +85,20 @@ namespace TanzuForVS.ViewModels
             Assert.AreEqual(newSpacesList.Count, ovm.Children.Count);
             mockCloudFoundryService.VerifyAll();
         }
+
+        [TestMethod]
+        public void LoadChildren_SetsSpecialDisplayText_WhenThereAreNoSpaces()
+        {
+            ovm = new OrgViewModel(new CloudFoundryOrganization("fake org", null), null, null, services);
+            List<string> emptySpacesList = new List<string>();
+
+            mockCloudFoundryService.Setup(mock => mock.GetSpaceNamesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(emptySpacesList);
+
+            ovm.IsExpanded = true;
+
+            Assert.IsTrue(ovm.DisplayText.Contains(" (no spaces)"));
+        }
     }
 
 }
