@@ -122,22 +122,11 @@ namespace TanzuForVS.CloudFoundryApiClient
                 var uri = new UriBuilder(cfTarget);
                 uri.Path = listOrgsPath;
 
-                var request = new HttpRequestMessage(HttpMethod.Get, uri.ToString());
-                request.Headers.Add("Authorization", "Bearer " + accessToken);
+                Href firstPageHref = new Href() { href = uri.ToString() };
 
-                var response = await _httpClient.SendAsync(request);
+                var visibleOrgs = new List<Org>();
 
-                if (!response.IsSuccessStatusCode) throw new Exception($"Response from `{listOrgsPath}` was {response.StatusCode}");
-
-                string resultContent = await response.Content.ReadAsStringAsync();
-                var orgsResponse = JsonConvert.DeserializeObject<OrgsResponse>(resultContent);
-
-                List<Org> visibleOrgs = orgsResponse.Orgs.ToList();
-
-                if (orgsResponse.pagination.next != null)
-                {
-                    visibleOrgs = await GetRemainingOrgsPages(orgsResponse.pagination.next, accessToken, visibleOrgs);
-                }
+                visibleOrgs = await GetRemainingOrgsPages(firstPageHref, accessToken, visibleOrgs);
 
                 return visibleOrgs;
             }
@@ -239,25 +228,11 @@ namespace TanzuForVS.CloudFoundryApiClient
                     Query = $"organization_guids={orgGuid}"
                 };
 
-                var request = new HttpRequestMessage(HttpMethod.Get, uri.ToString());
-                request.Headers.Add("Authorization", "Bearer " + accessToken);
+                Href firstPageHref = new Href() { href = uri.ToString() };
 
-                var response = await _httpClient.SendAsync(request);
+                var visibleSpaces = new List<Space>();
 
-                if (!response.IsSuccessStatusCode)
-                {
-                    throw new Exception($"Response from `{listSpacesPath}?organization_guids={orgGuid}` was {response.StatusCode}");
-                }
-
-                string resultContent = await response.Content.ReadAsStringAsync();
-                var spacesResponse = JsonConvert.DeserializeObject<SpacesResponse>(resultContent);
-
-                List<Space> visibleSpaces = spacesResponse.Spaces.ToList();
-
-                if (spacesResponse.pagination.next != null)
-                {
-                    visibleSpaces = await GetRemainingSpacesPages(spacesResponse.pagination.next, accessToken, visibleSpaces);
-                }
+                visibleSpaces = await GetRemainingSpacesPages(firstPageHref, accessToken, visibleSpaces);
 
                 return visibleSpaces;
             }
@@ -284,25 +259,11 @@ namespace TanzuForVS.CloudFoundryApiClient
                     Query = $"space_guids={spaceGuid}"
                 };
 
-                var request = new HttpRequestMessage(HttpMethod.Get, uri.ToString());
-                request.Headers.Add("Authorization", "Bearer " + accessToken);
+                Href firstPageHref = new Href() { href = uri.ToString() };
 
-                var response = await _httpClient.SendAsync(request);
+                var visibleApps = new List<App>();
 
-                if (!response.IsSuccessStatusCode)
-                {
-                    throw new Exception($"Response from `{listAppsPath}?space_guids={spaceGuid}` was {response.StatusCode}");
-                }
-
-                string resultContent = await response.Content.ReadAsStringAsync();
-                var appsResponse = JsonConvert.DeserializeObject<AppsResponse>(resultContent);
-
-                List<App> visibleApps = appsResponse.Apps.ToList();
-
-                if (appsResponse.pagination.next != null)
-                {
-                    visibleApps = await GetRemainingAppsPages(appsResponse.pagination.next, accessToken, visibleApps);
-                }
+                visibleApps = await GetRemainingAppsPages(firstPageHref, accessToken, visibleApps);
 
                 return visibleApps;
             }
