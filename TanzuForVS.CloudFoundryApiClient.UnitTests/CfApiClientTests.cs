@@ -1,6 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Newtonsoft.Json;
 using RichardSzalay.MockHttp;
 using System;
 using System.Net;
@@ -10,51 +9,11 @@ using TanzuForVS.CloudFoundryApiClient.Models.Token;
 namespace TanzuForVS.CloudFoundryApiClient.UnitTests
 {
     [TestClass()]
-    public class CfApiClientTests
+    public class CfApiClientTests : CfApiClientTestSupport
     {
         private CfApiClient _sut;
         private Mock<IUaaClient> _mockUaaClient = new Mock<IUaaClient>();
         private static readonly MockHttpMessageHandler _mockHttp = new MockHttpMessageHandler();
-
-        private static readonly string _fakeTargetDomain = "myfaketarget.com";
-        private static readonly string _fakeCfApiAddress = $"https://api.{_fakeTargetDomain}";
-        private static readonly string _fakeLoginAddress = $"https://login.{_fakeTargetDomain}";
-        private static readonly string _fakeUaaAddress = $"https://uaa.{_fakeTargetDomain}";
-        private static readonly string _fakeCfUsername = "user";
-        private static readonly string _fakeCfPassword = "pass";
-        private static readonly string _fakeAccessToken = "fakeToken";
-
-        private static readonly string _fakeBasicInfoJsonResponse = JsonConvert.SerializeObject(new FakeBasicInfoResponse(
-            loginHref: _fakeLoginAddress, 
-            uaaHref: _fakeUaaAddress));
-
-        private static readonly string _fakeOrgsJsonResponsePage1 = JsonConvert.SerializeObject(new FakeOrgsResponse(
-            apiAddress: _fakeCfApiAddress,
-            pageNum: 1,
-            totalResults: 10,
-            totalPages: 4,
-            resultsPerPage: 3));
-
-        private static readonly string _fakeOrgsJsonResponsePage2 = JsonConvert.SerializeObject(new FakeOrgsResponse(
-            apiAddress: _fakeCfApiAddress,
-            pageNum: 2,
-            totalResults: 10,
-            totalPages: 4,
-            resultsPerPage: 3));
-
-        private static readonly string _fakeOrgsJsonResponsePage3 = JsonConvert.SerializeObject(new FakeOrgsResponse(
-            apiAddress: _fakeCfApiAddress,
-            pageNum: 3,
-            totalResults: 10,
-            totalPages: 4,
-            resultsPerPage: 3));
-
-        private static readonly string _fakeOrgsJsonResponsePage4 = JsonConvert.SerializeObject(new FakeOrgsResponse(
-            apiAddress: _fakeCfApiAddress,
-            pageNum: 4,
-            totalResults: 10,
-            totalPages: 4,
-            resultsPerPage: 3));
 
         [TestInitialize()]
         public void TestInit()
@@ -269,6 +228,36 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
         }
 
         [TestMethod()]
+        public async Task ListSpacesWithGuid_ReturnsListOfAllVisibleSpaces_WhenResponseContainsMultiplePages()
+        {
+            string expectedPath = CfApiClient.listSpacesPath;
+            string page2Identifier = "?page=2&per_page=3";
+            string page3Identifier = "?page=3&per_page=3";
+
+            MockedRequest spacesRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
+                    .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                    .Respond("application/json", _fakeSpacesJsonResponsePage1);
+
+            MockedRequest spacesPage2Request = _mockHttp.Expect(_fakeCfApiAddress + expectedPath + page2Identifier)
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond("application/json", _fakeSpacesJsonResponsePage2);
+
+            MockedRequest spacesPage3Request = _mockHttp.Expect(_fakeCfApiAddress + expectedPath + page3Identifier)
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond("application/json", _fakeSpacesJsonResponsePage3);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.ListSpacesWithGuid(_fakeCfApiAddress, _fakeAccessToken, "fake guid");
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(7, result.Count);
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(spacesRequest));
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(spacesPage2Request));
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(spacesPage3Request));
+        }
+
+        [TestMethod()]
         public async Task ListAppsWithGuid_ReturnsNull_WhenStatusCodeIsNotASuccess()
         {
             string expectedPath = CfApiClient.listAppsPath;
@@ -284,5 +273,37 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             Assert.IsNull(result);
             Assert.AreEqual(1, _mockHttp.GetMatchCount(appsRequest));
         }
+
+
+        [TestMethod()]
+        public async Task ListAppsWithGuid_ReturnsListOfAllVisibleApps_WhenResponseContainsMultiplePages()
+        {
+            string expectedPath = CfApiClient.listAppsPath;
+            string page2Identifier = "?page=2&per_page=50";
+            string page3Identifier = "?page=3&per_page=50";
+
+            MockedRequest appsRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
+                    .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                    .Respond("application/json", _fakeAppsJsonResponsePage1);
+
+            MockedRequest appsPage2Request = _mockHttp.Expect(_fakeCfApiAddress + expectedPath + page2Identifier)
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond("application/json", _fakeAppsJsonResponsePage2);
+
+            MockedRequest appsPage3Request = _mockHttp.Expect(_fakeCfApiAddress + expectedPath + page3Identifier)
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond("application/json", _fakeAppsJsonResponsePage3);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.ListAppsWithGuid(_fakeCfApiAddress, _fakeAccessToken, "fake guid");
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(125, result.Count);
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(appsRequest));
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(appsPage2Request));
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(appsPage3Request));
+        }
+
     }
 }
