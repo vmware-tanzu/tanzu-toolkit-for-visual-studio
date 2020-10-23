@@ -119,14 +119,14 @@ namespace TanzuForVS.CloudFoundryApiClient
                 ServicePointManager.ServerCertificateValidationCallback +=
                     (sender, cert, chain, sslPolicyErrors) => { return true; };
 
-                var uri = new UriBuilder(cfTarget);
-                uri.Path = listOrgsPath;
+                var uri = new UriBuilder(cfTarget)
+                {
+                    Path = listOrgsPath
+                };
 
                 Href firstPageHref = new Href() { href = uri.ToString() };
 
-                var visibleOrgs = new List<Org>();
-
-                visibleOrgs = await GetRemainingOrgsPages(firstPageHref, accessToken, visibleOrgs);
+                List<Org> visibleOrgs = await GetRemainingPagesForType<Org>(firstPageHref, accessToken, new List<Org>());
 
                 return visibleOrgs;
             }
@@ -147,70 +147,20 @@ namespace TanzuForVS.CloudFoundryApiClient
                 ServicePointManager.ServerCertificateValidationCallback +=
                     (sender, cert, chain, sslPolicyErrors) => { return true; };
 
-                var uri = new UriBuilder(cfTarget);
-                uri.Path = listSpacesPath;
-
-                var request = new HttpRequestMessage(HttpMethod.Get, uri.ToString());
-                request.Headers.Add("Authorization", "Bearer " + accessToken);
-
-                var response = await _httpClient.SendAsync(request);
-
-                if (!response.IsSuccessStatusCode) throw new Exception($"Response from `{listSpacesPath}` was {response.StatusCode}");
-
-                string resultContent = await response.Content.ReadAsStringAsync();
-                var spacesResponse = JsonConvert.DeserializeObject<SpacesResponse>(resultContent);
-
-                List<Space> visibleSpaces = spacesResponse.Spaces.ToList();
-
-                if (spacesResponse.pagination.next != null)
+                var uri = new UriBuilder(cfTarget)
                 {
-                    visibleSpaces = await GetRemainingSpacesPages(spacesResponse.pagination.next, accessToken, visibleSpaces);
-                }
+                    Path = listSpacesPath
+                };
 
-                return visibleSpaces;
+                Href firstPageHref = new Href() { href = uri.ToString() };
+
+                return await GetRemainingPagesForType<Space>(firstPageHref, accessToken, new List<Space>());
             }
             catch (Exception e)
             {
                 System.Diagnostics.Debug.WriteLine(e);
                 return null;
             }
-
-        }
-
-        private async Task<List<Org>> GetRemainingOrgsPages(Href nextPageHref, string accessToken, List<Org> resourcesList)
-        {
-            if (nextPageHref == null) return resourcesList;
-
-            var request = new HttpRequestMessage(HttpMethod.Get, nextPageHref.href);
-            request.Headers.Add("Authorization", "Bearer " + accessToken);
-
-            var response = await _httpClient.SendAsync(request);
-            if (!response.IsSuccessStatusCode) throw new Exception($"Response from `{listOrgsPath}` was {response.StatusCode}");
-
-            string resultContent = await response.Content.ReadAsStringAsync();
-            var orgsResponse = JsonConvert.DeserializeObject<OrgsResponse>(resultContent);
-
-            resourcesList.AddRange(orgsResponse.Orgs.ToList());
-
-            return await GetRemainingOrgsPages(orgsResponse.pagination.next, accessToken, resourcesList);
-        }
-
-        private async Task<List<Space>> GetRemainingSpacesPages(Href nextPageHref, string accessToken, List<Space> resourcesList)
-        {
-            if (nextPageHref == null) return resourcesList;
-
-            var request = new HttpRequestMessage(HttpMethod.Get, nextPageHref.href);
-            request.Headers.Add("Authorization", "Bearer " + accessToken);
-
-            var response = await _httpClient.SendAsync(request);
-            if (!response.IsSuccessStatusCode) throw new Exception($"Response from `{listSpacesPath}` was {response.StatusCode}");
-
-            string resultContent = await response.Content.ReadAsStringAsync();
-            var spacesResponse = JsonConvert.DeserializeObject<SpacesResponse>(resultContent);
-
-            resourcesList.AddRange(spacesResponse.Spaces.ToList());
-
-            return await GetRemainingSpacesPages(spacesResponse.pagination.next, accessToken, resourcesList);
         }
 
         public async Task<List<Space>> ListSpacesWithGuid(string cfTarget, string accessToken, string orgGuid)
@@ -230,18 +180,13 @@ namespace TanzuForVS.CloudFoundryApiClient
 
                 Href firstPageHref = new Href() { href = uri.ToString() };
 
-                var visibleSpaces = new List<Space>();
-
-                visibleSpaces = await GetRemainingSpacesPages(firstPageHref, accessToken, visibleSpaces);
-
-                return visibleSpaces;
+                return await GetRemainingPagesForType<Space>(firstPageHref, accessToken, new List<Space>());
             }
             catch (Exception e)
             {
                 System.Diagnostics.Debug.WriteLine(e);
                 return null;
             }
-
         }
 
         public async Task<List<App>> ListAppsWithGuid(string cfTarget, string accessToken, string spaceGuid)
@@ -261,36 +206,56 @@ namespace TanzuForVS.CloudFoundryApiClient
 
                 Href firstPageHref = new Href() { href = uri.ToString() };
 
-                var visibleApps = new List<App>();
-
-                visibleApps = await GetRemainingAppsPages(firstPageHref, accessToken, visibleApps);
-
-                return visibleApps;
+                return await GetRemainingPagesForType<App>(firstPageHref, accessToken, new List<App>());
             }
             catch (Exception e)
             {
                 System.Diagnostics.Debug.WriteLine(e);
                 return null;
             }
-
         }
 
-        private async Task<List<App>> GetRemainingAppsPages(Href nextPageHref, string accessToken, List<App> resourcesList)
+        private async Task<List<ResourceType>> GetRemainingPagesForType<ResourceType>(Href pageAddress, string accessToken, List<ResourceType> resultsSoFar)
         {
-            if (nextPageHref == null) return resourcesList;
+            if (pageAddress == null) return resultsSoFar;
 
-            var request = new HttpRequestMessage(HttpMethod.Get, nextPageHref.href);
+            var request = new HttpRequestMessage(HttpMethod.Get, pageAddress.href);
             request.Headers.Add("Authorization", "Bearer " + accessToken);
 
             var response = await _httpClient.SendAsync(request);
-            if (!response.IsSuccessStatusCode) throw new Exception($"Response from `{listAppsPath}` was {response.StatusCode}");
+            if (!response.IsSuccessStatusCode) throw new Exception($"Response from GET `{pageAddress}` was {response.StatusCode}");
 
             string resultContent = await response.Content.ReadAsStringAsync();
-            var appsResponse = JsonConvert.DeserializeObject<AppsResponse>(resultContent);
 
-            resourcesList.AddRange(appsResponse.Apps.ToList());
+            Href nextPageHref;
 
-            return await GetRemainingAppsPages(appsResponse.pagination.next, accessToken, resourcesList);
+            if (typeof(ResourceType) == typeof(Org))
+            {
+                var results = JsonConvert.DeserializeObject<OrgsResponse>(resultContent);
+                resultsSoFar.AddRange((IEnumerable<ResourceType>)results.Orgs.ToList());
+
+                nextPageHref = results.pagination.next;
+            }
+            else if (typeof(ResourceType) == typeof(Space))
+            {
+                var results = JsonConvert.DeserializeObject<SpacesResponse>(resultContent);
+                resultsSoFar.AddRange((IEnumerable<ResourceType>)results.Spaces.ToList());
+
+                nextPageHref = results.pagination.next;
+            }
+            else if (typeof(ResourceType) == typeof(App))
+            {
+                var results = JsonConvert.DeserializeObject<AppsResponse>(resultContent);
+                resultsSoFar.AddRange((IEnumerable<ResourceType>)results.Apps.ToList());
+
+                nextPageHref = results.pagination.next;
+            }
+            else
+            {
+                throw new Exception($"ResourceType unknown: {typeof(ResourceType).Name}");
+            }
+
+            return await GetRemainingPagesForType<ResourceType>(nextPageHref, accessToken, resultsSoFar);
         }
     }
 }
