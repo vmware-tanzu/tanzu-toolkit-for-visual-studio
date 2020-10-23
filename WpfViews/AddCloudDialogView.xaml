@@ -40,7 +40,7 @@
         </Grid.ColumnDefinitions>
 
         <Label Content="Instance Name" Grid.Row="2" Grid.Column="0"></Label>
-        <TextBox Name="tbInstanceName" Grid.Row="3" Grid.Column="1" x:FieldModifier="public"
+        <TextBox Name="tbInstanceName" Grid.Row="3" Grid.Column="1" 
                  HorizontalAlignment="Stretch" Width="auto" Text="{ Binding Path=InstanceName }"></TextBox>
         
         <Label Content="Target URL" Grid.Row="4" Grid.Column="0"></Label>

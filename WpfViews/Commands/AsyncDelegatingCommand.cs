@@ -8,7 +8,7 @@ namespace TanzuForVS.WpfViews.Commands
     {
         internal readonly Predicate<object> canExecute;
 
-        public readonly Func<object, Task> action;
+        internal readonly Func<object, Task> action;
 
         private EventHandler eventHandler;
 
