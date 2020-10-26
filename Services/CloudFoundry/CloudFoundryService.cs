@@ -73,7 +73,7 @@ namespace TanzuForVS.Services.CloudFoundry
 
         public async Task<List<CloudFoundrySpace>> GetSpacesAsync(string target, string accessToken, string orgId)
         {
-            List<Space> spacesResults = await _cfApiClient.ListSpacesWithGuid(target, accessToken, orgId);
+            List<Space> spacesResults = await _cfApiClient.ListSpacesForOrg(target, accessToken, orgId);
 
             var spaces = new List<CloudFoundrySpace>();
             if (spacesResults != null)
@@ -88,7 +88,7 @@ namespace TanzuForVS.Services.CloudFoundry
 
         public async Task<List<CloudFoundryApp>> GetAppsAsync(string target, string accessToken, string spaceId)
         {
-            List<App> appResults = await _cfApiClient.ListAppsWithGuid(target, accessToken, spaceId);
+            List<App> appResults = await _cfApiClient.ListAppsForSpace(target, accessToken, spaceId);
 
             var apps = new List<CloudFoundryApp>();
             if (appResults != null)

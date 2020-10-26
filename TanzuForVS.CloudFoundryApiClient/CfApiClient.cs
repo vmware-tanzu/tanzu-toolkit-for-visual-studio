@@ -163,7 +163,7 @@ namespace TanzuForVS.CloudFoundryApiClient
             }
         }
 
-        public async Task<List<Space>> ListSpacesWithGuid(string cfTarget, string accessToken, string orgGuid)
+        public async Task<List<Space>> ListSpacesForOrg(string cfTarget, string accessToken, string orgGuid)
         {
             try
             {
@@ -189,7 +189,7 @@ namespace TanzuForVS.CloudFoundryApiClient
             }
         }
 
-        public async Task<List<App>> ListAppsWithGuid(string cfTarget, string accessToken, string spaceGuid)
+        public async Task<List<App>> ListAppsForSpace(string cfTarget, string accessToken, string spaceGuid)
         {
             try
             {

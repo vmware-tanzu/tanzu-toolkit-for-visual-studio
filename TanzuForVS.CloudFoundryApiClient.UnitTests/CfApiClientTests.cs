@@ -221,7 +221,7 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
 
             _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
-            var result = await _sut.ListSpacesWithGuid(_fakeCfApiAddress, _fakeAccessToken, "orgGuid");
+            var result = await _sut.ListSpacesForOrg(_fakeCfApiAddress, _fakeAccessToken, "orgGuid");
 
             Assert.IsNull(result);
             Assert.AreEqual(1, _mockHttp.GetMatchCount(spacesRequest));
@@ -248,7 +248,7 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
 
             _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
-            var result = await _sut.ListSpacesWithGuid(_fakeCfApiAddress, _fakeAccessToken, "fake guid");
+            var result = await _sut.ListSpacesForOrg(_fakeCfApiAddress, _fakeAccessToken, "fake guid");
 
             Assert.IsNotNull(result);
             Assert.AreEqual(7, result.Count);
@@ -268,7 +268,7 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
 
             _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
-            var result = await _sut.ListAppsWithGuid(_fakeCfApiAddress, _fakeAccessToken, "spaceGuid");
+            var result = await _sut.ListAppsForSpace(_fakeCfApiAddress, _fakeAccessToken, "spaceGuid");
 
             Assert.IsNull(result);
             Assert.AreEqual(1, _mockHttp.GetMatchCount(appsRequest));
@@ -296,7 +296,7 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
 
             _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
-            var result = await _sut.ListAppsWithGuid(_fakeCfApiAddress, _fakeAccessToken, "fake guid");
+            var result = await _sut.ListAppsForSpace(_fakeCfApiAddress, _fakeAccessToken, "fake guid");
 
             Assert.IsNotNull(result);
             Assert.AreEqual(125, result.Count);
