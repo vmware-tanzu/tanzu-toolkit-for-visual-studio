@@ -1,9 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Newtonsoft.Json;
 using RichardSzalay.MockHttp;
 using System;
 using System.Net;
 using System.Threading.Tasks;
+using TanzuForVS.CloudFoundryApiClient.Models.AppsResponse;
 using TanzuForVS.CloudFoundryApiClient.Models.Token;
 
 namespace TanzuForVS.CloudFoundryApiClient.UnitTests
@@ -274,7 +276,6 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             Assert.AreEqual(1, _mockHttp.GetMatchCount(appsRequest));
         }
 
-
         [TestMethod()]
         public async Task ListAppsWithGuid_ReturnsListOfAllVisibleApps_WhenResponseContainsMultiplePages()
         {
@@ -305,5 +306,86 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             Assert.AreEqual(1, _mockHttp.GetMatchCount(appsPage3Request));
         }
 
+        [TestMethod]
+        public async Task StopAppWithGuid_ReturnsFalse_WhenStatusCodeIsNotASuccess()
+        {
+            string fakeAppGuid = "1234";
+            string expectedPath = _fakeCfApiAddress + CfApiClient.listAppsPath + $"/{fakeAppGuid}/actions/stop";
+            var fakeHttpExceptionMessage = "(fake) http request failed";
+            Exception resultException = null;
+
+            MockedRequest cfStopAppRequest = _mockHttp.Expect(expectedPath)
+               .Throw(new Exception(fakeHttpExceptionMessage));
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            bool stopResult = true;
+            try
+            {
+                stopResult = await _sut.StopAppWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
+            }
+            catch (Exception e)
+            {
+                resultException = e;
+            }
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(cfStopAppRequest));
+            Assert.IsNull(resultException);
+            Assert.IsFalse(stopResult);
+        }
+
+        [TestMethod]
+        public async Task StopAppWithGuid_ReturnsTrue_WhenAppStateIsSTOPPED()
+        {
+            string fakeAppGuid = "1234";
+            string expectedPath = _fakeCfApiAddress + CfApiClient.listAppsPath + $"/{fakeAppGuid}/actions/stop";
+            Exception resultException = null;
+
+            MockedRequest cfStopAppRequest = _mockHttp.Expect(expectedPath)
+               .Respond("application/json", JsonConvert.SerializeObject(new App { state = "STOPPED" }));
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            bool stopResult = false;
+            try
+            {
+                stopResult = await _sut.StopAppWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
+            }
+            catch (Exception e)
+            {
+                resultException = e;
+            }
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(cfStopAppRequest));
+            Assert.IsNull(resultException);
+            Assert.IsTrue(stopResult);
+        }
+
+        [TestMethod]
+        public async Task StopAppWithGuid_ReturnsFalse_WhenAppStateIsNotSTOPPED()
+        {
+            string fakeAppGuid = "1234";
+            string expectedPath = _fakeCfApiAddress + CfApiClient.listAppsPath + $"/{fakeAppGuid}/actions/stop";
+            Exception resultException = null;
+
+            MockedRequest cfStopAppRequest = _mockHttp.Expect(expectedPath)
+               .Respond("application/json", JsonConvert.SerializeObject(new App { state = "fake state != STOPPED" }));
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            bool stopResult = true;
+            try
+            {
+                stopResult = await _sut.StopAppWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
+            }
+            catch (Exception e)
+            {
+                resultException = e;
+            }
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(cfStopAppRequest));
+            Assert.IsNull(resultException);
+            Assert.IsFalse(stopResult);
+        }
     }
 }

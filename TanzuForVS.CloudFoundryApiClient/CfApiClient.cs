@@ -257,5 +257,40 @@ namespace TanzuForVS.CloudFoundryApiClient
 
             return await GetRemainingPagesForType<ResourceType>(nextPageHref, accessToken, resultsSoFar);
         }
+
+        public async Task<bool> StopAppWithGuid(string cfTarget, string accessToken, string appGuid)
+        {
+            try
+            {
+                // trust any certificate
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback +=
+                    (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+                var stopAppPath = listAppsPath + $"/{appGuid}/actions/stop";
+
+                var uri = new UriBuilder(cfTarget)
+                {
+                    Path = stopAppPath
+                };
+
+                var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString());
+                request.Headers.Add("Authorization", "Bearer " + accessToken);
+
+                var response = await _httpClient.SendAsync(request);
+                if (!response.IsSuccessStatusCode) throw new Exception($"Response from POST `{stopAppPath}` was {response.StatusCode}");
+
+                string resultContent = await response.Content.ReadAsStringAsync();
+                var result = JsonConvert.DeserializeObject<App>(resultContent);
+
+                if (result.state == "STOPPED") return true;
+                return false;
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e);
+                return false;
+            }
+        }
     }
 }
