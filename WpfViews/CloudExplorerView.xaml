@@ -1,5 +1,5 @@
 ﻿<UserControl x:Class="TanzuForVS.WpfViews.CloudExplorerView"
-                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
@@ -41,7 +41,7 @@
 
         <Button Grid.Row="0" Grid.Column="0" 
                 Style="{DynamicResource RoundedButtonStyle}"
-               Command ="{ Binding ElementName=CloudExplorerViewElement, Path=OpenLoginFormCommand }" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}">
+                Command ="{ Binding ElementName=CloudExplorerViewElement, Path=OpenLoginFormCommand }" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}">
             <Image Source="Resources/AddCloud.png" Stretch="None" 
                    ToolTip="Target New Cloud Foundry Instance"/>
         </Button>
@@ -73,7 +73,7 @@
             <TreeView.Resources>
                 <HierarchicalDataTemplate DataType="{x:Type ViewModels:CfInstanceViewModel}" 
                                           ItemsSource="{Binding Children}">
-                    
+
                     <StackPanel Orientation="Horizontal">
                         <Image Source="Resources/CloudFoundry.png" Stretch="None" Margin="0,2,4,0"/>
                         <TextBlock Text="{Binding DisplayText}" />
@@ -95,12 +95,23 @@
                         <TextBlock Text="{Binding DisplayText}" />
                     </StackPanel>
                 </HierarchicalDataTemplate>
-                
-              
+
                 <DataTemplate DataType="{x:Type ViewModels:AppViewModel}">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="Resources/CfAppRun.png" Stretch="None" Margin="0,2,4,0"/>
-                        <TextBlock Text="{Binding DisplayText}" />
+                        <Button Content="{Binding DisplayText}" VerticalAlignment="Center" HorizontalAlignment="Center" 
+                                Background="Transparent" BorderThickness="0"
+                                Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
+                            <Button.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Stop App" 
+                                              Command="{Binding PlacementTarget.Tag.StopCfAppCommand, 
+                                                                RelativeSource={RelativeSource Mode=FindAncestor, 
+                                                                AncestorType=ContextMenu}}"
+                                              CommandParameter="{Binding App}"/>
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                        </Button>
                     </StackPanel>
                 </DataTemplate>
             </TreeView.Resources>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using TanzuForVS.Models;
 
 namespace TanzuForVS.ViewModels
@@ -46,11 +47,27 @@ namespace TanzuForVS.ViewModels
             return true;
         }
 
+        public bool CanStopCfApp(object arg)
+        {
+            return true;
+        }
+
         public void OpenLoginView(object parent)
         {
             var result = DialogService.ShowDialog(typeof(AddCloudDialogViewModel).Name);
 
             UpdateCloudFoundryInstances();
+        }
+
+        public async Task StopCfApp(object app)
+        {
+            var cfApp = app as CloudFoundryApp;
+            if (cfApp == null)
+            {
+                throw new Exception($"Expected a CloudFoundryApp, received: {app}");
+            }
+
+            await CloudFoundryService.StopAppAsync(cfApp);
         }
 
         private void UpdateCloudFoundryInstances()
@@ -65,5 +82,6 @@ namespace TanzuForVS.ViewModels
 
             HasCloudTargets = CloudFoundryList.Count > 0;
         }
+
     }
 }

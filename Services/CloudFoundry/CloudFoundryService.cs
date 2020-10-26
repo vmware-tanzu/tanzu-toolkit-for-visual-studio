@@ -33,7 +33,7 @@ namespace TanzuForVS.Services.CloudFoundry
         public async Task<ConnectResult> ConnectToCFAsync(string target, string username, SecureString password, string httpProxy, bool skipSsl)
         {
             if (string.IsNullOrEmpty(target)) throw new ArgumentException(nameof(target));
-             
+
             if (string.IsNullOrEmpty(username)) throw new ArgumentException(nameof(username));
 
             if (password == null) throw new ArgumentNullException(nameof(password));
@@ -66,8 +66,9 @@ namespace TanzuForVS.Services.CloudFoundry
             var orgs = new List<CloudFoundryOrganization>();
             if (orgsResults != null)
             {
-                orgsResults.ForEach(delegate (Org org) { 
-                    orgs.Add(new CloudFoundryOrganization(org.name, org.guid, cf)); 
+                orgsResults.ForEach(delegate (Org org)
+                {
+                    orgs.Add(new CloudFoundryOrganization(org.name, org.guid, cf));
                 });
             }
 
@@ -84,8 +85,9 @@ namespace TanzuForVS.Services.CloudFoundry
             var spaces = new List<CloudFoundrySpace>();
             if (spacesResults != null)
             {
-                spacesResults.ForEach(delegate (Space space) { 
-                    spaces.Add(new CloudFoundrySpace(space.name, space.guid, org)); 
+                spacesResults.ForEach(delegate (Space space)
+                {
+                    spaces.Add(new CloudFoundrySpace(space.name, space.guid, org));
                 });
             }
 
@@ -102,7 +104,8 @@ namespace TanzuForVS.Services.CloudFoundry
             var apps = new List<CloudFoundryApp>();
             if (appResults != null)
             {
-                appResults.ForEach(delegate (App app) {
+                appResults.ForEach(delegate (App app)
+                {
                     apps.Add(new CloudFoundryApp(app.name, app.guid, space));
                 });
             }
@@ -128,6 +131,21 @@ namespace TanzuForVS.Services.CloudFoundry
                 {
                     FormatExceptionMessage(ex.InnerException, message);
                 }
+            }
+        }
+
+        public async Task<bool> StopAppAsync(CloudFoundryApp app)
+        {
+            try
+            {
+                var target = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
+                var token = app.ParentSpace.ParentOrg.ParentCf.AccessToken;
+                return await _cfApiClient.StopAppWithGuid(target, token, app.AppId);
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e);
+                return false;
             }
         }
     }

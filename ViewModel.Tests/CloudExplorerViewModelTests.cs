@@ -1,6 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using TanzuForVS.Models;
 
 namespace TanzuForVS.ViewModels
@@ -18,7 +20,7 @@ namespace TanzuForVS.ViewModels
         }
 
         [TestMethod]
-        public void CanOpenLoginView_ReturnsExcpected()
+        public void CanOpenLoginView_ReturnsExpected()
         {
             Assert.IsTrue(vm.CanOpenLoginView(null));
         }
@@ -48,5 +50,29 @@ namespace TanzuForVS.ViewModels
             Assert.AreEqual(1, vm.CloudFoundryList.Count);
         }
 
+        [TestMethod]
+        public void CanStopCfApp_ReturnsTrue()
+        {
+            Assert.IsTrue(vm.CanStopCfApp(null));
+        }
+
+        [TestMethod]
+        public async Task StopCfApp_ThrowsException_IfArgTypeIsNotCloudFoundryApp()
+        {
+            object notAnApp = new object();
+
+            Exception expectedException = null;
+            try
+            {
+                await vm.StopCfApp(notAnApp);
+            }
+            catch (Exception e)
+            {
+                expectedException = e;
+            }
+
+            Assert.IsNotNull(expectedException);
+            Assert.IsTrue(expectedException.Message.Contains("Expected a CloudFoundryApp"));
+        }
     }
 }

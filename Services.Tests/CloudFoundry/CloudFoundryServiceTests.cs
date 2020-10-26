@@ -180,5 +180,14 @@ namespace TanzuForVS.Services.CloudFoundry
             Assert.IsTrue(expectedException.Message.Contains(duplicateName));
             Assert.IsTrue(expectedException.Message.Contains("already exists"));
         }
+
+        [TestMethod]
+        public async Task StopAppAsync_ReturnsFalseAndLogsError_WhenRequestInfoIsMissing()
+        {
+            var fakeApp = new CloudFoundryApp("fakeApp",null, parentSpace: null);
+
+            var result = await cfService.StopAppAsync(fakeApp);
+            Assert.IsFalse(result);
+        }
     }
 }
