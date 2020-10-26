@@ -1,16 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TanzuForVS.Models
+﻿namespace TanzuForVS.Models
 {
     public class CloudFoundryApp
     {
         public string AppName { get; set; }
+        public string AppId { get; set; }
+        public CloudFoundrySpace ParentSpace { get; set; }
 
-        public CloudFoundryApp(string appName)
+        public CloudFoundryApp(string appName, string appGuid, CloudFoundrySpace parentSpace)
         {
             AppName = appName;
+            AppId = appGuid;
+            ParentSpace = parentSpace;
         }
 
     }

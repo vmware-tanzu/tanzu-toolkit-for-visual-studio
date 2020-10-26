@@ -56,45 +56,54 @@ namespace TanzuForVS.Services.CloudFoundry
             }
         }
 
-        public async Task<List<CloudFoundryOrganization>> GetOrgsAsync(string target, string accessToken)
+        public async Task<List<CloudFoundryOrganization>> GetOrgsForCfInstanceAsync(CloudFoundryInstance cf)
         {
+            var target = cf.ApiAddress;
+            var accessToken = cf.AccessToken;
+
             List<Org> orgsResults = await _cfApiClient.ListOrgs(target, accessToken);
 
             var orgs = new List<CloudFoundryOrganization>();
             if (orgsResults != null)
             {
                 orgsResults.ForEach(delegate (Org org) { 
-                    orgs.Add(new CloudFoundryOrganization(org.name, org.guid)); 
+                    orgs.Add(new CloudFoundryOrganization(org.name, org.guid, cf)); 
                 });
             }
 
             return orgs;
         }
 
-        public async Task<List<CloudFoundrySpace>> GetSpacesAsync(string target, string accessToken, string orgId)
+        public async Task<List<CloudFoundrySpace>> GetSpacesForOrgAsync(CloudFoundryOrganization org)
         {
-            List<Space> spacesResults = await _cfApiClient.ListSpacesForOrg(target, accessToken, orgId);
+            var target = org.ParentCf.ApiAddress;
+            var accessToken = org.ParentCf.AccessToken;
+
+            List<Space> spacesResults = await _cfApiClient.ListSpacesForOrg(target, accessToken, org.OrgId);
 
             var spaces = new List<CloudFoundrySpace>();
             if (spacesResults != null)
             {
                 spacesResults.ForEach(delegate (Space space) { 
-                    spaces.Add(new CloudFoundrySpace(space.name, space.guid)); 
+                    spaces.Add(new CloudFoundrySpace(space.name, space.guid, org)); 
                 });
             }
 
             return spaces;
         }
 
-        public async Task<List<CloudFoundryApp>> GetAppsAsync(string target, string accessToken, string spaceId)
+        public async Task<List<CloudFoundryApp>> GetAppsForSpaceAsync(CloudFoundrySpace space)
         {
-            List<App> appResults = await _cfApiClient.ListAppsForSpace(target, accessToken, spaceId);
+            var target = space.ParentOrg.ParentCf.ApiAddress;
+            var accessToken = space.ParentOrg.ParentCf.AccessToken;
+
+            List<App> appResults = await _cfApiClient.ListAppsForSpace(target, accessToken, space.SpaceId);
 
             var apps = new List<CloudFoundryApp>();
             if (appResults != null)
             {
                 appResults.ForEach(delegate (App app) {
-                    apps.Add(new CloudFoundryApp(app.name));
+                    apps.Add(new CloudFoundryApp(app.name, app.guid, space));
                 });
             }
 

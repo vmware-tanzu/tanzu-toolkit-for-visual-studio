@@ -7,23 +7,18 @@ namespace TanzuForVS.ViewModels
 {
     public class SpaceViewModel : TreeViewItemViewModel
     {
-        readonly CloudFoundrySpace _space;
-        readonly string _target;
-        readonly string _token;
+        public CloudFoundrySpace Space { get; }
 
-        public SpaceViewModel(CloudFoundrySpace space, string apiAddress, string accessToken, IServiceProvider services)
+        public SpaceViewModel(CloudFoundrySpace space, IServiceProvider services)
             : base(null, services)
         {
-            _space = space;
-            _target = apiAddress;
-            _token = accessToken;
-
-            this.DisplayText = _space.SpaceName;
+            Space = space;
+            this.DisplayText = Space.SpaceName;
         }
+
         protected override async Task LoadChildren()
         {
-            var apps = await CloudFoundryService.GetAppsAsync(_target, _token, _space.SpaceId);
-
+            var apps = await CloudFoundryService.GetAppsForSpaceAsync(Space);
             if (apps.Count == 0) DisplayText += " (no apps)";
 
             var updatedAppsList = new ObservableCollection<TreeViewItemViewModel>();

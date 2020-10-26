@@ -7,30 +7,25 @@ namespace TanzuForVS.ViewModels
 {
     public class OrgViewModel : TreeViewItemViewModel
     {
-        readonly CloudFoundryOrganization _org;
-        readonly string _target;
-        readonly string _token;
+        public CloudFoundryOrganization Org { get; }
 
-        public OrgViewModel(CloudFoundryOrganization org, string apiAddress, string accessToken, IServiceProvider services)
+        public OrgViewModel(CloudFoundryOrganization org, IServiceProvider services)
             : base(null, services)
         {
-            _org = org;
-            _target = apiAddress;
-            _token = accessToken;
-
-            this.DisplayText = _org.OrgName;
+            Org = org;
+            this.DisplayText = Org.OrgName;
         }
 
         protected override async Task LoadChildren()
         {
-            var spaces = await CloudFoundryService.GetSpacesAsync(_target, _token, _org.OrgId);
+            var spaces = await CloudFoundryService.GetSpacesForOrgAsync(Org);
 
             if (spaces.Count == 0) DisplayText += " (no spaces)";
 
             var updatedSpacesList = new ObservableCollection<TreeViewItemViewModel>();
             foreach (CloudFoundrySpace space in spaces)
             {
-                updatedSpacesList.Add(new SpaceViewModel(new CloudFoundrySpace(space.SpaceName, space.SpaceId), _target, _token, Services));
+                updatedSpacesList.Add(new SpaceViewModel(new CloudFoundrySpace(space.SpaceName, space.SpaceId, Org), Services));
             }
 
             Children = updatedSpacesList;

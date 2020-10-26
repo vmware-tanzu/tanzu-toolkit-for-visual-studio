@@ -24,13 +24,13 @@ namespace TanzuForVS.ViewModels
         {
             var fakeOrgsList = new List<CloudFoundryOrganization>
             {
-                new CloudFoundryOrganization("org1", "org-1-id"),
-                new CloudFoundryOrganization("org2", "org-2-id"),
-                new CloudFoundryOrganization("org3", "org-3-id"),
-                new CloudFoundryOrganization("org4", "org-4-id")
+                new CloudFoundryOrganization("org1", "org-1-id", null),
+                new CloudFoundryOrganization("org2", "org-2-id", null),
+                new CloudFoundryOrganization("org3", "org-3-id", null),
+                new CloudFoundryOrganization("org4", "org-4-id", null)
             };
 
-            mockCloudFoundryService.Setup(mock => mock.GetOrgsAsync(It.IsAny<string>(), It.IsAny<string>()))
+            mockCloudFoundryService.Setup(mock => mock.GetOrgsForCfInstanceAsync(It.IsAny<CloudFoundryInstance>()))
                 .ReturnsAsync(fakeOrgsList);
 
             cfivm = new CfInstanceViewModel(new CloudFoundryInstance("fake cf", null, null), services);
@@ -51,9 +51,9 @@ namespace TanzuForVS.ViewModels
 
             var initialOrgsList = new System.Collections.ObjectModel.ObservableCollection<TreeViewItemViewModel>
             {
-                new OrgViewModel(new CloudFoundryOrganization("initial org 1", "initial org 1 guid"), "address", "token", services),
-                new OrgViewModel(new CloudFoundryOrganization("initial org 2", "initial org 2 guid"), "address", "token", services),
-                new OrgViewModel(new CloudFoundryOrganization("initial org 3", "initial org 3 guid"), "address", "token", services)
+                new OrgViewModel(new CloudFoundryOrganization("initial org 1", "initial org 1 guid", null), services),
+                new OrgViewModel(new CloudFoundryOrganization("initial org 2", "initial org 2 guid", null), services),
+                new OrgViewModel(new CloudFoundryOrganization("initial org 3", "initial org 3 guid", null), services)
             };
 
             cfivm = new CfInstanceViewModel(new CloudFoundryInstance("fake cf instance", null, null), services)
@@ -63,11 +63,11 @@ namespace TanzuForVS.ViewModels
 
             var newOrgsList = new List<CloudFoundryOrganization>
             {
-                new CloudFoundryOrganization("initial org 1", "initial org 1 guid"),
-                new CloudFoundryOrganization("initial org 2", "initial org 2 guid")
+                new CloudFoundryOrganization("initial org 1", "initial org 1 guid", null),
+                new CloudFoundryOrganization("initial org 2", "initial org 2 guid", null)
             };
 
-            mockCloudFoundryService.Setup(mock => mock.GetOrgsAsync(It.IsAny<string>(), It.IsAny<string>()))
+            mockCloudFoundryService.Setup(mock => mock.GetOrgsForCfInstanceAsync(It.IsAny<CloudFoundryInstance>()))
                 .ReturnsAsync(newOrgsList);
 
             Assert.AreEqual(initialOrgsList.Count, cfivm.Children.Count);
@@ -84,7 +84,7 @@ namespace TanzuForVS.ViewModels
             cfivm = new CfInstanceViewModel(new CloudFoundryInstance("fake cf instance", null, null), services);
             var emptyOrgsList = new List<CloudFoundryOrganization>();
 
-            mockCloudFoundryService.Setup(mock => mock.GetOrgsAsync(It.IsAny<string>(), It.IsAny<string>()))
+            mockCloudFoundryService.Setup(mock => mock.GetOrgsForCfInstanceAsync(It.IsAny<CloudFoundryInstance>()))
                 .ReturnsAsync(emptyOrgsList);
 
             cfivm.IsExpanded = true;

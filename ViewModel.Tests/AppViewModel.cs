@@ -13,7 +13,7 @@ namespace TanzuForVS.ViewModels
         public void Constructor_SetsDisplayTextToAppName()
         {
             string appName = "junk";
-            var fakeApp = new CloudFoundryApp(appName);
+            var fakeApp = new CloudFoundryApp(appName, null, null);
 
             avm = new AppViewModel(fakeApp, services);
 

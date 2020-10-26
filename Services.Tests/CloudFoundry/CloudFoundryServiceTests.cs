@@ -19,11 +19,13 @@ namespace TanzuForVS.Services.CloudFoundry
         string fakeHttpProxy = "junk";
         bool skipSsl = true;
         string fakeValidAccessToken = "valid token";
+        CloudFoundryInstance fakeCfInstance;
 
         [TestInitialize()]
         public void TestInit()
         {
             cfService = new CloudFoundryService(services);
+            fakeCfInstance = new CloudFoundryInstance("fake cf", fakeValidTarget, fakeValidAccessToken);
         }
 
         [TestMethod()]
@@ -87,7 +89,7 @@ namespace TanzuForVS.Services.CloudFoundry
 
             mockCfApiClient.Setup(mock => mock.ListOrgs(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync((List<Org>)null);
 
-            var result = await cfService.GetOrgsAsync(fakeValidTarget, fakeValidAccessToken);
+            var result = await cfService.GetOrgsForCfInstanceAsync(fakeCfInstance);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count);
@@ -134,15 +136,15 @@ namespace TanzuForVS.Services.CloudFoundry
 
             var expectedResult = new List<CloudFoundryOrganization>
             {
-                new CloudFoundryOrganization(org1Name, org1Guid),
-                new CloudFoundryOrganization(org2Name, org2Guid),
-                new CloudFoundryOrganization(org3Name, org3Guid),
-                new CloudFoundryOrganization(org4Name, org4Guid)
+                new CloudFoundryOrganization(org1Name, org1Guid, fakeCfInstance),
+                new CloudFoundryOrganization(org2Name, org2Guid, fakeCfInstance),
+                new CloudFoundryOrganization(org3Name, org3Guid, fakeCfInstance),
+                new CloudFoundryOrganization(org4Name, org4Guid, fakeCfInstance)
             };
 
             mockCfApiClient.Setup(mock => mock.ListOrgs(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(mockOrgsResponse);
 
-            var result = await cfService.GetOrgsAsync(fakeValidTarget, fakeValidAccessToken);
+            var result = await cfService.GetOrgsForCfInstanceAsync(fakeCfInstance);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(expectedResult.Count, result.Count);
@@ -151,6 +153,7 @@ namespace TanzuForVS.Services.CloudFoundry
             {
                 Assert.AreEqual(expectedResult[i].OrgId, result[i].OrgId);
                 Assert.AreEqual(expectedResult[i].OrgName, result[i].OrgName);
+                Assert.AreEqual(expectedResult[i].ParentCf, result[i].ParentCf);
             }
 
             mockCfApiClient.Verify(mock => mock.ListOrgs(fakeValidTarget, fakeValidAccessToken), Times.Once);
