@@ -75,6 +75,7 @@
                                           ItemsSource="{Binding Children}">
                     
                     <StackPanel Orientation="Horizontal">
+                        <Image Source="Resources/CloudFoundry.png" Stretch="None" Margin="0,2,4,0"/>
                         <TextBlock Text="{Binding DisplayText}" />
                     </StackPanel>
                 </HierarchicalDataTemplate>
@@ -82,6 +83,7 @@
                 <HierarchicalDataTemplate DataType="{x:Type ViewModels:OrgViewModel}"
                                           ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal">
+                        <Image Source="Resources/CfOrg.png" Stretch="None" Margin="0,2,4,0"/>
                         <TextBlock Text="{Binding DisplayText}" />
                     </StackPanel>
                 </HierarchicalDataTemplate>
@@ -89,6 +91,7 @@
                 <HierarchicalDataTemplate DataType="{x:Type ViewModels:SpaceViewModel}"
                                           ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal">
+                        <Image Source="Resources/CfSpace.png" Stretch="None" Margin="0,2,4,0"/>
                         <TextBlock Text="{Binding DisplayText}" />
                     </StackPanel>
                 </HierarchicalDataTemplate>
@@ -96,6 +99,7 @@
               
                 <DataTemplate DataType="{x:Type ViewModels:AppViewModel}">
                     <StackPanel Orientation="Horizontal">
+                        <Image Source="Resources/CfAppRun.png" Stretch="None" Margin="0,2,4,0"/>
                         <TextBlock Text="{Binding DisplayText}" />
                     </StackPanel>
                 </DataTemplate>

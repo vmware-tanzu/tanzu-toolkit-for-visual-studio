@@ -121,9 +121,20 @@
       <Name>ViewModels</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <Resource Include="Resources\AddCloud.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\CloudFoundry.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\CfOrg.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\CfSpace.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\CfAppRun.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
