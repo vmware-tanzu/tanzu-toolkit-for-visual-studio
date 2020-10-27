@@ -136,5 +136,8 @@
   <ItemGroup>
     <Resource Include="Resources\CfAppRun.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\CfAppStopped.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

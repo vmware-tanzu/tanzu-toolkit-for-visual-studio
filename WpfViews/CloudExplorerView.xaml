@@ -97,10 +97,25 @@
                 </HierarchicalDataTemplate>
 
                 <DataTemplate DataType="{x:Type ViewModels:AppViewModel}">
-                    <StackPanel Orientation="Horizontal">
-                        <Image Source="Resources/CfAppRun.png" Stretch="None" Margin="0,2,4,0"/>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="18"></RowDefinition>
+                        </Grid.RowDefinitions>
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="20"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        
+                        <Image Source="Resources/CfAppRun.png" Stretch="None" Margin="0,2,4,0"
+                               Grid.Row="0" Grid.Column="0" 
+                               Visibility="{Binding Path=IsStopped, Converter={StaticResource InverseVisibility}}"/>
+                        <Image Source="Resources/CfAppStopped.png" Stretch="None" Margin="0,2,4,0"
+                               Grid.Row="0" Grid.Column="0" 
+                               Visibility="{Binding Path=IsStopped, Converter={StaticResource Visibility}}"/>
+                        
                         <Button Content="{Binding DisplayText}" VerticalAlignment="Center" HorizontalAlignment="Center" 
-                                Background="Transparent" BorderThickness="0"
+                                Background="Transparent" BorderThickness="0" Grid.Row="0" Grid.Column="1" 
                                 Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
                             <Button.ContextMenu>
                                 <ContextMenu>
@@ -112,7 +127,7 @@
                                 </ContextMenu>
                             </Button.ContextMenu>
                         </Button>
-                    </StackPanel>
+                    </Grid>
                 </DataTemplate>
             </TreeView.Resources>
         </TreeView>

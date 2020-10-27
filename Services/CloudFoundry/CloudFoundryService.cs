@@ -106,7 +106,11 @@ namespace TanzuForVS.Services.CloudFoundry
             {
                 appResults.ForEach(delegate (App app)
                 {
-                    apps.Add(new CloudFoundryApp(app.name, app.guid, space));
+                    var appToAdd = new CloudFoundryApp(app.name, app.guid, space)
+                    {
+                        State = app.state
+                    };
+                    apps.Add(appToAdd);
                 });
             }
 
