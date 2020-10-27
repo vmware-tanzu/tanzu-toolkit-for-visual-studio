@@ -166,7 +166,7 @@ namespace TanzuForVS.Services.CloudFoundry
 
             mockCfApiClient.Verify(mock => mock.ListOrgs(fakeValidTarget, fakeValidAccessToken), Times.Once);
         }
-        
+
         [TestMethod()]
         public async Task GetSpacesForOrgAsync_ReturnsEmptyList_WhenListSpacesFails()
         {
@@ -181,7 +181,7 @@ namespace TanzuForVS.Services.CloudFoundry
             Assert.AreEqual(0, result.Count);
             CollectionAssert.AreEqual(expectedResult, result);
             Assert.AreEqual(typeof(List<CloudFoundrySpace>), result.GetType());
-            mockCfApiClient.Verify(mock => mock.ListSpacesForOrg(fakeValidTarget, fakeValidAccessToken, fakeOrg.OrgId), 
+            mockCfApiClient.Verify(mock => mock.ListSpacesForOrg(fakeValidTarget, fakeValidAccessToken, fakeOrg.OrgId),
                 Times.Once);
         }
 
@@ -244,10 +244,10 @@ namespace TanzuForVS.Services.CloudFoundry
                 Assert.AreEqual(expectedResult[i].ParentOrg, result[i].ParentOrg);
             }
 
-            mockCfApiClient.Verify(mock => mock.ListSpacesForOrg(fakeValidTarget, fakeValidAccessToken, fakeOrg.OrgId), 
+            mockCfApiClient.Verify(mock => mock.ListSpacesForOrg(fakeValidTarget, fakeValidAccessToken, fakeOrg.OrgId),
                 Times.Once);
         }
-                
+
         [TestMethod()]
         public async Task GetAppsForSpaceAsync_ReturnsEmptyList_WhenListAppsFails()
         {
@@ -262,7 +262,7 @@ namespace TanzuForVS.Services.CloudFoundry
             Assert.AreEqual(0, result.Count);
             CollectionAssert.AreEqual(expectedResult, result);
             Assert.AreEqual(typeof(List<CloudFoundryApp>), result.GetType());
-            mockCfApiClient.Verify(mock => mock.ListAppsForSpace(fakeValidTarget, fakeValidAccessToken, fakeSpace.SpaceId), 
+            mockCfApiClient.Verify(mock => mock.ListAppsForSpace(fakeValidTarget, fakeValidAccessToken, fakeSpace.SpaceId),
                 Times.Once);
         }
 
@@ -325,7 +325,7 @@ namespace TanzuForVS.Services.CloudFoundry
                 Assert.AreEqual(expectedResult[i].ParentSpace, result[i].ParentSpace);
             }
 
-            mockCfApiClient.Verify(mock => mock.ListAppsForSpace(fakeValidTarget, fakeValidAccessToken, fakeSpace.SpaceId), 
+            mockCfApiClient.Verify(mock => mock.ListAppsForSpace(fakeValidTarget, fakeValidAccessToken, fakeSpace.SpaceId),
                 Times.Once);
         }
 
@@ -352,13 +352,39 @@ namespace TanzuForVS.Services.CloudFoundry
         }
 
         [TestMethod]
-        public async Task StopAppAsync_ReturnsFalseAndLogsError_WhenRequestInfoIsMissing()
+        public async Task StopAppAsync_ReturnsFalseAndDoesNotThrowException_WhenRequestInfoIsMissing()
         {
-            var fakeApp = new CloudFoundryApp("fakeApp",null, parentSpace: null);
+            var fakeApp = new CloudFoundryApp("fake app name", "fake app guid", parentSpace: null);
 
-            var result = await cfService.StopAppAsync(fakeApp);
-            Assert.IsFalse(result);
+            mockCfApiClient.Setup(mock => mock.StopAppWithGuid(It.IsAny<string>(), It.IsAny<string>(), fakeApp.AppId))
+                .ReturnsAsync(true);
+
+            bool stopResult = true;
+            Exception shouldStayNull = null;
+            try
+            {
+                stopResult = await cfService.StopAppAsync(fakeApp);
+            }
+            catch (Exception e)
+            {
+                shouldStayNull = e;
+            }
+
+            Assert.IsFalse(stopResult);
+            Assert.IsNull(shouldStayNull);
         }
 
+        [TestMethod]
+        public async Task StopAppAsync_UpdatesAppState_WhenAppStateChanges()
+        {
+            fakeApp.State = "STARTED";
+
+            mockCfApiClient.Setup(mock => mock.StopAppWithGuid(It.IsAny<string>(), It.IsAny<string>(), fakeApp.AppId))
+                .ReturnsAsync(true);
+
+            await cfService.StopAppAsync(fakeApp);
+
+            Assert.AreEqual("STOPPED", fakeApp.State);
+        }
     }
 }

@@ -140,7 +140,11 @@ namespace TanzuForVS.Services.CloudFoundry
             {
                 var target = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
                 var token = app.ParentSpace.ParentOrg.ParentCf.AccessToken;
-                return await _cfApiClient.StopAppWithGuid(target, token, app.AppId);
+                
+                bool appWasStopped = await _cfApiClient.StopAppWithGuid(target, token, app.AppId);
+                
+                if (appWasStopped) app.State = "STOPPED";
+                return appWasStopped;
             }
             catch (Exception e)
             {
