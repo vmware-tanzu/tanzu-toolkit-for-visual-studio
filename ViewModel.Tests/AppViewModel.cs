@@ -19,5 +19,31 @@ namespace TanzuForVS.ViewModels
 
             Assert.AreEqual(appName, avm.DisplayText);
         }
+
+        [TestMethod]
+        public void IsStopped_ReturnsTrue_WhenAppStateIsSTOPPED()
+        {
+            var fakeApp = new CloudFoundryApp("fake name", "fake guid", null)
+            {
+                State = "STOPPED"
+            };
+
+            avm = new AppViewModel(fakeApp, services);
+
+            Assert.IsTrue(avm.IsStopped);
+        }
+
+        [TestMethod]
+        public void IsStopped_ReturnsFalse_WhenAppStateIsNotSTOPPED()
+        {
+            var fakeApp = new CloudFoundryApp("fake name", "fake guid", null)
+            {
+                State = "anything-other-than-STOPPED"
+            };
+
+            avm = new AppViewModel(fakeApp, services);
+
+            Assert.IsFalse(avm.IsStopped);
+        }
     }
 }

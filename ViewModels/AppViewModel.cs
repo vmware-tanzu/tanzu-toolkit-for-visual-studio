@@ -13,5 +13,14 @@ namespace TanzuForVS.ViewModels
         }
 
         public CloudFoundryApp App { get; }
+
+        public bool IsStopped
+        {
+            get
+            {
+                if (App.State == "STOPPED") return true;
+                return false;
+            }
+        }
     }
 }
