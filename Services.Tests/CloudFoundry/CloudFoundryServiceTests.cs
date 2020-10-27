@@ -4,7 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
+using TanzuForVS.CloudFoundryApiClient.Models.AppsResponse;
 using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
+using TanzuForVS.CloudFoundryApiClient.Models.SpacesResponse;
 using TanzuForVS.Models;
 
 namespace TanzuForVS.Services.CloudFoundry
@@ -20,12 +22,18 @@ namespace TanzuForVS.Services.CloudFoundry
         bool skipSsl = true;
         string fakeValidAccessToken = "valid token";
         CloudFoundryInstance fakeCfInstance;
+        CloudFoundryOrganization fakeOrg;
+        CloudFoundrySpace fakeSpace;
+        CloudFoundryApp fakeApp;
 
         [TestInitialize()]
         public void TestInit()
         {
             cfService = new CloudFoundryService(services);
             fakeCfInstance = new CloudFoundryInstance("fake cf", fakeValidTarget, fakeValidAccessToken);
+            fakeOrg = new CloudFoundryOrganization("fake org", "fake org guid", fakeCfInstance);
+            fakeSpace = new CloudFoundrySpace("fake space", "fake space guid", fakeOrg);
+            fakeApp = new CloudFoundryApp("fake app", "fake app guid", fakeSpace);
         }
 
         [TestMethod()]
@@ -83,7 +91,7 @@ namespace TanzuForVS.Services.CloudFoundry
         }
 
         [TestMethod()]
-        public async Task GetOrgsAsync_ReturnsEmptyList_WhenListOrgsFails()
+        public async Task GetOrgsForCfInstanceAsync_ReturnsEmptyList_WhenListOrgsFails()
         {
             var expectedResult = new List<CloudFoundryOrganization>();
 
@@ -99,7 +107,7 @@ namespace TanzuForVS.Services.CloudFoundry
         }
 
         [TestMethod()]
-        public async Task GetOrgsAsync_ReturnsListOfStrings_WhenListOrgsSuceeds()
+        public async Task GetOrgsForCfInstanceAsync_ReturnsListOfOrgs_WhenListOrgsSuceeds()
         {
             const string org1Name = "org1";
             const string org2Name = "org2";
@@ -158,6 +166,168 @@ namespace TanzuForVS.Services.CloudFoundry
 
             mockCfApiClient.Verify(mock => mock.ListOrgs(fakeValidTarget, fakeValidAccessToken), Times.Once);
         }
+        
+        [TestMethod()]
+        public async Task GetSpacesForOrgAsync_ReturnsEmptyList_WhenListSpacesFails()
+        {
+            var expectedResult = new List<CloudFoundrySpace>();
+
+            mockCfApiClient.Setup(mock => mock.ListSpacesForOrg(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync((List<Space>)null);
+
+            var result = await cfService.GetSpacesForOrgAsync(fakeOrg);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count);
+            CollectionAssert.AreEqual(expectedResult, result);
+            Assert.AreEqual(typeof(List<CloudFoundrySpace>), result.GetType());
+            mockCfApiClient.Verify(mock => mock.ListSpacesForOrg(fakeValidTarget, fakeValidAccessToken, fakeOrg.OrgId), 
+                Times.Once);
+        }
+
+        [TestMethod()]
+        public async Task GetSpacesForOrgAsync_ReturnsListOfSpaces_WhenListSpacesSuceeds()
+        {
+            const string space1Name = "space1";
+            const string space2Name = "space2";
+            const string space3Name = "space3";
+            const string space4Name = "space4";
+            const string space1Guid = "space-1-id";
+            const string space2Guid = "space-2-id";
+            const string space3Guid = "space-3-id";
+            const string space4Guid = "space-4-id";
+
+            var mockSpacesResponse = new List<Space>
+            {
+                new Space
+                {
+                    name = space1Name,
+                    guid = space1Guid
+                },
+                new Space
+                {
+                    name = space2Name,
+                    guid = space2Guid
+                },
+                new Space
+                {
+                    name = space3Name,
+                    guid = space3Guid
+                },
+                new Space
+                {
+                    name = space4Name,
+                    guid = space4Guid
+                }
+            };
+
+            var expectedResult = new List<CloudFoundrySpace>
+            {
+                new CloudFoundrySpace(space1Name, space1Guid, fakeOrg),
+                new CloudFoundrySpace(space2Name, space2Guid, fakeOrg),
+                new CloudFoundrySpace(space3Name, space3Guid, fakeOrg),
+                new CloudFoundrySpace(space4Name, space4Guid, fakeOrg)
+            };
+
+            mockCfApiClient.Setup(mock => mock.ListSpacesForOrg(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(mockSpacesResponse);
+
+            var result = await cfService.GetSpacesForOrgAsync(fakeOrg);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(expectedResult.Count, result.Count);
+
+            for (int i = 0; i < expectedResult.Count; i++)
+            {
+                Assert.AreEqual(expectedResult[i].SpaceId, result[i].SpaceId);
+                Assert.AreEqual(expectedResult[i].SpaceName, result[i].SpaceName);
+                Assert.AreEqual(expectedResult[i].ParentOrg, result[i].ParentOrg);
+            }
+
+            mockCfApiClient.Verify(mock => mock.ListSpacesForOrg(fakeValidTarget, fakeValidAccessToken, fakeOrg.OrgId), 
+                Times.Once);
+        }
+                
+        [TestMethod()]
+        public async Task GetAppsForSpaceAsync_ReturnsEmptyList_WhenListAppsFails()
+        {
+            var expectedResult = new List<CloudFoundryApp>();
+
+            mockCfApiClient.Setup(mock => mock.ListAppsForSpace(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync((List<App>)null);
+
+            var result = await cfService.GetAppsForSpaceAsync(fakeSpace);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count);
+            CollectionAssert.AreEqual(expectedResult, result);
+            Assert.AreEqual(typeof(List<CloudFoundryApp>), result.GetType());
+            mockCfApiClient.Verify(mock => mock.ListAppsForSpace(fakeValidTarget, fakeValidAccessToken, fakeSpace.SpaceId), 
+                Times.Once);
+        }
+
+        [TestMethod()]
+        public async Task GetAppsForSpaceAsync_ReturnsListOfApps_WhenListAppsSuceeds()
+        {
+            const string app1Name = "app1";
+            const string app2Name = "app2";
+            const string app3Name = "app3";
+            const string app4Name = "app4";
+            const string app1Guid = "app-1-id";
+            const string app2Guid = "app-2-id";
+            const string app3Guid = "app-3-id";
+            const string app4Guid = "app-4-id";
+
+            var mockAppsResponse = new List<App>
+            {
+                new App
+                {
+                    name = app1Name,
+                    guid = app1Guid
+                },
+                new App
+                {
+                    name = app2Name,
+                    guid = app2Guid
+                },
+                new App
+                {
+                    name = app3Name,
+                    guid = app3Guid
+                },
+                new App
+                {
+                    name = app4Name,
+                    guid = app4Guid
+                }
+            };
+
+            var expectedResult = new List<CloudFoundryApp>
+            {
+                new CloudFoundryApp(app1Name, app1Guid, fakeSpace),
+                new CloudFoundryApp(app2Name, app2Guid, fakeSpace),
+                new CloudFoundryApp(app3Name, app3Guid, fakeSpace),
+                new CloudFoundryApp(app4Name, app4Guid, fakeSpace)
+            };
+
+            mockCfApiClient.Setup(mock => mock.ListAppsForSpace(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(mockAppsResponse);
+
+            var result = await cfService.GetAppsForSpaceAsync(fakeSpace);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(expectedResult.Count, result.Count);
+
+            for (int i = 0; i < expectedResult.Count; i++)
+            {
+                Assert.AreEqual(expectedResult[i].AppId, result[i].AppId);
+                Assert.AreEqual(expectedResult[i].AppName, result[i].AppName);
+                Assert.AreEqual(expectedResult[i].ParentSpace, result[i].ParentSpace);
+            }
+
+            mockCfApiClient.Verify(mock => mock.ListAppsForSpace(fakeValidTarget, fakeValidAccessToken, fakeSpace.SpaceId), 
+                Times.Once);
+        }
 
         [TestMethod()]
         public void AddCloudFoundryInstance_ThrowsException_WhenNameAlreadyExists()
@@ -189,5 +359,6 @@ namespace TanzuForVS.Services.CloudFoundry
             var result = await cfService.StopAppAsync(fakeApp);
             Assert.IsFalse(result);
         }
+
     }
 }
