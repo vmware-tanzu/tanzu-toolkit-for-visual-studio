@@ -156,5 +156,24 @@ namespace TanzuForVS.Services.CloudFoundry
                 return false;
             }
         }
+
+        public async Task<bool> StartAppAsync(CloudFoundryApp app)
+        {
+            try
+            {
+                var target = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
+                var token = app.ParentSpace.ParentOrg.ParentCf.AccessToken;
+
+                bool appWasStarted = await _cfApiClient.StartAppWithGuid(target, token, app.AppId);
+
+                if (appWasStarted) app.State = "STARTED";
+                return appWasStarted;
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e);
+                return false;
+            }
+        }
     }
 }

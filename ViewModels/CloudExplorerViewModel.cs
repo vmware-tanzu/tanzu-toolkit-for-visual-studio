@@ -52,6 +52,11 @@ namespace TanzuForVS.ViewModels
             return true;
         }
 
+        public bool CanStartCfApp(object arg)
+        {
+            return true; 
+        }
+
         public void OpenLoginView(object parent)
         {
             var result = DialogService.ShowDialog(typeof(AddCloudDialogViewModel).Name);
@@ -68,6 +73,17 @@ namespace TanzuForVS.ViewModels
             }
 
             await CloudFoundryService.StopAppAsync(cfApp);
+        }
+
+        public async Task StartCfApp(object app)
+        {
+            var cfApp = app as CloudFoundryApp;
+            if (cfApp == null)
+            {
+                throw new Exception($"Expected a CloudFoundryApp, received: {app}");
+            }
+
+            await CloudFoundryService.StartAppAsync(cfApp);
         }
 
         private void UpdateCloudFoundryInstances()

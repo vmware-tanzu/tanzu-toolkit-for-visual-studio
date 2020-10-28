@@ -16,5 +16,6 @@ namespace TanzuForVS.Services.CloudFoundry
         Task<List<CloudFoundrySpace>> GetSpacesForOrgAsync(CloudFoundryOrganization org);
         Task<List<CloudFoundryApp>> GetAppsForSpaceAsync(CloudFoundrySpace space);
         Task<bool> StopAppAsync(CloudFoundryApp app);
+        Task<bool> StartAppAsync(CloudFoundryApp app);
     }
 }

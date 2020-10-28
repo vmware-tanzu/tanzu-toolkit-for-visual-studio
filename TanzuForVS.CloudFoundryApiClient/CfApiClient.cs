@@ -292,5 +292,40 @@ namespace TanzuForVS.CloudFoundryApiClient
                 return false;
             }
         }
+
+        public async Task<bool> StartAppWithGuid(string cfTarget, string accessToken, string appGuid)
+        {
+            try
+            {
+                // trust any certificate
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback +=
+                    (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+                var startAppPath = listAppsPath + $"/{appGuid}/actions/start";
+
+                var uri = new UriBuilder(cfTarget)
+                {
+                    Path = startAppPath
+                };
+
+                var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString());
+                request.Headers.Add("Authorization", "Bearer " + accessToken);
+
+                var response = await _httpClient.SendAsync(request);
+                if (!response.IsSuccessStatusCode) throw new Exception($"Response from POST `{startAppPath}` was {response.StatusCode}");
+
+                string resultContent = await response.Content.ReadAsStringAsync();
+                var result = JsonConvert.DeserializeObject<App>(resultContent);
+
+                if (result.state == "STARTED") return true;
+                return false;
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e);
+                return false;
+            }
+        }
     }
 }

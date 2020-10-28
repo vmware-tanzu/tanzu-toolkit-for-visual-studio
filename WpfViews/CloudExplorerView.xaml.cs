@@ -12,6 +12,7 @@ namespace TanzuForVS.WpfViews
     {
         public ICommand OpenLoginFormCommand { get; }
         public ICommand StopCfAppCommand { get; }
+        public ICommand StartCfAppCommand { get; }
 
         public CloudExplorerView()
         {
@@ -22,6 +23,7 @@ namespace TanzuForVS.WpfViews
         {
             OpenLoginFormCommand = new DelegatingCommand(viewModel.OpenLoginView, viewModel.CanOpenLoginView);
             StopCfAppCommand = new AsyncDelegatingCommand(viewModel.StopCfApp, viewModel.CanStopCfApp);
+            StartCfAppCommand = new AsyncDelegatingCommand(viewModel.StartCfApp, viewModel.CanStartCfApp);
 
             DataContext = viewModel;
             InitializeComponent();

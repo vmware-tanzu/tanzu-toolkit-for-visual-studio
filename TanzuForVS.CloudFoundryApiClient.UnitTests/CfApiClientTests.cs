@@ -387,5 +387,87 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             Assert.IsNull(resultException);
             Assert.IsFalse(stopResult);
         }
+
+        [TestMethod]
+        public async Task StartAppWithGuid_ReturnsTrue_WhenAppStateIsSTARTED()
+        {
+            string fakeAppGuid = "1234";
+            string expectedPath = _fakeCfApiAddress + CfApiClient.listAppsPath + $"/{fakeAppGuid}/actions/start";
+            Exception resultException = null;
+
+            MockedRequest cfStartAppRequest = _mockHttp.Expect(expectedPath)
+               .Respond("application/json", JsonConvert.SerializeObject(new App { state = "STARTED" }));
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            bool startResult = false;
+            try
+            {
+                startResult = await _sut.StartAppWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
+            }
+            catch (Exception e)
+            {
+                resultException = e;
+            }
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(cfStartAppRequest));
+            Assert.IsNull(resultException);
+            Assert.IsTrue(startResult);
+        }
+
+        [TestMethod]
+        public async Task StartAppWithGuid_ReturnsFalse_WhenAppStateIsNotSTARTED()
+        {
+            string fakeAppGuid = "1234";
+            string expectedPath = _fakeCfApiAddress + CfApiClient.listAppsPath + $"/{fakeAppGuid}/actions/start";
+            Exception resultException = null;
+
+            MockedRequest cfStartAppRequest = _mockHttp.Expect(expectedPath)
+               .Respond("application/json", JsonConvert.SerializeObject(new App { state = "fake state != STARTED" }));
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            bool startResult = true;
+            try
+            {
+                startResult = await _sut.StartAppWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
+            }
+            catch (Exception e)
+            {
+                resultException = e;
+            }
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(cfStartAppRequest));
+            Assert.IsNull(resultException);
+            Assert.IsFalse(startResult);
+        }
+
+        [TestMethod]
+        public async Task StartAppWithGuid_ReturnsFalse_WhenStatusCodeIsNotASuccess()
+        {
+            string fakeAppGuid = "1234";
+            string expectedPath = _fakeCfApiAddress + CfApiClient.listAppsPath + $"/{fakeAppGuid}/actions/start";
+            var fakeHttpExceptionMessage = "(fake) http request failed";
+            Exception resultException = null;
+
+            MockedRequest cfStartAppRequest = _mockHttp.Expect(expectedPath)
+               .Throw(new Exception(fakeHttpExceptionMessage));
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            bool startResult = true;
+            try
+            {
+                startResult = await _sut.StartAppWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
+            }
+            catch (Exception e)
+            {
+                resultException = e;
+            }
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(cfStartAppRequest));
+            Assert.IsNull(resultException);
+            Assert.IsFalse(startResult);
+        }
     }
 }

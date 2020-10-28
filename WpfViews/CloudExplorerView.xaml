@@ -119,6 +119,11 @@
                                 Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
                             <Button.ContextMenu>
                                 <ContextMenu>
+                                    <MenuItem Header="Start App" 
+                                              Command="{Binding PlacementTarget.Tag.StartCfAppCommand, 
+                                                                RelativeSource={RelativeSource Mode=FindAncestor, 
+                                                                AncestorType=ContextMenu}}"
+                                              CommandParameter="{Binding App}"/>
                                     <MenuItem Header="Stop App" 
                                               Command="{Binding PlacementTarget.Tag.StopCfAppCommand, 
                                                                 RelativeSource={RelativeSource Mode=FindAncestor, 

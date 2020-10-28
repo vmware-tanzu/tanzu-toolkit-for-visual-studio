@@ -375,6 +375,42 @@ namespace TanzuForVS.Services.CloudFoundry
         }
 
         [TestMethod]
+        public async Task StartAppAsync_UpdatesAppState_WhenAppStateChanges()
+        {
+            fakeApp.State = "STOPPED";
+
+            mockCfApiClient.Setup(mock => mock.StartAppWithGuid(It.IsAny<string>(), It.IsAny<string>(), fakeApp.AppId))
+                .ReturnsAsync(true);
+
+            await cfService.StartAppAsync(fakeApp);
+
+            Assert.AreEqual("STARTED", fakeApp.State);
+        }
+
+        [TestMethod]
+        public async Task StartAppAsync_ReturnsFalseAndDoesNotThrowException_WhenRequestInfoIsMissing()
+        {
+            var fakeApp = new CloudFoundryApp("fake app name", "fake app guid", parentSpace: null);
+
+            mockCfApiClient.Setup(mock => mock.StartAppWithGuid(It.IsAny<string>(), It.IsAny<string>(), fakeApp.AppId))
+                .ReturnsAsync(true);
+
+            bool startResult = true;
+            Exception shouldStayNull = null;
+            try
+            {
+                startResult = await cfService.StartAppAsync(fakeApp);
+            }
+            catch (Exception e)
+            {
+                shouldStayNull = e;
+            }
+
+            Assert.IsFalse(startResult);
+            Assert.IsNull(shouldStayNull);
+        }
+
+        [TestMethod]
         public async Task StopAppAsync_UpdatesAppState_WhenAppStateChanges()
         {
             fakeApp.State = "STARTED";
