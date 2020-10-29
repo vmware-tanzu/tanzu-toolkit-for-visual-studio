@@ -41,7 +41,6 @@ namespace TanzuForVS.CloudFoundryApiClient.Models.AppsResponse
 
     public class Relationships
     {
-        [JsonProperty("spaces")]
         public SpaceParent space { get; set; }
     }
 
