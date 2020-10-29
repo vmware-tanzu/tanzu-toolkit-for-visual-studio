@@ -80,6 +80,10 @@
     <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="16.7.3069" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Models\Models.csproj">
+      <Project>{9486bbee-472d-4d0a-9644-a34151f66f62}</Project>
+      <Name>Models</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Services\Services.csproj">
       <Project>{743bfc55-6c1f-4d0d-8d7e-c66a2c8ed917}</Project>
       <Name>Services</Name>
