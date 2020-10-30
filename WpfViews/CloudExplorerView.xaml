@@ -129,6 +129,11 @@
                                                                 RelativeSource={RelativeSource Mode=FindAncestor, 
                                                                 AncestorType=ContextMenu}}"
                                               CommandParameter="{Binding App}"/>
+                                    <MenuItem Header="Delete App" 
+                                              Command="{Binding PlacementTarget.Tag.DeleteCfAppCommand, 
+                                                                RelativeSource={RelativeSource Mode=FindAncestor, 
+                                                                AncestorType=ContextMenu}}"
+                                              CommandParameter="{Binding App}"/>
                                 </ContextMenu>
                             </Button.ContextMenu>
                         </Button>

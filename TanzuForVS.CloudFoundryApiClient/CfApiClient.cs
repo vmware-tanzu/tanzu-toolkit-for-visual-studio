@@ -20,6 +20,7 @@ namespace TanzuForVS.CloudFoundryApiClient
         internal static readonly string listOrgsPath = "/v3/organizations";
         internal static readonly string listSpacesPath = "/v3/spaces";
         internal static readonly string listAppsPath = "/v3/apps";
+        internal static readonly string deleteAppsPath = "/v3/apps";
 
         public static readonly string defaultAuthClientId = "cf";
         public static readonly string defaultAuthClientSecret = "";
@@ -319,6 +320,38 @@ namespace TanzuForVS.CloudFoundryApiClient
                 var result = JsonConvert.DeserializeObject<App>(resultContent);
 
                 if (result.state == "STARTED") return true;
+                return false;
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e);
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteAppWithGuid(string cfTarget, string accessToken, string appGuid)
+        {
+            try
+            {
+                // trust any certificate
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback +=
+                    (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+                var deleteAppPath = deleteAppsPath + $"/{appGuid}";
+
+                var uri = new UriBuilder(cfTarget)
+                {
+                    Path = deleteAppPath
+                };
+
+                var request = new HttpRequestMessage(HttpMethod.Delete, uri.ToString());
+                request.Headers.Add("Authorization", "Bearer " + accessToken);
+
+                var response = await _httpClient.SendAsync(request);
+                if (response.StatusCode != HttpStatusCode.Accepted) throw new Exception($"Response from DELETE `{deleteAppPath}` was {response.StatusCode}");
+
+                if (response.StatusCode == HttpStatusCode.Accepted) return true;
                 return false;
             }
             catch (Exception e)

@@ -17,5 +17,9 @@ namespace TanzuForVS.ViewModels
         bool CanStartCfApp(object arg);
 
         Task StartCfApp(object arg);
+
+        bool CanDeleteCfApp(object arg);
+
+        Task DeleteCfApp(object arg);
     }
 }

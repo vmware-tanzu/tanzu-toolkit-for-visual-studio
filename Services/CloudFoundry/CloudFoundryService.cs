@@ -175,5 +175,24 @@ namespace TanzuForVS.Services.CloudFoundry
                 return false;
             }
         }
+
+        public async Task<bool> DeleteAppAsync(CloudFoundryApp app)
+        {
+            try
+            {
+                var target = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
+                var token = app.ParentSpace.ParentOrg.ParentCf.AccessToken;
+
+                bool appWasDeleted = await _cfApiClient.DeleteAppWithGuid(target, token, app.AppId);
+
+                if (appWasDeleted) app.State = "DELETED";
+                return appWasDeleted;
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e);
+                return false;
+            }
+        }
     }
 }
