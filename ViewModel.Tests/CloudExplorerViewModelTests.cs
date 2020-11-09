@@ -74,5 +74,52 @@ namespace TanzuForVS.ViewModels
             Assert.IsNotNull(expectedException);
             Assert.IsTrue(expectedException.Message.Contains("Expected a CloudFoundryApp"));
         }
+    
+        [TestMethod]
+        public void CanDeleteCfApp_ReturnsTrue()
+        {
+            Assert.IsTrue(vm.CanDeleteCfApp(null));
+
+        }
+
+        [TestMethod]
+        public async Task DeleteCfApp_ThrowsException_IfArgTypeIsNotCloudFoundryApp()
+        {
+            object notAnApp = new object();
+
+            Exception expectedException = null;
+            try
+            {
+                await vm.DeleteCfApp(notAnApp);
+            }
+            catch (Exception e)
+            {
+                expectedException = e;
+            }
+
+            Assert.IsNotNull(expectedException);
+            Assert.IsTrue(expectedException.Message.Contains("Expected a CloudFoundryApp"));
+        }
+
+        [TestMethod]
+        public async Task DeleteCfApp_CallsDeleteAppAsync()
+        {
+            var fakeApp = new CloudFoundryApp("junk","junk", parentSpace: null);
+
+            mockCloudFoundryService.Setup(mock => mock.DeleteAppAsync(fakeApp)).ReturnsAsync(true);
+
+            Exception shouldStayNull = null;
+            try
+            {
+                await vm.DeleteCfApp(fakeApp);
+            }
+            catch (Exception e)
+            {
+                shouldStayNull = e;
+            }
+
+            Assert.IsNull(shouldStayNull);
+            mockCloudFoundryService.VerifyAll();
+        }
     }
 }
