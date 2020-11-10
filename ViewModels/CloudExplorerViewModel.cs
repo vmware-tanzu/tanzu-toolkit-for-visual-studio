@@ -91,6 +91,20 @@ namespace TanzuForVS.ViewModels
             await CloudFoundryService.StartAppAsync(cfApp);
         }
 
+        public bool CanRefreshSpace(object arg)
+        {
+            return true;
+        }
+
+        public async Task RefreshSpace(object spaceViewModel)
+        {
+            var spaceVM = spaceViewModel as SpaceViewModel;
+            if (spaceVM != null)
+            {
+                await spaceVM.RefreshChildren();
+            }
+        }
+
         public async Task DeleteCfApp(object app)
         {
             var cfApp = app as CloudFoundryApp;

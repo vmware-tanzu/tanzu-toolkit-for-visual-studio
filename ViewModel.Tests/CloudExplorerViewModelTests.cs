@@ -74,7 +74,7 @@ namespace TanzuForVS.ViewModels
             Assert.IsNotNull(expectedException);
             Assert.IsTrue(expectedException.Message.Contains("Expected a CloudFoundryApp"));
         }
-    
+
         [TestMethod]
         public void CanDeleteCfApp_ReturnsTrue()
         {
@@ -104,7 +104,7 @@ namespace TanzuForVS.ViewModels
         [TestMethod]
         public async Task DeleteCfApp_CallsDeleteAppAsync()
         {
-            var fakeApp = new CloudFoundryApp("junk","junk", parentSpace: null);
+            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
 
             mockCloudFoundryService.Setup(mock => mock.DeleteAppAsync(fakeApp)).ReturnsAsync(true);
 
@@ -119,6 +119,48 @@ namespace TanzuForVS.ViewModels
             }
 
             Assert.IsNull(shouldStayNull);
+            mockCloudFoundryService.VerifyAll();
+        }
+
+        [TestMethod]
+        public void CanRefreshSpace_ReturnsTrue()
+        {
+            Assert.IsTrue(vm.CanRefreshSpace(null));
+        }
+
+        [TestMethod]
+        public async Task RefreshSpace_UpdatesChildrenOnSpaceViewModel()
+        {
+            var fakeSpace = new CloudFoundrySpace("fake space name", "fake space id", null);
+            var fakeSpaceViewModel = new SpaceViewModel(fakeSpace, services);
+
+            var fakeAppName1 = "fake app 1";
+            var fakeAppName2 = "fake app 2";
+            var fakeAppName3 = "fake app 3";
+
+            fakeSpaceViewModel.Children = new System.Collections.ObjectModel.ObservableCollection<TreeViewItemViewModel>
+            {
+                new AppViewModel(new CloudFoundryApp(fakeAppName1, "junk", fakeSpace), services)
+            };
+
+            Assert.AreEqual(1, fakeSpaceViewModel.Children.Count);
+            AppViewModel firstChildApp = (AppViewModel)fakeSpaceViewModel.Children[0];
+            Assert.AreEqual(fakeAppName1, firstChildApp.App.AppName);
+
+            mockCloudFoundryService.Setup(mock => mock.GetAppsForSpaceAsync(fakeSpace)).ReturnsAsync(new List<CloudFoundryApp>
+            {
+                new CloudFoundryApp(fakeAppName2, "junk", fakeSpace),
+                new CloudFoundryApp(fakeAppName3, "junk", fakeSpace)
+            });
+
+            await vm.RefreshSpace(fakeSpaceViewModel);
+
+            Assert.AreEqual(2, fakeSpaceViewModel.Children.Count);
+
+            AppViewModel firstNewChildApp = (AppViewModel)fakeSpaceViewModel.Children[0];
+            AppViewModel secondNewChildApp = (AppViewModel)fakeSpaceViewModel.Children[1];
+            Assert.AreEqual(fakeAppName2, firstNewChildApp.App.AppName);
+            Assert.AreEqual(fakeAppName3, secondNewChildApp.App.AppName);
             mockCloudFoundryService.VerifyAll();
         }
     }

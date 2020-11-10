@@ -21,5 +21,9 @@ namespace TanzuForVS.ViewModels
         bool CanDeleteCfApp(object arg);
 
         Task DeleteCfApp(object arg);
+
+        Task RefreshSpace(object space);
+
+        bool CanRefreshSpace(object arg);
     }
 }

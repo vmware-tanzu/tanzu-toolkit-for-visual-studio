@@ -26,5 +26,10 @@ namespace TanzuForVS.ViewModels
 
             Children = updatedAppsList;
         }
+
+        public async Task RefreshChildren()
+        {
+            await LoadChildren();
+        }
     }
 }

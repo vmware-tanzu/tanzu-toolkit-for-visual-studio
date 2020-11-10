@@ -92,7 +92,19 @@
                                           ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="Resources/CfSpace.png" Stretch="None" Margin="0,2,4,0"/>
-                        <TextBlock Text="{Binding DisplayText}" />
+                        <Button Content="{Binding DisplayText}" VerticalAlignment="Center" HorizontalAlignment="Center" 
+                                Background="Transparent" BorderThickness="0" Grid.Row="0" Grid.Column="1" 
+                                Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
+                            <Button.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Refresh Space" 
+                                              Command="{Binding PlacementTarget.Tag.RefreshSpaceCommand, 
+                                                                RelativeSource={RelativeSource Mode=FindAncestor, 
+                                                                AncestorType=ContextMenu}}"
+                                              CommandParameter="{Binding Path=.}"/>
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                        </Button>
                     </StackPanel>
                 </HierarchicalDataTemplate>
 
