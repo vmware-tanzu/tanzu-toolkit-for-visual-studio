@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using TanzuForVS.Models;
@@ -27,9 +28,18 @@ namespace TanzuForVS.ViewModels
             Children = updatedAppsList;
         }
 
-        public async Task RefreshChildren()
+        public async Task<List<AppViewModel>> FetchChildren()
         {
-            await LoadChildren();
+            var newAppsList = new List<AppViewModel>();
+
+            var apps = await CloudFoundryService.GetAppsForSpaceAsync(Space);
+            foreach (CloudFoundryApp app in apps)
+            {
+                var newOrg = new AppViewModel(app, Services);
+                newAppsList.Add(newOrg);
+            }
+
+            return newAppsList;
         }
     }
 }

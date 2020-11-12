@@ -1,6 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Threading.Tasks;
 using TanzuForVS.Models;
 
 namespace TanzuForVS.ViewModels
@@ -66,6 +68,38 @@ namespace TanzuForVS.ViewModels
             svm.IsExpanded = true;
 
             Assert.IsTrue(svm.DisplayText.Contains(" (no apps)"));
+        }
+
+        [TestMethod]
+        public async Task FetchChildren_ReturnsListOfApps_WithoutUpdatingChildren()
+        {
+            var receivedEvents = new List<string>();
+            var fakeSpace = new CloudFoundrySpace("junk", null, null);
+            svm = new SpaceViewModel(fakeSpace, services);
+
+            svm.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
+            {
+                receivedEvents.Add(e.PropertyName);
+            };
+
+            mockCloudFoundryService.Setup(mock => mock.GetAppsForSpaceAsync(fakeSpace))
+                .ReturnsAsync(new List<CloudFoundryApp>
+            {
+                new CloudFoundryApp("fake app name 1","fake app id 1", fakeSpace),
+                new CloudFoundryApp("fake app name 2","fake app id 2", fakeSpace)
+            });
+
+            var apps = await svm.FetchChildren();
+
+            Assert.AreEqual(2, apps.Count);
+
+            Assert.AreEqual(1, svm.Children.Count);
+            Assert.IsNull(svm.Children[0]);
+
+            // property changed events should not be raised
+            Assert.AreEqual(0, receivedEvents.Count);
+
+            mockCloudFoundryService.VerifyAll();
         }
     }
 }

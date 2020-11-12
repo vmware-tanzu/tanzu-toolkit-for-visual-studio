@@ -1,6 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Threading.Tasks;
 using TanzuForVS.Models;
 
 namespace TanzuForVS.ViewModels
@@ -99,6 +101,38 @@ namespace TanzuForVS.ViewModels
             ovm.IsExpanded = true;
 
             Assert.IsTrue(ovm.DisplayText.Contains(" (no spaces)"));
+        }
+
+        [TestMethod]
+        public async Task FetchChildren_ReturnsListOfSpaces_WithoutUpdatingChildren()
+        {
+            var receivedEvents = new List<string>();
+            var fakeOrg = new CloudFoundryOrganization("junk", null, null);
+            ovm = new OrgViewModel(fakeOrg, services);
+
+            ovm.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
+            {
+                receivedEvents.Add(e.PropertyName);
+            };
+
+            mockCloudFoundryService.Setup(mock => mock.GetSpacesForOrgAsync(fakeOrg))
+                .ReturnsAsync(new List<CloudFoundrySpace>
+            {
+                new CloudFoundrySpace("fake space name 1","fake space id 1", fakeOrg),
+                new CloudFoundrySpace("fake space name 2","fake space id 2", fakeOrg)
+            });
+
+            var spaces = await ovm.FetchChildren();
+
+            Assert.AreEqual(2, spaces.Count);
+
+            Assert.AreEqual(1, ovm.Children.Count);
+            Assert.IsNull(ovm.Children[0]);
+
+            // property changed events should not be raised
+            Assert.AreEqual(0, receivedEvents.Count);
+
+            mockCloudFoundryService.VerifyAll();
         }
     }
 

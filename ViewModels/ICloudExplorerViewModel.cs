@@ -25,5 +25,7 @@ namespace TanzuForVS.ViewModels
         Task RefreshSpace(object space);
 
         bool CanRefreshSpace(object arg);
+        Task RefreshAllCloudConnections(object arg);
+        bool CanRefreshAllCloudConnections(object arg);
     }
 }

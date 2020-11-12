@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using TanzuForVS.ViewModels;
 
 interface ITreeViewItemViewModel : INotifyPropertyChanged
@@ -9,4 +10,6 @@ interface ITreeViewItemViewModel : INotifyPropertyChanged
     bool IsExpanded { get; set; }
     bool IsSelected { get; set; }
     TreeViewItemViewModel Parent { get; }
+
+    Task RefreshChildren();
 }
