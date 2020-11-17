@@ -311,11 +311,11 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
         {
             string fakeAppGuid = "1234";
             string expectedPath = _fakeCfApiAddress + CfApiClient.listAppsPath + $"/{fakeAppGuid}/actions/stop";
-            var fakeHttpExceptionMessage = "(fake) http request failed";
             Exception resultException = null;
 
-            MockedRequest cfStopAppRequest = _mockHttp.Expect(expectedPath)
-               .Throw(new Exception(fakeHttpExceptionMessage));
+            MockedRequest appsRequest = _mockHttp.Expect(expectedPath)
+               .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+               .Respond(HttpStatusCode.Unauthorized);
 
             _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
@@ -329,7 +329,7 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
                 resultException = e;
             }
 
-            Assert.AreEqual(1, _mockHttp.GetMatchCount(cfStopAppRequest));
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(appsRequest));
             Assert.IsNull(resultException);
             Assert.IsFalse(stopResult);
         }
@@ -447,11 +447,11 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
         {
             string fakeAppGuid = "1234";
             string expectedPath = _fakeCfApiAddress + CfApiClient.listAppsPath + $"/{fakeAppGuid}/actions/start";
-            var fakeHttpExceptionMessage = "(fake) http request failed";
             Exception resultException = null;
 
-            MockedRequest cfStartAppRequest = _mockHttp.Expect(expectedPath)
-               .Throw(new Exception(fakeHttpExceptionMessage));
+            MockedRequest appsRequest = _mockHttp.Expect(expectedPath)
+               .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+               .Respond(HttpStatusCode.Unauthorized);
 
             _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
@@ -465,7 +465,7 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
                 resultException = e;
             }
 
-            Assert.AreEqual(1, _mockHttp.GetMatchCount(cfStartAppRequest));
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(appsRequest));
             Assert.IsNull(resultException);
             Assert.IsFalse(startResult);
         }
