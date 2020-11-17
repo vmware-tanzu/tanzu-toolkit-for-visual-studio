@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using TanzuForVS.Models;
@@ -29,6 +30,21 @@ namespace TanzuForVS.ViewModels
             }
 
             Children = updatedOrgsList;
+        }
+
+
+        public async Task<List<OrgViewModel>> FetchChildren()
+        {
+            var newOrgsList = new List<OrgViewModel>();
+
+            var orgs = await CloudFoundryService.GetOrgsForCfInstanceAsync(CloudFoundryInstance);
+            foreach (CloudFoundryOrganization org in orgs)
+            {
+                var newOrg = new OrgViewModel(org, Services);
+                newOrgsList.Add(newOrg);
+            }
+
+            return newOrgsList;
         }
     }
 }

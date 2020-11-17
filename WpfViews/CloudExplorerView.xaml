@@ -36,6 +36,7 @@
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="32"></ColumnDefinition>
+            <ColumnDefinition Width="32"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
@@ -45,8 +46,17 @@
             <Image Source="Resources/AddCloud.png" Stretch="None" 
                    ToolTip="Target New Cloud Foundry Instance"/>
         </Button>
+        
+        <Button Grid.Row="0" Grid.Column="1" 
+                Style="{DynamicResource RoundedButtonStyle}"
+                Command ="{ Binding ElementName=CloudExplorerViewElement, Path=RefreshAllCommand }">
+            <Image Source="Resources/Refresh.png" Stretch="None" 
+                   ToolTip="Refresh All Cloud Connections"/>
+        </Button>
 
-        <TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" 
+        <Rectangle Grid.Row="1" Grid.ColumnSpan="3" Fill="White"/>
+        
+        <TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" 
                  Margin="5"  IsReadOnly="True" 
                  TextWrapping="Wrap" BorderBrush="Transparent" 
                  ScrollViewer.VerticalScrollBarVisibility="Auto"
@@ -55,7 +65,7 @@
                  Background="Transparent" Text="Not Yet Connected" 
                  Visibility="{Binding Path=HasCloudTargets, Converter={StaticResource InverseVisibility}}"/>
 
-        <TreeView ItemsSource="{Binding CloudFoundryList}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Visibility="{Binding Path=HasCloudTargets, Converter={StaticResource Visibility}}">
+        <TreeView ItemsSource="{Binding CloudFoundryList}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Visibility="{Binding Path=HasCloudTargets, Converter={StaticResource Visibility}}">
             <TreeView.ItemContainerStyle>
                 <!-- This Style binds a TreeViewItem to a TreeViewItemViewModel. -->
                 <Style TargetType="{x:Type TreeViewItem}">
@@ -73,7 +83,6 @@
             <TreeView.Resources>
                 <HierarchicalDataTemplate DataType="{x:Type ViewModels:CfInstanceViewModel}" 
                                           ItemsSource="{Binding Children}">
-
                     <StackPanel Orientation="Horizontal">
                         <Image Source="Resources/CloudFoundry.png" Stretch="None" Margin="0,2,4,0"/>
                         <TextBlock Text="{Binding DisplayText}" />
@@ -92,7 +101,19 @@
                                           ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="Resources/CfSpace.png" Stretch="None" Margin="0,2,4,0"/>
-                        <TextBlock Text="{Binding DisplayText}" />
+                        <Button Content="{Binding DisplayText}" VerticalAlignment="Center" HorizontalAlignment="Center" 
+                                Background="Transparent" BorderThickness="0" Grid.Row="0" Grid.Column="1" 
+                                Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
+                            <Button.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Refresh Space" 
+                                              Command="{Binding PlacementTarget.Tag.RefreshSpaceCommand, 
+                                                                RelativeSource={RelativeSource Mode=FindAncestor, 
+                                                                AncestorType=ContextMenu}}"
+                                              CommandParameter="{Binding Path=.}"/>
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                        </Button>
                     </StackPanel>
                 </HierarchicalDataTemplate>
 
@@ -126,6 +147,11 @@
                                               CommandParameter="{Binding App}"/>
                                     <MenuItem Header="Stop App" 
                                               Command="{Binding PlacementTarget.Tag.StopCfAppCommand, 
+                                                                RelativeSource={RelativeSource Mode=FindAncestor, 
+                                                                AncestorType=ContextMenu}}"
+                                              CommandParameter="{Binding App}"/>
+                                    <MenuItem Header="Delete App" 
+                                              Command="{Binding PlacementTarget.Tag.DeleteCfAppCommand, 
                                                                 RelativeSource={RelativeSource Mode=FindAncestor, 
                                                                 AncestorType=ContextMenu}}"
                                               CommandParameter="{Binding App}"/>

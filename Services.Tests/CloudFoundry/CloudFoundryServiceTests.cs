@@ -422,5 +422,55 @@ namespace TanzuForVS.Services.CloudFoundry
 
             Assert.AreEqual("STOPPED", fakeApp.State);
         }
+
+        [TestMethod]
+        public async Task DeleteAppAsync_ReturnsFalseAndDoesNotThrowException_WhenRequestInfoIsMissing()
+        {
+            var fakeApp = new CloudFoundryApp("fake app name", "fake app guid", parentSpace: null);
+
+            mockCfApiClient.Setup(mock => mock.DeleteAppWithGuid(It.IsAny<string>(), It.IsAny<string>(), fakeApp.AppId))
+                .ReturnsAsync(true);
+
+            bool deleteResult = true;
+            Exception shouldStayNull = null;
+            try
+            {
+                deleteResult = await cfService.DeleteAppAsync(fakeApp);
+            }
+            catch (Exception e)
+            {
+                shouldStayNull = e;
+            }
+
+            Assert.IsFalse(deleteResult);
+            Assert.IsNull(shouldStayNull);
+            mockCfApiClient.Verify(mock => mock.DeleteAppWithGuid(It.IsAny<string>(), It.IsAny<string>(), fakeApp.AppId), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task DeleteAppAsync_UpdatesAppState_WhenAppStateChangesFromStarted()
+        {
+            fakeApp.State = "STARTED";
+
+            mockCfApiClient.Setup(mock => mock.DeleteAppWithGuid(It.IsAny<string>(), It.IsAny<string>(), fakeApp.AppId))
+                .ReturnsAsync(true);
+
+            await cfService.DeleteAppAsync(fakeApp);
+
+            Assert.AreEqual("DELETED", fakeApp.State);
+        }
+
+        [TestMethod]
+        public async Task DeleteAppAsync_UpdatesAppState_WhenAppStateChangesFromStopped()
+        {
+            fakeApp.State = "STOPPED";
+
+            mockCfApiClient.Setup(mock => mock.DeleteAppWithGuid(It.IsAny<string>(), It.IsAny<string>(), fakeApp.AppId))
+                .ReturnsAsync(true);
+
+            await cfService.DeleteAppAsync(fakeApp);
+
+            Assert.AreEqual("DELETED", fakeApp.State);
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using TanzuForVS.Models;
@@ -29,6 +30,20 @@ namespace TanzuForVS.ViewModels
             }
 
             Children = updatedSpacesList;
+        }
+
+        public async Task<List<SpaceViewModel>> FetchChildren()
+        {
+            var newSpacesList = new List<SpaceViewModel>();
+
+            var spaces = await CloudFoundryService.GetSpacesForOrgAsync(Org);
+            foreach (CloudFoundrySpace space in spaces)
+            {
+                var newSpace = new SpaceViewModel(space, Services);
+                newSpacesList.Add(newSpace);
+            }
+
+            return newSpacesList;
         }
     }
 

@@ -17,5 +17,15 @@ namespace TanzuForVS.ViewModels
         bool CanStartCfApp(object arg);
 
         Task StartCfApp(object arg);
+
+        bool CanDeleteCfApp(object arg);
+
+        Task DeleteCfApp(object arg);
+
+        Task RefreshSpace(object space);
+
+        bool CanRefreshSpace(object arg);
+        Task RefreshAllCloudConnections(object arg);
+        bool CanRefreshAllCloudConnections(object arg);
     }
 }

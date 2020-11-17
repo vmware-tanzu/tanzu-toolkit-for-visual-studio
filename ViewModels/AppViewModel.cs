@@ -22,5 +22,10 @@ namespace TanzuForVS.ViewModels
                 return false;
             }
         }
+
+        public void SignalIsStoppedChanged()
+        {
+            RaisePropertyChangedEvent("IsStopped");
+        }
     }
 }

@@ -11,6 +11,7 @@ namespace TanzuForVS.ViewModels
         private string _text;
         private TreeViewItemViewModel _parent;
         private ObservableCollection<TreeViewItemViewModel> _children;
+        private bool _loadChildrenOnExpansion;
 
         // placeholder to allow this tree view item to be expandable before its children 
         // have loaded (the presence of children causes the expansion button to appear)
@@ -25,6 +26,7 @@ namespace TanzuForVS.ViewModels
             {
                 DummyChild
             };
+            _loadChildrenOnExpansion = true;
         }
 
         /// <summary>
@@ -41,6 +43,12 @@ namespace TanzuForVS.ViewModels
             }
         }
 
+        public bool LoadChildrenOnExpansion
+        {
+            get => _loadChildrenOnExpansion;
+            set => _loadChildrenOnExpansion = value;
+        }
+
         /// <summary>
         /// Gets/sets whether the TreeViewItem 
         /// associated with this object is expanded.
@@ -53,7 +61,7 @@ namespace TanzuForVS.ViewModels
                 if (value != _isExpanded)
                 {
                     _isExpanded = value;
-                    if (value == true)
+                    if (value == true && LoadChildrenOnExpansion)
                     {
                         // Lazy load the child items, if necessary.
                         if (this.HasDummyChild) this.Children.Remove(DummyChild);
@@ -63,8 +71,8 @@ namespace TanzuForVS.ViewModels
                 }
 
                 // Expand all the way up to the root.
-                if (_isExpanded && _parent != null)
-                    _parent.IsExpanded = true;
+                //if (_isExpanded && _parent != null)
+                //    _parent.IsExpanded = true;
             }
         }
 
@@ -115,6 +123,11 @@ namespace TanzuForVS.ViewModels
         /// </summary>
         protected virtual async Task LoadChildren()
         {
+        }
+
+        public async Task RefreshChildren()
+        {
+            await LoadChildren();
         }
 
     }

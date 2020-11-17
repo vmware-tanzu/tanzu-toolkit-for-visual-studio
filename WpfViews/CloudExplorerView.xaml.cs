@@ -13,6 +13,9 @@ namespace TanzuForVS.WpfViews
         public ICommand OpenLoginFormCommand { get; }
         public ICommand StopCfAppCommand { get; }
         public ICommand StartCfAppCommand { get; }
+        public ICommand DeleteCfAppCommand { get; }
+        public ICommand RefreshSpaceCommand { get; }
+        public ICommand RefreshAllCommand { get; }
 
         public CloudExplorerView()
         {
@@ -24,6 +27,9 @@ namespace TanzuForVS.WpfViews
             OpenLoginFormCommand = new DelegatingCommand(viewModel.OpenLoginView, viewModel.CanOpenLoginView);
             StopCfAppCommand = new AsyncDelegatingCommand(viewModel.StopCfApp, viewModel.CanStopCfApp);
             StartCfAppCommand = new AsyncDelegatingCommand(viewModel.StartCfApp, viewModel.CanStartCfApp);
+            DeleteCfAppCommand = new AsyncDelegatingCommand(viewModel.DeleteCfApp, viewModel.CanDeleteCfApp);
+            RefreshSpaceCommand = new AsyncDelegatingCommand(viewModel.RefreshSpace, viewModel.CanRefreshSpace);
+            RefreshAllCommand = new AsyncDelegatingCommand(viewModel.RefreshAllCloudConnections, viewModel.CanRefreshAllCloudConnections);
 
             DataContext = viewModel;
             InitializeComponent();

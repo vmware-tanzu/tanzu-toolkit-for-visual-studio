@@ -1,6 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Threading.Tasks;
 using TanzuForVS.Models;
 
 namespace TanzuForVS.ViewModels
@@ -90,6 +92,38 @@ namespace TanzuForVS.ViewModels
             cfivm.IsExpanded = true;
 
             Assert.IsTrue(cfivm.DisplayText.Contains(" (no orgs)"));
+        }
+
+        [TestMethod]
+        public async Task FetchChildren_ReturnsListOfOrgs_WithoutUpdatingChildren()
+        {
+            var receivedEvents = new List<string>();
+            var fakeCfInstance = new CloudFoundryInstance("junk", null, null);
+            cfivm = new CfInstanceViewModel(fakeCfInstance, services);
+
+            cfivm.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
+            {
+                receivedEvents.Add(e.PropertyName);
+            };
+
+            mockCloudFoundryService.Setup(mock => mock.GetOrgsForCfInstanceAsync(fakeCfInstance))
+                .ReturnsAsync(new List<CloudFoundryOrganization>
+            {
+                new CloudFoundryOrganization("fake org name 1","fake org id 1", fakeCfInstance),
+                new CloudFoundryOrganization("fake org name 2","fake org id 2", fakeCfInstance)
+            });
+
+            var orgs = await cfivm.FetchChildren();
+
+            Assert.AreEqual(2, orgs.Count);
+
+            Assert.AreEqual(1, cfivm.Children.Count);
+            Assert.IsNull(cfivm.Children[0]);
+
+            // property changed events should not be raised
+            Assert.AreEqual(0, receivedEvents.Count);
+            
+            mockCloudFoundryService.VerifyAll();
         }
     }
 

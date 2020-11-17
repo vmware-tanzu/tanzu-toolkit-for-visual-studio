@@ -469,5 +469,59 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             Assert.IsNull(resultException);
             Assert.IsFalse(startResult);
         }
+
+        [TestMethod]
+        public async Task DeleteAppWithGuid_ReturnsTrue_WhenStatusCodeIs202()
+        {
+            var fakeAppGuid = "my fake guid";
+            string expectedPath = _fakeCfApiAddress + CfApiClient.deleteAppsPath + $"/{fakeAppGuid}";
+
+            MockedRequest cfDeleteAppRequest = _mockHttp.Expect(expectedPath)
+               .Respond(HttpStatusCode.Accepted);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            Exception resultException = null;
+            bool appWasDeleted = false;
+            try
+            {
+                appWasDeleted = await _sut.DeleteAppWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
+            }
+            catch (Exception e)
+            {
+                resultException = e;
+            }
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(cfDeleteAppRequest));
+            Assert.IsNull(resultException);
+            Assert.IsTrue(appWasDeleted);
+        }
+
+        [TestMethod]
+        public async Task DeleteAppWithGuid_ReturnsFalse_WhenStatusCodeIsNot202()
+        {
+            var fakeAppGuid = "my fake guid";
+            string expectedPath = _fakeCfApiAddress + CfApiClient.deleteAppsPath + $"/{fakeAppGuid}";
+
+            MockedRequest cfDeleteAppRequest = _mockHttp.Expect(expectedPath)
+               .Respond(HttpStatusCode.BadRequest);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            Exception resultException = null;
+            bool appWasDeleted = true;
+            try
+            {
+                appWasDeleted = await _sut.DeleteAppWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
+            }
+            catch (Exception e)
+            {
+                resultException = e;
+            }
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(cfDeleteAppRequest));
+            Assert.IsNull(resultException);
+            Assert.IsFalse(appWasDeleted);
+        }
     }
 }

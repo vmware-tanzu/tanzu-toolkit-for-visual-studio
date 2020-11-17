@@ -23,5 +23,7 @@ namespace TanzuForVS.CloudFoundryApiClient
         Task<bool> StopAppWithGuid(string cfTarget, string accessToken, string appGuid);
 
         Task<bool> StartAppWithGuid(string cfTarget, string accessToken, string appGuid);
+
+        Task<bool> DeleteAppWithGuid(string cfTarget, string accessToken, string appGuid);
     }
 }
