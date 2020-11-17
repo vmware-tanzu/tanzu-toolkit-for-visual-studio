@@ -37,6 +37,12 @@ namespace TanzuForVS.ViewModels
         }
 
         [TestMethod]
+        public void CanStartCfApp_ReturnsTrue()
+        {
+            Assert.IsTrue(vm.CanStartCfApp(null));
+        }
+
+        [TestMethod]
         public void CanDeleteCfApp_ReturnsTrue()
         {
             Assert.IsTrue(vm.CanDeleteCfApp(null));
@@ -100,41 +106,45 @@ namespace TanzuForVS.ViewModels
         }
 
         [TestMethod]
-        public async Task StopCfApp_ThrowsException_IfArgTypeIsNotCloudFoundryApp()
+        public async Task StopCfApp_CallsStopCfAppAsync()
         {
-            object notAnApp = new object();
+            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
 
-            Exception expectedException = null;
+            mockCloudFoundryService.Setup(mock => mock.StopAppAsync(fakeApp)).ReturnsAsync(true);
+
+            Exception shouldStayNull = null;
             try
             {
-                await vm.StopCfApp(notAnApp);
+                await vm.StopCfApp(fakeApp);
             }
             catch (Exception e)
             {
-                expectedException = e;
+                shouldStayNull = e;
             }
 
-            Assert.IsNotNull(expectedException);
-            Assert.IsTrue(expectedException.Message.Contains("Expected a CloudFoundryApp"));
+            Assert.IsNull(shouldStayNull);
+            mockCloudFoundryService.VerifyAll();
         }
 
         [TestMethod]
-        public async Task DeleteCfApp_ThrowsException_IfArgTypeIsNotCloudFoundryApp()
+        public async Task StartCfApp_CallsStartAppAsync()
         {
-            object notAnApp = new object();
+            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
 
-            Exception expectedException = null;
+            mockCloudFoundryService.Setup(mock => mock.StartAppAsync(fakeApp)).ReturnsAsync(true);
+
+            Exception shouldStayNull = null;
             try
             {
-                await vm.DeleteCfApp(notAnApp);
+                await vm.StartCfApp(fakeApp);
             }
             catch (Exception e)
             {
-                expectedException = e;
+                shouldStayNull = e;
             }
 
-            Assert.IsNotNull(expectedException);
-            Assert.IsTrue(expectedException.Message.Contains("Expected a CloudFoundryApp"));
+            Assert.IsNull(shouldStayNull);
+            mockCloudFoundryService.VerifyAll();
         }
 
         [TestMethod]
