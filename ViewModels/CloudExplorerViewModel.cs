@@ -101,34 +101,28 @@ namespace TanzuForVS.ViewModels
         public async Task StopCfApp(object app)
         {
             var cfApp = app as CloudFoundryApp;
-            if (cfApp == null)
+            if (cfApp != null)
             {
-                throw new Exception($"Expected a CloudFoundryApp, received: {app}");
+                await CloudFoundryService.StopAppAsync(cfApp);
             }
-
-            await CloudFoundryService.StopAppAsync(cfApp);
         }
 
         public async Task StartCfApp(object app)
         {
             var cfApp = app as CloudFoundryApp;
-            if (cfApp == null)
+            if (cfApp != null)
             {
-                throw new Exception($"Expected a CloudFoundryApp, received: {app}");
+                await CloudFoundryService.StartAppAsync(cfApp);
             }
-
-            await CloudFoundryService.StartAppAsync(cfApp);
         }
 
         public async Task DeleteCfApp(object app)
         {
             var cfApp = app as CloudFoundryApp;
-            if (cfApp == null)
+            if (cfApp != null)
             {
-                throw new Exception($"Expected a CloudFoundryApp, received: {app}");
+                await CloudFoundryService.DeleteAppAsync(cfApp);
             }
-
-            await CloudFoundryService.DeleteAppAsync(cfApp);
         }
 
         public async Task RefreshCfInstance(object cfInstanceViewModel)
