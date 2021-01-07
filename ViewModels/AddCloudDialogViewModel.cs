@@ -20,6 +20,7 @@ namespace TanzuForVS.ViewModels
         public AddCloudDialogViewModel(IServiceProvider services)
             : base(services)
         {
+            SkipSsl = true; 
         }
 
         public string InstanceName

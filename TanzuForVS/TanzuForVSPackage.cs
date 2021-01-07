@@ -4,6 +4,7 @@ using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Shell;
 using TanzuForVS.Services.CloudFoundry;
+using TanzuForVS.Services.CmdProcess;
 using TanzuForVS.Services.Dialog;
 using TanzuForVS.Services.Locator;
 using TanzuForVS.ViewModels;
@@ -13,6 +14,8 @@ using TanzuForVS.Commands;
 using Task = System.Threading.Tasks.Task;
 using TanzuForVS.CloudFoundryApiClient;
 using System.Net.Http;
+using TanzuForVS.Services.CfCli;
+using TanzuForVS.Services.FileLocator;
 
 namespace TanzuForVS
 {
@@ -67,6 +70,7 @@ namespace TanzuForVS
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
             await TanzuCloudExplorerCommand.InitializeAsync(this);
+            await PushToCloudFoundryCommand.InitializeAsync(this, serviceProvider);
         }
 
         protected override object GetService(Type serviceType)
@@ -96,15 +100,20 @@ namespace TanzuForVS
 
         private void ConfigureServices(IServiceCollection services)
         {
-
             services.AddSingleton<ICloudFoundryService, CloudFoundryService>();
             services.AddSingleton<IViewLocatorService, WpfViewLocatorService>();
             services.AddSingleton<IDialogService, WpfDialogService>();
+            services.AddSingleton<ICfCliService, CfCliService>();
+            services.AddSingleton<ICmdProcessService, CmdProcessService>();
+            services.AddSingleton<IFileLocatorService, FileLocatorService>();
 
             services.AddTransient<TanzuCloudExplorerToolWindow>();
 
             services.AddTransient<ICloudExplorerViewModel, CloudExplorerViewModel>();
             services.AddTransient<ICloudExplorerView, CloudExplorerView>();
+
+            services.AddTransient<IDeploymentDialogViewModel, DeploymentDialogViewModel>();
+            services.AddTransient<IDeploymentDialogView, DeploymentDialogView>();
 
             services.AddTransient<IAddCloudDialogViewModel, AddCloudDialogViewModel>();
             services.AddTransient<IAddCloudDialogView, AddCloudDialogView>();

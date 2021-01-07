@@ -14,9 +14,30 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
         <Grid Margin="20,17,20,20">
-            <ListBox HorizontalContentAlignment="Stretch">
+            <ListBox HorizontalContentAlignment="Stretch" ScrollViewer.CanContentScroll="False">
                 <ListBoxItem>
                     <Button Content="Open Cloud Explorer" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Command ="{ Binding ElementName=MainWindowElement, Path=OpenCloudExplorerCommand }"/>
+                </ListBoxItem>
+                <ListBoxItem Margin="0,10,0,0">
+                    <TextBlock Text="Input:"/>
+                </ListBoxItem>
+                <ListBoxItem>
+                    <TextBox Text="{Binding CommandInput}"/>
+                </ListBoxItem>
+                <ListBoxItem>
+                    <Button Content="Execute command (Command Prompt)" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Command="{Binding ElementName=MainWindowElement, Path=InvokeCommandPromptCommand}"/>
+                </ListBoxItem>
+                <ListBoxItem>
+                    <Button Content="Execute command (CF CLI)" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Command="{Binding ElementName=MainWindowElement, Path=InvokeCfCliCommand}"/>
+                </ListBoxItem>
+                <ListBoxItem Margin="0,10,0,0">
+                    <TextBlock Text="Output:"/>
+                </ListBoxItem>
+                <ListBoxItem>
+                    <TextBox Text="{Binding CommandOutput}" Background="Bisque"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"
+                             TextWrapping="Wrap"
+                             MinLines="1" MaxLines="20"/>
                 </ListBoxItem>
             </ListBox>
         </Grid>

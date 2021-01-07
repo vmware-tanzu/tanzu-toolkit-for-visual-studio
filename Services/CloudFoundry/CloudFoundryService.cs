@@ -8,20 +8,29 @@ using TanzuForVS.CloudFoundryApiClient.Models.AppsResponse;
 using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
 using TanzuForVS.CloudFoundryApiClient.Models.SpacesResponse;
 using TanzuForVS.Models;
+using TanzuForVS.Services.CfCli;
+using TanzuForVS.Services.FileLocator;
 
 namespace TanzuForVS.Services.CloudFoundry
 {
     public class CloudFoundryService : ICloudFoundryService
     {
         private static ICfApiClient _cfApiClient;
+        private static ICfCliService _cfCliService;
+        private static IFileLocatorService _fileLocatorService;
+        internal const string emptyOutputDirMessage = "Unable to locate app files; project output directory is empty. (Has your project already been compiled?)";
+
         public string LoginFailureMessage { get; } = "Login failed.";
         public Dictionary<string, CloudFoundryInstance> CloudFoundryInstances { get; private set; }
         public CloudFoundryInstance ActiveCloud { get; set; }
 
         public CloudFoundryService(IServiceProvider services)
         {
-            _cfApiClient = services.GetRequiredService<ICfApiClient>();
             CloudFoundryInstances = new Dictionary<string, CloudFoundryInstance>();
+
+            _cfApiClient = services.GetRequiredService<ICfApiClient>();
+            _cfCliService = services.GetRequiredService<ICfCliService>();
+            _fileLocatorService = services.GetRequiredService<IFileLocatorService>();
         }
 
         public void AddCloudFoundryInstance(string name, string apiAddress, string accessToken)
@@ -43,8 +52,11 @@ namespace TanzuForVS.Services.CloudFoundry
                 string passwordStr = new System.Net.NetworkCredential(string.Empty, password).Password;
                 string accessToken = await _cfApiClient.LoginAsync(target, username, passwordStr);
 
-                if (!string.IsNullOrEmpty(accessToken)) return new ConnectResult(true, null, accessToken);
+                //* Redundant call to `cf login` provisions the cli environment, enabling it to make 
+                //* requests like `cf push`, `cf orgs` (which require user to be logged in).
+                await LoginViaCfCli(target, username, skipSsl, passwordStr);
 
+                if (!string.IsNullOrEmpty(accessToken)) return new ConnectResult(true, null, accessToken);
                 throw new Exception(LoginFailureMessage);
             }
             catch (Exception e)
@@ -144,9 +156,9 @@ namespace TanzuForVS.Services.CloudFoundry
             {
                 var target = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
                 var token = app.ParentSpace.ParentOrg.ParentCf.AccessToken;
-                
+
                 bool appWasStopped = await _cfApiClient.StopAppWithGuid(target, token, app.AppId);
-                
+
                 if (appWasStopped) app.State = "STOPPED";
                 return appWasStopped;
             }
@@ -194,5 +206,35 @@ namespace TanzuForVS.Services.CloudFoundry
                 return false;
             }
         }
+
+        public async Task<DetailedResult> DeployAppAsync(CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, string appName, string appProjPath)
+        {
+            if (!_fileLocatorService.DirContainsFiles(appProjPath)) return new DetailedResult(false, emptyOutputDirMessage);
+
+            DetailedResult cfTargetResult = await _cfCliService.ExecuteCfCliCommandAsync(arguments: $"target -o {targetOrg.OrgName} -s {targetSpace.SpaceName}");
+            if (!cfTargetResult.Succeeded) return new DetailedResult(false, $"Unable to target org '{targetOrg.OrgName}' or space '{targetSpace.SpaceName}'.\n{cfTargetResult.Explanation}");
+
+            DetailedResult cfPushResult = await _cfCliService.ExecuteCfCliCommandAsync(arguments: "push " + appName, workingDir: appProjPath);
+            if (!cfPushResult.Succeeded) return new DetailedResult(false, $"Successfully targeted org '{targetOrg.OrgName}' and space '{targetSpace.SpaceName}' but app deployment failed at the `cf push` stage.\n{cfPushResult.Explanation}");
+
+            return new DetailedResult(true, $"App successfully deploying to org '{targetOrg.OrgName}', space '{targetSpace.SpaceName}'...");
+        }
+
+        /// <summary>
+        /// Simulate a `cf login` command by combining `cf api` with `cf auth`.
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="username"></param>
+        /// <param name="skipSsl"></param>
+        /// <param name="passwordStr"></param>
+        /// <returns></returns>
+        private static async Task LoginViaCfCli(string target, string username, bool skipSsl, string passwordStr)
+        {
+            string cfApiCmdArgs = $"api {target}{(skipSsl ? " --skip-ssl-validation" : string.Empty)}";
+            await _cfCliService.ExecuteCfCliCommandAsync(cfApiCmdArgs);
+
+            await _cfCliService.ExecuteCfCliCommandAsync($"auth {username} {passwordStr}");
+        }
+
     }
 }

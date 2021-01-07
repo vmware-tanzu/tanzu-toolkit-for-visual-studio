@@ -46,6 +46,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Commands\PushToCloudFoundryCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TanzuForVSPackage.cs" />
     <Compile Include="TanzuCloudExplorerToolWindow.cs" />
@@ -107,6 +108,11 @@
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Commands\Resources\PushToCloudFoundryCommand.png" />
+    <Content Include="Resources\cf.exe" CopyToOutputDirectory="PreserveNewest">
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="Resources\PushToCloudFoundry.png" />
     <Content Include="Resources\tanzu16.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

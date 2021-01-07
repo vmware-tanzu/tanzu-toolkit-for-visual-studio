@@ -66,9 +66,13 @@
     <Compile Include="Commands\AsyncDelegatingCommand.cs" />
     <Compile Include="ICloudExplorerView.cs" />
     <Compile Include="IAddCloudDialogView.cs" />
+    <Compile Include="IDeploymentDialogView.cs" />
     <Compile Include="Services\WpfDialogResult.cs" />
     <Compile Include="Services\WpfDialogService.cs" />
     <Compile Include="Services\WpfViewLocatorService.cs" />
+    <Compile Include="DeploymentDialogView.xaml.cs">
+      <DependentUpon>DeploymentDialogView.xaml</DependentUpon>
+    </Compile>
     <Page Include="CloudExplorerView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -85,6 +89,10 @@
     <Compile Include="AddCloudDialogView.xaml.cs">
       <DependentUpon>AddCloudDialogView.xaml</DependentUpon>
     </Compile>
+    <Page Include="DeploymentDialogView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
