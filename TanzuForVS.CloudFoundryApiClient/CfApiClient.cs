@@ -52,6 +52,7 @@ namespace TanzuForVS.CloudFoundryApiClient
             validateUriStringOrThrow(cfTarget, InvalidTargetUriMessage);
             var authServerUri = await GetAuthServerUriFromCfTarget(cfTarget);
 
+        
             var result = await _uaaClient.RequestAccessTokenAsync(authServerUri,
                                                                   defaultAuthClientId,
                                                                   defaultAuthClientSecret,

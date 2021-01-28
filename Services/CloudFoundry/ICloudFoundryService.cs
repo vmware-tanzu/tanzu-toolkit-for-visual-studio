@@ -10,6 +10,7 @@ namespace TanzuForVS.Services.CloudFoundry
         CloudFoundryInstance ActiveCloud { get; set; }
         Dictionary<string, CloudFoundryInstance> CloudFoundryInstances { get; }
         string LoginFailureMessage { get; }
+
         void AddCloudFoundryInstance(string name, string apiAddress, string accessToken);
         Task<ConnectResult> ConnectToCFAsync(string target, string username, SecureString password, string httpProxy, bool skipSsl);
         Task<List<CloudFoundryOrganization>> GetOrgsForCfInstanceAsync(CloudFoundryInstance cf);
@@ -18,5 +19,6 @@ namespace TanzuForVS.Services.CloudFoundry
         Task<bool> StopAppAsync(CloudFoundryApp app);
         Task<bool> StartAppAsync(CloudFoundryApp app);
         Task<bool> DeleteAppAsync(CloudFoundryApp app);
+        Task<DetailedResult> DeployAppAsync(CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, string appName, string appProjPath);
     }
 }
