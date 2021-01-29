@@ -8,6 +8,10 @@ namespace TanzuForVS.ViewModels
 {
     public class DeploymentDialogViewModel : AbstractViewModel, IDeploymentDialogViewModel
     {
+        internal const string appNameEmptyMsg = "App name not specified.";
+        internal const string targetEmptyMsg = "Target not specified.";
+        internal const string orgEmptyMsg = "Org not specified.";
+        internal const string spaceEmptyMsg = "Space not specified.";
         private readonly string projDir;
         private string status;
         private string appName;
@@ -150,10 +154,10 @@ namespace TanzuForVS.ViewModels
             {
                 DeploymentStatus = initialStatus;
 
-                if (string.IsNullOrEmpty(AppName)) throw new Exception("App name not specified");
-                if (SelectedCf == null) throw new Exception("Target not specified");
-                if (SelectedOrg == null) throw new Exception("Org not specified");
-                if (SelectedSpace == null) throw new Exception("Space not specified");
+                if (string.IsNullOrEmpty(AppName)) throw new Exception(appNameEmptyMsg);
+                if (SelectedCf == null) throw new Exception(targetEmptyMsg);
+                if (SelectedOrg == null) throw new Exception(orgEmptyMsg);
+                if (SelectedSpace == null) throw new Exception(spaceEmptyMsg);
 
                 DeploymentStatus = "Waiting for app to deploy....";
 
@@ -163,14 +167,12 @@ namespace TanzuForVS.ViewModels
                                                                                AppName,
                                                                                projDir);
 
-
-
                 if (appDeployment.Succeeded) DeploymentStatus = "App was successfully deployed!";
                 else DeploymentStatus = appDeployment.Explanation;
             }
             catch (Exception e)
             {
-                DeploymentStatus = $"An error occurred: \n{e}";
+                DeploymentStatus = $"An error occurred: \n{e.Message}";
             }
         }
 
