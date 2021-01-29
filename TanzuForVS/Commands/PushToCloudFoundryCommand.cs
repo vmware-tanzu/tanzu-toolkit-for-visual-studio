@@ -160,6 +160,8 @@ namespace TanzuForVS.Commands
     {
         internal DeploymentWindow()
         {
+            this.Height = 316;
+            this.Width = 512;
             this.HasMaximizeButton = true;
             this.HasMinimizeButton = true;
         }
