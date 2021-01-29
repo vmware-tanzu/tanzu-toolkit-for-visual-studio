@@ -43,14 +43,14 @@
         <Button Grid.Row="0" Grid.Column="0" 
                 Style="{DynamicResource RoundedButtonStyle}"
                 Command ="{ Binding ElementName=CloudExplorerViewElement, Path=OpenLoginFormCommand }" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}">
-            <Image Source="Resources/AddCloud.png" Stretch="None" 
+            <Image Source="Resources/AddCloud.png" Stretch="Uniform" Width="16px" Height="16px"
                    ToolTip="Target New Cloud Foundry Instance"/>
         </Button>
         
         <Button Grid.Row="0" Grid.Column="1" 
                 Style="{DynamicResource RoundedButtonStyle}"
                 Command ="{ Binding ElementName=CloudExplorerViewElement, Path=RefreshAllCommand }">
-            <Image Source="Resources/Refresh.png" Stretch="None" 
+            <Image Source="Resources/Refresh.png" Stretch="Uniform" Width="16px" Height="16px"
                    ToolTip="Refresh All Cloud Connections"/>
         </Button>
 
@@ -83,24 +83,24 @@
             <TreeView.Resources>
                 <HierarchicalDataTemplate DataType="{x:Type ViewModels:CfInstanceViewModel}" 
                                           ItemsSource="{Binding Children}">
-                    <StackPanel Orientation="Horizontal">
-                        <Image Source="Resources/CloudFoundry.png" Stretch="None" Margin="0,2,4,0"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                        <Image Source="Resources/CloudFoundry.png" Stretch="Uniform" Height="16px" Width="16px" Margin="0,2,4,0"/>
                         <TextBlock Text="{Binding DisplayText}" />
                     </StackPanel>
                 </HierarchicalDataTemplate>
 
                 <HierarchicalDataTemplate DataType="{x:Type ViewModels:OrgViewModel}"
                                           ItemsSource="{Binding Children}">
-                    <StackPanel Orientation="Horizontal">
-                        <Image Source="Resources/CfOrg.png" Stretch="None" Margin="0,2,4,0"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                        <Image Source="Resources/CfOrg.png" Stretch="Uniform" Height="16px" Width="16px" Margin="0,2,4,0"/>
                         <TextBlock Text="{Binding DisplayText}" />
                     </StackPanel>
                 </HierarchicalDataTemplate>
 
                 <HierarchicalDataTemplate DataType="{x:Type ViewModels:SpaceViewModel}"
                                           ItemsSource="{Binding Children}">
-                    <StackPanel Orientation="Horizontal">
-                        <Image Source="Resources/CfSpace.png" Stretch="None" Margin="0,2,4,0"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                        <Image Source="Resources/CfSpace.png" Stretch="Uniform" Height="16px" Width="16px" Margin="0,2,4,0"/>
                         <Button Content="{Binding DisplayText}" VerticalAlignment="Center" HorizontalAlignment="Center" 
                                 Background="Transparent" BorderThickness="0" Grid.Row="0" Grid.Column="1" 
                                 Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
@@ -127,11 +127,11 @@
                             <ColumnDefinition Width="20"></ColumnDefinition>
                             <ColumnDefinition Width="*"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
-                        
-                        <Image Source="Resources/CfAppRun.png" Stretch="None" Margin="0,2,4,0"
+
+                        <Image Source="Resources/CfAppRun.png" Stretch="Uniform" Height="16px" Width="16px" Margin="0,2,4,0"
                                Grid.Row="0" Grid.Column="0" 
                                Visibility="{Binding Path=IsStopped, Converter={StaticResource InverseVisibility}}"/>
-                        <Image Source="Resources/CfAppStopped.png" Stretch="None" Margin="0,2,4,0"
+                        <Image Source="Resources/CfAppStopped.png" Stretch="Uniform" Height="16px" Width="16px" Margin="0,2,4,0"
                                Grid.Row="0" Grid.Column="0" 
                                Visibility="{Binding Path=IsStopped, Converter={StaticResource Visibility}}"/>
                         

@@ -66,7 +66,7 @@
         <Button Grid.Row="1" Grid.Column="2" Margin="0,4,0,4"
                 Style="{DynamicResource RoundedButtonStyle}" 
                 Command ="{ Binding ElementName=DeploymentDialogViewElement, Path=OpenLoginDialogCommand }" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}">
-            <Image Source="Resources/AddCloud.png" Stretch="None" 
+            <Image Source="Resources/AddCloud.png" Stretch="Uniform" Height="16px" Width="16px" 
                    ToolTip="Target New Cloud Foundry Instance"/>
         </Button>
 
