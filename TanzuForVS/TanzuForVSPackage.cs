@@ -1,21 +1,22 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.Shell;
+using System;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.Shell;
+using TanzuForVS.CloudFoundryApiClient;
+using TanzuForVS.Commands;
+using TanzuForVS.Services;
+using TanzuForVS.Services.CfCli;
 using TanzuForVS.Services.CloudFoundry;
 using TanzuForVS.Services.CmdProcess;
 using TanzuForVS.Services.Dialog;
+using TanzuForVS.Services.FileLocator;
 using TanzuForVS.Services.Locator;
 using TanzuForVS.ViewModels;
 using TanzuForVS.WpfViews;
 using TanzuForVS.WpfViews.Services;
-using TanzuForVS.Commands;
 using Task = System.Threading.Tasks.Task;
-using TanzuForVS.CloudFoundryApiClient;
-using System.Net.Http;
-using TanzuForVS.Services.CfCli;
-using TanzuForVS.Services.FileLocator;
 
 namespace TanzuForVS
 {

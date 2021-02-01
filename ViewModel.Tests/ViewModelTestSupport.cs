@@ -18,13 +18,15 @@ namespace TanzuForVS.ViewModels
         protected ViewModelTestSupport()
         {
             var services = new ServiceCollection();
+
             mockCloudFoundryService = new Mock<ICloudFoundryService>();
             mockDialogService = new Mock<IDialogService>();
             mockViewLocatorService = new Mock<IViewLocatorService>();
 
-            services.AddSingleton<ICloudFoundryService>(mockCloudFoundryService.Object);
-            services.AddSingleton<IDialogService>(mockDialogService.Object);
-            services.AddSingleton<IViewLocatorService>(mockViewLocatorService.Object);
+            services.AddSingleton(mockCloudFoundryService.Object);
+            services.AddSingleton(mockDialogService.Object);
+            services.AddSingleton(mockViewLocatorService.Object);
+
             this.services = services.BuildServiceProvider();
         }
     }

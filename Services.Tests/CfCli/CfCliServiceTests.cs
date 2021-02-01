@@ -1,9 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using System.IO;
 using System.Threading.Tasks;
 using TanzuForVS.Services.CfCli;
-using static TanzuForVS.Services.CfCli.StdOutHandler;
+using static TanzuForVS.Services.OutputHandler;
 
 namespace TanzuForVS.Services.Tests
 {

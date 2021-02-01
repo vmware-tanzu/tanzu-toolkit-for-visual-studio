@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using static TanzuForVS.Services.CfCli.StdOutHandler;
+using static TanzuForVS.Services.OutputHandler;
 
 namespace TanzuForVS.Services.CmdProcess
 {

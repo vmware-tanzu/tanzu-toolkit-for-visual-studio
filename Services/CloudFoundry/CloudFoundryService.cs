@@ -10,7 +10,7 @@ using TanzuForVS.CloudFoundryApiClient.Models.SpacesResponse;
 using TanzuForVS.Models;
 using TanzuForVS.Services.CfCli;
 using TanzuForVS.Services.FileLocator;
-using static TanzuForVS.Services.CfCli.StdOutHandler;
+using static TanzuForVS.Services.OutputHandler;
 
 namespace TanzuForVS.Services.CloudFoundry
 {

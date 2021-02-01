@@ -4,7 +4,7 @@ using System.IO;
 using System.Threading.Tasks;
 using TanzuForVS.Services.CmdProcess;
 using TanzuForVS.Services.FileLocator;
-using static TanzuForVS.Services.CfCli.StdOutHandler;
+using static TanzuForVS.Services.OutputHandler;
 
 namespace TanzuForVS.Services.CfCli
 {

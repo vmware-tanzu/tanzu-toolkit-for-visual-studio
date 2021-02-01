@@ -1,17 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using TanzuForVS.Models;
 using TanzuForVS.Services;
+
+[assembly: InternalsVisibleTo("TanzuForVS.ViewModel.Tests")]
 
 namespace TanzuForVS.ViewModels
 {
     public class DeploymentDialogViewModel : AbstractViewModel, IDeploymentDialogViewModel
     {
+        internal const string initialStatus = "Deployment hasn't started yet.";
         internal const string appNameEmptyMsg = "App name not specified.";
         internal const string targetEmptyMsg = "Target not specified.";
         internal const string orgEmptyMsg = "Org not specified.";
         internal const string spaceEmptyMsg = "Space not specified.";
+        internal const string deploymentSuccessMsg = "App was successfully deployed!\nYou can now close this window.";
         private readonly string projDir;
         private string status;
         private string appName;
@@ -22,7 +27,6 @@ namespace TanzuForVS.ViewModels
         private CloudFoundryOrganization selectedOrg;
         private CloudFoundrySpace selectedSpace;
 
-        public string initialStatus = "Deployment hasn't started yet.";
 
         public DeploymentDialogViewModel(IServiceProvider services, string directoryOfProjectToDeploy)
             : base(services)
@@ -166,14 +170,14 @@ namespace TanzuForVS.ViewModels
                                                                                SelectedSpace,
                                                                                AppName,
                                                                                projDir,
-                                                                               UpdateDeplyomentStatus);
+                                                                               UpdateDeploymentStatus);
 
-                if (appDeployment.Succeeded) DeploymentStatus = "App was successfully deployed!";
-                else DeploymentStatus = appDeployment.Explanation;
+                if (appDeployment.Succeeded) DeploymentStatus += $"\n{deploymentSuccessMsg}";
+                else DeploymentStatus += '\n' + appDeployment.Explanation;
             }
             catch (Exception e)
             {
-                DeploymentStatus = $"An error occurred: \n{e.Message}";
+                DeploymentStatus += $"\nAn error occurred: \n{e.Message}";
             }
         }
 
@@ -215,11 +219,10 @@ namespace TanzuForVS.ViewModels
             }
         }
 
-        private void UpdateDeplyomentStatus(string content)
+        private void UpdateDeploymentStatus(string content)
         {
             DeploymentStatus += $"\n{content}";
         }
-
 
     }
 }

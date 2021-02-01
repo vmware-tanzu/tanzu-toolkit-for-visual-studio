@@ -8,7 +8,7 @@ using TanzuForVS.CloudFoundryApiClient.Models.AppsResponse;
 using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
 using TanzuForVS.CloudFoundryApiClient.Models.SpacesResponse;
 using TanzuForVS.Models;
-using static TanzuForVS.Services.CfCli.StdOutHandler;
+using static TanzuForVS.Services.OutputHandler;
 
 namespace TanzuForVS.Services.CloudFoundry
 {
