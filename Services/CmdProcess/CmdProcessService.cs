@@ -77,10 +77,11 @@ namespace TanzuForVS.Services.CmdProcess
             }
         }
 
-        private void ErrorHandler(object sendingProcess, DataReceivedEventArgs outLine)
+        private void ErrorHandler(object sendingProcess, DataReceivedEventArgs errLine)
         {
-            if (outLine.Data != null)
+            if (errLine.Data != null)
             {
+                StdOutHandler?.Invoke(errLine.Data);
             }
         }
     }

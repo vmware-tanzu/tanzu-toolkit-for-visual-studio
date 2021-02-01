@@ -234,6 +234,37 @@ namespace TanzuForVS.ViewModelsTests
             Assert.IsTrue(_sut.DeploymentStatus.Contains(_fakeStdOutput));
             mockCloudFoundryService.VerifyAll();
         }
+        [TestMethod]
+        public async Task DeployApp_UpdatesDeploymentStatus_WithStdError()
+        {
+            string _fakeStdError = "Let's pretend this line was printed to StdErr";
+            bool DeploymentStatusPropertyChangedCalled = false;
+
+            _sut.PropertyChanged += (s, args) =>
+            {
+                if ("DeploymentStatus" == args.PropertyName) DeploymentStatusPropertyChangedCalled = true;
+            };
+
+            //* mock cf service to:
+            //*     (A) invoke the delegate method it was passed (via Moq Callback)
+            //*     (B) return a "failure" DetailedResult 
+            mockCloudFoundryService.Setup(mock => mock.DeployAppAsync(_fakeCfInstance,
+                _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, It.IsAny<StdOutDelegate>()))
+                .Callback<CloudFoundryInstance, CloudFoundryOrganization, CloudFoundrySpace, string, string, StdOutDelegate>(
+                    (cf,org,space,appname,path,del) => del.Invoke(_fakeStdError))
+                .ReturnsAsync(new DetailedResult(false));
+
+            _sut.AppName = _fakeAppName;
+            _sut.SelectedCf = _fakeCfInstance;
+            _sut.SelectedOrg = _fakeOrg;
+            _sut.SelectedSpace = _fakeSpace;
+
+            await _sut.DeployApp(null);
+
+            Assert.IsTrue(DeploymentStatusPropertyChangedCalled);
+            Assert.IsTrue(_sut.DeploymentStatus.Contains(_fakeStdError));
+            mockCloudFoundryService.VerifyAll();
+        }
 
     }
 
