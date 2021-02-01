@@ -7,6 +7,7 @@ using Moq;
 using System.Threading.Tasks;
 using System;
 using System.ComponentModel;
+using static TanzuForVS.Services.CfCli.StdOutHandler;
 
 namespace TanzuForVS.ViewModelsTests
 {
@@ -45,7 +46,7 @@ namespace TanzuForVS.ViewModelsTests
             _sut.SelectedSpace = _fakeSpace;
 
             mockCloudFoundryService.Setup(mock => mock.DeployAppAsync(_fakeCfInstance,
-                _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath))
+                _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, It.IsAny<StdOutDelegate>()))
                 .ReturnsAsync(new DetailedResult(true));
 
             bool DeploymentStatusPropertyChangedCalled = false;
@@ -71,7 +72,7 @@ namespace TanzuForVS.ViewModelsTests
             _sut.SelectedSpace = _fakeSpace;
 
             mockCloudFoundryService.Setup(mock => mock.DeployAppAsync(_fakeCfInstance,
-               _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath))
+               _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, It.IsAny<StdOutDelegate>()))
                .ReturnsAsync(new DetailedResult(false, "it failed"));
 
             bool DeploymentStatusPropertyChangedCalled = false;
@@ -102,7 +103,7 @@ namespace TanzuForVS.ViewModelsTests
             };
 
             mockCloudFoundryService.Setup(mock => 
-                mock.DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath))
+                mock.DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, It.IsAny<StdOutDelegate>()))
                     .ThrowsAsync(fakeException);
 
             _sut.AppName = _fakeAppName;

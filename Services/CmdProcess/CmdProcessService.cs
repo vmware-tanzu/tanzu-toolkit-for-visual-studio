@@ -1,13 +1,15 @@
 ﻿using System.Diagnostics;
 using System.Threading.Tasks;
+using static TanzuForVS.Services.CfCli.StdOutHandler;
 
 namespace TanzuForVS.Services.CmdProcess
 {
     public class CmdProcessService : ICmdProcessService
     {
+        StdOutDelegate StdOutHandler;
+
         public CmdProcessService()
         {
-
         }
 
         /// <summary>
@@ -16,7 +18,7 @@ namespace TanzuForVS.Services.CmdProcess
         /// <param name="arguments"></param>
         /// <param name="workingDir"></param>
         /// <returns></returns>
-        public async Task<bool> ExecuteWindowlessCommandAsync(string arguments, string workingDir)
+        public async Task<bool> ExecuteWindowlessCommandAsync(string arguments, string workingDir, StdOutDelegate stdOutHandler)
         {
             //* Create your Process
             Process process = new Process();
@@ -29,6 +31,7 @@ namespace TanzuForVS.Services.CmdProcess
             if (workingDir != null) process.StartInfo.WorkingDirectory = workingDir;
 
             //* Set your output and error (asynchronous) handlers
+            StdOutHandler = stdOutHandler;
             process.OutputDataReceived += new DataReceivedEventHandler(OutputHandler);
             process.ErrorDataReceived += new DataReceivedEventHandler(ErrorHandler);
 
@@ -70,6 +73,7 @@ namespace TanzuForVS.Services.CmdProcess
         {
             if (outLine.Data != null)
             {
+                StdOutHandler?.Invoke(outLine.Data);
             }
         }
 

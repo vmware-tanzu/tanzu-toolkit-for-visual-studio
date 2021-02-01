@@ -3,6 +3,7 @@ using Moq;
 using System.IO;
 using System.Threading.Tasks;
 using TanzuForVS.Services.CfCli;
+using static TanzuForVS.Services.CfCli.StdOutHandler;
 
 namespace TanzuForVS.Services.Tests
 {
@@ -31,10 +32,10 @@ namespace TanzuForVS.Services.Tests
         {
             mockFileLocatorService.SetupGet(mock => mock.FullPathToCfExe).Returns(_fakePathToCfExe);
 
-            mockCmdProcessService.Setup(mock => mock.ExecuteWindowlessCommandAsync(It.IsAny<string>(), It.IsAny<string>()))
+            mockCmdProcessService.Setup(mock => mock.ExecuteWindowlessCommandAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<StdOutDelegate>()))
                 .ReturnsAsync(true);
 
-            DetailedResult result = await _sut.ExecuteCfCliCommandAsync(_fakeArguments);
+            DetailedResult result = await _sut.ExecuteCfCliCommandAsync(_fakeArguments, stdOutHandler: null);
 
             Assert.AreEqual(true, result.Succeeded);
         }
@@ -44,10 +45,10 @@ namespace TanzuForVS.Services.Tests
         {
             mockFileLocatorService.SetupGet(mock => mock.FullPathToCfExe).Returns(_fakePathToCfExe);
 
-            mockCmdProcessService.Setup(mock => mock.ExecuteWindowlessCommandAsync(It.IsAny<string>(), It.IsAny<string>()))
+            mockCmdProcessService.Setup(mock => mock.ExecuteWindowlessCommandAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<StdOutDelegate>()))
                 .ReturnsAsync(false);
 
-            DetailedResult result = await _sut.ExecuteCfCliCommandAsync(_fakeArguments);
+            DetailedResult result = await _sut.ExecuteCfCliCommandAsync(_fakeArguments, stdOutHandler: null);
 
             Assert.IsFalse(result.Succeeded);
         }
@@ -57,7 +58,7 @@ namespace TanzuForVS.Services.Tests
         {
             mockFileLocatorService.SetupGet(mock => mock.FullPathToCfExe).Returns((string)null);
 
-            DetailedResult result = await _sut.ExecuteCfCliCommandAsync(_fakeArguments);
+            DetailedResult result = await _sut.ExecuteCfCliCommandAsync(_fakeArguments, stdOutHandler: null);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains("Unable to locate cf.exe"));
@@ -68,14 +69,14 @@ namespace TanzuForVS.Services.Tests
         {
             mockFileLocatorService.SetupGet(mock => mock.FullPathToCfExe).Returns(_fakePathToCfExe);
 
-            mockCmdProcessService.Setup(mock => mock.ExecuteWindowlessCommandAsync(It.IsAny<string>(), It.IsAny<string>()))
+            mockCmdProcessService.Setup(mock => mock.ExecuteWindowlessCommandAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<StdOutDelegate>()))
                 .ReturnsAsync(true);
 
-            DetailedResult result = await _sut.ExecuteCfCliCommandAsync(_fakeArguments);
+            DetailedResult result = await _sut.ExecuteCfCliCommandAsync(_fakeArguments, stdOutHandler: null);
 
             string expectedCmdStr = $"\"{_fakePathToCfExe}\" {_fakeArguments}";
             string expectedWorkingDir = null;
-            mockCmdProcessService.Verify(mock => mock.ExecuteWindowlessCommandAsync(expectedCmdStr, expectedWorkingDir), Times.Once());
+            mockCmdProcessService.Verify(mock => mock.ExecuteWindowlessCommandAsync(expectedCmdStr, expectedWorkingDir, null), Times.Once());
         }
     }
 }

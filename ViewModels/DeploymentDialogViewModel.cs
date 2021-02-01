@@ -165,7 +165,8 @@ namespace TanzuForVS.ViewModels
                                                                                SelectedSpace.ParentOrg,
                                                                                SelectedSpace,
                                                                                AppName,
-                                                                               projDir);
+                                                                               projDir,
+                                                                               UpdateDeplyomentStatus);
 
                 if (appDeployment.Succeeded) DeploymentStatus = "App was successfully deployed!";
                 else DeploymentStatus = appDeployment.Explanation;
@@ -213,6 +214,12 @@ namespace TanzuForVS.ViewModels
                 CfSpaceOptions = spaces;
             }
         }
+
+        private void UpdateDeplyomentStatus(string content)
+        {
+            DeploymentStatus += $"\n{content}";
+        }
+
 
     }
 }
