@@ -38,5 +38,11 @@ namespace TanzuForVS.WpfViews
         {
             _viewModel.UpdateCfSpaceOptions();
         }
+
+        private void DeploymentStatus_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            deploymentStatusText.ScrollToEnd();
+        }
+
     }
 }
