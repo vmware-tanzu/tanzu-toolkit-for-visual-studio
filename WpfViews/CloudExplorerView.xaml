@@ -144,17 +144,29 @@
                                               Command="{Binding PlacementTarget.Tag.StartCfAppCommand, 
                                                                 RelativeSource={RelativeSource Mode=FindAncestor, 
                                                                 AncestorType=ContextMenu}}"
-                                              CommandParameter="{Binding App}"/>
+                                              CommandParameter="{Binding App}">
+                                        <MenuItem.Icon>
+                                            <Image Source="Resources/StartApp.png" ></Image>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
                                     <MenuItem Header="Stop App" 
                                               Command="{Binding PlacementTarget.Tag.StopCfAppCommand, 
                                                                 RelativeSource={RelativeSource Mode=FindAncestor, 
                                                                 AncestorType=ContextMenu}}"
-                                              CommandParameter="{Binding App}"/>
+                                              CommandParameter="{Binding App}">
+                                        <MenuItem.Icon>
+                                            <Image Source="Resources/StopApp.png" ></Image>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
                                     <MenuItem Header="Delete App" 
                                               Command="{Binding PlacementTarget.Tag.DeleteCfAppCommand, 
                                                                 RelativeSource={RelativeSource Mode=FindAncestor, 
                                                                 AncestorType=ContextMenu}}"
-                                              CommandParameter="{Binding App}"/>
+                                              CommandParameter="{Binding App}">
+                                        <MenuItem.Icon>
+                                            <Image Source="Resources/DeleteApp.png" ></Image>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
                                 </ContextMenu>
                             </Button.ContextMenu>
                         </Button>
