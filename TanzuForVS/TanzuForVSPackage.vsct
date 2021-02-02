@@ -53,8 +53,8 @@
 				<Parent guid="guidTanzuForVSPackageCmdSet1" id="MyMenuGroup" />
 				<Icon guid="guidImages1" id="bmpPic1" />
 				<Strings>
-					<ButtonText>Deploy To Cloud Foundry</ButtonText>
-				</Strings>
+          <ButtonText>Deploy To Tanzu Application Service</ButtonText>
+        </Strings>
 			</Button>
 		</Buttons>
 
@@ -66,7 +66,7 @@
             inside a button definition. An important aspect of this declaration is that the element id
             must be the actual index (1-based) of the bitmap inside the bitmap strip. -->
 			<Bitmap guid="guidImages" href="Resources\tanzu16.png" usedList="bmpPic1" />
-			<Bitmap guid="guidImages1" href="Resources\PushToCloudFoundry.png" usedList="bmpPic1" />
+			<Bitmap guid="guidImages1" href="Resources\DeployApp.png" usedList="bmpPic1" />
 		</Bitmaps>
 	</Commands>
 

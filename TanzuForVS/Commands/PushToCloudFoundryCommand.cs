@@ -124,7 +124,7 @@ namespace TanzuForVS.Commands
                 VsShellUtilities.ShowMessageBox(
                     package,
                     ex.ToString(),
-                            "Unable to push to Cloud Foundry",
+                            "Unable to push to Tanzu Application Service",
                             OLEMSGICON.OLEMSGICON_CRITICAL,
                             OLEMSGBUTTON.OLEMSGBUTTON_OK,
                             OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST

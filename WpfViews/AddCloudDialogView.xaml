@@ -43,7 +43,7 @@
         <TextBox Name="tbInstanceName" Grid.Row="3" Grid.Column="1" 
                  HorizontalAlignment="Stretch" Width="auto" Text="{ Binding Path=InstanceName }"></TextBox>
         
-        <Label Content="Target URL" Grid.Row="4" Grid.Column="0"></Label>
+        <Label Content="Target Api Address" Grid.Row="4" Grid.Column="0"></Label>
         <TextBox Name="tbUrl" Grid.Row="5" Grid.Column="1" 
                  HorizontalAlignment="Stretch" Width="auto" Text="{ Binding Path=Target }"></TextBox>
 
