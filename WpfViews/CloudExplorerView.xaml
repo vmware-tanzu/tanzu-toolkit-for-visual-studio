@@ -44,7 +44,7 @@
                 Style="{DynamicResource RoundedButtonStyle}"
                 Command ="{ Binding ElementName=CloudExplorerViewElement, Path=OpenLoginFormCommand }" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}">
             <Image Source="Resources/AddCloud.png" Stretch="Uniform" Width="16px" Height="16px"
-                   ToolTip="Target New Cloud Foundry Instance"/>
+                   ToolTip="Target New Tanzu Application Service"/>
         </Button>
         
         <Button Grid.Row="0" Grid.Column="1" 

@@ -53,7 +53,7 @@
 				<Parent guid="guidTanzuForVSPackageCmdSet1" id="MyMenuGroup" />
 				<Icon guid="guidImages1" id="bmpPic1" />
 				<Strings>
-          <ButtonText>Deploy To Cloud Foundry</ButtonText>
+          <ButtonText>Deploy To Tanzu Application Service</ButtonText>
         </Strings>
 			</Button>
 		</Buttons>
