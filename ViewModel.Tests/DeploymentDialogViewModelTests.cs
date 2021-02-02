@@ -1,12 +1,13 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using TanzuForVS.ViewModels;
+using Moq;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Threading.Tasks;
 using TanzuForVS.Models;
 using TanzuForVS.Services;
-using Moq;
-using System.Threading.Tasks;
-using System;
-using System.ComponentModel;
+using TanzuForVS.ViewModels;
+using static TanzuForVS.Services.OutputHandler;
 
 namespace TanzuForVS.ViewModelsTests
 {
@@ -45,7 +46,7 @@ namespace TanzuForVS.ViewModelsTests
             _sut.SelectedSpace = _fakeSpace;
 
             mockCloudFoundryService.Setup(mock => mock.DeployAppAsync(_fakeCfInstance,
-                _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath))
+                _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, It.IsAny<StdOutDelegate>()))
                 .ReturnsAsync(new DetailedResult(true));
 
             bool DeploymentStatusPropertyChangedCalled = false;
@@ -58,7 +59,7 @@ namespace TanzuForVS.ViewModelsTests
             await _sut.DeployApp(null);
 
             Assert.IsTrue(DeploymentStatusPropertyChangedCalled);
-            Assert.AreEqual("App was successfully deployed!", _sut.DeploymentStatus);
+            Assert.IsTrue(_sut.DeploymentStatus.Contains(DeploymentDialogViewModel.deploymentSuccessMsg));
             mockCloudFoundryService.VerifyAll();
         }
 
@@ -70,9 +71,10 @@ namespace TanzuForVS.ViewModelsTests
             _sut.SelectedOrg = _fakeOrg;
             _sut.SelectedSpace = _fakeSpace;
 
+            const string fakeFailureMsg = "it failed";
             mockCloudFoundryService.Setup(mock => mock.DeployAppAsync(_fakeCfInstance,
-               _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath))
-               .ReturnsAsync(new DetailedResult(false, "it failed"));
+               _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, It.IsAny<StdOutDelegate>()))
+               .ReturnsAsync(new DetailedResult(false, fakeFailureMsg));
 
             bool DeploymentStatusPropertyChangedCalled = false;
 
@@ -84,7 +86,7 @@ namespace TanzuForVS.ViewModelsTests
             await _sut.DeployApp(null);
 
             Assert.IsTrue(DeploymentStatusPropertyChangedCalled);
-            Assert.AreEqual("it failed", _sut.DeploymentStatus);
+            Assert.IsTrue(_sut.DeploymentStatus.Contains(fakeFailureMsg));
             mockCloudFoundryService.VerifyAll();
         }
 
@@ -102,7 +104,7 @@ namespace TanzuForVS.ViewModelsTests
             };
 
             mockCloudFoundryService.Setup(mock => 
-                mock.DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath))
+                mock.DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, It.IsAny<StdOutDelegate>()))
                     .ThrowsAsync(fakeException);
 
             _sut.AppName = _fakeAppName;
@@ -134,7 +136,8 @@ namespace TanzuForVS.ViewModelsTests
             await _sut.DeployApp(null);
 
             Assert.IsTrue(receivedEvents.Contains("DeploymentStatus"));
-            Assert.AreEqual(_sut.DeploymentStatus, "An error occurred: \nApp name not specified.");
+            Assert.IsTrue(_sut.DeploymentStatus.Contains("An error occurred:"));
+            Assert.IsTrue(_sut.DeploymentStatus.Contains(DeploymentDialogViewModel.appNameEmptyMsg));
         }
         
         [TestMethod]
@@ -154,7 +157,8 @@ namespace TanzuForVS.ViewModelsTests
             await _sut.DeployApp(null);
 
             Assert.IsTrue(receivedEvents.Contains("DeploymentStatus"));
-            Assert.AreEqual(_sut.DeploymentStatus, "An error occurred: \nTarget not specified.");
+            Assert.IsTrue(_sut.DeploymentStatus.Contains("An error occurred:"));
+            Assert.IsTrue(_sut.DeploymentStatus.Contains(DeploymentDialogViewModel.targetEmptyMsg));
         }
         
         [TestMethod]
@@ -174,7 +178,8 @@ namespace TanzuForVS.ViewModelsTests
             await _sut.DeployApp(null);
 
             Assert.IsTrue(receivedEvents.Contains("DeploymentStatus"));
-            Assert.AreEqual(_sut.DeploymentStatus, "An error occurred: \nOrg not specified.");
+            Assert.IsTrue(_sut.DeploymentStatus.Contains("An error occurred:"));
+            Assert.IsTrue(_sut.DeploymentStatus.Contains(DeploymentDialogViewModel.orgEmptyMsg));
         }
         
         [TestMethod]
@@ -194,7 +199,71 @@ namespace TanzuForVS.ViewModelsTests
             await _sut.DeployApp(null);
 
             Assert.IsTrue(receivedEvents.Contains("DeploymentStatus"));
-            Assert.AreEqual(_sut.DeploymentStatus, "An error occurred: \nSpace not specified.");
+            Assert.IsTrue(_sut.DeploymentStatus.Contains("An error occurred:"));
+            Assert.IsTrue(_sut.DeploymentStatus.Contains(DeploymentDialogViewModel.spaceEmptyMsg));
+        }
+
+        [TestMethod]
+        public async Task DeployApp_UpdatesDeploymentStatus_WithStdOutput()
+        {
+            string _fakeStdOutput = "Let's pretend this line was printed to StdOut";
+            bool DeploymentStatusPropertyChangedCalled = false;
+
+            _sut.PropertyChanged += (s, args) =>
+            {
+                if ("DeploymentStatus" == args.PropertyName) DeploymentStatusPropertyChangedCalled = true;
+            };
+
+            //* mock cf service to:
+            //*     (A) invoke the delegate method it was passed (via Moq Callback)
+            //*     (B) return a "success" DetailedResult so DeployApp can proceed
+            mockCloudFoundryService.Setup(mock => mock.DeployAppAsync(_fakeCfInstance,
+                _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, It.IsAny<StdOutDelegate>()))
+                .Callback<CloudFoundryInstance, CloudFoundryOrganization, CloudFoundrySpace, string, string, StdOutDelegate>(
+                    (cf,org,space,appname,path,del) => del.Invoke(_fakeStdOutput))
+                .ReturnsAsync(new DetailedResult(true));
+
+            _sut.AppName = _fakeAppName;
+            _sut.SelectedCf = _fakeCfInstance;
+            _sut.SelectedOrg = _fakeOrg;
+            _sut.SelectedSpace = _fakeSpace;
+
+            await _sut.DeployApp(null);
+
+            Assert.IsTrue(DeploymentStatusPropertyChangedCalled);
+            Assert.IsTrue(_sut.DeploymentStatus.Contains(_fakeStdOutput));
+            mockCloudFoundryService.VerifyAll();
+        }
+        [TestMethod]
+        public async Task DeployApp_UpdatesDeploymentStatus_WithStdError()
+        {
+            string _fakeStdError = "Let's pretend this line was printed to StdErr";
+            bool DeploymentStatusPropertyChangedCalled = false;
+
+            _sut.PropertyChanged += (s, args) =>
+            {
+                if ("DeploymentStatus" == args.PropertyName) DeploymentStatusPropertyChangedCalled = true;
+            };
+
+            //* mock cf service to:
+            //*     (A) invoke the delegate method it was passed (via Moq Callback)
+            //*     (B) return a "failure" DetailedResult 
+            mockCloudFoundryService.Setup(mock => mock.DeployAppAsync(_fakeCfInstance,
+                _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, It.IsAny<StdOutDelegate>()))
+                .Callback<CloudFoundryInstance, CloudFoundryOrganization, CloudFoundrySpace, string, string, StdOutDelegate>(
+                    (cf,org,space,appname,path,del) => del.Invoke(_fakeStdError))
+                .ReturnsAsync(new DetailedResult(false));
+
+            _sut.AppName = _fakeAppName;
+            _sut.SelectedCf = _fakeCfInstance;
+            _sut.SelectedOrg = _fakeOrg;
+            _sut.SelectedSpace = _fakeSpace;
+
+            await _sut.DeployApp(null);
+
+            Assert.IsTrue(DeploymentStatusPropertyChangedCalled);
+            Assert.IsTrue(_sut.DeploymentStatus.Contains(_fakeStdError));
+            mockCloudFoundryService.VerifyAll();
         }
 
     }

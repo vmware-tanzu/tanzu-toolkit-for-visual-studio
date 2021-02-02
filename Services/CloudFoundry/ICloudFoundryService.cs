@@ -2,6 +2,7 @@
 using System.Security;
 using System.Threading.Tasks;
 using TanzuForVS.Models;
+using static TanzuForVS.Services.OutputHandler;
 
 namespace TanzuForVS.Services.CloudFoundry
 {
@@ -19,6 +20,6 @@ namespace TanzuForVS.Services.CloudFoundry
         Task<bool> StopAppAsync(CloudFoundryApp app);
         Task<bool> StartAppAsync(CloudFoundryApp app);
         Task<bool> DeleteAppAsync(CloudFoundryApp app);
-        Task<DetailedResult> DeployAppAsync(CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, string appName, string appProjPath);
+        Task<DetailedResult> DeployAppAsync(CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, string appName, string appProjPath, StdOutDelegate stdOutHandler);
     }
 }

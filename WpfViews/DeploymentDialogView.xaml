@@ -7,7 +7,7 @@
                 xmlns:ViewModels="clr-namespace:TanzuForVS.ViewModels;assembly=TanzuForVS.ViewModels"
                 xmlns:converters="clr-namespace:TanzuForVS.WpfViews.Converters"
                 mc:Ignorable="d"
-                Background="AntiqueWhite"
+                Background="White"
                 Name="DeploymentDialogViewElement"
                 d:DesignHeight="500" d:DesignWidth="800">
 
@@ -28,14 +28,14 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Height="256" Width="414" VerticalAlignment="Center" Margin="8,8,8,8">
+    <Grid Width="414" VerticalAlignment="Top" Margin="8,8,8,8">
         <Grid.RowDefinitions>
             <RowDefinition Height="32"></RowDefinition>
             <RowDefinition Height="32"></RowDefinition>
             <RowDefinition Height="32"></RowDefinition>
             <RowDefinition Height="32"></RowDefinition>
             <RowDefinition Height="32"></RowDefinition>
-            <RowDefinition Height="128"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
@@ -104,11 +104,17 @@
         </StackPanel>
 
         <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Margin="8,0,8,0">
-            <TextBox Margin="5"  IsReadOnly="True" 
-                 TextWrapping="Wrap" BorderBrush="Transparent" 
-                 ScrollViewer.VerticalScrollBarVisibility="Auto"
-                 Foreground="Crimson" MinLines="3" MaxLines="3" 
-                 Background="Transparent" Text="{Binding  Path=DeploymentStatus}" />
+            <ScrollViewer Name="scrollViewer" VerticalScrollBarVisibility="Auto" CanContentScroll="True">
+                <TextBox Name="deploymentStatusText" 
+                    Text="{Binding  Path=DeploymentStatus}"
+                    Padding="5"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                    IsReadOnly="True" 
+                    TextWrapping="Wrap" 
+                    BorderBrush="Black" 
+                    MaxLines="5"
+                    TextBoxBase.TextChanged="DeploymentStatus_TextChanged"/>
+            </ScrollViewer>
         </StackPanel>
 
     </Grid>

@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading.Tasks;
 using TanzuForVS.Services.CmdProcess;
 using TanzuForVS.Services.FileLocator;
+using static TanzuForVS.Services.OutputHandler;
 
 namespace TanzuForVS.Services.CfCli
 {
@@ -27,13 +28,13 @@ namespace TanzuForVS.Services.CfCli
         /// <param name="arguments">Parameters to include along with the `cf` command (e.g. "push", "apps")</param>
         /// <param name="workingDir"></param>
         /// <returns></returns>
-        public async Task<DetailedResult> ExecuteCfCliCommandAsync(string arguments, string workingDir = null)
+        public async Task<DetailedResult> ExecuteCfCliCommandAsync(string arguments, StdOutDelegate stdOutHandler, string workingDir = null)
         {
             string pathToCfExe = _fileLocatorService.FullPathToCfExe;
             if (string.IsNullOrEmpty(pathToCfExe)) return new DetailedResult(false, $"Unable to locate cf.exe.");
 
             string commandStr = '"' + pathToCfExe + '"' + ' ' + arguments;
-            bool commandSucceededWithoutError = await _cmdProcessService.ExecuteWindowlessCommandAsync(commandStr, workingDir);
+            bool commandSucceededWithoutError = await _cmdProcessService.ExecuteWindowlessCommandAsync(commandStr, workingDir, stdOutHandler);
 
             if (commandSucceededWithoutError) return new DetailedResult(succeeded: true);
 
