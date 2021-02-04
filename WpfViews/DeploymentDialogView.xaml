@@ -97,8 +97,9 @@
 
         <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Margin="8,4,8,4">
             <Button Content="Deploy" Width="100" HorizontalAlignment="Right" 
-                Command="{ Binding ElementName=DeploymentDialogViewElement, Path=UploadAppCommand }" >
-            </Button>
+                Command="{ Binding ElementName=DeploymentDialogViewElement, Path=UploadAppCommand }" 
+                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+             />
         </StackPanel>
 
         <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Margin="8,0,8,0">

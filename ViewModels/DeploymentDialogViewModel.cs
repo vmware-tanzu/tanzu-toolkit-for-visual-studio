@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.VisualStudio.Models;
-using Tanzu.Toolkit.VisualStudio.Services;
 
 [assembly: InternalsVisibleTo("Tanzu.Toolkit.VisualStudio.ViewModel.Tests")]
 
@@ -26,12 +25,17 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         private CloudFoundryInstance selectedCf;
         private CloudFoundryOrganization selectedOrg;
         private CloudFoundrySpace selectedSpace;
+        private IOutputViewModel outputViewModel;
 
 
         public DeploymentDialogViewModel(IServiceProvider services, string directoryOfProjectToDeploy)
             : base(services)
         {
+            IView outputView = ViewLocatorService.NavigateTo(nameof(OutputViewModel)) as IView;
+            outputViewModel = outputView?.ViewModel as IOutputViewModel;
+
             DeploymentStatus = initialStatus;
+            DeploymentInProgress = false;
             SelectedCf = null;
             projDir = directoryOfProjectToDeploy;
             UpdateCfInstanceOptions();
@@ -146,13 +150,15 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
             }
         }
 
+        public bool DeploymentInProgress { get; internal set; }
+
 
         public bool CanDeployApp(object arg)
         {
             return true;
         }
 
-        public async Task DeployApp(object arg)
+        public void DeployApp(object dialogWindow)
         {
             try
             {
@@ -165,20 +171,34 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
                 DeploymentStatus = "Waiting for app to deploy....";
 
-                DetailedResult appDeployment = await CloudFoundryService.DeployAppAsync(SelectedSpace.ParentOrg.ParentCf,
-                                                                               SelectedSpace.ParentOrg,
-                                                                               SelectedSpace,
-                                                                               AppName,
-                                                                               projDir,
-                                                                               UpdateDeploymentStatus);
+                DeploymentInProgress = true;
+                Task.Run(StartDeployment);
 
-                if (appDeployment.Succeeded) DeploymentStatus += $"\n{deploymentSuccessMsg}";
-                else DeploymentStatus += '\n' + appDeployment.Explanation;
+                DialogService.CloseDialog(dialogWindow, true);
             }
             catch (Exception e)
             {
                 DeploymentStatus += $"\nAn error occurred: \n{e.Message}";
             }
+        }
+
+        internal async Task StartDeployment()
+        {
+            try
+            {
+                await CloudFoundryService.DeployAppAsync(
+                    SelectedSpace.ParentOrg.ParentCf,
+                    SelectedSpace.ParentOrg,
+                    SelectedSpace,
+                    AppName,
+                    projDir,
+                    outputViewModel.AppendLine);
+            }
+            catch (Exception)
+            {
+            }
+
+            DeploymentInProgress = false; 
         }
 
         public bool CanOpenLoginView(object arg)
@@ -218,11 +238,5 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
                 CfSpaceOptions = spaces;
             }
         }
-
-        private void UpdateDeploymentStatus(string content)
-        {
-            DeploymentStatus += $"\n{content}";
-        }
-
     }
 }

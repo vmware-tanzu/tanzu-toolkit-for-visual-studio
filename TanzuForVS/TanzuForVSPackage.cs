@@ -40,6 +40,7 @@ namespace Tanzu.Toolkit.VisualStudio
     [Guid(PackageGuidString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [ProvideToolWindow(typeof(TanzuCloudExplorerToolWindow))]
+    [ProvideToolWindow(typeof(OutputToolWindow))]
     public sealed class TanzuForVSPackage : AsyncPackage
     {
         /// <summary>
@@ -108,6 +109,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<IFileLocatorService, FileLocatorService>();
 
             services.AddTransient<TanzuCloudExplorerToolWindow>();
+            services.AddTransient<OutputToolWindow>();
 
             services.AddTransient<ICloudExplorerViewModel, CloudExplorerViewModel>();
             services.AddTransient<ICloudExplorerView, CloudExplorerView>();
@@ -117,6 +119,9 @@ namespace Tanzu.Toolkit.VisualStudio
 
             services.AddTransient<IAddCloudDialogViewModel, AddCloudDialogViewModel>();
             services.AddTransient<IAddCloudDialogView, AddCloudDialogView>();
+
+            services.AddSingleton<IOutputViewModel, OutputViewModel>();
+            services.AddSingleton<IOutputView, OutputView>();
 
             HttpClient concreteHttpClient = new HttpClient();
             IUaaClient concreteUaaClient = new UaaClient(concreteHttpClient);

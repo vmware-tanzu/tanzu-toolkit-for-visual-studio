@@ -22,7 +22,7 @@ namespace Tanzu.Toolkit.VisualStudio.WpfViews
         public DeploymentDialogView(IDeploymentDialogViewModel viewModel)
         {
             _viewModel = viewModel;
-            UploadAppCommand = new AsyncDelegatingCommand(viewModel.DeployApp, viewModel.CanDeployApp);
+            UploadAppCommand = new DelegatingCommand(viewModel.DeployApp, viewModel.CanDeployApp);
             OpenLoginDialogCommand = new DelegatingCommand(viewModel.OpenLoginView, viewModel.CanOpenLoginView);
 
             DataContext = viewModel;

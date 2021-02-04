@@ -67,6 +67,10 @@
     <Compile Include="ICloudExplorerView.cs" />
     <Compile Include="IAddCloudDialogView.cs" />
     <Compile Include="IDeploymentDialogView.cs" />
+    <Compile Include="IOutputView.cs" />
+    <Compile Include="OutputView.xaml.cs">
+      <DependentUpon>OutputView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Services\WpfDialogResult.cs" />
     <Compile Include="Services\WpfDialogService.cs" />
     <Compile Include="Services\WpfViewLocatorService.cs" />
@@ -90,6 +94,10 @@
       <DependentUpon>AddCloudDialogView.xaml</DependentUpon>
     </Compile>
     <Page Include="DeploymentDialogView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="OutputView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
