@@ -1,4 +1,6 @@
-﻿namespace TanzuForVS.Services.Dialog
+﻿using Tanzu.Toolkit.VisualStudio.Services.Dialog;
+
+namespace Tanzu.Toolkit.VisualStudio.Services.Dialog
 {
     public interface IDialogService
     {

@@ -1,15 +1,17 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading.Tasks;
-using TanzuForVS.ViewModels;
 
-interface ITreeViewItemViewModel : INotifyPropertyChanged
+namespace Tanzu.Toolkit.VisualStudio.ViewModels
 {
-    ObservableCollection<TreeViewItemViewModel> Children { get; }
-    bool HasDummyChild { get; }
-    bool IsExpanded { get; set; }
-    bool IsSelected { get; set; }
-    TreeViewItemViewModel Parent { get; }
+    interface ITreeViewItemViewModel : INotifyPropertyChanged
+    {
+        ObservableCollection<TreeViewItemViewModel> Children { get; }
+        bool HasDummyChild { get; }
+        bool IsExpanded { get; set; }
+        bool IsSelected { get; set; }
+        TreeViewItemViewModel Parent { get; }
 
-    Task RefreshChildren();
+        Task RefreshChildren();
+    }
 }

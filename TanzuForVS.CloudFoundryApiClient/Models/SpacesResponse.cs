@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 
-namespace TanzuForVS.CloudFoundryApiClient.Models.SpacesResponse
+namespace Tanzu.Toolkit.CloudFoundryApiClient.Models.SpacesResponse
 {
 
     public class SpacesResponse

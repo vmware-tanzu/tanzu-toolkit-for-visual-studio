@@ -1,11 +1,11 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System;
-using TanzuForVS.Services.CloudFoundry;
-using TanzuForVS.Services.Dialog;
-using TanzuForVS.Services.Locator;
+using Tanzu.Toolkit.VisualStudio.Services.CloudFoundry;
+using Tanzu.Toolkit.VisualStudio.Services.Dialog;
+using Tanzu.Toolkit.VisualStudio.Services.ViewLocator;
 
-namespace TanzuForVS.ViewModels
+namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 {
     public abstract class ViewModelTestSupport
     {

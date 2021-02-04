@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
-using TanzuForVS.Models;
-using static TanzuForVS.Services.OutputHandler;
+using Tanzu.Toolkit.VisualStudio.Models;
+using static Tanzu.Toolkit.VisualStudio.Services.OutputHandler.OutputHandler;
 
-namespace TanzuForVS.Services.CloudFoundry
+namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
 {
     public interface ICloudFoundryService
     {

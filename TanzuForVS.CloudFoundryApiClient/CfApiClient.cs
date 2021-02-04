@@ -5,13 +5,13 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using TanzuForVS.CloudFoundryApiClient.Models;
-using TanzuForVS.CloudFoundryApiClient.Models.AppsResponse;
-using TanzuForVS.CloudFoundryApiClient.Models.BasicInfoResponse;
-using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
-using TanzuForVS.CloudFoundryApiClient.Models.SpacesResponse;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models.BasicInfoResponse;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models.OrgsResponse;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models.SpacesResponse;
 
-namespace TanzuForVS.CloudFoundryApiClient
+namespace Tanzu.Toolkit.CloudFoundryApiClient
 {
     public class CfApiClient : ICfApiClient
     {
@@ -52,7 +52,7 @@ namespace TanzuForVS.CloudFoundryApiClient
             validateUriStringOrThrow(cfTarget, InvalidTargetUriMessage);
             var authServerUri = await GetAuthServerUriFromCfTarget(cfTarget);
 
-        
+
             var result = await _uaaClient.RequestAccessTokenAsync(authServerUri,
                                                                   defaultAuthClientId,
                                                                   defaultAuthClientSecret,
@@ -128,7 +128,7 @@ namespace TanzuForVS.CloudFoundryApiClient
 
                 Href firstPageHref = new Href() { href = uri.ToString() };
 
-                List<Org> visibleOrgs = await GetRemainingPagesForType<Org>(firstPageHref, accessToken, new List<Org>());
+                List<Org> visibleOrgs = await GetRemainingPagesForType(firstPageHref, accessToken, new List<Org>());
 
                 return visibleOrgs;
             }
@@ -156,7 +156,7 @@ namespace TanzuForVS.CloudFoundryApiClient
 
                 Href firstPageHref = new Href() { href = uri.ToString() };
 
-                return await GetRemainingPagesForType<Space>(firstPageHref, accessToken, new List<Space>());
+                return await GetRemainingPagesForType(firstPageHref, accessToken, new List<Space>());
             }
             catch (Exception e)
             {
@@ -182,7 +182,7 @@ namespace TanzuForVS.CloudFoundryApiClient
 
                 Href firstPageHref = new Href() { href = uri.ToString() };
 
-                return await GetRemainingPagesForType<Space>(firstPageHref, accessToken, new List<Space>());
+                return await GetRemainingPagesForType(firstPageHref, accessToken, new List<Space>());
             }
             catch (Exception e)
             {
@@ -208,7 +208,7 @@ namespace TanzuForVS.CloudFoundryApiClient
 
                 Href firstPageHref = new Href() { href = uri.ToString() };
 
-                return await GetRemainingPagesForType<App>(firstPageHref, accessToken, new List<App>());
+                return await GetRemainingPagesForType(firstPageHref, accessToken, new List<App>());
             }
             catch (Exception e)
             {
@@ -257,7 +257,7 @@ namespace TanzuForVS.CloudFoundryApiClient
                 throw new Exception($"ResourceType unknown: {typeof(ResourceType).Name}");
             }
 
-            return await GetRemainingPagesForType<ResourceType>(nextPageHref, accessToken, resultsSoFar);
+            return await GetRemainingPagesForType(nextPageHref, accessToken, resultsSoFar);
         }
 
         public async Task<bool> StopAppWithGuid(string cfTarget, string accessToken, string appGuid)

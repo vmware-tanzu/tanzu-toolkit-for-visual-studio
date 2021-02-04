@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace TanzuForVS.WpfViews.Properties {
+namespace Tanzu.Toolkit.VisualStudio.WpfViews.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace TanzuForVS.WpfViews.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TanzuForVS.WpfViews.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Tanzu.Toolkit.VisualStudio.WpfViews.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

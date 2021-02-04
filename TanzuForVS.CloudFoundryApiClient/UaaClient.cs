@@ -5,9 +5,9 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using TanzuForVS.CloudFoundryApiClient.Models.Token;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models.Token;
 
-namespace TanzuForVS.CloudFoundryApiClient
+namespace Tanzu.Toolkit.CloudFoundryApiClient
 {
     public class UaaClient : IUaaClient
     {
@@ -73,7 +73,7 @@ namespace TanzuForVS.CloudFoundryApiClient
         private static string Base64Encode(string plainText)
         {
             var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
-            return System.Convert.ToBase64String(plainTextBytes);
+            return Convert.ToBase64String(plainTextBytes);
         }
     }
 }

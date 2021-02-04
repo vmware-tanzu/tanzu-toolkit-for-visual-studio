@@ -1,4 +1,4 @@
-﻿namespace TanzuForVS.Services.Dialog
+﻿namespace Tanzu.Toolkit.VisualStudio.Services.Dialog
 {
     public interface IDialogResult
     {

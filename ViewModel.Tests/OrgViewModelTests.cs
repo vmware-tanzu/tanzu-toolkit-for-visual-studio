@@ -3,9 +3,9 @@ using Moq;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
-using TanzuForVS.Models;
+using Tanzu.Toolkit.VisualStudio.Models;
 
-namespace TanzuForVS.ViewModels
+namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 {
     [TestClass]
     public class OrgViewModelTests : ViewModelTestSupport

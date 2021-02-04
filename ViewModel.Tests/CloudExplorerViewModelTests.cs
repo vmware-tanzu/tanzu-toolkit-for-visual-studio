@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading.Tasks;
-using TanzuForVS.Models;
+using Tanzu.Toolkit.VisualStudio.Models;
 
-namespace TanzuForVS.ViewModels
+namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 {
     [TestClass]
     public class CloudExplorerViewModelTests : ViewModelTestSupport
@@ -337,7 +337,7 @@ namespace TanzuForVS.ViewModels
             var fakeCfInstance3 = new CloudFoundryInstance("fake cf name3", "http://fake3.api.address", "fake-token3");
 
             mockCloudFoundryService.SetupGet(mock => mock.CloudFoundryInstances)
-                .Returns(new Dictionary<string, CloudFoundryInstance> { 
+                .Returns(new Dictionary<string, CloudFoundryInstance> {
                     { "instance1", fakeCfInstance1 },
                     { "instance2", fakeCfInstance2 },
                     { "instance3", fakeCfInstance3 },
@@ -369,10 +369,10 @@ namespace TanzuForVS.ViewModels
         [TestMethod]
         public async Task RefreshAllCloudConnections_RefreshesEachTreeViewItemViewModel()
         {
-            var eventsRaisedByCFIVM = new List<string>(); 
-            var eventsRaisedByOVM = new List<string>(); 
-            var eventsRaisedBySVM = new List<string>(); 
-            var eventsRaisedByAVM = new List<string>(); 
+            var eventsRaisedByCFIVM = new List<string>();
+            var eventsRaisedByOVM = new List<string>();
+            var eventsRaisedBySVM = new List<string>();
+            var eventsRaisedByAVM = new List<string>();
 
             var fakeCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address", "fake-token");
 
@@ -417,33 +417,33 @@ namespace TanzuForVS.ViewModels
             mockCloudFoundryService.Setup(mock => mock.GetAppsForSpaceAsync(fakeSpace)).ReturnsAsync(
                 new List<CloudFoundryApp> { fakeApp });
 
-            cfivm.Children = new ObservableCollection<TreeViewItemViewModel>{ovm};
+            cfivm.Children = new ObservableCollection<TreeViewItemViewModel> { ovm };
 
-            ovm.Children = new ObservableCollection<TreeViewItemViewModel>{svm};
+            ovm.Children = new ObservableCollection<TreeViewItemViewModel> { svm };
 
-            svm.Children = new ObservableCollection<TreeViewItemViewModel>{avm};
+            svm.Children = new ObservableCollection<TreeViewItemViewModel> { avm };
 
-            vm.CloudFoundryList = new List<CfInstanceViewModel>{cfivm};
+            vm.CloudFoundryList = new List<CfInstanceViewModel> { cfivm };
 
 
             await vm.RefreshAllCloudConnections(null);
 
             Assert.AreEqual(1, cfivm.Children.Count);
             Assert.AreEqual(ovm, cfivm.Children[0]);
-            Assert.AreEqual(1, eventsRaisedByCFIVM.Count); 
+            Assert.AreEqual(1, eventsRaisedByCFIVM.Count);
             Assert.AreEqual("Children", eventsRaisedByCFIVM[0]);
-            
+
             Assert.AreEqual(1, ovm.Children.Count);
             Assert.AreEqual(svm, ovm.Children[0]);
-            Assert.AreEqual(1, eventsRaisedByOVM.Count); 
+            Assert.AreEqual(1, eventsRaisedByOVM.Count);
             Assert.AreEqual("Children", eventsRaisedByOVM[0]);
-            
+
             Assert.AreEqual(1, svm.Children.Count);
             Assert.AreEqual(avm, svm.Children[0]);
-            Assert.AreEqual(1, eventsRaisedBySVM.Count); 
+            Assert.AreEqual(1, eventsRaisedBySVM.Count);
             Assert.AreEqual("Children", eventsRaisedBySVM[0]);
-            
-            Assert.AreEqual(1, eventsRaisedByAVM.Count); 
+
+            Assert.AreEqual(1, eventsRaisedByAVM.Count);
             Assert.AreEqual("IsStopped", eventsRaisedByAVM[0]);
 
             // ensure all view models issued queries for updated lists of children

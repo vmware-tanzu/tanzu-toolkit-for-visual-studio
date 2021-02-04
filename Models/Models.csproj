@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>TanzuForVS.Models</AssemblyName>
-    <RootNamespace>TanzuForVS.Models</RootNamespace>
+    <AssemblyName>Tanzu.Toolkit.VisualStudio.Models</AssemblyName>
+    <RootNamespace>Tanzu.Toolkit.VisualStudio.Models</RootNamespace>
   </PropertyGroup>
 
 </Project>

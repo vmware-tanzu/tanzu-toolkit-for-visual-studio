@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Windows;
-using TanzuForVS.Services.Dialog;
-using TanzuForVS.Services.Locator;
+using Tanzu.Toolkit.VisualStudio.Services.Dialog;
+using Tanzu.Toolkit.VisualStudio.Services.ViewLocator;
 
-namespace TanzuForVS.WpfViews.Services
+namespace Tanzu.Toolkit.VisualStudio.WpfViews.Services
 {
     public class WpfDialogService : IDialogService
     {

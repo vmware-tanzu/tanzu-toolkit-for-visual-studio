@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>TanzuForVS.Services</RootNamespace>
-    <AssemblyName>TanzuForVS.Services</AssemblyName>
+    <RootNamespace>Tanzu.Toolkit.VisualStudio.Services</RootNamespace>
+    <AssemblyName>Tanzu.Toolkit.VisualStudio.Services</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

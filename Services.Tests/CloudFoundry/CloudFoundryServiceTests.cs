@@ -4,13 +4,15 @@ using System;
 using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
-using TanzuForVS.CloudFoundryApiClient.Models.AppsResponse;
-using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
-using TanzuForVS.CloudFoundryApiClient.Models.SpacesResponse;
-using TanzuForVS.Models;
-using static TanzuForVS.Services.OutputHandler;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models.OrgsResponse;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models.SpacesResponse;
+using Tanzu.Toolkit.VisualStudio.Models;
+using Tanzu.Toolkit.VisualStudio.Services;
+using Tanzu.Toolkit.VisualStudio.Services.CloudFoundry;
+using static Tanzu.Toolkit.VisualStudio.Services.OutputHandler.OutputHandler;
 
-namespace TanzuForVS.Services.CloudFoundry
+namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
 {
     [TestClass()]
     public class CloudFoundryServiceTests : ServicesTestSupport
@@ -108,7 +110,7 @@ namespace TanzuForVS.Services.CloudFoundry
             mockCfCliService.Setup(mock =>
                 mock.ExecuteCfCliCommandAsync(cfApiArgs, It.IsAny<StdOutDelegate>(), It.IsAny<string>()))
                     .ReturnsAsync(fakeCfApiResponse);
-            
+
             mockCfCliService.Setup(mock =>
                 mock.ExecuteCfCliCommandAsync(cfAuthArgs, It.IsAny<StdOutDelegate>(), It.IsAny<string>()))
                     .ReturnsAsync(fakeCfAuthResponse);
@@ -512,7 +514,7 @@ namespace TanzuForVS.Services.CloudFoundry
                     .ReturnsAsync(fakeCfCmdResponse);
 
             mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
-            
+
             DetailedResult result = await cfService.DeployAppAsync(fakeCfInstance, fakeOrg, fakeSpace, fakeApp.AppName, fakeProjectPath, stdOutHandler: null);
 
             Assert.IsFalse(result.Succeeded);
@@ -542,7 +544,7 @@ namespace TanzuForVS.Services.CloudFoundry
                     .ReturnsAsync(fakeCfPushResponse);
 
             mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
-            
+
             DetailedResult result = await cfService.DeployAppAsync(fakeCfInstance, fakeOrg, fakeSpace, fakeApp.AppName, fakeProjectPath, stdOutHandler: null);
 
             Assert.IsFalse(result.Succeeded);

@@ -1,10 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using TanzuForVS.Models;
-using TanzuForVS.ViewModels;
-using TanzuForVS.WpfViews.Commands;
+using Tanzu.Toolkit.VisualStudio.Models;
+using Tanzu.Toolkit.VisualStudio.ViewModels;
+using Tanzu.Toolkit.VisualStudio.WpfViews.Commands;
 
-namespace TanzuForVS.WpfViews.Tests
+namespace Tanzu.Toolkit.VisualStudio.WpfViews.Tests
 {
     [TestClass]
     public class CloudExplorerViewTests : ViewTestSupport

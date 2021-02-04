@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
-namespace TanzuForVS.ViewModels
+namespace Tanzu.Toolkit.VisualStudio.ViewModels
 {
     public class TreeViewItemViewModel : AbstractViewModel, ITreeViewItemViewModel
     {
@@ -39,7 +39,7 @@ namespace TanzuForVS.ViewModels
             set
             {
                 _text = value;
-                this.RaisePropertyChangedEvent("DisplayText");
+                RaisePropertyChangedEvent("DisplayText");
             }
         }
 
@@ -64,10 +64,10 @@ namespace TanzuForVS.ViewModels
                     if (value == true && LoadChildrenOnExpansion)
                     {
                         // Lazy load the child items, if necessary.
-                        if (this.HasDummyChild) this.Children.Remove(DummyChild);
-                        this.LoadChildren();
+                        if (HasDummyChild) Children.Remove(DummyChild);
+                        LoadChildren();
                     }
-                    this.RaisePropertyChangedEvent("IsExpanded");
+                    RaisePropertyChangedEvent("IsExpanded");
                 }
 
                 // Expand all the way up to the root.
@@ -81,7 +81,7 @@ namespace TanzuForVS.ViewModels
         /// </summary>
         public bool HasDummyChild
         {
-            get { return this.Children.Count == 1 && this.Children[0] == DummyChild; }
+            get { return Children.Count == 1 && Children[0] == DummyChild; }
         }
 
         public bool IsSelected
@@ -92,18 +92,18 @@ namespace TanzuForVS.ViewModels
                 if (value != _isSelected)
                 {
                     _isSelected = value;
-                    this.RaisePropertyChangedEvent("IsSelected");
+                    RaisePropertyChangedEvent("IsSelected");
                 }
             }
         }
 
         public TreeViewItemViewModel Parent
         {
-            get { return this._parent; }
+            get { return _parent; }
             set
             {
-                this._parent = value;
-                this.RaisePropertyChangedEvent("Parent");
+                _parent = value;
+                RaisePropertyChangedEvent("Parent");
             }
         }
 
@@ -113,7 +113,7 @@ namespace TanzuForVS.ViewModels
             set
             {
                 _children = value;
-                this.RaisePropertyChangedEvent("Children");
+                RaisePropertyChangedEvent("Children");
             }
         }
 

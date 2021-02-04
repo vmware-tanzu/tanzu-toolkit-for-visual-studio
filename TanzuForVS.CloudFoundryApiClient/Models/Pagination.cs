@@ -1,4 +1,4 @@
-﻿namespace TanzuForVS.CloudFoundryApiClient.Models
+﻿namespace Tanzu.Toolkit.CloudFoundryApiClient.Models
 {
     public class Pagination
     {

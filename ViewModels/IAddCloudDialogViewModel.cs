@@ -2,7 +2,7 @@
 using System.Security;
 using System.Threading.Tasks;
 
-namespace TanzuForVS.ViewModels
+namespace Tanzu.Toolkit.VisualStudio.ViewModels
 {
     public interface IAddCloudDialogViewModel : IViewModel
     {

@@ -7,7 +7,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Task = System.Threading.Tasks.Task;
 
-namespace TanzuForVS.Commands
+namespace Tanzu.Toolkit.VisualStudio.Commands
 {
     /// <summary>
     /// Command handler
@@ -41,7 +41,7 @@ namespace TanzuForVS.Commands
             commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
 
             var menuCommandID = new CommandID(CommandSet, CommandId);
-            var menuItem = new MenuCommand(this.Execute, menuCommandID);
+            var menuItem = new MenuCommand(Execute, menuCommandID);
             commandService.AddCommand(menuItem);
         }
 
@@ -61,7 +61,7 @@ namespace TanzuForVS.Commands
         {
             get
             {
-                return this.package;
+                return package;
             }
         }
 
@@ -91,8 +91,8 @@ namespace TanzuForVS.Commands
             // Get the instance number 0 of this tool window. This window is single instance so this instance
             // is actually the only one.
             // The last flag is set to true so that if the tool window does not exists it will be created.
-            ToolWindowPane window = this.package.FindToolWindow(typeof(TanzuCloudExplorerToolWindow), 0, true);
-            if ((null == window) || (null == window.Frame))
+            ToolWindowPane window = package.FindToolWindow(typeof(TanzuCloudExplorerToolWindow), 0, true);
+            if (null == window || null == window.Frame)
             {
                 throw new NotSupportedException("Cannot create tool window");
             }

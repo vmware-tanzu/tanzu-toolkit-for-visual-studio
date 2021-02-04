@@ -1,4 +1,4 @@
-﻿namespace TanzuForVS.CloudFoundryApiClient.Models.Token
+﻿namespace Tanzu.Toolkit.CloudFoundryApiClient.Models.Token
 {
     public class Token
     {

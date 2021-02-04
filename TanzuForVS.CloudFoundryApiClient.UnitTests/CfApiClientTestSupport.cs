@@ -1,11 +1,11 @@
 ﻿using Newtonsoft.Json;
-using TanzuForVS.CloudFoundryApiClient.Models;
-using TanzuForVS.CloudFoundryApiClient.Models.AppsResponse;
-using TanzuForVS.CloudFoundryApiClient.Models.BasicInfoResponse;
-using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
-using TanzuForVS.CloudFoundryApiClient.Models.SpacesResponse;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models.BasicInfoResponse;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models.OrgsResponse;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models.SpacesResponse;
 
-namespace TanzuForVS.CloudFoundryApiClient.UnitTests
+namespace Tanzu.Toolkit.CloudFoundryApiClient.UnitTests
 {
     public class CfApiClientTestSupport
     {
@@ -77,14 +77,14 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             totalResults: 125,
             totalPages: 3,
             resultsPerPage: 50));
-        
+
         internal static readonly string _fakeAppsJsonResponsePage2 = JsonConvert.SerializeObject(new FakeAppsResponse(
             apiAddress: _fakeCfApiAddress,
             pageNum: 2,
             totalResults: 125,
             totalPages: 3,
             resultsPerPage: 50));
-        
+
         internal static readonly string _fakeAppsJsonResponsePage3 = JsonConvert.SerializeObject(new FakeAppsResponse(
             apiAddress: _fakeCfApiAddress,
             pageNum: 3,

@@ -1,4 +1,4 @@
-﻿namespace TanzuForVS.ViewModels
+﻿namespace Tanzu.Toolkit.VisualStudio.ViewModels
 {
     public interface IViewModel
     {

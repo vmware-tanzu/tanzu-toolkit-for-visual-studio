@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace TanzuForVS.WpfViews.Commands
+namespace Tanzu.Toolkit.VisualStudio.WpfViews.Commands
 {
     public class DelegatingCommand : ICommand
     {
@@ -11,7 +11,7 @@ namespace TanzuForVS.WpfViews.Commands
 
         public DelegatingCommand(Action<object> action) : this(action, null) { }
 
-    
+
         public DelegatingCommand(Action<object> action, Predicate<object> canExecute)
         {
             this.action = action;

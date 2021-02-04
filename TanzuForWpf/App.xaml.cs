@@ -2,15 +2,15 @@
 using System;
 using System.Net.Http;
 using System.Windows;
-using TanzuForVS.CloudFoundryApiClient;
-using TanzuForVS.Services.CloudFoundry;
-using TanzuForVS.Services.Dialog;
-using TanzuForVS.Services.Locator;
-using TanzuForVS.ViewModels;
-using TanzuForVS.WpfViews;
-using TanzuForVS.WpfViews.Services;
+using Tanzu.Toolkit.CloudFoundryApiClient;
+using Tanzu.Toolkit.VisualStudio.Services.CloudFoundry;
+using Tanzu.Toolkit.VisualStudio.Services.Dialog;
+using Tanzu.Toolkit.VisualStudio.Services.ViewLocator;
+using Tanzu.Toolkit.VisualStudio.ViewModels;
+using Tanzu.Toolkit.VisualStudio.WpfViews;
+using Tanzu.Toolkit.VisualStudio.WpfViews.Services;
 
-namespace TanzuForWpf
+namespace Tanzu.Toolkit.WpfApp
 {
     /// <summary>
     /// Interaction logic for App.xaml

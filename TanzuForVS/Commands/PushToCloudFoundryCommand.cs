@@ -9,11 +9,11 @@ using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.IO;
 using System.Threading.Tasks;
-using TanzuForVS.ViewModels;
-using TanzuForVS.WpfViews;
+using Tanzu.Toolkit.VisualStudio.ViewModels;
+using Tanzu.Toolkit.VisualStudio.WpfViews;
 using Task = System.Threading.Tasks.Task;
 
-namespace TanzuForVS.Commands
+namespace Tanzu.Toolkit.VisualStudio.Commands
 {
     /// <summary>
     /// Command handler
@@ -160,10 +160,10 @@ namespace TanzuForVS.Commands
     {
         internal DeploymentWindow()
         {
-            this.Height = 316;
-            this.Width = 512;
-            this.HasMaximizeButton = true;
-            this.HasMinimizeButton = true;
+            Height = 316;
+            Width = 512;
+            HasMaximizeButton = true;
+            HasMinimizeButton = true;
         }
     }
 }

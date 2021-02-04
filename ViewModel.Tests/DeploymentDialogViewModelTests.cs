@@ -4,12 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
-using TanzuForVS.Models;
-using TanzuForVS.Services;
-using TanzuForVS.ViewModels;
-using static TanzuForVS.Services.OutputHandler;
+using Tanzu.Toolkit.VisualStudio.Models;
+using Tanzu.Toolkit.VisualStudio.Services;
+using static Tanzu.Toolkit.VisualStudio.Services.OutputHandler.OutputHandler;
 
-namespace TanzuForVS.ViewModelsTests
+namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 {
     [TestClass()]
     public class DeploymentDialogViewModelTests : ViewModelTestSupport
@@ -103,7 +102,7 @@ namespace TanzuForVS.ViewModelsTests
                 receivedEvents.Add(e.PropertyName);
             };
 
-            mockCloudFoundryService.Setup(mock => 
+            mockCloudFoundryService.Setup(mock =>
                 mock.DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, It.IsAny<StdOutDelegate>()))
                     .ThrowsAsync(fakeException);
 
@@ -139,7 +138,7 @@ namespace TanzuForVS.ViewModelsTests
             Assert.IsTrue(_sut.DeploymentStatus.Contains("An error occurred:"));
             Assert.IsTrue(_sut.DeploymentStatus.Contains(DeploymentDialogViewModel.appNameEmptyMsg));
         }
-        
+
         [TestMethod]
         public async Task DeployApp_UpdatesDeploymentStatus_WhenTargetCfEmpty()
         {
@@ -160,7 +159,7 @@ namespace TanzuForVS.ViewModelsTests
             Assert.IsTrue(_sut.DeploymentStatus.Contains("An error occurred:"));
             Assert.IsTrue(_sut.DeploymentStatus.Contains(DeploymentDialogViewModel.targetEmptyMsg));
         }
-        
+
         [TestMethod]
         public async Task DeployApp_UpdatesDeploymentStatus_WhenTargetOrgEmpty()
         {
@@ -181,7 +180,7 @@ namespace TanzuForVS.ViewModelsTests
             Assert.IsTrue(_sut.DeploymentStatus.Contains("An error occurred:"));
             Assert.IsTrue(_sut.DeploymentStatus.Contains(DeploymentDialogViewModel.orgEmptyMsg));
         }
-        
+
         [TestMethod]
         public async Task DeployApp_UpdatesDeploymentStatus_WhenTargetSpaceEmpty()
         {
@@ -220,7 +219,7 @@ namespace TanzuForVS.ViewModelsTests
             mockCloudFoundryService.Setup(mock => mock.DeployAppAsync(_fakeCfInstance,
                 _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, It.IsAny<StdOutDelegate>()))
                 .Callback<CloudFoundryInstance, CloudFoundryOrganization, CloudFoundrySpace, string, string, StdOutDelegate>(
-                    (cf,org,space,appname,path,del) => del.Invoke(_fakeStdOutput))
+                    (cf, org, space, appname, path, del) => del.Invoke(_fakeStdOutput))
                 .ReturnsAsync(new DetailedResult(true));
 
             _sut.AppName = _fakeAppName;
@@ -251,7 +250,7 @@ namespace TanzuForVS.ViewModelsTests
             mockCloudFoundryService.Setup(mock => mock.DeployAppAsync(_fakeCfInstance,
                 _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, It.IsAny<StdOutDelegate>()))
                 .Callback<CloudFoundryInstance, CloudFoundryOrganization, CloudFoundrySpace, string, string, StdOutDelegate>(
-                    (cf,org,space,appname,path,del) => del.Invoke(_fakeStdError))
+                    (cf, org, space, appname, path, del) => del.Invoke(_fakeStdError))
                 .ReturnsAsync(new DetailedResult(false));
 
             _sut.AppName = _fakeAppName;

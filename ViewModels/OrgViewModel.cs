@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using TanzuForVS.Models;
+using Tanzu.Toolkit.VisualStudio.Models;
 
-namespace TanzuForVS.ViewModels
+namespace Tanzu.Toolkit.VisualStudio.ViewModels
 {
     public class OrgViewModel : TreeViewItemViewModel
     {
@@ -14,7 +14,7 @@ namespace TanzuForVS.ViewModels
             : base(null, services)
         {
             Org = org;
-            this.DisplayText = Org.OrgName;
+            DisplayText = Org.OrgName;
         }
 
         protected override async Task LoadChildren()

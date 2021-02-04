@@ -3,9 +3,9 @@ using Moq;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
-using TanzuForVS.Models;
+using Tanzu.Toolkit.VisualStudio.Models;
 
-namespace TanzuForVS.ViewModels
+namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 {
     [TestClass]
     public class CfInstanceViewModelTests : ViewModelTestSupport
@@ -36,15 +36,15 @@ namespace TanzuForVS.ViewModels
                 .ReturnsAsync(fakeOrgsList);
 
             cfivm = new CfInstanceViewModel(new CloudFoundryInstance("fake cf", null, null), services);
-            
+
             // check presence of single placeholder child *before* CfInstanceViewModel is expanded
-            Assert.AreEqual(1, cfivm.Children.Count); 
+            Assert.AreEqual(1, cfivm.Children.Count);
             Assert.AreEqual(null, cfivm.Children[0]);
-            
+
             cfivm.IsExpanded = true;
 
             Assert.AreEqual(fakeOrgsList.Count, cfivm.Children.Count);
-            mockCloudFoundryService.VerifyAll(); 
+            mockCloudFoundryService.VerifyAll();
         }
 
         [TestMethod]
@@ -122,7 +122,7 @@ namespace TanzuForVS.ViewModels
 
             // property changed events should not be raised
             Assert.AreEqual(0, receivedEvents.Count);
-            
+
             mockCloudFoundryService.VerifyAll();
         }
     }

@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using TanzuForVS.Models;
+using Tanzu.Toolkit.VisualStudio.Models;
 
-namespace TanzuForVS.ViewModels
+namespace Tanzu.Toolkit.VisualStudio.ViewModels
 {
     public class CloudExplorerViewModel : AbstractViewModel, ICloudExplorerViewModel
     {
@@ -24,23 +24,23 @@ namespace TanzuForVS.ViewModels
 
         public List<CfInstanceViewModel> CloudFoundryList
         {
-            get => this.cfs;
+            get => cfs;
 
             set
             {
-                this.cfs = value;
-                this.RaisePropertyChangedEvent("CloudFoundryList");
+                cfs = value;
+                RaisePropertyChangedEvent("CloudFoundryList");
             }
         }
 
         public bool HasCloudTargets
         {
-            get => this.hasCloudTargets;
+            get => hasCloudTargets;
 
             set
             {
-                this.hasCloudTargets = value;
-                this.RaisePropertyChangedEvent("HasCloudTargets");
+                hasCloudTargets = value;
+                RaisePropertyChangedEvent("HasCloudTargets");
             }
         }
 

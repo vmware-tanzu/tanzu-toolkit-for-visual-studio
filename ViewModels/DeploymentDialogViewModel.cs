@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using TanzuForVS.Models;
-using TanzuForVS.Services;
+using Tanzu.Toolkit.VisualStudio.Models;
+using Tanzu.Toolkit.VisualStudio.Services;
 
-[assembly: InternalsVisibleTo("TanzuForVS.ViewModel.Tests")]
+[assembly: InternalsVisibleTo("Tanzu.Toolkit.VisualStudio.ViewModel.Tests")]
 
-namespace TanzuForVS.ViewModels
+namespace Tanzu.Toolkit.VisualStudio.ViewModels
 {
     public class DeploymentDialogViewModel : AbstractViewModel, IDeploymentDialogViewModel
     {
@@ -52,12 +52,12 @@ namespace TanzuForVS.ViewModels
         public string DeploymentStatus
         {
 
-            get => this.status;
+            get => status;
 
             set
             {
-                this.status = value;
-                this.RaisePropertyChangedEvent("DeploymentStatus");
+                status = value;
+                RaisePropertyChangedEvent("DeploymentStatus");
             }
         }
 
@@ -120,7 +120,7 @@ namespace TanzuForVS.ViewModels
             set
             {
                 cfInstances = value;
-                this.RaisePropertyChangedEvent("CfInstanceOptions");
+                RaisePropertyChangedEvent("CfInstanceOptions");
             }
         }
 
@@ -131,7 +131,7 @@ namespace TanzuForVS.ViewModels
             set
             {
                 cfOrgs = value;
-                this.RaisePropertyChangedEvent("CfOrgOptions");
+                RaisePropertyChangedEvent("CfOrgOptions");
             }
         }
 
@@ -142,7 +142,7 @@ namespace TanzuForVS.ViewModels
             set
             {
                 cfSpaces = value;
-                this.RaisePropertyChangedEvent("CfSpaceOptions");
+                RaisePropertyChangedEvent("CfSpaceOptions");
             }
         }
 

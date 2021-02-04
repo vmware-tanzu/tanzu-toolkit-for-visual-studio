@@ -1,9 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace TanzuForVS.CloudFoundryApiClient.Models.AppsResponse
+namespace Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse
 {
 
     public class AppsResponse

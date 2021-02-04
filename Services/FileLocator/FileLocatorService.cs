@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace TanzuForVS.Services.FileLocator
+namespace Tanzu.Toolkit.VisualStudio.Services.FileLocator
 {
     public class FileLocatorService : IFileLocatorService
     {
