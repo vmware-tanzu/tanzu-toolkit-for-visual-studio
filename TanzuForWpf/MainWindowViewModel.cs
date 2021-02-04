@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using TanzuForVS.ViewModels;
+using Tanzu.Toolkit.VisualStudio.ViewModels;
 
-namespace TanzuForWpf
+namespace Tanzu.Toolkit.WpfApp
 {
     public class MainWindowViewModel : AbstractViewModel, IMainWindowViewModel
     {
@@ -89,7 +89,7 @@ namespace TanzuForWpf
         {
             return true;
         }
-        
+
         public bool CanInvokeCfCli(object arg)
         {
             return true;
@@ -129,8 +129,8 @@ namespace TanzuForWpf
             }
             else return;
 
-            if (arguments.StartsWith("cf ")) arguments = arguments.Remove(0,3);
-            string commandStr = '"'+cfCliCommandName + '"' + ' ' + arguments;
+            if (arguments.StartsWith("cf ")) arguments = arguments.Remove(0, 3);
+            string commandStr = '"' + cfCliCommandName + '"' + ' ' + arguments;
             ExecuteWindowlessCommand(commandStr, workingDir);
         }
 

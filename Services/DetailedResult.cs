@@ -1,4 +1,4 @@
-﻿namespace TanzuForVS.Services
+﻿namespace Tanzu.Toolkit.VisualStudio.Services
 {
     public class DetailedResult
     {

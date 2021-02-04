@@ -1,12 +1,12 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System;
-using TanzuForVS.CloudFoundryApiClient;
-using TanzuForVS.Services.CfCli;
-using TanzuForVS.Services.CmdProcess;
-using TanzuForVS.Services.FileLocator;
+using Tanzu.Toolkit.CloudFoundryApiClient;
+using Tanzu.Toolkit.VisualStudio.Services.CfCli;
+using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
+using Tanzu.Toolkit.VisualStudio.Services.FileLocator;
 
-namespace TanzuForVS.Services
+namespace Tanzu.Toolkit.VisualStudio.Services.Tests
 {
     public abstract class ServicesTestSupport
     {

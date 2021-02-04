@@ -1,7 +1,7 @@
 ﻿using System;
-using TanzuForVS.Services.Locator;
+using Tanzu.Toolkit.VisualStudio.Services.ViewLocator;
 
-namespace TanzuForVS.WpfViews.Services
+namespace Tanzu.Toolkit.VisualStudio.WpfViews.Services
 {
     public class WpfViewLocatorService : IViewLocatorService
     {

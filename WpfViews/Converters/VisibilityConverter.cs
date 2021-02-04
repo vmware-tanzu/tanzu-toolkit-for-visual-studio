@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 
-namespace TanzuForVS.WpfViews.Converters
+namespace Tanzu.Toolkit.VisualStudio.WpfViews.Converters
 {
     public class VisibilityConverter : IValueConverter
     {
@@ -11,7 +11,7 @@ namespace TanzuForVS.WpfViews.Converters
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value as bool? != this.Reversed)
+            if (value as bool? != Reversed)
             {
                 return Visibility.Visible;
             }

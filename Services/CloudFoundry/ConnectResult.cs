@@ -1,4 +1,4 @@
-﻿namespace TanzuForVS.Services.CloudFoundry
+﻿namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
 {
     public class ConnectResult
     {

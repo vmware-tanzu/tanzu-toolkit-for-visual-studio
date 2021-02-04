@@ -1,4 +1,4 @@
-﻿namespace TanzuForVS.Models
+﻿namespace Tanzu.Toolkit.VisualStudio.Models
 {
     public class CloudFoundryOrganization
     {

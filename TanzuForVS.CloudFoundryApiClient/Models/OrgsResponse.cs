@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 
-namespace TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse
+namespace Tanzu.Toolkit.CloudFoundryApiClient.Models.OrgsResponse
 {
     public class OrgsResponse
     {

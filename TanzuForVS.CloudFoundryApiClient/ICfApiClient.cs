@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using TanzuForVS.CloudFoundryApiClient.Models.AppsResponse;
-using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
-using TanzuForVS.CloudFoundryApiClient.Models.SpacesResponse;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models.OrgsResponse;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models.SpacesResponse;
 
-namespace TanzuForVS.CloudFoundryApiClient
+namespace Tanzu.Toolkit.CloudFoundryApiClient
 {
     public interface ICfApiClient
     {

@@ -1,3 +1,3 @@
 ﻿using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("TanzuForVS.Services.Tests")]
+[assembly: InternalsVisibleTo("Tanzu.Toolkit.VisualStudio.Services.Tests")]

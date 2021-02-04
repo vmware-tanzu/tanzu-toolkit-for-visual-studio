@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
-using static TanzuForVS.Services.OutputHandler;
+using static Tanzu.Toolkit.VisualStudio.Services.OutputHandler.OutputHandler;
 
-namespace TanzuForVS.Services.CfCli
+namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 {
     public interface ICfCliService
     {

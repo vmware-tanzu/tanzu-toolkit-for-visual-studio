@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
-using TanzuForVS.CloudFoundryApiClient.Models.Token;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models.Token;
 
-namespace TanzuForVS.CloudFoundryApiClient
+namespace Tanzu.Toolkit.CloudFoundryApiClient
 {
     public interface IUaaClient
     {

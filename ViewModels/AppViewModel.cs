@@ -1,7 +1,7 @@
 ﻿using System;
-using TanzuForVS.Models;
+using Tanzu.Toolkit.VisualStudio.Models;
 
-namespace TanzuForVS.ViewModels
+namespace Tanzu.Toolkit.VisualStudio.ViewModels
 {
     public class AppViewModel : TreeViewItemViewModel
     {
@@ -9,7 +9,7 @@ namespace TanzuForVS.ViewModels
             : base(null, services)
         {
             App = app;
-            this.DisplayText = App.AppName;
+            DisplayText = App.AppName;
         }
 
         public CloudFoundryApp App { get; }

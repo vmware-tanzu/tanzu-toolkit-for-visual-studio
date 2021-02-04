@@ -2,7 +2,7 @@
 using System.Security;
 using System.Threading.Tasks;
 
-namespace TanzuForVS.ViewModels
+namespace Tanzu.Toolkit.VisualStudio.ViewModels
 {
     public class AddCloudDialogViewModel : AbstractViewModel, IAddCloudDialogViewModel
     {
@@ -20,7 +20,7 @@ namespace TanzuForVS.ViewModels
         public AddCloudDialogViewModel(IServiceProvider services)
             : base(services)
         {
-            SkipSsl = true; 
+            SkipSsl = true;
         }
 
         public string InstanceName
@@ -29,8 +29,8 @@ namespace TanzuForVS.ViewModels
 
             set
             {
-                this.instanceName = value;
-                this.RaisePropertyChangedEvent("InstanceName");
+                instanceName = value;
+                RaisePropertyChangedEvent("InstanceName");
             }
         }
 
@@ -40,8 +40,8 @@ namespace TanzuForVS.ViewModels
 
             set
             {
-                this.target = value;
-                this.RaisePropertyChangedEvent("Target");
+                target = value;
+                RaisePropertyChangedEvent("Target");
             }
         }
 
@@ -51,8 +51,8 @@ namespace TanzuForVS.ViewModels
 
             set
             {
-                this.username = value;
-                this.RaisePropertyChangedEvent("Username");
+                username = value;
+                RaisePropertyChangedEvent("Username");
             }
         }
 
@@ -62,8 +62,8 @@ namespace TanzuForVS.ViewModels
 
             set
             {
-                this.httpProxy = value;
-                this.RaisePropertyChangedEvent("HttpProxy");
+                httpProxy = value;
+                RaisePropertyChangedEvent("HttpProxy");
             }
         }
 
@@ -73,8 +73,8 @@ namespace TanzuForVS.ViewModels
 
             set
             {
-                this.skipSsl = value;
-                this.RaisePropertyChangedEvent("SkipSsl");
+                skipSsl = value;
+                RaisePropertyChangedEvent("SkipSsl");
             }
         }
 
@@ -84,20 +84,20 @@ namespace TanzuForVS.ViewModels
 
             set
             {
-                this.hasErrors = value;
-                this.RaisePropertyChangedEvent("HasErrors");
+                hasErrors = value;
+                RaisePropertyChangedEvent("HasErrors");
             }
         }
 
         public string ErrorMessage
         {
-            get => this.errorMessage;
+            get => errorMessage;
 
             set
             {
-                this.errorMessage = value;
+                errorMessage = value;
                 if (!string.IsNullOrEmpty(value)) HasErrors = true;
-                this.RaisePropertyChangedEvent("ErrorMessage");
+                RaisePropertyChangedEvent("ErrorMessage");
             }
         }
 

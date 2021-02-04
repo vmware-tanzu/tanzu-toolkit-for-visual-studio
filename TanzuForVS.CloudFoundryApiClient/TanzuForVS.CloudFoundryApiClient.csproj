@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>Tanzu.Toolkit.CloudFoundryApiClient</AssemblyName>
+    <RootNamespace>Tanzu.Toolkit.CloudFoundryApiClient</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,8 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using TanzuForVS.ViewModels;
-using TanzuForVS.WpfViews.Commands;
+using Tanzu.Toolkit.VisualStudio.ViewModels;
+using Tanzu.Toolkit.VisualStudio.WpfViews.Commands;
 
-namespace TanzuForVS.WpfViews.Tests
+namespace Tanzu.Toolkit.VisualStudio.WpfViews.Tests
 {
     [TestClass]
     public class AddCloudDialogViewTests : ViewTestSupport

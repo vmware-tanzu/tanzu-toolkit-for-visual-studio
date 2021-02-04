@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>TanzuForVS.ViewModels</RootNamespace>
-    <AssemblyName>TanzuForVS.ViewModels</AssemblyName>
+    <RootNamespace>Tanzu.Toolkit.VisualStudio.ViewModels</RootNamespace>
+    <AssemblyName>Tanzu.Toolkit.VisualStudio.ViewModels</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

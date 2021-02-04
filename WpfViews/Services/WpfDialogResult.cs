@@ -1,6 +1,6 @@
-﻿using TanzuForVS.Services.Dialog;
+﻿using Tanzu.Toolkit.VisualStudio.Services.Dialog;
 
-namespace TanzuForVS.WpfViews.Services
+namespace Tanzu.Toolkit.VisualStudio.WpfViews.Services
 {
     public class WpfDialogResult : IDialogResult
     {

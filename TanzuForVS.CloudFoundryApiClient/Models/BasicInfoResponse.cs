@@ -1,4 +1,4 @@
-﻿namespace TanzuForVS.CloudFoundryApiClient.Models.BasicInfoResponse
+﻿namespace Tanzu.Toolkit.CloudFoundryApiClient.Models.BasicInfoResponse
 {
 
     public class BasicInfoResponse

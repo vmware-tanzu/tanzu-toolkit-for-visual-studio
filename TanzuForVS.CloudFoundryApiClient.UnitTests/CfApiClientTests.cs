@@ -5,10 +5,10 @@ using RichardSzalay.MockHttp;
 using System;
 using System.Net;
 using System.Threading.Tasks;
-using TanzuForVS.CloudFoundryApiClient.Models.AppsResponse;
-using TanzuForVS.CloudFoundryApiClient.Models.Token;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models.Token;
 
-namespace TanzuForVS.CloudFoundryApiClient.UnitTests
+namespace Tanzu.Toolkit.CloudFoundryApiClient.UnitTests
 {
     [TestClass()]
     public class CfApiClientTests : CfApiClientTestSupport
@@ -146,8 +146,8 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             Assert.IsTrue(resultException.Message.Contains(fakeHttpExceptionMessage));
             Assert.IsTrue(
                 resultException.Message.Contains(CfApiClient.AuthServerLookupFailureMessage)
-                || (resultException.Data.Contains("MessageToDisplay")
-                    && resultException.Data["MessageToDisplay"].ToString().Contains(CfApiClient.AuthServerLookupFailureMessage))
+                || resultException.Data.Contains("MessageToDisplay")
+                    && resultException.Data["MessageToDisplay"].ToString().Contains(CfApiClient.AuthServerLookupFailureMessage)
             );
 
             _mockUaaClient.Verify(mock =>

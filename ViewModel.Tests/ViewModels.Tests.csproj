@@ -5,9 +5,9 @@
 
     <IsPackable>false</IsPackable>
 
-    <RootNamespace>TanzuForVS.ViewModels</RootNamespace>
+    <RootNamespace>Tanzu.Toolkit.VisualStudio.ViewModels.Tests</RootNamespace>
 
-    <AssemblyName>TanzuForVS.ViewModel.Tests</AssemblyName>
+    <AssemblyName>Tanzu.Toolkit.VisualStudio.ViewModel.Tests</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

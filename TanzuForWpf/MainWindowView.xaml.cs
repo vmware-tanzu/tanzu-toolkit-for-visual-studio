@@ -1,9 +1,8 @@
-﻿using System.Diagnostics;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
-using TanzuForVS.WpfViews.Commands;
+using Tanzu.Toolkit.VisualStudio.WpfViews.Commands;
 
-namespace TanzuForWpf
+namespace Tanzu.Toolkit.WpfApp
 {
     /// <summary>
     /// Interaction logic for MainWindowView.xaml

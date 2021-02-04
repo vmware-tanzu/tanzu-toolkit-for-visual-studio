@@ -3,16 +3,16 @@ using System;
 using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
-using TanzuForVS.CloudFoundryApiClient;
-using TanzuForVS.CloudFoundryApiClient.Models.AppsResponse;
-using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
-using TanzuForVS.CloudFoundryApiClient.Models.SpacesResponse;
-using TanzuForVS.Models;
-using TanzuForVS.Services.CfCli;
-using TanzuForVS.Services.FileLocator;
-using static TanzuForVS.Services.OutputHandler;
+using Tanzu.Toolkit.CloudFoundryApiClient;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models.OrgsResponse;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models.SpacesResponse;
+using Tanzu.Toolkit.VisualStudio.Models;
+using Tanzu.Toolkit.VisualStudio.Services.CfCli;
+using Tanzu.Toolkit.VisualStudio.Services.FileLocator;
+using static Tanzu.Toolkit.VisualStudio.Services.OutputHandler.OutputHandler;
 
-namespace TanzuForVS.Services.CloudFoundry
+namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
 {
     public class CloudFoundryService : ICloudFoundryService
     {

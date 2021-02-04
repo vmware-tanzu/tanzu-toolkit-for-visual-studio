@@ -13,8 +13,8 @@
     <ProjectGuid>{DEA3D5BC-294A-4BF3-8F81-2A8A8D51A869}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TanzuForVS</RootNamespace>
-    <AssemblyName>TanzuForVS</AssemblyName>
+    <RootNamespace>Tanzu.Toolkit.VisualStudio</RootNamespace>
+    <AssemblyName>Tanzu.Toolkit.VisualStudio</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
     <UseCodebase>true</UseCodebase>

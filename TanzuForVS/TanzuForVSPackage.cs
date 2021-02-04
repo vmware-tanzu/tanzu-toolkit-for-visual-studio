@@ -4,21 +4,20 @@ using System;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading;
-using TanzuForVS.CloudFoundryApiClient;
-using TanzuForVS.Commands;
-using TanzuForVS.Services;
-using TanzuForVS.Services.CfCli;
-using TanzuForVS.Services.CloudFoundry;
-using TanzuForVS.Services.CmdProcess;
-using TanzuForVS.Services.Dialog;
-using TanzuForVS.Services.FileLocator;
-using TanzuForVS.Services.Locator;
-using TanzuForVS.ViewModels;
-using TanzuForVS.WpfViews;
-using TanzuForVS.WpfViews.Services;
+using Tanzu.Toolkit.CloudFoundryApiClient;
+using Tanzu.Toolkit.VisualStudio.Commands;
+using Tanzu.Toolkit.VisualStudio.Services.CfCli;
+using Tanzu.Toolkit.VisualStudio.Services.CloudFoundry;
+using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
+using Tanzu.Toolkit.VisualStudio.Services.Dialog;
+using Tanzu.Toolkit.VisualStudio.Services.FileLocator;
+using Tanzu.Toolkit.VisualStudio.Services.ViewLocator;
+using Tanzu.Toolkit.VisualStudio.ViewModels;
+using Tanzu.Toolkit.VisualStudio.WpfViews;
+using Tanzu.Toolkit.VisualStudio.WpfViews.Services;
 using Task = System.Threading.Tasks.Task;
 
-namespace TanzuForVS
+namespace Tanzu.Toolkit.VisualStudio
 {
     /// <summary>
     /// This is the class that implements the package exposed by this assembly.
@@ -38,7 +37,7 @@ namespace TanzuForVS
     /// </para>
     /// </remarks>
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
-    [Guid(TanzuForVSPackage.PackageGuidString)]
+    [Guid(PackageGuidString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [ProvideToolWindow(typeof(TanzuCloudExplorerToolWindow))]
     public sealed class TanzuForVSPackage : AsyncPackage
@@ -69,7 +68,7 @@ namespace TanzuForVS
         {
             // When initialized asynchronously, the current thread may be a background thread at this point.
             // Do any initialization that requires the UI thread after switching to the UI thread.
-            await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+            await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
             await TanzuCloudExplorerCommand.InitializeAsync(this);
             await PushToCloudFoundryCommand.InitializeAsync(this, serviceProvider);
         }
@@ -121,7 +120,7 @@ namespace TanzuForVS
 
             HttpClient concreteHttpClient = new HttpClient();
             IUaaClient concreteUaaClient = new UaaClient(concreteHttpClient);
-            services.AddSingleton<IUaaClient>(_ => concreteUaaClient);
+            services.AddSingleton(_ => concreteUaaClient);
             services.AddSingleton<ICfApiClient>(_ => new CfApiClient(concreteUaaClient, concreteHttpClient));
         }
     }

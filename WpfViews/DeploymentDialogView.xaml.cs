@@ -1,9 +1,9 @@
 ﻿using System.Windows.Controls;
 using System.Windows.Input;
-using TanzuForVS.ViewModels;
-using TanzuForVS.WpfViews.Commands;
+using Tanzu.Toolkit.VisualStudio.ViewModels;
+using Tanzu.Toolkit.VisualStudio.WpfViews.Commands;
 
-namespace TanzuForVS.WpfViews
+namespace Tanzu.Toolkit.VisualStudio.WpfViews
 {
     /// <summary>
     /// Interaction logic for DeploymentDialogView.xaml

@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace TanzuForVS.WpfViews.Commands
+namespace Tanzu.Toolkit.VisualStudio.WpfViews.Commands
 {
     public class AsyncDelegatingCommand : ICommand
     {
@@ -12,7 +12,7 @@ namespace TanzuForVS.WpfViews.Commands
 
         private EventHandler eventHandler;
 
-        public AsyncDelegatingCommand(Func<object, Task> action) 
+        public AsyncDelegatingCommand(Func<object, Task> action)
             : this(action, null)
         {
         }

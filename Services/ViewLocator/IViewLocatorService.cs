@@ -1,4 +1,4 @@
-﻿namespace TanzuForVS.Services.Locator
+﻿namespace Tanzu.Toolkit.VisualStudio.Services.ViewLocator
 {
     public interface IViewLocatorService
     {

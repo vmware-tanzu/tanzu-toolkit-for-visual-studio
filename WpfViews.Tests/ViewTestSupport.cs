@@ -1,11 +1,11 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System;
-using TanzuForVS.Services.CloudFoundry;
-using TanzuForVS.Services.Dialog;
-using TanzuForVS.Services.Locator;
+using Tanzu.Toolkit.VisualStudio.Services.CloudFoundry;
+using Tanzu.Toolkit.VisualStudio.Services.Dialog;
+using Tanzu.Toolkit.VisualStudio.Services.ViewLocator;
 
-namespace TanzuForVS.WpfViews.Tests
+namespace Tanzu.Toolkit.VisualStudio.WpfViews.Tests
 {
     public abstract class ViewTestSupport
     {
@@ -22,9 +22,9 @@ namespace TanzuForVS.WpfViews.Tests
             mockDialogService = new Mock<IDialogService>();
             mockViewLocatorService = new Mock<IViewLocatorService>();
 
-            services.AddSingleton<ICloudFoundryService>(mockCloudFoundryService.Object);
+            services.AddSingleton(mockCloudFoundryService.Object);
             services.AddSingleton<IDialogService>(mockDialogService.Object);
-            services.AddSingleton<IViewLocatorService>(mockViewLocatorService.Object);
+            services.AddSingleton(mockViewLocatorService.Object);
             this.services = services.BuildServiceProvider();
         }
     }

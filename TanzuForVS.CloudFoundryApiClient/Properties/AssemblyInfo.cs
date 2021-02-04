@@ -16,5 +16,5 @@ using System.Runtime.InteropServices;
 // The following GUID is for the ID of the typelib if this project is exposed to COM.
 
 [assembly: Guid("2599e735-7fb8-4ac5-8260-8590158f54ee")]
-[assembly: InternalsVisibleTo("TanzuForVS.CloudFoundryApiClient.UnitTests")]
+[assembly: InternalsVisibleTo("Tanzu.Toolkit.CloudFoundryApiClient.UnitTests")]
 

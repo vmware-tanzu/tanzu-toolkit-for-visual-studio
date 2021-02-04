@@ -5,9 +5,9 @@
 
     <IsPackable>false</IsPackable>
 
-    <RootNamespace>TanzuForVS.Services</RootNamespace>
+    <RootNamespace>Tanzu.Toolkit.VisualStudio.Services.Tests</RootNamespace>
 
-    <AssemblyName>TanzuForVS.Services.Tests</AssemblyName>
+    <AssemblyName>Tanzu.Toolkit.VisualStudio.Services.Tests</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

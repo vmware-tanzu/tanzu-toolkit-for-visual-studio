@@ -3,9 +3,9 @@ using Moq;
 using System;
 using System.Security;
 using System.Threading.Tasks;
-using TanzuForVS.Services.CloudFoundry;
+using Tanzu.Toolkit.VisualStudio.Services.CloudFoundry;
 
-namespace TanzuForVS.ViewModels
+namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 {
     [TestClass]
     public class AddCloudDialogViewModelTests : ViewModelTestSupport
@@ -119,7 +119,7 @@ namespace TanzuForVS.ViewModels
 
             Assert.IsNotNull(vm.ErrorMessage);
             mockDialogService.Verify(mock => mock.CloseDialog(It.IsAny<object>(), It.IsAny<bool>()), Times.Never);
-            mockCloudFoundryService.Verify(mock => mock.AddCloudFoundryInstance(It.IsAny<string>(),It.IsAny<string>(),It.IsAny<string>()), Times.Never);
+            mockCloudFoundryService.Verify(mock => mock.AddCloudFoundryInstance(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
             mockCloudFoundryService.VerifyAll();
         }
 

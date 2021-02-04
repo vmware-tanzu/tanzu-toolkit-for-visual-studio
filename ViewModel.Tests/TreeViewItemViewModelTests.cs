@@ -2,7 +2,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace TanzuForVS.ViewModels
+namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 {
     [TestClass]
     public class TreeViewItemViewModelTests : ViewModelTestSupport

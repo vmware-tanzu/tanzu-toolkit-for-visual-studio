@@ -4,7 +4,7 @@ using System;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace TanzuForVS.CloudFoundryApiClient.UnitTests
+namespace Tanzu.Toolkit.CloudFoundryApiClient.UnitTests
 {
     [TestClass()]
     public class UaaClientTests
@@ -76,7 +76,7 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             string cfPassword = null;
 
             Exception expectedException = null;
-            
+
             try
             {
                 await _uaaClient.RequestAccessTokenAsync(uaaUri, uaaClientId, uaaClientSecret, cfUsername, cfPassword);

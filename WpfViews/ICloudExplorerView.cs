@@ -1,4 +1,4 @@
-﻿namespace TanzuForVS.WpfViews
+﻿namespace Tanzu.Toolkit.VisualStudio.WpfViews
 {
     public interface ICloudExplorerView
     {

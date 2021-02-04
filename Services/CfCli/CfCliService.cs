@@ -2,11 +2,11 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using TanzuForVS.Services.CmdProcess;
-using TanzuForVS.Services.FileLocator;
-using static TanzuForVS.Services.OutputHandler;
+using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
+using Tanzu.Toolkit.VisualStudio.Services.FileLocator;
+using static Tanzu.Toolkit.VisualStudio.Services.OutputHandler.OutputHandler;
 
-namespace TanzuForVS.Services.CfCli
+namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 {
     public class CfCliService : ICfCliService
     {

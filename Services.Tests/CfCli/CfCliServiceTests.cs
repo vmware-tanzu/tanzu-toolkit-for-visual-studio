@@ -1,10 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Threading.Tasks;
-using TanzuForVS.Services.CfCli;
-using static TanzuForVS.Services.OutputHandler;
+using Tanzu.Toolkit.VisualStudio.Services;
+using Tanzu.Toolkit.VisualStudio.Services.CfCli;
+using static Tanzu.Toolkit.VisualStudio.Services.OutputHandler.OutputHandler;
 
-namespace TanzuForVS.Services.Tests
+namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
 {
     [TestClass()]
     public class CfCliServiceTests : ServicesTestSupport

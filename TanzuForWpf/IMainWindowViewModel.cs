@@ -1,6 +1,6 @@
-﻿using TanzuForVS.ViewModels;
+﻿using Tanzu.Toolkit.VisualStudio.ViewModels;
 
-namespace TanzuForWpf
+namespace Tanzu.Toolkit.WpfApp
 {
     public interface IMainWindowViewModel : IViewModel
     {

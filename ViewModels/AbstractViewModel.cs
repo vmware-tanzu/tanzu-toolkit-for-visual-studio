@@ -1,11 +1,11 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.ComponentModel;
-using TanzuForVS.Services.CloudFoundry;
-using TanzuForVS.Services.Dialog;
-using TanzuForVS.Services.Locator;
+using Tanzu.Toolkit.VisualStudio.Services.CloudFoundry;
+using Tanzu.Toolkit.VisualStudio.Services.Dialog;
+using Tanzu.Toolkit.VisualStudio.Services.ViewLocator;
 
-namespace TanzuForVS.ViewModels
+namespace Tanzu.Toolkit.VisualStudio.ViewModels
 {
     public abstract class AbstractViewModel : IViewModel, INotifyPropertyChanged
     {
@@ -33,19 +33,19 @@ namespace TanzuForVS.ViewModels
         {
             get
             {
-                return this.activeView;
+                return activeView;
             }
 
             set
             {
-                this.activeView = value;
-                this.RaisePropertyChangedEvent("ActiveView");
+                activeView = value;
+                RaisePropertyChangedEvent("ActiveView");
             }
         }
 
         protected void RaisePropertyChangedEvent(string propertyName)
         {
-            var handler = this.PropertyChanged;
+            var handler = PropertyChanged;
 
             if (handler != null)
             {

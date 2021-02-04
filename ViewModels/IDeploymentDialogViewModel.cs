@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace TanzuForVS.ViewModels
+namespace Tanzu.Toolkit.VisualStudio.ViewModels
 {
     public interface IDeploymentDialogViewModel
     {
