@@ -44,10 +44,10 @@
 
         <TextBlock Grid.Row="0" Text="App Name:" VerticalAlignment="Center" Margin="8,0,8,0"/>
 
-        <TextBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="1" Margin="8,4,8,4" Text="{Binding AppName}" VerticalAlignment="Center"/>
+        <TextBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="1" Margin="8,4,8,4" Height="20" Text="{Binding AppName}" VerticalAlignment="Center"/>
 
         <StackPanel VerticalAlignment="Center" Grid.Row="1" Margin="8,8,8,8">
-            <TextBlock VerticalAlignment="Center" Text="Target Api Address:"/>
+            <TextBlock VerticalAlignment="Center" Text="Deployment Target:"/>
         </StackPanel>
 
         <ComboBox Grid.Row="1" Grid.Column="1" Margin="8,4,8,4" 
@@ -110,7 +110,7 @@
                     ScrollViewer.VerticalScrollBarVisibility="Auto"
                     IsReadOnly="True" 
                     TextWrapping="Wrap" 
-                    BorderBrush="Black" 
+                    BorderBrush="Gray" 
                     MaxLines="5"
                     TextBoxBase.TextChanged="DeploymentStatus_TextChanged"/>
             </ScrollViewer>
