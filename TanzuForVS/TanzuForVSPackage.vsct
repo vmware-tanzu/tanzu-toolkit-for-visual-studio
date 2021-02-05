@@ -56,7 +56,7 @@
           <ButtonText>Deploy To Tanzu Application Service</ButtonText>
         </Strings>
 			</Button>
-		</Buttons>
+    </Buttons>
 
 		<!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
 		<Bitmaps>
@@ -67,12 +67,12 @@
             must be the actual index (1-based) of the bitmap inside the bitmap strip. -->
 			<Bitmap guid="guidImages" href="Resources\tanzu16.png" usedList="bmpPic1" />
 			<Bitmap guid="guidImages1" href="Resources\DeployApp.png" usedList="bmpPic1" />
-		</Bitmaps>
+    </Bitmaps>
 	</Commands>
 
 	<CommandPlacements>
 		<CommandPlacement guid="guidTanzuForVSPackageCmdSet1" id="cmdidPushToCloudFoundryCommand">
-			<Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_EXPLORE"/>
+			<Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_EXPLORE" />
 		</CommandPlacement>
 	</CommandPlacements>
 
@@ -83,7 +83,7 @@
 		<!-- This is the guid used to group the menu commands together -->
 		<GuidSymbol name="guidTanzuForVSPackageCmdSet" value="{f91c88fb-6e17-42a6-878d-f4d16ead7625}">
 			<IDSymbol name="TanzuCloudExplorerCommandId" value="0x0100" />
-		</GuidSymbol>
+    </GuidSymbol>
 		<GuidSymbol name="guidTanzuForVSPackageCmdSet1" value="{06b33924-97f3-4d33-804c-472ed0d0cc59}">
 			<IDSymbol value="4128" name="MyMenuGroup" />
 			<IDSymbol value="256" name="cmdidPushToCloudFoundryCommand" />
@@ -97,5 +97,5 @@
 			<IDSymbol name="bmpPic1" value="1" />
 		</GuidSymbol>
 
-	</Symbols>
+  </Symbols>
 </CommandTable>

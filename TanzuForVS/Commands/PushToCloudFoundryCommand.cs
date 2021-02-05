@@ -102,7 +102,12 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         {
             try
             {
-                foreach (string projectPath in await GetSelectedProjectPathsAsync())
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+                var dte = (DTE2)await package.GetServiceAsync(typeof(DTE));
+                Assumes.Present(dte);
+
+                foreach (string projectPath in await GetSelectedProjectPathsAsync(dte))
                 {
                     var viewModel = new DeploymentDialogViewModel(_services, projectPath);
                     var view = new DeploymentDialogView(viewModel);
@@ -113,6 +118,12 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                     };
 
                     deployWindow.ShowModal();
+
+                    //* Actions to take after modal closes:
+                    if (viewModel.DeploymentInProgress) // don't open tool window if modal was closed via "X" button
+                    {
+                        DisplayOutputToolWindow();
+                    }
                 }
             }
             catch (Exception ex)
@@ -132,13 +143,25 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             }
         }
 
-        private async Task<List<string>> GetSelectedProjectPathsAsync()
+        private void DisplayOutputToolWindow()
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
+            // The last flag is set to true so that if the tool window does not exists it will be created.
+            ToolWindowPane window = this.package.FindToolWindow(typeof(OutputToolWindow), 0, true);
+            if ((null == window) || (null == window.Frame))
+            {
+                throw new NotSupportedException("Unable to create OutputToolWindow");
+            }
+
+            IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
+            Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
+        }
+
+        private async Task<List<string>> GetSelectedProjectPathsAsync(DTE2 dte)
         {
             // Ensure project file access happens on the main thread
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
-            var dte = (DTE2)await package.GetServiceAsync(typeof(DTE));
-            Assumes.Present(dte);
 
             var projectPaths = new List<string>();
             var activeProjects = (Array)dte.ActiveSolutionProjects;

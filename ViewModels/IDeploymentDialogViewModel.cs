@@ -6,7 +6,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
     {
         bool CanDeployApp(object arg);
         bool CanOpenLoginView(object arg);
-        Task DeployApp(object arg);
+        void DeployApp(object arg);
         void OpenLoginView(object arg);
         void UpdateCfInstanceOptions();
         Task UpdateCfOrgOptions();
