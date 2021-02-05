@@ -11,14 +11,13 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <ScrollViewer Background="White" VerticalScrollBarVisibility="Auto">
-            <TextBlock 
-                Text="{Binding Path=OutputContent}"
-                Margin="12"
-                Grid.Row="1"
-                Background="White"
-                Foreground="Black"
-            />
+        <ScrollViewer x:Name="OutputScrollViewer" Background="White" VerticalScrollBarVisibility="Auto">
+            <TextBox
+                Text="{Binding OutputContent}"
+                Margin="4"
+                IsReadOnly="True"
+                TextChanged="TextBox_TextChanged"
+                />
         </ScrollViewer>
     </Grid>
 </UserControl>

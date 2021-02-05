@@ -22,5 +22,23 @@ namespace Tanzu.Toolkit.VisualStudio.WpfViews
             InitializeComponent();
         }
 
+        /// <summary>
+        /// If scroll viewer is already scrolled all the way down, scroll to
+        /// bottom after printing new line of content.
+        /// Otherwise, if scroll viewer is scrolled up more than 1 pixel above 
+        /// the bottom of the scrollable content, do not scroll.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var offset = OutputScrollViewer.VerticalOffset;
+
+            if (offset == (OutputScrollViewer.ExtentHeight - OutputScrollViewer.ViewportHeight))
+            {
+                OutputScrollViewer.ScrollToBottom();
+            }
+
+        }
     }
 }
