@@ -23,12 +23,12 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         /// <summary>
         /// Command ID.
         /// </summary>
-        public const int CommandId = 256;
+        public const int CommandId = 257;
 
         /// <summary>
         /// Command menu group (command set GUID).
         /// </summary>
-        public static readonly Guid CommandSet = new Guid("06b33924-97f3-4d33-804c-472ed0d0cc59");
+        public static readonly Guid CommandSet = new Guid("f91c88fb-6e17-42a6-878d-f4d16ead7625");
 
         /// <summary>
         /// VS Package that provides this command, not null.

@@ -30,7 +30,7 @@
     called "command set" and is used to group different command inside a logically related
     group; your package should define its own command set in order to avoid collisions
     with command ids defined by other packages. -->
-
+    
 		<!--Buttons section. -->
 		<!--This section defines the elements the user can interact with, like a menu command or a button
         or combo box in a toolbar. -->
@@ -42,21 +42,23 @@
               <CommandFlag>DefaultInvisible</CommandFlag>
               <CommandFlag>DynamicVisibility</CommandFlag>
           If you do not want an image next to your command, remove the Icon node /> -->
-			<Button guid="guidTanzuForVSPackageCmdSet" id="TanzuCloudExplorerCommandId" priority="0x0100" type="Button">
+			<Button guid="guidTanzuForVSPackageCmdSet" id="CloudExplorerCommandId" priority="0x0100" type="Button">
 				<Parent guid="guidSHLMainMenu" id="IDG_VS_MM_TOOLSADDINS" />
 				<Icon guid="guidImages" id="bmpPic1" />
 				<Strings>
 					<ButtonText>Tanzu Cloud Explorer</ButtonText>
 				</Strings>
 			</Button>
-			<Button guid="guidTanzuForVSPackageCmdSet1" id="cmdidPushToCloudFoundryCommand" priority="0x0100" type="Button">
-				<Parent guid="guidTanzuForVSPackageCmdSet1" id="MyMenuGroup" />
-				<Icon guid="guidImages1" id="bmpPic1" />
+      
+			<Button guid="guidTanzuForVSPackageCmdSet" id="PushToCloudFoundryCommandId" priority="0x0100" type="Button">
+        <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_EXPLORE" />
+        <Icon guid="guidImages1" id="bmpPic1" />
 				<Strings>
           <ButtonText>Deploy To Tanzu Application Service</ButtonText>
         </Strings>
 			</Button>
-      <Button guid="guidTanzuForVSPackageCmdSet2" id="cmdidOutputWindowCommand" priority="0x0100" type="Button">
+      
+      <Button guid="guidTanzuForVSPackageCmdSet" id="OutputWindowCommandId" priority="0x0100" type="Button">
         <Parent guid="guidSHLMainMenu" id="IDG_VS_VIEW_DEV_WINDOWS" />
         <Icon guid="guidImages2" id="bmpPic1" />
         <Strings>
@@ -78,26 +80,15 @@
     </Bitmaps>
   </Commands>
 
-	<CommandPlacements>
-		<CommandPlacement guid="guidTanzuForVSPackageCmdSet1" id="cmdidPushToCloudFoundryCommand">
-			<Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_EXPLORE" />
-		</CommandPlacement>
-	</CommandPlacements>
-
 	<Symbols>
 		<!-- This is the package guid. -->
 		<GuidSymbol name="guidTanzuForVSPackage" value="{9419e55b-9e82-4d87-8ee5-70871b01b7cc}" />
 
 		<!-- This is the guid used to group the menu commands together -->
 		<GuidSymbol name="guidTanzuForVSPackageCmdSet" value="{f91c88fb-6e17-42a6-878d-f4d16ead7625}">
-			<IDSymbol name="TanzuCloudExplorerCommandId" value="0x0100" />
-    </GuidSymbol>
-		<GuidSymbol name="guidTanzuForVSPackageCmdSet1" value="{06b33924-97f3-4d33-804c-472ed0d0cc59}">
-			<IDSymbol value="4128" name="MyMenuGroup" />
-			<IDSymbol value="256" name="cmdidPushToCloudFoundryCommand" />
-		</GuidSymbol>
-    <GuidSymbol name="guidTanzuForVSPackageCmdSet2" value="{a236e835-5509-4066-a3a2-cf1661b8b22e}">
-      <IDSymbol value="256" name="cmdidOutputWindowCommand" />
+			<IDSymbol name="CloudExplorerCommandId" value="256" />
+			<IDSymbol name="PushToCloudFoundryCommandId" value="257"/>
+      <IDSymbol name="OutputWindowCommandId" value="258"/>
     </GuidSymbol>
 
     <!-- Images -->
