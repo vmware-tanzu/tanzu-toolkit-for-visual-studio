@@ -72,6 +72,7 @@ namespace Tanzu.Toolkit.VisualStudio
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
             await TanzuCloudExplorerCommand.InitializeAsync(this);
             await PushToCloudFoundryCommand.InitializeAsync(this, serviceProvider);
+            await Tanzu.Toolkit.VisualStudio.Commands.OutputWindowCommand.InitializeAsync(this);
         }
 
         protected override object GetService(Type serviceType)

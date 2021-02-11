@@ -46,6 +46,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Commands\OutputWindowCommand.cs" />
     <Compile Include="Commands\PushToCloudFoundryCommand.cs" />
     <Compile Include="OutputToolWindow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -109,7 +110,6 @@
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Commands\Resources\PushToCloudFoundryCommand.png" />
     <Content Include="Resources\DeployApp.png" />
     <Content Include="Resources\cf.exe" CopyToOutputDirectory="PreserveNewest">
       <IncludeInVSIX>true</IncludeInVSIX>

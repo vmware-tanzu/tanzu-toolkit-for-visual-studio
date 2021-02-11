@@ -56,6 +56,13 @@
           <ButtonText>Deploy To Tanzu Application Service</ButtonText>
         </Strings>
 			</Button>
+      <Button guid="guidTanzuForVSPackageCmdSet2" id="cmdidOutputWindowCommand" priority="0x0100" type="Button">
+        <Parent guid="guidSHLMainMenu" id="IDG_VS_VIEW_DEV_WINDOWS" />
+        <Icon guid="guidImages2" id="bmpPic1" />
+        <Strings>
+          <ButtonText>Tanzu Output Window</ButtonText>
+        </Strings>
+      </Button>
     </Buttons>
 
 		<!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
@@ -67,8 +74,9 @@
             must be the actual index (1-based) of the bitmap inside the bitmap strip. -->
 			<Bitmap guid="guidImages" href="Resources\tanzu16.png" usedList="bmpPic1" />
 			<Bitmap guid="guidImages1" href="Resources\DeployApp.png" usedList="bmpPic1" />
+      <Bitmap guid="guidImages2" href="Resources\Output.png" usedList="bmpPic1" />
     </Bitmaps>
-	</Commands>
+  </Commands>
 
 	<CommandPlacements>
 		<CommandPlacement guid="guidTanzuForVSPackageCmdSet1" id="cmdidPushToCloudFoundryCommand">
@@ -88,14 +96,19 @@
 			<IDSymbol value="4128" name="MyMenuGroup" />
 			<IDSymbol value="256" name="cmdidPushToCloudFoundryCommand" />
 		</GuidSymbol>
+    <GuidSymbol name="guidTanzuForVSPackageCmdSet2" value="{a236e835-5509-4066-a3a2-cf1661b8b22e}">
+      <IDSymbol value="256" name="cmdidOutputWindowCommand" />
+    </GuidSymbol>
 
-		<!-- Images -->
+    <!-- Images -->
 		<GuidSymbol name="guidImages" value="{99936759-85d4-4db9-8ac2-ca1402b12ad4}">
 			<IDSymbol name="bmpPic1" value="1" />
 		</GuidSymbol>
 		<GuidSymbol name="guidImages1" value="{1e401806-768f-42f2-af53-6e1281da6f5e}">
 			<IDSymbol name="bmpPic1" value="1" />
 		</GuidSymbol>
-
+    <GuidSymbol name="guidImages2" value="{2251cfc3-e92f-40ce-b730-98cf8bd7042d}">
+      <IDSymbol name="bmpPic1" value="1" />
+    </GuidSymbol>
   </Symbols>
 </CommandTable>
