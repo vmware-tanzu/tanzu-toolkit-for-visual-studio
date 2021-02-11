@@ -13,12 +13,25 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         private readonly ICmdProcessService _cmdProcessService;
         private readonly IFileLocatorService _fileLocatorService;
 
+        /* CF CLI V6 COMMANDS */
+        public static string V6_GetCliVersionCmd = "version";
+        public static string V6_GetOAuthTokenCmd = "oauth-token";
+
         public CfCliService(IServiceProvider services)
         {
             _cmdProcessService = services.GetRequiredService<ICmdProcessService>();
             _fileLocatorService = services.GetRequiredService<IFileLocatorService>();
         }
 
+
+        public string GetOAuthToken()
+        {
+            CmdOutput result = ExecuteCfCliCommand(V6_GetOAuthTokenCmd);
+
+            if (result.ExitCode != 0) return null;
+
+            return FormatToken(result.StdOut);
+        }
 
         /// <summary>
         /// Initiate a new Cloud Foundry CLI command with the given arguments.
@@ -28,13 +41,13 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         /// <param name="arguments">Parameters to include along with the `cf` command (e.g. "push", "apps")</param>
         /// <param name="workingDir"></param>
         /// <returns></returns>
-        public async Task<DetailedResult> ExecuteCfCliCommandAsync(string arguments, StdOutDelegate stdOutHandler, string workingDir = null)
+        public async Task<DetailedResult> InvokeCfCliAsync(string arguments, StdOutDelegate stdOutHandler, string workingDir = null)
         {
             string pathToCfExe = _fileLocatorService.FullPathToCfExe;
             if (string.IsNullOrEmpty(pathToCfExe)) return new DetailedResult(false, $"Unable to locate cf.exe.");
 
             string commandStr = '"' + pathToCfExe + '"' + ' ' + arguments;
-            bool commandSucceededWithoutError = await _cmdProcessService.ExecuteWindowlessCommandAsync(commandStr, workingDir, stdOutHandler);
+            bool commandSucceededWithoutError = await _cmdProcessService.InvokeWindowlessCommandAsync(commandStr, workingDir, stdOutHandler);
 
             if (commandSucceededWithoutError) return new DetailedResult(succeeded: true);
 
@@ -43,19 +56,25 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         }
 
         /// <summary>
-        /// Initiate a new CF CLI command with the given arguments. 
-        /// Invoke the command prompt process and return immediately; do not wait for process to exit.
+        /// Invoke the CF CLI command prompt process and return StdOut result string immediately; do not wait for process to exit.
         /// </summary>
         /// <param name="arguments">Parameters to include along with the `cf` command (e.g. "push", "apps")</param>
         /// <param name="workingDir"></param>
-        public void InitiateCfCliCommand(string arguments, string workingDir)
+        public CmdOutput ExecuteCfCliCommand(string arguments, string workingDir = null)
         {
             string pathToCfExe = _fileLocatorService.FullPathToCfExe;
             if (string.IsNullOrEmpty(pathToCfExe)) throw new FileNotFoundException("Unable to locate cf.exe.");
 
             string commandStr = '"' + pathToCfExe + '"' + ' ' + arguments;
-            _cmdProcessService.InitiateWindowlessCommand(commandStr, workingDir);
+            return _cmdProcessService.ExecuteWindowlessCommand(commandStr, workingDir);
         }
 
+        private string FormatToken(string tokenStr)
+        {
+            tokenStr = tokenStr.Replace("\n","");
+            if (tokenStr.StartsWith("bearer ")) tokenStr = tokenStr.Remove(0, 7);
+            
+            return tokenStr;
+        }
     }
 }

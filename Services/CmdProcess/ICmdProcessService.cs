@@ -5,7 +5,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CmdProcess
 {
     public interface ICmdProcessService
     {
-        Task<bool> ExecuteWindowlessCommandAsync(string arguments, string workingDir, StdOutDelegate stdOutHandler);
-        void InitiateWindowlessCommand(string arguments, string workingDir);
+        Task<bool> InvokeWindowlessCommandAsync(string arguments, string workingDir, StdOutDelegate stdOutHandler);
+        CmdOutput ExecuteWindowlessCommand(string arguments, string workingDir);
     }
 }
