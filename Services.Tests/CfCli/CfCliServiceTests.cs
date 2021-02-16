@@ -118,5 +118,32 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.IsFalse(token.Contains("\n"));
         }
 
+        [TestMethod]
+        public void TargetApi_ReturnsTrue_WhenCmdExitCodeIsZero()
+        {
+            var fakeApiAddress = "my.api.addr";
+            bool skipSsl = true;
+            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService.V6_TargetApiCmd} {fakeApiAddress} --skip-ssl-validation";
+
+            mockCmdProcessService.Setup(mock => mock.
+              ExecuteWindowlessCommand(expectedCmdStr, null))
+                .Returns(new CmdResult("junk", "junk", 0));
+
+            Assert.IsTrue(_sut.TargetApi(fakeApiAddress, skipSsl));
+        }
+
+        [TestMethod]
+        public void TargetApi_ReturnsFalse_WhenCmdExitCodeIsNotZero()
+        {
+            var fakeApiAddress = "my.api.addr";
+            bool skipSsl = true;
+            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService.V6_TargetApiCmd} {fakeApiAddress} --skip-ssl-validation";
+
+            mockCmdProcessService.Setup(mock => mock.
+              ExecuteWindowlessCommand(expectedCmdStr, null))
+                .Returns(new CmdResult("junk", "junk", 1));
+
+            Assert.IsFalse(_sut.TargetApi(fakeApiAddress, skipSsl));
+        }
     }
 }

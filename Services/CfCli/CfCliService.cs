@@ -16,6 +16,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         /* CF CLI V6 COMMANDS */
         public static string V6_GetCliVersionCmd = "version";
         public static string V6_GetOAuthTokenCmd = "oauth-token";
+        public static string V6_TargetApiCmd = "api";
 
         public CfCliService(IServiceProvider services)
         {
@@ -31,6 +32,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             if (result.ExitCode != 0) return null;
 
             return FormatToken(result.StdOut);
+        }
+
+        public bool TargetApi(string apiAddress, bool skipSsl)
+        {
+            string args = $"{V6_TargetApiCmd} {apiAddress}{(skipSsl ? " --skip-ssl-validation" : string.Empty)}";
+            CmdResult result = ExecuteCfCliCommand(args);
+
+            return result.ExitCode == 0;
         }
 
         /// <summary>

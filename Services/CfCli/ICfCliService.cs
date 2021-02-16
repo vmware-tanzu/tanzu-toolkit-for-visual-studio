@@ -9,5 +9,6 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         CmdResult ExecuteCfCliCommand(string arguments, string workingDir = null);
         string GetOAuthToken();
         Task<DetailedResult> InvokeCfCliAsync(string arguments, StdOutDelegate stdOutHandler = null, string workingDir = null);
+        bool TargetApi(string apiAddress, bool skipSsl);
     }
 }
