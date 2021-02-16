@@ -26,7 +26,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
         public string GetOAuthToken()
         {
-            CmdOutput result = ExecuteCfCliCommand(V6_GetOAuthTokenCmd);
+            CmdResult result = ExecuteCfCliCommand(V6_GetOAuthTokenCmd);
 
             if (result.ExitCode != 0) return null;
 
@@ -60,7 +60,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         /// </summary>
         /// <param name="arguments">Parameters to include along with the `cf` command (e.g. "push", "apps")</param>
         /// <param name="workingDir"></param>
-        public CmdOutput ExecuteCfCliCommand(string arguments, string workingDir = null)
+        public CmdResult ExecuteCfCliCommand(string arguments, string workingDir = null)
         {
             string pathToCfExe = _fileLocatorService.FullPathToCfExe;
             if (string.IsNullOrEmpty(pathToCfExe)) throw new FileNotFoundException("Unable to locate cf.exe.");

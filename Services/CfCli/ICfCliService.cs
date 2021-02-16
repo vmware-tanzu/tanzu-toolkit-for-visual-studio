@@ -6,7 +6,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 {
     public interface ICfCliService
     {
-        CmdOutput ExecuteCfCliCommand(string arguments, string workingDir = null);
+        CmdResult ExecuteCfCliCommand(string arguments, string workingDir = null);
         string GetOAuthToken();
         Task<DetailedResult> InvokeCfCliAsync(string arguments, StdOutDelegate stdOutHandler = null, string workingDir = null);
     }

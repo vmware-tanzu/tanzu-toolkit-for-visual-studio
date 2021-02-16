@@ -49,7 +49,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CmdProcess
             return false;
         }
 
-        public CmdOutput ExecuteWindowlessCommand(string arguments, string workingDir)
+        public CmdResult ExecuteWindowlessCommand(string arguments, string workingDir)
         {
             //* Create your Process
             Process process = new Process();
@@ -74,7 +74,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CmdProcess
 
             process.WaitForExit();
 
-            return new CmdOutput(StdOutAggregator, StdErrAggregator, process.ExitCode);
+            return new CmdResult(StdOutAggregator, StdErrAggregator, process.ExitCode);
         }
 
         private void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)

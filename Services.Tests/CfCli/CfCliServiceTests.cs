@@ -84,7 +84,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
 
             mockCmdProcessService.Setup(mock => mock.
               ExecuteWindowlessCommand(expectedCmdStr, null))
-                .Returns(new CmdOutput(_fakeStdOut, _fakeStdErr, exitCode: 1));
+                .Returns(new CmdResult(_fakeStdOut, _fakeStdErr, exitCode: 1));
 
             var token = _sut.GetOAuthToken();
 
@@ -98,7 +98,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
 
             mockCmdProcessService.Setup(mock => mock.
               ExecuteWindowlessCommand(expectedCmdStr, null))
-                .Returns(new CmdOutput(_fakeRealisticTokenOutput, _fakeStdErr, exitCode: 0));
+                .Returns(new CmdResult(_fakeRealisticTokenOutput, _fakeStdErr, exitCode: 0));
 
             var token = _sut.GetOAuthToken();
             Assert.IsFalse(token.Contains("bearer"));
@@ -111,7 +111,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
 
             mockCmdProcessService.Setup(mock => mock.
               ExecuteWindowlessCommand(expectedCmdStr, null))
-                .Returns(new CmdOutput(_fakeRealisticTokenOutput, _fakeStdErr, exitCode: 0));
+                .Returns(new CmdResult(_fakeRealisticTokenOutput, _fakeStdErr, exitCode: 0));
             
             var token = _sut.GetOAuthToken();
 
