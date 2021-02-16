@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System.Security;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli;
 using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
@@ -145,5 +146,36 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
 
             Assert.IsFalse(_sut.TargetApi(fakeApiAddress, skipSsl));
         }
+
+        [TestMethod]
+        public void Authenticate_ReturnsTrue_WhenCmdExitCodeIsZero()
+        {
+            var fakeUsername = "uname";
+            var fakePw = new SecureString();
+            var fakeDecodedPw = "";
+            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService.V6_AuthenticateCmd} {fakeUsername} {fakeDecodedPw}";
+
+            mockCmdProcessService.Setup(mock => mock.
+              ExecuteWindowlessCommand(expectedCmdStr, null))
+                .Returns(new CmdResult("junk", "junk", 0));
+
+            Assert.IsTrue(_sut.Authenticate(fakeUsername, fakePw));
+        }
+
+        [TestMethod]
+        public void Authenticate_ReturnsFalse_WhenCmdExitCodeIsNotZero()
+        {
+            var fakeUsername = "uname";
+            var fakePw = new SecureString();
+            var fakeDecodedPw = "";
+            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService.V6_AuthenticateCmd} {fakeUsername} {fakeDecodedPw}";
+
+            mockCmdProcessService.Setup(mock => mock.
+              ExecuteWindowlessCommand(expectedCmdStr, null))
+                .Returns(new CmdResult("junk", "junk", 1));
+
+            Assert.IsFalse(_sut.Authenticate(fakeUsername, fakePw));
+        }
+
     }
 }

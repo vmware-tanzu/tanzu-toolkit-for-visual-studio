@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.IO;
+using System.Security;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
 using Tanzu.Toolkit.VisualStudio.Services.FileLocator;
@@ -17,6 +18,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         public static string V6_GetCliVersionCmd = "version";
         public static string V6_GetOAuthTokenCmd = "oauth-token";
         public static string V6_TargetApiCmd = "api";
+        public static string V6_AuthenticateCmd = "auth";
 
         public CfCliService(IServiceProvider services)
         {
@@ -38,6 +40,22 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         {
             string args = $"{V6_TargetApiCmd} {apiAddress}{(skipSsl ? " --skip-ssl-validation" : string.Empty)}";
             CmdResult result = ExecuteCfCliCommand(args);
+
+            return result.ExitCode == 0;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0059:Unnecessary assignment of a value", Justification = "Null assigment is meant to clear plain text password from memory")]
+        public bool Authenticate(string username, SecureString password)
+        {
+            string passwordStr = new System.Net.NetworkCredential(string.Empty, password).Password;
+
+            string args = $"{V6_AuthenticateCmd} {username} {passwordStr}";
+            CmdResult result = ExecuteCfCliCommand(args);
+
+            /* Erase pw from memory */
+            passwordStr = null;
+            password.Clear();
+            password.Dispose();
 
             return result.ExitCode == 0;
         }
