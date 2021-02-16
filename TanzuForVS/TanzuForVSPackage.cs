@@ -106,7 +106,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<IViewLocatorService, WpfViewLocatorService>();
             services.AddSingleton<IDialogService, WpfDialogService>();
             services.AddSingleton<ICfCliService, CfCliService>();
-            services.AddSingleton<ICmdProcessService, CmdProcessService>();
+            services.AddTransient<ICmdProcessService, CmdProcessService>();
             services.AddSingleton<IFileLocatorService, FileLocatorService>();
 
             services.AddTransient<TanzuCloudExplorerToolWindow>();
