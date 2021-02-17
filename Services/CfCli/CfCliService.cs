@@ -14,6 +14,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         private readonly ICmdProcessService _cmdProcessService;
         private readonly IFileLocatorService _fileLocatorService;
 
+        internal readonly string cfExePathErrorMsg = $"Unable to locate cf.exe.";
+
         /* CF CLI V6 COMMANDS */
         public static string V6_GetCliVersionCmd = "version";
         public static string V6_GetOAuthTokenCmd = "oauth-token";
@@ -29,35 +31,33 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
         public string GetOAuthToken()
         {
-            CmdResult result = ExecuteCfCliCommand(V6_GetOAuthTokenCmd);
+            DetailedResult result = ExecuteCfCliCommand(V6_GetOAuthTokenCmd);
 
-            if (result.ExitCode != 0) return null;
+            if (result.CmdDetails.ExitCode != 0) return null;
 
-            return FormatToken(result.StdOut);
+            return FormatToken(result.CmdDetails.StdOut);
         }
 
-        public bool TargetApi(string apiAddress, bool skipSsl)
+        public DetailedResult TargetApi(string apiAddress, bool skipSsl)
         {
             string args = $"{V6_TargetApiCmd} {apiAddress}{(skipSsl ? " --skip-ssl-validation" : string.Empty)}";
-            CmdResult result = ExecuteCfCliCommand(args);
-
-            return result.ExitCode == 0;
+            return ExecuteCfCliCommand(args);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0059:Unnecessary assignment of a value", Justification = "Null assigment is meant to clear plain text password from memory")]
-        public bool Authenticate(string username, SecureString password)
+        public async Task<DetailedResult> AuthenticateAsync(string username, SecureString password)
         {
             string passwordStr = new System.Net.NetworkCredential(string.Empty, password).Password;
 
             string args = $"{V6_AuthenticateCmd} {username} {passwordStr}";
-            CmdResult result = ExecuteCfCliCommand(args);
+            DetailedResult result = await InvokeCfCliAsync(args);
 
             /* Erase pw from memory */
             passwordStr = null;
             password.Clear();
             password.Dispose();
 
-            return result.ExitCode == 0;
+            return result;
         }
 
         /// <summary>
@@ -87,20 +87,28 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         /// </summary>
         /// <param name="arguments">Parameters to include along with the `cf` command (e.g. "push", "apps")</param>
         /// <param name="workingDir"></param>
-        public CmdResult ExecuteCfCliCommand(string arguments, string workingDir = null)
+        public DetailedResult ExecuteCfCliCommand(string arguments, string workingDir = null)
         {
             string pathToCfExe = _fileLocatorService.FullPathToCfExe;
-            if (string.IsNullOrEmpty(pathToCfExe)) throw new FileNotFoundException("Unable to locate cf.exe.");
+            if (string.IsNullOrEmpty(pathToCfExe))
+            {
+                return new DetailedResult(false, cfExePathErrorMsg);
+            }
 
             string commandStr = '"' + pathToCfExe + '"' + ' ' + arguments;
-            return _cmdProcessService.ExecuteWindowlessCommand(commandStr, workingDir);
+            CmdResult result = _cmdProcessService.ExecuteWindowlessCommand(commandStr, workingDir);
+
+            if (result.ExitCode == 0) return new DetailedResult(succeeded: true, cmdDetails: result);
+
+            string reason = $"Unable to execute `cf {arguments}`.";
+            return new DetailedResult(false, reason, cmdDetails: result);
         }
 
         private string FormatToken(string tokenStr)
         {
-            tokenStr = tokenStr.Replace("\n","");
+            tokenStr = tokenStr.Replace("\n", "");
             if (tokenStr.StartsWith("bearer ")) tokenStr = tokenStr.Remove(0, 7);
-            
+
             return tokenStr;
         }
     }

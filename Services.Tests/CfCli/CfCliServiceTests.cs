@@ -37,7 +37,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         }
 
         [TestMethod()]
-        public async Task ExecuteCfCliCommandAsync_ReturnsTrueResult_WhenProcessSucceeded()
+        public async Task InvokeCfCliAsync_ReturnsTrueResult_WhenProcessSucceeded()
         {
             mockCmdProcessService.Setup(mock => mock.InvokeWindowlessCommandAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>()))
                 .ReturnsAsync(_fakeSuccessResult);
@@ -48,7 +48,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         }
 
         [TestMethod()]
-        public async Task ExecuteCfCliCommandAsync_ReturnsFalseResult_WhenProcessFails()
+        public async Task InvokeCfCliAsync_ReturnsFalseResult_WhenProcessFails()
         {
             mockCmdProcessService.Setup(mock => mock.InvokeWindowlessCommandAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>()))
                 .ReturnsAsync(_fakeFailureResult);
@@ -59,7 +59,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         }
 
         [TestMethod()]
-        public async Task ExecuteCfCliCommandAsync_ReturnsFalseResult_WhenCfExeCouldNotBeFound()
+        public async Task InvokeCfCliAsync_ReturnsFalseResult_WhenCfExeCouldNotBeFound()
         {
             mockFileLocatorService.SetupGet(mock => mock.FullPathToCfExe).Returns((string)null);
 
@@ -69,8 +69,52 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.IsTrue(result.Explanation.Contains("Unable to locate cf.exe"));
         }
 
+        [TestMethod]
+        public void ExecuteCfCliCommand_ReturnsTrueResult_WhenProcessSucceeded()
+        {
+            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {_fakeArguments}";
+
+            mockCmdProcessService.Setup(mock => mock.
+              ExecuteWindowlessCommand(expectedCmdStr, null))
+                .Returns(_fakeSuccessResult);
+
+            DetailedResult result = _sut.ExecuteCfCliCommand(_fakeArguments);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+        }
+        
+        [TestMethod]
+        public void ExecuteCfCliCommand_ReturnsFalseResult_WhenProcessFails()
+        {
+            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {_fakeArguments}";
+
+            mockCmdProcessService.Setup(mock => mock.
+              ExecuteWindowlessCommand(expectedCmdStr, null))
+                .Returns(_fakeFailureResult);
+
+            DetailedResult result = _sut.ExecuteCfCliCommand(_fakeArguments);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsTrue(result.Explanation.Contains($"Unable to execute `cf {_fakeArguments}`."));
+            Assert.AreEqual(_fakeFailureResult, result.CmdDetails);
+        }
+        
+        [TestMethod]
+        public void ExecuteCfCliCommand_ReturnsFalseResult_WhenCfExeCouldNotBeFound()
+        {
+            mockFileLocatorService.SetupGet(mock => mock.
+              FullPathToCfExe)
+                .Returns((string)null);
+
+            DetailedResult result = _sut.ExecuteCfCliCommand(_fakeArguments);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual(_sut.cfExePathErrorMsg, result.Explanation);
+        }
+
         [TestMethod()]
-        public async Task ExecuteCfCliCommandAsync_UsesDefaultDir_WhenNotSpecified()
+        public async Task InvokeCfCliAsync_UsesDefaultDir_WhenNotSpecified()
         {
             string expectedCmdStr = $"\"{_fakePathToCfExe}\" {_fakeArguments}";
             string expectedWorkingDir = null;
@@ -133,9 +177,15 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
 
             mockCmdProcessService.Setup(mock => mock.
               ExecuteWindowlessCommand(expectedCmdStr, null))
-                .Returns(new CmdResult("junk", "junk", 0));
+                .Returns(new CmdResult(_fakeStdOut, _fakeStdErr, 0));
 
-            Assert.IsTrue(_sut.TargetApi(fakeApiAddress, skipSsl));
+            DetailedResult result = _sut.TargetApi(fakeApiAddress, skipSsl);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsTrue(result.CmdDetails.ExitCode == 0);
+            Assert.IsNull(result.Explanation);
+            Assert.AreEqual(_fakeStdOut, result.CmdDetails.StdOut);
+            Assert.AreEqual(_fakeStdErr, result.CmdDetails.StdErr);
         }
 
         [TestMethod]
@@ -147,13 +197,19 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
 
             mockCmdProcessService.Setup(mock => mock.
               ExecuteWindowlessCommand(expectedCmdStr, null))
-                .Returns(new CmdResult("junk", "junk", 1));
+                .Returns(new CmdResult(_fakeStdOut, _fakeStdErr, 1));
 
-            Assert.IsFalse(_sut.TargetApi(fakeApiAddress, skipSsl));
+            DetailedResult result = _sut.TargetApi(fakeApiAddress, skipSsl);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsTrue(result.CmdDetails.ExitCode == 1);
+            Assert.IsNotNull(result.Explanation);
+            Assert.AreEqual(_fakeStdOut, result.CmdDetails.StdOut);
+            Assert.AreEqual(_fakeStdErr, result.CmdDetails.StdErr);
         }
 
         [TestMethod]
-        public void Authenticate_ReturnsTrue_WhenCmdExitCodeIsZero()
+        public async Task Authenticate_ReturnsTrue_WhenCmdExitCodeIsZero()
         {
             var fakeUsername = "uname";
             var fakePw = new SecureString();
@@ -161,14 +217,20 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService.V6_AuthenticateCmd} {fakeUsername} {fakeDecodedPw}";
 
             mockCmdProcessService.Setup(mock => mock.
-              ExecuteWindowlessCommand(expectedCmdStr, null))
-                .Returns(new CmdResult("junk", "junk", 0));
+              InvokeWindowlessCommandAsync(expectedCmdStr, null, null, null))
+                .ReturnsAsync(new CmdResult(_fakeStdOut, _fakeStdErr, 0));
 
-            Assert.IsTrue(_sut.Authenticate(fakeUsername, fakePw));
+            DetailedResult result = await _sut.AuthenticateAsync(fakeUsername, fakePw);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsTrue(result.CmdDetails.ExitCode == 0);
+            Assert.IsNull(result.Explanation);
+            Assert.AreEqual(_fakeStdOut, result.CmdDetails.StdOut);
+            Assert.AreEqual(_fakeStdErr, result.CmdDetails.StdErr);
         }
 
         [TestMethod]
-        public void Authenticate_ReturnsFalse_WhenCmdExitCodeIsNotZero()
+        public async Task Authenticate_ReturnsFalse_WhenCmdExitCodeIsNotZero()
         {
             var fakeUsername = "uname";
             var fakePw = new SecureString();
@@ -176,10 +238,16 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService.V6_AuthenticateCmd} {fakeUsername} {fakeDecodedPw}";
 
             mockCmdProcessService.Setup(mock => mock.
-              ExecuteWindowlessCommand(expectedCmdStr, null))
-                .Returns(new CmdResult("junk", "junk", 1));
+              InvokeWindowlessCommandAsync(expectedCmdStr, null, null, null))
+                .ReturnsAsync(new CmdResult(_fakeStdOut, _fakeStdErr, 1));
 
-            Assert.IsFalse(_sut.Authenticate(fakeUsername, fakePw));
+            DetailedResult result = await _sut.AuthenticateAsync(fakeUsername, fakePw);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsTrue(result.CmdDetails.ExitCode == 1);
+            Assert.IsNotNull(result.Explanation);
+            Assert.AreEqual(_fakeStdOut, result.CmdDetails.StdOut);
+            Assert.AreEqual(_fakeStdErr, result.CmdDetails.StdErr);
         }
 
         [TestMethod]

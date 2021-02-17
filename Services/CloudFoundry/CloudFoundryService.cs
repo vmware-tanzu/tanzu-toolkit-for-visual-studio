@@ -41,9 +41,9 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             CloudFoundryInstances.Add(name, new CloudFoundryInstance(name, apiAddress, accessToken));
         }
 
-        public async Task<ConnectResult> ConnectToCFAsync(string target, string username, SecureString password, string httpProxy, bool skipSsl)
+        public async Task<ConnectResult> ConnectToCFAsync(string targetApiAddress, string username, SecureString password, string httpProxy, bool skipSsl)
         {
-            if (string.IsNullOrEmpty(target)) throw new ArgumentException(nameof(target));
+            if (string.IsNullOrEmpty(targetApiAddress)) throw new ArgumentException(nameof(targetApiAddress));
 
             if (string.IsNullOrEmpty(username)) throw new ArgumentException(nameof(username));
 
@@ -51,15 +51,34 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
 
             try
             {
-                string passwordStr = new System.Net.NetworkCredential(string.Empty, password).Password;
+                DetailedResult targetResult = cfCliService.TargetApi(targetApiAddress, skipSsl);
 
-                //* Redundant call to `cf login` provisions the cli environment, enabling it to make 
-                //* requests like `cf push`, `cf orgs` (which require user to be logged in).
-                await LoginViaCfCli(target, username, skipSsl, passwordStr);
+                // TODO: add test to make sure this doesn't break when targetResult.CmdDetails == null
+                if (targetResult.CmdDetails.ExitCode != 0)
+                {
+                    throw new Exception(
+                        message: LoginFailureMessage,
+                        innerException: new Exception(
+                            message: $"Unable to target api at this address: {targetApiAddress}",
+                            innerException: new Exception(targetResult.CmdDetails.StdErr)));
+                }
 
-                string accessToken = cfCliService.GetOAuthToken(); 
+                DetailedResult authResult = await cfCliService.AuthenticateAsync(username, password);
+
+                // TODO: add test to make sure this doesn't break when authResult.CmdDetails == null
+                if (authResult.CmdDetails.ExitCode != 0)
+                {
+                    throw new Exception(
+                       message: LoginFailureMessage,
+                       innerException: new Exception(
+                           message: $"Unable to authenticate user \"{username}\"",
+                           innerException: new Exception(authResult.CmdDetails.StdErr)));
+                }
+
+                string accessToken = cfCliService.GetOAuthToken();
 
                 if (!string.IsNullOrEmpty(accessToken)) return new ConnectResult(true, null, accessToken);
+
                 throw new Exception(LoginFailureMessage);
             }
             catch (Exception e)
@@ -223,20 +242,5 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             return new DetailedResult(true, $"App successfully deploying to org '{targetOrg.OrgName}', space '{targetSpace.SpaceName}'...");
         }
 
-        /// <summary>
-        /// Simulate a `cf login` command by combining `cf api` with `cf auth`.
-        /// </summary>
-        /// <param name="target"></param>
-        /// <param name="username"></param>
-        /// <param name="skipSsl"></param>
-        /// <param name="passwordStr"></param>
-        /// <returns></returns>
-        private static async Task LoginViaCfCli(string target, string username, bool skipSsl, string passwordStr)
-        {
-            string cfApiCmdArgs = $"api {target}{(skipSsl ? " --skip-ssl-validation" : string.Empty)}";
-            await cfCliService.InvokeCfCliAsync(cfApiCmdArgs);
-
-            await cfCliService.InvokeCfCliAsync($"auth {username} {passwordStr}");
-        }
     }
 }
