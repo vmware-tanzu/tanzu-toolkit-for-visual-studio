@@ -25,7 +25,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         private CloudFoundryInstance selectedCf;
         private CloudFoundryOrganization selectedOrg;
         private CloudFoundrySpace selectedSpace;
-        private IOutputViewModel outputViewModel;
+        internal IOutputViewModel outputViewModel;
 
 
         public DeploymentDialogViewModel(IServiceProvider services, string directoryOfProjectToDeploy)
@@ -192,7 +192,9 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
                     SelectedSpace,
                     AppName,
                     projDir,
-                    outputViewModel.AppendLine);
+                    stdOutCallback: outputViewModel.AppendLine,
+                    stdErrCallback: outputViewModel.AppendLine
+                );
             }
             catch (Exception)
             {

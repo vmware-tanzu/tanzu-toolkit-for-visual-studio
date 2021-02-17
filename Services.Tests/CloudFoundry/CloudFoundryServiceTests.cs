@@ -54,7 +54,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
         [TestMethod()]
         public async Task ConnectToCFAsync_ReturnsConnectResult_WhenLoginSucceeds()
         {
-            mockCfCliService.Setup(mock => mock.InvokeCfCliAsync(It.IsAny<string>(), It.IsAny<StdOutDelegate>(), It.IsAny<string>())).ReturnsAsync(new DetailedResult(true));
+            mockCfCliService.Setup(mock => mock.InvokeCfCliAsync(It.IsAny<string>(), It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), It.IsAny<string>())).ReturnsAsync(new DetailedResult(true));
             mockCfCliService.Setup(mock => mock.GetOAuthToken()).Returns(fakeValidAccessToken);
 
             ConnectResult result = await cfService.ConnectToCFAsync(fakeValidTarget, fakeValidUsername, fakeValidPassword, fakeHttpProxy, skipSsl);
@@ -69,7 +69,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
         public async Task ConnectToCFAsync_ReturnsConnectResult_WhenLoginFails()
         {
             string unacquiredToken = null;
-            mockCfCliService.Setup(mock => mock.InvokeCfCliAsync(It.IsAny<string>(), It.IsAny<StdOutDelegate>(), It.IsAny<string>())).ReturnsAsync(new DetailedResult(true));
+            mockCfCliService.Setup(mock => mock.InvokeCfCliAsync(It.IsAny<string>(), It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), It.IsAny<string>())).ReturnsAsync(new DetailedResult(true));
             mockCfCliService.Setup(mock => mock.GetOAuthToken()).Returns(unacquiredToken);
 
             ConnectResult result = await cfService.ConnectToCFAsync(fakeValidTarget, fakeValidUsername, fakeValidPassword, fakeHttpProxy, skipSsl);
@@ -88,7 +88,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             string outerMessage = "outer exception message";
             Exception multilayeredException = new Exception(outerMessage, new Exception(innerMessage, new Exception(baseMessage)));
 
-            mockCfCliService.Setup(mock => mock.InvokeCfCliAsync(It.IsAny<string>(), It.IsAny<StdOutDelegate>(), It.IsAny<string>())).ReturnsAsync(new DetailedResult(true));
+            mockCfCliService.Setup(mock => mock.InvokeCfCliAsync(It.IsAny<string>(), It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), It.IsAny<string>())).ReturnsAsync(new DetailedResult(true));
             mockCfCliService.Setup(mock => mock.GetOAuthToken()).Throws(multilayeredException);
 
             ConnectResult result = await cfService.ConnectToCFAsync(fakeValidTarget, fakeValidUsername, fakeValidPassword, fakeHttpProxy, skipSsl);
@@ -110,11 +110,11 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             var fakeCfAuthResponse = new DetailedResult(true);
 
             mockCfCliService.Setup(mock =>
-                mock.InvokeCfCliAsync(cfApiArgs, It.IsAny<StdOutDelegate>(), It.IsAny<string>()))
+                mock.InvokeCfCliAsync(cfApiArgs, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), It.IsAny<string>()))
                     .ReturnsAsync(fakeCfApiResponse);
 
             mockCfCliService.Setup(mock =>
-                mock.InvokeCfCliAsync(cfAuthArgs, It.IsAny<StdOutDelegate>(), It.IsAny<string>()))
+                mock.InvokeCfCliAsync(cfAuthArgs, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), It.IsAny<string>()))
                     .ReturnsAsync(fakeCfAuthResponse);
 
             var result = await cfService.ConnectToCFAsync(fakeValidTarget, fakeValidUsername, fakeValidPassword, fakeHttpProxy, skipSsl);
@@ -512,19 +512,19 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             var fakeCfCmdResponse = new DetailedResult(false, fakeFailureExplanation);
 
             mockCfCliService.Setup(mock =>
-                mock.InvokeCfCliAsync(It.IsAny<string>(), It.IsAny<StdOutDelegate>(), It.IsAny<string>()))
+                mock.InvokeCfCliAsync(It.IsAny<string>(), It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), It.IsAny<string>()))
                     .ReturnsAsync(fakeCfCmdResponse);
 
             mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
-            DetailedResult result = await cfService.DeployAppAsync(fakeCfInstance, fakeOrg, fakeSpace, fakeApp.AppName, fakeProjectPath, stdOutHandler: null);
+            DetailedResult result = await cfService.DeployAppAsync(fakeCfInstance, fakeOrg, fakeSpace, fakeApp.AppName, fakeProjectPath, stdOutCallback: null, stdErrCallback: null);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains(fakeFailureExplanation));
 
             var cfTargetArgs = $"target -o {fakeOrg.OrgName} -s {fakeSpace.SpaceName}";
             mockCfCliService.Verify(mock =>
-                mock.InvokeCfCliAsync(cfTargetArgs, null, null),
+                mock.InvokeCfCliAsync(cfTargetArgs, null, null, null),
                     Times.Once);
         }
 
@@ -538,26 +538,26 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             var fakeCfPushResponse = new DetailedResult(false, fakeFailureExplanation);
 
             mockCfCliService.Setup(mock =>
-                mock.InvokeCfCliAsync(cfTargetArgs, It.IsAny<StdOutDelegate>(), It.IsAny<string>()))
+                mock.InvokeCfCliAsync(cfTargetArgs, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), It.IsAny<string>()))
                     .ReturnsAsync(fakeCfTargetResponse);
 
             mockCfCliService.Setup(mock =>
-                mock.InvokeCfCliAsync(cfPushArgs, It.IsAny<StdOutDelegate>(), It.IsAny<string>()))
+                mock.InvokeCfCliAsync(cfPushArgs, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), It.IsAny<string>()))
                     .ReturnsAsync(fakeCfPushResponse);
 
             mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
-            DetailedResult result = await cfService.DeployAppAsync(fakeCfInstance, fakeOrg, fakeSpace, fakeApp.AppName, fakeProjectPath, stdOutHandler: null);
+            DetailedResult result = await cfService.DeployAppAsync(fakeCfInstance, fakeOrg, fakeSpace, fakeApp.AppName, fakeProjectPath, stdOutCallback: null, stdErrCallback: null);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains(fakeFailureExplanation));
 
             mockCfCliService.Verify(mock =>
-                mock.InvokeCfCliAsync(cfTargetArgs, null, null),
+                mock.InvokeCfCliAsync(cfTargetArgs, null, null, null),
                     Times.Once);
 
             mockCfCliService.Verify(mock =>
-                mock.InvokeCfCliAsync(cfPushArgs, null, fakeProjectPath),
+                mock.InvokeCfCliAsync(cfPushArgs, null, null, fakeProjectPath),
                     Times.Once);
         }
 
@@ -570,25 +570,25 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             var fakeCfPushResponse = new DetailedResult(true);
 
             mockCfCliService.Setup(mock =>
-                mock.InvokeCfCliAsync(cfTargetArgs, It.IsAny<StdOutDelegate>(), It.IsAny<string>()))
+                mock.InvokeCfCliAsync(cfTargetArgs, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), It.IsAny<string>()))
                     .ReturnsAsync(fakeCfTargetResponse);
 
             mockCfCliService.Setup(mock =>
-                mock.InvokeCfCliAsync(cfPushArgs, It.IsAny<StdOutDelegate>(), It.IsAny<string>()))
+                mock.InvokeCfCliAsync(cfPushArgs, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), It.IsAny<string>()))
                     .ReturnsAsync(fakeCfPushResponse);
 
             mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
-            DetailedResult result = await cfService.DeployAppAsync(fakeCfInstance, fakeOrg, fakeSpace, fakeApp.AppName, fakeProjectPath, stdOutHandler: null);
+            DetailedResult result = await cfService.DeployAppAsync(fakeCfInstance, fakeOrg, fakeSpace, fakeApp.AppName, fakeProjectPath, stdOutCallback: null, stdErrCallback: null);
 
             Assert.IsTrue(result.Succeeded);
 
             mockCfCliService.Verify(mock =>
-                mock.InvokeCfCliAsync(cfTargetArgs, null, null),
+                mock.InvokeCfCliAsync(cfTargetArgs, null, null, null),
                     Times.Once);
 
             mockCfCliService.Verify(mock =>
-                mock.InvokeCfCliAsync(cfPushArgs, null, fakeProjectPath),
+                mock.InvokeCfCliAsync(cfPushArgs, null, null, fakeProjectPath),
                     Times.Once);
         }
 
@@ -597,7 +597,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
         {
             mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(false);
 
-            var result = await cfService.DeployAppAsync(fakeCfInstance, fakeOrg, fakeSpace, fakeApp.AppName, fakeProjectPath, null);
+            var result = await cfService.DeployAppAsync(fakeCfInstance, fakeOrg, fakeSpace, fakeApp.AppName, fakeProjectPath, stdOutCallback: null, stdErrCallback: null);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains(CloudFoundryService.emptyOutputDirMessage));

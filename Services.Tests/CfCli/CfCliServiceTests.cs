@@ -17,6 +17,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         private readonly string _fakeStdOut = "some output content";
         private readonly string _fakeStdErr = "some error content";
         private readonly string _fakeRealisticTokenOutput = "bearer my.fake.token\n";
+        private readonly CmdResult _fakeSuccessResult = new CmdResult("junk output", "junk error", 0);
+        private readonly CmdResult _fakeFailureResult = new CmdResult("junk output", "junk error", 1);
+        private readonly StdOutDelegate _fakeOutCallback = delegate (string content) { };
+        private readonly StdErrDelegate _fakeErrCallback = delegate (string content) { };
 
         [TestInitialize]
         public void TestInit()
@@ -35,10 +39,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         [TestMethod()]
         public async Task ExecuteCfCliCommandAsync_ReturnsTrueResult_WhenProcessSucceeded()
         {
-            mockCmdProcessService.Setup(mock => mock.InvokeWindowlessCommandAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<StdOutDelegate>()))
-                .ReturnsAsync(true);
+            mockCmdProcessService.Setup(mock => mock.InvokeWindowlessCommandAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>()))
+                .ReturnsAsync(_fakeSuccessResult);
 
-            DetailedResult result = await _sut.InvokeCfCliAsync(_fakeArguments, stdOutHandler: null);
+            DetailedResult result = await _sut.InvokeCfCliAsync(_fakeArguments);
 
             Assert.AreEqual(true, result.Succeeded);
         }
@@ -46,10 +50,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         [TestMethod()]
         public async Task ExecuteCfCliCommandAsync_ReturnsFalseResult_WhenProcessFails()
         {
-            mockCmdProcessService.Setup(mock => mock.InvokeWindowlessCommandAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<StdOutDelegate>()))
-                .ReturnsAsync(false);
+            mockCmdProcessService.Setup(mock => mock.InvokeWindowlessCommandAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>()))
+                .ReturnsAsync(_fakeFailureResult);
 
-            DetailedResult result = await _sut.InvokeCfCliAsync(_fakeArguments, stdOutHandler: null);
+            DetailedResult result = await _sut.InvokeCfCliAsync(_fakeArguments);
 
             Assert.IsFalse(result.Succeeded);
         }
@@ -59,7 +63,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         {
             mockFileLocatorService.SetupGet(mock => mock.FullPathToCfExe).Returns((string)null);
 
-            DetailedResult result = await _sut.InvokeCfCliAsync(_fakeArguments, stdOutHandler: null);
+            DetailedResult result = await _sut.InvokeCfCliAsync(_fakeArguments);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains("Unable to locate cf.exe"));
@@ -68,14 +72,15 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         [TestMethod()]
         public async Task ExecuteCfCliCommandAsync_UsesDefaultDir_WhenNotSpecified()
         {
-            mockCmdProcessService.Setup(mock => mock.InvokeWindowlessCommandAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<StdOutDelegate>()))
-                .ReturnsAsync(true);
-
-            DetailedResult result = await _sut.InvokeCfCliAsync(_fakeArguments, stdOutHandler: null);
-
             string expectedCmdStr = $"\"{_fakePathToCfExe}\" {_fakeArguments}";
             string expectedWorkingDir = null;
-            mockCmdProcessService.Verify(mock => mock.InvokeWindowlessCommandAsync(expectedCmdStr, expectedWorkingDir, null), Times.Once());
+
+            mockCmdProcessService.Setup(mock => mock.InvokeWindowlessCommandAsync(It.IsAny<string>(), expectedWorkingDir, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>()))
+                .ReturnsAsync(_fakeSuccessResult);
+
+            DetailedResult result = await _sut.InvokeCfCliAsync(_fakeArguments);
+
+            mockCmdProcessService.Verify(mock => mock.InvokeWindowlessCommandAsync(expectedCmdStr, expectedWorkingDir, null, null), Times.Once());
         }
 
         [TestMethod]
@@ -177,5 +182,40 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.IsFalse(_sut.Authenticate(fakeUsername, fakePw));
         }
 
+        [TestMethod]
+        public async Task InvokeCfCliAsync_ReturnsTrueDetailedResult_WhenCmdExitsWithZeroCode()
+        {
+            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {_fakeArguments}";
+
+            mockCmdProcessService.Setup(mock => mock.
+              InvokeWindowlessCommandAsync(expectedCmdStr, null, _fakeOutCallback, _fakeErrCallback))
+                .ReturnsAsync(new CmdResult(_fakeStdOut, _fakeStdErr, 0));
+
+            var result = await _sut.InvokeCfCliAsync(_fakeArguments, _fakeOutCallback, _fakeErrCallback);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.IsTrue(result.CmdDetails.ExitCode == 0);
+            Assert.IsTrue(result.CmdDetails.StdOut == _fakeStdOut);
+            Assert.IsTrue(result.CmdDetails.StdErr == _fakeStdErr);
+        }
+
+        [TestMethod]
+        public async Task InvokeCfCliAsync_ReturnsFalseDetailedResult_WhenCmdExitsWithNonZeroCode()
+        {
+            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {_fakeArguments}";
+
+            mockCmdProcessService.Setup(mock => mock.
+              InvokeWindowlessCommandAsync(expectedCmdStr, null, _fakeOutCallback, _fakeErrCallback))
+                .ReturnsAsync(new CmdResult(_fakeStdOut, _fakeStdErr, 1));
+
+            var result = await _sut.InvokeCfCliAsync(_fakeArguments, _fakeOutCallback, _fakeErrCallback);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsTrue(result.Explanation.Contains($"Unable to execute `cf {_fakeArguments}`."));
+            Assert.IsTrue(result.CmdDetails.ExitCode == 1);
+            Assert.IsTrue(result.CmdDetails.StdOut == _fakeStdOut);
+            Assert.IsTrue(result.CmdDetails.StdErr == _fakeStdErr);
+        }
     }
 }

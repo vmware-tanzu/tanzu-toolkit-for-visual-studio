@@ -68,18 +68,18 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         /// <param name="arguments">Parameters to include along with the `cf` command (e.g. "push", "apps")</param>
         /// <param name="workingDir"></param>
         /// <returns></returns>
-        public async Task<DetailedResult> InvokeCfCliAsync(string arguments, StdOutDelegate stdOutHandler, string workingDir = null)
+        public async Task<DetailedResult> InvokeCfCliAsync(string arguments, StdOutDelegate stdOutCallback = null, StdErrDelegate stdErrCallback = null, string workingDir = null)
         {
             string pathToCfExe = _fileLocatorService.FullPathToCfExe;
             if (string.IsNullOrEmpty(pathToCfExe)) return new DetailedResult(false, $"Unable to locate cf.exe.");
 
             string commandStr = '"' + pathToCfExe + '"' + ' ' + arguments;
-            bool commandSucceededWithoutError = await _cmdProcessService.InvokeWindowlessCommandAsync(commandStr, workingDir, stdOutHandler);
+            CmdResult result = await _cmdProcessService.InvokeWindowlessCommandAsync(commandStr, workingDir, stdOutCallback, stdErrCallback);
 
-            if (commandSucceededWithoutError) return new DetailedResult(succeeded: true);
+            if (result.ExitCode == 0) return new DetailedResult(succeeded: true, cmdDetails: result);
 
             string reason = $"Unable to execute `cf {arguments}`.";
-            return new DetailedResult(false, reason);
+            return new DetailedResult(false, reason, cmdDetails: result);
         }
 
         /// <summary>

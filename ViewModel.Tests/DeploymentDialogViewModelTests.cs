@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.VisualStudio.Models;
-using Tanzu.Toolkit.VisualStudio.Services;
 using static Tanzu.Toolkit.VisualStudio.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
@@ -156,7 +155,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             };
 
             mockCloudFoundryService.Setup(mock =>
-                mock.DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, It.IsAny<StdOutDelegate>()))
+                mock.DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>()))
                     .ThrowsAsync(fakeException);
 
             _sut.AppName = _fakeAppName;
@@ -180,6 +179,26 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             mockCloudFoundryService.VerifyAll(); // ensure DeployAppAsync was called with proper params
             mockViewLocatorService.VerifyAll(); // ensure we're using a mock output view/viewmodel
+        }
+
+        [TestMethod]
+        public async Task StartDeploymentTask_PassesOutputViewModelAppendLineMethod_AsCallbacks()
+        {
+            _sut.AppName = _fakeAppName;
+            _sut.SelectedCf = _fakeCfInstance;
+            _sut.SelectedOrg = _fakeOrg;
+            _sut.SelectedSpace = _fakeSpace;
+
+            StdOutDelegate expectedStdOutCallback = _sut.outputViewModel.AppendLine;
+            StdErrDelegate expectedStdErrCallback = _sut.outputViewModel.AppendLine;
+
+            await _sut.StartDeployment();
+
+            mockCloudFoundryService.Verify(mock => mock.
+              DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath,
+                             expectedStdOutCallback,
+                             expectedStdErrCallback), 
+                Times.Once);
         }
     }
 

@@ -6,7 +6,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CmdProcess
 {
     public class CmdProcessService : ICmdProcessService
     {
-        StdOutDelegate StdOutHandler;
+        StdOutDelegate StdOutCallback;
+        StdErrDelegate StdErrCallback;
         private string StdOutAggregator = "";
         private string StdErrAggregator = "";
 
@@ -20,7 +21,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CmdProcess
         /// <param name="arguments"></param>
         /// <param name="workingDir"></param>
         /// <returns></returns>
-        public async Task<bool> InvokeWindowlessCommandAsync(string arguments, string workingDir, StdOutDelegate stdOutHandler)
+        public async Task<CmdResult> InvokeWindowlessCommandAsync(string arguments, string workingDir, StdOutDelegate stdOutDelegate, StdErrDelegate stdErrDelegate)
         {
             //* Create your Process
             Process process = new Process();
@@ -33,9 +34,12 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CmdProcess
             if (workingDir != null) process.StartInfo.WorkingDirectory = workingDir;
 
             //* Set your output and error (asynchronous) handlers
-            StdOutHandler = stdOutHandler;
-            process.OutputDataReceived += new DataReceivedEventHandler(OutputHandler);
-            process.ErrorDataReceived += new DataReceivedEventHandler(ErrorHandler);
+            StdOutCallback = stdOutDelegate;
+            StdErrCallback = stdErrDelegate;
+            StdOutAggregator = "";
+            StdErrAggregator = "";
+            process.OutputDataReceived += new DataReceivedEventHandler(OutputRecorder);
+            process.ErrorDataReceived += new DataReceivedEventHandler(ErrorRecorder);
 
             //* Start process and handlers
             process.Start();
@@ -45,8 +49,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CmdProcess
             // Begin blocking call
             await Task.Run(() => process.WaitForExit());
 
-            if (process.ExitCode == 0) return true;
-            return false;
+            return new CmdResult(StdOutAggregator, StdErrAggregator, process.ExitCode);
         }
 
         public CmdResult ExecuteWindowlessCommand(string arguments, string workingDir)
@@ -64,8 +67,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CmdProcess
             //* Set your output and error (asynchronous) handlers
             StdOutAggregator = "";
             StdErrAggregator = "";
-            process.OutputDataReceived += new DataReceivedEventHandler(StdOutRecorder);
-            process.ErrorDataReceived += new DataReceivedEventHandler(StdErrRecorder);
+            process.OutputDataReceived += new DataReceivedEventHandler(OutputRecorder);
+            process.ErrorDataReceived += new DataReceivedEventHandler(ErrorRecorder);
 
             //* Start process and handlers
             process.Start();
@@ -76,40 +79,24 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CmdProcess
 
             return new CmdResult(StdOutAggregator, StdErrAggregator, process.ExitCode);
         }
-
-        private void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
-        {
-            string outContent = outLine.Data;
-            if (outContent != null)
-            {
-                StdOutHandler?.Invoke(outContent);
-            }
-        }
-
-        private void ErrorHandler(object sendingProcess, DataReceivedEventArgs errLine)
-        {
-            string errContent = errLine.Data;
-            if (errContent != null)
-            {
-                StdOutHandler?.Invoke(errContent);
-            }
-        }
         
-        private void StdOutRecorder(object sendingProcess, DataReceivedEventArgs outLine)
+        private void OutputRecorder(object sendingProcess, DataReceivedEventArgs outLine)
         {
             string outContent = outLine.Data;
             if (outContent != null)
             {
                 StdOutAggregator += $"{outContent}\n";
+                StdOutCallback?.Invoke(outContent);
             }
         }
 
-        private void StdErrRecorder(object sendingProcess, DataReceivedEventArgs errLine)
+        private void ErrorRecorder(object sendingProcess, DataReceivedEventArgs errLine)
         {
             string errContent = errLine.Data;
             if (errContent != null)
             {
                 StdErrAggregator += $"{errContent}\n";
+                StdErrCallback?.Invoke(errContent);
             }
         }
 
