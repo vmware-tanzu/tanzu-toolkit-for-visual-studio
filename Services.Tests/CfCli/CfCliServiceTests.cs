@@ -9,18 +9,20 @@ using static Tanzu.Toolkit.VisualStudio.Services.OutputHandler.OutputHandler;
 namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
 {
     [TestClass()]
-    public class CfCliServiceTests : ServicesTestSupport
+    public class CfCliServiceTests : CfCliServiceTestSupport
     {
         private CfCliService _sut;
-        private readonly string _fakeArguments = "fake args";
-        private readonly string _fakePathToCfExe = "this\\is\\a\\fake\\path";
-        private readonly string _fakeStdOut = "some output content";
-        private readonly string _fakeStdErr = "some error content";
-        private readonly string _fakeRealisticTokenOutput = "bearer my.fake.token\n";
-        private readonly CmdResult _fakeSuccessResult = new CmdResult("junk output", "junk error", 0);
-        private readonly CmdResult _fakeFailureResult = new CmdResult("junk output", "junk error", 1);
-        private readonly StdOutDelegate _fakeOutCallback = delegate (string content) { };
-        private readonly StdErrDelegate _fakeErrCallback = delegate (string content) { };
+        private static readonly string _fakeArguments = "fake args";
+        private static readonly string _fakePathToCfExe = "this\\is\\a\\fake\\path";
+        private static readonly string _fakeStdOut = "some output content";
+        private static readonly string _fakeStdErr = "some error content";
+        private static readonly string _fakeRealisticTokenOutput = "bearer my.fake.token\n";
+        private static readonly CmdResult _fakeSuccessResult = new CmdResult("junk output", "junk error", 0);
+        private static readonly CmdResult _fakeFailureResult = new CmdResult("junk output", "junk error", 1);
+        private static readonly StdOutDelegate _fakeOutCallback = delegate (string content) { };
+        private static readonly StdErrDelegate _fakeErrCallback = delegate (string content) { };
+        private static readonly CmdResult _fakeOrgsCmdResult = new CmdResult(_fakeMultiPageOrgsOutput, string.Empty, 0);
+
 
         [TestInitialize]
         public void TestInit()
@@ -83,7 +85,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.IsTrue(result.Succeeded);
             Assert.IsNull(result.Explanation);
         }
-        
+
         [TestMethod]
         public void ExecuteCfCliCommand_ReturnsFalseResult_WhenProcessFails()
         {
@@ -99,7 +101,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.IsTrue(result.Explanation.Contains($"Unable to execute `cf {_fakeArguments}`."));
             Assert.AreEqual(_fakeFailureResult, result.CmdDetails);
         }
-        
+
         [TestMethod]
         public void ExecuteCfCliCommand_ReturnsFalseResult_WhenCfExeCouldNotBeFound()
         {
@@ -153,7 +155,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             var token = _sut.GetOAuthToken();
             Assert.IsFalse(token.Contains("bearer"));
         }
-        
+
         [TestMethod]
         public void GetOAuthToken_RemovesNewlinesFromTokenResult()
         {
@@ -162,7 +164,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             mockCmdProcessService.Setup(mock => mock.
               ExecuteWindowlessCommand(expectedCmdStr, null))
                 .Returns(new CmdResult(_fakeRealisticTokenOutput, _fakeStdErr, exitCode: 0));
-            
+
             var token = _sut.GetOAuthToken();
 
             Assert.IsFalse(token.Contains("\n"));
@@ -284,6 +286,54 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.IsTrue(result.CmdDetails.ExitCode == 1);
             Assert.IsTrue(result.CmdDetails.StdOut == _fakeStdOut);
             Assert.IsTrue(result.CmdDetails.StdErr == _fakeStdErr);
+        }
+
+        [TestMethod]
+        public async Task GetOrgsAsync_ReturnsListOfOrgs_WhenCmdSucceeds()
+        {
+            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetOrgsCmd} -v";
+
+            mockCmdProcessService.Setup(mock => mock.
+              InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
+                .ReturnsAsync(_fakeOrgsCmdResult);
+
+            var result = await _sut.GetOrgsAsync();
+
+            int numOrgsInFakeResponse = 54;
+            Assert.AreEqual(numOrgsInFakeResponse, result.Count);
+            Assert.AreEqual(_fakeOrgName1, result[0].entity.name);
+            Assert.AreEqual(_fakeOrgGuid1, result[0].metadata.guid);
+        }
+
+        [TestMethod]
+        public async Task GetOrgsAsync_ReturnsEmptyList_WhenCmdExitsWithNonZeroCode()
+        {
+            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetOrgsCmd} -v";
+            var fakeFailureCmdResult = new CmdResult(string.Empty, string.Empty, 1);
+
+            mockCmdProcessService.Setup(mock => mock.
+              InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
+                .ReturnsAsync(fakeFailureCmdResult);
+
+            var result = await _sut.GetOrgsAsync();
+
+            Assert.AreEqual(0, result.Count);
+        }
+
+        [TestMethod]
+        public async Task GetOrgsAsync_ReturnsEmptyList_WhenJsonParsingFails()
+        {
+            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetOrgsCmd} -v";
+            var fakeInvalidJsonOutput = $"REQUEST {CfCliService.V6_GetOrgsRequestPath} asdf RESPONSE asdf";
+            var fakeFailureCmdResult = new CmdResult(fakeInvalidJsonOutput, string.Empty, 0);
+
+            mockCmdProcessService.Setup(mock => mock.
+              InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
+                .ReturnsAsync(fakeFailureCmdResult);
+
+            var result = await _sut.GetOrgsAsync();
+
+            Assert.AreEqual(0, result.Count);
         }
     }
 }

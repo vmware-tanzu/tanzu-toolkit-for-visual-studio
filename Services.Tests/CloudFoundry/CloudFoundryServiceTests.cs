@@ -101,6 +101,37 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             mockCfCliService.VerifyAll();
         }
 
+       
+        [TestMethod()]
+        public async Task ConnectToCFAsync_ReturnsConnectResult_WhenLoginFails_BecuaseTargetResultCmdDetailsAreNull()
+        {
+            mockCfCliService.Setup(mock => mock.TargetApi(fakeValidTarget, true))
+                .Returns(new DetailedResult(true, null, null));
+
+            ConnectResult result = await cfService.ConnectToCFAsync(fakeValidTarget, fakeValidUsername, fakeValidPassword, fakeHttpProxy, skipSsl);
+
+            Assert.IsFalse(result.IsLoggedIn);
+            Assert.IsTrue(result.ErrorMessage.Contains(cfService.LoginFailureMessage));
+            Assert.IsNull(result.Token);
+            mockCfCliService.VerifyAll();
+        }
+
+        [TestMethod()]
+        public async Task ConnectToCFAsync_ReturnsConnectResult_WhenLoginFails_BecuaseAuthResultCmdDetailsAreNull()
+        {
+            mockCfCliService.Setup(mock => mock.TargetApi(fakeValidTarget, true))
+                .Returns(new DetailedResult(true, null, _fakeSuccessResult));
+            mockCfCliService.Setup(mock => mock.AuthenticateAsync(fakeValidUsername, fakeValidPassword))
+                .ReturnsAsync(new DetailedResult(false, "fake failure message", null));
+
+            ConnectResult result = await cfService.ConnectToCFAsync(fakeValidTarget, fakeValidUsername, fakeValidPassword, fakeHttpProxy, skipSsl);
+
+            Assert.IsFalse(result.IsLoggedIn);
+            Assert.IsTrue(result.ErrorMessage.Contains(cfService.LoginFailureMessage));
+            Assert.IsNull(result.Token);
+            mockCfCliService.VerifyAll();
+        }
+
         [TestMethod()]
         public async Task ConnectToCFAsync_ReturnsConnectResult_WhenLoginFails_BecuaseOfInvalidOAuthToken()
         {

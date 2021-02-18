@@ -1,8 +1,12 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using System;
-using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models;
 using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
 using Tanzu.Toolkit.VisualStudio.Services.FileLocator;
 using static Tanzu.Toolkit.VisualStudio.Services.OutputHandler.OutputHandler;
@@ -16,11 +20,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
         internal readonly string cfExePathErrorMsg = $"Unable to locate cf.exe.";
 
-        /* CF CLI V6 COMMANDS */
+        /* CF CLI V6 CONSTANTS */
         public static string V6_GetCliVersionCmd = "version";
         public static string V6_GetOAuthTokenCmd = "oauth-token";
         public static string V6_TargetApiCmd = "api";
         public static string V6_AuthenticateCmd = "auth";
+        public static string V6_GetOrgsCmd = "orgs";
+        internal static string V6_GetOrgsRequestPath = "GET /v2/organizations";
+
 
         public CfCliService(IServiceProvider services)
         {
@@ -58,6 +65,34 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             password.Dispose();
 
             return result;
+        }
+
+        public async Task<List<Org>> GetOrgsAsync()
+        {
+            try
+            {
+                string args = $"{V6_GetOrgsCmd} -v"; // -v prints api request details to stdout
+                DetailedResult result = await InvokeCfCliAsync(args);
+
+                if (!result.Succeeded || result.CmdDetails.ExitCode != 0) return new List<Org>();
+
+                var orgResponsePages = GetJsonResponsePages<OrgsApiV2ResponsePage>(result.CmdDetails.StdOut, V6_GetOrgsRequestPath);
+
+                var orgsList = new List<Org>();
+                foreach (OrgsApiV2ResponsePage responsePage in orgResponsePages)
+                {
+                    foreach (Org org in responsePage.resources)
+                    {
+                        orgsList.Add(org);
+                    }
+                }
+
+                return orgsList;
+            }
+            catch
+            {
+                return new List<Org>();
+            }
         }
 
         /// <summary>
@@ -110,6 +145,56 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             if (tokenStr.StartsWith("bearer ")) tokenStr = tokenStr.Remove(0, 7);
 
             return tokenStr;
+        }
+
+        internal List<ResponseType> GetJsonResponsePages<ResponseType>(string content, string requestFilter)
+        {
+            try
+            {
+                var jsonResponses = new List<ResponseType>();
+
+                /* separate content into individual request/response pairs */
+                string[] requestResponsePairs = Regex.Split(content, pattern: "(?=REQUEST)");
+
+                /* filter out extraneous requests */
+                List<string> relevantRequests = requestResponsePairs
+                    .Where(s => s.Contains(requestFilter))
+                    .ToList();
+
+                foreach (string requestResponsePair in relevantRequests)
+                {
+                    if (!string.IsNullOrWhiteSpace(requestResponsePair))
+                    {
+                        /* separate request from response */
+                        string[] reqRes = Regex.Split(requestResponsePair, pattern: "(?=RESPONSE)");
+
+                        string responseContent = reqRes[1];
+
+                        /* look for any part of the response content that resembles json */
+                        if (responseContent.Contains("{") && responseContent.Contains("}"))
+                        {
+                            int substringStart = responseContent.IndexOf('{');
+                            int substringEnd = responseContent.LastIndexOf('}');
+                            int substringLength = substringEnd - substringStart + 1;
+
+                            string speculativeJsonStr = responseContent.Substring(
+                                substringStart,
+                                substringLength);
+
+                            /* try converting json-like string to `ResponseType` instance */
+                            ResponseType responsePage = JsonConvert.DeserializeObject<ResponseType>(speculativeJsonStr);
+
+                            jsonResponses.Add(responsePage);
+                        }
+                    }
+                }
+
+                return jsonResponses;
+            }
+            catch
+            {
+                return new List<ResponseType>();
+            }
         }
     }
 }

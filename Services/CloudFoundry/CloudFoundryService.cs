@@ -53,8 +53,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             {
                 DetailedResult targetResult = cfCliService.TargetApi(targetApiAddress, skipSsl);
 
-                // TODO: add test to make sure this doesn't break when targetResult.CmdDetails == null
-                if (targetResult.CmdDetails.ExitCode != 0)
+                if (targetResult.CmdDetails == null)
+                {
+                    throw new Exception(
+                        message: LoginFailureMessage,
+                        innerException: new Exception(
+                            message: $"Unable to connect to CF CLI"));
+                }
+                else if (targetResult.CmdDetails.ExitCode != 0)
                 {
                     throw new Exception(
                         message: LoginFailureMessage,
@@ -65,8 +71,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
 
                 DetailedResult authResult = await cfCliService.AuthenticateAsync(username, password);
 
-                // TODO: add test to make sure this doesn't break when authResult.CmdDetails == null
-                if (authResult.CmdDetails.ExitCode != 0)
+                if (authResult.CmdDetails == null)
+                {
+                    throw new Exception(
+                       message: LoginFailureMessage,
+                       innerException: new Exception(
+                           message: $"Unable to connect to Cf CLI"));
+                }
+                else if (authResult.CmdDetails.ExitCode != 0)
                 {
                     throw new Exception(
                        message: LoginFailureMessage,
