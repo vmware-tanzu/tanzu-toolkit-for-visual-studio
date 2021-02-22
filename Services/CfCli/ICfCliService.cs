@@ -1,6 +1,8 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Security;
 using System.Threading.Tasks;
+using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models;
 using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
 using static Tanzu.Toolkit.VisualStudio.Services.OutputHandler.OutputHandler;
 
@@ -14,5 +16,6 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         DetailedResult TargetApi(string apiAddress, bool skipSsl);
         Task<DetailedResult> AuthenticateAsync(string username, SecureString password);
         DetailedResult ExecuteCfCliCommand(string arguments, string workingDir = null);
+        Task<List<Org>> GetOrgsAsync();
     }
 }

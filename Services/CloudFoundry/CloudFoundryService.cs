@@ -103,18 +103,16 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
         }
 
         public async Task<List<CloudFoundryOrganization>> GetOrgsForCfInstanceAsync(CloudFoundryInstance cf)
-        {
-            var target = cf.ApiAddress;
-            var accessToken = cf.AccessToken;
-
-            List<Org> orgsResults = await _cfApiClient.ListOrgs(target, accessToken);
+        { 
+    
+            List<CfCli.Models.Org> orgsResults = await cfCliService.GetOrgsAsync();
 
             var orgs = new List<CloudFoundryOrganization>();
             if (orgsResults != null)
-            {
-                orgsResults.ForEach(delegate (Org org)
+           {
+                orgsResults.ForEach(delegate (CfCli.Models.Org org)
                 {
-                    orgs.Add(new CloudFoundryOrganization(org.name, org.guid, cf));
+                   orgs.Add(new CloudFoundryOrganization(org.entity.name, org.metadata.guid, cf));
                 });
             }
 

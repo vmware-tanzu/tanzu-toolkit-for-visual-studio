@@ -10,9 +10,11 @@ using Tanzu.Toolkit.CloudFoundryApiClient.Models.SpacesResponse;
 using Tanzu.Toolkit.VisualStudio.Models;
 using Tanzu.Toolkit.VisualStudio.Services;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli;
+using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models;
 using Tanzu.Toolkit.VisualStudio.Services.CloudFoundry;
 using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
 using static Tanzu.Toolkit.VisualStudio.Services.OutputHandler.OutputHandler;
+using Metadata = Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Metadata;
 
 namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
 {
@@ -200,7 +202,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
         {
             var expectedResult = new List<CloudFoundryOrganization>();
 
-            mockCfApiClient.Setup(mock => mock.ListOrgs(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync((List<Org>)null);
+            mockCfCliService.Setup(mock => mock.GetOrgsAsync()).ReturnsAsync(new List<Services.CfCli.Models.Org>());
 
             var result = await cfService.GetOrgsForCfInstanceAsync(fakeCfInstance);
 
@@ -208,12 +210,13 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             Assert.AreEqual(0, result.Count);
             CollectionAssert.AreEqual(expectedResult, result);
             Assert.AreEqual(typeof(List<CloudFoundryOrganization>), result.GetType());
-            mockCfApiClient.Verify(mock => mock.ListOrgs(fakeValidTarget, fakeValidAccessToken), Times.Once);
+            mockCfCliService.Verify(mock => mock.GetOrgsAsync(), Times.Once);
         }
 
         [TestMethod()]
-        public async Task GetOrgsForCfInstanceAsync_ReturnsListOfOrgs_WhenListOrgsSuceeds()
+        public async Task GetOrgsForCfInstanceAsync_ReturnsListOfOrgs_WhenGetOrgsAsyncSuceeds()
         {
+            
             const string org1Name = "org1";
             const string org2Name = "org2";
             const string org3Name = "org3";
@@ -223,27 +226,27 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             const string org3Guid = "org-3-id";
             const string org4Guid = "org-4-id";
 
-            var mockOrgsResponse = new List<Org>
+            var mockOrgsResponse = new List<Services.CfCli.Models.Org>
             {
-                new Org
+                new Services.CfCli.Models.Org
                 {
-                    name = org1Name,
-                    guid = org1Guid
+                    entity = new Entity{name = org1Name },
+                    metadata = new Metadata{guid = org1Guid }
                 },
-                new Org
+                new Services.CfCli.Models.Org
                 {
-                    name = org2Name,
-                    guid = org2Guid
+                   entity = new Entity{name = org2Name },
+                   metadata = new Metadata{guid = org2Guid }
                 },
-                new Org
+                new Services.CfCli.Models.Org
                 {
-                    name = org3Name,
-                    guid = org3Guid
+                    entity = new Entity{name = org3Name },
+                    metadata = new Metadata{guid = org3Guid }
                 },
-                new Org
+                new Services.CfCli.Models.Org
                 {
-                    name = org4Name,
-                    guid = org4Guid
+                    entity = new Entity{name = org4Name },
+                    metadata = new Metadata{guid = org4Guid }
                 }
             };
 
@@ -255,7 +258,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
                 new CloudFoundryOrganization(org4Name, org4Guid, fakeCfInstance)
             };
 
-            mockCfApiClient.Setup(mock => mock.ListOrgs(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(mockOrgsResponse);
+            mockCfCliService.Setup(mock => mock.GetOrgsAsync()).ReturnsAsync(mockOrgsResponse);
 
             var result = await cfService.GetOrgsForCfInstanceAsync(fakeCfInstance);
 
@@ -269,7 +272,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
                 Assert.AreEqual(expectedResult[i].ParentCf, result[i].ParentCf);
             }
 
-            mockCfApiClient.Verify(mock => mock.ListOrgs(fakeValidTarget, fakeValidAccessToken), Times.Once);
+            mockCfCliService.Verify(mock => mock.GetOrgsAsync(), Times.Once);
         }
 
         [TestMethod()]
