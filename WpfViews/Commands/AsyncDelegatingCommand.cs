@@ -61,10 +61,8 @@ namespace Tanzu.Toolkit.VisualStudio.WpfViews.Commands
             {
                 await action(parameter);
             }
-            catch (Exception e)
+            catch 
             {
-                // Assume exceptions caught in view model
-                // TODO: Log when not
             }
 
             IsExecuting = false;

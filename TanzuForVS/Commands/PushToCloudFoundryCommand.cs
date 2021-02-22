@@ -130,8 +130,6 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-                // TODO: decide what to do if we encounter an error at this stage 
-                // (log or message box? etc.)
                 VsShellUtilities.ShowMessageBox(
                     package,
                     ex.ToString(),
