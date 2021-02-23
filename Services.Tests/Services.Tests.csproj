@@ -27,6 +27,9 @@
     <None Update="CfCli\FakeMultiPageOrgsOutput.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="CfCli\FakeMultiPageSpacesOutput.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
