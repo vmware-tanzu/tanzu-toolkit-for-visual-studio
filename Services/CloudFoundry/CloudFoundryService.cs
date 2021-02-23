@@ -8,6 +8,7 @@ using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.SpacesResponse;
 using Tanzu.Toolkit.VisualStudio.Models;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli;
+using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models;
 using Tanzu.Toolkit.VisualStudio.Services.FileLocator;
 using static Tanzu.Toolkit.VisualStudio.Services.OutputHandler.OutputHandler;
 
@@ -122,14 +123,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             var target = org.ParentCf.ApiAddress;
             var accessToken = org.ParentCf.AccessToken;
 
-            List<Space> spacesResults = await _cfApiClient.ListSpacesForOrg(target, accessToken, org.OrgId);
+            List<CfCli.Models.Spaces.Space> spacesResults = await cfCliService.GetSpacesAsync();
 
             var spaces = new List<CloudFoundrySpace>();
             if (spacesResults != null)
             {
-                spacesResults.ForEach(delegate (Space space)
+                spacesResults.ForEach(delegate (CfCli.Models.Spaces.Space space)
                 {
-                    spaces.Add(new CloudFoundrySpace(space.name, space.guid, org));
+                    spaces.Add(new CloudFoundrySpace(space.entity.name, space.metadata.guid, org));
                 });
             }
 

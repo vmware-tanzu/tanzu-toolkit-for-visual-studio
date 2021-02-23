@@ -74,7 +74,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
         {
             mockCfCliService.Setup(mock => mock.TargetApi(fakeValidTarget, true))
                 .Returns(new DetailedResult(false, "fake failure message", _fakeFailureResult));
-            
+
             ConnectResult result = await cfService.ConnectToCFAsync(fakeValidTarget, fakeValidUsername, fakeValidPassword, fakeHttpProxy, skipSsl);
 
             Assert.IsFalse(result.IsLoggedIn);
@@ -99,7 +99,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             mockCfCliService.VerifyAll();
         }
 
-       
+
         [TestMethod()]
         public async Task ConnectToCFAsync_ReturnsConnectResult_WhenLoginFails_BecuaseTargetResultCmdDetailsAreNull()
         {
@@ -212,7 +212,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
         [TestMethod()]
         public async Task GetOrgsForCfInstanceAsync_ReturnsListOfOrgs_WhenGetOrgsAsyncSuceeds()
         {
-            
+
             const string org1Name = "org1";
             const string org2Name = "org2";
             const string org3Name = "org3";
@@ -275,9 +275,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
         public async Task GetSpacesForOrgAsync_ReturnsEmptyList_WhenListSpacesFails()
         {
             var expectedResult = new List<CloudFoundrySpace>();
+            var fakeFailedResponse = new List<Services.CfCli.Models.Spaces.Space>();
 
-            mockCfApiClient.Setup(mock => mock.ListSpacesForOrg(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync((List<Space>)null);
+            mockCfCliService.Setup(mock => mock.
+              GetSpacesAsync()).ReturnsAsync(fakeFailedResponse);
 
             var result = await cfService.GetSpacesForOrgAsync(fakeOrg);
 
@@ -285,7 +286,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             Assert.AreEqual(0, result.Count);
             CollectionAssert.AreEqual(expectedResult, result);
             Assert.AreEqual(typeof(List<CloudFoundrySpace>), result.GetType());
-            mockCfApiClient.Verify(mock => mock.ListSpacesForOrg(fakeValidTarget, fakeValidAccessToken, fakeOrg.OrgId),
+
+            mockCfCliService.Verify(mock => mock.GetSpacesAsync(),
                 Times.Once);
         }
 
@@ -301,28 +303,52 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             const string space3Guid = "space-3-id";
             const string space4Guid = "space-4-id";
 
-            var mockSpacesResponse = new List<Space>
+            var mockSpacesResponse = new List<Services.CfCli.Models.Spaces.Space>
             {
-                new Space
+                new Services.CfCli.Models.Spaces.Space
                 {
-                    name = space1Name,
-                    guid = space1Guid
+                    entity = new Services.CfCli.Models.Spaces.Entity
+                    {
+                        name = space1Name
+                    },
+                    metadata = new Services.CfCli.Models.Spaces.Metadata
+                    {
+                        guid = space1Guid
+                    }
                 },
-                new Space
+                new Services.CfCli.Models.Spaces.Space
                 {
-                    name = space2Name,
-                    guid = space2Guid
+                    entity = new Services.CfCli.Models.Spaces.Entity
+                    {
+                        name = space2Name
+                    },
+                    metadata = new Services.CfCli.Models.Spaces.Metadata
+                    {
+                        guid = space2Guid
+                    }
                 },
-                new Space
+                new Services.CfCli.Models.Spaces.Space
                 {
-                    name = space3Name,
-                    guid = space3Guid
+                    entity = new Services.CfCli.Models.Spaces.Entity
+                    {
+                        name = space3Name
+                    },
+                    metadata = new Services.CfCli.Models.Spaces.Metadata
+                    {
+                        guid = space3Guid
+                    }
                 },
-                new Space
+                new Services.CfCli.Models.Spaces.Space
                 {
-                    name = space4Name,
-                    guid = space4Guid
-                }
+                    entity = new Services.CfCli.Models.Spaces.Entity
+                    {
+                        name = space4Name
+                    },
+                    metadata = new Services.CfCli.Models.Spaces.Metadata
+                    {
+                        guid = space4Guid
+                    }
+                },
             };
 
             var expectedResult = new List<CloudFoundrySpace>
@@ -333,8 +359,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
                 new CloudFoundrySpace(space4Name, space4Guid, fakeOrg)
             };
 
-            mockCfApiClient.Setup(mock => mock.ListSpacesForOrg(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(mockSpacesResponse);
+            mockCfCliService.Setup(mock => mock.
+              GetSpacesAsync()).ReturnsAsync(mockSpacesResponse);
 
             var result = await cfService.GetSpacesForOrgAsync(fakeOrg);
 
@@ -348,8 +374,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
                 Assert.AreEqual(expectedResult[i].ParentOrg, result[i].ParentOrg);
             }
 
-            mockCfApiClient.Verify(mock => mock.ListSpacesForOrg(fakeValidTarget, fakeValidAccessToken, fakeOrg.OrgId),
-                Times.Once);
+            mockCfCliService.Verify(mock => mock.GetSpacesAsync(), Times.Once);
         }
 
         [TestMethod()]
