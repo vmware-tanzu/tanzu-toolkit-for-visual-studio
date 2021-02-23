@@ -22,6 +22,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         private static readonly StdOutDelegate _fakeOutCallback = delegate (string content) { };
         private static readonly StdErrDelegate _fakeErrCallback = delegate (string content) { };
         private static readonly CmdResult _fakeOrgsCmdResult = new CmdResult(_fakeMultiPageOrgsOutput, string.Empty, 0);
+        private static readonly CmdResult _fakeSpacesCmdResult = new CmdResult(_fakeMultiPageSpacesOutput, string.Empty, 0);
 
 
         [TestInitialize]
@@ -335,5 +336,55 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
 
             Assert.AreEqual(0, result.Count);
         }
+
+        
+        [TestMethod]
+        public async Task GetSpacesAsync_ReturnsListOfSpaces_WhenCmdSucceeds()
+        {
+            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetSpacesCmd} -v";
+
+            mockCmdProcessService.Setup(mock => mock.
+              InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
+                .ReturnsAsync(_fakeSpacesCmdResult);
+
+            var result = await _sut.GetSpacesAsync();
+
+            int numSpacesInFakeResponse = 54;
+            Assert.AreEqual(numSpacesInFakeResponse, result.Count);
+            Assert.AreEqual(_fakeSpaceName1, result[0].entity.name);
+            Assert.AreEqual(_fakeSpaceGuid1, result[0].metadata.guid);
+        }
+
+        [TestMethod]
+        public async Task GetSpacesAsync_ReturnsEmptyList_WhenCmdExitsWithNonZeroCode()
+        {
+            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetSpacesCmd} -v";
+            var fakeFailureCmdResult = new CmdResult(string.Empty, string.Empty, 1);
+
+            mockCmdProcessService.Setup(mock => mock.
+              InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
+                .ReturnsAsync(fakeFailureCmdResult);
+
+            var result = await _sut.GetSpacesAsync();
+         
+            Assert.AreEqual(0, result.Count);
+        }
+
+        [TestMethod]
+        public async Task GetSpacesAsync_ReturnsEmptyList_WhenJsonParsingFails()
+        {
+            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetSpacesCmd} -v";
+            var fakeInvalidJsonOutput = $"REQUEST {CfCliService.V6_GetSpacesRequestPath} asdf RESPONSE asdf";
+            var fakeFailureCmdResult = new CmdResult(fakeInvalidJsonOutput, string.Empty, 0);
+
+            mockCmdProcessService.Setup(mock => mock.
+              InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
+                .ReturnsAsync(fakeFailureCmdResult);
+
+            var result = await _sut.GetSpacesAsync();
+
+            Assert.AreEqual(0, result.Count);
+        }
+
     }
 }

@@ -7,6 +7,7 @@ using System.Security;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Orgs;
+using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Spaces;
 using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
 using Tanzu.Toolkit.VisualStudio.Services.FileLocator;
 using static Tanzu.Toolkit.VisualStudio.Services.OutputHandler.OutputHandler;
@@ -26,7 +27,9 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         public static string V6_TargetApiCmd = "api";
         public static string V6_AuthenticateCmd = "auth";
         public static string V6_GetOrgsCmd = "orgs";
+        public static string V6_GetSpacesCmd = "spaces";
         internal static string V6_GetOrgsRequestPath = "GET /v2/organizations";
+        internal static string V6_GetSpacesRequestPath = "GET /v2/spaces";
 
 
         public CfCliService(IServiceProvider services)
@@ -92,6 +95,34 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             catch
             {
                 return new List<Org>();
+            }
+        }
+
+        public async Task<List<Space>> GetSpacesAsync()
+        {
+            try
+            {
+                string args = $"{V6_GetSpacesCmd} -v"; // -v prints api request details to stdout
+                DetailedResult result = await InvokeCfCliAsync(args);
+
+                if (!result.Succeeded || result.CmdDetails.ExitCode != 0) return new List<Space>();
+
+                var spaceResponsePages = GetJsonResponsePages<SpacesApiV2ResponsePage>(result.CmdDetails.StdOut, V6_GetSpacesRequestPath);
+
+                var spacesList = new List<Space>();
+                foreach (SpacesApiV2ResponsePage responsePage in spaceResponsePages)
+                {
+                    foreach (Space space in responsePage.resources)
+                    {
+                        spacesList.Add(space);
+                    }
+                }
+
+                return spacesList;
+            }
+            catch
+            {
+                return new List<Space>();
             }
         }
 
