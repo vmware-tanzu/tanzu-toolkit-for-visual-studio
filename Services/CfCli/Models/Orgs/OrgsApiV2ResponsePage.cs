@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Tanzu.Toolkit.VisualStudio.Services.CfCli.Models
+namespace Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Orgs
 {
     public class OrgsApiV2ResponsePage
     {

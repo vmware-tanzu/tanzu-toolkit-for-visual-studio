@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Security;
 using System.Threading.Tasks;
-using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models;
+using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Orgs;
 using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
 using static Tanzu.Toolkit.VisualStudio.Services.OutputHandler.OutputHandler;
 

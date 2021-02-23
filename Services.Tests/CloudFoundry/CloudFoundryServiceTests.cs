@@ -5,16 +5,12 @@ using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
-using Tanzu.Toolkit.CloudFoundryApiClient.Models.OrgsResponse;
-using Tanzu.Toolkit.CloudFoundryApiClient.Models.SpacesResponse;
 using Tanzu.Toolkit.VisualStudio.Models;
-using Tanzu.Toolkit.VisualStudio.Services;
-using Tanzu.Toolkit.VisualStudio.Services.CfCli;
-using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models;
+using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Orgs;
 using Tanzu.Toolkit.VisualStudio.Services.CloudFoundry;
 using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
 using static Tanzu.Toolkit.VisualStudio.Services.OutputHandler.OutputHandler;
-using Metadata = Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Metadata;
+using Metadata = Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Orgs.Metadata;
 
 namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
 {
@@ -202,7 +198,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
         {
             var expectedResult = new List<CloudFoundryOrganization>();
 
-            mockCfCliService.Setup(mock => mock.GetOrgsAsync()).ReturnsAsync(new List<Services.CfCli.Models.Org>());
+            mockCfCliService.Setup(mock => mock.GetOrgsAsync()).ReturnsAsync(new List<Services.CfCli.Models.Orgs.Org>());
 
             var result = await cfService.GetOrgsForCfInstanceAsync(fakeCfInstance);
 
@@ -226,24 +222,24 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             const string org3Guid = "org-3-id";
             const string org4Guid = "org-4-id";
 
-            var mockOrgsResponse = new List<Services.CfCli.Models.Org>
+            var mockOrgsResponse = new List<Services.CfCli.Models.Orgs.Org>
             {
-                new Services.CfCli.Models.Org
+                new Services.CfCli.Models.Orgs.Org
                 {
                     entity = new Entity{name = org1Name },
                     metadata = new Metadata{guid = org1Guid }
                 },
-                new Services.CfCli.Models.Org
+                new Services.CfCli.Models.Orgs.Org
                 {
                    entity = new Entity{name = org2Name },
                    metadata = new Metadata{guid = org2Guid }
                 },
-                new Services.CfCli.Models.Org
+                new Services.CfCli.Models.Orgs.Org
                 {
                     entity = new Entity{name = org3Name },
                     metadata = new Metadata{guid = org3Guid }
                 },
-                new Services.CfCli.Models.Org
+                new Services.CfCli.Models.Orgs.Org
                 {
                     entity = new Entity{name = org4Name },
                     metadata = new Metadata{guid = org4Guid }

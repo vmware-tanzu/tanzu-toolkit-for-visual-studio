@@ -5,11 +5,9 @@ using System.Security;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.CloudFoundryApiClient;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
-using Tanzu.Toolkit.CloudFoundryApiClient.Models.OrgsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.SpacesResponse;
 using Tanzu.Toolkit.VisualStudio.Models;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli;
-using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
 using Tanzu.Toolkit.VisualStudio.Services.FileLocator;
 using static Tanzu.Toolkit.VisualStudio.Services.OutputHandler.OutputHandler;
 
@@ -103,16 +101,16 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
         }
 
         public async Task<List<CloudFoundryOrganization>> GetOrgsForCfInstanceAsync(CloudFoundryInstance cf)
-        { 
-    
-            List<CfCli.Models.Org> orgsResults = await cfCliService.GetOrgsAsync();
+        {
+
+            List<CfCli.Models.Orgs.Org> orgsResults = await cfCliService.GetOrgsAsync();
 
             var orgs = new List<CloudFoundryOrganization>();
             if (orgsResults != null)
-           {
-                orgsResults.ForEach(delegate (CfCli.Models.Org org)
+            {
+                orgsResults.ForEach(delegate (CfCli.Models.Orgs.Org org)
                 {
-                   orgs.Add(new CloudFoundryOrganization(org.entity.name, org.metadata.guid, cf));
+                    orgs.Add(new CloudFoundryOrganization(org.entity.name, org.metadata.guid, cf));
                 });
             }
 
