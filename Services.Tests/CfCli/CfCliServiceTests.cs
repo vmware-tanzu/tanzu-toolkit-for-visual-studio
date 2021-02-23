@@ -337,7 +337,6 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.AreEqual(0, result.Count);
         }
 
-        
         [TestMethod]
         public async Task GetSpacesAsync_ReturnsListOfSpaces_WhenCmdSucceeds()
         {
@@ -384,6 +383,46 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             var result = await _sut.GetSpacesAsync();
 
             Assert.AreEqual(0, result.Count);
+        }
+
+        [TestMethod]
+        public void TargetOrg_ReturnsTrue_WhenCmdExitCodeIsZero()
+        {
+            var fakeOrgName = "fake-org";
+            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService.V6_TargetOrgCmd} {fakeOrgName}";
+            CmdResult fakeSuccessResult = new CmdResult(_fakeStdOut, _fakeStdErr, 0);
+
+            mockCmdProcessService.Setup(mock => mock.
+              ExecuteWindowlessCommand(expectedCmdStr, null))
+                .Returns(fakeSuccessResult);
+
+            DetailedResult result = _sut.TargetOrg(fakeOrgName);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsTrue(result.CmdDetails.ExitCode == 0);
+            Assert.IsNull(result.Explanation);
+            Assert.AreEqual(_fakeStdOut, result.CmdDetails.StdOut);
+            Assert.AreEqual(_fakeStdErr, result.CmdDetails.StdErr);
+        }
+
+        [TestMethod]
+        public void TargetOrg_ReturnsFalse_WhenCmdExitCodeIsNotZero()
+        {
+            var fakeOrgName = "fake-org";
+            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService.V6_TargetOrgCmd} {fakeOrgName}";
+            CmdResult fakeFailureResult = new CmdResult(_fakeStdOut, _fakeStdErr, 1);
+
+            mockCmdProcessService.Setup(mock => mock.
+              ExecuteWindowlessCommand(expectedCmdStr, null))
+                .Returns(fakeFailureResult);
+
+            DetailedResult result = _sut.TargetOrg(fakeOrgName);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsTrue(result.CmdDetails.ExitCode == 1);
+            Assert.IsNotNull(result.Explanation);
+            Assert.AreEqual(_fakeStdOut, result.CmdDetails.StdOut);
+            Assert.AreEqual(_fakeStdErr, result.CmdDetails.StdErr);
         }
 
     }

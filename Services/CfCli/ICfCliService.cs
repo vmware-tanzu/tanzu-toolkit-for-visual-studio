@@ -19,5 +19,6 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         DetailedResult ExecuteCfCliCommand(string arguments, string workingDir = null);
         Task<List<Org>> GetOrgsAsync();
         Task<List<Space>> GetSpacesAsync();
+        DetailedResult TargetOrg(string orgName);
     }
 }

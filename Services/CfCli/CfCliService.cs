@@ -26,6 +26,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         public static string V6_GetOAuthTokenCmd = "oauth-token";
         public static string V6_TargetApiCmd = "api";
         public static string V6_AuthenticateCmd = "auth";
+        public static string V6_TargetOrgCmd = "target -o";
         public static string V6_GetOrgsCmd = "orgs";
         public static string V6_GetSpacesCmd = "spaces";
         internal static string V6_GetOrgsRequestPath = "GET /v2/organizations";
@@ -68,6 +69,12 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             password.Dispose();
 
             return result;
+        }
+
+        public DetailedResult TargetOrg(string orgName)
+        {
+            string args = $"{V6_TargetOrgCmd} {orgName}";
+            return ExecuteCfCliCommand(args);
         }
 
         public async Task<List<Org>> GetOrgsAsync()

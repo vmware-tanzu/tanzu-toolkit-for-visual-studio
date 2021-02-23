@@ -5,10 +5,8 @@ using System.Security;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.CloudFoundryApiClient;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
-using Tanzu.Toolkit.CloudFoundryApiClient.Models.SpacesResponse;
 using Tanzu.Toolkit.VisualStudio.Models;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli;
-using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models;
 using Tanzu.Toolkit.VisualStudio.Services.FileLocator;
 using static Tanzu.Toolkit.VisualStudio.Services.OutputHandler.OutputHandler;
 
@@ -120,8 +118,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
 
         public async Task<List<CloudFoundrySpace>> GetSpacesForOrgAsync(CloudFoundryOrganization org)
         {
-            var target = org.ParentCf.ApiAddress;
-            var accessToken = org.ParentCf.AccessToken;
+            var targetOrgResult = cfCliService.TargetOrg(org.OrgName);
+            if (!targetOrgResult.Succeeded || targetOrgResult.CmdDetails.ExitCode != 0) return new List<CloudFoundrySpace>();
 
             List<CfCli.Models.Spaces.Space> spacesResults = await cfCliService.GetSpacesAsync();
 
