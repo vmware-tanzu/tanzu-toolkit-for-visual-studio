@@ -99,8 +99,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             }
         }
 
-        public async Task<List<CloudFoundryOrganization>> GetOrgsForCfInstanceAsync(CloudFoundryInstance cf)
+        public async Task<List<CloudFoundryOrganization>> GetOrgsForCfInstanceAsync(CloudFoundryInstance cf, bool skipSsl = true)
         {
+            var targetApiResult = cfCliService.TargetApi(cf.ApiAddress, skipSsl);
+            if (!targetApiResult.Succeeded || targetApiResult.CmdDetails.ExitCode != 0) return new List<CloudFoundryOrganization>();
 
             List<CfCli.Models.Orgs.Org> orgsResults = await cfCliService.GetOrgsAsync();
 

@@ -213,11 +213,13 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             OrgViewModel firstChildOrg = (OrgViewModel)fakeCfInstanceViewModel.Children[0];
             Assert.AreEqual(fakeOrgName1, firstChildOrg.Org.OrgName);
 
-            mockCloudFoundryService.Setup(mock => mock.GetOrgsForCfInstanceAsync(fakeCfInstance)).ReturnsAsync(new List<CloudFoundryOrganization>
-            {
-                new CloudFoundryOrganization(fakeOrgName2, fakeOrgGuid2, fakeCfInstance),
-                new CloudFoundryOrganization(fakeOrgName3, fakeOrgGuid3, fakeCfInstance)
-            });
+            mockCloudFoundryService.Setup(mock => mock.
+                GetOrgsForCfInstanceAsync(fakeCfInstance, true))
+                    .ReturnsAsync(new List<CloudFoundryOrganization>
+                    {
+                        new CloudFoundryOrganization(fakeOrgName2, fakeOrgGuid2, fakeCfInstance),
+                        new CloudFoundryOrganization(fakeOrgName3, fakeOrgGuid3, fakeCfInstance)
+                    });
 
             await vm.RefreshCfInstance(fakeCfInstanceViewModel);
 
@@ -342,8 +344,9 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                     { "instance2", fakeCfInstance2 },
                     { "instance3", fakeCfInstance3 },
                 });
-            mockCloudFoundryService.Setup(mock => mock.GetOrgsForCfInstanceAsync(It.IsAny<CloudFoundryInstance>())).ReturnsAsync(
-               new List<CloudFoundryOrganization> { });
+            mockCloudFoundryService.Setup(mock => mock.
+                GetOrgsForCfInstanceAsync(It.IsAny<CloudFoundryInstance>(), true))
+                    .ReturnsAsync(new List<CloudFoundryOrganization> { });
 
             vm.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
             {
@@ -408,8 +411,9 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                 eventsRaisedByAVM.Add(e.PropertyName);
             };
 
-            mockCloudFoundryService.Setup(mock => mock.GetOrgsForCfInstanceAsync(fakeCfInstance)).ReturnsAsync(
-                new List<CloudFoundryOrganization> { fakeOrg });
+            mockCloudFoundryService.Setup(mock => mock.
+                GetOrgsForCfInstanceAsync(fakeCfInstance, true))
+                    .ReturnsAsync(new List<CloudFoundryOrganization> { fakeOrg });
 
             mockCloudFoundryService.Setup(mock => mock.GetSpacesForOrgAsync(fakeOrg)).ReturnsAsync(
                 new List<CloudFoundrySpace> { fakeSpace });
@@ -466,7 +470,9 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             Assert.AreEqual(1, cfivm.Children.Count);
             Assert.IsNull(cfivm.Children[0]);
 
-            mockCloudFoundryService.Setup(mock => mock.GetOrgsForCfInstanceAsync(fakeCfInstance)).ReturnsAsync(new List<CloudFoundryOrganization>());
+            mockCloudFoundryService.Setup(mock => mock.
+                GetOrgsForCfInstanceAsync(fakeCfInstance, true))
+                    .ReturnsAsync(new List<CloudFoundryOrganization>());
 
             vm.CloudFoundryList = new List<CfInstanceViewModel>
             {
@@ -515,10 +521,12 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             Assert.AreEqual(1, ovm.Children.Count);
             Assert.IsNull(ovm.Children[0]);
 
-            mockCloudFoundryService.Setup(mock => mock.GetOrgsForCfInstanceAsync(fakeCfInstance)).ReturnsAsync(new List<CloudFoundryOrganization>
-            {
-                fakeOrg
-            });
+            mockCloudFoundryService.Setup(mock => mock.
+                GetOrgsForCfInstanceAsync(fakeCfInstance, true))
+                    .ReturnsAsync(new List<CloudFoundryOrganization>
+                    {
+                        fakeOrg
+                    });
 
             mockCloudFoundryService.Setup(mock => mock.GetSpacesForOrgAsync(fakeOrg)).ReturnsAsync(new List<CloudFoundrySpace>());
 
@@ -581,10 +589,12 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             Assert.AreEqual(1, svm.Children.Count);
             Assert.IsNull(svm.Children[0]);
 
-            mockCloudFoundryService.Setup(mock => mock.GetOrgsForCfInstanceAsync(fakeCfInstance)).ReturnsAsync(new List<CloudFoundryOrganization>
-            {
-                fakeOrg
-            });
+            mockCloudFoundryService.Setup(mock => mock.
+                GetOrgsForCfInstanceAsync(fakeCfInstance, true))
+                    .ReturnsAsync(new List<CloudFoundryOrganization>
+                    {
+                        fakeOrg
+                    });
 
             mockCloudFoundryService.Setup(mock => mock.GetSpacesForOrgAsync(fakeOrg)).ReturnsAsync(new List<CloudFoundrySpace>
             {

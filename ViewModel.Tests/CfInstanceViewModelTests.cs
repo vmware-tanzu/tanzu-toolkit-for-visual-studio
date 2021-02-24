@@ -32,7 +32,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                 new CloudFoundryOrganization("org4", "org-4-id", null)
             };
 
-            mockCloudFoundryService.Setup(mock => mock.GetOrgsForCfInstanceAsync(It.IsAny<CloudFoundryInstance>()))
+            mockCloudFoundryService.Setup(mock => mock.GetOrgsForCfInstanceAsync(It.IsAny<CloudFoundryInstance>(), true))
                 .ReturnsAsync(fakeOrgsList);
 
             cfivm = new CfInstanceViewModel(new CloudFoundryInstance("fake cf", null, null), services);
@@ -69,7 +69,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                 new CloudFoundryOrganization("initial org 2", "initial org 2 guid", null)
             };
 
-            mockCloudFoundryService.Setup(mock => mock.GetOrgsForCfInstanceAsync(It.IsAny<CloudFoundryInstance>()))
+            mockCloudFoundryService.Setup(mock => mock.GetOrgsForCfInstanceAsync(It.IsAny<CloudFoundryInstance>(), true))
                 .ReturnsAsync(newOrgsList);
 
             Assert.AreEqual(initialOrgsList.Count, cfivm.Children.Count);
@@ -86,7 +86,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             cfivm = new CfInstanceViewModel(new CloudFoundryInstance("fake cf instance", null, null), services);
             var emptyOrgsList = new List<CloudFoundryOrganization>();
 
-            mockCloudFoundryService.Setup(mock => mock.GetOrgsForCfInstanceAsync(It.IsAny<CloudFoundryInstance>()))
+            mockCloudFoundryService.Setup(mock => mock.GetOrgsForCfInstanceAsync(It.IsAny<CloudFoundryInstance>(), true))
                 .ReturnsAsync(emptyOrgsList);
 
             cfivm.IsExpanded = true;
@@ -106,7 +106,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                 receivedEvents.Add(e.PropertyName);
             };
 
-            mockCloudFoundryService.Setup(mock => mock.GetOrgsForCfInstanceAsync(fakeCfInstance))
+            mockCloudFoundryService.Setup(mock => mock.GetOrgsForCfInstanceAsync(fakeCfInstance, true))
                 .ReturnsAsync(new List<CloudFoundryOrganization>
             {
                 new CloudFoundryOrganization("fake org name 1","fake org id 1", fakeCfInstance),
