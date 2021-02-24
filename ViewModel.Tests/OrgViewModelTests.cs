@@ -34,8 +34,9 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                 new CloudFoundrySpace("spaceName4", "spaceId4", null)
             };
 
-            mockCloudFoundryService.Setup(mock => mock.GetSpacesForOrgAsync(It.IsAny<CloudFoundryOrganization>()))
-                .ReturnsAsync(fakeSpaceList);
+            mockCloudFoundryService.Setup(mock => mock.
+                GetSpacesForOrgAsync(It.IsAny<CloudFoundryOrganization>(), true))
+                    .ReturnsAsync(fakeSpaceList);
 
             ovm = new OrgViewModel(new CloudFoundryOrganization("fake org", null, null), services);
 
@@ -52,7 +53,8 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             Assert.AreEqual(fakeSpaceList.Count, ovm.Children.Count);
             mockCloudFoundryService.Verify(mock =>
-                mock.GetSpacesForOrgAsync(It.IsAny<CloudFoundryOrganization>()), Times.Exactly(3));
+                mock.GetSpacesForOrgAsync(It.IsAny<CloudFoundryOrganization>(), true),
+                    Times.Exactly(3));
         }
 
 
@@ -78,8 +80,9 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                 new CloudFoundrySpace("initial space 2", "initial space 2 guid", null)
             };
 
-            mockCloudFoundryService.Setup(mock => mock.GetSpacesForOrgAsync(It.IsAny<CloudFoundryOrganization>()))
-                .ReturnsAsync(newSpacesList);
+            mockCloudFoundryService.Setup(mock => mock.
+                GetSpacesForOrgAsync(It.IsAny<CloudFoundryOrganization>(), true))
+                    .ReturnsAsync(newSpacesList);
 
             Assert.AreEqual(initialSpacesList.Count, ovm.Children.Count);
 
@@ -95,8 +98,9 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             ovm = new OrgViewModel(new CloudFoundryOrganization("fake org", null, null), services);
             List<CloudFoundrySpace> emptySpacesList = new List<CloudFoundrySpace>();
 
-            mockCloudFoundryService.Setup(mock => mock.GetSpacesForOrgAsync(It.IsAny<CloudFoundryOrganization>()))
-                .ReturnsAsync(emptySpacesList);
+            mockCloudFoundryService.Setup(mock => mock.
+                GetSpacesForOrgAsync(It.IsAny<CloudFoundryOrganization>(), true))
+                    .ReturnsAsync(emptySpacesList);
 
             ovm.IsExpanded = true;
 
@@ -115,12 +119,13 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                 receivedEvents.Add(e.PropertyName);
             };
 
-            mockCloudFoundryService.Setup(mock => mock.GetSpacesForOrgAsync(fakeOrg))
-                .ReturnsAsync(new List<CloudFoundrySpace>
-            {
-                new CloudFoundrySpace("fake space name 1","fake space id 1", fakeOrg),
-                new CloudFoundrySpace("fake space name 2","fake space id 2", fakeOrg)
-            });
+            mockCloudFoundryService.Setup(mock => mock.
+                GetSpacesForOrgAsync(fakeOrg, true))
+                    .ReturnsAsync(new List<CloudFoundrySpace>
+                    {
+                        new CloudFoundrySpace("fake space name 1","fake space id 1", fakeOrg),
+                        new CloudFoundrySpace("fake space name 2","fake space id 2", fakeOrg)
+                    });
 
             var spaces = await ovm.FetchChildren();
 

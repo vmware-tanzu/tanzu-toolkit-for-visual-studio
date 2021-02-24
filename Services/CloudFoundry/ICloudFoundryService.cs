@@ -15,7 +15,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
         void AddCloudFoundryInstance(string name, string apiAddress, string accessToken);
         Task<ConnectResult> ConnectToCFAsync(string target, string username, SecureString password, string httpProxy, bool skipSsl);
         Task<List<CloudFoundryOrganization>> GetOrgsForCfInstanceAsync(CloudFoundryInstance cf, bool skipSsl = true);
-        Task<List<CloudFoundrySpace>> GetSpacesForOrgAsync(CloudFoundryOrganization org);
+        Task<List<CloudFoundrySpace>> GetSpacesForOrgAsync(CloudFoundryOrganization org, bool skipSsl = true);
         Task<List<CloudFoundryApp>> GetAppsForSpaceAsync(CloudFoundrySpace space);
         Task<bool> StopAppAsync(CloudFoundryApp app);
         Task<bool> StartAppAsync(CloudFoundryApp app);

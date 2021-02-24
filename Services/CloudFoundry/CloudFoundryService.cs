@@ -118,8 +118,11 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             return orgs;
         }
 
-        public async Task<List<CloudFoundrySpace>> GetSpacesForOrgAsync(CloudFoundryOrganization org)
+        public async Task<List<CloudFoundrySpace>> GetSpacesForOrgAsync(CloudFoundryOrganization org, bool skipSsl = true)
         {
+            var targetApiResult = cfCliService.TargetApi(org.ParentCf.ApiAddress, skipSsl);
+            if (!targetApiResult.Succeeded || targetApiResult.CmdDetails.ExitCode != 0) return new List<CloudFoundrySpace>();
+
             var targetOrgResult = cfCliService.TargetOrg(org.OrgName);
             if (!targetOrgResult.Succeeded || targetOrgResult.CmdDetails.ExitCode != 0) return new List<CloudFoundrySpace>();
 

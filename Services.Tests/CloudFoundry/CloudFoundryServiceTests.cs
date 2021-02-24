@@ -309,10 +309,16 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             var fakeTargetOrgResponse = new DetailedResult(true, null, new CmdResult("", "", 0));
 
             mockCfCliService.Setup(mock => mock.
-                TargetOrg(fakeOrg.OrgName)).Returns(fakeTargetOrgResponse);
+                TargetApi(fakeCfInstance.ApiAddress, true))
+                    .Returns(new DetailedResult(true, null, _fakeSuccessResult));
 
             mockCfCliService.Setup(mock => mock.
-              GetSpacesAsync()).ReturnsAsync(fakeFailedResponse);
+                TargetOrg(fakeOrg.OrgName))
+                    .Returns(fakeTargetOrgResponse);
+
+            mockCfCliService.Setup(mock => mock.
+              GetSpacesAsync())
+                    .ReturnsAsync(fakeFailedResponse);
 
             var result = await cfService.GetSpacesForOrgAsync(fakeOrg);
 
@@ -398,10 +404,16 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             var fakeTargetOrgResponse = new DetailedResult(true, null, new CmdResult("","",0));
 
             mockCfCliService.Setup(mock => mock.
-                TargetOrg(fakeOrg.OrgName)).Returns(fakeTargetOrgResponse);
+                TargetApi(fakeCfInstance.ApiAddress, true))
+                    .Returns(new DetailedResult(true, null, _fakeSuccessResult));
 
             mockCfCliService.Setup(mock => mock.
-              GetSpacesAsync()).ReturnsAsync(mockSpacesResponse);
+                TargetOrg(fakeOrg.OrgName))
+                    .Returns(fakeTargetOrgResponse);
+
+            mockCfCliService.Setup(mock => mock.
+              GetSpacesAsync())
+                    .ReturnsAsync(mockSpacesResponse);
 
             var result = await cfService.GetSpacesForOrgAsync(fakeOrg);
 
@@ -420,11 +432,34 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
                 Times.Once);
         }
 
+        [TestMethod()]
+        public async Task GetSpacesForOrgAsync_ReturnsEmptyList_WhenTargetApiFails()
+        {
+            var expectedResult = new List<CloudFoundrySpace>();
+
+            mockCfCliService.Setup(mock => mock.
+                TargetApi(fakeCfInstance.ApiAddress, true))
+                    .Returns(new DetailedResult(false, null, _fakeFailureResult));
+
+            var result = await cfService.GetSpacesForOrgAsync(fakeOrg);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count);
+            CollectionAssert.AreEqual(expectedResult, result);
+            Assert.AreEqual(typeof(List<CloudFoundrySpace>), result.GetType());
+
+            mockCfCliService.VerifyAll();
+        }
+
         [TestMethod]
-        public async Task GetSpacesForOrgAsync_ReturnsEmptyList_WhenOrgCannotBeTargeted()
+        public async Task GetSpacesForOrgAsync_ReturnsEmptyList_WhenTargetOrgFails()
         {
             var expectedResult = new List<CloudFoundrySpace>();
             var fakeFailedResponse = new DetailedResult(false);
+
+            mockCfCliService.Setup(mock => mock.
+                TargetApi(fakeCfInstance.ApiAddress, true))
+                    .Returns(new DetailedResult(true, null, _fakeSuccessResult));
 
             mockCfCliService.Setup(mock => mock.
                 TargetOrg(fakeOrg.OrgName)).Returns(fakeFailedResponse);
@@ -436,8 +471,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             CollectionAssert.AreEqual(expectedResult, result);
             Assert.AreEqual(typeof(List<CloudFoundrySpace>), result.GetType());
 
-            mockCfCliService.Verify(mock => mock.TargetOrg(fakeOrg.OrgName),
-                Times.Once);
+            mockCfCliService.VerifyAll();
         }
 
         [TestMethod()]
