@@ -24,10 +24,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="CfCli\FakeManyAppsOutput.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="CfCli\FakeMultiPageOrgsOutput.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="CfCli\FakeMultiPageSpacesOutput.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="CfCli\FakeNoAppsOutput.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="CfCli\FakeNoOrgsOutput.txt">

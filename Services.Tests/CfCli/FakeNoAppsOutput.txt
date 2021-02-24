@@ -1,0 +1,34 @@
+Getting apps in org org-1 / space space-1 as admin...
+
+REQUEST: [2021-02-24T16:07:50-05:00]
+GET /v2/spaces/c41b5427-908c-4e64-938e-c180a72642b3/summary HTTP/1.1
+Host: api.sys.jamestown.cf-app.com
+Accept: application/json
+Authorization: [PRIVATE DATA HIDDEN]
+Content-Type: application/json
+User-Agent: go-cli 6.53.0+8e2b70a4a.2020-10-01 / windows
+
+
+RESPONSE: [2021-02-24T16:07:50-05:00]
+HTTP/1.1 200 OK
+Connection: close
+Content-Length: 113
+Content-Type: application/json;charset=utf-8
+Date: Wed, 24 Feb 2021 21:07:52 GMT
+Server: nginx
+X-Content-Type-Options: nosniff
+X-Vcap-Request-Id: ebd90915-a6dd-42bf-6261-0a21019f4ae3::b993705a-64f4-46fa-a481-822678eb0fac
+
+{
+  "guid": "c41b5427-908c-4e64-938e-c180a72642b3",
+  "name": "space-1",
+  "apps": [
+
+  ],
+  "services": [
+
+  ]
+}
+OK
+
+No apps found

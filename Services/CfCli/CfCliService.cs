@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Apps;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Orgs;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Spaces;
 using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
@@ -27,10 +28,13 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         public static string V6_TargetApiCmd = "api";
         public static string V6_AuthenticateCmd = "auth";
         public static string V6_TargetOrgCmd = "target -o";
+        public static string V6_TargetSpaceCmd = "target -s";
         public static string V6_GetOrgsCmd = "orgs";
         public static string V6_GetSpacesCmd = "spaces";
+        public static string V6_GetAppsCmd = "apps";
         internal static string V6_GetOrgsRequestPath = "GET /v2/organizations";
         internal static string V6_GetSpacesRequestPath = "GET /v2/spaces";
+        internal static string V6_GetAppsRequestPath = "GET /v2/spaces"; // not a typo; app info returned when requesting space details
 
 
         public CfCliService(IServiceProvider services)
@@ -143,6 +147,40 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             }
         }
 
+        public async Task<List<App>> GetAppsAsync()
+        {
+            try
+            {
+                string args = $"{V6_GetAppsCmd} -v"; // -v prints api request details to stdout
+                DetailedResult result = await InvokeCfCliAsync(args);
+
+                if (!result.Succeeded || result.CmdDetails.ExitCode != 0) return new List<App>();
+
+                /* break early & skip json parsing if output contains 'No apps found' */
+                string content = result.CmdDetails.StdOut;
+                string contentEnding = content.Substring(content.Length - 20);
+                if (contentEnding.Contains("No apps found")) return new List<App>();
+
+                var appsResponses = GetJsonResponsePages<AppsApiV2Response>(content, V6_GetAppsRequestPath);
+
+                var appsList = new List<App>();
+                foreach (AppsApiV2Response response in appsResponses)
+                {
+                    foreach (App app in response.apps)
+                    {
+                        appsList.Add(app);
+                    }
+                }
+
+                return appsList;
+            }
+            catch
+            {
+                return new List<App>();
+            }
+
+        }
+
         /// <summary>
         /// Initiate a new Cloud Foundry CLI command with the given arguments.
         /// Invoke the command prompt and wait for the process to exit before returning.
@@ -244,5 +282,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
                 return new List<ResponseType>();
             }
         }
+
     }
+
 }

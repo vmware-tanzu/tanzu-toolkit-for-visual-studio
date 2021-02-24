@@ -25,6 +25,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         private static readonly CmdResult _fakeNoOrgsCmdResult = new CmdResult(_fakeNoOrgsOutput, string.Empty, 0);
         private static readonly CmdResult _fakeSpacesCmdResult = new CmdResult(_fakeMultiPageSpacesOutput, string.Empty, 0);
         private static readonly CmdResult _fakeNoSpacesCmdResult = new CmdResult(_fakeNoSpacesOutput, string.Empty, 0);
+        private static readonly CmdResult _fakeAppsCmdResult = new CmdResult(_fakeManyAppsOutput, string.Empty, 0);
+        private static readonly CmdResult _fakeNoAppsCmdResult = new CmdResult(_fakeNoAppsOutput, string.Empty, 0);
 
 
         [TestInitialize]
@@ -412,6 +414,70 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
                     .ReturnsAsync(_fakeNoSpacesCmdResult);
 
             var result = await _sut.GetSpacesAsync();
+
+            Assert.AreEqual(0, result.Count);
+
+            mockCmdProcessService.VerifyAll();
+        }
+        
+        [TestMethod]
+        public async Task GetAppsAsync_ReturnsListOfApps_WhenCmdSucceeds()
+        {
+            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetAppsCmd} -v";
+
+            mockCmdProcessService.Setup(mock => mock.
+              InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
+                .ReturnsAsync(_fakeAppsCmdResult);
+
+            var result = await _sut.GetAppsAsync();
+
+            int numAppsInFakeResponse = 53;
+            Assert.AreEqual(numAppsInFakeResponse, result.Count);
+            Assert.AreEqual(_fakeAppName1, result[0].name);
+            Assert.AreEqual(_fakeAppGuid1, result[0].guid);
+        }
+
+        [TestMethod]
+        public async Task GetAppsAsync_ReturnsEmptyList_WhenCmdExitsWithNonZeroCode()
+        {
+            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetAppsCmd} -v";
+            var fakeFailureCmdResult = new CmdResult(string.Empty, string.Empty, 1);
+
+            mockCmdProcessService.Setup(mock => mock.
+              InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
+                .ReturnsAsync(fakeFailureCmdResult);
+
+            var result = await _sut.GetAppsAsync();
+
+            Assert.AreEqual(0, result.Count);
+        }
+
+        [TestMethod]
+        public async Task GetAppsAsync_ReturnsEmptyList_WhenJsonParsingFails()
+        {
+            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetAppsCmd} -v";
+            var fakeInvalidJsonOutput = $"REQUEST {CfCliService.V6_GetAppsRequestPath} asdf RESPONSE asdf";
+            var fakeFailureCmdResult = new CmdResult(fakeInvalidJsonOutput, string.Empty, 0);
+
+            mockCmdProcessService.Setup(mock => mock.
+              InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
+                .ReturnsAsync(fakeFailureCmdResult);
+
+            var result = await _sut.GetAppsAsync();
+
+            Assert.AreEqual(0, result.Count);
+        }
+
+        [TestMethod]
+        public async Task GetAppsAsync_ReturnsEmptyList_WhenResponseContainsNoAppsFound()
+        {
+            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetAppsCmd} -v";
+
+            mockCmdProcessService.Setup(mock => mock.
+                InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
+                    .ReturnsAsync(_fakeNoAppsCmdResult);
+
+            var result = await _sut.GetAppsAsync();
 
             Assert.AreEqual(0, result.Count);
 
