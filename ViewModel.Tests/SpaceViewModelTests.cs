@@ -45,7 +45,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                 new CloudFoundryApp("initial app 2", null, null)
             };
 
-            mockCloudFoundryService.Setup(mock => mock.GetAppsForSpaceAsync(It.IsAny<CloudFoundrySpace>()))
+            mockCloudFoundryService.Setup(mock => mock.GetAppsForSpaceAsync(It.IsAny<CloudFoundrySpace>(), true))
                 .ReturnsAsync(newAppsList);
 
             Assert.AreEqual(initialAppsList.Count, svm.Children.Count);
@@ -62,7 +62,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             svm = new SpaceViewModel(new CloudFoundrySpace("fake space", null, null), services);
             List<CloudFoundryApp> emptyAppsList = new List<CloudFoundryApp>();
 
-            mockCloudFoundryService.Setup(mock => mock.GetAppsForSpaceAsync(It.IsAny<CloudFoundrySpace>()))
+            mockCloudFoundryService.Setup(mock => mock.GetAppsForSpaceAsync(It.IsAny<CloudFoundrySpace>(), true))
                 .ReturnsAsync(emptyAppsList);
 
             svm.IsExpanded = true;
@@ -82,7 +82,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                 receivedEvents.Add(e.PropertyName);
             };
 
-            mockCloudFoundryService.Setup(mock => mock.GetAppsForSpaceAsync(fakeSpace))
+            mockCloudFoundryService.Setup(mock => mock.GetAppsForSpaceAsync(fakeSpace, true))
                 .ReturnsAsync(new List<CloudFoundryApp>
             {
                 new CloudFoundryApp("fake app name 1","fake app id 1", fakeSpace),

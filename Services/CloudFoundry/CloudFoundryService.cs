@@ -140,17 +140,24 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             return spaces;
         }
 
-        public async Task<List<CloudFoundryApp>> GetAppsForSpaceAsync(CloudFoundrySpace space)
+        public async Task<List<CloudFoundryApp>> GetAppsForSpaceAsync(CloudFoundrySpace space, bool skipSsl = true)
         {
-            var target = space.ParentOrg.ParentCf.ApiAddress;
-            var accessToken = space.ParentOrg.ParentCf.AccessToken;
+            var targetApiResult = cfCliService.TargetApi(space.ParentOrg.ParentCf.ApiAddress, skipSsl);
+            if (!targetApiResult.Succeeded || targetApiResult.CmdDetails.ExitCode != 0) return new List<CloudFoundryApp>();
 
-            List<App> appResults = await _cfApiClient.ListAppsForSpace(target, accessToken, space.SpaceId);
+            var targetOrgResult = cfCliService.TargetOrg(space.ParentOrg.OrgName);
+            if (!targetOrgResult.Succeeded || targetOrgResult.CmdDetails.ExitCode != 0) return new List<CloudFoundryApp>();
+
+            var targetSpaceResult = cfCliService.TargetSpace(space.SpaceName);
+            if (!targetSpaceResult.Succeeded || targetSpaceResult.CmdDetails.ExitCode != 0) return new List<CloudFoundryApp>();
+
+
+            List<CfCli.Models.Apps.App> appResults = await cfCliService.GetAppsAsync();
 
             var apps = new List<CloudFoundryApp>();
             if (appResults != null)
             {
-                appResults.ForEach(delegate (App app)
+                appResults.ForEach(delegate (CfCli.Models.Apps.App app)
                 {
                     var appToAdd = new CloudFoundryApp(app.name, app.guid, space)
                     {

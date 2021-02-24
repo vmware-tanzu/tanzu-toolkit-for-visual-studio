@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Security;
 using System.Threading.Tasks;
+using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Apps;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Orgs;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Spaces;
 using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
@@ -20,5 +21,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         Task<List<Org>> GetOrgsAsync();
         Task<List<Space>> GetSpacesAsync();
         DetailedResult TargetOrg(string orgName);
+        DetailedResult TargetSpace(string spaceName);
+        Task<List<App>> GetAppsAsync();
     }
 }

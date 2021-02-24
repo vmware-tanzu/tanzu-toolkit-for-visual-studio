@@ -81,6 +81,12 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             return ExecuteCfCliCommand(args);
         }
 
+        public DetailedResult TargetSpace(string spaceName)
+        {
+            string args = $"{V6_TargetSpaceCmd} {spaceName}";
+            return ExecuteCfCliCommand(args);
+        }
+
         public async Task<List<Org>> GetOrgsAsync()
         {
             try
