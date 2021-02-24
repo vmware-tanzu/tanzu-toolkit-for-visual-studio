@@ -10,6 +10,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         internal const string _fakeSpaceGuid1 = "b008f4c6-5a4d-4ed0-880f-f0eb57de95eb";
 
         internal static readonly string _fakeMultiPageOrgsOutput = File.ReadAllText("CfCli/FakeMultiPageOrgsOutput.txt");
+        internal static readonly string _fakeNoOrgsOutput = File.ReadAllText("CfCli/FakeNoOrgsOutput.txt");
         internal static readonly string _fakeMultiPageSpacesOutput = File.ReadAllText("CfCli/FakeMultiPageSpacesOutput.txt");
         internal static readonly string _fakeNoSpacesOutput = File.ReadAllText("CfCli/FakeNoSpacesOutput.txt");
     }

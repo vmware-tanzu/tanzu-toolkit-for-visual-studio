@@ -86,6 +86,11 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
                 if (!result.Succeeded || result.CmdDetails.ExitCode != 0) return new List<Org>();
 
+                /* break early & skip json parsing if output contains 'No orgs found' */
+                string content = result.CmdDetails.StdOut;
+                string contentEnding = content.Substring(content.Length - 20);
+                if (contentEnding.Contains("No orgs found")) return new List<Org>();
+
                 var orgResponsePages = GetJsonResponsePages<OrgsApiV2ResponsePage>(result.CmdDetails.StdOut, V6_GetOrgsRequestPath);
 
                 var orgsList = new List<Org>();

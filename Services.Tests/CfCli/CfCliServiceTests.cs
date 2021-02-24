@@ -22,6 +22,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         private static readonly StdOutDelegate _fakeOutCallback = delegate (string content) { };
         private static readonly StdErrDelegate _fakeErrCallback = delegate (string content) { };
         private static readonly CmdResult _fakeOrgsCmdResult = new CmdResult(_fakeMultiPageOrgsOutput, string.Empty, 0);
+        private static readonly CmdResult _fakeNoOrgsCmdResult = new CmdResult(_fakeNoOrgsOutput, string.Empty, 0);
         private static readonly CmdResult _fakeSpacesCmdResult = new CmdResult(_fakeMultiPageSpacesOutput, string.Empty, 0);
         private static readonly CmdResult _fakeNoSpacesCmdResult = new CmdResult(_fakeNoSpacesOutput, string.Empty, 0);
 
@@ -332,6 +333,21 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             mockCmdProcessService.Setup(mock => mock.
               InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
                 .ReturnsAsync(fakeFailureCmdResult);
+
+            var result = await _sut.GetOrgsAsync();
+
+            Assert.AreEqual(0, result.Count);
+        }
+
+        [TestMethod]
+        public async Task GetOrgsAsync_ReturnsEmptyList_WhenResponseContainsNoOrgsFound()
+        {
+            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetOrgsCmd} -v";
+            var fakeFailureCmdResult = new CmdResult(string.Empty, string.Empty, 1);
+
+            mockCmdProcessService.Setup(mock => mock.
+              InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
+                .ReturnsAsync(_fakeNoOrgsCmdResult);
 
             var result = await _sut.GetOrgsAsync();
 
