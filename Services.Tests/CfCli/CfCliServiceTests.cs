@@ -23,6 +23,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         private static readonly StdErrDelegate _fakeErrCallback = delegate (string content) { };
         private static readonly CmdResult _fakeOrgsCmdResult = new CmdResult(_fakeMultiPageOrgsOutput, string.Empty, 0);
         private static readonly CmdResult _fakeSpacesCmdResult = new CmdResult(_fakeMultiPageSpacesOutput, string.Empty, 0);
+        private static readonly CmdResult _fakeNoSpacesCmdResult = new CmdResult(_fakeNoSpacesOutput, string.Empty, 0);
 
 
         [TestInitialize]
@@ -365,7 +366,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
                 .ReturnsAsync(fakeFailureCmdResult);
 
             var result = await _sut.GetSpacesAsync();
-         
+
             Assert.AreEqual(0, result.Count);
         }
 
@@ -383,6 +384,22 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             var result = await _sut.GetSpacesAsync();
 
             Assert.AreEqual(0, result.Count);
+        }
+
+        [TestMethod]
+        public async Task GetSpacesAsync_ReturnsEmptyList_WhenResponseContainsNoSpacesFound()
+        {
+            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetSpacesCmd} -v";
+
+            mockCmdProcessService.Setup(mock => mock.
+                InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
+                    .ReturnsAsync(_fakeNoSpacesCmdResult);
+
+            var result = await _sut.GetSpacesAsync();
+
+            Assert.AreEqual(0, result.Count);
+
+            mockCmdProcessService.VerifyAll();
         }
 
         [TestMethod]

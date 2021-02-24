@@ -1,0 +1,174 @@
+REQUEST: [2021-02-23T16:49:06-05:00]
+GET /v2/info HTTP/1.1
+Host: api.sys.jamestown.cf-app.com
+Accept: application/json
+User-Agent: cf.exe/6.53.0+8e2b70a4a.2020-10-01 (go1.13.8; amd64 windows)
+
+RESPONSE: [2021-02-23T16:49:06-05:00]
+HTTP/1.1 200 OK
+Content-Length: 767
+Content-Type: application/json;charset=utf-8
+Date: Tue, 23 Feb 2021 21:49:09 GMT
+Server: nginx
+X-Content-Type-Options: nosniff
+X-Vcap-Request-Id: 9879679a-fbc7-4908-66fb-68d755d8db37::a3f3ab73-6bc1-4843-b6de-68940d4cac38
+{
+  "api_version": "2.145.0",
+  "app_ssh_endpoint": "ssh.sys.jamestown.cf-app.com:2222",
+  "app_ssh_host_key_fingerprint": "6f:0e:04:a2:f3:7e:9d:76:78:97:02:45:c1:5e:37:9e",
+  "app_ssh_oauth_client": "ssh-proxy",
+  "authorization_endpoint": "https://login.sys.jamestown.cf-app.com",
+  "build": "2.9.8-build.6",
+  "description": "https://docs.pivotal.io/pivotalcf/2-9/pcf-release-notes/runtime-rn.html",
+  "doppler_logging_endpoint": "wss://doppler.sys.jamestown.cf-app.com:443",
+  "min_cli_version": "6.23.0",
+  "min_recommended_cli_version": "6.23.0",
+  "name": "Small Footprint VMware Tanzu Application Service",
+  "osbapi_version": "2.15",
+  "routing_endpoint": "https://api.sys.jamestown.cf-app.com/routing",
+  "support": "https://support.pivotal.io",
+  "token_endpoint": "[PRIVATE DATA HIDDEN]",
+  "version": 0
+}
+
+
+REQUEST: [2021-02-23T16:49:06-05:00]
+GET / HTTP/1.1
+Host: api.sys.jamestown.cf-app.com
+Accept: application/json
+User-Agent: cf.exe/6.53.0+8e2b70a4a.2020-10-01 (go1.13.8; amd64 windows)
+
+RESPONSE: [2021-02-23T16:49:06-05:00]
+HTTP/1.1 200 OK
+Content-Length: 1359
+Content-Type: application/json;charset=utf-8
+Date: Tue, 23 Feb 2021 21:49:09 GMT
+Server: nginx
+X-Content-Type-Options: nosniff
+X-Vcap-Request-Id: cec4efa5-675c-4a99-7f72-5d2ce46bea18::62a00cbb-8854-46fc-afd1-a3d73d93aeae
+{
+  "links": {
+    "app_ssh": {
+      "href": "ssh.sys.jamestown.cf-app.com:2222",
+      "meta": {
+        "host_key_fingerprint": "6f:0e:04:a2:f3:7e:9d:76:78:97:02:45:c1:5e:37:9e",
+        "oauth_client": "ssh-proxy"
+      }
+    },
+    "bits_service": null,
+    "cloud_controller_v2": {
+      "href": "https://api.sys.jamestown.cf-app.com/v2",
+      "meta": {
+        "version": "2.145.0"
+      }
+    },
+    "cloud_controller_v3": {
+      "href": "https://api.sys.jamestown.cf-app.com/v3",
+      "meta": {
+        "version": "3.80.0"
+      }
+    },
+    "credhub": null,
+    "log_cache": {
+      "href": "https://log-cache.sys.jamestown.cf-app.com"
+    },
+    "log_stream": {
+      "href": "https://log-stream.sys.jamestown.cf-app.com"
+    },
+    "logging": {
+      "href": "wss://doppler.sys.jamestown.cf-app.com:443"
+    },
+    "login": {
+      "href": "https://login.sys.jamestown.cf-app.com"
+    },
+    "network_policy_v0": {
+      "href": "https://api.sys.jamestown.cf-app.com/networking/v0/external"
+    },
+    "network_policy_v1": {
+      "href": "https://api.sys.jamestown.cf-app.com/networking/v1/external"
+    },
+    "routing": {
+      "href": "https://api.sys.jamestown.cf-app.com/routing"
+    },
+    "self": {
+      "href": "https://api.sys.jamestown.cf-app.com"
+    },
+    "uaa": {
+      "href": "https://uaa.sys.jamestown.cf-app.com"
+    }
+  }
+}
+
+
+REQUEST: [2021-02-23T16:49:06-05:00]
+GET /login HTTP/1.1
+Host: login.sys.jamestown.cf-app.com
+Accept: application/json
+Connection: close
+User-Agent: cf.exe/6.53.0+8e2b70a4a.2020-10-01 (go1.13.8; amd64 windows)
+
+RESPONSE: [2021-02-23T16:49:06-05:00]
+HTTP/1.1 200 OK
+Cache-Control: no-store
+Content-Language: en-US
+Content-Length: 415
+Content-Type: application/json;charset=UTF-8
+Date: Tue, 23 Feb 2021 21:49:08 GMT
+Set-Cookie: [PRIVATE DATA HIDDEN]
+Strict-Transport-Security: max-age=31536000 ; includeSubDomains
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+X-Vcap-Request-Id: 84f664c9-95f8-40bb-513b-f7a2987f0fe3
+X-Xss-Protection: 1; mode=block
+{
+  "app": {
+    "version": "74.5.18"
+  },
+  "commit_id": "30eacc8",
+  "entityID": "http://login.sys.jamestown.cf-app.com",
+  "idpDefinitions": {},
+  "links": {
+    "login": "https://login.sys.jamestown.cf-app.com",
+    "passwd": "/forgot_password",
+    "register": "/create_account",
+    "uaa": "https://uaa.sys.jamestown.cf-app.com"
+  },
+  "prompts": {
+    "password": "[PRIVATE DATA HIDDEN]",
+    "username": [
+      "text",
+      "Email"
+    ]
+  },
+  "timestamp": "2020-06-25T18:41:56+0000",
+  "zone_name": "uaa"
+}
+
+
+Getting spaces in org org-4 as admin...
+
+REQUEST: [2021-02-23T16:49:06-05:00]
+GET /v2/spaces?order-by=name&q=organization_guid%3Aa6c09d35-afb4-4fed-8626-1ddb9fde73b1 HTTP/1.1
+Host: api.sys.jamestown.cf-app.com
+Accept: application/json
+Authorization: [PRIVATE DATA HIDDEN]
+User-Agent: cf.exe/6.53.0+8e2b70a4a.2020-10-01 (go1.13.8; amd64 windows)
+
+RESPONSE: [2021-02-23T16:49:06-05:00]
+HTTP/1.1 200 OK
+Content-Length: 107
+Content-Type: application/json;charset=utf-8
+Date: Tue, 23 Feb 2021 21:49:09 GMT
+Server: nginx
+X-Content-Type-Options: nosniff
+X-Vcap-Request-Id: f2eee740-edfd-471d-493a-2b63fa082c07::19896a76-b5c1-472a-9651-4d8682e6489d
+{
+  "next_url": null,
+  "prev_url": null,
+  "resources": null,
+  "total_pages": 1,
+  "total_results": 0
+}
+
+
+No spaces found.

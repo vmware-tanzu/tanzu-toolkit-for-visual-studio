@@ -11,5 +11,6 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
 
         internal static readonly string _fakeMultiPageOrgsOutput = File.ReadAllText("CfCli/FakeMultiPageOrgsOutput.txt");
         internal static readonly string _fakeMultiPageSpacesOutput = File.ReadAllText("CfCli/FakeMultiPageSpacesOutput.txt");
+        internal static readonly string _fakeNoSpacesOutput = File.ReadAllText("CfCli/FakeNoSpacesOutput.txt");
     }
 }

@@ -114,7 +114,12 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
                 if (!result.Succeeded || result.CmdDetails.ExitCode != 0) return new List<Space>();
 
-                var spaceResponsePages = GetJsonResponsePages<SpacesApiV2ResponsePage>(result.CmdDetails.StdOut, V6_GetSpacesRequestPath);
+                /* break early & skip json parsing if output contains 'No spaces found' */
+                string content = result.CmdDetails.StdOut;
+                string contentEnding = content.Substring(content.Length - 20);
+                if (contentEnding.Contains("No spaces found")) return new List<Space>();
+
+                var spaceResponsePages = GetJsonResponsePages<SpacesApiV2ResponsePage>(content, V6_GetSpacesRequestPath);
 
                 var spacesList = new List<Space>();
                 foreach (SpacesApiV2ResponsePage responsePage in spaceResponsePages)
