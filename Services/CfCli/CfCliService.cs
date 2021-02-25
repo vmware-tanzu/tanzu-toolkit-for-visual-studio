@@ -34,6 +34,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         public static string V6_GetSpacesCmd = "spaces";
         public static string V6_GetAppsCmd = "apps";
         public static string V6_StopAppCmd = "stop";
+        public static string V6_StartAppCmd = "start";
         internal static string V6_GetOrgsRequestPath = "GET /v2/organizations";
         internal static string V6_GetSpacesRequestPath = "GET /v2/spaces";
         internal static string V6_GetAppsRequestPath = "GET /v2/spaces"; // not a typo; app info returned when requesting space details
@@ -192,6 +193,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         public async Task<DetailedResult> StopAppByNameAsync(string appName)
         {
             string args = $"{V6_StopAppCmd} {appName}";
+            DetailedResult result = await InvokeCfCliAsync(args);
+
+            return result;
+        }
+        
+        public async Task<DetailedResult> StartAppByNameAsync(string appName)
+        {
+            string args = $"{V6_StartAppCmd} {appName}";
             DetailedResult result = await InvokeCfCliAsync(args);
 
             return result;

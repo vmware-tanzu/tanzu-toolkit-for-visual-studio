@@ -24,5 +24,6 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         DetailedResult TargetSpace(string spaceName);
         Task<List<App>> GetAppsAsync();
         Task<DetailedResult> StopAppByNameAsync(string appName);
+        Task<DetailedResult> StartAppByNameAsync(string appName);
     }
 }

@@ -603,6 +603,46 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.AreEqual(_fakeStdOut, result.CmdDetails.StdOut);
             Assert.AreEqual(_fakeStdErr, result.CmdDetails.StdErr);
         }
+        
+        [TestMethod]
+        public async Task StartAppCliAsync_ReturnsTrueResult_WhenCmdExitCodeIsZero()
+        {
+            var fakeAppName = "fake-app";
+            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService.V6_StartAppCmd} {fakeAppName}";
+            CmdResult fakeSuccessResult = new CmdResult(_fakeStdOut, _fakeStdErr, 0);
+
+            mockCmdProcessService.Setup(mock => mock.
+              InvokeWindowlessCommandAsync(expectedCmdStr, null, null, null))
+                .ReturnsAsync(fakeSuccessResult);
+
+            DetailedResult result = await _sut.StartAppByNameAsync(fakeAppName);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsTrue(result.CmdDetails.ExitCode == 0);
+            Assert.IsNull(result.Explanation);
+            Assert.AreEqual(_fakeStdOut, result.CmdDetails.StdOut);
+            Assert.AreEqual(_fakeStdErr, result.CmdDetails.StdErr);
+        }
+
+        [TestMethod]
+        public async Task StartAppCliAsync_ReturnsFalseResult_WhenCmdExitCodeIsNotZero()
+        {
+            var fakeAppName = "fake-app";
+            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService.V6_StartAppCmd} {fakeAppName}";
+            CmdResult fakeFailureResult = new CmdResult(_fakeStdOut, _fakeStdErr, 1);
+
+            mockCmdProcessService.Setup(mock => mock.
+              InvokeWindowlessCommandAsync(expectedCmdStr, null, null, null))
+                .ReturnsAsync(fakeFailureResult);
+
+            DetailedResult result = await _sut.StartAppByNameAsync(fakeAppName);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsTrue(result.CmdDetails.ExitCode == 1);
+            Assert.IsNotNull(result.Explanation);
+            Assert.AreEqual(_fakeStdOut, result.CmdDetails.StdOut);
+            Assert.AreEqual(_fakeStdErr, result.CmdDetails.StdErr);
+        }
 
     }
 }

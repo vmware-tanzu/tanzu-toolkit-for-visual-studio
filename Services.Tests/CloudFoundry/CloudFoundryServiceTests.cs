@@ -702,41 +702,44 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
 
             Assert.IsFalse(result);
         }
-
+        
         [TestMethod]
-        public async Task StartAppAsync_UpdatesAppState_WhenAppStateChanges()
+        public async Task StartAppAsync_ReturnsTrue_AndUpdatesAppState_WhenStartCmdSucceeds()
         {
             fakeApp.State = "STOPPED";
 
-            mockCfApiClient.Setup(mock => mock.StartAppWithGuid(It.IsAny<string>(), It.IsAny<string>(), fakeApp.AppId))
-                .ReturnsAsync(true);
+            mockCfCliService.Setup(mock => mock.
+                StartAppByNameAsync(fakeApp.AppName))
+                    .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
 
-            await cfService.StartAppAsync(fakeApp);
+            var result = await cfService.StartAppAsync(fakeApp);
 
             Assert.AreEqual("STARTED", fakeApp.State);
+            Assert.IsTrue(result);
         }
-
+        
         [TestMethod]
-        public async Task StartAppAsync_ReturnsFalseAndDoesNotThrowException_WhenRequestInfoIsMissing()
+        public async Task StartAppAsync_ReturnsFalse_WhenStartCmdReportsFailure()
         {
-            var fakeApp = new CloudFoundryApp("fake app name", "fake app guid", parentSpace: null);
+            mockCfCliService.Setup(mock => mock.
+                StartAppByNameAsync(fakeApp.AppName))
+                    .ReturnsAsync(new DetailedResult(false, null, null));
 
-            mockCfApiClient.Setup(mock => mock.StartAppWithGuid(It.IsAny<string>(), It.IsAny<string>(), fakeApp.AppId))
-                .ReturnsAsync(true);
+            var result = await cfService.StartAppAsync(fakeApp);
 
-            bool startResult = true;
-            Exception shouldStayNull = null;
-            try
-            {
-                startResult = await cfService.StartAppAsync(fakeApp);
-            }
-            catch (Exception e)
-            {
-                shouldStayNull = e;
-            }
+            Assert.IsFalse(result);
+        }
+        
+        [TestMethod]
+        public async Task StartAppAsync_ReturnsFalse_WhenStartCmdExitsWithNonZeroCode()
+        {
+            mockCfCliService.Setup(mock => mock.
+              StartAppByNameAsync(fakeApp.AppName))
+                  .ReturnsAsync(new DetailedResult(true, null, _fakeFailureCmdResult));
 
-            Assert.IsFalse(startResult);
-            Assert.IsNull(shouldStayNull);
+            var result = await cfService.StartAppAsync(fakeApp);
+
+            Assert.IsFalse(result);
         }
 
         [TestMethod]

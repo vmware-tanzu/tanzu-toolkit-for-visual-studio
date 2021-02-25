@@ -199,24 +199,15 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             app.State = "STOPPED";
             return true;
         }
-
+        
         public async Task<bool> StartAppAsync(CloudFoundryApp app)
         {
-            try
-            {
-                var target = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
-                var token = app.ParentSpace.ParentOrg.ParentCf.AccessToken;
+            DetailedResult startResult = await cfCliService.StartAppByNameAsync(app.AppName);
 
-                bool appWasStarted = await _cfApiClient.StartAppWithGuid(target, token, app.AppId);
+            if (!startResult.Succeeded || startResult.CmdDetails.ExitCode != 0) return false;
 
-                if (appWasStarted) app.State = "STARTED";
-                return appWasStarted;
-            }
-            catch (Exception e)
-            {
-                System.Diagnostics.Debug.WriteLine(e);
-                return false;
-            }
+            app.State = "STARTED";
+            return true;
         }
 
         public async Task<bool> DeleteAppAsync(CloudFoundryApp app)
