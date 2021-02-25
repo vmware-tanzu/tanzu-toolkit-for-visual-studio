@@ -190,8 +190,17 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             }
         }
 
-        public async Task<bool> StopAppAsync(CloudFoundryApp app)
+        public async Task<bool> StopAppAsync(CloudFoundryApp app, bool skipSsl = true)
         {
+            var targetApiResult = cfCliService.TargetApi(app.ParentSpace.ParentOrg.ParentCf.ApiAddress, skipSsl);
+            if (!targetApiResult.Succeeded || targetApiResult.CmdDetails.ExitCode != 0) return false;
+
+            var targetOrgResult = cfCliService.TargetOrg(app.ParentSpace.ParentOrg.OrgName);
+            if (!targetOrgResult.Succeeded || targetOrgResult.CmdDetails.ExitCode != 0) return false;
+
+            var targetSpaceResult = cfCliService.TargetSpace(app.ParentSpace.SpaceName);
+            if (!targetSpaceResult.Succeeded || targetSpaceResult.CmdDetails.ExitCode != 0) return false;
+
             DetailedResult stopResult = await cfCliService.StopAppByNameAsync(app.AppName);
 
             if (!stopResult.Succeeded || stopResult.CmdDetails.ExitCode != 0) return false;
@@ -200,8 +209,17 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             return true;
         }
         
-        public async Task<bool> StartAppAsync(CloudFoundryApp app)
+        public async Task<bool> StartAppAsync(CloudFoundryApp app, bool skipSsl = true)
         {
+            var targetApiResult = cfCliService.TargetApi(app.ParentSpace.ParentOrg.ParentCf.ApiAddress, skipSsl);
+            if (!targetApiResult.Succeeded || targetApiResult.CmdDetails.ExitCode != 0) return false;
+
+            var targetOrgResult = cfCliService.TargetOrg(app.ParentSpace.ParentOrg.OrgName);
+            if (!targetOrgResult.Succeeded || targetOrgResult.CmdDetails.ExitCode != 0) return false;
+
+            var targetSpaceResult = cfCliService.TargetSpace(app.ParentSpace.SpaceName);
+            if (!targetSpaceResult.Succeeded || targetSpaceResult.CmdDetails.ExitCode != 0) return false;
+
             DetailedResult startResult = await cfCliService.StartAppByNameAsync(app.AppName);
 
             if (!startResult.Succeeded || startResult.CmdDetails.ExitCode != 0) return false;

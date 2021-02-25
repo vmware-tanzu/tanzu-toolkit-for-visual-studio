@@ -565,7 +565,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         }
 
         [TestMethod]
-        public async Task StopAppCliAsync_ReturnsTrueResult_WhenCmdExitCodeIsZero()
+        public async Task StopAppByNameAsync_ReturnsTrueResult_WhenCmdExitCodeIsZero()
         {
             var fakeAppName = "fake-app";
             string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService.V6_StopAppCmd} {fakeAppName}";
@@ -585,7 +585,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         }
 
         [TestMethod]
-        public async Task StopAppCliAsync_ReturnsFalseResult_WhenCmdExitCodeIsNotZero()
+        public async Task StopAppByNameAsync_ReturnsFalseResult_WhenCmdExitCodeIsNotZero()
         {
             var fakeAppName = "fake-app";
             string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService.V6_StopAppCmd} {fakeAppName}";
@@ -605,7 +605,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         }
         
         [TestMethod]
-        public async Task StartAppCliAsync_ReturnsTrueResult_WhenCmdExitCodeIsZero()
+        public async Task StartAppByNameAsync_ReturnsTrueResult_WhenCmdExitCodeIsZero()
         {
             var fakeAppName = "fake-app";
             string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService.V6_StartAppCmd} {fakeAppName}";
@@ -625,7 +625,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         }
 
         [TestMethod]
-        public async Task StartAppCliAsync_ReturnsFalseResult_WhenCmdExitCodeIsNotZero()
+        public async Task StartAppByNameAsync_ReturnsFalseResult_WhenCmdExitCodeIsNotZero()
         {
             var fakeAppName = "fake-app";
             string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService.V6_StartAppCmd} {fakeAppName}";

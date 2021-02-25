@@ -110,7 +110,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
 
-            mockCloudFoundryService.Setup(mock => mock.StopAppAsync(fakeApp)).ReturnsAsync(true);
+            mockCloudFoundryService.Setup(mock => mock.StopAppAsync(fakeApp, true)).ReturnsAsync(true);
 
             Exception shouldStayNull = null;
             try
@@ -131,7 +131,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
 
-            mockCloudFoundryService.Setup(mock => mock.StartAppAsync(fakeApp)).ReturnsAsync(true);
+            mockCloudFoundryService.Setup(mock => mock.StartAppAsync(fakeApp, true)).ReturnsAsync(true);
 
             Exception shouldStayNull = null;
             try
