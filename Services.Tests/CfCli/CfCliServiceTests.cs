@@ -524,5 +524,45 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.AreEqual(_fakeStdErr, result.CmdDetails.StdErr);
         }
 
+        [TestMethod]
+        public void TargetSpace_ReturnsTrueResult_WhenCmdExitCodeIsZero()
+        {
+            var fakeSpaceName = "fake-space";
+            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService.V6_TargetSpaceCmd} {fakeSpaceName}";
+            CmdResult fakeSuccessResult = new CmdResult(_fakeStdOut, _fakeStdErr, 0);
+
+            mockCmdProcessService.Setup(mock => mock.
+              ExecuteWindowlessCommand(expectedCmdStr, null))
+                .Returns(fakeSuccessResult);
+
+            DetailedResult result = _sut.TargetSpace(fakeSpaceName);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsTrue(result.CmdDetails.ExitCode == 0);
+            Assert.IsNull(result.Explanation);
+            Assert.AreEqual(_fakeStdOut, result.CmdDetails.StdOut);
+            Assert.AreEqual(_fakeStdErr, result.CmdDetails.StdErr);
+        }
+
+        [TestMethod]
+        public void TargetSpace_ReturnsFalseResult_WhenCmdExitCodeIsNotZero()
+        {
+            var fakeSpaceName = "fake-space";
+            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService.V6_TargetSpaceCmd} {fakeSpaceName}";
+            CmdResult fakeFailureResult = new CmdResult(_fakeStdOut, _fakeStdErr, 1);
+
+            mockCmdProcessService.Setup(mock => mock.
+              ExecuteWindowlessCommand(expectedCmdStr, null))
+                .Returns(fakeFailureResult);
+
+            DetailedResult result = _sut.TargetSpace(fakeSpaceName);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsTrue(result.CmdDetails.ExitCode == 1);
+            Assert.IsNotNull(result.Explanation);
+            Assert.AreEqual(_fakeStdOut, result.CmdDetails.StdOut);
+            Assert.AreEqual(_fakeStdErr, result.CmdDetails.StdErr);
+        }
+
     }
 }

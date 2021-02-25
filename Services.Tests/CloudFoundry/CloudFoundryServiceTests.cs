@@ -346,9 +346,9 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             const string space3Guid = "space-3-id";
             const string space4Guid = "space-4-id";
 
-            var mockSpacesResponse = new List<Services.CfCli.Models.Spaces.Space>
+            var mockSpacesResponse = new List<Space>
             {
-                new Services.CfCli.Models.Spaces.Space
+                new Space
                 {
                     entity = new Services.CfCli.Models.Spaces.Entity
                     {
@@ -359,7 +359,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
                         guid = space1Guid
                     }
                 },
-                new Services.CfCli.Models.Spaces.Space
+                new Space
                 {
                     entity = new Services.CfCli.Models.Spaces.Entity
                     {
@@ -370,7 +370,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
                         guid = space2Guid
                     }
                 },
-                new Services.CfCli.Models.Spaces.Space
+                new Space
                 {
                     entity = new Services.CfCli.Models.Spaces.Entity
                     {
@@ -381,7 +381,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
                         guid = space3Guid
                     }
                 },
-                new Services.CfCli.Models.Spaces.Space
+                new Space
                 {
                     entity = new Services.CfCli.Models.Spaces.Entity
                     {
