@@ -138,9 +138,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\AddCloud.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\CloudFoundry.png" />
   </ItemGroup>
   <ItemGroup>
@@ -162,6 +159,9 @@
     <Resource Include="Resources\DeleteApp.png" />
     <Resource Include="Resources\StopApp.png" />
     <Resource Include="Resources\StartApp.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\AddCloud.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
