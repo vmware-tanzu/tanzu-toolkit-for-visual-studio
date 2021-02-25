@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Tanzu.Toolkit.VisualStudio.Models;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Apps;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Orgs;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Spaces;
@@ -32,6 +33,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         public static string V6_GetOrgsCmd = "orgs";
         public static string V6_GetSpacesCmd = "spaces";
         public static string V6_GetAppsCmd = "apps";
+        public static string V6_StopAppCmd = "stop";
         internal static string V6_GetOrgsRequestPath = "GET /v2/organizations";
         internal static string V6_GetSpacesRequestPath = "GET /v2/spaces";
         internal static string V6_GetAppsRequestPath = "GET /v2/spaces"; // not a typo; app info returned when requesting space details
@@ -185,6 +187,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
                 return new List<App>();
             }
 
+        }
+
+        public async Task<DetailedResult> StopAppByNameAsync(string appName)
+        {
+            string args = $"{V6_StopAppCmd} {appName}";
+            DetailedResult result = await InvokeCfCliAsync(args);
+
+            return result;
         }
 
         /// <summary>

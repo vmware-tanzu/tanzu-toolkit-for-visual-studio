@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.CloudFoundryApiClient;
-using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
 using Tanzu.Toolkit.VisualStudio.Models;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli;
 using Tanzu.Toolkit.VisualStudio.Services.FileLocator;
@@ -193,21 +192,12 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
 
         public async Task<bool> StopAppAsync(CloudFoundryApp app)
         {
-            try
-            {
-                var target = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
-                var token = app.ParentSpace.ParentOrg.ParentCf.AccessToken;
+            DetailedResult stopResult = await cfCliService.StopAppByNameAsync(app.AppName);
 
-                bool appWasStopped = await _cfApiClient.StopAppWithGuid(target, token, app.AppId);
+            if (!stopResult.Succeeded || stopResult.CmdDetails.ExitCode != 0) return false;
 
-                if (appWasStopped) app.State = "STOPPED";
-                return appWasStopped;
-            }
-            catch (Exception e)
-            {
-                System.Diagnostics.Debug.WriteLine(e);
-                return false;
-            }
+            app.State = "STOPPED";
+            return true;
         }
 
         public async Task<bool> StartAppAsync(CloudFoundryApp app)
