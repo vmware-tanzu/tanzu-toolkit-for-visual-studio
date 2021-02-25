@@ -228,23 +228,23 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             return true;
         }
 
-        public async Task<bool> DeleteAppAsync(CloudFoundryApp app)
+        public async Task<bool> DeleteAppAsync(CloudFoundryApp app, bool skipSsl = true, bool removeRoutes = true)
         {
-            try
-            {
-                var target = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
-                var token = app.ParentSpace.ParentOrg.ParentCf.AccessToken;
+            var targetApiResult = cfCliService.TargetApi(app.ParentSpace.ParentOrg.ParentCf.ApiAddress, skipSsl);
+            if (!targetApiResult.Succeeded || targetApiResult.CmdDetails.ExitCode != 0) return false;
 
-                bool appWasDeleted = await _cfApiClient.DeleteAppWithGuid(target, token, app.AppId);
+            var targetOrgResult = cfCliService.TargetOrg(app.ParentSpace.ParentOrg.OrgName);
+            if (!targetOrgResult.Succeeded || targetOrgResult.CmdDetails.ExitCode != 0) return false;
 
-                if (appWasDeleted) app.State = "DELETED";
-                return appWasDeleted;
-            }
-            catch (Exception e)
-            {
-                System.Diagnostics.Debug.WriteLine(e);
-                return false;
-            }
+            var targetSpaceResult = cfCliService.TargetSpace(app.ParentSpace.SpaceName);
+            if (!targetSpaceResult.Succeeded || targetSpaceResult.CmdDetails.ExitCode != 0) return false;
+
+            DetailedResult deleteResult = await cfCliService.DeleteAppByNameAsync(app.AppName, removeRoutes);
+
+            if (!deleteResult.Succeeded || deleteResult.CmdDetails.ExitCode != 0) return false;
+
+            app.State = "DELETED";
+            return true;
         }
 
         public async Task<DetailedResult> DeployAppAsync(CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, string appName, string appProjPath, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback)

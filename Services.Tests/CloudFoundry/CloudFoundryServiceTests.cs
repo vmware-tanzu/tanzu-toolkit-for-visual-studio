@@ -298,7 +298,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             Assert.AreEqual(0, result.Count);
             CollectionAssert.AreEqual(expectedResult, result);
             Assert.AreEqual(typeof(List<CloudFoundryOrganization>), result.GetType());
-            
+
             mockCfCliService.VerifyAll();
         }
 
@@ -402,7 +402,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
                 new CloudFoundrySpace(space4Name, space4Guid, fakeOrg)
             };
 
-            var fakeTargetOrgResponse = new DetailedResult(true, null, new CmdResult("","",0));
+            var fakeTargetOrgResponse = new DetailedResult(true, null, new CmdResult("", "", 0));
 
             mockCfCliService.Setup(mock => mock.
                 TargetApi(fakeCfInstance.ApiAddress, true))
@@ -688,7 +688,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             Assert.AreEqual("STOPPED", fakeApp.State);
             Assert.IsTrue(result);
         }
-        
+
         [TestMethod]
         public async Task StopAppAsync_ReturnsFalse_WhenStopCmdReportsFailure()
         {
@@ -710,7 +710,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
 
             Assert.IsFalse(result);
         }
-        
+
         [TestMethod]
         public async Task StopAppAsync_ReturnsFalse_WhenStopCmdExitsWithNonZeroCode()
         {
@@ -732,12 +732,12 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
 
             Assert.IsFalse(result);
         }
-        
+
         [TestMethod]
         public async Task StartAppAsync_ReturnsTrue_AndUpdatesAppState_WhenStartCmdSucceeds()
         {
             fakeApp.State = "STOPPED";
-            
+
             mockCfCliService.Setup(mock => mock.
                 TargetApi(fakeCfInstance.ApiAddress, true))
                     .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
@@ -757,7 +757,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             Assert.AreEqual("STARTED", fakeApp.State);
             Assert.IsTrue(result);
         }
-        
+
         [TestMethod]
         public async Task StartAppAsync_ReturnsFalse_WhenStartCmdReportsFailure()
         {
@@ -779,7 +779,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
 
             Assert.IsFalse(result);
         }
-        
+
         [TestMethod]
         public async Task StartAppAsync_ReturnsFalse_WhenStartCmdExitsWithNonZeroCode()
         {
@@ -803,53 +803,72 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
-        public async Task DeleteAppAsync_ReturnsFalseAndDoesNotThrowException_WhenRequestInfoIsMissing()
-        {
-            var fakeApp = new CloudFoundryApp("fake app name", "fake app guid", parentSpace: null);
-
-            mockCfApiClient.Setup(mock => mock.DeleteAppWithGuid(It.IsAny<string>(), It.IsAny<string>(), fakeApp.AppId))
-                .ReturnsAsync(true);
-
-            bool deleteResult = true;
-            Exception shouldStayNull = null;
-            try
-            {
-                deleteResult = await cfService.DeleteAppAsync(fakeApp);
-            }
-            catch (Exception e)
-            {
-                shouldStayNull = e;
-            }
-
-            Assert.IsFalse(deleteResult);
-            Assert.IsNull(shouldStayNull);
-            mockCfApiClient.Verify(mock => mock.DeleteAppWithGuid(It.IsAny<string>(), It.IsAny<string>(), fakeApp.AppId), Times.Never);
-        }
-
-        [TestMethod]
-        public async Task DeleteAppAsync_UpdatesAppState_WhenAppStateChangesFromStarted()
-        {
-            fakeApp.State = "STARTED";
-
-            mockCfApiClient.Setup(mock => mock.DeleteAppWithGuid(It.IsAny<string>(), It.IsAny<string>(), fakeApp.AppId))
-                .ReturnsAsync(true);
-
-            await cfService.DeleteAppAsync(fakeApp);
-
-            Assert.AreEqual("DELETED", fakeApp.State);
-        }
-
-        [TestMethod]
-        public async Task DeleteAppAsync_UpdatesAppState_WhenAppStateChangesFromStopped()
+        public async Task DeleteAppAsync_ReturnsTrue_AndUpdatesAppState_WhenDeleteCmdSucceeds()
         {
             fakeApp.State = "STOPPED";
 
-            mockCfApiClient.Setup(mock => mock.DeleteAppWithGuid(It.IsAny<string>(), It.IsAny<string>(), fakeApp.AppId))
-                .ReturnsAsync(true);
+            mockCfCliService.Setup(mock => mock.
+                TargetApi(fakeCfInstance.ApiAddress, true))
+                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
 
-            await cfService.DeleteAppAsync(fakeApp);
+            mockCfCliService.Setup(mock => mock.
+               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+
+            mockCfCliService.Setup(mock => mock.
+               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+
+            mockCfCliService.Setup(mock => mock.
+                DeleteAppByNameAsync(fakeApp.AppName, true))
+                    .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
+
+            var result = await cfService.DeleteAppAsync(fakeApp);
 
             Assert.AreEqual("DELETED", fakeApp.State);
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public async Task DeleteAppAsync_ReturnsFalse_WhenDeleteCmdReportsFailure()
+        {
+            mockCfCliService.Setup(mock => mock.
+                TargetApi(fakeCfInstance.ApiAddress, true))
+                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+
+            mockCfCliService.Setup(mock => mock.
+               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+
+            mockCfCliService.Setup(mock => mock.
+               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+
+            mockCfCliService.Setup(mock => mock.
+                DeleteAppByNameAsync(fakeApp.AppName, true))
+                    .ReturnsAsync(new DetailedResult(false, null, null));
+
+            var result = await cfService.DeleteAppAsync(fakeApp);
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task DeleteAppAsync_ReturnsFalse_WhenDeleteCmdExitsWithNonZeroCode()
+        {
+            mockCfCliService.Setup(mock => mock.
+                TargetApi(fakeCfInstance.ApiAddress, true))
+                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+
+            mockCfCliService.Setup(mock => mock.
+               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+
+            mockCfCliService.Setup(mock => mock.
+               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+
+            mockCfCliService.Setup(mock => mock.
+              DeleteAppByNameAsync(fakeApp.AppName, true))
+                  .ReturnsAsync(new DetailedResult(true, null, _fakeFailureCmdResult));
+
+            var result = await cfService.DeleteAppAsync(fakeApp);
+
+            Assert.IsFalse(result);
         }
 
         [TestMethod]

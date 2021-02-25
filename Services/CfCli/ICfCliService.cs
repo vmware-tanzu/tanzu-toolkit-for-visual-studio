@@ -25,5 +25,6 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         Task<List<App>> GetAppsAsync();
         Task<DetailedResult> StopAppByNameAsync(string appName);
         Task<DetailedResult> StartAppByNameAsync(string appName);
+        Task<DetailedResult> DeleteAppByNameAsync(string appName, bool removeMappedRoutes = true);
     }
 }

@@ -152,7 +152,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
 
-            mockCloudFoundryService.Setup(mock => mock.DeleteAppAsync(fakeApp)).ReturnsAsync(true);
+            mockCloudFoundryService.Setup(mock => mock.DeleteAppAsync(fakeApp, true, true)).ReturnsAsync(true);
 
             Exception shouldStayNull = null;
             try

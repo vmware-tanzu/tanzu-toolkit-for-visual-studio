@@ -35,6 +35,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         public static string V6_GetAppsCmd = "apps";
         public static string V6_StopAppCmd = "stop";
         public static string V6_StartAppCmd = "start";
+        public static string V6_DeleteAppCmd = "delete -f"; // -f avoids confirmation prompt
         internal static string V6_GetOrgsRequestPath = "GET /v2/organizations";
         internal static string V6_GetSpacesRequestPath = "GET /v2/spaces";
         internal static string V6_GetAppsRequestPath = "GET /v2/spaces"; // not a typo; app info returned when requesting space details
@@ -201,6 +202,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         public async Task<DetailedResult> StartAppByNameAsync(string appName)
         {
             string args = $"{V6_StartAppCmd} {appName}";
+            DetailedResult result = await InvokeCfCliAsync(args);
+
+            return result;
+        }
+
+        public async Task<DetailedResult> DeleteAppByNameAsync(string appName, bool removeMappedRoutes = true)
+        {
+            string args = $"{V6_DeleteAppCmd} {appName}{(removeMappedRoutes ? " -r" : string.Empty)}";
             DetailedResult result = await InvokeCfCliAsync(args);
 
             return result;
