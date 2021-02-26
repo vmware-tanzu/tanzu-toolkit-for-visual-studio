@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Apps;
@@ -301,7 +301,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
                                 substringLength);
 
                             /* try converting json-like string to `ResponseType` instance */
-                            ResponseType responsePage = JsonConvert.DeserializeObject<ResponseType>(speculativeJsonStr);
+                            ResponseType responsePage = JsonSerializer.Deserialize<ResponseType>(speculativeJsonStr);
 
                             jsonResponses.Add(responsePage);
                         }
