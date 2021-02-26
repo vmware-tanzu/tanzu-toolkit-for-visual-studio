@@ -69,6 +69,21 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             Assert.IsTrue(svm.DisplayText.Contains(" (no apps)"));
         }
+        
+        [TestMethod]
+        public void LoadChildren__DoesNotAddNoAppsToName_WhenNameAlreadyContainsNoApps()
+        {
+            svm = new SpaceViewModel(new CloudFoundrySpace("fake space (no apps)", null, null), services);
+            List<CloudFoundryApp> emptyAppsList = new List<CloudFoundryApp>();
+
+            mockCloudFoundryService.Setup(mock => mock.GetAppsForSpaceAsync(It.IsAny<CloudFoundrySpace>(), true))
+                .ReturnsAsync(emptyAppsList);
+
+            svm.IsExpanded = true;
+
+            Assert.IsTrue(svm.DisplayText.EndsWith(" (no apps)"));
+            Assert.IsFalse(svm.DisplayText.EndsWith(" (no apps) (no apps)"));
+        }
 
         [TestMethod]
         public async Task FetchChildren_ReturnsListOfApps_WithoutUpdatingChildren()

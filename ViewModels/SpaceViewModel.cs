@@ -19,8 +19,9 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
         protected override async Task LoadChildren()
         {
-            var apps = await CloudFoundryService.GetAppsForSpaceAsync(Space);
-            if (apps.Count == 0) DisplayText += " (no apps)";
+            var apps = await CloudFoundryService.GetAppsForSpaceAsync(Space); 
+
+            if (apps.Count == 0 && !DisplayText.Contains("(no apps)")) DisplayText += " (no apps)";
 
             var updatedAppsList = new ObservableCollection<TreeViewItemViewModel>();
             foreach (CloudFoundryApp app in apps) updatedAppsList.Add(new AppViewModel(app, Services));

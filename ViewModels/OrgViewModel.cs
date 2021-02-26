@@ -21,7 +21,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         {
             var spaces = await CloudFoundryService.GetSpacesForOrgAsync(Org);
 
-            if (spaces.Count == 0) DisplayText += " (no spaces)";
+            if (spaces.Count == 0 && !DisplayText.Contains("(no spaces)")) DisplayText += " (no spaces)";
 
             var updatedSpacesList = new ObservableCollection<TreeViewItemViewModel>();
             foreach (CloudFoundrySpace space in spaces)

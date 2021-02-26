@@ -20,7 +20,8 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         protected override async Task LoadChildren()
         {
             var orgs = await CloudFoundryService.GetOrgsForCfInstanceAsync(CloudFoundryInstance);
-            if (orgs.Count == 0) DisplayText += " (no orgs)";
+
+            if (orgs.Count == 0 && !DisplayText.Contains("(no orgs)")) DisplayText += " (no orgs)";
 
             var updatedOrgsList = new ObservableCollection<TreeViewItemViewModel>();
             foreach (CloudFoundryOrganization org in orgs)

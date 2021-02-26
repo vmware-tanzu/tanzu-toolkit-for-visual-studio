@@ -93,6 +93,21 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             Assert.IsTrue(cfivm.DisplayText.Contains(" (no orgs)"));
         }
+        
+        [TestMethod]
+        public void LoadChildren_DoesNotAddNoOrgsToName_WhenNameAlreadyContainsNoOrgs()
+        {
+            cfivm = new CfInstanceViewModel(new CloudFoundryInstance("fake cf instance (no orgs)", null, null), services);
+            var emptyOrgsList = new List<CloudFoundryOrganization>();
+
+            mockCloudFoundryService.Setup(mock => mock.GetOrgsForCfInstanceAsync(It.IsAny<CloudFoundryInstance>(), true))
+                .ReturnsAsync(emptyOrgsList);
+
+            cfivm.IsExpanded = true;
+
+            Assert.IsTrue(cfivm.DisplayText.EndsWith(" (no orgs)"));
+            Assert.IsFalse(cfivm.DisplayText.EndsWith(" (no orgs) (no orgs)"));
+        }
 
         [TestMethod]
         public async Task FetchChildren_ReturnsListOfOrgs_WithoutUpdatingChildren()

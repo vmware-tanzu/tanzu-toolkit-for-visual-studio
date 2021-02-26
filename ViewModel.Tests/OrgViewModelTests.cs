@@ -106,6 +106,22 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             Assert.IsTrue(ovm.DisplayText.Contains(" (no spaces)"));
         }
+        
+        [TestMethod]
+        public void LoadChildren__DoesNotAddNoSpacesToName_WhenNameAlreadyContainsNoSpaces()
+        {
+            ovm = new OrgViewModel(new CloudFoundryOrganization("fake org (no spaces)", null, null), services);
+            List<CloudFoundrySpace> emptySpacesList = new List<CloudFoundrySpace>();
+
+            mockCloudFoundryService.Setup(mock => mock.
+                GetSpacesForOrgAsync(It.IsAny<CloudFoundryOrganization>(), true))
+                    .ReturnsAsync(emptySpacesList);
+
+            ovm.IsExpanded = true;
+
+            Assert.IsTrue(ovm.DisplayText.EndsWith(" (no spaces)"));
+            Assert.IsFalse(ovm.DisplayText.EndsWith(" (no spaces) (no spaces)"));
+        }
 
         [TestMethod]
         public async Task FetchChildren_ReturnsListOfSpaces_WithoutUpdatingChildren()
