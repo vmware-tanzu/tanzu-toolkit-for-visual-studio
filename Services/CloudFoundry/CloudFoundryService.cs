@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
-using Tanzu.Toolkit.CloudFoundryApiClient;
 using Tanzu.Toolkit.VisualStudio.Models;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli;
 using Tanzu.Toolkit.VisualStudio.Services.FileLocator;
@@ -13,7 +12,6 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
 {
     public class CloudFoundryService : ICloudFoundryService
     {
-        private static ICfApiClient _cfApiClient;
         private static ICfCliService cfCliService;
         private static IFileLocatorService _fileLocatorService;
         internal const string emptyOutputDirMessage = "Unable to locate app files; project output directory is empty. (Has your project already been compiled?)";
@@ -26,7 +24,6 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
         {
             CloudFoundryInstances = new Dictionary<string, CloudFoundryInstance>();
 
-            _cfApiClient = services.GetRequiredService<ICfApiClient>();
             cfCliService = services.GetRequiredService<ICfCliService>();
             _fileLocatorService = services.GetRequiredService<IFileLocatorService>();
         }

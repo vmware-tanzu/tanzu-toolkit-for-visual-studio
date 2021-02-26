@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Net.Http;
 using System.Windows;
-using Tanzu.Toolkit.CloudFoundryApiClient;
 using Tanzu.Toolkit.VisualStudio.Services.CloudFoundry;
 using Tanzu.Toolkit.VisualStudio.Services.Dialog;
 using Tanzu.Toolkit.VisualStudio.Services.ViewLocator;
@@ -54,11 +52,6 @@ namespace Tanzu.Toolkit.WpfApp
 
             services.AddTransient<IAddCloudDialogViewModel, AddCloudDialogViewModel>();
             services.AddTransient<IAddCloudDialogView, AddCloudDialogView>();
-
-            HttpClient concreteHttpClient = new HttpClient();
-            IUaaClient concreteUaaClient = new UaaClient(concreteHttpClient);
-            services.AddSingleton<IUaaClient>(_ => concreteUaaClient);
-            services.AddSingleton<ICfApiClient>(_ => new CfApiClient(concreteUaaClient, concreteHttpClient));
         }
     }
 }

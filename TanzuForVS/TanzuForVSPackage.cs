@@ -4,7 +4,6 @@ using System;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Tanzu.Toolkit.CloudFoundryApiClient;
 using Tanzu.Toolkit.VisualStudio.Commands;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli;
 using Tanzu.Toolkit.VisualStudio.Services.CloudFoundry;
@@ -123,11 +122,6 @@ namespace Tanzu.Toolkit.VisualStudio
 
             services.AddSingleton<IOutputViewModel, OutputViewModel>();
             services.AddSingleton<IOutputView, OutputView>();
-
-            HttpClient concreteHttpClient = new HttpClient();
-            IUaaClient concreteUaaClient = new UaaClient(concreteHttpClient);
-            services.AddSingleton(_ => concreteUaaClient);
-            services.AddSingleton<ICfApiClient>(_ => new CfApiClient(concreteUaaClient, concreteHttpClient));
         }
     }
 }

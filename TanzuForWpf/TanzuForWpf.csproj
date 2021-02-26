@@ -116,10 +116,6 @@
       <Project>{743bfc55-6c1f-4d0d-8d7e-c66a2c8ed917}</Project>
       <Name>Services</Name>
     </ProjectReference>
-    <ProjectReference Include="..\TanzuForVS.CloudFoundryApiClient\TanzuForVS.CloudFoundryApiClient.csproj">
-      <Project>{3AE10A3E-DF4C-4152-8609-1CB412B86795}</Project>
-      <Name>TanzuForVS.CloudFoundryApiClient</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ViewModels\ViewModels.csproj">
       <Project>{3ca888e6-13a9-4815-ba6a-868e235c5bce}</Project>
       <Name>ViewModels</Name>

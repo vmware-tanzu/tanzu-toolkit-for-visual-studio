@@ -571,7 +571,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
                 Assert.AreEqual(expectedResult[i].ParentSpace, result[i].ParentSpace);
             }
 
-            mockCfApiClient.VerifyAll();
+            mockCfCliService.VerifyAll();
         }
 
         [TestMethod()]
