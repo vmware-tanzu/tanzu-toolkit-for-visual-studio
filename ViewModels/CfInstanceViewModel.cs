@@ -9,6 +9,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
     public class CfInstanceViewModel : TreeViewItemViewModel
     {
         internal const string emptyOrgsPlaceholderMsg = "No orgs";
+        internal const string loadingMsg = "Loading orgs...";
 
         public CloudFoundryInstance CloudFoundryInstance { get; }
 
@@ -21,6 +22,14 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
         protected override async Task LoadChildren()
         {
+            Children = new ObservableCollection<TreeViewItemViewModel>
+            {
+                new PlaceholderViewModel(parent: this, Services)
+                {
+                    DisplayText = loadingMsg
+                }
+            };
+
             var orgs = await CloudFoundryService.GetOrgsForCfInstanceAsync(CloudFoundryInstance);
 
             if (orgs.Count == 0)

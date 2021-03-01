@@ -12,6 +12,12 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
     {
         private CfInstanceViewModel cfivm;
 
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            mockCloudFoundryService.VerifyAll();
+        }
+
         [TestMethod]
         public void Constructor_SetsDisplayTextToInstanceName()
         {
@@ -98,7 +104,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         }
 
         [TestMethod]
-        public void LoadChildren_AssignsPlaceholder_WhenThereAreNoOrgs()
+        public void LoadChildren_AssignsNoOrgsPlaceholder_WhenThereAreNoOrgs()
         {
             cfivm = new CfInstanceViewModel(new CloudFoundryInstance("fake cf instance", null, null), services);
             var emptyOrgsList = new List<CloudFoundryOrganization>();
@@ -119,6 +125,35 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             Assert.AreEqual(typeof(PlaceholderViewModel), cfivm.Children[0].GetType());
             Assert.IsTrue(ChildrenPropertyChangedCalled);
             Assert.AreEqual(CfInstanceViewModel.emptyOrgsPlaceholderMsg, cfivm.Children[0].DisplayText);
+        }
+
+        [TestMethod]
+        public void LoadChildren_DisplaysLoadingPlaceholder_BeforeOrgsResultsArrive()
+        {
+            cfivm = new CfInstanceViewModel(new CloudFoundryInstance("fake cf instance", null, null), services);
+            var emptyOrgsList = new List<CloudFoundryOrganization>();
+            bool loadingMsgDisplayed = false;
+
+            cfivm.PropertyChanged += (s, args) =>
+            {
+                var vm = s as CfInstanceViewModel;
+
+                if (args.PropertyName == "Children"
+                    && vm.Children.Count == 1
+                    && vm.Children[0].DisplayText == CfInstanceViewModel.loadingMsg)
+                {
+                    loadingMsgDisplayed = true;
+                }
+            };
+
+            mockCloudFoundryService.Setup(mock => mock.GetOrgsForCfInstanceAsync(It.IsAny<CloudFoundryInstance>(), true))
+                .ReturnsAsync(emptyOrgsList);
+
+
+            /* Invoke `LoadChildren` */
+            cfivm.IsExpanded = true;
+
+            Assert.IsTrue(loadingMsgDisplayed);
         }
 
         [TestMethod]
