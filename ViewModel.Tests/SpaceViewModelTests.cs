@@ -57,32 +57,56 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         }
 
         [TestMethod]
-        public void LoadChildren_SetsSpecialDisplayText_WhenThereAreNoApps()
+        public void LoadChildren_AssignsNoAppsPlaceholder_WhenThereAreNoApps()
         {
-            svm = new SpaceViewModel(new CloudFoundrySpace("fake space", null, null), services);
-            List<CloudFoundryApp> emptyAppsList = new List<CloudFoundryApp>();
+            svm = new SpaceViewModel(new CloudFoundrySpace("fake cf space", null, null), services);
+            var emptyAppsList = new List<CloudFoundryApp>();
+            bool ChildrenPropertyChangedCalled = false;
+
+            svm.PropertyChanged += (s, args) =>
+            {
+                if ("Children" == args.PropertyName) ChildrenPropertyChangedCalled = true;
+            };
 
             mockCloudFoundryService.Setup(mock => mock.GetAppsForSpaceAsync(It.IsAny<CloudFoundrySpace>(), true))
                 .ReturnsAsync(emptyAppsList);
 
+            /* Invoke `LoadChildren` */
             svm.IsExpanded = true;
 
-            Assert.IsTrue(svm.DisplayText.Contains(" (no apps)"));
+            Assert.AreEqual(1, svm.Children.Count);
+            Assert.AreEqual(typeof(PlaceholderViewModel), svm.Children[0].GetType());
+            Assert.IsTrue(ChildrenPropertyChangedCalled);
+            Assert.AreEqual(SpaceViewModel.emptyAppsPlaceholderMsg, svm.Children[0].DisplayText);
         }
-        
+
         [TestMethod]
-        public void LoadChildren__DoesNotAddNoAppsToName_WhenNameAlreadyContainsNoApps()
+        public void LoadChildren_DisplaysLoadingPlaceholder_BeforeAppsResultsArrive()
         {
-            svm = new SpaceViewModel(new CloudFoundrySpace("fake space (no apps)", null, null), services);
-            List<CloudFoundryApp> emptyAppsList = new List<CloudFoundryApp>();
+            svm = new SpaceViewModel(new CloudFoundrySpace("fake cf space", null, null), services);
+            var emptyAppsList = new List<CloudFoundryApp>();
+            bool loadingMsgDisplayed = false;
+
+            svm.PropertyChanged += (s, args) =>
+            {
+                var vm = s as SpaceViewModel;
+
+                if (args.PropertyName == "Children"
+                    && vm.Children.Count == 1
+                    && vm.Children[0].DisplayText == SpaceViewModel.loadingMsg)
+                {
+                    loadingMsgDisplayed = true;
+                }
+            };
 
             mockCloudFoundryService.Setup(mock => mock.GetAppsForSpaceAsync(It.IsAny<CloudFoundrySpace>(), true))
                 .ReturnsAsync(emptyAppsList);
 
+
+            /* Invoke `LoadChildren` */
             svm.IsExpanded = true;
 
-            Assert.IsTrue(svm.DisplayText.EndsWith(" (no apps)"));
-            Assert.IsFalse(svm.DisplayText.EndsWith(" (no apps) (no apps)"));
+            Assert.IsTrue(loadingMsgDisplayed);
         }
 
         [TestMethod]

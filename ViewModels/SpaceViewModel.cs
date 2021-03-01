@@ -8,6 +8,9 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 {
     public class SpaceViewModel : TreeViewItemViewModel
     {
+        internal const string emptyAppsPlaceholderMsg = "No apps";
+        internal const string loadingMsg = "Loading apps...";
+
         public CloudFoundrySpace Space { get; }
 
         public SpaceViewModel(CloudFoundrySpace space, IServiceProvider services)
@@ -19,14 +22,35 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
         protected override async Task LoadChildren()
         {
-            var apps = await CloudFoundryService.GetAppsForSpaceAsync(Space); 
+            Children = new ObservableCollection<TreeViewItemViewModel>
+            {
+                new PlaceholderViewModel(parent: this, Services)
+                {
+                    DisplayText = loadingMsg
+                }
+            };
 
-            if (apps.Count == 0 && !DisplayText.Contains("(no apps)")) DisplayText += " (no apps)";
+            var apps = await CloudFoundryService.GetAppsForSpaceAsync(Space);
 
-            var updatedAppsList = new ObservableCollection<TreeViewItemViewModel>();
-            foreach (CloudFoundryApp app in apps) updatedAppsList.Add(new AppViewModel(app, Services));
+            if (apps.Count == 0)
+            {
+                var noChildrenList = new ObservableCollection<TreeViewItemViewModel>
+                {
+                    new PlaceholderViewModel(parent: this, Services)
+                    {
+                        DisplayText = emptyAppsPlaceholderMsg
+                    }
+                };
 
-            Children = updatedAppsList;
+                Children = noChildrenList;
+            }
+            else
+            {
+                var updatedAppsList = new ObservableCollection<TreeViewItemViewModel>();
+                foreach (CloudFoundryApp app in apps) updatedAppsList.Add(new AppViewModel(app, Services));
+
+                Children = updatedAppsList;
+            }
         }
 
         public async Task<List<AppViewModel>> FetchChildren()
