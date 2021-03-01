@@ -80,6 +80,7 @@
             </TreeView.ItemContainerStyle>
 
             <TreeView.Resources>
+                <!-- CLOUD FOUNDRY INSTANCES -->
                 <HierarchicalDataTemplate DataType="{x:Type ViewModels:CfInstanceViewModel}" 
                                           ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
@@ -88,6 +89,7 @@
                     </StackPanel>
                 </HierarchicalDataTemplate>
 
+                <!-- CLOUD FOUNDRY ORGS -->
                 <HierarchicalDataTemplate DataType="{x:Type ViewModels:OrgViewModel}"
                                           ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
@@ -96,6 +98,7 @@
                     </StackPanel>
                 </HierarchicalDataTemplate>
 
+                <!-- CLOUD FOUNDRY SPACES -->
                 <HierarchicalDataTemplate DataType="{x:Type ViewModels:SpaceViewModel}"
                                           ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
@@ -116,6 +119,7 @@
                     </StackPanel>
                 </HierarchicalDataTemplate>
 
+                <!-- CLOUD FOUNDRY APPS -->
                 <DataTemplate DataType="{x:Type ViewModels:AppViewModel}">
                     <Grid>
                         <Grid.RowDefinitions>
@@ -171,6 +175,15 @@
                         </Button>
                     </Grid>
                 </DataTemplate>
+                
+                <!-- PLACEHOLDER TREE VIEW ITEMS -->
+                <DataTemplate DataType="{x:Type ViewModels:PlaceholderViewModel}">
+                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                        <Image Source="Resources/NestedItemArrow.png" Stretch="Uniform" Height="16px" Width="16px" Margin="0,2,4,0" />
+                        <TextBlock Text="{Binding DisplayText}" VerticalAlignment="Bottom"/>
+                    </StackPanel>
+                </DataTemplate>
+                
             </TreeView.Resources>
         </TreeView>
 

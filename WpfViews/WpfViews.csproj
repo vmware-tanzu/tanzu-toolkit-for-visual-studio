@@ -163,5 +163,8 @@
   <ItemGroup>
     <Resource Include="Resources\AddCloud.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\NestedItemArrow.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

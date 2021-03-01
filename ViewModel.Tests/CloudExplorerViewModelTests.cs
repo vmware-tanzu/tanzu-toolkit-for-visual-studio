@@ -469,7 +469,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             var cfivm = new CfInstanceViewModel(fakeCfInstance, services);
 
-            // check for presence of Dummy child (sanity check)
+            // check for presence of Placeholder child (sanity check)
             Assert.AreEqual(1, cfivm.Children.Count);
             Assert.IsNull(cfivm.Children[0]);
 
@@ -520,7 +520,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                 ovm
             };
 
-            // check for presence of Dummy child (sanity check)
+            // check for presence of Placeholder child (sanity check)
             Assert.AreEqual(1, ovm.Children.Count);
             Assert.IsNull(ovm.Children[0]);
 
@@ -590,7 +590,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                 svm
             };
 
-            // check for presence of Dummy child (sanity check)
+            // check for presence of Placeholder child (sanity check)
             Assert.AreEqual(1, svm.Children.Count);
             Assert.IsNull(svm.Children[0]);
 

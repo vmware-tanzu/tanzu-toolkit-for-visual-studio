@@ -8,6 +8,8 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 {
     public class CfInstanceViewModel : TreeViewItemViewModel
     {
+        internal const string emptyOrgsPlaceholderMsg = "No orgs";
+
         public CloudFoundryInstance CloudFoundryInstance { get; }
 
         public CfInstanceViewModel(CloudFoundryInstance cloudFoundryInstance, IServiceProvider services)
@@ -21,16 +23,29 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         {
             var orgs = await CloudFoundryService.GetOrgsForCfInstanceAsync(CloudFoundryInstance);
 
-            if (orgs.Count == 0 && !DisplayText.Contains("(no orgs)")) DisplayText += " (no orgs)";
-
-            var updatedOrgsList = new ObservableCollection<TreeViewItemViewModel>();
-            foreach (CloudFoundryOrganization org in orgs)
+            if (orgs.Count == 0)
             {
-                var newOrg = new OrgViewModel(org, Services);
-                updatedOrgsList.Add(newOrg);
-            }
+                var noChildrenList = new ObservableCollection<TreeViewItemViewModel>
+                {
+                    new PlaceholderViewModel(parent: this, Services)
+                    {
+                        DisplayText = emptyOrgsPlaceholderMsg
+                    }
+                };
 
-            Children = updatedOrgsList;
+                Children = noChildrenList;
+            }
+            else
+            {
+                var updatedOrgsList = new ObservableCollection<TreeViewItemViewModel>();
+                foreach (CloudFoundryOrganization org in orgs)
+                {
+                    var newOrg = new OrgViewModel(org, Services);
+                    updatedOrgsList.Add(newOrg);
+                }
+
+                Children = updatedOrgsList;
+            }
         }
 
 
@@ -48,4 +63,5 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
             return newOrgsList;
         }
     }
+
 }

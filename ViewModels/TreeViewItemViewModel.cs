@@ -12,10 +12,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         private TreeViewItemViewModel _parent;
         private ObservableCollection<TreeViewItemViewModel> _children;
         private bool _loadChildrenOnExpansion;
-
-        // placeholder to allow this tree view item to be expandable before its children 
-        // have loaded (the presence of children causes the expansion button to appear)
-        private readonly TreeViewItemViewModel DummyChild;
+        private TreeViewItemViewModel placeholderChild;
 
         protected TreeViewItemViewModel(TreeViewItemViewModel parent, IServiceProvider services)
             : base(services)
@@ -24,7 +21,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
             _isExpanded = false;
             _children = new ObservableCollection<TreeViewItemViewModel>
             {
-                DummyChild
+                PlaceholderChild
             };
             _loadChildrenOnExpansion = true;
         }
@@ -63,25 +60,31 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
                     _isExpanded = value;
                     if (value == true && LoadChildrenOnExpansion)
                     {
-                        // Lazy load the child items, if necessary.
-                        if (HasDummyChild) Children.Remove(DummyChild);
-                        LoadChildren();
+                        if (HasPlaceholderChild) Children.Remove(PlaceholderChild);
+
+                        // Lazily load the child items
+                        LoadChildren(); 
                     }
                     RaisePropertyChangedEvent("IsExpanded");
                 }
-
-                // Expand all the way up to the root.
-                //if (_isExpanded && _parent != null)
-                //    _parent.IsExpanded = true;
             }
+        }
+
+        // placeholder to allow this tree view item to be expandable before its children 
+        // have loaded or if it has no children (the presence of children causes the 
+        // expansion button to appear)
+        public TreeViewItemViewModel PlaceholderChild
+        {
+            get { return placeholderChild; }
+            set { placeholderChild = value; }
         }
 
         /// <summary>
         /// Returns true if this object's Children have not yet been populated.
         /// </summary>
-        public bool HasDummyChild
+        public bool HasPlaceholderChild
         {
-            get { return Children.Count == 1 && Children[0] == DummyChild; }
+            get { return Children.Count == 1 && Children[0] == PlaceholderChild; }
         }
 
         public bool IsSelected

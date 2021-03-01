@@ -37,20 +37,28 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             cfivm = new CfInstanceViewModel(new CloudFoundryInstance("fake cf", null, null), services);
 
+            bool ChildrenPropertyChangedCalled = false;
+
+            cfivm.PropertyChanged += (s, args) =>
+            {
+                if ("Children" == args.PropertyName) ChildrenPropertyChangedCalled = true;
+            };
+
             // check presence of single placeholder child *before* CfInstanceViewModel is expanded
             Assert.AreEqual(1, cfivm.Children.Count);
             Assert.AreEqual(null, cfivm.Children[0]);
 
+            /* Invoke `LoadChildren` */
             cfivm.IsExpanded = true;
 
             Assert.AreEqual(fakeOrgsList.Count, cfivm.Children.Count);
             mockCloudFoundryService.VerifyAll();
+            Assert.IsTrue(ChildrenPropertyChangedCalled);
         }
 
         [TestMethod]
         public void LoadChildren_UpdatesAllOrgs()
         {
-
             var initialOrgsList = new System.Collections.ObjectModel.ObservableCollection<TreeViewItemViewModel>
             {
                 new OrgViewModel(new CloudFoundryOrganization("initial org 1", "initial org 1 guid", null), services),
@@ -69,44 +77,48 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                 new CloudFoundryOrganization("initial org 2", "initial org 2 guid", null)
             };
 
+            bool ChildrenPropertyChangedCalled = false;
+
+            cfivm.PropertyChanged += (s, args) =>
+            {
+                if ("Children" == args.PropertyName) ChildrenPropertyChangedCalled = true;
+            };
+
             mockCloudFoundryService.Setup(mock => mock.GetOrgsForCfInstanceAsync(It.IsAny<CloudFoundryInstance>(), true))
                 .ReturnsAsync(newOrgsList);
 
             Assert.AreEqual(initialOrgsList.Count, cfivm.Children.Count);
 
+            /* Invoke `LoadChildren` */
             cfivm.IsExpanded = true;
 
             Assert.AreEqual(newOrgsList.Count, cfivm.Children.Count);
             mockCloudFoundryService.VerifyAll();
+            Assert.IsTrue(ChildrenPropertyChangedCalled);
         }
 
         [TestMethod]
-        public void LoadChildren_SetsSpecialDisplayText_WhenThereAreNoOrgs()
+        public void LoadChildren_AssignsPlaceholder_WhenThereAreNoOrgs()
         {
             cfivm = new CfInstanceViewModel(new CloudFoundryInstance("fake cf instance", null, null), services);
             var emptyOrgsList = new List<CloudFoundryOrganization>();
+            bool ChildrenPropertyChangedCalled = false;
+
+            cfivm.PropertyChanged += (s, args) =>
+            {
+                if ("Children" == args.PropertyName) ChildrenPropertyChangedCalled = true;
+            };
 
             mockCloudFoundryService.Setup(mock => mock.GetOrgsForCfInstanceAsync(It.IsAny<CloudFoundryInstance>(), true))
                 .ReturnsAsync(emptyOrgsList);
 
+            /* Invoke `LoadChildren` */
             cfivm.IsExpanded = true;
 
-            Assert.IsTrue(cfivm.DisplayText.Contains(" (no orgs)"));
-        }
-        
-        [TestMethod]
-        public void LoadChildren_DoesNotAddNoOrgsToName_WhenNameAlreadyContainsNoOrgs()
-        {
-            cfivm = new CfInstanceViewModel(new CloudFoundryInstance("fake cf instance (no orgs)", null, null), services);
-            var emptyOrgsList = new List<CloudFoundryOrganization>();
-
-            mockCloudFoundryService.Setup(mock => mock.GetOrgsForCfInstanceAsync(It.IsAny<CloudFoundryInstance>(), true))
-                .ReturnsAsync(emptyOrgsList);
-
-            cfivm.IsExpanded = true;
-
-            Assert.IsTrue(cfivm.DisplayText.EndsWith(" (no orgs)"));
-            Assert.IsFalse(cfivm.DisplayText.EndsWith(" (no orgs) (no orgs)"));
+            Assert.AreEqual(1, cfivm.Children.Count);
+            Assert.AreEqual(typeof(PlaceholderViewModel), cfivm.Children[0].GetType());
+            Assert.IsTrue(ChildrenPropertyChangedCalled);
+            Assert.AreEqual(CfInstanceViewModel.emptyOrgsPlaceholderMsg, cfivm.Children[0].DisplayText);
         }
 
         [TestMethod]

@@ -7,7 +7,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
     interface ITreeViewItemViewModel : INotifyPropertyChanged
     {
         ObservableCollection<TreeViewItemViewModel> Children { get; }
-        bool HasDummyChild { get; }
+        bool HasPlaceholderChild { get; }
         bool IsExpanded { get; set; }
         bool IsSelected { get; set; }
         TreeViewItemViewModel Parent { get; }
