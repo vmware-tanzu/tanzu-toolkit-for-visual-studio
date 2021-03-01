@@ -57,7 +57,6 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                     Times.Exactly(3));
         }
 
-
         [TestMethod]
         public void LoadChildren_UpdatesAllSpaces()
         {
@@ -93,34 +92,56 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         }
 
         [TestMethod]
-        public void LoadChildren_SetsSpecialDisplayText_WhenThereAreNoSpaces()
+        public void LoadChildren_AssignsNoSpacesPlaceholder_WhenThereAreNoSpaces()
         {
-            ovm = new OrgViewModel(new CloudFoundryOrganization("fake org", null, null), services);
-            List<CloudFoundrySpace> emptySpacesList = new List<CloudFoundrySpace>();
+            ovm = new OrgViewModel(new CloudFoundryOrganization("fake cf org", null, null), services);
+            var emptySpacesList = new List<CloudFoundrySpace>();
+            bool ChildrenPropertyChangedCalled = false;
 
-            mockCloudFoundryService.Setup(mock => mock.
-                GetSpacesForOrgAsync(It.IsAny<CloudFoundryOrganization>(), true))
-                    .ReturnsAsync(emptySpacesList);
+            ovm.PropertyChanged += (s, args) =>
+            {
+                if ("Children" == args.PropertyName) ChildrenPropertyChangedCalled = true;
+            };
 
+            mockCloudFoundryService.Setup(mock => mock.GetSpacesForOrgAsync(It.IsAny<CloudFoundryOrganization>(), true))
+                .ReturnsAsync(emptySpacesList);
+
+            /* Invoke `LoadChildren` */
             ovm.IsExpanded = true;
 
-            Assert.IsTrue(ovm.DisplayText.Contains(" (no spaces)"));
+            Assert.AreEqual(1, ovm.Children.Count);
+            Assert.AreEqual(typeof(PlaceholderViewModel), ovm.Children[0].GetType());
+            Assert.IsTrue(ChildrenPropertyChangedCalled);
+            Assert.AreEqual(OrgViewModel.emptySpacesPlaceholderMsg, ovm.Children[0].DisplayText);
         }
-        
+
         [TestMethod]
-        public void LoadChildren__DoesNotAddNoSpacesToName_WhenNameAlreadyContainsNoSpaces()
+        public void LoadChildren_DisplaysLoadingPlaceholder_BeforeSpacesResultsArrive()
         {
-            ovm = new OrgViewModel(new CloudFoundryOrganization("fake org (no spaces)", null, null), services);
-            List<CloudFoundrySpace> emptySpacesList = new List<CloudFoundrySpace>();
+            ovm = new OrgViewModel(new CloudFoundryOrganization("fake cf org", null, null), services);
+            var emptySpacesList = new List<CloudFoundrySpace>();
+            bool loadingMsgDisplayed = false;
 
-            mockCloudFoundryService.Setup(mock => mock.
-                GetSpacesForOrgAsync(It.IsAny<CloudFoundryOrganization>(), true))
-                    .ReturnsAsync(emptySpacesList);
+            ovm.PropertyChanged += (s, args) =>
+            {
+                var vm = s as OrgViewModel;
 
+                if (args.PropertyName == "Children"
+                    && vm.Children.Count == 1
+                    && vm.Children[0].DisplayText == OrgViewModel.loadingMsg)
+                {
+                    loadingMsgDisplayed = true;
+                }
+            };
+
+            mockCloudFoundryService.Setup(mock => mock.GetSpacesForOrgAsync(It.IsAny<CloudFoundryOrganization>(), true))
+                .ReturnsAsync(emptySpacesList);
+
+
+            /* Invoke `LoadChildren` */
             ovm.IsExpanded = true;
 
-            Assert.IsTrue(ovm.DisplayText.EndsWith(" (no spaces)"));
-            Assert.IsFalse(ovm.DisplayText.EndsWith(" (no spaces) (no spaces)"));
+            Assert.IsTrue(loadingMsgDisplayed);
         }
 
         [TestMethod]

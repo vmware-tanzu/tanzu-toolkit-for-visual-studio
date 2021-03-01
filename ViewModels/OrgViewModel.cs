@@ -8,6 +8,9 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 {
     public class OrgViewModel : TreeViewItemViewModel
     {
+        internal const string emptySpacesPlaceholderMsg = "No spaces";
+        internal const string loadingMsg = "Loading spaces...";
+
         public CloudFoundryOrganization Org { get; }
 
         public OrgViewModel(CloudFoundryOrganization org, IServiceProvider services)
@@ -19,17 +22,38 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
         protected override async Task LoadChildren()
         {
+            Children = new ObservableCollection<TreeViewItemViewModel>
+            {
+                new PlaceholderViewModel(parent: this, Services)
+                {
+                    DisplayText = loadingMsg
+                }
+            };
+
             var spaces = await CloudFoundryService.GetSpacesForOrgAsync(Org);
 
-            if (spaces.Count == 0 && !DisplayText.Contains("(no spaces)")) DisplayText += " (no spaces)";
-
-            var updatedSpacesList = new ObservableCollection<TreeViewItemViewModel>();
-            foreach (CloudFoundrySpace space in spaces)
+            if (spaces.Count == 0)
             {
-                updatedSpacesList.Add(new SpaceViewModel(new CloudFoundrySpace(space.SpaceName, space.SpaceId, Org), Services));
-            }
+                var noChildrenList = new ObservableCollection<TreeViewItemViewModel>
+                {
+                    new PlaceholderViewModel(parent: this, Services)
+                    {
+                        DisplayText = emptySpacesPlaceholderMsg
+                    }
+                };
 
-            Children = updatedSpacesList;
+                Children = noChildrenList;
+            }
+            else
+            {
+                var updatedSpacesList = new ObservableCollection<TreeViewItemViewModel>();
+                foreach (CloudFoundrySpace space in spaces)
+                {
+                    updatedSpacesList.Add(new SpaceViewModel(new CloudFoundrySpace(space.SpaceName, space.SpaceId, Org), Services));
+                }
+
+                Children = updatedSpacesList;
+            }
         }
 
         public async Task<List<SpaceViewModel>> FetchChildren()
