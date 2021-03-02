@@ -18,18 +18,15 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         {
             Org = org;
             DisplayText = Org.OrgName;
+
+            LoadingPlaceholder = new PlaceholderViewModel(parent: this, services)
+            {
+                DisplayText = loadingMsg
+            };
         }
 
-        protected override async Task LoadChildren()
+        internal protected override async Task LoadChildren()
         {
-            Children = new ObservableCollection<TreeViewItemViewModel>
-            {
-                new PlaceholderViewModel(parent: this, Services)
-                {
-                    DisplayText = loadingMsg
-                }
-            };
-
             var spaces = await CloudFoundryService.GetSpacesForOrgAsync(Org);
 
             if (spaces.Count == 0)

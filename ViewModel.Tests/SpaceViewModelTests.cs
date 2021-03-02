@@ -10,22 +10,41 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
     [TestClass]
     public class SpaceViewModelTests : ViewModelTestSupport
     {
-        private SpaceViewModel svm;
+        private SpaceViewModel _sut;
+        private List<string> _receivedEvents;
+
+        [TestInitialize]
+        public void TestInit()
+        {
+            _sut = new SpaceViewModel(fakeCfSpace, services);
+
+            _receivedEvents = new List<string>();
+            _sut.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
+            {
+                _receivedEvents.Add(e.PropertyName);
+            };
+        }
+
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            mockCloudFoundryService.VerifyAll();
+        }
 
         [TestMethod]
         public void Constructor_SetsDisplayTextToSpaceName()
         {
-            string spaceName = "junk";
-            string spaceId = "junk";
-            var fakeSpace = new CloudFoundrySpace(spaceName, spaceId, null);
-
-            svm = new SpaceViewModel(fakeSpace, services);
-
-            Assert.AreEqual(spaceName, svm.DisplayText);
+            Assert.AreEqual(fakeCfSpace.SpaceName, _sut.DisplayText);
         }
 
         [TestMethod]
-        public void LoadChildren_UpdatesAllSpaces()
+        public void Constructor_SetsLoadingPlaceholder()
+        {
+            Assert.AreEqual(SpaceViewModel.loadingMsg, _sut.LoadingPlaceholder.DisplayText);
+        }
+
+        [TestMethod]
+        public async Task LoadChildren_UpdatesAllSpaces()
         {
             var initialAppsList = new System.Collections.ObjectModel.ObservableCollection<TreeViewItemViewModel>
             {
@@ -34,111 +53,70 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                 new AppViewModel(new CloudFoundryApp("initial app 3", null, null), services),
             };
 
-            svm = new SpaceViewModel(new CloudFoundrySpace("fake space", null, null), services)
-            {
-                Children = initialAppsList
-            };
-
             var newAppsList = new List<CloudFoundryApp>
             {
                 new CloudFoundryApp("initial app 1", null, null),
                 new CloudFoundryApp("initial app 2", null, null)
             };
 
+            _sut.Children = initialAppsList;
+
+            /* erase record of initial "Children" event */
+            _receivedEvents.Clear();
+
             mockCloudFoundryService.Setup(mock => mock.GetAppsForSpaceAsync(It.IsAny<CloudFoundrySpace>(), true))
                 .ReturnsAsync(newAppsList);
 
-            Assert.AreEqual(initialAppsList.Count, svm.Children.Count);
+            Assert.AreEqual(initialAppsList.Count, _sut.Children.Count);
 
-            svm.IsExpanded = true;
+            await _sut.LoadChildren();
 
-            Assert.AreEqual(newAppsList.Count, svm.Children.Count);
-            mockCloudFoundryService.VerifyAll();
+            Assert.AreEqual(newAppsList.Count, _sut.Children.Count);
+
+            Assert.AreEqual(1, _receivedEvents.Count);
+            Assert.AreEqual("Children", _receivedEvents[0]);
         }
 
         [TestMethod]
-        public void LoadChildren_AssignsNoAppsPlaceholder_WhenThereAreNoApps()
+        public async Task LoadChildren_AssignsNoAppsPlaceholder_WhenThereAreNoApps()
         {
-            svm = new SpaceViewModel(new CloudFoundrySpace("fake cf space", null, null), services);
-            var emptyAppsList = new List<CloudFoundryApp>();
-            bool ChildrenPropertyChangedCalled = false;
-
-            svm.PropertyChanged += (s, args) =>
-            {
-                if ("Children" == args.PropertyName) ChildrenPropertyChangedCalled = true;
-            };
-
             mockCloudFoundryService.Setup(mock => mock.GetAppsForSpaceAsync(It.IsAny<CloudFoundrySpace>(), true))
-                .ReturnsAsync(emptyAppsList);
+                .ReturnsAsync(emptyListOfApps);
 
-            /* Invoke `LoadChildren` */
-            svm.IsExpanded = true;
+            await _sut.LoadChildren();
 
-            Assert.AreEqual(1, svm.Children.Count);
-            Assert.AreEqual(typeof(PlaceholderViewModel), svm.Children[0].GetType());
-            Assert.IsTrue(ChildrenPropertyChangedCalled);
-            Assert.AreEqual(SpaceViewModel.emptyAppsPlaceholderMsg, svm.Children[0].DisplayText);
-        }
-
-        [TestMethod]
-        public void LoadChildren_DisplaysLoadingPlaceholder_BeforeAppsResultsArrive()
-        {
-            svm = new SpaceViewModel(new CloudFoundrySpace("fake cf space", null, null), services);
-            var emptyAppsList = new List<CloudFoundryApp>();
-            bool loadingMsgDisplayed = false;
-
-            svm.PropertyChanged += (s, args) =>
-            {
-                var vm = s as SpaceViewModel;
-
-                if (args.PropertyName == "Children"
-                    && vm.Children.Count == 1
-                    && vm.Children[0].DisplayText == SpaceViewModel.loadingMsg)
-                {
-                    loadingMsgDisplayed = true;
-                }
-            };
-
-            mockCloudFoundryService.Setup(mock => mock.GetAppsForSpaceAsync(It.IsAny<CloudFoundrySpace>(), true))
-                .ReturnsAsync(emptyAppsList);
-
-
-            /* Invoke `LoadChildren` */
-            svm.IsExpanded = true;
-
-            Assert.IsTrue(loadingMsgDisplayed);
+            Assert.AreEqual(1, _sut.Children.Count);
+            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
+            Assert.AreEqual(SpaceViewModel.emptyAppsPlaceholderMsg, _sut.Children[0].DisplayText);
+            
+            Assert.AreEqual(1, _receivedEvents.Count);
+            Assert.AreEqual("Children", _receivedEvents[0]);
         }
 
         [TestMethod]
         public async Task FetchChildren_ReturnsListOfApps_WithoutUpdatingChildren()
         {
-            var receivedEvents = new List<string>();
-            var fakeSpace = new CloudFoundrySpace("junk", null, null);
-            svm = new SpaceViewModel(fakeSpace, services);
-
-            svm.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
-            {
-                receivedEvents.Add(e.PropertyName);
-            };
-
-            mockCloudFoundryService.Setup(mock => mock.GetAppsForSpaceAsync(fakeSpace, true))
+            mockCloudFoundryService.Setup(mock => mock.GetAppsForSpaceAsync(fakeCfSpace, true))
                 .ReturnsAsync(new List<CloudFoundryApp>
             {
-                new CloudFoundryApp("fake app name 1","fake app id 1", fakeSpace),
-                new CloudFoundryApp("fake app name 2","fake app id 2", fakeSpace)
+                new CloudFoundryApp("fake app name 1","fake app id 1", fakeCfSpace),
+                new CloudFoundryApp("fake app name 2","fake app id 2", fakeCfSpace)
             });
 
-            var apps = await svm.FetchChildren();
+            /* pre-check presence of placeholder */
+            Assert.AreEqual(1, _sut.Children.Count);
+            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
+
+            var apps = await _sut.FetchChildren();
 
             Assert.AreEqual(2, apps.Count);
 
-            Assert.AreEqual(1, svm.Children.Count);
-            Assert.IsNull(svm.Children[0]);
+            /* confirm presence of placeholder */
+            Assert.AreEqual(1, _sut.Children.Count);
+            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
 
             // property changed events should not be raised
-            Assert.AreEqual(0, receivedEvents.Count);
-
-            mockCloudFoundryService.VerifyAll();
+            Assert.AreEqual(0, _receivedEvents.Count);
         }
     }
 }

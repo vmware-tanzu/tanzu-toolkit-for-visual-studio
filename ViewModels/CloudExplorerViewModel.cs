@@ -127,8 +127,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
         public async Task RefreshCfInstance(object cfInstanceViewModel)
         {
-            var cfivm = cfInstanceViewModel as CfInstanceViewModel;
-            if (cfivm != null)
+            if (cfInstanceViewModel is CfInstanceViewModel cfivm)
             {
                 var currentOrgs = await cfivm.FetchChildren();
 
@@ -139,8 +138,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
         public async Task RefreshOrg(object orgViewModel)
         {
-            var ovm = orgViewModel as OrgViewModel;
-            if (ovm != null)
+            if (orgViewModel is OrgViewModel ovm)
             {
                 var currentSpaces = await ovm.FetchChildren();
 
@@ -151,8 +149,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
         public async Task RefreshSpace(object spaceViewModel)
         {
-            var svm = spaceViewModel as SpaceViewModel;
-            if (svm != null)
+            if (spaceViewModel is SpaceViewModel svm)
             {
                 var currentApps = await svm.FetchChildren();
 
@@ -163,8 +160,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
         public void RefreshApp(object appViewModel)
         {
-            var avm = appViewModel as AppViewModel;
-            if (avm != null)
+            if (appViewModel is AppViewModel avm)
             {
                 avm.SignalIsStoppedChanged();
             }
@@ -180,21 +176,21 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
             {
                 await RefreshCfInstance(cfivm);
 
-                foreach (OrgViewModel ovm in cfivm.Children)
+                foreach (TreeViewItemViewModel cfChild in cfivm.Children)
                 {
-                    if (ovm != null)
+                    if (cfChild is OrgViewModel ovm)
                     {
                         await RefreshOrg(ovm);
 
-                        foreach (SpaceViewModel svm in ovm.Children)
+                        foreach (TreeViewItemViewModel orgChild in ovm.Children)
                         {
-                            if (svm != null)
+                            if (orgChild is SpaceViewModel svm)
                             {
                                 await RefreshSpace(svm);
 
-                                foreach (AppViewModel avm in svm.Children)
+                                foreach (TreeViewItemViewModel spaceChild in svm.Children)
                                 {
-                                    if (avm != null) RefreshApp(avm);
+                                    if (spaceChild is AppViewModel avm) RefreshApp(avm);
                                 }
                             }
                         }
@@ -292,9 +288,9 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         {
             var appsToRemove = new List<AppViewModel>();
 
-            foreach (AppViewModel oldAVM in svm.Children)
+            foreach (TreeViewItemViewModel priorChild in svm.Children)
             {
-                if (oldAVM != null)
+                if (priorChild is AppViewModel oldAVM)
                 {
                     bool appStillExists = currentApps.Any(avm => avm != null && avm.App.AppId == oldAVM.App.AppId);
 
@@ -336,9 +332,9 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         {
             var spacesToRemove = new List<SpaceViewModel>();
 
-            foreach (SpaceViewModel oldSVM in ovm.Children)
+            foreach (TreeViewItemViewModel priorChild in ovm.Children)
             {
-                if (oldSVM != null)
+                if (priorChild is SpaceViewModel oldSVM)
                 {
                     bool spaceStillExists = currentSpaces.Any(svm => svm != null && svm.Space.SpaceId == oldSVM.Space.SpaceId);
 
@@ -380,11 +376,10 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         {
             var orgsToRemove = new List<OrgViewModel>();
 
-            foreach (OrgViewModel oldOVM in cfivm.Children)
+            foreach (TreeViewItemViewModel priorChild in cfivm.Children)
             {
-                if (oldOVM != null)
+                if (priorChild is OrgViewModel oldOVM)
                 {
-
                     bool orgStillExists = currentOrgs.Any(ovm => ovm != null && ovm.Org.OrgId == oldOVM.Org.OrgId);
 
                     if (!orgStillExists) orgsToRemove.Add(oldOVM);

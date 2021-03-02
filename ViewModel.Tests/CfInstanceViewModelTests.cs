@@ -10,7 +10,20 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
     [TestClass]
     public class CfInstanceViewModelTests : ViewModelTestSupport
     {
-        private CfInstanceViewModel cfivm;
+        private CfInstanceViewModel _sut;
+        private List<string> _receivedEvents;
+
+        [TestInitialize]
+        public void TestInit()
+        {
+            _sut = new CfInstanceViewModel(fakeCfInstance, services);
+
+            _receivedEvents = new List<string>();
+            _sut.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
+                {
+                    _receivedEvents.Add(e.PropertyName);
+                };
+        }
 
         [TestCleanup]
         public void TestCleanup()
@@ -21,49 +34,17 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public void Constructor_SetsDisplayTextToInstanceName()
         {
-            string instanceName = "junk";
-            cfivm = new CfInstanceViewModel(new CloudFoundryInstance(instanceName, null, null), services);
-
-            Assert.AreEqual(instanceName, cfivm.DisplayText);
+            Assert.AreEqual(fakeCfInstance.InstanceName, _sut.DisplayText);
         }
 
         [TestMethod]
-        public void ChildrenAreLazilyLoaded_UponViewModelExpansion()
+        public void Constructor_SetsLoadingPlaceholder()
         {
-            var fakeOrgsList = new List<CloudFoundryOrganization>
-            {
-                new CloudFoundryOrganization("org1", "org-1-id", null),
-                new CloudFoundryOrganization("org2", "org-2-id", null),
-                new CloudFoundryOrganization("org3", "org-3-id", null),
-                new CloudFoundryOrganization("org4", "org-4-id", null)
-            };
-
-            mockCloudFoundryService.Setup(mock => mock.GetOrgsForCfInstanceAsync(It.IsAny<CloudFoundryInstance>(), true))
-                .ReturnsAsync(fakeOrgsList);
-
-            cfivm = new CfInstanceViewModel(new CloudFoundryInstance("fake cf", null, null), services);
-
-            bool ChildrenPropertyChangedCalled = false;
-
-            cfivm.PropertyChanged += (s, args) =>
-            {
-                if ("Children" == args.PropertyName) ChildrenPropertyChangedCalled = true;
-            };
-
-            // check presence of single placeholder child *before* CfInstanceViewModel is expanded
-            Assert.AreEqual(1, cfivm.Children.Count);
-            Assert.AreEqual(null, cfivm.Children[0]);
-
-            /* Invoke `LoadChildren` */
-            cfivm.IsExpanded = true;
-
-            Assert.AreEqual(fakeOrgsList.Count, cfivm.Children.Count);
-            mockCloudFoundryService.VerifyAll();
-            Assert.IsTrue(ChildrenPropertyChangedCalled);
+            Assert.AreEqual(CfInstanceViewModel.loadingMsg, _sut.LoadingPlaceholder.DisplayText);
         }
 
         [TestMethod]
-        public void LoadChildren_UpdatesAllOrgs()
+        public async Task LoadChildren_UpdatesAllOrgs()
         {
             var initialOrgsList = new System.Collections.ObjectModel.ObservableCollection<TreeViewItemViewModel>
             {
@@ -72,102 +53,49 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                 new OrgViewModel(new CloudFoundryOrganization("initial org 3", "initial org 3 guid", null), services)
             };
 
-            cfivm = new CfInstanceViewModel(new CloudFoundryInstance("fake cf instance", null, null), services)
-            {
-                Children = initialOrgsList
-            };
-
             var newOrgsList = new List<CloudFoundryOrganization>
             {
                 new CloudFoundryOrganization("initial org 1", "initial org 1 guid", null),
                 new CloudFoundryOrganization("initial org 2", "initial org 2 guid", null)
             };
 
-            bool ChildrenPropertyChangedCalled = false;
+            _sut.Children = initialOrgsList;
 
-            cfivm.PropertyChanged += (s, args) =>
-            {
-                if ("Children" == args.PropertyName) ChildrenPropertyChangedCalled = true;
-            };
+            /* erase record of initial "Children" event */
+            _receivedEvents.Clear();
 
             mockCloudFoundryService.Setup(mock => mock.GetOrgsForCfInstanceAsync(It.IsAny<CloudFoundryInstance>(), true))
                 .ReturnsAsync(newOrgsList);
 
-            Assert.AreEqual(initialOrgsList.Count, cfivm.Children.Count);
+            Assert.AreEqual(initialOrgsList.Count, _sut.Children.Count);
 
-            /* Invoke `LoadChildren` */
-            cfivm.IsExpanded = true;
+            await _sut.LoadChildren();
 
-            Assert.AreEqual(newOrgsList.Count, cfivm.Children.Count);
-            mockCloudFoundryService.VerifyAll();
-            Assert.IsTrue(ChildrenPropertyChangedCalled);
+            Assert.AreEqual(newOrgsList.Count, _sut.Children.Count);
+
+            Assert.AreEqual(1, _receivedEvents.Count);
+            Assert.AreEqual("Children", _receivedEvents[0]);
         }
 
         [TestMethod]
-        public void LoadChildren_AssignsNoOrgsPlaceholder_WhenThereAreNoOrgs()
+        public async Task LoadChildren_AssignsNoOrgsPlaceholder_WhenThereAreNoOrgs()
         {
-            cfivm = new CfInstanceViewModel(new CloudFoundryInstance("fake cf instance", null, null), services);
-            var emptyOrgsList = new List<CloudFoundryOrganization>();
-            bool ChildrenPropertyChangedCalled = false;
-
-            cfivm.PropertyChanged += (s, args) =>
-            {
-                if ("Children" == args.PropertyName) ChildrenPropertyChangedCalled = true;
-            };
-
             mockCloudFoundryService.Setup(mock => mock.GetOrgsForCfInstanceAsync(It.IsAny<CloudFoundryInstance>(), true))
-                .ReturnsAsync(emptyOrgsList);
+                .ReturnsAsync(emptyListOfOrgs);
 
-            /* Invoke `LoadChildren` */
-            cfivm.IsExpanded = true;
+            await _sut.LoadChildren();
 
-            Assert.AreEqual(1, cfivm.Children.Count);
-            Assert.AreEqual(typeof(PlaceholderViewModel), cfivm.Children[0].GetType());
-            Assert.IsTrue(ChildrenPropertyChangedCalled);
-            Assert.AreEqual(CfInstanceViewModel.emptyOrgsPlaceholderMsg, cfivm.Children[0].DisplayText);
-        }
-
-        [TestMethod]
-        public void LoadChildren_DisplaysLoadingPlaceholder_BeforeOrgsResultsArrive()
-        {
-            cfivm = new CfInstanceViewModel(new CloudFoundryInstance("fake cf instance", null, null), services);
-            var emptyOrgsList = new List<CloudFoundryOrganization>();
-            bool loadingMsgDisplayed = false;
-
-            cfivm.PropertyChanged += (s, args) =>
-            {
-                var vm = s as CfInstanceViewModel;
-
-                if (args.PropertyName == "Children"
-                    && vm.Children.Count == 1
-                    && vm.Children[0].DisplayText == CfInstanceViewModel.loadingMsg)
-                {
-                    loadingMsgDisplayed = true;
-                }
-            };
-
-            mockCloudFoundryService.Setup(mock => mock.GetOrgsForCfInstanceAsync(It.IsAny<CloudFoundryInstance>(), true))
-                .ReturnsAsync(emptyOrgsList);
-
-
-            /* Invoke `LoadChildren` */
-            cfivm.IsExpanded = true;
-
-            Assert.IsTrue(loadingMsgDisplayed);
+            Assert.AreEqual(1, _sut.Children.Count);
+            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
+            Assert.AreEqual(CfInstanceViewModel.emptyOrgsPlaceholderMsg, _sut.Children[0].DisplayText);
+            
+            Assert.AreEqual(1, _receivedEvents.Count);
+            Assert.AreEqual("Children", _receivedEvents[0]);
         }
 
         [TestMethod]
         public async Task FetchChildren_ReturnsListOfOrgs_WithoutUpdatingChildren()
         {
-            var receivedEvents = new List<string>();
-            var fakeCfInstance = new CloudFoundryInstance("junk", null, null);
-            cfivm = new CfInstanceViewModel(fakeCfInstance, services);
-
-            cfivm.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
-            {
-                receivedEvents.Add(e.PropertyName);
-            };
-
             mockCloudFoundryService.Setup(mock => mock.GetOrgsForCfInstanceAsync(fakeCfInstance, true))
                 .ReturnsAsync(new List<CloudFoundryOrganization>
             {
@@ -175,17 +103,20 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                 new CloudFoundryOrganization("fake org name 2","fake org id 2", fakeCfInstance)
             });
 
-            var orgs = await cfivm.FetchChildren();
+            /* pre-check presence of placeholder */
+            Assert.AreEqual(1, _sut.Children.Count);
+            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
+
+            var orgs = await _sut.FetchChildren();
 
             Assert.AreEqual(2, orgs.Count);
 
-            Assert.AreEqual(1, cfivm.Children.Count);
-            Assert.IsNull(cfivm.Children[0]);
+            /* confirm presence of placeholder */
+            Assert.AreEqual(1, _sut.Children.Count);
+            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
 
             // property changed events should not be raised
-            Assert.AreEqual(0, receivedEvents.Count);
-
-            mockCloudFoundryService.VerifyAll();
+            Assert.AreEqual(0, _receivedEvents.Count);
         }
     }
 

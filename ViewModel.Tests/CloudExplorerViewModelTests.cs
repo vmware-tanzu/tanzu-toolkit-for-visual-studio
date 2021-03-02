@@ -458,7 +458,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         }
 
         [TestMethod]
-        public async Task RefreshAllCloudConnections_DoesNotThrowExceptions_WhenCfInstancesHaveNullChildren()
+        public async Task RefreshAllCloudConnections_DoesNotThrowExceptions_WhenCfInstancesHaveNoOrgChildren()
         {
             var fakeCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address", "fake-token");
 
@@ -471,7 +471,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             // check for presence of Placeholder child (sanity check)
             Assert.AreEqual(1, cfivm.Children.Count);
-            Assert.IsNull(cfivm.Children[0]);
+            Assert.AreEqual(typeof(PlaceholderViewModel), cfivm.Children[0].GetType());
 
             mockCloudFoundryService.Setup(mock => mock.
                 GetOrgsForCfInstanceAsync(fakeCfInstance, true))
@@ -493,15 +493,16 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             }
 
             Assert.IsNull(shouldStayNull);
-
+            
+            // check for presence of Placeholder child
             Assert.AreEqual(1, cfivm.Children.Count);
-            Assert.IsNull(cfivm.Children[0]);
+            Assert.AreEqual(typeof(PlaceholderViewModel), cfivm.Children[0].GetType());
 
             mockCloudFoundryService.VerifyAll();
         }
 
         [TestMethod]
-        public async Task RefreshAllCloudConnections_DoesNotThrowExceptions_WhenOrgsHaveNullChildren()
+        public async Task RefreshAllCloudConnections_DoesNotThrowExceptions_WhenOrgsHaveNoSpaceChildren()
         {
             var fakeCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address", "fake-token");
 
@@ -522,7 +523,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             // check for presence of Placeholder child (sanity check)
             Assert.AreEqual(1, ovm.Children.Count);
-            Assert.IsNull(ovm.Children[0]);
+            Assert.AreEqual(typeof(PlaceholderViewModel), ovm.Children[0].GetType());
 
             mockCloudFoundryService.Setup(mock => mock.
                 GetOrgsForCfInstanceAsync(fakeCfInstance, true))
@@ -555,15 +556,16 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             Assert.AreEqual(1, cfivm.Children.Count);
             Assert.AreEqual(ovm, cfivm.Children[0]);
 
+            // check for presence of Placeholder child
             Assert.AreEqual(1, ovm.Children.Count);
-            Assert.IsNull(ovm.Children[0]);
+            Assert.AreEqual(typeof(PlaceholderViewModel), ovm.Children[0].GetType());
 
             mockCloudFoundryService.VerifyAll();
 
         }
 
         [TestMethod]
-        public async Task RefreshAllCloudConnections_DoesNotThrowExceptions_WhenSpacesHaveNullChildren()
+        public async Task RefreshAllCloudConnections_DoesNotThrowExceptions_WhenSpacesHaveNoAppChildren()
         {
             var fakeCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address", "fake-token");
 
@@ -592,7 +594,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             // check for presence of Placeholder child (sanity check)
             Assert.AreEqual(1, svm.Children.Count);
-            Assert.IsNull(svm.Children[0]);
+            Assert.AreEqual(typeof(PlaceholderViewModel), svm.Children[0].GetType());
 
             mockCloudFoundryService.Setup(mock => mock.
                 GetOrgsForCfInstanceAsync(fakeCfInstance, true))
@@ -633,8 +635,9 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             Assert.AreEqual(1, ovm.Children.Count);
             Assert.AreEqual(svm, ovm.Children[0]);
 
+            // check for presence of Placeholder child
             Assert.AreEqual(1, svm.Children.Count);
-            Assert.IsNull(svm.Children[0]);
+            Assert.AreEqual(typeof(PlaceholderViewModel), svm.Children[0].GetType());
 
             mockCloudFoundryService.VerifyAll();
         }

@@ -10,67 +10,47 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
     [TestClass]
     public class OrgViewModelTests : ViewModelTestSupport
     {
-        private OrgViewModel ovm;
+        private OrgViewModel _sut;
+        private List<string> _receivedEvents;
+
+        [TestInitialize]
+        public void TestInit()
+        {
+            _sut = new OrgViewModel(fakeCfOrg, services);
+
+            _receivedEvents = new List<string>();
+            _sut.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
+            {
+                _receivedEvents.Add(e.PropertyName);
+            };
+        }
+
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            mockCloudFoundryService.VerifyAll();
+        }
 
         [TestMethod]
         public void Constructor_SetsDisplayTextToOrgName()
         {
-            string orgName = "junk";
-            var fakeOrg = new CloudFoundryOrganization(orgName, null, null);
-
-            ovm = new OrgViewModel(fakeOrg, services);
-
-            Assert.AreEqual(orgName, ovm.DisplayText);
+            Assert.AreEqual(fakeCfOrg.OrgName, _sut.DisplayText);
         }
 
         [TestMethod]
-        public void ChildrenAreLazilyLoaded_UponViewModelExpansion()
+        public void Constructor_SetsLoadingPlaceholder()
         {
-            var fakeSpaceList = new List<CloudFoundrySpace>
-            {
-                new CloudFoundrySpace("spaceName1", "spaceId1", null),
-                new CloudFoundrySpace("spaceName2", "spaceId2", null),
-                new CloudFoundrySpace("spaceName3", "spaceId3", null),
-                new CloudFoundrySpace("spaceName4", "spaceId4", null)
-            };
-
-            mockCloudFoundryService.Setup(mock => mock.
-                GetSpacesForOrgAsync(It.IsAny<CloudFoundryOrganization>(), true))
-                    .ReturnsAsync(fakeSpaceList);
-
-            ovm = new OrgViewModel(new CloudFoundryOrganization("fake org", null, null), services);
-
-            // check presence of single placeholder child *before* CfInstanceViewModel is expanded
-            Assert.AreEqual(1, ovm.Children.Count);
-            Assert.AreEqual(null, ovm.Children[0]);
-
-            // expand several times to ensure children re-loaded each time
-            ovm.IsExpanded = true;
-            ovm.IsExpanded = false;
-            ovm.IsExpanded = true;
-            ovm.IsExpanded = false;
-            ovm.IsExpanded = true;
-
-            Assert.AreEqual(fakeSpaceList.Count, ovm.Children.Count);
-            mockCloudFoundryService.Verify(mock =>
-                mock.GetSpacesForOrgAsync(It.IsAny<CloudFoundryOrganization>(), true),
-                    Times.Exactly(3));
+            Assert.AreEqual(OrgViewModel.loadingMsg, _sut.LoadingPlaceholder.DisplayText);
         }
 
         [TestMethod]
-        public void LoadChildren_UpdatesAllSpaces()
+        public async Task LoadChildren_UpdatesAllSpaces()
         {
-
             var initialSpacesList = new System.Collections.ObjectModel.ObservableCollection<TreeViewItemViewModel>
             {
                 new SpaceViewModel(new CloudFoundrySpace("initial space 1", "initial space 1 guid", null), services),
                 new SpaceViewModel(new CloudFoundrySpace("initial space 2", "initial space 2 guid", null), services),
                 new SpaceViewModel(new CloudFoundrySpace("initial space 3", "initial space 3 guid", null), services)
-            };
-
-            ovm = new OrgViewModel(new CloudFoundryOrganization("fake org", null, null), services)
-            {
-                Children = initialSpacesList
             };
 
             var newSpacesList = new List<CloudFoundrySpace>
@@ -79,102 +59,66 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                 new CloudFoundrySpace("initial space 2", "initial space 2 guid", null)
             };
 
+            _sut.Children = initialSpacesList;
+
+            /* erase record of initial "Children" event */
+            _receivedEvents.Clear();
+
             mockCloudFoundryService.Setup(mock => mock.
                 GetSpacesForOrgAsync(It.IsAny<CloudFoundryOrganization>(), true))
                     .ReturnsAsync(newSpacesList);
 
-            Assert.AreEqual(initialSpacesList.Count, ovm.Children.Count);
+            Assert.AreEqual(initialSpacesList.Count, _sut.Children.Count);
 
-            ovm.IsExpanded = true;
+            await _sut.LoadChildren();
 
-            Assert.AreEqual(newSpacesList.Count, ovm.Children.Count);
-            mockCloudFoundryService.VerifyAll();
+            Assert.AreEqual(newSpacesList.Count, _sut.Children.Count);
+
+            Assert.AreEqual(1, _receivedEvents.Count);
+            Assert.AreEqual("Children", _receivedEvents[0]);
         }
 
         [TestMethod]
-        public void LoadChildren_AssignsNoSpacesPlaceholder_WhenThereAreNoSpaces()
+        public async Task LoadChildren_AssignsNoSpacesPlaceholder_WhenThereAreNoSpaces()
         {
-            ovm = new OrgViewModel(new CloudFoundryOrganization("fake cf org", null, null), services);
-            var emptySpacesList = new List<CloudFoundrySpace>();
-            bool ChildrenPropertyChangedCalled = false;
-
-            ovm.PropertyChanged += (s, args) =>
-            {
-                if ("Children" == args.PropertyName) ChildrenPropertyChangedCalled = true;
-            };
-
             mockCloudFoundryService.Setup(mock => mock.GetSpacesForOrgAsync(It.IsAny<CloudFoundryOrganization>(), true))
-                .ReturnsAsync(emptySpacesList);
+                .ReturnsAsync(emptyListOfSpaces);
 
-            /* Invoke `LoadChildren` */
-            ovm.IsExpanded = true;
+            await _sut.LoadChildren();
 
-            Assert.AreEqual(1, ovm.Children.Count);
-            Assert.AreEqual(typeof(PlaceholderViewModel), ovm.Children[0].GetType());
-            Assert.IsTrue(ChildrenPropertyChangedCalled);
-            Assert.AreEqual(OrgViewModel.emptySpacesPlaceholderMsg, ovm.Children[0].DisplayText);
-        }
+            Assert.AreEqual(1, _sut.Children.Count);
+            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
+            Assert.AreEqual(OrgViewModel.emptySpacesPlaceholderMsg, _sut.Children[0].DisplayText);
 
-        [TestMethod]
-        public void LoadChildren_DisplaysLoadingPlaceholder_BeforeSpacesResultsArrive()
-        {
-            ovm = new OrgViewModel(new CloudFoundryOrganization("fake cf org", null, null), services);
-            var emptySpacesList = new List<CloudFoundrySpace>();
-            bool loadingMsgDisplayed = false;
-
-            ovm.PropertyChanged += (s, args) =>
-            {
-                var vm = s as OrgViewModel;
-
-                if (args.PropertyName == "Children"
-                    && vm.Children.Count == 1
-                    && vm.Children[0].DisplayText == OrgViewModel.loadingMsg)
-                {
-                    loadingMsgDisplayed = true;
-                }
-            };
-
-            mockCloudFoundryService.Setup(mock => mock.GetSpacesForOrgAsync(It.IsAny<CloudFoundryOrganization>(), true))
-                .ReturnsAsync(emptySpacesList);
-
-
-            /* Invoke `LoadChildren` */
-            ovm.IsExpanded = true;
-
-            Assert.IsTrue(loadingMsgDisplayed);
+            Assert.AreEqual(1, _receivedEvents.Count);
+            Assert.AreEqual("Children", _receivedEvents[0]);
         }
 
         [TestMethod]
         public async Task FetchChildren_ReturnsListOfSpaces_WithoutUpdatingChildren()
         {
-            var receivedEvents = new List<string>();
-            var fakeOrg = new CloudFoundryOrganization("junk", null, null);
-            ovm = new OrgViewModel(fakeOrg, services);
-
-            ovm.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
-            {
-                receivedEvents.Add(e.PropertyName);
-            };
-
             mockCloudFoundryService.Setup(mock => mock.
-                GetSpacesForOrgAsync(fakeOrg, true))
+                GetSpacesForOrgAsync(fakeCfOrg, true))
                     .ReturnsAsync(new List<CloudFoundrySpace>
                     {
-                        new CloudFoundrySpace("fake space name 1","fake space id 1", fakeOrg),
-                        new CloudFoundrySpace("fake space name 2","fake space id 2", fakeOrg)
+                        new CloudFoundrySpace("fake space name 1","fake space id 1", fakeCfOrg),
+                        new CloudFoundrySpace("fake space name 2","fake space id 2", fakeCfOrg)
                     });
 
-            var spaces = await ovm.FetchChildren();
+            /* pre-check presence of placeholder */
+            Assert.AreEqual(1, _sut.Children.Count);
+            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
+
+            var spaces = await _sut.FetchChildren();
 
             Assert.AreEqual(2, spaces.Count);
 
-            Assert.AreEqual(1, ovm.Children.Count);
-            Assert.IsNull(ovm.Children[0]);
+            /* confirm presence of placeholder */
+            Assert.AreEqual(1, _sut.Children.Count);
+            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
 
             // property changed events should not be raised
-            Assert.AreEqual(0, receivedEvents.Count);
-
-            mockCloudFoundryService.VerifyAll();
+            Assert.AreEqual(0, _receivedEvents.Count);
         }
     }
 

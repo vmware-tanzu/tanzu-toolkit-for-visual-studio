@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
 namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
@@ -7,45 +8,85 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
     [TestClass]
     public class TreeViewItemViewModelTests : ViewModelTestSupport
     {
-        TestTreeViewItemViewModel tvivm;
+        TestTreeViewItemViewModel collpased_tvivm;
+        TestTreeViewItemViewModel expanded_tvivm;
 
         [TestInitialize]
         public void TestInit()
         {
-            tvivm = new TestTreeViewItemViewModel(services);
+            collpased_tvivm = new TestTreeViewItemViewModel(services);
+            expanded_tvivm = new TestTreeViewItemViewModel(services)
+            {
+                IsExpanded = true
+            };
         }
 
         [TestMethod]
         public void Constructor_Initializes()
         {
-            Assert.AreSame(services, tvivm.Services);
-            Assert.IsNotNull(tvivm.CloudFoundryService);
+            var sut = collpased_tvivm;
+
+            Assert.AreSame(services, sut.Services);
+            Assert.IsNotNull(sut.CloudFoundryService);
+
+            /* loading placeholder gets instantiated */
+            Assert.IsNotNull(sut.LoadingPlaceholder);
+            Assert.AreEqual(TreeViewItemViewModel._defaultLoadingMsg, sut.LoadingPlaceholder.DisplayText);
+            
+            /* children set to loading placeholder */
+            Assert.AreEqual(1, sut.Children.Count);
+            Assert.AreEqual(sut.LoadingPlaceholder, sut.Children[0]);
         }
 
         [TestMethod]
-        public void Expansion_LoadsChildren_WhenNotAlreadyExpanded()
+        public void Constructor_DoesNotCreatePlaceholder_OrSetChildren_WhenMarkedAsChildless()
         {
-            Assert.IsFalse(tvivm.IsExpanded);
-            int initialCalls = tvivm.NumTimesChildrenLoaded;
+            var sut = new TestTreeViewItemViewModel(services, childless: true);
 
-            tvivm.IsExpanded = true;
-
-            Assert.AreEqual(initialCalls + 1, tvivm.NumTimesChildrenLoaded);
+            Assert.IsNull(sut.LoadingPlaceholder);
+            Assert.IsNull(sut.Children);
         }
 
         [TestMethod]
-        public void Expansion_DoesNotLoadChildren_WhenAlreadyExpanded()
+        public async Task Expansion_LoadsChildren_WhenNotAlreadyExpanded()
         {
-            tvivm = new TestTreeViewItemViewModel(services)
+            Assert.IsFalse(collpased_tvivm.IsExpanded);
+            int initialCalls = collpased_tvivm.NumTimesChildrenLoaded;
+
+            await Task.Run(() => { collpased_tvivm.IsExpanded = true; });
+
+            Assert.AreEqual(initialCalls + 1, collpased_tvivm.NumTimesChildrenLoaded);
+        }
+
+        [TestMethod]
+        public async Task Expansion_DoesNotLoadChildren_WhenAlreadyExpanded()
+        {
+            int initialCalls = expanded_tvivm.NumTimesChildrenLoaded;
+
+            await Task.Run(() => { collpased_tvivm.IsExpanded = true; });
+
+            Assert.AreEqual(initialCalls, collpased_tvivm.NumTimesChildrenLoaded);
+        }
+
+        [TestMethod]
+        public void Expansion_ReplacesChildrenWithLoadingPlaceholder_WhileChildrenLoad()
+        {
+            var sut = collpased_tvivm;
+            sut.Children = new ObservableCollection<TreeViewItemViewModel>()
             {
-                IsExpanded = true
+                null,
+                null,
+                null
             };
 
-            int initialCalls = tvivm.NumTimesChildrenLoaded;
+            Assert.AreEqual(3, sut.Children.Count);
 
-            tvivm.IsExpanded = true;
+            sut.IsExpanded = true;
 
-            Assert.AreEqual(initialCalls, tvivm.NumTimesChildrenLoaded);
+            Assert.AreEqual(1, sut.Children.Count);
+            Assert.AreEqual(typeof(PlaceholderViewModel), sut.Children[0].GetType());
+            Assert.AreEqual(sut.LoadingPlaceholder, sut.Children[0]);
+            Assert.AreEqual(TreeViewItemViewModel._defaultLoadingMsg, sut.Children[0].DisplayText);
         }
     }
 
@@ -55,12 +96,18 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         {
             NumTimesChildrenLoaded = 0;
         }
+        public TestTreeViewItemViewModel(IServiceProvider services, bool childless) : base(null, services, childless)
+        {
+            NumTimesChildrenLoaded = 0;
+        }
 
         public int NumTimesChildrenLoaded { get; set; }
 
-        protected override async Task LoadChildren()
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        internal protected override async Task LoadChildren()
         {
             NumTimesChildrenLoaded += 1;
         }
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     }
 }

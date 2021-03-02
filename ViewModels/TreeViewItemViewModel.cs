@@ -11,19 +11,26 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         private string _text;
         private TreeViewItemViewModel _parent;
         private ObservableCollection<TreeViewItemViewModel> _children;
-        private bool _loadChildrenOnExpansion;
-        private TreeViewItemViewModel placeholderChild;
+        internal const string _defaultLoadingMsg = "Loading ...";
 
-        protected TreeViewItemViewModel(TreeViewItemViewModel parent, IServiceProvider services)
+        protected TreeViewItemViewModel(TreeViewItemViewModel parent, IServiceProvider services, bool childless = false)
             : base(services)
         {
             _parent = parent;
             _isExpanded = false;
-            _children = new ObservableCollection<TreeViewItemViewModel>
+
+            if (!childless) // only create placeholder & assign children if this vm isn't a placeholder itself
             {
-                PlaceholderChild
-            };
-            _loadChildrenOnExpansion = true;
+                LoadingPlaceholder = new PlaceholderViewModel(parent: this, services)
+                {
+                    DisplayText = _defaultLoadingMsg
+                };
+
+                _children = new ObservableCollection<TreeViewItemViewModel>
+                {
+                    LoadingPlaceholder
+                };
+            } 
         }
 
         /// <summary>
@@ -40,11 +47,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
             }
         }
 
-        public bool LoadChildrenOnExpansion
-        {
-            get => _loadChildrenOnExpansion;
-            set => _loadChildrenOnExpansion = value;
-        }
+        public PlaceholderViewModel LoadingPlaceholder { get; set; }
 
         /// <summary>
         /// Gets/sets whether the TreeViewItem 
@@ -58,33 +61,21 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
                 if (value != _isExpanded)
                 {
                     _isExpanded = value;
-                    if (value == true && LoadChildrenOnExpansion)
-                    {
-                        if (HasPlaceholderChild) Children.Remove(PlaceholderChild);
 
-                        // Lazily load the child items
-                        LoadChildren(); 
+                    if (value == true)
+                    {
+                        Children = new ObservableCollection<TreeViewItemViewModel>
+                        {
+                            LoadingPlaceholder
+                        };
+
+                        // Lazily load the child items @ expansion time in a separate thread
+                        Task.Run(LoadChildren);
                     }
+
                     RaisePropertyChangedEvent("IsExpanded");
                 }
             }
-        }
-
-        // placeholder to allow this tree view item to be expandable before its children 
-        // have loaded or if it has no children (the presence of children causes the 
-        // expansion button to appear)
-        public TreeViewItemViewModel PlaceholderChild
-        {
-            get { return placeholderChild; }
-            set { placeholderChild = value; }
-        }
-
-        /// <summary>
-        /// Returns true if this object's Children have not yet been populated.
-        /// </summary>
-        public bool HasPlaceholderChild
-        {
-            get { return Children.Count == 1 && Children[0] == PlaceholderChild; }
         }
 
         public bool IsSelected
@@ -124,9 +115,11 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         /// Invoked when the child items need to be loaded on demand.
         /// Subclasses can override this to populate the Children collection.
         /// </summary>
-        protected virtual async Task LoadChildren()
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        internal protected virtual async Task LoadChildren()
         {
         }
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 
         public async Task RefreshChildren()
         {

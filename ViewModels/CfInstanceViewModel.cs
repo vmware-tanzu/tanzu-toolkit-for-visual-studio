@@ -18,18 +18,15 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         {
             CloudFoundryInstance = cloudFoundryInstance;
             DisplayText = CloudFoundryInstance.InstanceName;
+
+            LoadingPlaceholder = new PlaceholderViewModel(parent: this, services)
+            {
+                DisplayText = loadingMsg
+            };
         }
 
-        protected override async Task LoadChildren()
+        internal protected override async Task LoadChildren()
         {
-            Children = new ObservableCollection<TreeViewItemViewModel>
-            {
-                new PlaceholderViewModel(parent: this, Services)
-                {
-                    DisplayText = loadingMsg
-                }
-            };
-
             var orgs = await CloudFoundryService.GetOrgsForCfInstanceAsync(CloudFoundryInstance);
 
             if (orgs.Count == 0)

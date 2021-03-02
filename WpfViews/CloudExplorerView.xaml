@@ -179,8 +179,7 @@
                 <!-- PLACEHOLDER TREE VIEW ITEMS -->
                 <DataTemplate DataType="{x:Type ViewModels:PlaceholderViewModel}">
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                        <Image Source="Resources/NestedItemArrow.png" Stretch="Uniform" Height="16px" Width="16px" Margin="0,2,4,0" />
-                        <TextBlock Text="{Binding DisplayText}" VerticalAlignment="Bottom"/>
+                        <TextBlock Text="{Binding DisplayText}" FontStyle="Italic" VerticalAlignment="Bottom"/>
                     </StackPanel>
                 </DataTemplate>
                 
