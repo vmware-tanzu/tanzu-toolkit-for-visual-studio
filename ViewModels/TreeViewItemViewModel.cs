@@ -11,6 +11,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         private string _text;
         private TreeViewItemViewModel _parent;
         private ObservableCollection<TreeViewItemViewModel> _children;
+        private bool _isLoading;
         internal const string _defaultLoadingMsg = "Loading ...";
 
         protected TreeViewItemViewModel(TreeViewItemViewModel parent, IServiceProvider services, bool childless = false)
@@ -18,6 +19,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         {
             _parent = parent;
             _isExpanded = false;
+            _isLoading = false;
 
             if (!childless) // only create placeholder & assign children if this vm isn't a placeholder itself
             {
@@ -30,7 +32,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
                 {
                     LoadingPlaceholder
                 };
-            } 
+            }
         }
 
         /// <summary>
@@ -47,6 +49,8 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
             }
         }
 
+        public bool IsLoading { get => _isLoading; set => _isLoading = value; }
+
         public PlaceholderViewModel LoadingPlaceholder { get; set; }
 
         /// <summary>
@@ -62,8 +66,10 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
                 {
                     _isExpanded = value;
 
-                    if (value == true)
+                    if (value == true && !IsLoading)
                     {
+                        IsLoading = true;
+
                         Children = new ObservableCollection<TreeViewItemViewModel>
                         {
                             LoadingPlaceholder

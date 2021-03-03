@@ -24,10 +24,12 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public void Constructor_Initializes()
         {
-            var sut = collpased_tvivm;
+            var sut = new TestTreeViewItemViewModel(services);
 
             Assert.AreSame(services, sut.Services);
             Assert.IsNotNull(sut.CloudFoundryService);
+
+            Assert.IsFalse(sut.IsLoading);
 
             /* loading placeholder gets instantiated */
             Assert.IsNotNull(sut.LoadingPlaceholder);
@@ -48,24 +50,59 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         }
 
         [TestMethod]
-        public async Task Expansion_LoadsChildren_WhenNotAlreadyExpanded()
+        public void Expansion_SetsIsLoadingToTrue_WhenNotAlreadyExpanded_AndWhenNotLoading()
         {
-            Assert.IsFalse(collpased_tvivm.IsExpanded);
-            int initialCalls = collpased_tvivm.NumTimesChildrenLoaded;
+            var sut = collpased_tvivm;
 
-            await Task.Run(() => { collpased_tvivm.IsExpanded = true; });
+            Assert.IsFalse(sut.IsExpanded);
+            Assert.IsFalse(sut.IsLoading);
 
-            Assert.AreEqual(initialCalls + 1, collpased_tvivm.NumTimesChildrenLoaded);
+            sut.IsExpanded = true;
+
+            Assert.IsTrue(sut.IsLoading);
+        }
+
+        [TestMethod]
+        public async Task Expansion_LoadsChildren_WhenNotAlreadyExpanded_AndWhenNotLoading()
+        {
+            var sut = collpased_tvivm;
+            int initialCalls = sut.NumTimesChildrenLoaded;
+
+            Assert.IsFalse(sut.IsExpanded);
+            Assert.IsFalse(sut.IsLoading);
+
+            await Task.Run(() => { sut.IsExpanded = true; });
+
+            bool loadChildrenWasCalledOnce = sut.NumTimesChildrenLoaded == initialCalls + 1;
+            Assert.IsTrue(loadChildrenWasCalledOnce);
         }
 
         [TestMethod]
         public async Task Expansion_DoesNotLoadChildren_WhenAlreadyExpanded()
         {
-            int initialCalls = expanded_tvivm.NumTimesChildrenLoaded;
+            var sut = expanded_tvivm;
+            int initialCalls = sut.NumTimesChildrenLoaded;
 
-            await Task.Run(() => { collpased_tvivm.IsExpanded = true; });
+            Assert.IsTrue(sut.IsExpanded);
 
-            Assert.AreEqual(initialCalls, collpased_tvivm.NumTimesChildrenLoaded);
+            await Task.Run(() => { sut.IsExpanded = true; });
+
+            bool loadChildrenWasNeverCalled = sut.NumTimesChildrenLoaded == initialCalls;
+            Assert.IsTrue(loadChildrenWasNeverCalled);
+        }
+        
+        [TestMethod]
+        public async Task Expansion_DoesNotLoadChildren_WhenAlreadyLoading()
+        {
+            var sut = collpased_tvivm;
+            int initialCalls = sut.NumTimesChildrenLoaded;
+
+            sut.IsLoading = true;
+
+            await Task.Run(() => { sut.IsExpanded = true; });
+
+            bool loadChildrenWasNeverCalled = sut.NumTimesChildrenLoaded == initialCalls;
+            Assert.IsTrue(loadChildrenWasNeverCalled);
         }
 
         [TestMethod]

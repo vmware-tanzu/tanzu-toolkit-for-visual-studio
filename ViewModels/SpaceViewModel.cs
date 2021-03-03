@@ -48,6 +48,8 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
                 Children = updatedAppsList;
             }
+
+            IsLoading = false;
         }
 
         public async Task<List<AppViewModel>> FetchChildren()

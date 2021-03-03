@@ -51,6 +51,8 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
                 Children = updatedSpacesList;
             }
+
+            IsLoading = false;
         }
 
         public async Task<List<SpaceViewModel>> FetchChildren()

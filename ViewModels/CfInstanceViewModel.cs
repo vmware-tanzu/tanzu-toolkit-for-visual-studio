@@ -52,6 +52,8 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
                 Children = updatedOrgsList;
             }
+
+            IsLoading = false;
         }
 
 

@@ -95,6 +95,19 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         }
 
         [TestMethod]
+        public async Task LoadChildren_SetsIsLoadingToFalse_WhenComplete()
+        {
+            mockCloudFoundryService.Setup(mock => mock.GetSpacesForOrgAsync(_sut.Org, true))
+                .ReturnsAsync(emptyListOfSpaces);
+
+            _sut.IsLoading = true;
+
+            await _sut.LoadChildren();
+
+            Assert.IsFalse(_sut.IsLoading);
+        }
+
+        [TestMethod]
         public async Task FetchChildren_ReturnsListOfSpaces_WithoutUpdatingChildren()
         {
             mockCloudFoundryService.Setup(mock => mock.
