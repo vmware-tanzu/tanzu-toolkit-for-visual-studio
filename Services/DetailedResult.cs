@@ -15,4 +15,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services
         public string Explanation { get; set; }
         public CmdResult CmdDetails { get; }
     }
+
+    public class DetailedResult<T> : DetailedResult
+    {
+        public DetailedResult(T content, bool succeeded, string explanation = null, CmdResult cmdDetails = null) : base(succeeded, explanation, cmdDetails)
+        {
+            Content = content;
+        }
+
+        public T Content { get; internal set; }
+    }
 }

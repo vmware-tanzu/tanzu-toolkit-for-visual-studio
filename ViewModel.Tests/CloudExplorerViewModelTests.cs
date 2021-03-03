@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.VisualStudio.Models;
+using Tanzu.Toolkit.VisualStudio.Services;
 
 namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 {
@@ -209,17 +210,21 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                 receivedEvents.Add(e.PropertyName);
             };
 
+            var fakeOrgsList = new List<CloudFoundryOrganization>
+            {
+                new CloudFoundryOrganization(fakeOrgName2, fakeOrgGuid2, fakeCfInstance),
+                new CloudFoundryOrganization(fakeOrgName3, fakeOrgGuid3, fakeCfInstance)
+            };
+
+            var fakeSuccessResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: true, content: fakeOrgsList);
+
             Assert.AreEqual(1, fakeCfInstanceViewModel.Children.Count);
             OrgViewModel firstChildOrg = (OrgViewModel)fakeCfInstanceViewModel.Children[0];
             Assert.AreEqual(fakeOrgName1, firstChildOrg.Org.OrgName);
 
             mockCloudFoundryService.Setup(mock => mock.
                 GetOrgsForCfInstanceAsync(fakeCfInstance, true))
-                    .ReturnsAsync(new List<CloudFoundryOrganization>
-                    {
-                        new CloudFoundryOrganization(fakeOrgName2, fakeOrgGuid2, fakeCfInstance),
-                        new CloudFoundryOrganization(fakeOrgName3, fakeOrgGuid3, fakeCfInstance)
-                    });
+                    .ReturnsAsync(fakeSuccessResult);
 
             await vm.RefreshCfInstance(fakeCfInstanceViewModel);
 
@@ -346,9 +351,12 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                     { "instance2", fakeCfInstance2 },
                     { "instance3", fakeCfInstance3 },
                 });
+
+            var fakeSuccessResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: true, content: new List<CloudFoundryOrganization>());
+
             mockCloudFoundryService.Setup(mock => mock.
                 GetOrgsForCfInstanceAsync(It.IsAny<CloudFoundryInstance>(), true))
-                    .ReturnsAsync(new List<CloudFoundryOrganization> { });
+                    .ReturnsAsync(fakeSuccessResult);
 
             vm.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
             {
@@ -413,9 +421,12 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                 eventsRaisedByAVM.Add(e.PropertyName);
             };
 
+            var fakeOrgsList = new List<CloudFoundryOrganization> { fakeOrg };
+            var fakeSuccessResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: true, content: fakeOrgsList);
+
             mockCloudFoundryService.Setup(mock => mock.
                 GetOrgsForCfInstanceAsync(fakeCfInstance, true))
-                    .ReturnsAsync(new List<CloudFoundryOrganization> { fakeOrg });
+                    .ReturnsAsync(fakeSuccessResult);
 
             mockCloudFoundryService.Setup(mock => mock.
                 GetSpacesForOrgAsync(fakeOrg, true))
@@ -473,9 +484,11 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             Assert.AreEqual(1, cfivm.Children.Count);
             Assert.AreEqual(typeof(PlaceholderViewModel), cfivm.Children[0].GetType());
 
+            var fakeSuccessResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: true, content: new List<CloudFoundryOrganization>());
+
             mockCloudFoundryService.Setup(mock => mock.
                 GetOrgsForCfInstanceAsync(fakeCfInstance, true))
-                    .ReturnsAsync(new List<CloudFoundryOrganization>());
+                    .ReturnsAsync(fakeSuccessResult);
 
             vm.CloudFoundryList = new List<CfInstanceViewModel>
             {
@@ -493,7 +506,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             }
 
             Assert.IsNull(shouldStayNull);
-            
+
             // check for presence of Placeholder child
             Assert.AreEqual(1, cfivm.Children.Count);
             Assert.AreEqual(typeof(PlaceholderViewModel), cfivm.Children[0].GetType());
@@ -525,12 +538,12 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             Assert.AreEqual(1, ovm.Children.Count);
             Assert.AreEqual(typeof(PlaceholderViewModel), ovm.Children[0].GetType());
 
+            var fakeOrgsList = new List<CloudFoundryOrganization>{ fakeOrg };
+            var fakeSuccessResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: true, content: fakeOrgsList);
+
             mockCloudFoundryService.Setup(mock => mock.
                 GetOrgsForCfInstanceAsync(fakeCfInstance, true))
-                    .ReturnsAsync(new List<CloudFoundryOrganization>
-                    {
-                        fakeOrg
-                    });
+                    .ReturnsAsync(fakeSuccessResult);
 
             mockCloudFoundryService.Setup(mock => mock.
                 GetSpacesForOrgAsync(fakeOrg, true))
@@ -596,12 +609,12 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             Assert.AreEqual(1, svm.Children.Count);
             Assert.AreEqual(typeof(PlaceholderViewModel), svm.Children[0].GetType());
 
+            var fakeOrgsList = new List<CloudFoundryOrganization> { fakeOrg };
+            var fakeSuccessResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: true, content: fakeOrgsList);
+
             mockCloudFoundryService.Setup(mock => mock.
                 GetOrgsForCfInstanceAsync(fakeCfInstance, true))
-                    .ReturnsAsync(new List<CloudFoundryOrganization>
-                    {
-                        fakeOrg
-                    });
+                    .ReturnsAsync(fakeSuccessResult);
 
             mockCloudFoundryService.Setup(mock => mock.
                 GetSpacesForOrgAsync(fakeOrg, true))

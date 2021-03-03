@@ -1,8 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli;
+using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Orgs;
 using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
 using static Tanzu.Toolkit.VisualStudio.Services.OutputHandler.OutputHandler;
 
@@ -43,29 +45,47 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             mockCmdProcessService.VerifyAll();
         }
 
-        [TestMethod()]
-        public async Task InvokeCfCliAsync_ReturnsTrueResult_WhenProcessSucceeded()
+
+        [TestMethod]
+        [TestCategory("InvokeCfCliAsync")]
+        public async Task InvokeCfCliAsync_ReturnsSuccessfulResult_WhenCmdProcessExitsWithZeroCode()
         {
-            mockCmdProcessService.Setup(mock => mock.InvokeWindowlessCommandAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>()))
-                .ReturnsAsync(_fakeSuccessResult);
+            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {_fakeArguments}";
 
-            DetailedResult result = await _sut.InvokeCfCliAsync(_fakeArguments);
+            mockCmdProcessService.Setup(mock => mock.
+              InvokeWindowlessCommandAsync(expectedCmdStr, null, _fakeOutCallback, _fakeErrCallback))
+                .ReturnsAsync(new CmdResult(_fakeStdOut, _fakeStdErr, 0));
 
-            Assert.AreEqual(true, result.Succeeded);
+            var result = await _sut.InvokeCfCliAsync(_fakeArguments, _fakeOutCallback, _fakeErrCallback);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.IsTrue(result.CmdDetails.ExitCode == 0);
+            Assert.IsTrue(result.CmdDetails.StdOut == _fakeStdOut);
+            Assert.IsTrue(result.CmdDetails.StdErr == _fakeStdErr);
         }
 
-        [TestMethod()]
-        public async Task InvokeCfCliAsync_ReturnsFalseResult_WhenProcessFails()
+        [TestMethod]
+        [TestCategory("InvokeCfCliAsync")]
+        public async Task InvokeCfCliAsync_ReturnsFailedResult_WhenCmdProcessExitsWithNonZeroCode()
         {
-            mockCmdProcessService.Setup(mock => mock.InvokeWindowlessCommandAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>()))
-                .ReturnsAsync(_fakeFailureResult);
+            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {_fakeArguments}";
 
-            DetailedResult result = await _sut.InvokeCfCliAsync(_fakeArguments);
+            mockCmdProcessService.Setup(mock => mock.
+              InvokeWindowlessCommandAsync(expectedCmdStr, null, _fakeOutCallback, _fakeErrCallback))
+                .ReturnsAsync(new CmdResult(_fakeStdOut, _fakeStdErr, 1));
+
+            var result = await _sut.InvokeCfCliAsync(_fakeArguments, _fakeOutCallback, _fakeErrCallback);
 
             Assert.IsFalse(result.Succeeded);
+            Assert.IsTrue(result.Explanation.Contains($"Unable to execute `cf {_fakeArguments}`."));
+            Assert.IsTrue(result.CmdDetails.ExitCode == 1);
+            Assert.IsTrue(result.CmdDetails.StdOut == _fakeStdOut);
+            Assert.IsTrue(result.CmdDetails.StdErr == _fakeStdErr);
         }
-
-        [TestMethod()]
+        
+        [TestMethod]
+        [TestCategory("InvokeCfCliAsync")]
         public async Task InvokeCfCliAsync_ReturnsFalseResult_WhenCfExeCouldNotBeFound()
         {
             mockFileLocatorService.SetupGet(mock => mock.FullPathToCfExe).Returns((string)null);
@@ -77,7 +97,25 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         }
 
         [TestMethod]
-        public void ExecuteCfCliCommand_ReturnsTrueResult_WhenProcessSucceeded()
+        [TestCategory("InvokeCfCliAsync")]
+        public async Task InvokeCfCliAsync_UsesDefaultDir_WhenNotSpecified()
+        {
+            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {_fakeArguments}";
+            string expectedWorkingDir = null;
+
+            mockCmdProcessService.Setup(mock => mock.InvokeWindowlessCommandAsync(It.IsAny<string>(), expectedWorkingDir, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>()))
+                .ReturnsAsync(_fakeSuccessResult);
+
+            DetailedResult result = await _sut.InvokeCfCliAsync(_fakeArguments);
+
+            mockCmdProcessService.Verify(mock => mock.InvokeWindowlessCommandAsync(expectedCmdStr, expectedWorkingDir, null, null), Times.Once());
+        }
+
+
+
+        [TestMethod]
+        [TestCategory("ExecuteCfCliCommand")]
+        public void ExecuteCfCliCommand_ReturnsTrueResult_WhenProcessExitCodeIsZero()
         {
             string expectedCmdStr = $"\"{_fakePathToCfExe}\" {_fakeArguments}";
 
@@ -92,7 +130,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         }
 
         [TestMethod]
-        public void ExecuteCfCliCommand_ReturnsFalseResult_WhenProcessFails()
+        [TestCategory("ExecuteCfCliCommand")]
+        public void ExecuteCfCliCommand_ReturnsFalseResult_WhenProcessExitCodeIsNotZero()
         {
             string expectedCmdStr = $"\"{_fakePathToCfExe}\" {_fakeArguments}";
 
@@ -108,6 +147,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         }
 
         [TestMethod]
+        [TestCategory("ExecuteCfCliCommand")]
         public void ExecuteCfCliCommand_ReturnsFalseResult_WhenCfExeCouldNotBeFound()
         {
             mockFileLocatorService.SetupGet(mock => mock.
@@ -117,24 +157,13 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             DetailedResult result = _sut.ExecuteCfCliCommand(_fakeArguments);
 
             Assert.IsFalse(result.Succeeded);
-            Assert.AreEqual(_sut.cfExePathErrorMsg, result.Explanation);
+            Assert.AreEqual(_sut._cfExePathErrorMsg, result.Explanation);
         }
 
-        [TestMethod()]
-        public async Task InvokeCfCliAsync_UsesDefaultDir_WhenNotSpecified()
-        {
-            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {_fakeArguments}";
-            string expectedWorkingDir = null;
 
-            mockCmdProcessService.Setup(mock => mock.InvokeWindowlessCommandAsync(It.IsAny<string>(), expectedWorkingDir, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>()))
-                .ReturnsAsync(_fakeSuccessResult);
-
-            DetailedResult result = await _sut.InvokeCfCliAsync(_fakeArguments);
-
-            mockCmdProcessService.Verify(mock => mock.InvokeWindowlessCommandAsync(expectedCmdStr, expectedWorkingDir, null, null), Times.Once());
-        }
 
         [TestMethod]
+        [TestCategory("GetOAuthToken")]
         public void GetOAuthToken_ReturnsNull_WhenProcessExitsWithNonZeroCode()
         {
             string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetOAuthTokenCmd}";
@@ -149,6 +178,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         }
 
         [TestMethod]
+        [TestCategory("GetOAuthToken")]
         public void GetOAuthToken_TrimsPrefix_WhenResultStartsWithBearer()
         {
             string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetOAuthTokenCmd}";
@@ -162,6 +192,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         }
 
         [TestMethod]
+        [TestCategory("GetOAuthToken")]
         public void GetOAuthToken_RemovesNewlinesFromTokenResult()
         {
             string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetOAuthTokenCmd}";
@@ -175,7 +206,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.IsFalse(token.Contains("\n"));
         }
 
+
+
         [TestMethod]
+        [TestCategory("TargetApi")]
         public void TargetApi_ReturnsTrue_WhenCmdExitCodeIsZero()
         {
             var fakeApiAddress = "my.api.addr";
@@ -196,6 +230,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         }
 
         [TestMethod]
+        [TestCategory("TargetApi")]
         public void TargetApi_ReturnsFalse_WhenCmdExitCodeIsNotZero()
         {
             var fakeApiAddress = "my.api.addr";
@@ -215,7 +250,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.AreEqual(_fakeStdErr, result.CmdDetails.StdErr);
         }
 
+
+
         [TestMethod]
+        [TestCategory("Authenticate")]
         public async Task Authenticate_ReturnsTrue_WhenCmdExitCodeIsZero()
         {
             var fakeUsername = "uname";
@@ -237,6 +275,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         }
 
         [TestMethod]
+        [TestCategory("Authenticate")]
         public async Task Authenticate_ReturnsFalse_WhenCmdExitCodeIsNotZero()
         {
             var fakeUsername = "uname";
@@ -257,44 +296,11 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.AreEqual(_fakeStdErr, result.CmdDetails.StdErr);
         }
 
-        [TestMethod]
-        public async Task InvokeCfCliAsync_ReturnsTrueDetailedResult_WhenCmdExitsWithZeroCode()
-        {
-            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {_fakeArguments}";
 
-            mockCmdProcessService.Setup(mock => mock.
-              InvokeWindowlessCommandAsync(expectedCmdStr, null, _fakeOutCallback, _fakeErrCallback))
-                .ReturnsAsync(new CmdResult(_fakeStdOut, _fakeStdErr, 0));
-
-            var result = await _sut.InvokeCfCliAsync(_fakeArguments, _fakeOutCallback, _fakeErrCallback);
-
-            Assert.IsTrue(result.Succeeded);
-            Assert.IsNull(result.Explanation);
-            Assert.IsTrue(result.CmdDetails.ExitCode == 0);
-            Assert.IsTrue(result.CmdDetails.StdOut == _fakeStdOut);
-            Assert.IsTrue(result.CmdDetails.StdErr == _fakeStdErr);
-        }
 
         [TestMethod]
-        public async Task InvokeCfCliAsync_ReturnsFalseDetailedResult_WhenCmdExitsWithNonZeroCode()
-        {
-            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {_fakeArguments}";
-
-            mockCmdProcessService.Setup(mock => mock.
-              InvokeWindowlessCommandAsync(expectedCmdStr, null, _fakeOutCallback, _fakeErrCallback))
-                .ReturnsAsync(new CmdResult(_fakeStdOut, _fakeStdErr, 1));
-
-            var result = await _sut.InvokeCfCliAsync(_fakeArguments, _fakeOutCallback, _fakeErrCallback);
-
-            Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.Explanation.Contains($"Unable to execute `cf {_fakeArguments}`."));
-            Assert.IsTrue(result.CmdDetails.ExitCode == 1);
-            Assert.IsTrue(result.CmdDetails.StdOut == _fakeStdOut);
-            Assert.IsTrue(result.CmdDetails.StdErr == _fakeStdErr);
-        }
-
-        [TestMethod]
-        public async Task GetOrgsAsync_ReturnsListOfOrgs_WhenCmdSucceeds()
+        [TestCategory("GetOrgsAsync")]
+        public async Task GetOrgsAsync_ReturnsSuccessfulResult_WhenCmdSucceeds()
         {
             string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetOrgsCmd} -v";
 
@@ -302,31 +308,38 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
               InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
                 .ReturnsAsync(_fakeOrgsCmdResult);
 
-            var result = await _sut.GetOrgsAsync();
+            DetailedResult<List<Org>> result = await _sut.GetOrgsAsync();
 
-            int numOrgsInFakeResponse = 54;
-            Assert.AreEqual(numOrgsInFakeResponse, result.Count);
-            Assert.AreEqual(_fakeOrgName1, result[0].entity.name);
-            Assert.AreEqual(_fakeOrgGuid1, result[0].metadata.guid);
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.AreEqual(_fakeOrgsCmdResult, result.CmdDetails);
+
+            Assert.AreEqual(numOrgsInFakeResponse, result.Content.Count);
+            Assert.AreEqual(_fakeOrgName1, result.Content[0].entity.name);
+            Assert.AreEqual(_fakeOrgGuid1, result.Content[0].metadata.guid);
         }
 
         [TestMethod]
-        public async Task GetOrgsAsync_ReturnsEmptyList_WhenCmdExitsWithNonZeroCode()
+        [TestCategory("GetOrgsAsync")]
+        public async Task GetOrgsAsync_ReturnsFailedResult_WhenCmdResultReportsFailure()
         {
             string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetOrgsCmd} -v";
-            var fakeFailureCmdResult = new CmdResult(string.Empty, string.Empty, 1);
 
             mockCmdProcessService.Setup(mock => mock.
               InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
                 .ReturnsAsync(fakeFailureCmdResult);
 
-            var result = await _sut.GetOrgsAsync();
+            DetailedResult<List<Org>> result = await _sut.GetOrgsAsync();
 
-            Assert.AreEqual(0, result.Count);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNull(result.Content);
+            Assert.AreEqual(_sut._requestErrorMsg, result.Explanation);
+            Assert.AreEqual(fakeFailureCmdResult, result.CmdDetails);
         }
 
         [TestMethod]
-        public async Task GetOrgsAsync_ReturnsEmptyList_WhenJsonParsingFails()
+        [TestCategory("GetOrgsAsync")]
+        public async Task GetOrgsAsync_ReturnsFailedResult_WhenJsonParsingFails()
         {
             string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetOrgsCmd} -v";
             var fakeInvalidJsonOutput = $"REQUEST {CfCliService.V6_GetOrgsRequestPath} asdf RESPONSE asdf";
@@ -336,16 +349,19 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
               InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
                 .ReturnsAsync(fakeFailureCmdResult);
 
-            var result = await _sut.GetOrgsAsync();
+            DetailedResult<List<Org>> result = await _sut.GetOrgsAsync();
 
-            Assert.AreEqual(0, result.Count);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNull(result.Content);
+            Assert.AreEqual(_sut._jsonParsingErrorMsg, result.Explanation);
+            Assert.AreEqual(fakeFailureCmdResult, result.CmdDetails);
         }
 
         [TestMethod]
-        public async Task GetOrgsAsync_ReturnsEmptyList_WhenResponseContainsNoOrgsFound()
+        [TestCategory("GetOrgsAsync")]
+        public async Task GetOrgsAsync_ReturnsSuccessfulResult_WhenResponseContainsNoOrgsFound()
         {
             string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetOrgsCmd} -v";
-            var fakeFailureCmdResult = new CmdResult(string.Empty, string.Empty, 1);
 
             mockCmdProcessService.Setup(mock => mock.
               InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
@@ -353,10 +369,16 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
 
             var result = await _sut.GetOrgsAsync();
 
-            Assert.AreEqual(0, result.Count);
+            Assert.IsTrue(result.Succeeded);
+            CollectionAssert.AreEqual(new List<Org>(), result.Content);
+            Assert.IsNull(result.Explanation);
+            Assert.AreEqual(_fakeNoOrgsCmdResult, result.CmdDetails);
         }
 
+
+
         [TestMethod]
+        [TestCategory("GetSpacesAsync")]
         public async Task GetSpacesAsync_ReturnsListOfSpaces_WhenCmdSucceeds()
         {
             string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetSpacesCmd} -v";
@@ -374,6 +396,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         }
 
         [TestMethod]
+        [TestCategory("GetSpacesAsync")]
         public async Task GetSpacesAsync_ReturnsEmptyList_WhenCmdExitsWithNonZeroCode()
         {
             string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetSpacesCmd} -v";
@@ -389,6 +412,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         }
 
         [TestMethod]
+        [TestCategory("GetSpacesAsync")]
         public async Task GetSpacesAsync_ReturnsEmptyList_WhenJsonParsingFails()
         {
             string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetSpacesCmd} -v";
@@ -405,6 +429,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         }
 
         [TestMethod]
+        [TestCategory("GetSpacesAsync")]
         public async Task GetSpacesAsync_ReturnsEmptyList_WhenResponseContainsNoSpacesFound()
         {
             string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetSpacesCmd} -v";
@@ -420,7 +445,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             mockCmdProcessService.VerifyAll();
         }
         
+
+
         [TestMethod]
+        [TestCategory("GetAppsAsync")]
         public async Task GetAppsAsync_ReturnsListOfApps_WhenCmdSucceeds()
         {
             string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetAppsCmd} -v";
@@ -438,6 +466,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         }
 
         [TestMethod]
+        [TestCategory("GetAppsAsync")]
         public async Task GetAppsAsync_ReturnsEmptyList_WhenCmdExitsWithNonZeroCode()
         {
             string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetAppsCmd} -v";
@@ -453,6 +482,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         }
 
         [TestMethod]
+        [TestCategory("GetAppsAsync")]
         public async Task GetAppsAsync_ReturnsEmptyList_WhenJsonParsingFails()
         {
             string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetAppsCmd} -v";
@@ -469,6 +499,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         }
 
         [TestMethod]
+        [TestCategory("GetAppsAsync")]
         public async Task GetAppsAsync_ReturnsEmptyList_WhenResponseContainsNoAppsFound()
         {
             string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetAppsCmd} -v";
@@ -484,7 +515,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             mockCmdProcessService.VerifyAll();
         }
 
+
+
         [TestMethod]
+        [TestCategory("TargetOrg")]
         public void TargetOrg_ReturnsTrue_WhenCmdExitCodeIsZero()
         {
             var fakeOrgName = "fake-org";
@@ -505,6 +539,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         }
 
         [TestMethod]
+        [TestCategory("TargetOrg")]
         public void TargetOrg_ReturnsFalse_WhenCmdExitCodeIsNotZero()
         {
             var fakeOrgName = "fake-org";
@@ -524,7 +559,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.AreEqual(_fakeStdErr, result.CmdDetails.StdErr);
         }
 
+
+
         [TestMethod]
+        [TestCategory("TargetSpace")]
         public void TargetSpace_ReturnsTrueResult_WhenCmdExitCodeIsZero()
         {
             var fakeSpaceName = "fake-space";
@@ -545,6 +583,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         }
 
         [TestMethod]
+        [TestCategory("TargetSpace")]
         public void TargetSpace_ReturnsFalseResult_WhenCmdExitCodeIsNotZero()
         {
             var fakeSpaceName = "fake-space";
@@ -564,7 +603,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.AreEqual(_fakeStdErr, result.CmdDetails.StdErr);
         }
 
+
+
         [TestMethod]
+        [TestCategory("StopApp")]
         public async Task StopAppByNameAsync_ReturnsTrueResult_WhenCmdExitCodeIsZero()
         {
             var fakeAppName = "fake-app";
@@ -585,6 +627,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         }
 
         [TestMethod]
+        [TestCategory("StopApp")]
         public async Task StopAppByNameAsync_ReturnsFalseResult_WhenCmdExitCodeIsNotZero()
         {
             var fakeAppName = "fake-app";
@@ -604,7 +647,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.AreEqual(_fakeStdErr, result.CmdDetails.StdErr);
         }
         
+
+
         [TestMethod]
+        [TestCategory("StartApp")]
         public async Task StartAppByNameAsync_ReturnsTrueResult_WhenCmdExitCodeIsZero()
         {
             var fakeAppName = "fake-app";
@@ -625,6 +671,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         }
 
         [TestMethod]
+        [TestCategory("StartApp")]
         public async Task StartAppByNameAsync_ReturnsFalseResult_WhenCmdExitCodeIsNotZero()
         {
             var fakeAppName = "fake-app";
@@ -644,7 +691,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.AreEqual(_fakeStdErr, result.CmdDetails.StdErr);
         }
 
+
+
         [TestMethod]
+        [TestCategory("DeleteApp")]
         public async Task DeleteAppByNameAsync_ReturnsTrueResult_WhenCmdExitCodeIsZero()
         {
             var fakeAppName = "fake-app";
@@ -665,6 +715,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         }
 
         [TestMethod]
+        [TestCategory("DeleteApp")]
         public async Task DeleteAppByNameAsync_ReturnsFalseResult_WhenCmdExitCodeIsNotZero()
         {
             var fakeAppName = "fake-app";
@@ -685,6 +736,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         }
 
         [TestMethod]
+        [TestCategory("DeleteApp")]
         public async Task DeleteAppByNameAsync_DoesNotIncludeDashRFlag_WhenRemoveMappedRoutesIsFalse()
         {
             var fakeAppName = "fake-app";

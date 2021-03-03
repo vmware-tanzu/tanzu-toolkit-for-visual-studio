@@ -225,8 +225,15 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
             else
             {
-                var orgs = await CloudFoundryService.GetOrgsForCfInstanceAsync(SelectedCf);
-                CfOrgOptions = orgs;
+                var orgsResponse = await CloudFoundryService.GetOrgsForCfInstanceAsync(SelectedCf);
+
+                if (orgsResponse.Succeeded == false)
+                {
+                    // TODO: test this
+                    // TODO: write this (display error dialog???)
+                }
+
+                CfOrgOptions = orgsResponse.Content;
             }
         }
 

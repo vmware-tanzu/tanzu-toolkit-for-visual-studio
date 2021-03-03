@@ -18,21 +18,6 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
     [TestClass()]
     public class CloudFoundryServiceTests : ServicesTestSupport
     {
-        ICloudFoundryService cfService;
-        readonly string fakeValidTarget = "https://my.fake.target";
-        readonly string fakeValidUsername = "junk";
-        readonly SecureString fakeValidPassword = new SecureString();
-        readonly string fakeHttpProxy = "junk";
-        readonly bool skipSsl = true;
-        readonly string fakeValidAccessToken = "valid token";
-        readonly string fakeProjectPath = "this\\is\\a\\fake\\path";
-        CloudFoundryInstance fakeCfInstance;
-        CloudFoundryOrganization fakeOrg;
-        CloudFoundrySpace fakeSpace;
-        CloudFoundryApp fakeApp;
-        private readonly CmdResult _fakeSuccessCmdResult = new CmdResult("junk output", "junk error", 0);
-        private readonly CmdResult _fakeFailureCmdResult = new CmdResult("junk output", "junk error", 1);
-
         [TestInitialize()]
         public void TestInit()
         {
@@ -43,7 +28,9 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             fakeApp = new CloudFoundryApp("fake app", "fake app guid", fakeSpace);
         }
 
-        [TestMethod()]
+
+        [TestMethod]
+        [TestCategory("ConnectToCfAsync")]
         public async Task ConnectToCFAsync_ThrowsExceptions_WhenParametersAreInvalid()
         {
             await Assert.ThrowsExceptionAsync<ArgumentException>(() => cfService.ConnectToCFAsync(null, null, null, null, false));
@@ -53,14 +40,15 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => cfService.ConnectToCFAsync("Junk", "Junk", null, null, false));
         }
 
-        [TestMethod()]
+        [TestMethod]
+        [TestCategory("ConnectToCfAsync")]
         public async Task ConnectToCFAsync_ReturnsConnectResult_WhenLoginSucceeds()
         {
             mockCfCliService.Setup(mock => mock.TargetApi(fakeValidTarget, true))
-                .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
             mockCfCliService.Setup(mock => mock.GetOAuthToken()).Returns(fakeValidAccessToken);
             mockCfCliService.Setup(mock => mock.AuthenticateAsync(fakeValidUsername, fakeValidPassword))
-                .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                .ReturnsAsync(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             ConnectResult result = await cfService.ConnectToCFAsync(fakeValidTarget, fakeValidUsername, fakeValidPassword, fakeHttpProxy, skipSsl);
 
@@ -70,11 +58,12 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             mockCfCliService.VerifyAll();
         }
 
-        [TestMethod()]
+        [TestMethod]
+        [TestCategory("ConnectToCfAsync")]
         public async Task ConnectToCFAsync_ReturnsConnectResult_WhenLoginFails_BecuaseTargetApiFails()
         {
             mockCfCliService.Setup(mock => mock.TargetApi(fakeValidTarget, true))
-                .Returns(new DetailedResult(false, "fake failure message", _fakeFailureCmdResult));
+                .Returns(new DetailedResult(false, "fake failure message", fakeFailureCmdResult));
 
             ConnectResult result = await cfService.ConnectToCFAsync(fakeValidTarget, fakeValidUsername, fakeValidPassword, fakeHttpProxy, skipSsl);
 
@@ -84,13 +73,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             mockCfCliService.VerifyAll();
         }
 
-        [TestMethod()]
+        [TestMethod]
+        [TestCategory("ConnectToCfAsync")]
         public async Task ConnectToCFAsync_ReturnsConnectResult_WhenLoginFails_BecuaseAuthenticateFails()
         {
             mockCfCliService.Setup(mock => mock.TargetApi(fakeValidTarget, true))
-                .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
             mockCfCliService.Setup(mock => mock.AuthenticateAsync(fakeValidUsername, fakeValidPassword))
-                .ReturnsAsync(new DetailedResult(false, "fake failure message", _fakeFailureCmdResult));
+                .ReturnsAsync(new DetailedResult(false, "fake failure message", fakeFailureCmdResult));
 
             ConnectResult result = await cfService.ConnectToCFAsync(fakeValidTarget, fakeValidUsername, fakeValidPassword, fakeHttpProxy, skipSsl);
 
@@ -100,8 +90,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             mockCfCliService.VerifyAll();
         }
 
-
-        [TestMethod()]
+        [TestMethod]
+        [TestCategory("ConnectToCfAsync")]
         public async Task ConnectToCFAsync_ReturnsConnectResult_WhenLoginFails_BecuaseTargetResultCmdDetailsAreNull()
         {
             mockCfCliService.Setup(mock => mock.TargetApi(fakeValidTarget, true))
@@ -115,11 +105,12 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             mockCfCliService.VerifyAll();
         }
 
-        [TestMethod()]
+        [TestMethod]
+        [TestCategory("ConnectToCfAsync")]
         public async Task ConnectToCFAsync_ReturnsConnectResult_WhenLoginFails_BecuaseAuthResultCmdDetailsAreNull()
         {
             mockCfCliService.Setup(mock => mock.TargetApi(fakeValidTarget, true))
-                .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
             mockCfCliService.Setup(mock => mock.AuthenticateAsync(fakeValidUsername, fakeValidPassword))
                 .ReturnsAsync(new DetailedResult(false, "fake failure message", null));
 
@@ -131,14 +122,15 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             mockCfCliService.VerifyAll();
         }
 
-        [TestMethod()]
+        [TestMethod]
+        [TestCategory("ConnectToCfAsync")]
         public async Task ConnectToCFAsync_ReturnsConnectResult_WhenLoginFails_BecuaseOfInvalidOAuthToken()
         {
             string unacquiredToken = null;
             mockCfCliService.Setup(mock => mock.TargetApi(fakeValidTarget, true))
-                .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
             mockCfCliService.Setup(mock => mock.AuthenticateAsync(fakeValidUsername, fakeValidPassword))
-                .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                .ReturnsAsync(new DetailedResult(true, null, fakeSuccessCmdResult));
             mockCfCliService.Setup(mock => mock.GetOAuthToken()).Returns(unacquiredToken);
 
             ConnectResult result = await cfService.ConnectToCFAsync(fakeValidTarget, fakeValidUsername, fakeValidPassword, fakeHttpProxy, skipSsl);
@@ -149,7 +141,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             mockCfCliService.VerifyAll();
         }
 
-        [TestMethod()]
+        [TestMethod]
+        [TestCategory("ConnectToCfAsync")]
         public async Task ConnectToCfAsync_IncludesNestedExceptionMessages_WhenExceptionIsThrown()
         {
             string baseMessage = "base exception message";
@@ -158,9 +151,9 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             Exception multilayeredException = new Exception(outerMessage, new Exception(innerMessage, new Exception(baseMessage)));
 
             mockCfCliService.Setup(mock => mock.TargetApi(fakeValidTarget, true))
-                .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
             mockCfCliService.Setup(mock => mock.AuthenticateAsync(fakeValidUsername, fakeValidPassword))
-                .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                .ReturnsAsync(new DetailedResult(true, null, fakeSuccessCmdResult));
             mockCfCliService.Setup(mock => mock.GetOAuthToken()).Throws(multilayeredException);
 
             ConnectResult result = await cfService.ConnectToCFAsync(fakeValidTarget, fakeValidUsername, fakeValidPassword, fakeHttpProxy, skipSsl);
@@ -173,6 +166,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
+        [TestCategory("ConnectToCfAsync")]
         public async Task ConnectToCfAsync_InvokesCfApiAndCfAuthCommands()
         {
             var cfApiArgs = $"api {fakeValidTarget}{(skipSsl ? " --skip-ssl-validation" : string.Empty)}";
@@ -194,65 +188,71 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             mockCfCliService.VerifyAll();
         }
 
-        [TestMethod()]
-        public async Task GetOrgsForCfInstanceAsync_ReturnsEmptyList_WhenListOrgsFails()
+
+
+        [TestMethod]
+        [TestCategory("GetOrgs")]
+        public async Task GetOrgsForCfInstanceAsync_ReturnsFailedResult_WhenListOrgsFails()
         {
-            var expectedResult = new List<CloudFoundryOrganization>();
+            var fakeFailedOrgsResult = new DetailedResult<List<Org>>(
+                content: new List<Org>(), // this is unrealistic if succeeded == false; testing just in case
+                succeeded: false, 
+                explanation: "junk", 
+                cmdDetails: fakeFailureCmdResult);
 
             mockCfCliService.Setup(mock => mock.
                 TargetApi(fakeCfInstance.ApiAddress, true))
-                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                    .Returns(fakeSuccessDetailedResult);
 
             mockCfCliService.Setup(mock => mock.
                 GetOrgsAsync())
-                    .ReturnsAsync(new List<Org>());
+                    .ReturnsAsync(fakeFailedOrgsResult);
 
-            var result = await cfService.GetOrgsForCfInstanceAsync(fakeCfInstance);
+            DetailedResult<List<CloudFoundryOrganization>> result = await cfService.GetOrgsForCfInstanceAsync(fakeCfInstance);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(0, result.Count);
-            CollectionAssert.AreEqual(expectedResult, result);
-            Assert.AreEqual(typeof(List<CloudFoundryOrganization>), result.GetType());
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual(fakeFailedOrgsResult.Explanation, result.Explanation);
+            Assert.AreEqual(fakeFailedOrgsResult.CmdDetails, result.CmdDetails);
+
+            mockCfCliService.VerifyAll();
+        }
+        
+        [TestMethod]
+        [TestCategory("GetOrgs")]
+        public async Task GetOrgsForCfInstanceAsync_ReturnsFailedResult_WhenListOrgsReturnsNoContent()
+        {
+            var fakeFailedOrgsResult = new DetailedResult<List<Org>>(
+                content: null, 
+                succeeded: true, // this is unrealistic if content == null; testing just in case
+                explanation: "junk", 
+                cmdDetails: fakeFailureCmdResult);
+
+            mockCfCliService.Setup(mock => mock.
+                TargetApi(fakeCfInstance.ApiAddress, true))
+                    .Returns(fakeSuccessDetailedResult);
+
+            mockCfCliService.Setup(mock => mock.
+                GetOrgsAsync())
+                    .ReturnsAsync(fakeFailedOrgsResult);
+
+            DetailedResult<List<CloudFoundryOrganization>> result = await cfService.GetOrgsForCfInstanceAsync(fakeCfInstance);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual(fakeFailedOrgsResult.Explanation, result.Explanation);
+            Assert.AreEqual(fakeFailedOrgsResult.CmdDetails, result.CmdDetails);
+
             mockCfCliService.VerifyAll();
         }
 
-        [TestMethod()]
-        public async Task GetOrgsForCfInstanceAsync_ReturnsListOfOrgs_WhenGetOrgsAsyncSuceeds()
+        [TestMethod]
+        [TestCategory("GetOrgs")]
+        public async Task GetOrgsForCfInstanceAsync_ReturnsSuccessfulResult_WhenGetOrgsAsyncSucceeds()
         {
-            const string org1Name = "org1";
-            const string org2Name = "org2";
-            const string org3Name = "org3";
-            const string org4Name = "org4";
-            const string org1Guid = "org-1-id";
-            const string org2Guid = "org-2-id";
-            const string org3Guid = "org-3-id";
-            const string org4Guid = "org-4-id";
+            var fakeOrgsDetailedResult = new DetailedResult<List<Org>>(content: mockOrgsResponse, succeeded: true, cmdDetails: fakeSuccessCmdResult);
 
-            var mockOrgsResponse = new List<Org>
-            {
-                new Org
-                {
-                    entity = new Services.CfCli.Models.Orgs.Entity{name = org1Name },
-                    metadata = new Metadata{guid = org1Guid }
-                },
-                new Org
-                {
-                   entity = new Services.CfCli.Models.Orgs.Entity{name = org2Name },
-                   metadata = new Metadata{guid = org2Guid }
-                },
-                new Org
-                {
-                    entity = new Services.CfCli.Models.Orgs.Entity{name = org3Name },
-                    metadata = new Metadata{guid = org3Guid }
-                },
-                new Org
-                {
-                    entity = new Services.CfCli.Models.Orgs.Entity{name = org4Name },
-                    metadata = new Metadata{guid = org4Guid }
-                }
-            };
-
-            var expectedResult = new List<CloudFoundryOrganization>
+            var expectedResultContent = new List<CloudFoundryOrganization>
             {
                 new CloudFoundryOrganization(org1Name, org1Guid, fakeCfInstance),
                 new CloudFoundryOrganization(org2Name, org2Guid, fakeCfInstance),
@@ -262,47 +262,53 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
 
             mockCfCliService.Setup(mock => mock.
                 TargetApi(fakeCfInstance.ApiAddress, true))
-                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                    .Returns(fakeSuccessDetailedResult);
 
             mockCfCliService.Setup(mock => mock.
                 GetOrgsAsync())
-                    .ReturnsAsync(mockOrgsResponse);
+                    .ReturnsAsync(fakeOrgsDetailedResult);
 
-            var result = await cfService.GetOrgsForCfInstanceAsync(fakeCfInstance);
+            DetailedResult<List<CloudFoundryOrganization>> result = await cfService.GetOrgsForCfInstanceAsync(fakeCfInstance);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(expectedResult.Count, result.Count);
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.AreEqual(fakeOrgsDetailedResult.CmdDetails, result.CmdDetails);
+            Assert.AreEqual(expectedResultContent.Count, result.Content.Count);
 
-            for (int i = 0; i < expectedResult.Count; i++)
+            for (int i = 0; i < expectedResultContent.Count; i++)
             {
-                Assert.AreEqual(expectedResult[i].OrgId, result[i].OrgId);
-                Assert.AreEqual(expectedResult[i].OrgName, result[i].OrgName);
-                Assert.AreEqual(expectedResult[i].ParentCf, result[i].ParentCf);
+                Assert.AreEqual(expectedResultContent[i].OrgId, result.Content[i].OrgId);
+                Assert.AreEqual(expectedResultContent[i].OrgName, result.Content[i].OrgName);
+                Assert.AreEqual(expectedResultContent[i].ParentCf, result.Content[i].ParentCf);
             }
 
             mockCfCliService.VerifyAll();
         }
 
-        [TestMethod()]
-        public async Task GetOrgsForCfInstanceAsync_ReturnsEmptyList_WhenTargetApiFails()
+        [TestMethod]
+        [TestCategory("GetOrgs")]
+        public async Task GetOrgsForCfInstanceAsync_ReturnsFailedResult_WhenTargetApiFails()
         {
-            var expectedResult = new List<CloudFoundryOrganization>();
-
             mockCfCliService.Setup(mock => mock.
                 TargetApi(fakeCfInstance.ApiAddress, true))
-                    .Returns(new DetailedResult(false, null, _fakeFailureCmdResult));
+                    .Returns(fakeFailureDetailedResult);
 
-            var result = await cfService.GetOrgsForCfInstanceAsync(fakeCfInstance);
+            DetailedResult<List<CloudFoundryOrganization>> result = await cfService.GetOrgsForCfInstanceAsync(fakeCfInstance);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(0, result.Count);
-            CollectionAssert.AreEqual(expectedResult, result);
-            Assert.AreEqual(typeof(List<CloudFoundryOrganization>), result.GetType());
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNull(result.Content);
+            Assert.AreEqual(fakeFailureDetailedResult.Explanation, result.Explanation);
+            Assert.AreEqual(fakeFailureDetailedResult.CmdDetails, result.CmdDetails);
 
             mockCfCliService.VerifyAll();
         }
 
-        [TestMethod()]
+
+
+        [TestMethod]
+        [TestCategory("GetSpaces")]
         public async Task GetSpacesForOrgAsync_ReturnsEmptyList_WhenListSpacesFails()
         {
             var expectedResult = new List<CloudFoundrySpace>();
@@ -311,7 +317,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
 
             mockCfCliService.Setup(mock => mock.
                 TargetApi(fakeCfInstance.ApiAddress, true))
-                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
                 TargetOrg(fakeOrg.OrgName))
@@ -334,7 +340,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
                 Times.Once);
         }
 
-        [TestMethod()]
+        [TestMethod]
+        [TestCategory("GetSpaces")]
         public async Task GetSpacesForOrgAsync_ReturnsListOfSpaces_WhenListSpacesSuceeds()
         {
             const string space1Name = "space1";
@@ -406,7 +413,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
 
             mockCfCliService.Setup(mock => mock.
                 TargetApi(fakeCfInstance.ApiAddress, true))
-                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
                 TargetOrg(fakeOrg.OrgName))
@@ -433,14 +440,15 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
                 Times.Once);
         }
 
-        [TestMethod()]
+        [TestCategory("GetSpaces")]
+        [TestMethod]
         public async Task GetSpacesForOrgAsync_ReturnsEmptyList_WhenTargetApiFails()
         {
             var expectedResult = new List<CloudFoundrySpace>();
 
             mockCfCliService.Setup(mock => mock.
                 TargetApi(fakeCfInstance.ApiAddress, true))
-                    .Returns(new DetailedResult(false, null, _fakeFailureCmdResult));
+                    .Returns(new DetailedResult(false, null, fakeFailureCmdResult));
 
             var result = await cfService.GetSpacesForOrgAsync(fakeOrg);
 
@@ -453,6 +461,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
+        [TestCategory("GetSpaces")]
         public async Task GetSpacesForOrgAsync_ReturnsEmptyList_WhenTargetOrgFails()
         {
             var expectedResult = new List<CloudFoundrySpace>();
@@ -460,7 +469,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
 
             mockCfCliService.Setup(mock => mock.
                 TargetApi(fakeCfInstance.ApiAddress, true))
-                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
                 TargetOrg(fakeOrg.OrgName)).Returns(fakeFailedResponse);
@@ -475,23 +484,26 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             mockCfCliService.VerifyAll();
         }
 
-        [TestMethod()]
+
+
+        [TestMethod]
+        [TestCategory("GetApps")]
         public async Task GetAppsForSpaceAsync_ReturnsEmptyList_WhenGetAppsFails()
         {
             var expectedResult = new List<CloudFoundryApp>();
 
             mockCfCliService.Setup(mock => mock.
                 TargetApi(fakeCfInstance.ApiAddress, true))
-                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
-               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.GetAppsAsync())
                 .ReturnsAsync(new List<App>());
 
             mockCfCliService.Setup(mock => mock.
-               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             var result = await cfService.GetAppsForSpaceAsync(fakeSpace);
 
@@ -502,7 +514,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             mockCfCliService.VerifyAll();
         }
 
-        [TestMethod()]
+        [TestMethod]
+        [TestCategory("GetApps")]
         public async Task GetAppsForSpaceAsync_ReturnsListOfApps_WhenListAppsSuceeds()
         {
             const string app1Name = "app1";
@@ -548,13 +561,13 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
 
             mockCfCliService.Setup(mock => mock.
                 TargetApi(fakeCfInstance.ApiAddress, true))
-                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
-               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
-               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.GetAppsAsync())
                 .ReturnsAsync(mockAppsResponse);
@@ -574,14 +587,15 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             mockCfCliService.VerifyAll();
         }
 
-        [TestMethod()]
+        [TestMethod]
+        [TestCategory("GetApps")]
         public async Task GetAppsForSpaceAsync_ReturnsEmptyList_WhenTargetApiFails()
         {
             var expectedResult = new List<CloudFoundryApp>();
 
             mockCfCliService.Setup(mock => mock.
                 TargetApi(fakeCfInstance.ApiAddress, true))
-                    .Returns(new DetailedResult(false, null, _fakeFailureCmdResult));
+                    .Returns(new DetailedResult(false, null, fakeFailureCmdResult));
 
             var result = await cfService.GetAppsForSpaceAsync(fakeSpace);
 
@@ -594,6 +608,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
+        [TestCategory("GetApps")]
         public async Task GetAppsForSpaceAsync_ReturnsEmptyList_WhenTargetOrgFails()
         {
             var expectedResult = new List<CloudFoundryApp>();
@@ -601,7 +616,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
 
             mockCfCliService.Setup(mock => mock.
                 TargetApi(fakeCfInstance.ApiAddress, true))
-                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
                 TargetOrg(fakeOrg.OrgName)).Returns(fakeFailedResponse);
@@ -617,6 +632,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
+        [TestCategory("GetApps")]
         public async Task GetAppsForSpaceAsync_ReturnsEmptyList_WhenTargetSpaceFails()
         {
             var expectedResult = new List<CloudFoundryApp>();
@@ -624,10 +640,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
 
             mockCfCliService.Setup(mock => mock.
                 TargetApi(fakeCfInstance.ApiAddress, true))
-                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
-                TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
                 TargetSpace(fakeSpace.SpaceName)).Returns(fakeFailedResponse);
@@ -642,7 +658,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             mockCfCliService.VerifyAll();
         }
 
-        [TestMethod()]
+
+
+        [TestMethod]
+        [TestCategory("AddCloudFoundryInstance")]
         public void AddCloudFoundryInstance_ThrowsException_WhenNameAlreadyExists()
         {
             var duplicateName = "fake name";
@@ -664,24 +683,27 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             Assert.IsTrue(expectedException.Message.Contains("already exists"));
         }
 
+
+
         [TestMethod]
+        [TestCategory("StopApp")]
         public async Task StopAppAsync_ReturnsTrue_AndUpdatesAppState_WhenStopCmdSucceeds()
         {
             fakeApp.State = "STARTED";
 
             mockCfCliService.Setup(mock => mock.
                 TargetApi(fakeCfInstance.ApiAddress, true))
-                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
-               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
-               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
                 StopAppByNameAsync(fakeApp.AppName))
-                    .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                    .ReturnsAsync(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             var result = await cfService.StopAppAsync(fakeApp);
 
@@ -690,17 +712,18 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
+        [TestCategory("StopApp")]
         public async Task StopAppAsync_ReturnsFalse_WhenStopCmdReportsFailure()
         {
             mockCfCliService.Setup(mock => mock.
                 TargetApi(fakeCfInstance.ApiAddress, true))
-                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
-               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
-               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
                 StopAppByNameAsync(fakeApp.AppName))
@@ -712,45 +735,49 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
+        [TestCategory("StopApp")]
         public async Task StopAppAsync_ReturnsFalse_WhenStopCmdExitsWithNonZeroCode()
         {
             mockCfCliService.Setup(mock => mock.
                 TargetApi(fakeCfInstance.ApiAddress, true))
-                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
-               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
-               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
               StopAppByNameAsync(fakeApp.AppName))
-                  .ReturnsAsync(new DetailedResult(true, null, _fakeFailureCmdResult));
+                  .ReturnsAsync(new DetailedResult(true, null, fakeFailureCmdResult));
 
             var result = await cfService.StopAppAsync(fakeApp);
 
             Assert.IsFalse(result);
         }
 
+
+
         [TestMethod]
+        [TestCategory("StartApp")]
         public async Task StartAppAsync_ReturnsTrue_AndUpdatesAppState_WhenStartCmdSucceeds()
         {
             fakeApp.State = "STOPPED";
 
             mockCfCliService.Setup(mock => mock.
                 TargetApi(fakeCfInstance.ApiAddress, true))
-                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
-               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
-               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
                 StartAppByNameAsync(fakeApp.AppName))
-                    .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                    .ReturnsAsync(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             var result = await cfService.StartAppAsync(fakeApp);
 
@@ -759,17 +786,18 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
+        [TestCategory("StartApp")]
         public async Task StartAppAsync_ReturnsFalse_WhenStartCmdReportsFailure()
         {
             mockCfCliService.Setup(mock => mock.
                 TargetApi(fakeCfInstance.ApiAddress, true))
-                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
-               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
-               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
                 StartAppByNameAsync(fakeApp.AppName))
@@ -781,45 +809,49 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
+        [TestCategory("StartApp")]
         public async Task StartAppAsync_ReturnsFalse_WhenStartCmdExitsWithNonZeroCode()
         {
             mockCfCliService.Setup(mock => mock.
                 TargetApi(fakeCfInstance.ApiAddress, true))
-                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
-               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
-               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
               StartAppByNameAsync(fakeApp.AppName))
-                  .ReturnsAsync(new DetailedResult(true, null, _fakeFailureCmdResult));
+                  .ReturnsAsync(new DetailedResult(true, null, fakeFailureCmdResult));
 
             var result = await cfService.StartAppAsync(fakeApp);
 
             Assert.IsFalse(result);
         }
 
+
+
         [TestMethod]
+        [TestCategory("DeleteApp")]
         public async Task DeleteAppAsync_ReturnsTrue_AndUpdatesAppState_WhenDeleteCmdSucceeds()
         {
             fakeApp.State = "STOPPED";
 
             mockCfCliService.Setup(mock => mock.
                 TargetApi(fakeCfInstance.ApiAddress, true))
-                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
-               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
-               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
                 DeleteAppByNameAsync(fakeApp.AppName, true))
-                    .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                    .ReturnsAsync(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             var result = await cfService.DeleteAppAsync(fakeApp);
 
@@ -828,17 +860,18 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
+        [TestCategory("DeleteApp")]
         public async Task DeleteAppAsync_ReturnsFalse_WhenDeleteCmdReportsFailure()
         {
             mockCfCliService.Setup(mock => mock.
                 TargetApi(fakeCfInstance.ApiAddress, true))
-                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
-               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
-               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
                 DeleteAppByNameAsync(fakeApp.AppName, true))
@@ -850,28 +883,32 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
+        [TestCategory("DeleteApp")]
         public async Task DeleteAppAsync_ReturnsFalse_WhenDeleteCmdExitsWithNonZeroCode()
         {
             mockCfCliService.Setup(mock => mock.
                 TargetApi(fakeCfInstance.ApiAddress, true))
-                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
-               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
-               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
               DeleteAppByNameAsync(fakeApp.AppName, true))
-                  .ReturnsAsync(new DetailedResult(true, null, _fakeFailureCmdResult));
+                  .ReturnsAsync(new DetailedResult(true, null, fakeFailureCmdResult));
 
             var result = await cfService.DeleteAppAsync(fakeApp);
 
             Assert.IsFalse(result);
         }
 
+
+
         [TestMethod]
+        [TestCategory("DeployApp")]
         public async Task DeployAppAsync_ReturnsFalseResult_WhenCfTargetCommandFails()
         {
             const string fakeFailureExplanation = "cf target failed";
@@ -895,6 +932,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
+        [TestCategory("DeployApp")]
         public async Task DeployAppAsync_ReturnsFalseResult_WhenCfPushCommandFails()
         {
             const string fakeFailureExplanation = "cf push failed";
@@ -928,6 +966,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
+        [TestCategory("DeployApp")]
         public async Task DeployAppAsync_ReturnsTrueResult_WhenCfTargetAndPushCommandsSucceed()
         {
             var cfTargetArgs = $"target -o {fakeOrg.OrgName} -s {fakeSpace.SpaceName}";
@@ -959,6 +998,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
+        [TestCategory("DeployApp")]
         public async Task DeployAppAsync_ReturnsFalseResult_WhenProjDirContainsNoFiles()
         {
             mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(false);

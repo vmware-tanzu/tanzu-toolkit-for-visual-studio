@@ -122,6 +122,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddTransient<ICloudExplorerViewModel, CloudExplorerViewModel>();
             services.AddTransient<IDeploymentDialogViewModel, DeploymentDialogViewModel>();
             services.AddTransient<IAddCloudDialogViewModel, AddCloudDialogViewModel>();
+            services.AddTransient<IErrorDialogViewModel, ErrorDialogViewModel>();
 
 
             /* Views */
@@ -130,6 +131,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddTransient<ICloudExplorerView, CloudExplorerView>();
             services.AddTransient<IDeploymentDialogView, DeploymentDialogView>();
             services.AddTransient<IAddCloudDialogView, AddCloudDialogView>();
+            services.AddTransient<IErrorDialogView, ErrorDialogView>();
         }
     }
 }

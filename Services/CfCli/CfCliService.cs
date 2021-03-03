@@ -20,7 +20,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         private readonly ICmdProcessService _cmdProcessService;
         private readonly IFileLocatorService _fileLocatorService;
 
-        internal readonly string cfExePathErrorMsg = $"Unable to locate cf.exe.";
+        /* ERROR MESSAGE CONSTANTS */
+        internal readonly string _cfExePathErrorMsg = $"Unable to locate cf.exe.";
+        internal readonly string _requestErrorMsg = $"An error occurred while requesting content from the Cloud Foundry API.";
+        internal readonly string _jsonParsingErrorMsg = $"Unable to parse response from Cloud Foundry API.";
 
         /* CF CLI V6 CONSTANTS */
         public static string V6_GetCliVersionCmd = "version";
@@ -90,21 +93,46 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             return ExecuteCfCliCommand(args);
         }
 
-        public async Task<List<Org>> GetOrgsAsync()
+        public async Task<DetailedResult<List<Org>>> GetOrgsAsync()
         {
+            DetailedResult cmdResult = null;
+
             try
             {
                 string args = $"{V6_GetOrgsCmd} -v"; // -v prints api request details to stdout
-                DetailedResult result = await InvokeCfCliAsync(args);
+                cmdResult = await InvokeCfCliAsync(args);
 
-                if (!result.Succeeded || result.CmdDetails.ExitCode != 0) return new List<Org>();
+                if (!cmdResult.Succeeded)
+                {
+                    return new DetailedResult<List<Org>>(
+                        content: null,
+                        succeeded: false,
+                        explanation: _requestErrorMsg,
+                        cmdDetails: cmdResult.CmdDetails);
+                }
 
                 /* break early & skip json parsing if output contains 'No orgs found' */
-                string content = result.CmdDetails.StdOut;
+                string content = cmdResult.CmdDetails.StdOut;
                 string contentEnding = content.Substring(content.Length - 20);
-                if (contentEnding.Contains("No orgs found")) return new List<Org>();
+                if (contentEnding.Contains("No orgs found"))
+                {
+                    return new DetailedResult<List<Org>>(
+                        content: new List<Org>(),
+                        succeeded: true,
+                        explanation: null,
+                        cmdDetails: cmdResult.CmdDetails);
+                }
 
-                var orgResponsePages = GetJsonResponsePages<OrgsApiV2ResponsePage>(result.CmdDetails.StdOut, V6_GetOrgsRequestPath);
+                var orgResponsePages = GetJsonResponsePages<OrgsApiV2ResponsePage>(cmdResult.CmdDetails.StdOut, V6_GetOrgsRequestPath);
+
+                if (orgResponsePages == null)
+                {
+                    return new DetailedResult<List<Org>>(
+                        content: null,
+                        succeeded: false,
+                        explanation: _jsonParsingErrorMsg,
+                        cmdDetails: cmdResult.CmdDetails);
+                }
 
                 var orgsList = new List<Org>();
                 foreach (OrgsApiV2ResponsePage responsePage in orgResponsePages)
@@ -115,11 +143,11 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
                     }
                 }
 
-                return orgsList;
+                return new DetailedResult<List<Org>>(orgsList, true, null, cmdResult.CmdDetails);
             }
-            catch
+            catch (Exception e)
             {
-                return new List<Org>();
+                return new DetailedResult<List<Org>>(null, false, e.Message, cmdResult?.CmdDetails);
             }
         }
 
@@ -197,7 +225,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
             return result;
         }
-        
+
         public async Task<DetailedResult> StartAppByNameAsync(string appName)
         {
             string args = $"{V6_StartAppCmd} {appName}";
@@ -246,7 +274,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             string pathToCfExe = _fileLocatorService.FullPathToCfExe;
             if (string.IsNullOrEmpty(pathToCfExe))
             {
-                return new DetailedResult(false, cfExePathErrorMsg);
+                return new DetailedResult(false, _cfExePathErrorMsg);
             }
 
             string commandStr = '"' + pathToCfExe + '"' + ' ' + arguments;
@@ -266,11 +294,26 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             return tokenStr;
         }
 
+        /// <summary>
+        /// Tries to parse string content from a CF CLI v6 response (1 or more pages).
+        /// </summary>
+        /// <typeparam name="ResponseType"></typeparam>
+        /// <param name="content"></param>
+        /// <param name="requestFilter"></param>
+        /// <returns> 
+        ///     <para>A list of <typeparamref name="ResponseType"/> pages if successful.</para>
+        ///     <para><c>null</c> otherwise.</para>
+        /// </returns>
         internal List<ResponseType> GetJsonResponsePages<ResponseType>(string content, string requestFilter)
         {
             try
             {
                 var jsonResponses = new List<ResponseType>();
+
+                if (!content.Contains("REQUEST") || !content.Contains("RESPONSE") || !content.Contains(requestFilter))
+                {
+                    return null;
+                }
 
                 /* separate content into individual request/response pairs */
                 string[] requestResponsePairs = Regex.Split(content, pattern: "(?=REQUEST)");
@@ -305,6 +348,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
                             jsonResponses.Add(responsePage);
                         }
+                        else
+                        {
+                            return null;
+                        }
                     }
                 }
 
@@ -312,7 +359,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             }
             catch
             {
-                return new List<ResponseType>();
+                return null;
             }
         }
 

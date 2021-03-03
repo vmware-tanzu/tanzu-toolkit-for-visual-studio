@@ -8,8 +8,10 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 {
     public class CfInstanceViewModel : TreeViewItemViewModel
     {
-        internal const string emptyOrgsPlaceholderMsg = "No orgs";
-        internal const string loadingMsg = "Loading orgs...";
+        /* ERROR MESSAGE CONSTANTS */
+        internal static readonly string _emptyOrgsPlaceholderMsg = "No orgs";
+        internal static readonly string _loadingMsg = "Loading orgs...";
+        internal static readonly string _getOrgsFailureMsg = "Unable to load orgs";
 
         public CloudFoundryInstance CloudFoundryInstance { get; }
 
@@ -21,39 +23,50 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
             LoadingPlaceholder = new PlaceholderViewModel(parent: this, services)
             {
-                DisplayText = loadingMsg
+                DisplayText = _loadingMsg
             };
         }
 
         internal protected override async Task LoadChildren()
         {
-            var orgs = await CloudFoundryService.GetOrgsForCfInstanceAsync(CloudFoundryInstance);
+            var orgsResponse = await CloudFoundryService.GetOrgsForCfInstanceAsync(CloudFoundryInstance);
 
-            if (orgs.Count == 0)
+            if (orgsResponse.Succeeded)
             {
-                var noChildrenList = new ObservableCollection<TreeViewItemViewModel>
+                if (orgsResponse.Content.Count == 0)
                 {
-                    new PlaceholderViewModel(parent: this, Services)
+                    var noChildrenList = new ObservableCollection<TreeViewItemViewModel>
                     {
-                        DisplayText = emptyOrgsPlaceholderMsg
-                    }
-                };
+                        new PlaceholderViewModel(parent: this, Services)
+                        {
+                            DisplayText = _emptyOrgsPlaceholderMsg
+                        }
+                    };
 
-                Children = noChildrenList;
+                    Children = noChildrenList;
+                }
+                else
+                {
+                    var updatedOrgsList = new ObservableCollection<TreeViewItemViewModel>();
+                    foreach (CloudFoundryOrganization org in orgsResponse.Content)
+                    {
+                        var newOrg = new OrgViewModel(org, Services);
+                        updatedOrgsList.Add(newOrg);
+                    }
+
+                    Children = updatedOrgsList;
+                }
+
+                IsLoading = false;
             }
             else
             {
-                var updatedOrgsList = new ObservableCollection<TreeViewItemViewModel>();
-                foreach (CloudFoundryOrganization org in orgs)
-                {
-                    var newOrg = new OrgViewModel(org, Services);
-                    updatedOrgsList.Add(newOrg);
-                }
+                IsLoading = false;
 
-                Children = updatedOrgsList;
+                DialogService.DisplayErrorDialog(_getOrgsFailureMsg, orgsResponse.Explanation);
+
+                IsExpanded = false;
             }
-
-            IsLoading = false;
         }
 
 
@@ -61,11 +74,21 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         {
             var newOrgsList = new List<OrgViewModel>();
 
-            var orgs = await CloudFoundryService.GetOrgsForCfInstanceAsync(CloudFoundryInstance);
-            foreach (CloudFoundryOrganization org in orgs)
+            var orgsResponse = await CloudFoundryService.GetOrgsForCfInstanceAsync(CloudFoundryInstance);
+
+            if (orgsResponse.Succeeded)
             {
-                var newOrg = new OrgViewModel(org, Services);
-                newOrgsList.Add(newOrg);
+                List<CloudFoundryOrganization> orgs = orgsResponse.Content;
+
+                foreach (CloudFoundryOrganization org in orgs)
+                {
+                    var newOrg = new OrgViewModel(org, Services);
+                    newOrgsList.Add(newOrg);
+                }
+            }
+            else
+            {
+                DialogService.DisplayErrorDialog(_getOrgsFailureMsg, orgsResponse.Explanation);
             }
 
             return newOrgsList;

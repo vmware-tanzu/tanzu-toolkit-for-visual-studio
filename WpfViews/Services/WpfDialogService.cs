@@ -3,6 +3,7 @@ using System;
 using System.Windows;
 using Tanzu.Toolkit.VisualStudio.Services.Dialog;
 using Tanzu.Toolkit.VisualStudio.Services.ViewLocator;
+using Tanzu.Toolkit.VisualStudio.ViewModels;
 
 namespace Tanzu.Toolkit.VisualStudio.WpfViews.Services
 {
@@ -31,6 +32,22 @@ namespace Tanzu.Toolkit.VisualStudio.WpfViews.Services
             //dialogWindow.Parent = Application.Current.MainWindow;
 
             return new WpfDialogResult() { Result = result };
+        }
+
+        public void DisplayErrorDialog(string errorTitle, string errorMsg)
+        {
+            /* Ensure dialog is displayed in UI thread */
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                var viewModel = new ErrorDialogViewModel()
+                {
+                    Title = errorTitle,
+                    Message = errorMsg
+                };
+
+                var view = new ErrorDialogView(viewModel);
+                view.ShowDialog();
+            });
         }
     }
 }

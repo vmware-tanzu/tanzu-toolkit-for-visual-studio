@@ -95,23 +95,42 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             }
         }
 
-        public async Task<List<CloudFoundryOrganization>> GetOrgsForCfInstanceAsync(CloudFoundryInstance cf, bool skipSsl = true)
+        public async Task<DetailedResult<List<CloudFoundryOrganization>>> GetOrgsForCfInstanceAsync(CloudFoundryInstance cf, bool skipSsl = true)
         {
             var targetApiResult = cfCliService.TargetApi(cf.ApiAddress, skipSsl);
-            if (!targetApiResult.Succeeded || targetApiResult.CmdDetails.ExitCode != 0) return new List<CloudFoundryOrganization>();
+            if (!targetApiResult.Succeeded)
+            {
+                return new DetailedResult<List<CloudFoundryOrganization>>(
+                        content: null,
+                        succeeded: false,
+                        explanation: targetApiResult.Explanation,
+                        cmdDetails: targetApiResult.CmdDetails);
+            }
 
-            List<CfCli.Models.Orgs.Org> orgsResults = await cfCliService.GetOrgsAsync();
+            DetailedResult<List<CfCli.Models.Orgs.Org>> orgsDetailedResult = await cfCliService.GetOrgsAsync();
+
+            if (!orgsDetailedResult.Succeeded || orgsDetailedResult.Content == null)
+            {
+                return new DetailedResult<List<CloudFoundryOrganization>>(
+                        content: null,
+                        succeeded: false,
+                        explanation: orgsDetailedResult.Explanation,
+                        cmdDetails: orgsDetailedResult.CmdDetails);
+            }
 
             var orgs = new List<CloudFoundryOrganization>();
-            if (orgsResults != null)
             {
-                orgsResults.ForEach(delegate (CfCli.Models.Orgs.Org org)
+                orgsDetailedResult.Content.ForEach(delegate (CfCli.Models.Orgs.Org org)
                 {
                     orgs.Add(new CloudFoundryOrganization(org.entity.name, org.metadata.guid, cf));
                 });
             }
 
-            return orgs;
+            return new DetailedResult<List<CloudFoundryOrganization>>(
+                succeeded: true, 
+                content: orgs,
+                explanation: null,
+                cmdDetails: orgsDetailedResult.CmdDetails);
         }
 
         public async Task<List<CloudFoundrySpace>> GetSpacesForOrgAsync(CloudFoundryOrganization org, bool skipSsl = true)
@@ -205,7 +224,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             app.State = "STOPPED";
             return true;
         }
-        
+
         public async Task<bool> StartAppAsync(CloudFoundryApp app, bool skipSsl = true)
         {
             var targetApiResult = cfCliService.TargetApi(app.ParentSpace.ParentOrg.ParentCf.ApiAddress, skipSsl);

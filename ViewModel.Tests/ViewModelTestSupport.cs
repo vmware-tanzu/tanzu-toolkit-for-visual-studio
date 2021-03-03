@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using Tanzu.Toolkit.VisualStudio.Models;
 using Tanzu.Toolkit.VisualStudio.Services.CloudFoundry;
+using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
 using Tanzu.Toolkit.VisualStudio.Services.Dialog;
 using Tanzu.Toolkit.VisualStudio.Services.ViewLocator;
 
@@ -32,6 +33,9 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         protected readonly List<CloudFoundryOrganization> emptyListOfOrgs = new List<CloudFoundryOrganization>();
         protected readonly List<CloudFoundrySpace> emptyListOfSpaces = new List<CloudFoundrySpace>();
         protected readonly List<CloudFoundryApp> emptyListOfApps = new List<CloudFoundryApp>();
+
+        internal static readonly CmdResult fakeSuccessCmdResult = new CmdResult("junk output", "junk error", 0);
+        internal static readonly CmdResult fakeFailureCmdResult = new CmdResult("junk output", "junk error", 1);
 
         protected ViewModelTestSupport()
         {
