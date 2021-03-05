@@ -101,27 +101,35 @@ namespace Tanzu.Toolkit.VisualStudio
 
         private void ConfigureServices(IServiceCollection services)
         {
+            /* Services */
             services.AddSingleton<ICloudFoundryService, CloudFoundryService>();
             services.AddSingleton<IViewLocatorService, WpfViewLocatorService>();
             services.AddSingleton<IDialogService, WpfDialogService>();
             services.AddSingleton<ICfCliService, CfCliService>();
-            services.AddTransient<ICmdProcessService, CmdProcessService>();
             services.AddSingleton<IFileLocatorService, FileLocatorService>();
 
+            services.AddTransient<ICmdProcessService, CmdProcessService>();
+
+
+            /* Tool Windows */
             services.AddTransient<TanzuCloudExplorerToolWindow>();
             services.AddTransient<OutputToolWindow>();
 
-            services.AddTransient<ICloudExplorerViewModel, CloudExplorerViewModel>();
-            services.AddTransient<ICloudExplorerView, CloudExplorerView>();
 
-            services.AddTransient<IDeploymentDialogViewModel, DeploymentDialogViewModel>();
-            services.AddTransient<IDeploymentDialogView, DeploymentDialogView>();
-
-            services.AddTransient<IAddCloudDialogViewModel, AddCloudDialogViewModel>();
-            services.AddTransient<IAddCloudDialogView, AddCloudDialogView>();
-
+            /* View Models */
             services.AddSingleton<IOutputViewModel, OutputViewModel>();
+
+            services.AddTransient<ICloudExplorerViewModel, CloudExplorerViewModel>();
+            services.AddTransient<IDeploymentDialogViewModel, DeploymentDialogViewModel>();
+            services.AddTransient<IAddCloudDialogViewModel, AddCloudDialogViewModel>();
+
+
+            /* Views */
             services.AddSingleton<IOutputView, OutputView>();
+
+            services.AddTransient<ICloudExplorerView, CloudExplorerView>();
+            services.AddTransient<IDeploymentDialogView, DeploymentDialogView>();
+            services.AddTransient<IAddCloudDialogView, AddCloudDialogView>();
         }
     }
 }
