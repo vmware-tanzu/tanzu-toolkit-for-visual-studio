@@ -17,7 +17,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 {
     public class CfCliService : ICfCliService
     {
-        private readonly ICmdProcessService _cmdProcessService;
+        private IServiceProvider _services { get; set; }
         private readonly IFileLocatorService _fileLocatorService;
 
         /* ERROR MESSAGE CONSTANTS */
@@ -45,7 +45,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
         public CfCliService(IServiceProvider services)
         {
-            _cmdProcessService = services.GetRequiredService<ICmdProcessService>();
+            _services = services;
             _fileLocatorService = services.GetRequiredService<IFileLocatorService>();
         }
 
@@ -256,7 +256,9 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             if (string.IsNullOrEmpty(pathToCfExe)) return new DetailedResult(false, $"Unable to locate cf.exe.");
 
             string commandStr = '"' + pathToCfExe + '"' + ' ' + arguments;
-            CmdResult result = await _cmdProcessService.InvokeWindowlessCommandAsync(commandStr, workingDir, stdOutCallback, stdErrCallback);
+
+            ICmdProcessService cmdProcessService = _services.GetRequiredService<ICmdProcessService>();
+            CmdResult result = await cmdProcessService.InvokeWindowlessCommandAsync(commandStr, workingDir, stdOutCallback, stdErrCallback);
 
             if (result.ExitCode == 0) return new DetailedResult(succeeded: true, cmdDetails: result);
 
@@ -278,7 +280,9 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             }
 
             string commandStr = '"' + pathToCfExe + '"' + ' ' + arguments;
-            CmdResult result = _cmdProcessService.ExecuteWindowlessCommand(commandStr, workingDir);
+
+            ICmdProcessService cmdProcessService = _services.GetRequiredService<ICmdProcessService>();
+            CmdResult result = cmdProcessService.ExecuteWindowlessCommand(commandStr, workingDir);
 
             if (result.ExitCode == 0) return new DetailedResult(succeeded: true, cmdDetails: result);
 
