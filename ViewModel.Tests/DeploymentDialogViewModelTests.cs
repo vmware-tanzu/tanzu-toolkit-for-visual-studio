@@ -19,6 +19,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         private const string _fakeAppName = "fake app name";
         private const string _fakeProjPath = "this\\is\\a\\fake\\path\\to\\a\\project\\directory";
         private DeploymentDialogViewModel _sut;
+        private List<string> _receivedEvents;
 
         [TestInitialize]
         public void TestInit()
@@ -34,6 +35,20 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                     .Returns(new FakeOutputView());
 
             _sut = new DeploymentDialogViewModel(services, _fakeProjPath);
+
+            _receivedEvents = new List<string>();
+            _sut.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
+            {
+                _receivedEvents.Add(e.PropertyName);
+            };
+        }
+
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            mockCloudFoundryService.VerifyAll();
+            mockViewLocatorService.VerifyAll();
+            mockDialogService.VerifyAll();
         }
 
         [TestMethod()]
