@@ -1,11 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Security;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Apps;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Orgs;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Spaces;
-using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
 using static Tanzu.Toolkit.VisualStudio.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
@@ -19,7 +17,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         Task<DetailedResult> AuthenticateAsync(string username, SecureString password);
         DetailedResult ExecuteCfCliCommand(string arguments, string workingDir = null);
         Task<DetailedResult<List<Org>>> GetOrgsAsync();
-        Task<List<Space>> GetSpacesAsync();
+        Task<DetailedResult<List<Space>>> GetSpacesAsync();
         DetailedResult TargetOrg(string orgName);
         DetailedResult TargetSpace(string spaceName);
         Task<List<App>> GetAppsAsync();

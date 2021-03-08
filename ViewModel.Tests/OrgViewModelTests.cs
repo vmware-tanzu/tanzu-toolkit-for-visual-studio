@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.VisualStudio.Models;
+using Tanzu.Toolkit.VisualStudio.Services;
 
 namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 {
@@ -40,7 +41,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public void Constructor_SetsLoadingPlaceholder()
         {
-            Assert.AreEqual(OrgViewModel.loadingMsg, _sut.LoadingPlaceholder.DisplayText);
+            Assert.AreEqual(OrgViewModel._loadingMsg, _sut.LoadingPlaceholder.DisplayText);
         }
 
         [TestMethod]
@@ -58,6 +59,13 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                 new CloudFoundrySpace("initial space 1", "initial space 1 guid", null),
                 new CloudFoundrySpace("initial space 2", "initial space 2 guid", null)
             };
+            var fakeSucccessResponse = new DetailedResult<List<CloudFoundrySpace>>
+            (
+                content: newSpacesList,
+                succeeded: true,
+                explanation: null,
+                cmdDetails: fakeSuccessCmdResult
+            );
 
             _sut.Children = initialSpacesList;
 
@@ -66,7 +74,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             mockCloudFoundryService.Setup(mock => mock.
                 GetSpacesForOrgAsync(It.IsAny<CloudFoundryOrganization>(), true))
-                    .ReturnsAsync(newSpacesList);
+                    .ReturnsAsync(fakeSucccessResponse);
 
             Assert.AreEqual(initialSpacesList.Count, _sut.Children.Count);
 
@@ -81,14 +89,23 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task LoadChildren_AssignsNoSpacesPlaceholder_WhenThereAreNoSpaces()
         {
-            mockCloudFoundryService.Setup(mock => mock.GetSpacesForOrgAsync(It.IsAny<CloudFoundryOrganization>(), true))
-                .ReturnsAsync(emptyListOfSpaces);
+            var fakeNoSpacesResponse = new DetailedResult<List<CloudFoundrySpace>>
+            (
+                content: emptyListOfSpaces,
+                succeeded: true,
+                explanation: null,
+                cmdDetails: fakeSuccessCmdResult
+            );
+
+            mockCloudFoundryService.Setup(mock => mock.
+                GetSpacesForOrgAsync(It.IsAny<CloudFoundryOrganization>(), true))
+                    .ReturnsAsync(fakeNoSpacesResponse);
 
             await _sut.LoadChildren();
 
             Assert.AreEqual(1, _sut.Children.Count);
             Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
-            Assert.AreEqual(OrgViewModel.emptySpacesPlaceholderMsg, _sut.Children[0].DisplayText);
+            Assert.AreEqual(OrgViewModel._emptySpacesPlaceholderMsg, _sut.Children[0].DisplayText);
 
             Assert.AreEqual(1, _receivedEvents.Count);
             Assert.AreEqual("Children", _receivedEvents[0]);
@@ -97,8 +114,17 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task LoadChildren_SetsIsLoadingToFalse_WhenComplete()
         {
-            mockCloudFoundryService.Setup(mock => mock.GetSpacesForOrgAsync(_sut.Org, true))
-                .ReturnsAsync(emptyListOfSpaces);
+            var fakeNoSpacesResponse = new DetailedResult<List<CloudFoundrySpace>>
+            (
+                content: emptyListOfSpaces,
+                succeeded: true,
+                explanation: null,
+                cmdDetails: fakeSuccessCmdResult
+            );
+
+            mockCloudFoundryService.Setup(mock => mock.
+                GetSpacesForOrgAsync(_sut.Org, true))
+                    .ReturnsAsync(fakeNoSpacesResponse);
 
             _sut.IsLoading = true;
 
@@ -108,15 +134,47 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         }
 
         [TestMethod]
+        public async Task LoadChildren_DisplaysErrorDialog_WhenSpacesRequestFails()
+        {
+            var fakeFailedResult = new DetailedResult<List<CloudFoundrySpace>>(
+                succeeded: false,
+                content: null,
+                explanation: "junk",
+                cmdDetails: fakeFailureCmdResult);
+
+            mockCloudFoundryService.Setup(mock => mock.
+              GetSpacesForOrgAsync(_sut.Org, true))
+                .ReturnsAsync(fakeFailedResult);
+
+            await _sut.LoadChildren();
+
+            Assert.IsFalse(_sut.IsLoading);
+
+            mockDialogService.Verify(mock => mock.
+              DisplayErrorDialog(OrgViewModel._getSpacesFailureMsg, fakeFailedResult.Explanation),
+                Times.Once);
+        }
+
+        [TestMethod]
         public async Task FetchChildren_ReturnsListOfSpaces_WithoutUpdatingChildren()
         {
+            List<CloudFoundrySpace> fakeSpacesList = new List<CloudFoundrySpace>
+            {
+                new CloudFoundrySpace("fake space name 1","fake space id 1", fakeCfOrg),
+                new CloudFoundrySpace("fake space name 2","fake space id 2", fakeCfOrg)
+            };
+
+            var fakeSuccessResponse = new DetailedResult<List<CloudFoundrySpace>>
+            (
+                content: fakeSpacesList,
+                succeeded: true,
+                explanation: null,
+                cmdDetails: fakeSuccessCmdResult
+            );
+
             mockCloudFoundryService.Setup(mock => mock.
                 GetSpacesForOrgAsync(fakeCfOrg, true))
-                    .ReturnsAsync(new List<CloudFoundrySpace>
-                    {
-                        new CloudFoundrySpace("fake space name 1","fake space id 1", fakeCfOrg),
-                        new CloudFoundrySpace("fake space name 2","fake space id 2", fakeCfOrg)
-                    });
+                    .ReturnsAsync(fakeSuccessResponse);
 
             /* pre-check presence of placeholder */
             Assert.AreEqual(1, _sut.Children.Count);
@@ -133,6 +191,29 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             // property changed events should not be raised
             Assert.AreEqual(0, _receivedEvents.Count);
         }
+
+        [TestMethod]
+        public async Task FetchChildren_DisplaysErrorDialog_WhenSpacesRequestFails()
+        {
+            var fakeFailedResult = new DetailedResult<List<CloudFoundrySpace>>(
+                succeeded: false,
+                content: null,
+                explanation: "junk",
+                cmdDetails: fakeFailureCmdResult);
+
+            mockCloudFoundryService.Setup(mock => mock.
+              GetSpacesForOrgAsync(_sut.Org, true))
+                .ReturnsAsync(fakeFailedResult);
+
+            var result = await _sut.FetchChildren();
+
+            CollectionAssert.AreEqual(emptyListOfSpaces, result);
+
+            mockDialogService.Verify(mock => mock.
+              DisplayErrorDialog(OrgViewModel._getSpacesFailureMsg, fakeFailedResult.Explanation),
+                Times.Once);
+        }
+
     }
 
 }

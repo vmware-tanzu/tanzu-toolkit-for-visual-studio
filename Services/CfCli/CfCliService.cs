@@ -125,6 +125,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
                 var orgResponsePages = GetJsonResponsePages<OrgsApiV2ResponsePage>(cmdResult.CmdDetails.StdOut, V6_GetOrgsRequestPath);
 
+                /* check for unsuccessful json parsing */
                 if (orgResponsePages == null)
                 {
                     return new DetailedResult<List<Org>>(
@@ -151,21 +152,47 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             }
         }
 
-        public async Task<List<Space>> GetSpacesAsync()
+        public async Task<DetailedResult<List<Space>>> GetSpacesAsync()
         {
+            DetailedResult cmdResult = null;
+
             try
             {
                 string args = $"{V6_GetSpacesCmd} -v"; // -v prints api request details to stdout
-                DetailedResult result = await InvokeCfCliAsync(args);
+                cmdResult = await InvokeCfCliAsync(args);
 
-                if (!result.Succeeded || result.CmdDetails.ExitCode != 0) return new List<Space>();
+                if (!cmdResult.Succeeded)
+                {
+                    return new DetailedResult<List<Space>>(
+                        content: null,
+                        succeeded: false,
+                        explanation: _requestErrorMsg,
+                        cmdDetails: cmdResult.CmdDetails);
+                }
 
                 /* break early & skip json parsing if output contains 'No spaces found' */
-                string content = result.CmdDetails.StdOut;
+                string content = cmdResult.CmdDetails.StdOut;
                 string contentEnding = content.Substring(content.Length - 20);
-                if (contentEnding.Contains("No spaces found")) return new List<Space>();
+                if (contentEnding.Contains("No spaces found"))
+                {
+                    return new DetailedResult<List<Space>>(
+                        content: new List<Space>(),
+                        succeeded: true,
+                        explanation: null,
+                        cmdDetails: cmdResult.CmdDetails);
+                }
 
                 var spaceResponsePages = GetJsonResponsePages<SpacesApiV2ResponsePage>(content, V6_GetSpacesRequestPath);
+                
+                /* check for unsuccessful json parsing */
+                if (spaceResponsePages == null)
+                {
+                    return new DetailedResult<List<Space>>(
+                        content: null,
+                        succeeded: false,
+                        explanation: _jsonParsingErrorMsg,
+                        cmdDetails: cmdResult.CmdDetails);
+                }
 
                 var spacesList = new List<Space>();
                 foreach (SpacesApiV2ResponsePage responsePage in spaceResponsePages)
@@ -176,11 +203,11 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
                     }
                 }
 
-                return spacesList;
+                return new DetailedResult<List<Space>>(spacesList, true, null, cmdResult.CmdDetails);
             }
-            catch
+            catch (Exception e)
             {
-                return new List<Space>();
+                return new DetailedResult<List<Space>>(null, false, e.Message, cmdResult?.CmdDetails);
             }
         }
 

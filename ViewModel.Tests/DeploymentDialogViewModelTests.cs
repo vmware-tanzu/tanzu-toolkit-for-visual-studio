@@ -303,6 +303,88 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             mockDialogService.VerifyAll();
             Assert.AreEqual(initialOrgOptions, _sut.CfOrgOptions);
         }
+    
+        
+        [TestMethod]
+        public async Task UpdateCfSpaceOptions_RaisesPropertyChangedEvent_WhenSpacesRequestSucceeds()
+        {
+            var fakeSpacesList = new List<CloudFoundrySpace> { fakeCfSpace };
+
+            var fakeSuccessfulSpacesResponse = new DetailedResult<List<CloudFoundrySpace>>(
+                content: fakeSpacesList,
+                succeeded: true,
+                explanation: null,
+                cmdDetails: fakeSuccessCmdResult);
+
+            mockCloudFoundryService.Setup(mock => mock.
+                GetSpacesForOrgAsync(fakeCfOrg, true))
+                    .ReturnsAsync(fakeSuccessfulSpacesResponse);
+
+            _sut.SelectedCf = fakeCfInstance;
+            _sut.SelectedOrg = fakeCfOrg;
+
+            Assert.AreEqual(0, _sut.CfSpaceOptions.Count);
+
+            await _sut.UpdateCfSpaceOptions();
+
+            Assert.AreEqual(1, _sut.CfSpaceOptions.Count);
+            Assert.AreEqual(fakeCfSpace, _sut.CfSpaceOptions[0]);
+
+            Assert.IsTrue(_receivedEvents.Contains("CfSpaceOptions"));
+        }
+    
+        [TestMethod]
+        public async Task UpdateCfSpaceOptions_SetsCfSpaceOptionsToEmptyList_WhenSelectedCfIsNull()
+        {
+            _sut.SelectedCf = null;
+
+            await _sut.UpdateCfSpaceOptions();
+
+            Assert.AreEqual(0, _sut.CfSpaceOptions.Count);
+
+            Assert.IsTrue(_receivedEvents.Contains("CfSpaceOptions"));
+        }
+        
+        [TestMethod]
+        public async Task UpdateCfSpaceOptions_SetsCfSpaceOptionsToEmptyList_WhenSelectedOrgIsNull()
+        {
+            _sut.SelectedOrg = null;
+
+            await _sut.UpdateCfSpaceOptions();
+
+            Assert.AreEqual(0, _sut.CfSpaceOptions.Count);
+
+            Assert.IsTrue(_receivedEvents.Contains("CfSpaceOptions"));
+        }
+
+        [TestMethod]
+        public async Task UpdateCfSpaceOptions_DisplaysErrorDialog_WhenSpacesResponseReportsFailure()
+        {
+            var fakeExplanation = "junk";
+
+            var fakeFailedSpacesResponse = new DetailedResult<List<CloudFoundrySpace>>(
+                content: null,
+                succeeded: false,
+                explanation: fakeExplanation,
+                cmdDetails: fakeFailureCmdResult);
+
+            mockCloudFoundryService.Setup(mock => mock.
+                GetSpacesForOrgAsync(fakeCfOrg, true))
+                    .ReturnsAsync(fakeFailedSpacesResponse);
+
+            mockDialogService.Setup(mock => mock.
+                DisplayErrorDialog(DeploymentDialogViewModel.getSpacesFailureMsg, fakeExplanation));
+
+            _sut.SelectedCf = fakeCfInstance;
+            _sut.SelectedOrg = fakeCfOrg;
+            var initialSpaceOptions = _sut.CfSpaceOptions;
+
+            await _sut.UpdateCfSpaceOptions();
+
+            mockDialogService.VerifyAll();
+            Assert.AreEqual(initialSpaceOptions, _sut.CfSpaceOptions);
+        }
+    
     }
 
     class FakeException : Exception

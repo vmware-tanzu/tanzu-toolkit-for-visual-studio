@@ -17,6 +17,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         internal const string spaceEmptyMsg = "Space not specified.";
         internal const string deploymentSuccessMsg = "App was successfully deployed!\nYou can now close this window.";
         internal const string getOrgsFailureMsg = "Unable to fetch orgs.";
+        internal const string getSpacesFailureMsg = "Unable to fetch spaces.";
         private readonly string projDir;
         private string status;
         private string appName;
@@ -205,7 +206,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
             {
             }
 
-            DeploymentInProgress = false; 
+            DeploymentInProgress = false;
         }
 
         public bool CanOpenLoginView(object arg)
@@ -232,25 +233,33 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
             {
                 var orgsResponse = await CloudFoundryService.GetOrgsForCfInstanceAsync(SelectedCf);
 
-                if (orgsResponse.Succeeded == false)
+                if (orgsResponse.Succeeded)
                 {
-                    DialogService.DisplayErrorDialog(getOrgsFailureMsg, orgsResponse.Explanation);
+                    CfOrgOptions = orgsResponse.Content;
                 }
                 else
                 {
-                    CfOrgOptions = orgsResponse.Content;
+                    DialogService.DisplayErrorDialog(getOrgsFailureMsg, orgsResponse.Explanation);
                 }
             }
         }
 
         public async Task UpdateCfSpaceOptions()
         {
-            if (SelectedOrg == null) CfSpaceOptions = new List<CloudFoundrySpace>();
+            if (SelectedOrg == null || SelectedCf == null) CfSpaceOptions = new List<CloudFoundrySpace>();
 
             else
             {
-                var spaces = await CloudFoundryService.GetSpacesForOrgAsync(SelectedOrg);
-                CfSpaceOptions = spaces;
+                var spacesResponse = await CloudFoundryService.GetSpacesForOrgAsync(SelectedOrg);
+
+                if (spacesResponse.Succeeded)
+                {
+                    CfSpaceOptions = spacesResponse.Content;
+                }
+                else
+                {
+                    DialogService.DisplayErrorDialog(getSpacesFailureMsg, spacesResponse.Explanation);
+                }
             }
         }
     }

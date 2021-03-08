@@ -8,8 +8,10 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 {
     public class OrgViewModel : TreeViewItemViewModel
     {
-        internal const string emptySpacesPlaceholderMsg = "No spaces";
-        internal const string loadingMsg = "Loading spaces...";
+        /* ERROR MESSAGE CONSTANTS */
+        internal static readonly string _emptySpacesPlaceholderMsg = "No spaces";
+        internal static readonly string _loadingMsg = "Loading spaces...";
+        internal static readonly string _getSpacesFailureMsg = "Unable to load spaces.";
 
         public CloudFoundryOrganization Org { get; }
 
@@ -21,49 +23,72 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
             LoadingPlaceholder = new PlaceholderViewModel(parent: this, services)
             {
-                DisplayText = loadingMsg
+                DisplayText = _loadingMsg
             };
         }
 
         internal protected override async Task LoadChildren()
         {
-            var spaces = await CloudFoundryService.GetSpacesForOrgAsync(Org);
+            var spacesResponse = await CloudFoundryService.GetSpacesForOrgAsync(Org);
 
-            if (spaces.Count == 0)
+            if (spacesResponse.Succeeded)
             {
-                var noChildrenList = new ObservableCollection<TreeViewItemViewModel>
+                if (spacesResponse.Content.Count == 0)
                 {
-                    new PlaceholderViewModel(parent: this, Services)
+                    var noChildrenList = new ObservableCollection<TreeViewItemViewModel>
                     {
-                        DisplayText = emptySpacesPlaceholderMsg
-                    }
-                };
+                        new PlaceholderViewModel(parent: this, Services)
+                        {
+                            DisplayText = _emptySpacesPlaceholderMsg
+                        }
+                    };
 
-                Children = noChildrenList;
+                    Children = noChildrenList;
+                }
+                else
+                {
+                    var updatedSpacesList = new ObservableCollection<TreeViewItemViewModel>();
+                    foreach (CloudFoundrySpace space in spacesResponse.Content)
+                    {
+                        var newSpace = new SpaceViewModel(space, Services);
+                        updatedSpacesList.Add(newSpace);
+                    }
+
+                    Children = updatedSpacesList;
+                }
+
+                IsLoading = false;
             }
             else
             {
-                var updatedSpacesList = new ObservableCollection<TreeViewItemViewModel>();
-                foreach (CloudFoundrySpace space in spaces)
-                {
-                    updatedSpacesList.Add(new SpaceViewModel(new CloudFoundrySpace(space.SpaceName, space.SpaceId, Org), Services));
-                }
+                IsLoading = false;
 
-                Children = updatedSpacesList;
+                DialogService.DisplayErrorDialog(_getSpacesFailureMsg, spacesResponse.Explanation);
+
+                IsExpanded = false;
             }
 
-            IsLoading = false;
         }
 
         public async Task<List<SpaceViewModel>> FetchChildren()
         {
             var newSpacesList = new List<SpaceViewModel>();
 
-            var spaces = await CloudFoundryService.GetSpacesForOrgAsync(Org);
-            foreach (CloudFoundrySpace space in spaces)
+            var spacesResponse = await CloudFoundryService.GetSpacesForOrgAsync(Org);
+
+            if (spacesResponse.Succeeded)
             {
-                var newSpace = new SpaceViewModel(space, Services);
-                newSpacesList.Add(newSpace);
+                List<CloudFoundrySpace> spaces = spacesResponse.Content;
+
+                foreach (CloudFoundrySpace space in spaces)
+                {
+                    var newSpace = new SpaceViewModel(space, Services);
+                    newSpacesList.Add(newSpace);
+                }
+            }
+            else
+            {
+                DialogService.DisplayErrorDialog(_getSpacesFailureMsg, spacesResponse.Explanation);
             }
 
             return newSpacesList;

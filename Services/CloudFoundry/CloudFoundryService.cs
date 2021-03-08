@@ -127,32 +127,56 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             }
 
             return new DetailedResult<List<CloudFoundryOrganization>>(
-                succeeded: true, 
+                succeeded: true,
                 content: orgs,
                 explanation: null,
                 cmdDetails: orgsDetailedResult.CmdDetails);
         }
 
-        public async Task<List<CloudFoundrySpace>> GetSpacesForOrgAsync(CloudFoundryOrganization org, bool skipSsl = true)
+        public async Task<DetailedResult<List<CloudFoundrySpace>>> GetSpacesForOrgAsync(CloudFoundryOrganization org, bool skipSsl = true)
         {
             var targetApiResult = cfCliService.TargetApi(org.ParentCf.ApiAddress, skipSsl);
-            if (!targetApiResult.Succeeded || targetApiResult.CmdDetails.ExitCode != 0) return new List<CloudFoundrySpace>();
-
-            var targetOrgResult = cfCliService.TargetOrg(org.OrgName);
-            if (!targetOrgResult.Succeeded || targetOrgResult.CmdDetails.ExitCode != 0) return new List<CloudFoundrySpace>();
-
-            List<CfCli.Models.Spaces.Space> spacesResults = await cfCliService.GetSpacesAsync();
-
-            var spaces = new List<CloudFoundrySpace>();
-            if (spacesResults != null)
+            if (!targetApiResult.Succeeded)
             {
-                spacesResults.ForEach(delegate (CfCli.Models.Spaces.Space space)
-                {
-                    spaces.Add(new CloudFoundrySpace(space.entity.name, space.metadata.guid, org));
-                });
+                return new DetailedResult<List<CloudFoundrySpace>>(
+                        content: null,
+                        succeeded: false,
+                        explanation: targetApiResult.Explanation,
+                        cmdDetails: targetApiResult.CmdDetails);
             }
 
-            return spaces;
+            var targetOrgResult = cfCliService.TargetOrg(org.OrgName);
+            if (!targetOrgResult.Succeeded)
+            {
+                return new DetailedResult<List<CloudFoundrySpace>>(
+                        content: null,
+                        succeeded: false,
+                        explanation: targetOrgResult.Explanation,
+                        cmdDetails: targetOrgResult.CmdDetails);
+            }
+
+            DetailedResult<List<CfCli.Models.Spaces.Space>> spacesDetailedResult = await cfCliService.GetSpacesAsync();
+
+            if (!spacesDetailedResult.Succeeded || spacesDetailedResult.Content == null)
+            {
+                return new DetailedResult<List<CloudFoundrySpace>>(
+                        content: null,
+                        succeeded: false,
+                        explanation: spacesDetailedResult.Explanation,
+                        cmdDetails: spacesDetailedResult.CmdDetails);
+            }
+
+            var spaces = new List<CloudFoundrySpace>();
+            spacesDetailedResult.Content.ForEach(delegate (CfCli.Models.Spaces.Space space)
+            {
+                spaces.Add(new CloudFoundrySpace(space.entity.name, space.metadata.guid, org));
+            });
+
+            return new DetailedResult<List<CloudFoundrySpace>>(
+                    succeeded: true,
+                    content: spaces,
+                    explanation: null,
+                    cmdDetails: spacesDetailedResult.CmdDetails);
         }
 
         public async Task<List<CloudFoundryApp>> GetAppsForSpaceAsync(CloudFoundrySpace space, bool skipSsl = true)

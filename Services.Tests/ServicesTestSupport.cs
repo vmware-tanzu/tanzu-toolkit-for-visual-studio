@@ -6,6 +6,7 @@ using System.Security;
 using Tanzu.Toolkit.VisualStudio.Models;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Orgs;
+using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Spaces;
 using Tanzu.Toolkit.VisualStudio.Services.CloudFoundry;
 using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
 using Tanzu.Toolkit.VisualStudio.Services.FileLocator;
@@ -32,7 +33,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests
         internal static readonly bool skipSsl = true;
         internal static readonly string fakeValidAccessToken = "valid token";
         internal static readonly string fakeProjectPath = "this\\is\\a\\fake\\path";
-        
+
         internal static readonly CmdResult fakeSuccessCmdResult = new CmdResult("junk output", "junk error", 0);
         internal static readonly CmdResult fakeFailureCmdResult = new CmdResult("junk output", "junk error", 1);
         internal static readonly DetailedResult fakeSuccessDetailedResult = new DetailedResult(true, null, fakeSuccessCmdResult);
@@ -47,29 +48,62 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests
         internal static readonly string org3Guid = "org-3-id";
         internal static readonly string org4Guid = "org-4-id";
 
+        internal static readonly string space1Name = "space1";
+        internal static readonly string space2Name = "space2";
+        internal static readonly string space3Name = "space3";
+        internal static readonly string space4Name = "space4";
+        internal static readonly string space1Guid = "space-1-id";
+        internal static readonly string space2Guid = "space-2-id";
+        internal static readonly string space3Guid = "space-3-id";
+        internal static readonly string space4Guid = "space-4-id";
+
         internal static readonly List<Org> mockOrgsResponse = new List<Org>
+        {
+            new Org
             {
-                new Org
-                {
-                    entity = new Services.CfCli.Models.Orgs.Entity{ name = org1Name },
-                    metadata = new Metadata{ guid = org1Guid }
-                },
-                new Org
-                {
-                   entity = new Services.CfCli.Models.Orgs.Entity{ name = org2Name },
-                   metadata = new Metadata{ guid = org2Guid }
-                },
-                new Org
-                {
-                    entity = new Services.CfCli.Models.Orgs.Entity{ name = org3Name },
-                    metadata = new Metadata{ guid = org3Guid }
-                },
-                new Org
-                {
-                    entity = new Services.CfCli.Models.Orgs.Entity{ name = org4Name },
-                    metadata = new Metadata{ guid = org4Guid }
-                }
+                entity = new Services.CfCli.Models.Orgs.Entity{ name = org1Name },
+                metadata = new Services.CfCli.Models.Orgs.Metadata{ guid = org1Guid }
+            },
+            new Org
+            {
+                entity = new Services.CfCli.Models.Orgs.Entity{ name = org2Name },
+                metadata = new Services.CfCli.Models.Orgs.Metadata{ guid = org2Guid }
+            },
+            new Org
+            {
+                entity = new Services.CfCli.Models.Orgs.Entity{ name = org3Name },
+                metadata = new Services.CfCli.Models.Orgs.Metadata{ guid = org3Guid }
+            },
+            new Org
+            {
+                entity = new Services.CfCli.Models.Orgs.Entity{ name = org4Name },
+                metadata = new Services.CfCli.Models.Orgs.Metadata{ guid = org4Guid }
+            }
             };
+
+        internal static readonly List<Space> mockSpacesResponse = new List<Space>
+        {
+            new Space
+            {
+                entity = new Services.CfCli.Models.Spaces.Entity{ name = space1Name },
+                metadata = new Services.CfCli.Models.Spaces.Metadata{ guid = space1Guid }
+            },
+            new Space
+            {
+                entity = new Services.CfCli.Models.Spaces.Entity{ name = space2Name },
+                metadata = new Services.CfCli.Models.Spaces.Metadata{ guid = space2Guid }
+            },
+            new Space
+            {
+                entity = new Services.CfCli.Models.Spaces.Entity{ name = space3Name },
+                metadata = new Services.CfCli.Models.Spaces.Metadata{ guid = space3Guid }
+            },
+            new Space
+            {
+                entity = new Services.CfCli.Models.Spaces.Entity{ name = space4Name },
+                metadata = new Services.CfCli.Models.Spaces.Metadata{ guid = space4Guid }
+            }
+        };
 
         protected ServicesTestSupport()
         {
