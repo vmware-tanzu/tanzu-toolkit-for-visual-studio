@@ -38,7 +38,11 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
             DeploymentInProgress = false;
             SelectedCf = null;
             projDir = directoryOfProjectToDeploy;
+
+
             UpdateCfInstanceOptions();
+            CfOrgOptions = new List<CloudFoundryOrganization>();
+            CfSpaceOptions = new List<CloudFoundrySpace>();
         }
 
 

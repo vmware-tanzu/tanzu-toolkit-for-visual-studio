@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.VisualStudio.Models;
+using Tanzu.Toolkit.VisualStudio.Services;
 using static Tanzu.Toolkit.VisualStudio.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
@@ -40,7 +41,28 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         {
             var vm = new DeploymentDialogViewModel(services, _fakeProjPath);
 
-            mockCloudFoundryService.VerifyAll();
+            Assert.IsNotNull(vm.CfInstanceOptions);
+            Assert.AreEqual(0, vm.CfInstanceOptions.Count);
+
+            mockCloudFoundryService.VerifyGet(mock => mock.CloudFoundryInstances);
+        }
+        
+        [TestMethod()]
+        public void DeploymentDialogViewModel_SetsCfOrgOptionsToEmptyList_WhenConstructed()
+        {
+            var vm = new DeploymentDialogViewModel(services, _fakeProjPath);
+
+            Assert.IsNotNull(vm.CfOrgOptions);
+            Assert.AreEqual(0, vm.CfOrgOptions.Count);
+        }
+        
+        [TestMethod()]
+        public void DeploymentDialogViewModel_SetsCfSpaceOptionsToEmptyList_WhenConstructed()
+        {
+            var vm = new DeploymentDialogViewModel(services, _fakeProjPath);
+
+            Assert.IsNotNull(vm.CfSpaceOptions);
+            Assert.AreEqual(0, vm.CfSpaceOptions.Count);
         }
 
         [TestMethod]
