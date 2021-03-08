@@ -16,6 +16,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         internal const string orgEmptyMsg = "Org not specified.";
         internal const string spaceEmptyMsg = "Space not specified.";
         internal const string deploymentSuccessMsg = "App was successfully deployed!\nYou can now close this window.";
+        internal const string getOrgsFailureMsg = "Unable to fetch orgs.";
         private readonly string projDir;
         private string status;
         private string appName;
@@ -233,11 +234,12 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
                 if (orgsResponse.Succeeded == false)
                 {
-                    // TODO: test this
-                    // TODO: write this (display error dialog???)
+                    DialogService.DisplayErrorDialog(getOrgsFailureMsg, orgsResponse.Explanation);
                 }
-
-                CfOrgOptions = orgsResponse.Content;
+                else
+                {
+                    CfOrgOptions = orgsResponse.Content;
+                }
             }
         }
 

@@ -234,8 +234,74 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             mockCloudFoundryService.Verify(mock => mock.
               DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath,
                              expectedStdOutCallback,
-                             expectedStdErrCallback), 
+                             expectedStdErrCallback),
                 Times.Once);
+        }
+
+        [TestMethod]
+        public async Task UpdateCfOrgOptions_RaisesPropertyChangedEvent_WhenOrgsRequestSucceeds()
+        {
+            var fakeOrgsList = new List<CloudFoundryOrganization> { fakeCfOrg };
+
+            var fakeSuccessfulOrgsResponse = new DetailedResult<List<CloudFoundryOrganization>>(
+                content: fakeOrgsList,
+                succeeded: true,
+                explanation: null,
+                cmdDetails: fakeSuccessCmdResult);
+
+            mockCloudFoundryService.Setup(mock => mock.
+                GetOrgsForCfInstanceAsync(fakeCfInstance, true))
+                    .ReturnsAsync(fakeSuccessfulOrgsResponse);
+
+            _sut.SelectedCf = fakeCfInstance;
+
+            Assert.AreEqual(0, _sut.CfOrgOptions.Count);
+
+            await _sut.UpdateCfOrgOptions();
+
+            Assert.AreEqual(1, _sut.CfOrgOptions.Count);
+            Assert.AreEqual(fakeCfOrg, _sut.CfOrgOptions[0]);
+
+            Assert.IsTrue(_receivedEvents.Contains("CfOrgOptions"));
+        }
+    
+        [TestMethod]
+        public async Task UpdateCfOrgOptions_SetsCfOrgOptionsToEmptyList_WhenSelectedCfIsNull()
+        {
+            _sut.SelectedCf = null;
+
+            await _sut.UpdateCfOrgOptions();
+
+            Assert.AreEqual(0, _sut.CfOrgOptions.Count);
+
+            Assert.IsTrue(_receivedEvents.Contains("CfOrgOptions"));
+        }
+
+        [TestMethod]
+        public async Task UpdateCfOrgOptions_DisplaysErrorDialog_WhenOrgsResponseReportsFailure()
+        {
+            var fakeExplanation = "junk";
+
+            var fakeFailedOrgsResponse = new DetailedResult<List<CloudFoundryOrganization>>(
+                content: null,
+                succeeded: false,
+                explanation: fakeExplanation,
+                cmdDetails: fakeFailureCmdResult);
+
+            mockCloudFoundryService.Setup(mock => mock.
+                GetOrgsForCfInstanceAsync(fakeCfInstance, true))
+                    .ReturnsAsync(fakeFailedOrgsResponse);
+
+            mockDialogService.Setup(mock => mock.
+                DisplayErrorDialog(DeploymentDialogViewModel.getOrgsFailureMsg, fakeExplanation));
+
+            _sut.SelectedCf = fakeCfInstance;
+            var initialOrgOptions = _sut.CfOrgOptions;
+
+            await _sut.UpdateCfOrgOptions();
+
+            mockDialogService.VerifyAll();
+            Assert.AreEqual(initialOrgOptions, _sut.CfOrgOptions);
         }
     }
 
