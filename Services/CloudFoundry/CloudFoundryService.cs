@@ -179,34 +179,65 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
                     cmdDetails: spacesDetailedResult.CmdDetails);
         }
 
-        public async Task<List<CloudFoundryApp>> GetAppsForSpaceAsync(CloudFoundrySpace space, bool skipSsl = true)
+        public async Task<DetailedResult<List<CloudFoundryApp>>> GetAppsForSpaceAsync(CloudFoundrySpace space, bool skipSsl = true)
         {
             var targetApiResult = cfCliService.TargetApi(space.ParentOrg.ParentCf.ApiAddress, skipSsl);
-            if (!targetApiResult.Succeeded || targetApiResult.CmdDetails.ExitCode != 0) return new List<CloudFoundryApp>();
-
-            var targetOrgResult = cfCliService.TargetOrg(space.ParentOrg.OrgName);
-            if (!targetOrgResult.Succeeded || targetOrgResult.CmdDetails.ExitCode != 0) return new List<CloudFoundryApp>();
-
-            var targetSpaceResult = cfCliService.TargetSpace(space.SpaceName);
-            if (!targetSpaceResult.Succeeded || targetSpaceResult.CmdDetails.ExitCode != 0) return new List<CloudFoundryApp>();
-
-
-            List<CfCli.Models.Apps.App> appResults = await cfCliService.GetAppsAsync();
-
-            var apps = new List<CloudFoundryApp>();
-            if (appResults != null)
+            if (!targetApiResult.Succeeded)
             {
-                appResults.ForEach(delegate (CfCli.Models.Apps.App app)
-                {
-                    var appToAdd = new CloudFoundryApp(app.name, app.guid, space)
-                    {
-                        State = app.state
-                    };
-                    apps.Add(appToAdd);
-                });
+                return new DetailedResult<List<CloudFoundryApp>>(
+                    succeeded: false,
+                    content: null,
+                    explanation: targetApiResult.Explanation,
+                    cmdDetails: targetApiResult.CmdDetails);
             }
 
-            return apps;
+            var targetOrgResult = cfCliService.TargetOrg(space.ParentOrg.OrgName);
+            if (!targetOrgResult.Succeeded)
+            {
+                return new DetailedResult<List<CloudFoundryApp>>(
+                    succeeded: false,
+                    content: null,
+                    explanation: targetOrgResult.Explanation,
+                    cmdDetails: targetOrgResult.CmdDetails);
+            }
+
+            var targetSpaceResult = cfCliService.TargetSpace(space.SpaceName);
+            if (!targetSpaceResult.Succeeded)
+            {
+                return new DetailedResult<List<CloudFoundryApp>>(
+                    succeeded: false,
+                    content: null,
+                    explanation: targetSpaceResult.Explanation,
+                    cmdDetails: targetSpaceResult.CmdDetails);
+            }
+
+
+            DetailedResult<List<CfCli.Models.Apps.App>> appsDetailedResult = await cfCliService.GetAppsAsync();
+            
+            if (!appsDetailedResult.Succeeded || appsDetailedResult.Content == null)
+            {
+                return new DetailedResult<List<CloudFoundryApp>>(
+                        content: null,
+                        succeeded: false,
+                        explanation: appsDetailedResult.Explanation,
+                        cmdDetails: appsDetailedResult.CmdDetails);
+            }
+
+            var apps = new List<CloudFoundryApp>();
+            appsDetailedResult.Content.ForEach(delegate (CfCli.Models.Apps.App app)
+            {
+                var appToAdd = new CloudFoundryApp(app.name, app.guid, space)
+                {
+                    State = app.state
+                };
+                apps.Add(appToAdd);
+            });
+
+            return new DetailedResult<List<CloudFoundryApp>>(
+                succeeded: true,
+                content: apps,
+                explanation: null,
+                cmdDetails: appsDetailedResult.CmdDetails);
         }
 
         public static void FormatExceptionMessage(Exception ex, List<string> message)

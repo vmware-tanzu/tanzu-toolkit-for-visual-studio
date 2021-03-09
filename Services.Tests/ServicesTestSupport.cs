@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Security;
 using Tanzu.Toolkit.VisualStudio.Models;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli;
+using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Apps;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Orgs;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Spaces;
 using Tanzu.Toolkit.VisualStudio.Services.CloudFoundry;
@@ -57,6 +58,15 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests
         internal static readonly string space3Guid = "space-3-id";
         internal static readonly string space4Guid = "space-4-id";
 
+        internal static readonly string app1Name = "app1";
+        internal static readonly string app2Name = "app2";
+        internal static readonly string app3Name = "app3";
+        internal static readonly string app4Name = "app4";
+        internal static readonly string app1Guid = "app-1-id";
+        internal static readonly string app2Guid = "app-2-id";
+        internal static readonly string app3Guid = "app-3-id";
+        internal static readonly string app4Guid = "app-4-id";
+
         internal static readonly List<Org> mockOrgsResponse = new List<Org>
         {
             new Org
@@ -104,6 +114,30 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests
                 metadata = new Services.CfCli.Models.Spaces.Metadata{ guid = space4Guid }
             }
         };
+
+        internal static readonly List<App> mockAppsResponse = new List<App>
+            {
+                new App
+                {
+                    name = app1Name,
+                    guid = app1Guid
+                },
+                new App
+                {
+                    name = app2Name,
+                    guid = app2Guid
+                },
+                new App
+                {
+                    name = app3Name,
+                    guid = app3Guid
+                },
+                new App
+                {
+                    name = app4Name,
+                    guid = app4Guid
+                }
+            };
 
         protected ServicesTestSupport()
         {

@@ -328,11 +328,20 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             AppViewModel firstChildApp = (AppViewModel)fakeSpaceViewModel.Children[0];
             Assert.AreEqual(fakeAppName1, firstChildApp.App.AppName);
 
-            mockCloudFoundryService.Setup(mock => mock.GetAppsForSpaceAsync(fakeSpace, true)).ReturnsAsync(new List<CloudFoundryApp>
+            var fakeAppsResponseContent = new List<CloudFoundryApp>
             {
                 new CloudFoundryApp(fakeAppName2, fakeAppGuid2, fakeSpace),
                 new CloudFoundryApp(fakeAppName3, fakeAppGuid3, fakeSpace)
-            });
+            };
+            var fakeAppsResult = new DetailedResult<List<CloudFoundryApp>>(
+                succeeded: true,
+                content: fakeAppsResponseContent,
+                explanation: null,
+                cmdDetails: fakeSuccessCmdResult);
+
+            mockCloudFoundryService.Setup(mock => mock.
+                GetAppsForSpaceAsync(fakeSpace, true))
+                    .ReturnsAsync(fakeAppsResult);
 
             await vm.RefreshSpace(fakeSpaceViewModel);
 
@@ -432,11 +441,10 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             };
 
             var fakeOrgsList = new List<CloudFoundryOrganization> { fakeOrg };
-            var fakeSuccessResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: true, content: fakeOrgsList);
+            var fakeSuccessfulOrgsResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: true, content: fakeOrgsList);
 
             List<CloudFoundrySpace> fakeSpaceList = new List<CloudFoundrySpace> { fakeSpace };
-
-            var fakeSuccessResponse = new DetailedResult<List<CloudFoundrySpace>>
+            var fakeSuccessfulSpacesResult = new DetailedResult<List<CloudFoundrySpace>>
             (
                 content: fakeSpaceList,
                 succeeded: true,
@@ -444,16 +452,26 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                 cmdDetails: fakeSuccessCmdResult
             );
 
+            var fakeAppsList = new List<CloudFoundryApp> { fakeApp };
+            var fakeSuccessfulAppsResult = new DetailedResult<List<CloudFoundryApp>>
+            (
+                content: fakeAppsList,
+                succeeded: true,
+                explanation: null,
+                cmdDetails: fakeSuccessCmdResult
+            );
+
             mockCloudFoundryService.Setup(mock => mock.
                 GetOrgsForCfInstanceAsync(fakeCfInstance, true))
-                    .ReturnsAsync(fakeSuccessResult);
+                    .ReturnsAsync(fakeSuccessfulOrgsResult);
 
             mockCloudFoundryService.Setup(mock => mock.
                 GetSpacesForOrgAsync(fakeOrg, true))
-                    .ReturnsAsync(fakeSuccessResponse);
+                    .ReturnsAsync(fakeSuccessfulSpacesResult);
 
-            mockCloudFoundryService.Setup(mock => mock.GetAppsForSpaceAsync(fakeSpace, true)).ReturnsAsync(
-                new List<CloudFoundryApp> { fakeApp });
+            mockCloudFoundryService.Setup(mock => mock.
+                GetAppsForSpaceAsync(fakeSpace, true))
+                    .ReturnsAsync(fakeSuccessfulAppsResult);
 
             cfivm.Children = new ObservableCollection<TreeViewItemViewModel> { ovm };
 
@@ -649,6 +667,15 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                 cmdDetails: fakeSuccessCmdResult
             );
 
+            var emptyAppsList = new List<CloudFoundryApp>();
+            var fakeSuccessfulAppsResult = new DetailedResult<List<CloudFoundryApp>>
+            (
+                content: emptyAppsList,
+                succeeded: true,
+                explanation: null,
+                cmdDetails: fakeSuccessCmdResult
+            );
+
             mockCloudFoundryService.Setup(mock => mock.
                 GetOrgsForCfInstanceAsync(fakeCfInstance, true))
                     .ReturnsAsync(fakeSuccessResult);
@@ -657,7 +684,9 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                 GetSpacesForOrgAsync(fakeOrg, true))
                     .ReturnsAsync(fakeSpacesResponse);
 
-            mockCloudFoundryService.Setup(mock => mock.GetAppsForSpaceAsync(fakeSpace, true)).ReturnsAsync(new List<CloudFoundryApp>());
+            mockCloudFoundryService.Setup(mock => mock.
+                GetAppsForSpaceAsync(fakeSpace, true))
+                    .ReturnsAsync(fakeSuccessfulAppsResult);
 
             vm.CloudFoundryList = new List<CfInstanceViewModel>
             {

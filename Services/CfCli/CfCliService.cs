@@ -211,21 +211,47 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             }
         }
 
-        public async Task<List<App>> GetAppsAsync()
+        public async Task<DetailedResult<List<App>>> GetAppsAsync()
         {
+            DetailedResult cmdResult = null;
+
             try
             {
                 string args = $"{V6_GetAppsCmd} -v"; // -v prints api request details to stdout
-                DetailedResult result = await InvokeCfCliAsync(args);
+                cmdResult = await InvokeCfCliAsync(args);
 
-                if (!result.Succeeded || result.CmdDetails.ExitCode != 0) return new List<App>();
+                if (!cmdResult.Succeeded)
+                {
+                    return new DetailedResult<List<App>>(
+                        content: null,
+                        succeeded: false,
+                        explanation: _requestErrorMsg,
+                        cmdDetails: cmdResult.CmdDetails);
+                }
 
                 /* break early & skip json parsing if output contains 'No apps found' */
-                string content = result.CmdDetails.StdOut;
+                string content = cmdResult.CmdDetails.StdOut;
                 string contentEnding = content.Substring(content.Length - 20);
-                if (contentEnding.Contains("No apps found")) return new List<App>();
+                if (contentEnding.Contains("No apps found"))
+                {
+                    return new DetailedResult<List<App>>(
+                        content: new List<App>(),
+                        succeeded: true,
+                        explanation: null,
+                        cmdDetails: cmdResult.CmdDetails);
+                }
 
                 var appsResponses = GetJsonResponsePages<AppsApiV2Response>(content, V6_GetAppsRequestPath);
+
+                /* check for unsuccessful json parsing */
+                if (appsResponses == null)
+                {
+                    return new DetailedResult<List<App>>(
+                        content: null,
+                        succeeded: false,
+                        explanation: _jsonParsingErrorMsg,
+                        cmdDetails: cmdResult.CmdDetails);
+                }
 
                 var appsList = new List<App>();
                 foreach (AppsApiV2Response response in appsResponses)
@@ -236,11 +262,11 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
                     }
                 }
 
-                return appsList;
+                return new DetailedResult<List<App>>(appsList, true, null, cmdResult.CmdDetails);
             }
-            catch
+            catch (Exception e)
             {
-                return new List<App>();
+                return new DetailedResult<List<App>>(null, false, e.Message, cmdResult?.CmdDetails);
             }
 
         }

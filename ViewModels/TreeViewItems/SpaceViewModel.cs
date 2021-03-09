@@ -10,6 +10,8 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
     {
         internal const string emptyAppsPlaceholderMsg = "No apps";
         internal const string loadingMsg = "Loading apps...";
+        internal static readonly string _getAppsFailureMsg = "Unable to load apps.";
+
 
         public CloudFoundrySpace Space { get; }
 
@@ -27,40 +29,62 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
         internal protected override async Task LoadChildren()
         {
-            var apps = await CloudFoundryService.GetAppsForSpaceAsync(Space);
+            var appsResult = await CloudFoundryService.GetAppsForSpaceAsync(Space);
 
-            if (apps.Count == 0)
+            if (appsResult.Succeeded)
             {
-                var noChildrenList = new ObservableCollection<TreeViewItemViewModel>
-                {
-                    new PlaceholderViewModel(parent: this, Services)
-                    {
-                        DisplayText = emptyAppsPlaceholderMsg
-                    }
-                };
 
-                Children = noChildrenList;
+                if (appsResult.Content.Count == 0)
+                {
+                    var noChildrenList = new ObservableCollection<TreeViewItemViewModel>
+                    {
+                        new PlaceholderViewModel(parent: this, Services)
+                        {
+                            DisplayText = emptyAppsPlaceholderMsg
+                        }
+                    };
+
+                    Children = noChildrenList;
+                }
+                else
+                {
+                    var updatedAppsList = new ObservableCollection<TreeViewItemViewModel>();
+                    foreach (CloudFoundryApp app in appsResult.Content) updatedAppsList.Add(new AppViewModel(app, Services));
+
+                    Children = updatedAppsList;
+                }
+
+                IsLoading = false;
             }
+
             else
             {
-                var updatedAppsList = new ObservableCollection<TreeViewItemViewModel>();
-                foreach (CloudFoundryApp app in apps) updatedAppsList.Add(new AppViewModel(app, Services));
+                IsLoading = false;
 
-                Children = updatedAppsList;
+                DialogService.DisplayErrorDialog(_getAppsFailureMsg, appsResult.Explanation);
+
+                IsExpanded = false;
             }
 
-            IsLoading = false;
         }
 
         public async Task<List<AppViewModel>> FetchChildren()
         {
             var newAppsList = new List<AppViewModel>();
 
-            var apps = await CloudFoundryService.GetAppsForSpaceAsync(Space);
-            foreach (CloudFoundryApp app in apps)
+            var appsResult = await CloudFoundryService.GetAppsForSpaceAsync(Space);
+
+            if (appsResult.Succeeded)
             {
-                var newOrg = new AppViewModel(app, Services);
-                newAppsList.Add(newOrg);
+                foreach (CloudFoundryApp app in appsResult.Content)
+                {
+                    var newOrg = new AppViewModel(app, Services);
+                    newAppsList.Add(newOrg);
+                }
+            }
+            else
+            {
+                DialogService.DisplayErrorDialog(_getAppsFailureMsg, appsResult.Explanation);
             }
 
             return newAppsList;

@@ -20,7 +20,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         Task<DetailedResult<List<Space>>> GetSpacesAsync();
         DetailedResult TargetOrg(string orgName);
         DetailedResult TargetSpace(string spaceName);
-        Task<List<App>> GetAppsAsync();
+        Task<DetailedResult<List<App>>> GetAppsAsync();
         Task<DetailedResult> StopAppByNameAsync(string appName);
         Task<DetailedResult> StartAppByNameAsync(string appName);
         Task<DetailedResult> DeleteAppByNameAsync(string appName, bool removeMappedRoutes = true);
