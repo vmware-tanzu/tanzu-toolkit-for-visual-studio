@@ -261,23 +261,23 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             }
         }
 
-        public async Task<bool> StopAppAsync(CloudFoundryApp app, bool skipSsl = true)
+        public async Task<DetailedResult> StopAppAsync(CloudFoundryApp app, bool skipSsl = true)
         {
             var targetApiResult = cfCliService.TargetApi(app.ParentSpace.ParentOrg.ParentCf.ApiAddress, skipSsl);
-            if (!targetApiResult.Succeeded || targetApiResult.CmdDetails.ExitCode != 0) return false;
+            if (!targetApiResult.Succeeded) return new DetailedResult(false, targetApiResult.Explanation, targetApiResult.CmdDetails);
 
             var targetOrgResult = cfCliService.TargetOrg(app.ParentSpace.ParentOrg.OrgName);
-            if (!targetOrgResult.Succeeded || targetOrgResult.CmdDetails.ExitCode != 0) return false;
+            if (!targetOrgResult.Succeeded) return new DetailedResult(false, targetOrgResult.Explanation, targetOrgResult.CmdDetails);
 
             var targetSpaceResult = cfCliService.TargetSpace(app.ParentSpace.SpaceName);
-            if (!targetSpaceResult.Succeeded || targetSpaceResult.CmdDetails.ExitCode != 0) return false;
+            if (!targetSpaceResult.Succeeded) return new DetailedResult(false, targetSpaceResult.Explanation, targetSpaceResult.CmdDetails);
 
             DetailedResult stopResult = await cfCliService.StopAppByNameAsync(app.AppName);
 
-            if (!stopResult.Succeeded || stopResult.CmdDetails.ExitCode != 0) return false;
+            if (!stopResult.Succeeded) return new DetailedResult(false, stopResult.Explanation, stopResult.CmdDetails);
 
             app.State = "STOPPED";
-            return true;
+            return stopResult;
         }
 
         public async Task<bool> StartAppAsync(CloudFoundryApp app, bool skipSsl = true)

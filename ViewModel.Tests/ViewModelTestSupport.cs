@@ -3,6 +3,7 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using Tanzu.Toolkit.VisualStudio.Models;
+using Tanzu.Toolkit.VisualStudio.Services;
 using Tanzu.Toolkit.VisualStudio.Services.CloudFoundry;
 using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
 using Tanzu.Toolkit.VisualStudio.Services.Dialog;
@@ -36,6 +37,9 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
         internal static readonly CmdResult fakeSuccessCmdResult = new CmdResult("junk output", "junk error", 0);
         internal static readonly CmdResult fakeFailureCmdResult = new CmdResult("junk output", "junk error", 1);
+
+        internal static readonly DetailedResult fakeSuccessDetailedResult = new DetailedResult(true, null, fakeSuccessCmdResult);
+        internal static readonly DetailedResult fakeFailureDetailedResult = new DetailedResult(false, "junk error", fakeFailureCmdResult);
 
         protected ViewModelTestSupport()
         {

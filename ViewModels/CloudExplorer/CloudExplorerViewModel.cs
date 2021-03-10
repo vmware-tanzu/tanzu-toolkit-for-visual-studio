@@ -12,6 +12,8 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         private List<CfInstanceViewModel> cfs;
         private IServiceProvider _services;
 
+        internal static readonly string _stopAppErrorMsg = "Encountered an error while stopping app";
+
 
         public CloudExplorerViewModel(IServiceProvider services)
             : base(services)
@@ -100,10 +102,13 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
         public async Task StopCfApp(object app)
         {
-            var cfApp = app as CloudFoundryApp;
-            if (cfApp != null)
+            if (app is CloudFoundryApp cfApp)
             {
-                await CloudFoundryService.StopAppAsync(cfApp);
+                var stopResult = await CloudFoundryService.StopAppAsync(cfApp);
+                if (!stopResult.Succeeded)
+                {
+                    DialogService.DisplayErrorDialog($"{_stopAppErrorMsg} {cfApp.AppName}.", stopResult.Explanation);
+                }
             }
         }
 

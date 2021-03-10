@@ -646,7 +646,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
 
         [TestMethod]
         [TestCategory("StopApp")]
-        public async Task StopAppAsync_ReturnsTrue_AndUpdatesAppState_WhenStopCmdSucceeds()
+        public async Task StopAppAsync_ReturnsSuccessfulResult_AndUpdatesAppState_WhenStopCmdSucceeds()
         {
             fakeApp.State = "STARTED";
 
@@ -655,65 +655,52 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
                     .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
-               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
+                TargetOrg(fakeOrg.OrgName))
+                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
-               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
+                TargetSpace(fakeSpace.SpaceName))
+                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
                 StopAppByNameAsync(fakeApp.AppName))
                     .ReturnsAsync(new DetailedResult(true, null, fakeSuccessCmdResult));
 
-            var result = await cfService.StopAppAsync(fakeApp);
+            DetailedResult result = await cfService.StopAppAsync(fakeApp);
 
             Assert.AreEqual("STOPPED", fakeApp.State);
-            Assert.IsTrue(result);
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.AreEqual(fakeSuccessCmdResult, result.CmdDetails);
         }
 
         [TestMethod]
         [TestCategory("StopApp")]
-        public async Task StopAppAsync_ReturnsFalse_WhenStopCmdReportsFailure()
+        public async Task StopAppAsync_ReturnsFailedResult_WhenStopCmdReportsFailure()
         {
+            var fakeExplanation = "junk";
+
             mockCfCliService.Setup(mock => mock.
                 TargetApi(fakeCfInstance.ApiAddress, true))
                     .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
-               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
+                TargetOrg(fakeOrg.OrgName))
+                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
-               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
+                TargetSpace(fakeSpace.SpaceName))
+                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             mockCfCliService.Setup(mock => mock.
                 StopAppByNameAsync(fakeApp.AppName))
-                    .ReturnsAsync(new DetailedResult(false, null, null));
+                    .ReturnsAsync(new DetailedResult(false, fakeExplanation, fakeFailureCmdResult));
 
-            var result = await cfService.StopAppAsync(fakeApp);
+            DetailedResult result = await cfService.StopAppAsync(fakeApp);
 
-            Assert.IsFalse(result);
-        }
-
-        [TestMethod]
-        [TestCategory("StopApp")]
-        public async Task StopAppAsync_ReturnsFalse_WhenStopCmdExitsWithNonZeroCode()
-        {
-            mockCfCliService.Setup(mock => mock.
-                TargetApi(fakeCfInstance.ApiAddress, true))
-                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
-
-            mockCfCliService.Setup(mock => mock.
-               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
-
-            mockCfCliService.Setup(mock => mock.
-               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
-
-            mockCfCliService.Setup(mock => mock.
-              StopAppByNameAsync(fakeApp.AppName))
-                  .ReturnsAsync(new DetailedResult(true, null, fakeFailureCmdResult));
-
-            var result = await cfService.StopAppAsync(fakeApp);
-
-            Assert.IsFalse(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual(fakeExplanation, result.Explanation);
+            Assert.AreEqual(fakeFailureCmdResult, result.CmdDetails);
         }
 
 

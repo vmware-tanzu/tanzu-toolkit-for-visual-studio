@@ -111,7 +111,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
 
-            mockCloudFoundryService.Setup(mock => mock.StopAppAsync(fakeApp, true)).ReturnsAsync(true);
+            mockCloudFoundryService.Setup(mock => mock.StopAppAsync(fakeApp, true)).ReturnsAsync(fakeSuccessDetailedResult);
 
             Exception shouldStayNull = null;
             try
@@ -125,6 +125,25 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             Assert.IsNull(shouldStayNull);
             mockCloudFoundryService.VerifyAll();
+        }
+
+        [TestMethod]
+        public async Task StopCfApp_DisplaysErrorDialog_WhenStopAppAsyncFails()
+        {
+            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
+
+            mockCloudFoundryService.Setup(mock => mock.
+                StopAppAsync(fakeApp, true))
+                    .ReturnsAsync(fakeFailureDetailedResult);
+
+            await vm.StopCfApp(fakeApp);
+
+            var expectedErrorTitle = $"{CloudExplorerViewModel._stopAppErrorMsg} {fakeApp.AppName}.";
+            var expectedErrorMsg = fakeFailureDetailedResult.Explanation;
+
+            mockDialogService.Verify(mock => mock.
+              DisplayErrorDialog(expectedErrorTitle, expectedErrorMsg),
+                Times.Once);
         }
 
         [TestMethod]
