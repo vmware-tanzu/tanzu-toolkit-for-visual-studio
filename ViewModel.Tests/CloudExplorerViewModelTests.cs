@@ -151,7 +151,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
 
-            mockCloudFoundryService.Setup(mock => mock.StartAppAsync(fakeApp, true)).ReturnsAsync(true);
+            mockCloudFoundryService.Setup(mock => mock.StartAppAsync(fakeApp, true)).ReturnsAsync(fakeSuccessDetailedResult);
 
             Exception shouldStayNull = null;
             try
@@ -165,6 +165,25 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             Assert.IsNull(shouldStayNull);
             mockCloudFoundryService.VerifyAll();
+        }
+
+        [TestMethod]
+        public async Task StartCfApp_DisplaysErrorDialog_WhenStartAppAsyncFails()
+        {
+            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
+
+            mockCloudFoundryService.Setup(mock => mock.
+                StartAppAsync(fakeApp, true))
+                    .ReturnsAsync(fakeFailureDetailedResult);
+
+            await vm.StartCfApp(fakeApp);
+
+            var expectedErrorTitle = $"{CloudExplorerViewModel._startAppErrorMsg} {fakeApp.AppName}.";
+            var expectedErrorMsg = fakeFailureDetailedResult.Explanation;
+
+            mockDialogService.Verify(mock => mock.
+              DisplayErrorDialog(expectedErrorTitle, expectedErrorMsg),
+                Times.Once);
         }
 
         [TestMethod]
@@ -186,6 +205,25 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             Assert.IsNull(shouldStayNull);
             mockCloudFoundryService.VerifyAll();
+        }
+
+        [TestMethod]
+        public async Task DeleteCfApp_DisplaysErrorDialog_WhenDeleteAppAsyncFails()
+        {
+            //var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
+
+            //mockCloudFoundryService.Setup(mock => mock.
+            //    DeleteAppAsync(fakeApp, true))
+            //        .ReturnsAsync(fakeFailureDetailedResult);
+
+            //await vm.DeleteCfApp(fakeApp);
+
+            //mockDialogService.Verify(mock => mock.
+            //  DisplayErrorDialog(CloudExplorerViewModel._stopAppErrorMsg, fakeFailureDetailedResult.Explanation),
+            //    Times.Once);
+
+            Assert.Fail("NYI");
+
         }
 
         [TestMethod]

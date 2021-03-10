@@ -13,6 +13,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         private IServiceProvider _services;
 
         internal static readonly string _stopAppErrorMsg = "Encountered an error while stopping app";
+        internal static readonly string _startAppErrorMsg = "Encountered an error while starting app";
 
 
         public CloudExplorerViewModel(IServiceProvider services)
@@ -114,10 +115,13 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
         public async Task StartCfApp(object app)
         {
-            var cfApp = app as CloudFoundryApp;
-            if (cfApp != null)
+            if (app is CloudFoundryApp cfApp)
             {
-                await CloudFoundryService.StartAppAsync(cfApp);
+                var startResult = await CloudFoundryService.StartAppAsync(cfApp);
+                if (!startResult.Succeeded)
+                {
+                    DialogService.DisplayErrorDialog($"{_startAppErrorMsg} {cfApp.AppName}.", startResult.Explanation);
+                }
             }
         }
 
@@ -127,6 +131,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
             if (cfApp != null)
             {
                 await CloudFoundryService.DeleteAppAsync(cfApp);
+                // TODO: display error dialog if something goes wrong with this request
             }
         }
 
