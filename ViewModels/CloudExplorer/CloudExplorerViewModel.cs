@@ -14,7 +14,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
         internal static readonly string _stopAppErrorMsg = "Encountered an error while stopping app";
         internal static readonly string _startAppErrorMsg = "Encountered an error while starting app";
-
+        internal static readonly string _deleteAppErrorMsg = "Encountered an error while deleting app";
 
         public CloudExplorerViewModel(IServiceProvider services)
             : base(services)
@@ -127,11 +127,13 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
         public async Task DeleteCfApp(object app)
         {
-            var cfApp = app as CloudFoundryApp;
-            if (cfApp != null)
+            if (app is CloudFoundryApp cfApp)
             {
-                await CloudFoundryService.DeleteAppAsync(cfApp);
-                // TODO: display error dialog if something goes wrong with this request
+                var deleteResult = await CloudFoundryService.DeleteAppAsync(cfApp);
+                if (!deleteResult.Succeeded)
+                {
+                    DialogService.DisplayErrorDialog($"{_deleteAppErrorMsg} {cfApp.AppName}.", deleteResult.Explanation);
+                }
             }
         }
 

@@ -191,7 +191,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
 
-            mockCloudFoundryService.Setup(mock => mock.DeleteAppAsync(fakeApp, true, true)).ReturnsAsync(true);
+            mockCloudFoundryService.Setup(mock => mock.DeleteAppAsync(fakeApp, true, true)).ReturnsAsync(fakeSuccessDetailedResult);
 
             Exception shouldStayNull = null;
             try
@@ -210,19 +210,20 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task DeleteCfApp_DisplaysErrorDialog_WhenDeleteAppAsyncFails()
         {
-            //var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
+            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
 
-            //mockCloudFoundryService.Setup(mock => mock.
-            //    DeleteAppAsync(fakeApp, true))
-            //        .ReturnsAsync(fakeFailureDetailedResult);
+            mockCloudFoundryService.Setup(mock => mock.
+                DeleteAppAsync(fakeApp, true, true))
+                    .ReturnsAsync(fakeFailureDetailedResult);
 
-            //await vm.DeleteCfApp(fakeApp);
+            await vm.DeleteCfApp(fakeApp);
 
-            //mockDialogService.Verify(mock => mock.
-            //  DisplayErrorDialog(CloudExplorerViewModel._stopAppErrorMsg, fakeFailureDetailedResult.Explanation),
-            //    Times.Once);
+            var expectedErrorTitle = $"{CloudExplorerViewModel._deleteAppErrorMsg} {fakeApp.AppName}.";
+            var expectedErrorMsg = fakeFailureDetailedResult.Explanation;
 
-            Assert.Fail("NYI");
+            mockDialogService.Verify(mock => mock.
+              DisplayErrorDialog(expectedErrorTitle, expectedErrorMsg),
+                Times.Once);
 
         }
 

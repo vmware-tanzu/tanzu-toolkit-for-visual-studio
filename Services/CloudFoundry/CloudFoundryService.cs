@@ -299,23 +299,23 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             return startResult;
         }
 
-        public async Task<bool> DeleteAppAsync(CloudFoundryApp app, bool skipSsl = true, bool removeRoutes = true)
+        public async Task<DetailedResult> DeleteAppAsync(CloudFoundryApp app, bool skipSsl = true, bool removeRoutes = true)
         {
             var targetApiResult = cfCliService.TargetApi(app.ParentSpace.ParentOrg.ParentCf.ApiAddress, skipSsl);
-            if (!targetApiResult.Succeeded || targetApiResult.CmdDetails.ExitCode != 0) return false;
+            if (!targetApiResult.Succeeded) return new DetailedResult(false, targetApiResult.Explanation, targetApiResult.CmdDetails);
 
             var targetOrgResult = cfCliService.TargetOrg(app.ParentSpace.ParentOrg.OrgName);
-            if (!targetOrgResult.Succeeded || targetOrgResult.CmdDetails.ExitCode != 0) return false;
+            if (!targetOrgResult.Succeeded) return new DetailedResult(false, targetOrgResult.Explanation, targetOrgResult.CmdDetails);
 
             var targetSpaceResult = cfCliService.TargetSpace(app.ParentSpace.SpaceName);
-            if (!targetSpaceResult.Succeeded || targetSpaceResult.CmdDetails.ExitCode != 0) return false;
+            if (!targetSpaceResult.Succeeded) return new DetailedResult(false, targetSpaceResult.Explanation, targetSpaceResult.CmdDetails);
 
             DetailedResult deleteResult = await cfCliService.DeleteAppByNameAsync(app.AppName, removeRoutes);
 
-            if (!deleteResult.Succeeded || deleteResult.CmdDetails.ExitCode != 0) return false;
+            if (!deleteResult.Succeeded) return new DetailedResult(false, deleteResult.Explanation, deleteResult.CmdDetails);
 
             app.State = "DELETED";
-            return true;
+            return deleteResult;
         }
 
         public async Task<DetailedResult> DeployAppAsync(CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, string appName, string appProjPath, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback)
