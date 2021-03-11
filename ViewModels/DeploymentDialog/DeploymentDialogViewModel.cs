@@ -16,6 +16,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         internal const string orgEmptyMsg = "Org not specified.";
         internal const string spaceEmptyMsg = "Space not specified.";
         internal const string deploymentSuccessMsg = "App was successfully deployed!\nYou can now close this window.";
+        internal const string deploymentErrorMsg = "Unable to deploy app:";
         internal const string getOrgsFailureMsg = "Unable to fetch orgs.";
         internal const string getSpacesFailureMsg = "Unable to fetch spaces.";
         private readonly string projDir;
@@ -190,20 +191,22 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
         internal async Task StartDeployment()
         {
-            try
+            var deploymentResult = await CloudFoundryService.DeployAppAsync(
+                SelectedSpace.ParentOrg.ParentCf,
+                SelectedSpace.ParentOrg,
+                SelectedSpace,
+                AppName,
+                projDir,
+                stdOutCallback: outputViewModel.AppendLine,
+                stdErrCallback: outputViewModel.AppendLine
+            );
+
+            if (!deploymentResult.Succeeded)
             {
-                await CloudFoundryService.DeployAppAsync(
-                    SelectedSpace.ParentOrg.ParentCf,
-                    SelectedSpace.ParentOrg,
-                    SelectedSpace,
-                    AppName,
-                    projDir,
-                    stdOutCallback: outputViewModel.AppendLine,
-                    stdErrCallback: outputViewModel.AppendLine
-                );
-            }
-            catch (Exception)
-            {
+                var errorTitle = $"{deploymentErrorMsg} {AppName}.";
+                var errorMsg = deploymentResult.Explanation;
+
+                DialogService.DisplayErrorDialog(errorTitle, errorMsg);
             }
 
             DeploymentInProgress = false;

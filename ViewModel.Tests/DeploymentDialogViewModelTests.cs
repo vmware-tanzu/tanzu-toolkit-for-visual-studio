@@ -61,7 +61,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             mockCloudFoundryService.VerifyGet(mock => mock.CloudFoundryInstances);
         }
-        
+
         [TestMethod()]
         public void DeploymentDialogViewModel_SetsCfOrgOptionsToEmptyList_WhenConstructed()
         {
@@ -70,7 +70,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             Assert.IsNotNull(vm.CfOrgOptions);
             Assert.AreEqual(0, vm.CfOrgOptions.Count);
         }
-        
+
         [TestMethod()]
         public void DeploymentDialogViewModel_SetsCfSpaceOptionsToEmptyList_WhenConstructed()
         {
@@ -181,10 +181,6 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task StartDeploymentTask_UpdatesDeploymentInProgress_WhenComplete()
         {
-            var fakeExMsg = "I was thrown by cf service!";
-            var fakeExTrace = "this is a stack trace: a<b<c<d<e";
-            var fakeException = new FakeException(fakeExMsg, fakeExTrace);
-
             var receivedEvents = new List<string>();
             _sut.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
             {
@@ -192,30 +188,21 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             };
 
             mockCloudFoundryService.Setup(mock =>
-                mock.DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>()))
-                    .ThrowsAsync(fakeException);
+                mock.DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath,
+                                    It.IsAny<StdOutDelegate>(),
+                                    It.IsAny<StdErrDelegate>()))
+                    .ReturnsAsync(fakeSuccessDetailedResult);
 
             _sut.AppName = _fakeAppName;
             _sut.SelectedCf = _fakeCfInstance;
             _sut.SelectedOrg = _fakeOrg;
             _sut.SelectedSpace = _fakeSpace;
 
-            Exception shouldStayNull = null;
-            try
-            {
-                _sut.DeploymentInProgress = true;
-                await _sut.StartDeployment();
-            }
-            catch (Exception ex)
-            {
-                shouldStayNull = ex;
-            }
+            _sut.DeploymentInProgress = true;
 
-            Assert.IsNull(shouldStayNull);
+            await _sut.StartDeployment();
+
             Assert.IsFalse(_sut.DeploymentInProgress);
-
-            mockCloudFoundryService.VerifyAll(); // ensure DeployAppAsync was called with proper params
-            mockViewLocatorService.VerifyAll(); // ensure we're using a mock output view/viewmodel
         }
 
         [TestMethod]
@@ -229,13 +216,39 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             StdOutDelegate expectedStdOutCallback = _sut.outputViewModel.AppendLine;
             StdErrDelegate expectedStdErrCallback = _sut.outputViewModel.AppendLine;
 
-            await _sut.StartDeployment();
-
-            mockCloudFoundryService.Verify(mock => mock.
+            mockCloudFoundryService.Setup(mock => mock.
               DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath,
                              expectedStdOutCallback,
-                             expectedStdErrCallback),
-                Times.Once);
+                             expectedStdErrCallback))
+                .ReturnsAsync(fakeSuccessDetailedResult);
+
+            await _sut.StartDeployment();
+        }
+
+        [TestMethod]
+        public async Task StartDeploymentTask_DisplaysErrorDialog_WhenDeployResultReportsFailure()
+        {
+            _sut.AppName = _fakeAppName;
+            _sut.SelectedCf = _fakeCfInstance;
+            _sut.SelectedOrg = _fakeOrg;
+            _sut.SelectedSpace = _fakeSpace;
+
+            StdOutDelegate expectedStdOutCallback = _sut.outputViewModel.AppendLine;
+            StdErrDelegate expectedStdErrCallback = _sut.outputViewModel.AppendLine;
+
+            mockCloudFoundryService.Setup(mock => mock.
+                DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath,
+                             expectedStdOutCallback,
+                             expectedStdErrCallback))
+                    .ReturnsAsync(fakeFailureDetailedResult);
+
+            var expectedErrorTitle = $"{DeploymentDialogViewModel.deploymentErrorMsg} {_fakeAppName}.";
+            var expectedErrorMsg = $"{fakeFailureDetailedResult.Explanation}";
+
+            mockDialogService.Setup(mock => mock.
+                DisplayErrorDialog(expectedErrorTitle, expectedErrorMsg));
+
+            await _sut.StartDeployment();
         }
 
         [TestMethod]
@@ -264,7 +277,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             Assert.IsTrue(_receivedEvents.Contains("CfOrgOptions"));
         }
-    
+
         [TestMethod]
         public async Task UpdateCfOrgOptions_SetsCfOrgOptionsToEmptyList_WhenSelectedCfIsNull()
         {
@@ -303,8 +316,8 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             mockDialogService.VerifyAll();
             Assert.AreEqual(initialOrgOptions, _sut.CfOrgOptions);
         }
-    
-        
+
+
         [TestMethod]
         public async Task UpdateCfSpaceOptions_RaisesPropertyChangedEvent_WhenSpacesRequestSucceeds()
         {
@@ -332,7 +345,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             Assert.IsTrue(_receivedEvents.Contains("CfSpaceOptions"));
         }
-    
+
         [TestMethod]
         public async Task UpdateCfSpaceOptions_SetsCfSpaceOptionsToEmptyList_WhenSelectedCfIsNull()
         {
@@ -344,7 +357,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             Assert.IsTrue(_receivedEvents.Contains("CfSpaceOptions"));
         }
-        
+
         [TestMethod]
         public async Task UpdateCfSpaceOptions_SetsCfSpaceOptionsToEmptyList_WhenSelectedOrgIsNull()
         {
@@ -384,35 +397,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             mockDialogService.VerifyAll();
             Assert.AreEqual(initialSpaceOptions, _sut.CfSpaceOptions);
         }
-    
-    }
 
-    class FakeException : Exception
-    {
-        private readonly string message;
-        private readonly string stackTrace;
-
-        public FakeException(string message = "", string stackTrace = "")
-        {
-            this.message = message;
-            this.stackTrace = stackTrace;
-        }
-
-        public override string Message
-        {
-            get
-            {
-                return message;
-            }
-        }
-
-        public override string StackTrace
-        {
-            get
-            {
-                return stackTrace;
-            }
-        }
     }
 
     class FakeOutputView : ViewModelTestSupport, IView
