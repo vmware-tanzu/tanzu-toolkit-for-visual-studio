@@ -118,8 +118,8 @@ namespace Tanzu.Toolkit.VisualStudio
 
             /* View Models */
             services.AddSingleton<IOutputViewModel, OutputViewModel>();
+            services.AddSingleton<ICloudExplorerViewModel, CloudExplorerViewModel>();
 
-            services.AddTransient<ICloudExplorerViewModel, CloudExplorerViewModel>();
             services.AddTransient<IDeploymentDialogViewModel, DeploymentDialogViewModel>();
             services.AddTransient<IAddCloudDialogViewModel, AddCloudDialogViewModel>();
             services.AddTransient<IErrorDialogViewModel, ErrorDialogViewModel>();
