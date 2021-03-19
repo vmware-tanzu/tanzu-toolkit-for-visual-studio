@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.VisualStudio.Models;
@@ -70,15 +69,15 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
         }
 
-        public async Task<List<SpaceViewModel>> FetchChildren()
+        public async Task<ObservableCollection<SpaceViewModel>> FetchChildren()
         {
-            var newSpacesList = new List<SpaceViewModel>();
+            var newSpacesList = new ObservableCollection<SpaceViewModel>();
 
             var spacesResponse = await CloudFoundryService.GetSpacesForOrgAsync(Org);
 
             if (spacesResponse.Succeeded)
             {
-                List<CloudFoundrySpace> spaces = spacesResponse.Content;
+                var spaces = new ObservableCollection<CloudFoundrySpace>(spacesResponse.Content);
 
                 foreach (CloudFoundrySpace space in spaces)
                 {

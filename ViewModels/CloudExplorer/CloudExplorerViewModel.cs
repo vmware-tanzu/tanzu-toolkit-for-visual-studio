@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Linq;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.VisualStudio.Models;
+using System.Collections.ObjectModel;
+using System.Collections.Generic;
 
 namespace Tanzu.Toolkit.VisualStudio.ViewModels
 {
     public class CloudExplorerViewModel : AbstractViewModel, ICloudExplorerViewModel
     {
         private bool hasCloudTargets;
-        private List<CfInstanceViewModel> cfs;
+        private ObservableCollection<CfInstanceViewModel> cfs;
         private IServiceProvider _services;
 
         internal static readonly string _stopAppErrorMsg = "Encountered an error while stopping app";
@@ -20,12 +21,12 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
             : base(services)
         {
             _services = services;
-            cfs = new List<CfInstanceViewModel>();
+            cfs = new ObservableCollection<CfInstanceViewModel>();
             HasCloudTargets = CloudFoundryService.CloudFoundryInstances.Keys.Count > 0;
         }
 
 
-        public List<CfInstanceViewModel> CloudFoundryList
+        public ObservableCollection<CfInstanceViewModel> CloudFoundryList
         {
             get => cfs;
 
@@ -180,29 +181,59 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
         public async Task RefreshAllCloudConnections(object arg)
         {
+            // record original items before refreshing starts to  
+            // avoid unnecessary LoadChildren calls for *new* items
+            var initalIds = new List<string>();
+
+            foreach (CfInstanceViewModel cfivm in CloudFoundryList)
+            {
+                initalIds.Add(cfivm.CloudFoundryInstance.ApiAddress);
+
+                foreach (TreeViewItemViewModel cfChild in cfivm.Children)
+                {
+                    if (cfChild is OrgViewModel ovm)
+                    {
+                        initalIds.Add(ovm.Org.OrgId);
+
+                        foreach (TreeViewItemViewModel orgChild in ovm.Children)
+                        {
+                            if (orgChild is SpaceViewModel svm)
+                            {
+                                initalIds.Add(svm.Space.SpaceId);
+                            }
+                        }
+                    }
+                }
+            }
+
             // before refreshing each cf instance, check the Model's record of Cloud 
             // connections & make sure `CloudFoundryList` matches those values 
             SyncCloudFoundryList();
 
             foreach (CfInstanceViewModel cfivm in CloudFoundryList)
             {
-                await RefreshCfInstance(cfivm);
+                bool cfNotNew = initalIds.Contains(cfivm.CloudFoundryInstance.ApiAddress);
 
-                foreach (TreeViewItemViewModel cfChild in cfivm.Children)
+                if (cfNotNew)
                 {
-                    if (cfChild is OrgViewModel ovm)
+                    await RefreshCfInstance(cfivm);
+
+                    foreach (TreeViewItemViewModel cfChild in cfivm.Children)
                     {
-                        await RefreshOrg(ovm);
-
-                        foreach (TreeViewItemViewModel orgChild in ovm.Children)
+                        if (cfChild is OrgViewModel ovm && initalIds.Contains(ovm.Org.OrgId))
                         {
-                            if (orgChild is SpaceViewModel svm)
-                            {
-                                await RefreshSpace(svm);
+                            await RefreshOrg(ovm);
 
-                                foreach (TreeViewItemViewModel spaceChild in svm.Children)
+                            foreach (TreeViewItemViewModel orgChild in ovm.Children)
+                            {
+                                if (orgChild is SpaceViewModel svm && initalIds.Contains(svm.Space.SpaceId))
                                 {
-                                    if (spaceChild is AppViewModel avm) RefreshApp(avm);
+                                    await RefreshSpace(svm);
+
+                                    foreach (TreeViewItemViewModel spaceChild in svm.Children)
+                                    {
+                                        if (spaceChild is AppViewModel avm) RefreshApp(avm);
+                                    }
                                 }
                             }
                         }
@@ -217,8 +248,8 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         /// </summary>
         private void SyncCloudFoundryList()
         {
-            var loggedInCfs = new List<CloudFoundryInstance>(CloudFoundryService.CloudFoundryInstances.Values);
-            var updatedCfInstanceViewModelList = new List<CfInstanceViewModel>();
+            var loggedInCfs = new ObservableCollection<CloudFoundryInstance>(CloudFoundryService.CloudFoundryInstances.Values);
+            var updatedCfInstanceViewModelList = new ObservableCollection<CfInstanceViewModel>();
             foreach (CloudFoundryInstance cf in loggedInCfs)
             {
                 updatedCfInstanceViewModelList.Add(new CfInstanceViewModel(cf, _services));
@@ -230,7 +261,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
             HasCloudTargets = CloudFoundryList.Count > 0;
         }
 
-        private void AddNewCfsToCloudFoundryList(List<CfInstanceViewModel> updatedCfInstanceViewModelList)
+        private void AddNewCfsToCloudFoundryList(ObservableCollection<CfInstanceViewModel> updatedCfInstanceViewModelList)
         {
             foreach (CfInstanceViewModel newCFIVM in updatedCfInstanceViewModelList)
             {
@@ -249,9 +280,9 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
             }
         }
 
-        private void RemoveNonexistentCfsFromCloudFoundryList(List<CfInstanceViewModel> updatedCfInstanceViewModelList)
+        private void RemoveNonexistentCfsFromCloudFoundryList(ObservableCollection<CfInstanceViewModel> updatedCfInstanceViewModelList)
         {
-            var cfsToRemove = new List<CfInstanceViewModel>();
+            var cfsToRemove = new ObservableCollection<CfInstanceViewModel>();
 
             foreach (CfInstanceViewModel oldCFIVM in CloudFoundryList)
             {
@@ -274,7 +305,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         /// </summary>
         /// <param name="svm"></param>
         /// <param name="currentApps"></param>
-        private static void AddNewApps(SpaceViewModel svm, List<AppViewModel> currentApps)
+        private static void AddNewApps(SpaceViewModel svm, ObservableCollection<AppViewModel> currentApps)
         {
             foreach (AppViewModel newAVM in currentApps)
             {
@@ -296,9 +327,9 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         /// </summary>
         /// <param name="svm"></param>
         /// <param name="currentApps"></param>
-        private static void RemoveNonexistentApps(SpaceViewModel svm, List<AppViewModel> currentApps)
+        private static void RemoveNonexistentApps(SpaceViewModel svm, ObservableCollection<AppViewModel> currentApps)
         {
-            var appsToRemove = new List<AppViewModel>();
+            var appsToRemove = new ObservableCollection<AppViewModel>();
 
             foreach (TreeViewItemViewModel priorChild in svm.Children)
             {
@@ -318,7 +349,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         /// </summary>
         /// <param name="ovm"></param>
         /// <param name="currentSpaces"></param>
-        private static void AddNewSpaces(OrgViewModel ovm, List<SpaceViewModel> currentSpaces)
+        private static void AddNewSpaces(OrgViewModel ovm, ObservableCollection<SpaceViewModel> currentSpaces)
         {
             foreach (SpaceViewModel newSVM in currentSpaces)
             {
@@ -340,9 +371,9 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         /// </summary>
         /// <param name="ovm"></param>
         /// <param name="currentSpaces"></param>
-        private static void RemoveNonexistentSpaces(OrgViewModel ovm, List<SpaceViewModel> currentSpaces)
+        private static void RemoveNonexistentSpaces(OrgViewModel ovm, ObservableCollection<SpaceViewModel> currentSpaces)
         {
-            var spacesToRemove = new List<SpaceViewModel>();
+            var spacesToRemove = new ObservableCollection<SpaceViewModel>();
 
             foreach (TreeViewItemViewModel priorChild in ovm.Children)
             {
@@ -362,7 +393,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         /// </summary>
         /// <param name="cfivm"></param>
         /// <param name="currentOrgs"></param>
-        private static void AddNewOrgs(CfInstanceViewModel cfivm, List<OrgViewModel> currentOrgs)
+        private static void AddNewOrgs(CfInstanceViewModel cfivm, ObservableCollection<OrgViewModel> currentOrgs)
         {
             foreach (OrgViewModel newOVM in currentOrgs)
             {
@@ -384,9 +415,9 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         /// </summary>
         /// <param name="cfivm"></param>
         /// <param name="currentOrgs"></param>
-        private static void RemoveNonexistentOrgs(CfInstanceViewModel cfivm, List<OrgViewModel> currentOrgs)
+        private static void RemoveNonexistentOrgs(CfInstanceViewModel cfivm, ObservableCollection<OrgViewModel> currentOrgs)
         {
-            var orgsToRemove = new List<OrgViewModel>();
+            var orgsToRemove = new ObservableCollection<OrgViewModel>();
 
             foreach (TreeViewItemViewModel priorChild in cfivm.Children)
             {
@@ -403,8 +434,8 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
         private void UpdateCloudFoundryInstances()
         {
-            var loggedInCfs = new List<CloudFoundryInstance>(CloudFoundryService.CloudFoundryInstances.Values);
-            var updatedCfInstanceViewModelList = new List<CfInstanceViewModel>();
+            var loggedInCfs = new ObservableCollection<CloudFoundryInstance>(CloudFoundryService.CloudFoundryInstances.Values);
+            var updatedCfInstanceViewModelList = new ObservableCollection<CfInstanceViewModel>();
             foreach (CloudFoundryInstance cf in loggedInCfs)
             {
                 updatedCfInstanceViewModelList.Add(new CfInstanceViewModel(cf, _services));

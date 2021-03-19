@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.VisualStudio.Models;
@@ -68,9 +67,9 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
         }
 
-        public async Task<List<AppViewModel>> FetchChildren()
+        public async Task<ObservableCollection<AppViewModel>> FetchChildren()
         {
-            var newAppsList = new List<AppViewModel>();
+            var newAppsList = new ObservableCollection<AppViewModel>();
 
             var appsResult = await CloudFoundryService.GetAppsForSpaceAsync(Space);
 

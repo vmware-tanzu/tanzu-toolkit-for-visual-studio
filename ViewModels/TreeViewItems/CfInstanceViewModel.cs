@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.VisualStudio.Models;
@@ -70,15 +69,15 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         }
 
 
-        public async Task<List<OrgViewModel>> FetchChildren()
+        public async Task<ObservableCollection<OrgViewModel>> FetchChildren()
         {
-            var newOrgsList = new List<OrgViewModel>();
+            var newOrgsList = new ObservableCollection<OrgViewModel>();
 
             var orgsResponse = await CloudFoundryService.GetOrgsForCfInstanceAsync(CloudFoundryInstance);
 
             if (orgsResponse.Succeeded)
             {
-                List<CloudFoundryOrganization> orgs = orgsResponse.Content;
+                var orgs = new ObservableCollection<CloudFoundryOrganization>(orgsResponse.Content);
 
                 foreach (CloudFoundryOrganization org in orgs)
                 {
