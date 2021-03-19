@@ -187,7 +187,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
             foreach (CfInstanceViewModel cfivm in CloudFoundryList)
             {
-                initalIds.Add(cfivm.CloudFoundryInstance.ApiAddress);
+                initalIds.Add(cfivm.CloudFoundryInstance.InstanceId);
 
                 foreach (TreeViewItemViewModel cfChild in cfivm.Children)
                 {
@@ -212,7 +212,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
             foreach (CfInstanceViewModel cfivm in CloudFoundryList)
             {
-                bool cfNotNew = initalIds.Contains(cfivm.CloudFoundryInstance.ApiAddress);
+                bool cfNotNew = initalIds.Contains(cfivm.CloudFoundryInstance.InstanceId);
 
                 if (cfNotNew)
                 {
