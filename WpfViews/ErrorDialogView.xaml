@@ -5,9 +5,20 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Tanzu.Toolkit.VisualStudio.WpfViews"
         mc:Ignorable="d"
-        Title="{Binding Title}"
-        Height="450" Width="800">
+        Title="{Binding Title}" 
+        Icon="Resources/redx1.png"
+        Height="286.957" Width="372.173">
+
+
     <Grid>
-        <TextBlock Text="{Binding Message}"/>
+        <ScrollViewer x:Name="ErrorDialogScrollViewer" Background="White" VerticalScrollBarVisibility="Auto">
+            <TextBox
+                BorderBrush="Black"
+                TextWrapping="Wrap"
+                Text="{Binding Message}"
+                Margin="4"
+                IsReadOnly="True"
+                />
+        </ScrollViewer>
     </Grid>
 </Window>
