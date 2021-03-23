@@ -1,8 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using System;
 using System.ComponentModel;
 using Tanzu.Toolkit.VisualStudio.Services.CloudFoundry;
 using Tanzu.Toolkit.VisualStudio.Services.Dialog;
+using Tanzu.Toolkit.VisualStudio.Services.Logging;
 using Tanzu.Toolkit.VisualStudio.Services.ViewLocator;
 
 namespace Tanzu.Toolkit.VisualStudio.ViewModels
@@ -19,6 +21,8 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
             CloudFoundryService = services.GetRequiredService<ICloudFoundryService>();
             DialogService = services.GetRequiredService<IDialogService>();
             ViewLocatorService = services.GetRequiredService<IViewLocatorService>();
+            var logSvc = services.GetRequiredService<ILoggingService>();
+            Logger = logSvc.Logger;
         }
 
         public IServiceProvider Services { get; }
@@ -28,6 +32,8 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         public IViewLocatorService ViewLocatorService { get; }
 
         public IDialogService DialogService { get; }
+
+        public ILogger Logger { get; }
 
         public object ActiveView
         {
