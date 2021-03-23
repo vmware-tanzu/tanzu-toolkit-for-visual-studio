@@ -7,6 +7,7 @@ using Tanzu.Toolkit.VisualStudio.Services;
 using Tanzu.Toolkit.VisualStudio.Services.CloudFoundry;
 using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
 using Tanzu.Toolkit.VisualStudio.Services.Dialog;
+using Tanzu.Toolkit.VisualStudio.Services.Logging;
 using Tanzu.Toolkit.VisualStudio.Services.ViewLocator;
 
 namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
@@ -18,6 +19,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         protected Mock<ICloudFoundryService> mockCloudFoundryService;
         protected Mock<IDialogService> mockDialogService;
         protected Mock<IViewLocatorService> mockViewLocatorService;
+        protected Mock<ILoggingService> mockLoggingService;
 
         protected const string fakeCfName = "fake cf name";
         protected const string fakeCfApiAddress = "http://fake.api.address";
@@ -48,10 +50,12 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             mockCloudFoundryService = new Mock<ICloudFoundryService>();
             mockDialogService = new Mock<IDialogService>();
             mockViewLocatorService = new Mock<IViewLocatorService>();
+            mockLoggingService = new Mock<ILoggingService>();
 
             services.AddSingleton(mockCloudFoundryService.Object);
             services.AddSingleton(mockDialogService.Object);
             services.AddSingleton(mockViewLocatorService.Object);
+            services.AddSingleton(mockLoggingService.Object);
 
             this.services = services.BuildServiceProvider();
         }

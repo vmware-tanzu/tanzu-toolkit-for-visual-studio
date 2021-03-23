@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Shell;
 using System;
-using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Tanzu.Toolkit.VisualStudio.Commands;
@@ -10,6 +9,7 @@ using Tanzu.Toolkit.VisualStudio.Services.CloudFoundry;
 using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
 using Tanzu.Toolkit.VisualStudio.Services.Dialog;
 using Tanzu.Toolkit.VisualStudio.Services.FileLocator;
+using Tanzu.Toolkit.VisualStudio.Services.Logging;
 using Tanzu.Toolkit.VisualStudio.Services.ViewLocator;
 using Tanzu.Toolkit.VisualStudio.ViewModels;
 using Tanzu.Toolkit.VisualStudio.WpfViews;
@@ -107,9 +107,9 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<IDialogService, WpfDialogService>();
             services.AddSingleton<ICfCliService, CfCliService>();
             services.AddSingleton<IFileLocatorService, FileLocatorService>();
+            services.AddSingleton<ILoggingService, LoggingService>();
 
             services.AddTransient<ICmdProcessService, CmdProcessService>();
-
 
             /* Tool Windows */
             services.AddTransient<TanzuCloudExplorerToolWindow>();
