@@ -109,6 +109,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
                 var stopResult = await CloudFoundryService.StopAppAsync(cfApp);
                 if (!stopResult.Succeeded)
                 {
+                    Logger.Error(_stopAppErrorMsg + " {AppName}. {StopResult}", cfApp.AppName, stopResult);
                     DialogService.DisplayErrorDialog($"{_stopAppErrorMsg} {cfApp.AppName}.", stopResult.Explanation);
                 }
             }
@@ -121,6 +122,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
                 var startResult = await CloudFoundryService.StartAppAsync(cfApp);
                 if (!startResult.Succeeded)
                 {
+                    Logger.Error(_startAppErrorMsg + " {AppName}. {StartResult}", cfApp.AppName, startResult);
                     DialogService.DisplayErrorDialog($"{_startAppErrorMsg} {cfApp.AppName}.", startResult.Explanation);
                 }
             }
@@ -133,6 +135,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
                 var deleteResult = await CloudFoundryService.DeleteAppAsync(cfApp);
                 if (!deleteResult.Succeeded)
                 {
+                    Logger.Error(_deleteAppErrorMsg + " {AppName}. {DeleteResult}", cfApp.AppName, deleteResult);
                     DialogService.DisplayErrorDialog($"{_deleteAppErrorMsg} {cfApp.AppName}.", deleteResult.Explanation);
                 }
             }

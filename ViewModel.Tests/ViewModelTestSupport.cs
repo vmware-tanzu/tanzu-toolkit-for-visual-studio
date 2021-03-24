@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using Tanzu.Toolkit.VisualStudio.Models;
@@ -20,6 +21,8 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         protected Mock<IDialogService> mockDialogService;
         protected Mock<IViewLocatorService> mockViewLocatorService;
         protected Mock<ILoggingService> mockLoggingService;
+
+        protected Mock<ILogger> mockLogger;
 
         protected const string fakeCfName = "fake cf name";
         protected const string fakeCfApiAddress = "http://fake.api.address";
@@ -51,6 +54,9 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             mockDialogService = new Mock<IDialogService>();
             mockViewLocatorService = new Mock<IViewLocatorService>();
             mockLoggingService = new Mock<ILoggingService>();
+
+            mockLogger = new Mock<ILogger>();
+            mockLoggingService.SetupGet(m => m.Logger).Returns(mockLogger.Object);
 
             services.AddSingleton(mockCloudFoundryService.Object);
             services.AddSingleton(mockDialogService.Object);

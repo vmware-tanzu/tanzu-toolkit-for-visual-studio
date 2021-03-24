@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -150,6 +151,26 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
               DisplayErrorDialog(expectedErrorTitle, expectedErrorMsg),
                 Times.Once);
         }
+        
+        [TestMethod]
+        public async Task StopCfApp_LogsError_WhenStopAppAsyncFails()
+        {
+            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
+
+            mockCloudFoundryService.Setup(mock => mock.
+                StopAppAsync(fakeApp, true))
+                    .ReturnsAsync(fakeFailureDetailedResult);
+
+            await vm.StopCfApp(fakeApp);
+
+            var logPropVal1 = "{AppName}";
+            var logPropVal2 = "{StopResult}";
+            var expectedLogMsg = $"{CloudExplorerViewModel._stopAppErrorMsg} {logPropVal1}. {logPropVal2}";
+
+            mockLogger.Verify(m => m.
+                Error(expectedLogMsg, fakeApp.AppName, fakeFailureDetailedResult),
+                    Times.Once);
+        }
 
         [TestMethod]
         public async Task StartCfApp_CallsStartAppAsync()
@@ -192,6 +213,26 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         }
 
         [TestMethod]
+        public async Task StartCfApp_LogsError_WhenStartAppAsyncFails()
+        {
+            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
+
+            mockCloudFoundryService.Setup(mock => mock.
+                StartAppAsync(fakeApp, true))
+                    .ReturnsAsync(fakeFailureDetailedResult);
+
+            await vm.StartCfApp(fakeApp);
+
+            var logPropVal1 = "{AppName}";
+            var logPropVal2 = "{StartResult}";
+            var expectedLogMsg = $"{CloudExplorerViewModel._startAppErrorMsg} {logPropVal1}. {logPropVal2}";
+
+            mockLogger.Verify(m => m.
+                Error(expectedLogMsg, fakeApp.AppName, fakeFailureDetailedResult),
+                    Times.Once);
+        }
+
+        [TestMethod]
         public async Task DeleteCfApp_CallsDeleteAppAsync()
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
@@ -230,6 +271,26 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
               DisplayErrorDialog(expectedErrorTitle, expectedErrorMsg),
                 Times.Once);
 
+        }
+
+        [TestMethod]
+        public async Task DeleteCfApp_LogsError_WhenDeleteAppAsyncFails()
+        {
+            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
+
+            mockCloudFoundryService.Setup(mock => mock.
+                DeleteAppAsync(fakeApp, true, true))
+                    .ReturnsAsync(fakeFailureDetailedResult);
+
+            await vm.DeleteCfApp(fakeApp);
+
+            var logPropVal1 = "{AppName}";
+            var logPropVal2 = "{DeleteResult}";
+            var expectedLogMsg = $"{CloudExplorerViewModel._deleteAppErrorMsg} {logPropVal1}. {logPropVal2}";
+
+            mockLogger.Verify(m => m.
+                Error(expectedLogMsg, fakeApp.AppName, fakeFailureDetailedResult),
+                    Times.Once);
         }
 
         [TestMethod]
