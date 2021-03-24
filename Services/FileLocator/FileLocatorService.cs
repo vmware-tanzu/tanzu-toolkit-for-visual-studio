@@ -11,8 +11,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.FileLocator
         {
             get
             {
-                var pathToVsixAssemblies = Path.GetDirectoryName(GetType().Assembly.Location);
-                var pathToCfExe = Path.Combine(pathToVsixAssemblies, _defaultCfCliDir, _defaultCfExeName);
+                var pathToCfExe = Path.Combine(VsixPackageBaseDir, _defaultCfCliDir, _defaultCfExeName);
 
                 if (File.Exists(pathToCfExe)) return pathToCfExe;
                 return null;
@@ -22,6 +21,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services.FileLocator
         public bool DirContainsFiles(string dirPath)
         {
             return Directory.Exists(dirPath) && Directory.GetFiles(dirPath).Length > 0;
+        }
+
+        public string VsixPackageBaseDir
+        {
+            get
+            {
+                return Path.GetDirectoryName(GetType().Assembly.Location);
+            }
         }
     }
 }
