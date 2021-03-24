@@ -1,4 +1,5 @@
-﻿using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
+﻿using System.Text.Json;
+using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
 
 namespace Tanzu.Toolkit.VisualStudio.Services
 {
@@ -14,6 +15,11 @@ namespace Tanzu.Toolkit.VisualStudio.Services
         public bool Succeeded { get; set; }
         public string Explanation { get; set; }
         public CmdResult CmdDetails { get; }
+
+        public override string ToString()
+        {
+            return JsonSerializer.Serialize(this);
+        }
     }
 
     public class DetailedResult<T> : DetailedResult

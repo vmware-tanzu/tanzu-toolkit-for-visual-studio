@@ -109,7 +109,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
                 var stopResult = await CloudFoundryService.StopAppAsync(cfApp);
                 if (!stopResult.Succeeded)
                 {
-                    Logger.Error(_stopAppErrorMsg + " {AppName}. {StopResult}", cfApp.AppName, stopResult);
+                    Logger.Error(_stopAppErrorMsg + " {AppName}. {StopResult}", cfApp.AppName, stopResult.ToString());
                     DialogService.DisplayErrorDialog($"{_stopAppErrorMsg} {cfApp.AppName}.", stopResult.Explanation);
                 }
             }
@@ -122,7 +122,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
                 var startResult = await CloudFoundryService.StartAppAsync(cfApp);
                 if (!startResult.Succeeded)
                 {
-                    Logger.Error(_startAppErrorMsg + " {AppName}. {StartResult}", cfApp.AppName, startResult);
+                    Logger.Error(_startAppErrorMsg + " {AppName}. {StartResult}", cfApp.AppName, startResult.ToString());
                     DialogService.DisplayErrorDialog($"{_startAppErrorMsg} {cfApp.AppName}.", startResult.Explanation);
                 }
             }
@@ -135,7 +135,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
                 var deleteResult = await CloudFoundryService.DeleteAppAsync(cfApp);
                 if (!deleteResult.Succeeded)
                 {
-                    Logger.Error(_deleteAppErrorMsg + " {AppName}. {DeleteResult}", cfApp.AppName, deleteResult);
+                    Logger.Error(_deleteAppErrorMsg + " {AppName}. {DeleteResult}", cfApp.AppName, deleteResult.ToString());
                     DialogService.DisplayErrorDialog($"{_deleteAppErrorMsg} {cfApp.AppName}.", deleteResult.Explanation);
                 }
             }

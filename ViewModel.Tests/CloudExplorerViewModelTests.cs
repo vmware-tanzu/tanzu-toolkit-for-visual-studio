@@ -168,7 +168,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             var expectedLogMsg = $"{CloudExplorerViewModel._stopAppErrorMsg} {logPropVal1}. {logPropVal2}";
 
             mockLogger.Verify(m => m.
-                Error(expectedLogMsg, fakeApp.AppName, fakeFailureDetailedResult),
+                Error(expectedLogMsg, fakeApp.AppName, fakeFailureDetailedResult.ToString()),
                     Times.Once);
         }
 
@@ -228,7 +228,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             var expectedLogMsg = $"{CloudExplorerViewModel._startAppErrorMsg} {logPropVal1}. {logPropVal2}";
 
             mockLogger.Verify(m => m.
-                Error(expectedLogMsg, fakeApp.AppName, fakeFailureDetailedResult),
+                Error(expectedLogMsg, fakeApp.AppName, fakeFailureDetailedResult.ToString()),
                     Times.Once);
         }
 
@@ -289,7 +289,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             var expectedLogMsg = $"{CloudExplorerViewModel._deleteAppErrorMsg} {logPropVal1}. {logPropVal2}";
 
             mockLogger.Verify(m => m.
-                Error(expectedLogMsg, fakeApp.AppName, fakeFailureDetailedResult),
+                Error(expectedLogMsg, fakeApp.AppName, fakeFailureDetailedResult.ToString()),
                     Times.Once);
         }
 
