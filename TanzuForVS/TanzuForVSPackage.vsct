@@ -40,8 +40,8 @@
       <Group guid="guidTanzuForVSPackageCmdSet" id="ViewMenuGroup" priority="0x0800">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_VIEW" />
       </Group>
-      <Group guid="guidTanzuForVSPackageCmdSet1" id="MyMenuGroup" priority="0x0600">
-        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS" />
+      <Group guid="guidTanzuForVSPackageCmdSet" id="ExtensionsMenuGroup" priority="0x0600">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_EXTENSIONS" />
       </Group>
     </Groups>
     
@@ -79,8 +79,9 @@
           <ButtonText>Tanzu Output Window</ButtonText>
         </Strings>
       </Button>
-      <Button guid="guidTanzuForVSPackageCmdSet1" id="cmdidOpenLogsCommand" priority="0x0100" type="Button">
-        <Parent guid="guidTanzuForVSPackageCmdSet1" id="MyMenuGroup" />
+      
+      <Button guid="guidTanzuForVSPackageCmdSet" id="OpenLogsCommandId" priority="0x0100" type="Button">
+        <Parent guid="guidTanzuForVSPackageCmdSet" id="ExtensionsMenuGroup" />
         <Icon guid="ImageCatalogGuid" id="Log" />
         <CommandFlag>IconIsMoniker</CommandFlag>
         <Strings>
@@ -108,11 +109,19 @@
 
 		<!-- This is the guid used to group the menu commands together -->
 		<GuidSymbol name="guidTanzuForVSPackageCmdSet" value="{f91c88fb-6e17-42a6-878d-f4d16ead7625}">
+      
 			<IDSymbol name="CloudExplorerCommandId" value="256" />
 			<IDSymbol name="PushToCloudFoundryCommandId" value="257" />
       <IDSymbol name="OutputWindowCommandId" value="258" />
+      <IDSymbol name="OpenLogsCommandId" value="259"/>
+
       <IDSymbol name="ProjContextMenuGroup" value="1001" />
       <IDSymbol name="ViewMenuGroup" value="1002" />
+      <IDSymbol name="ExtensionsMenuGroup" value="4128"/>
+    </GuidSymbol>
+
+    <GuidSymbol name="guidSHLMainMenu" value="{d309f791-903f-11d0-9efc-00a0c911004f}">
+      <IDSymbol name="IDM_VS_MENU_EXTENSIONS" value="0x0091" />
     </GuidSymbol>
 
     <!-- Images -->
@@ -125,11 +134,5 @@
     <GuidSymbol name="guidImages2" value="{2251cfc3-e92f-40ce-b730-98cf8bd7042d}">
       <IDSymbol name="bmpPic1" value="1" />
     </GuidSymbol>
-  
-    <GuidSymbol value="{1fd6a73c-62e9-4beb-b4d9-0f0eb62d55d3}" name="guidTanzuForVSPackageCmdSet1">
-      <IDSymbol value="4128" name="MyMenuGroup" />
-      <IDSymbol value="256" name="cmdidOpenLogsCommand" />
-    </GuidSymbol>
-  
   </Symbols>
 </CommandTable>
