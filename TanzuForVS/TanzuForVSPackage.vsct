@@ -43,7 +43,19 @@
       <Group guid="guidTanzuForVSPackageCmdSet" id="ExtensionsMenuGroup" priority="0x0600">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_EXTENSIONS" />
       </Group>
+      <Group guid="guidTanzuForVSPackageCmdSet" id="ToolkitExtSubmenuGroup" priority="0x0600">
+        <Parent guid="guidTanzuForVSPackageCmdSet" id="TanzuToolkitMenu"/>
+      </Group>
     </Groups>
+
+    <Menus>
+      <Menu guid="guidTanzuForVSPackageCmdSet" id="TanzuToolkitMenu" priority="0x700" type="Menu">
+        <Parent guid="guidTanzuForVSPackageCmdSet" id="ExtensionsMenuGroup" />
+        <Strings>
+          <ButtonText>Tanzu Toolkit</ButtonText>
+        </Strings>
+      </Menu>
+    </Menus>
     
 		<!--Buttons section. -->
 		<!--This section defines the elements the user can interact with, like a menu command or a button
@@ -81,11 +93,11 @@
       </Button>
       
       <Button guid="guidTanzuForVSPackageCmdSet" id="OpenLogsCommandId" priority="0x0100" type="Button">
-        <Parent guid="guidTanzuForVSPackageCmdSet" id="ExtensionsMenuGroup" />
+        <Parent guid="guidTanzuForVSPackageCmdSet" id="ToolkitExtSubmenuGroup" />
         <Icon guid="ImageCatalogGuid" id="Log" />
         <CommandFlag>IconIsMoniker</CommandFlag>
         <Strings>
-          <ButtonText>Tanzu Toolkit Diagnostics</ButtonText>
+          <ButtonText>Diagnostic Logs</ButtonText>
         </Strings>
       </Button>
     </Buttons>
@@ -118,6 +130,9 @@
       <IDSymbol name="ProjContextMenuGroup" value="1001" />
       <IDSymbol name="ViewMenuGroup" value="1002" />
       <IDSymbol name="ExtensionsMenuGroup" value="4128"/>
+      
+      <IDSymbol name="TanzuToolkitMenu" value="0x1022"/>
+      <IDSymbol name="ToolkitExtSubmenuGroup" value="0x1023"/>
     </GuidSymbol>
 
     <GuidSymbol name="guidSHLMainMenu" value="{d309f791-903f-11d0-9efc-00a0c911004f}">
