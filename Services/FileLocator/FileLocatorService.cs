@@ -6,6 +6,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.FileLocator
     {
         const string _defaultCfExeName = "cf.exe";
         const string _defaultCfCliDir = "Resources";
+        const string _defaultLogsFileName = "toolkit-diagnostics.log";
+        const string _defaultLogsDir = "Logs";
 
         public string FullPathToCfExe
         {
@@ -28,6 +30,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services.FileLocator
             get
             {
                 return Path.GetDirectoryName(GetType().Assembly.Location);
+            }
+        }
+
+        public string PathToLogsFile
+        {
+            get
+            {
+                return Path.Combine(VsixPackageBaseDir, _defaultLogsDir, _defaultLogsFileName);
             }
         }
     }

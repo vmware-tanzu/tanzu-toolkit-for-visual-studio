@@ -33,10 +33,13 @@
 
     <Groups>
       <Group guid="guidTanzuForVSPackageCmdSet" id="ProjContextMenuGroup" priority="0x0100">
-        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_PROJNODE"/>
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_PROJNODE" />
       </Group>
       <Group guid="guidTanzuForVSPackageCmdSet" id="ViewMenuGroup" priority="0x0800">
-        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_VIEW"/>
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_VIEW" />
+      </Group>
+      <Group guid="guidTanzuForVSPackageCmdSet1" id="MyMenuGroup" priority="0x0600">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS" />
       </Group>
     </Groups>
     
@@ -74,6 +77,13 @@
           <ButtonText>Tanzu Output Window</ButtonText>
         </Strings>
       </Button>
+      <Button guid="guidTanzuForVSPackageCmdSet1" id="cmdidOpenLogsCommand" priority="0x0100" type="Button">
+        <Parent guid="guidTanzuForVSPackageCmdSet1" id="MyMenuGroup" />
+        <Icon guid="guidImages3" id="bmpPic1" />
+        <Strings>
+          <ButtonText>Invoke OpenLogsCommand</ButtonText>
+        </Strings>
+      </Button>
     </Buttons>
 
 		<!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
@@ -86,6 +96,7 @@
 			<Bitmap guid="guidImages" href="Resources\tanzu16.png" usedList="bmpPic1" />
 			<Bitmap guid="guidImages1" href="Resources\DeployApp.png" usedList="bmpPic1" />
       <Bitmap guid="guidImages2" href="Resources\Output.png" usedList="bmpPic1" />
+      <Bitmap guid="guidImages3" href="Commands\Resources\OpenLogsCommand.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough" />
     </Bitmaps>
   </Commands>
 
@@ -96,10 +107,10 @@
 		<!-- This is the guid used to group the menu commands together -->
 		<GuidSymbol name="guidTanzuForVSPackageCmdSet" value="{f91c88fb-6e17-42a6-878d-f4d16ead7625}">
 			<IDSymbol name="CloudExplorerCommandId" value="256" />
-			<IDSymbol name="PushToCloudFoundryCommandId" value="257"/>
-      <IDSymbol name="OutputWindowCommandId" value="258"/>
-      <IDSymbol name="ProjContextMenuGroup" value="1001"/>
-      <IDSymbol name="ViewMenuGroup" value="1002"/>
+			<IDSymbol name="PushToCloudFoundryCommandId" value="257" />
+      <IDSymbol name="OutputWindowCommandId" value="258" />
+      <IDSymbol name="ProjContextMenuGroup" value="1001" />
+      <IDSymbol name="ViewMenuGroup" value="1002" />
     </GuidSymbol>
 
     <!-- Images -->
@@ -111,6 +122,20 @@
 		</GuidSymbol>
     <GuidSymbol name="guidImages2" value="{2251cfc3-e92f-40ce-b730-98cf8bd7042d}">
       <IDSymbol name="bmpPic1" value="1" />
+    </GuidSymbol>
+  
+    <GuidSymbol value="{1fd6a73c-62e9-4beb-b4d9-0f0eb62d55d3}" name="guidTanzuForVSPackageCmdSet1">
+      <IDSymbol value="4128" name="MyMenuGroup" />
+      <IDSymbol value="256" name="cmdidOpenLogsCommand" />
+    </GuidSymbol>
+  
+    <GuidSymbol value="{c9101a29-4096-40db-b33f-83ad4d40273e}" name="guidImages3">
+      <IDSymbol name="bmpPic1" value="1" />
+      <IDSymbol name="bmpPic2" value="2" />
+      <IDSymbol name="bmpPicSearch" value="3" />
+      <IDSymbol name="bmpPicX" value="4" />
+      <IDSymbol name="bmpPicArrows" value="5" />
+      <IDSymbol name="bmpPicStrikethrough" value="6" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>

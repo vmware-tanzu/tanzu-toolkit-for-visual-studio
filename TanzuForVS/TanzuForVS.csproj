@@ -46,6 +46,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Commands\OpenLogsCommand.cs" />
     <Compile Include="Commands\OutputWindowCommand.cs" />
     <Compile Include="Commands\PushToCloudFoundryCommand.cs" />
     <Compile Include="OutputToolWindow.cs" />
@@ -112,6 +113,7 @@
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Commands\Resources\OpenLogsCommand.png" />
     <Content Include="Resources\DeployApp.png" />
     <Content Include="Resources\tanzu16.png" />
     <Content Include="Resources\cf.exe" CopyToOutputDirectory="PreserveNewest">

@@ -4,6 +4,7 @@
     {
         string FullPathToCfExe { get; }
         string VsixPackageBaseDir { get; }
+        string PathToLogsFile { get; }
 
         bool DirContainsFiles(string dirPath);
     }

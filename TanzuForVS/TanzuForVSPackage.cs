@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using EnvDTE;
+using EnvDTE80;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Shell;
 using System;
 using System.Runtime.InteropServices;
@@ -53,8 +55,6 @@ namespace Tanzu.Toolkit.VisualStudio
         {
         }
 
-
-
         #region Package Members
 
         /// <summary>
@@ -69,9 +69,11 @@ namespace Tanzu.Toolkit.VisualStudio
             // When initialized asynchronously, the current thread may be a background thread at this point.
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+
             await TanzuCloudExplorerCommand.InitializeAsync(this);
             await PushToCloudFoundryCommand.InitializeAsync(this, serviceProvider);
-            await Tanzu.Toolkit.VisualStudio.Commands.OutputWindowCommand.InitializeAsync(this);
+            await OutputWindowCommand.InitializeAsync(this);
+            await OpenLogsCommand.InitializeAsync(this, serviceProvider);
         }
 
         protected override object GetService(Type serviceType)
