@@ -19,6 +19,8 @@
 
 	<!--This header contains the command ids for the menus provided by the shell. -->
 	<Extern href="vsshlids.h" />
+  
+  <Include href="KnownImageIds.vsct"/>
 
 	<!--The Commands section is where commands, menus, and menu groups are defined.
       This section uses a Guid to identify the package that provides the command defined inside it. -->
@@ -79,9 +81,10 @@
       </Button>
       <Button guid="guidTanzuForVSPackageCmdSet1" id="cmdidOpenLogsCommand" priority="0x0100" type="Button">
         <Parent guid="guidTanzuForVSPackageCmdSet1" id="MyMenuGroup" />
-        <Icon guid="guidImages3" id="bmpPic1" />
+        <Icon guid="ImageCatalogGuid" id="Log" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
         <Strings>
-          <ButtonText>Invoke OpenLogsCommand</ButtonText>
+          <ButtonText>Tanzu Toolkit Diagnostics</ButtonText>
         </Strings>
       </Button>
     </Buttons>
@@ -96,7 +99,6 @@
 			<Bitmap guid="guidImages" href="Resources\tanzu16.png" usedList="bmpPic1" />
 			<Bitmap guid="guidImages1" href="Resources\DeployApp.png" usedList="bmpPic1" />
       <Bitmap guid="guidImages2" href="Resources\Output.png" usedList="bmpPic1" />
-      <Bitmap guid="guidImages3" href="Commands\Resources\OpenLogsCommand.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough" />
     </Bitmaps>
   </Commands>
 
@@ -129,13 +131,5 @@
       <IDSymbol value="256" name="cmdidOpenLogsCommand" />
     </GuidSymbol>
   
-    <GuidSymbol value="{c9101a29-4096-40db-b33f-83ad4d40273e}" name="guidImages3">
-      <IDSymbol name="bmpPic1" value="1" />
-      <IDSymbol name="bmpPic2" value="2" />
-      <IDSymbol name="bmpPicSearch" value="3" />
-      <IDSymbol name="bmpPicX" value="4" />
-      <IDSymbol name="bmpPicArrows" value="5" />
-      <IDSymbol name="bmpPicStrikethrough" value="6" />
-    </GuidSymbol>
   </Symbols>
 </CommandTable>

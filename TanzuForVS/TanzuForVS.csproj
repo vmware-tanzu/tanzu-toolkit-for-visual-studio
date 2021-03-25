@@ -113,7 +113,6 @@
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Commands\Resources\OpenLogsCommand.png" />
     <Content Include="Resources\DeployApp.png" />
     <Content Include="Resources\tanzu16.png" />
     <Content Include="Resources\cf.exe" CopyToOutputDirectory="PreserveNewest">
