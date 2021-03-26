@@ -10,6 +10,8 @@ using Tanzu.Toolkit.VisualStudio.Services.FileLocator;
 using Task = System.Threading.Tasks.Task;
 using Tanzu.Toolkit.VisualStudio.Services.Dialog;
 using System.Collections.Generic;
+using Serilog;
+using Tanzu.Toolkit.VisualStudio.Services.Logging;
 
 namespace Tanzu.Toolkit.VisualStudio.Commands
 {
@@ -21,6 +23,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         private static DTE2 _dte;
         private static IFileLocatorService _fileLocatorService;
         private static IDialogService _dialogService;
+        private static ILogger _logger;
 
         /// <summary>
         /// Command ID.
@@ -95,14 +98,18 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
 
             OleMenuCommandService commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
             Instance = new OpenLogsCommand(package, commandService);
+
             Dte = await package.GetServiceAsync(typeof(DTE)) as DTE2;
-            Assumes.Present(Dte);
-
             _fileLocatorService = services.GetRequiredService<IFileLocatorService>();
-            Assumes.Present(_fileLocatorService);
-
             _dialogService = services.GetRequiredService<IDialogService>();
+            var logSvc = services.GetRequiredService<ILoggingService>();
+
+            Assumes.Present(Dte);
+            Assumes.Present(_fileLocatorService);
             Assumes.Present(_dialogService);
+            Assumes.Present(logSvc);
+
+            _logger = logSvc.Logger;
         }
 
         /// <summary>
@@ -135,6 +142,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                 }
                 catch (Exception ex)
                 {
+                    _logger.Error($"An error occurred in OpenLogsCommand while trying to generate a tmp log file to display. {ex.Message}");
                     _dialogService.DisplayErrorDialog("Unable to open log file.", ex.Message);
                 }
 
@@ -154,9 +162,9 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                         }
                         catch (Exception ex)
                         {
-                            _dialogService.DisplayErrorDialog(
-                                errorTitle: "File Cleanup Error",
-                                errorMsg: $"Unable to delete of tmp log file '${tmpFilePath}'.\n{ex.Message}");
+                            string errorMsg = $"Unable to delete tmp log file '${tmpFilePath}'.{Environment.NewLine}{ex.Message}";
+
+                            _logger.Error(errorMsg);
                         }
                     }
                 }
