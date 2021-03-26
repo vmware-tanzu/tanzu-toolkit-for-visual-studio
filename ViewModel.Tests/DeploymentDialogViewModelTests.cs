@@ -226,6 +226,43 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         }
 
         [TestMethod]
+        public async Task StartDeploymentTask_LogsError_WhenDeployResultReportsFailure()
+        {
+            _sut.AppName = _fakeAppName;
+            _sut.SelectedCf = _fakeCfInstance;
+            _sut.SelectedOrg = _fakeOrg;
+            _sut.SelectedSpace = _fakeSpace;
+
+            StdOutDelegate expectedStdOutCallback = _sut.outputViewModel.AppendLine;
+            StdErrDelegate expectedStdErrCallback = _sut.outputViewModel.AppendLine;
+
+            mockCloudFoundryService.Setup(mock => mock.
+                DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath,
+                             expectedStdOutCallback,
+                             expectedStdErrCallback))
+                    .ReturnsAsync(fakeFailureDetailedResult);
+
+            var expectedErrorTitle = $"{DeploymentDialogViewModel.deploymentErrorMsg} {_fakeAppName}.";
+            var expectedErrorMsg = $"{fakeFailureDetailedResult.Explanation}";
+
+            mockDialogService.Setup(mock => mock.
+                DisplayErrorDialog(expectedErrorTitle, expectedErrorMsg));
+
+            await _sut.StartDeployment();
+
+            var logPropVal1 = "{AppName}";
+            var logPropVal2 = "{TargetApi}";
+            var logPropVal3 = "{TargetOrg}";
+            var logPropVal4 = "{TargetSpace}";
+            var logPropVal5 = "{DplmtResult}";
+            var expectedLogMsg = $"DeploymentDialogViewModel initiated app deployment of {logPropVal1} to target {logPropVal2}.{logPropVal3}.{logPropVal4}; deployment result reported failure: {logPropVal5}.";
+
+            mockLogger.Verify(m => m.
+                Error(expectedLogMsg, _fakeAppName, _fakeCfInstance.ApiAddress, _fakeOrg.OrgName, _fakeSpace.SpaceName, fakeFailureDetailedResult.ToString()),
+                    Times.Once);
+        }
+        
+        [TestMethod]
         public async Task StartDeploymentTask_DisplaysErrorDialog_WhenDeployResultReportsFailure()
         {
             _sut.AppName = _fakeAppName;
@@ -316,6 +353,34 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             mockDialogService.VerifyAll();
             Assert.AreEqual(initialOrgOptions, _sut.CfOrgOptions);
         }
+        
+        [TestMethod]
+        public async Task UpdateCfOrgOptions_LogsError_WhenOrgsResponseReportsFailure()
+        {
+            var fakeExplanation = "junk";
+
+            var fakeFailedOrgsResponse = new DetailedResult<List<CloudFoundryOrganization>>(
+                content: null,
+                succeeded: false,
+                explanation: fakeExplanation,
+                cmdDetails: fakeFailureCmdResult);
+
+            mockCloudFoundryService.Setup(mock => mock.
+                GetOrgsForCfInstanceAsync(fakeCfInstance, true))
+                    .ReturnsAsync(fakeFailedOrgsResponse);
+
+            mockDialogService.Setup(mock => mock.
+                DisplayErrorDialog(DeploymentDialogViewModel.getOrgsFailureMsg, fakeExplanation));
+
+            _sut.SelectedCf = fakeCfInstance;
+            var initialOrgOptions = _sut.CfOrgOptions;
+
+            await _sut.UpdateCfOrgOptions();
+
+            mockLogger.Verify(m => m.
+                Error($"{DeploymentDialogViewModel.getOrgsFailureMsg}. {fakeFailedOrgsResponse}"),
+                    Times.Once);
+        }
 
 
         [TestMethod]
@@ -370,6 +435,35 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             Assert.IsTrue(_receivedEvents.Contains("CfSpaceOptions"));
         }
 
+        [TestMethod]
+        public async Task UpdateCfSpaceOptions_LogsError_WhenSpacesResponseReportsFailure()
+        {
+            var fakeExplanation = "junk";
+
+            var fakeFailedSpacesResponse = new DetailedResult<List<CloudFoundrySpace>>(
+                content: null,
+                succeeded: false,
+                explanation: fakeExplanation,
+                cmdDetails: fakeFailureCmdResult);
+
+            mockCloudFoundryService.Setup(mock => mock.
+                GetSpacesForOrgAsync(fakeCfOrg, true))
+                    .ReturnsAsync(fakeFailedSpacesResponse);
+
+            mockDialogService.Setup(mock => mock.
+                DisplayErrorDialog(DeploymentDialogViewModel.getSpacesFailureMsg, fakeExplanation));
+
+            _sut.SelectedCf = fakeCfInstance;
+            _sut.SelectedOrg = fakeCfOrg;
+            var initialSpaceOptions = _sut.CfSpaceOptions;
+
+            await _sut.UpdateCfSpaceOptions();
+
+            mockLogger.Verify(m => m.
+                Error($"{DeploymentDialogViewModel.getSpacesFailureMsg}. {fakeFailedSpacesResponse}"),
+                    Times.Once);
+        }
+        
         [TestMethod]
         public async Task UpdateCfSpaceOptions_DisplaysErrorDialog_WhenSpacesResponseReportsFailure()
         {

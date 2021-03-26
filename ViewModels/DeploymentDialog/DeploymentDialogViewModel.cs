@@ -206,6 +206,14 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
                 var errorTitle = $"{deploymentErrorMsg} {AppName}.";
                 var errorMsg = deploymentResult.Explanation;
 
+                Logger.Error(
+                    "DeploymentDialogViewModel initiated app deployment of {AppName} to target {TargetApi}.{TargetOrg}.{TargetSpace}; deployment result reported failure: {DplmtResult}.",
+                    AppName,
+                    SelectedSpace.ParentOrg.ParentCf.ApiAddress,
+                    SelectedSpace.ParentOrg.OrgName,
+                    SelectedSpace.SpaceName,
+                    deploymentResult.ToString()
+                );
                 DialogService.DisplayErrorDialog(errorTitle, errorMsg);
             }
 
@@ -242,6 +250,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
                 }
                 else
                 {
+                    Logger.Error($"{getOrgsFailureMsg}. {orgsResponse}");
                     DialogService.DisplayErrorDialog(getOrgsFailureMsg, orgsResponse.Explanation);
                 }
             }
@@ -261,6 +270,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
                 }
                 else
                 {
+                    Logger.Error($"{getSpacesFailureMsg}. {spacesResponse}");
                     DialogService.DisplayErrorDialog(getSpacesFailureMsg, spacesResponse.Explanation);
                 }
             }
