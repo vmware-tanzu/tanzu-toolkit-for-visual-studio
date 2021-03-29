@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,7 @@ using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Orgs;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Spaces;
 using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
 using Tanzu.Toolkit.VisualStudio.Services.FileLocator;
+using Tanzu.Toolkit.VisualStudio.Services.Logging;
 using static Tanzu.Toolkit.VisualStudio.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
@@ -19,6 +21,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
     {
         private IServiceProvider _services { get; set; }
         private readonly IFileLocatorService _fileLocatorService;
+        private readonly ILogger _logger;
 
         /* ERROR MESSAGE CONSTANTS */
         internal readonly string _cfExePathErrorMsg = $"Unable to locate cf.exe.";
@@ -47,6 +50,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         {
             _services = services;
             _fileLocatorService = services.GetRequiredService<IFileLocatorService>();
+            var logSvc = services.GetRequiredService<ILoggingService>();
+            _logger = logSvc.Logger;
         }
 
 
@@ -54,7 +59,11 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         {
             DetailedResult result = ExecuteCfCliCommand(V6_GetOAuthTokenCmd);
 
-            if (result.CmdDetails.ExitCode != 0) return null;
+            if (result.CmdDetails.ExitCode != 0)
+            {
+                _logger.Error($"GetOAuthToken failed: {result}");
+                return null;
+            }
 
             return FormatToken(result.CmdDetails.StdOut);
         }
@@ -62,7 +71,11 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         public DetailedResult TargetApi(string apiAddress, bool skipSsl)
         {
             string args = $"{V6_TargetApiCmd} {apiAddress}{(skipSsl ? " --skip-ssl-validation" : string.Empty)}";
-            return ExecuteCfCliCommand(args);
+            var result = ExecuteCfCliCommand(args);
+            
+            if (!result.Succeeded) _logger.Error($"TargetApi({apiAddress}, {skipSsl}) failed: {result}");
+
+            return result;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0059:Unnecessary assignment of a value", Justification = "Null assigment is meant to clear plain text password from memory")]
@@ -78,19 +91,29 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             password.Clear();
             password.Dispose();
 
+            if (!result.Succeeded) _logger.Error($"AuthenticateAsync({username}, ***) failed: {result}");
+
             return result;
         }
 
         public DetailedResult TargetOrg(string orgName)
         {
             string args = $"{V6_TargetOrgCmd} {orgName}";
-            return ExecuteCfCliCommand(args);
+            var result = ExecuteCfCliCommand(args);
+
+            if (!result.Succeeded) _logger.Error($"TargetOrg({orgName}) failed: {result}");
+
+            return result;
         }
 
         public DetailedResult TargetSpace(string spaceName)
         {
             string args = $"{V6_TargetSpaceCmd} {spaceName}";
-            return ExecuteCfCliCommand(args);
+            var result = ExecuteCfCliCommand(args);
+
+            if (!result.Succeeded) _logger.Error($"TargetSpace({spaceName}) failed: {result}");
+
+            return result;
         }
 
         public async Task<DetailedResult<List<Org>>> GetOrgsAsync()
@@ -104,6 +127,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
                 if (!cmdResult.Succeeded)
                 {
+                    _logger.Error($"GetOrgsAsync() failed during InvokeCfCliAsync: {cmdResult}");
+
                     return new DetailedResult<List<Org>>(
                         content: null,
                         succeeded: false,
@@ -128,6 +153,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
                 /* check for unsuccessful json parsing */
                 if (orgResponsePages == null)
                 {
+                    _logger.Error($"GetOrgsAsync() failed during response parsing. Used this delimeter: '{V6_GetOrgsRequestPath}' to parse through: {cmdResult.CmdDetails.StdOut}");
+
                     return new DetailedResult<List<Org>>(
                         content: null,
                         succeeded: false,
@@ -148,6 +175,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             }
             catch (Exception e)
             {
+                _logger.Error($"GetOrgsAsync() failed due to an unpredicted exception: {e}.");
+
                 return new DetailedResult<List<Org>>(null, false, e.Message, cmdResult?.CmdDetails);
             }
         }
@@ -163,6 +192,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
                 if (!cmdResult.Succeeded)
                 {
+                    _logger.Error($"GetSpacesAsync() failed during InvokeCfCliAsync: {cmdResult}");
+
                     return new DetailedResult<List<Space>>(
                         content: null,
                         succeeded: false,
@@ -187,6 +218,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
                 /* check for unsuccessful json parsing */
                 if (spaceResponsePages == null)
                 {
+                    _logger.Error($"GetSpacesAsync() failed during response parsing. Used this delimeter: '{V6_GetSpacesRequestPath}' to parse through: {cmdResult.CmdDetails.StdOut}");
+
                     return new DetailedResult<List<Space>>(
                         content: null,
                         succeeded: false,
@@ -207,6 +240,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             }
             catch (Exception e)
             {
+                _logger.Error($"GetSpacesAsync() failed due to an unpredicted exception: {e}.");
+
                 return new DetailedResult<List<Space>>(null, false, e.Message, cmdResult?.CmdDetails);
             }
         }
@@ -222,6 +257,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
                 if (!cmdResult.Succeeded)
                 {
+                    _logger.Error($"GetAppsAsync() failed during InvokeCfCliAsync: {cmdResult}");
+
                     return new DetailedResult<List<App>>(
                         content: null,
                         succeeded: false,
@@ -246,6 +283,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
                 /* check for unsuccessful json parsing */
                 if (appsResponses == null)
                 {
+                    _logger.Error($"GetAppsAsync() failed during response parsing. Used this delimeter: '{V6_GetAppsRequestPath}' to parse through: {cmdResult.CmdDetails.StdOut}");
+
                     return new DetailedResult<List<App>>(
                         content: null,
                         succeeded: false,
@@ -266,6 +305,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             }
             catch (Exception e)
             {
+                _logger.Error($"GetAppsAsync() failed due to an unpredicted exception: {e}.");
+
                 return new DetailedResult<List<App>>(null, false, e.Message, cmdResult?.CmdDetails);
             }
 
@@ -276,6 +317,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             string args = $"{V6_StopAppCmd} {appName}";
             DetailedResult result = await InvokeCfCliAsync(args);
 
+            if (!result.Succeeded) _logger.Error($"StopAppByNameAsync({appName}) failed during InvokeCfCliAsync: {result}");
+
             return result;
         }
 
@@ -284,6 +327,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             string args = $"{V6_StartAppCmd} {appName}";
             DetailedResult result = await InvokeCfCliAsync(args);
 
+            if (!result.Succeeded) _logger.Error($"StartAppByNameAsync({appName}) failed during InvokeCfCliAsync: {result}");
+
             return result;
         }
 
@@ -291,6 +336,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         {
             string args = $"{V6_DeleteAppCmd} {appName}{(removeMappedRoutes ? " -r" : string.Empty)}";
             DetailedResult result = await InvokeCfCliAsync(args);
+
+            if (!result.Succeeded) _logger.Error($"DeleteAppByNameAsync({appName}, {removeMappedRoutes}) failed during InvokeCfCliAsync: {result}");
 
             return result;
         }
@@ -369,6 +416,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
                 if (!content.Contains("REQUEST") || !content.Contains("RESPONSE") || !content.Contains(requestFilter))
                 {
+                    _logger.Error($"Api response parsing failed; content either does not contain 'REQUEST', 'RESPONSE' or '{requestFilter}'. Content: {content}");
                     return null;
                 }
 
@@ -407,6 +455,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
                         }
                         else
                         {
+                            _logger.Error($"Api response parsing failed; content either does not contain '{{', or '}}'. Content: {content}");
+
                             return null;
                         }
                     }
@@ -414,8 +464,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
                 return jsonResponses;
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.Error($"Api response parsing failed due to an unpredicted exception: {ex}.");
+
                 return null;
             }
         }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Security;
@@ -11,6 +12,7 @@ using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Spaces;
 using Tanzu.Toolkit.VisualStudio.Services.CloudFoundry;
 using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
 using Tanzu.Toolkit.VisualStudio.Services.FileLocator;
+using Tanzu.Toolkit.VisualStudio.Services.Logging;
 
 namespace Tanzu.Toolkit.VisualStudio.Services.Tests
 {
@@ -20,6 +22,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests
         protected Mock<ICfCliService> mockCfCliService;
         protected Mock<ICmdProcessService> mockCmdProcessService;
         protected Mock<IFileLocatorService> mockFileLocatorService;
+        protected Mock<ILoggingService> mockLoggingService;
+        protected Mock<ILogger> mockLogger;
 
         internal static ICloudFoundryService cfService;
         internal static CloudFoundryInstance fakeCfInstance;
@@ -145,10 +149,15 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests
             mockCfCliService = new Mock<ICfCliService>();
             mockCmdProcessService = new Mock<ICmdProcessService>();
             mockFileLocatorService = new Mock<IFileLocatorService>();
+            mockLoggingService = new Mock<ILoggingService>();
+
+            mockLogger = new Mock<ILogger>();
+            mockLoggingService.SetupGet(m => m.Logger).Returns(mockLogger.Object);
 
             services.AddSingleton(mockCfCliService.Object);
             services.AddSingleton(mockCmdProcessService.Object);
             services.AddSingleton(mockFileLocatorService.Object);
+            services.AddSingleton(mockLoggingService.Object);
 
             this.services = services.BuildServiceProvider();
         }
