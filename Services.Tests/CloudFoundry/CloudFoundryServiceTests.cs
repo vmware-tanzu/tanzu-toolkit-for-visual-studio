@@ -92,10 +92,13 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
 
         [TestMethod]
         [TestCategory("ConnectToCfAsync")]
-        public async Task ConnectToCFAsync_ReturnsConnectResult_WhenLoginFails_BecuaseTargetResultCmdDetailsAreNull()
+        public async Task ConnectToCFAsync_ReturnsConnectResult_WhenLoginFails_DueToMissingCmdResult()
         {
-            mockCfCliService.Setup(mock => mock.TargetApi(fakeValidTarget, true))
-                .Returns(new DetailedResult(true, null, null));
+            DetailedResult cfExeMissingResult = new DetailedResult(true, "we couldn't find cf.exe", null);
+
+            mockCfCliService.Setup(mock => mock.
+                TargetApi(fakeValidTarget, true))
+                    .Returns(cfExeMissingResult);
 
             ConnectResult result = await cfService.ConnectToCFAsync(fakeValidTarget, fakeValidUsername, fakeValidPassword, fakeHttpProxy, skipSsl);
 
