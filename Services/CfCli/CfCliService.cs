@@ -35,7 +35,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         public static string V6_AuthenticateCmd = "auth";
         public static string V6_TargetOrgCmd = "target -o";
         public static string V6_TargetSpaceCmd = "target -s";
-        public static string V6_GetOrgsCmd = "orgs";
+        public static string V6_GetOrgsCmd = "curl /v2/organizations -v"; // -v prints api request details to stdout
         public static string V6_GetSpacesCmd = "spaces";
         public static string V6_GetAppsCmd = "apps";
         public static string V6_StopAppCmd = "stop";
@@ -122,8 +122,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
             try
             {
-                string args = $"{V6_GetOrgsCmd} -v"; // -v prints api request details to stdout
-                cmdResult = await InvokeCfCliAsync(args);
+                cmdResult = await InvokeCfCliAsync(V6_GetOrgsCmd);
 
                 if (!cmdResult.Succeeded)
                 {
