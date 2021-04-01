@@ -12,6 +12,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         internal const string _fakeCurledSpaceGuid1 = "69cc0abb-296e-4c47-9701-9368a1570f38";
         internal const string _fakeAppName1 = "sample-app";
         internal const string _fakeAppGuid1 = "75b5b69b-2b58-46b0-b01c-3aa1b6b891e8";
+        internal const string _fakeCurledAppName1 = "test-app-1-1-1";
+        internal const string _fakeCurledAppGuid1 = "9a3508f9-dd3e-4b0e-abcd-72b9434ea02d";
 
         internal static readonly string _fakeMultiPageOrgsOutput = File.ReadAllText("CfCli/FakeMultiPageOrgsOutput.txt");
         internal static readonly string _fakeNoOrgsOutput = File.ReadAllText("CfCli/FakeNoOrgsOutput.txt");
@@ -20,6 +22,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         internal static readonly string _fakeManyAppsOutput = File.ReadAllText("CfCli/FakeManyAppsOutput.txt");
         internal static readonly string _fakeNoAppsOutput = File.ReadAllText("CfCli/FakeNoAppsOutput.txt");
         internal static readonly string _fakeCurlSpacesOutput = File.ReadAllText("CfCli/FakeCurlSpacesOutput.txt");
+        internal static readonly string _fakeCurlAppsOutput = File.ReadAllText("CfCli/FakeCurlAppsOutput.txt");
 
         internal static readonly int numOrgsInFakeResponse = 54;
         internal static readonly int numSpacesInFakeResponse = 54;

@@ -131,23 +131,23 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests
             {
                 new App
                 {
-                    name = app1Name,
-                    guid = app1Guid
+                    entity = new Services.CfCli.Models.Apps.Entity{ name = app1Name },
+                    metadata = new Services.CfCli.Models.Apps.Metadata{ guid = app1Guid }
                 },
                 new App
                 {
-                    name = app2Name,
-                    guid = app2Guid
+                    entity = new Services.CfCli.Models.Apps.Entity{ name = app2Name },
+                    metadata = new Services.CfCli.Models.Apps.Metadata{ guid = app2Guid }
                 },
                 new App
                 {
-                    name = app3Name,
-                    guid = app3Guid
+                    entity = new Services.CfCli.Models.Apps.Entity{ name = app3Name },
+                    metadata = new Services.CfCli.Models.Apps.Metadata{ guid = app3Guid }
                 },
                 new App
                 {
-                    name = app4Name,
-                    guid = app4Guid
+                    entity = new Services.CfCli.Models.Apps.Entity{ name = app4Name },
+                    metadata = new Services.CfCli.Models.Apps.Metadata{ guid = app4Guid }
                 }
             };
 

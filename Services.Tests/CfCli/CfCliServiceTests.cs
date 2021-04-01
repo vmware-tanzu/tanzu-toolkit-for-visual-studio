@@ -29,7 +29,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         private static readonly CmdResult _fakeNoOrgsCmdResult = new CmdResult(_fakeNoOrgsOutput, string.Empty, 0);
         private static readonly CmdResult _fakeSpacesCmdResult = new CmdResult(_fakeMultiPageSpacesOutput, string.Empty, 0);
         private static readonly CmdResult _fakeNoSpacesCmdResult = new CmdResult(_fakeNoSpacesOutput, string.Empty, 0);
-        private static readonly CmdResult _fakeAppsCmdResult = new CmdResult(_fakeManyAppsOutput, string.Empty, 0);
+        private static readonly CmdResult _fakeAppsCmdResult = new CmdResult(_fakeCurlAppsOutput, string.Empty, 0);
         private static readonly CmdResult _fakeNoAppsCmdResult = new CmdResult(_fakeNoAppsOutput, string.Empty, 0);
 
 
@@ -469,14 +469,15 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         [TestCategory("GetAppsAsync")]
         public async Task GetAppsAsync_ReturnsSuccessfulResult_WhenCmdSucceeds()
         {
-            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetAppsCmd} -v";
-            int numAppsInFakeResponse = 53;
+            var fakeAppsUrl = "fake/apps/url";
+            string expectedArgs = $"\"{_fakePathToCfExe}\" curl {fakeAppsUrl} -v";
+            int numAppsInFakeResponse = 3;
 
             mockCmdProcessService.Setup(mock => mock.
               InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
                 .ReturnsAsync(_fakeAppsCmdResult);
 
-            var result = await _sut.GetAppsAsync();
+            var result = await _sut.GetAppsAsync(fakeAppsUrl);
 
             Assert.IsTrue(result.Succeeded);
             Assert.IsNull(result.Explanation);
@@ -484,22 +485,23 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
 
             Assert.AreEqual(typeof(List<App>), result.Content.GetType());
             Assert.AreEqual(numAppsInFakeResponse, result.Content.Count);
-            Assert.AreEqual(_fakeAppName1, result.Content[0].name);
-            Assert.AreEqual(_fakeAppGuid1, result.Content[0].guid);
+            Assert.AreEqual(_fakeCurledAppName1, result.Content[0].entity.name);
+            Assert.AreEqual(_fakeCurledAppGuid1, result.Content[0].metadata.guid);
         }
 
         [TestMethod]
         [TestCategory("GetAppsAsync")]
         public async Task GetAppsAsync_ReturnsFailedResult_WhenCmdResultReportsFailure()
         {
-            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetAppsCmd} -v";
+            var fakeAppsUrl = "fake/apps/url";
+            string expectedArgs = $"\"{_fakePathToCfExe}\" curl {fakeAppsUrl} -v";
             var fakeFailureCmdResult = new CmdResult(string.Empty, string.Empty, 1);
 
             mockCmdProcessService.Setup(mock => mock.
               InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
                 .ReturnsAsync(fakeFailureCmdResult);
 
-            var result = await _sut.GetAppsAsync();
+            var result = await _sut.GetAppsAsync(fakeAppsUrl);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNull(result.Content);
@@ -511,7 +513,9 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         [TestCategory("GetAppsAsync")]
         public async Task GetAppsAsync_ReturnsFailedResult_WhenJsonParsingFails()
         {
-            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetAppsCmd} -v";
+            var fakeAppsUrl = "fake/apps/url";
+            string expectedArgs = $"\"{_fakePathToCfExe}\" curl {fakeAppsUrl} -v";
+
             var fakeInvalidJsonOutput = $"REQUEST {CfCliService.V6_GetAppsRequestPath} asdf RESPONSE asdf";
             var fakeFailureCmdResult = new CmdResult(fakeInvalidJsonOutput, string.Empty, 0);
 
@@ -519,7 +523,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
               InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
                 .ReturnsAsync(fakeFailureCmdResult);
 
-            var result = await _sut.GetAppsAsync();
+            var result = await _sut.GetAppsAsync(fakeAppsUrl);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNull(result.Content);
@@ -531,13 +535,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         [TestCategory("GetAppsAsync")]
         public async Task GetAppsAsync_ReturnsFailedResult_WhenResponseContainsNoAppsFound()
         {
-            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetAppsCmd} -v";
+            var fakeAppsUrl = "fake/apps/url";
+            string expectedArgs = $"\"{_fakePathToCfExe}\" curl {fakeAppsUrl} -v";
 
             mockCmdProcessService.Setup(mock => mock.
                 InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
                     .ReturnsAsync(_fakeNoAppsCmdResult);
 
-            var result = await _sut.GetAppsAsync();
+            var result = await _sut.GetAppsAsync(fakeAppsUrl);
 
             Assert.IsTrue(result.Succeeded);
             CollectionAssert.AreEqual(new List<App>(), result.Content);

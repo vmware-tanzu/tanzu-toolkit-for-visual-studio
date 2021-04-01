@@ -42,7 +42,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         public static string V6_DeleteAppCmd = "delete -f"; // -f avoids confirmation prompt
         internal static string V6_GetOrgsRequestPath = "GET /v2/organizations";
         internal static string V6_GetSpacesRequestPath = "GET /v2/organizations"; // not a typo; spaces info returned from /v2/organizations/:guid/spaces
-        internal static string V6_GetAppsRequestPath = "GET /v2/spaces"; // not a typo; app info returned when requesting space details
+        internal static string V6_GetAppsRequestPath = "GET /v2/spaces"; // not a typo; app info returned from /v2/spaces/:guid/apps
 
 
         public CfCliService(IServiceProvider services)
@@ -244,13 +244,13 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             }
         }
 
-        public async Task<DetailedResult<List<App>>> GetAppsAsync()
+        public async Task<DetailedResult<List<App>>> GetAppsAsync(string appsUrl)
         {
             DetailedResult cmdResult = null;
 
             try
             {
-                string args = $"{V6_GetAppsCmd} -v"; // -v prints api request details to stdout
+                string args = $"curl {appsUrl} -v"; // -v prints api request details to stdout
                 cmdResult = await InvokeCfCliAsync(args);
 
                 if (!cmdResult.Succeeded)
@@ -293,7 +293,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
                 var appsList = new List<App>();
                 foreach (AppsApiV2Response response in appsResponses)
                 {
-                    foreach (App app in response.apps)
+                    foreach (App app in response.resources)
                     {
                         appsList.Add(app);
                     }

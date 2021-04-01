@@ -2,22 +2,32 @@
 
 namespace Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Apps
 {
+
     public class AppsApiV2Response
     {
-        public string guid { get; set; }
-        public string name { get; set; }
-        public App[] apps { get; set; }
-        public object[] services { get; set; }
+        public int total_results { get; set; }
+        public int total_pages { get; set; }
+        public object prev_url { get; set; }
+        public object next_url { get; set; }
+        public App[] resources { get; set; }
     }
 
     public class App
     {
+        public Metadata metadata { get; set; }
+        public Entity entity { get; set; }
+    }
+
+    public class Metadata
+    {
         public string guid { get; set; }
-        public string[] urls { get; set; }
-        public Route[] routes { get; set; }
-        public int service_count { get; set; }
-        public object[] service_names { get; set; }
-        public int running_instances { get; set; }
+        public string url { get; set; }
+        public DateTime created_at { get; set; }
+        public DateTime updated_at { get; set; }
+    }
+
+    public class Entity
+    {
         public string name { get; set; }
         public bool production { get; set; }
         public string space_guid { get; set; }
@@ -43,29 +53,28 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Apps
         public object staging_failed_description { get; set; }
         public bool diego { get; set; }
         public object docker_image { get; set; }
+        public Docker_Credentials docker_credentials { get; set; }
         public DateTime package_updated_at { get; set; }
         public string detected_start_command { get; set; }
         public bool enable_ssh { get; set; }
-        public object ports { get; set; }
+        public int[] ports { get; set; }
+        public string space_url { get; set; }
+        public string stack_url { get; set; }
+        public string routes_url { get; set; }
+        public string events_url { get; set; }
+        public string service_bindings_url { get; set; }
+        public string route_mappings_url { get; set; }
     }
 
     public class Environment_Json
     {
     }
 
-    public class Route
+    public class Docker_Credentials
     {
-        public string guid { get; set; }
-        public string host { get; set; }
-        public object port { get; set; }
-        public string path { get; set; }
-        public Domain domain { get; set; }
+        public object username { get; set; }
+        public object password { get; set; }
     }
 
-    public class Domain
-    {
-        public string guid { get; set; }
-        public string name { get; set; }
-    }
 
 }
