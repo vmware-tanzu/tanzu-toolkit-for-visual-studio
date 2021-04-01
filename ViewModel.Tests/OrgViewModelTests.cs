@@ -49,15 +49,15 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         {
             var initialSpacesList = new System.Collections.ObjectModel.ObservableCollection<TreeViewItemViewModel>
             {
-                new SpaceViewModel(new CloudFoundrySpace("initial space 1", "initial space 1 guid", null), services),
-                new SpaceViewModel(new CloudFoundrySpace("initial space 2", "initial space 2 guid", null), services),
-                new SpaceViewModel(new CloudFoundrySpace("initial space 3", "initial space 3 guid", null), services)
+                new SpaceViewModel(new CloudFoundrySpace("initial space 1", "initial space 1 guid", null, "fake apps url"), services),
+                new SpaceViewModel(new CloudFoundrySpace("initial space 2", "initial space 2 guid", null, "fake apps url"), services),
+                new SpaceViewModel(new CloudFoundrySpace("initial space 3", "initial space 3 guid", null, "fake apps url"), services)
             };
 
             var newSpacesList = new List<CloudFoundrySpace>
             {
-                new CloudFoundrySpace("initial space 1", "initial space 1 guid", null),
-                new CloudFoundrySpace("initial space 2", "initial space 2 guid", null)
+                new CloudFoundrySpace("initial space 1", "initial space 1 guid", null, "fake apps url"),
+                new CloudFoundrySpace("initial space 2", "initial space 2 guid", null, "fake apps url")
             };
             var fakeSucccessResponse = new DetailedResult<List<CloudFoundrySpace>>
             (
@@ -160,8 +160,8 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         {
             List<CloudFoundrySpace> fakeSpacesList = new List<CloudFoundrySpace>
             {
-                new CloudFoundrySpace("fake space name 1","fake space id 1", fakeCfOrg),
-                new CloudFoundrySpace("fake space name 2","fake space id 2", fakeCfOrg)
+                new CloudFoundrySpace("fake space name 1","fake space id 1", fakeCfOrg, "fake apps url"),
+                new CloudFoundrySpace("fake space name 2","fake space id 2", fakeCfOrg, "fake apps url")
             };
 
             var fakeSuccessResponse = new DetailedResult<List<CloudFoundrySpace>>

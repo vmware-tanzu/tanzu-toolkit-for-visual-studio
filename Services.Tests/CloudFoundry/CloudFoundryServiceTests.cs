@@ -24,7 +24,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             cfService = new CloudFoundryService(services);
             fakeCfInstance = new CloudFoundryInstance("fake cf", fakeValidTarget, fakeValidAccessToken);
             fakeOrg = new CloudFoundryOrganization("fake org", "fake org guid", fakeCfInstance, "fake spaces url");
-            fakeSpace = new CloudFoundrySpace("fake space", "fake space guid", fakeOrg);
+            fakeSpace = new CloudFoundrySpace("fake space", "fake space guid", fakeOrg, "fake apps url");
             fakeApp = new CloudFoundryApp("fake app", "fake app guid", fakeSpace);
         }
 
@@ -375,10 +375,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
 
             var expectedResultContent = new List<CloudFoundrySpace>
             {
-                new CloudFoundrySpace(space1Name, space1Guid, fakeOrg),
-                new CloudFoundrySpace(space2Name, space2Guid, fakeOrg),
-                new CloudFoundrySpace(space3Name, space3Guid, fakeOrg),
-                new CloudFoundrySpace(space4Name, space4Guid, fakeOrg)
+                new CloudFoundrySpace(space1Name, space1Guid, fakeOrg, space1AppsUrl),
+                new CloudFoundrySpace(space2Name, space2Guid, fakeOrg, space2AppsUrl),
+                new CloudFoundrySpace(space3Name, space3Guid, fakeOrg, space3AppsUrl),
+                new CloudFoundrySpace(space4Name, space4Guid, fakeOrg, space4AppsUrl)
             };
 
             mockCfCliService.Setup(mock => mock.
@@ -402,6 +402,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
                 Assert.AreEqual(expectedResultContent[i].SpaceId, result.Content[i].SpaceId);
                 Assert.AreEqual(expectedResultContent[i].SpaceName, result.Content[i].SpaceName);
                 Assert.AreEqual(expectedResultContent[i].ParentOrg, result.Content[i].ParentOrg);
+                Assert.AreEqual(expectedResultContent[i].AppsUrl, result.Content[i].AppsUrl);
             }
 
             mockCfCliService.VerifyAll();

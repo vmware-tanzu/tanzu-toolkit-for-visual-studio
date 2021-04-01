@@ -65,6 +65,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests
         internal static readonly string space2Guid = "space-2-id";
         internal static readonly string space3Guid = "space-3-id";
         internal static readonly string space4Guid = "space-4-id";
+        internal static readonly string space1AppsUrl = "fake apps url 1";
+        internal static readonly string space2AppsUrl = "fake apps url 2";
+        internal static readonly string space3AppsUrl = "fake apps url 3";
+        internal static readonly string space4AppsUrl = "fake apps url 4";
 
         internal static readonly string app1Name = "app1";
         internal static readonly string app2Name = "app2";
@@ -103,22 +107,22 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests
         {
             new Space
             {
-                entity = new Services.CfCli.Models.Spaces.Entity{ name = space1Name },
+                entity = new Services.CfCli.Models.Spaces.Entity{ name = space1Name, apps_url = space1AppsUrl },
                 metadata = new Services.CfCli.Models.Spaces.Metadata{ guid = space1Guid }
             },
             new Space
             {
-                entity = new Services.CfCli.Models.Spaces.Entity{ name = space2Name },
+                entity = new Services.CfCli.Models.Spaces.Entity{ name = space2Name, apps_url = space2AppsUrl },
                 metadata = new Services.CfCli.Models.Spaces.Metadata{ guid = space2Guid }
             },
             new Space
             {
-                entity = new Services.CfCli.Models.Spaces.Entity{ name = space3Name },
+                entity = new Services.CfCli.Models.Spaces.Entity{ name = space3Name, apps_url = space3AppsUrl },
                 metadata = new Services.CfCli.Models.Spaces.Metadata{ guid = space3Guid }
             },
             new Space
             {
-                entity = new Services.CfCli.Models.Spaces.Entity{ name = space4Name },
+                entity = new Services.CfCli.Models.Spaces.Entity{ name = space4Name, apps_url = space4AppsUrl },
                 metadata = new Services.CfCli.Models.Spaces.Metadata{ guid = space4Guid }
             }
         };

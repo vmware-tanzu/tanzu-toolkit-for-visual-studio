@@ -34,7 +34,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
         protected static readonly CloudFoundryInstance fakeCfInstance = new CloudFoundryInstance(fakeCfName, fakeCfApiAddress, fakeAccessToken);
         protected static readonly CloudFoundryOrganization fakeCfOrg = new CloudFoundryOrganization(fakeOrgName, fakeOrgGuid, fakeCfInstance, "fake spaces url");
-        protected static readonly CloudFoundrySpace fakeCfSpace = new CloudFoundrySpace(fakeSpaceName, fakeSpaceGuid, fakeCfOrg);
+        protected static readonly CloudFoundrySpace fakeCfSpace = new CloudFoundrySpace(fakeSpaceName, fakeSpaceGuid, fakeCfOrg, "fake apps url");
 
         protected readonly List<CloudFoundryOrganization> emptyListOfOrgs = new List<CloudFoundryOrganization>();
         protected readonly List<CloudFoundrySpace> emptyListOfSpaces = new List<CloudFoundrySpace>();

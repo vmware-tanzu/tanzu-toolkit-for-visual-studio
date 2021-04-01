@@ -166,7 +166,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             var spaces = new List<CloudFoundrySpace>();
             spacesDetailedResult.Content.ForEach(delegate (CfCli.Models.Spaces.Space space)
             {
-                spaces.Add(new CloudFoundrySpace(space.entity.name, space.metadata.guid, org));
+                spaces.Add(new CloudFoundrySpace(space.entity.name, space.metadata.guid, org, space.entity.apps_url));
             });
 
             return new DetailedResult<List<CloudFoundrySpace>>(

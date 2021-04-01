@@ -15,7 +15,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
     {
         private static CloudFoundryInstance _fakeCfInstance = new CloudFoundryInstance("", "", "");
         private static CloudFoundryOrganization _fakeOrg = new CloudFoundryOrganization("", "", _fakeCfInstance, "fake spaces url");
-        private CloudFoundrySpace _fakeSpace = new CloudFoundrySpace("", "", _fakeOrg);
+        private CloudFoundrySpace _fakeSpace = new CloudFoundrySpace("", "", _fakeOrg, "fake apps url");
         private const string _fakeAppName = "fake app name";
         private const string _fakeProjPath = "this\\is\\a\\fake\\path\\to\\a\\project\\directory";
         private DeploymentDialogViewModel _sut;
