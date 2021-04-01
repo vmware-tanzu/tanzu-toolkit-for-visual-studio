@@ -52,6 +52,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests
         internal static readonly string org2Guid = "org-2-id";
         internal static readonly string org3Guid = "org-3-id";
         internal static readonly string org4Guid = "org-4-id";
+        internal static readonly string org1SpacesUrl = "fake spaces url 1";
+        internal static readonly string org2SpacesUrl = "fake spaces url 2";
+        internal static readonly string org3SpacesUrl = "fake spaces url 3";
+        internal static readonly string org4SpacesUrl = "fake spaces url 4";
 
         internal static readonly string space1Name = "space1";
         internal static readonly string space2Name = "space2";
@@ -75,22 +79,22 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests
         {
             new Org
             {
-                entity = new Services.CfCli.Models.Orgs.Entity{ name = org1Name },
+                entity = new Services.CfCli.Models.Orgs.Entity{ name = org1Name, spaces_url = org1SpacesUrl },
                 metadata = new Services.CfCli.Models.Orgs.Metadata{ guid = org1Guid }
             },
             new Org
             {
-                entity = new Services.CfCli.Models.Orgs.Entity{ name = org2Name },
+                entity = new Services.CfCli.Models.Orgs.Entity{ name = org2Name, spaces_url = org2SpacesUrl },
                 metadata = new Services.CfCli.Models.Orgs.Metadata{ guid = org2Guid }
             },
             new Org
             {
-                entity = new Services.CfCli.Models.Orgs.Entity{ name = org3Name },
+                entity = new Services.CfCli.Models.Orgs.Entity{ name = org3Name, spaces_url = org3SpacesUrl },
                 metadata = new Services.CfCli.Models.Orgs.Metadata{ guid = org3Guid }
             },
             new Org
             {
-                entity = new Services.CfCli.Models.Orgs.Entity{ name = org4Name },
+                entity = new Services.CfCli.Models.Orgs.Entity{ name = org4Name, spaces_url = org4SpacesUrl },
                 metadata = new Services.CfCli.Models.Orgs.Metadata{ guid = org4Guid }
             }
             };

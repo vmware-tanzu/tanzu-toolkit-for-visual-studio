@@ -23,7 +23,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
         {
             cfService = new CloudFoundryService(services);
             fakeCfInstance = new CloudFoundryInstance("fake cf", fakeValidTarget, fakeValidAccessToken);
-            fakeOrg = new CloudFoundryOrganization("fake org", "fake org guid", fakeCfInstance);
+            fakeOrg = new CloudFoundryOrganization("fake org", "fake org guid", fakeCfInstance, "fake spaces url");
             fakeSpace = new CloudFoundrySpace("fake space", "fake space guid", fakeOrg);
             fakeApp = new CloudFoundryApp("fake app", "fake app guid", fakeSpace);
         }
@@ -257,10 +257,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
 
             var expectedResultContent = new List<CloudFoundryOrganization>
             {
-                new CloudFoundryOrganization(org1Name, org1Guid, fakeCfInstance),
-                new CloudFoundryOrganization(org2Name, org2Guid, fakeCfInstance),
-                new CloudFoundryOrganization(org3Name, org3Guid, fakeCfInstance),
-                new CloudFoundryOrganization(org4Name, org4Guid, fakeCfInstance)
+                new CloudFoundryOrganization(org1Name, org1Guid, fakeCfInstance, org1SpacesUrl),
+                new CloudFoundryOrganization(org2Name, org2Guid, fakeCfInstance, org2SpacesUrl),
+                new CloudFoundryOrganization(org3Name, org3Guid, fakeCfInstance, org3SpacesUrl),
+                new CloudFoundryOrganization(org4Name, org4Guid, fakeCfInstance, org4SpacesUrl)
             };
 
             mockCfCliService.Setup(mock => mock.
@@ -284,6 +284,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
                 Assert.AreEqual(expectedResultContent[i].OrgId, result.Content[i].OrgId);
                 Assert.AreEqual(expectedResultContent[i].OrgName, result.Content[i].OrgName);
                 Assert.AreEqual(expectedResultContent[i].ParentCf, result.Content[i].ParentCf);
+                Assert.AreEqual(expectedResultContent[i].SpacesUrl, result.Content[i].SpacesUrl);
             }
 
             mockCfCliService.VerifyAll();

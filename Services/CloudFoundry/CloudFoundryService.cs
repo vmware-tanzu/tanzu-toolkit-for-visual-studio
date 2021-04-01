@@ -124,7 +124,12 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             {
                 orgsDetailedResult.Content.ForEach(delegate (CfCli.Models.Orgs.Org org)
                 {
-                    orgs.Add(new CloudFoundryOrganization(org.entity.name, org.metadata.guid, cf));
+                    orgs.Add(new CloudFoundryOrganization(
+                        org.entity.name, 
+                        org.metadata.guid, 
+                        cf,
+                        org.entity.spaces_url
+                    ));
                 });
             }
 

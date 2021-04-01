@@ -49,15 +49,15 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         {
             var initialOrgsList = new System.Collections.ObjectModel.ObservableCollection<TreeViewItemViewModel>
             {
-                new OrgViewModel(new CloudFoundryOrganization("initial org 1", "initial org 1 guid", null), services),
-                new OrgViewModel(new CloudFoundryOrganization("initial org 2", "initial org 2 guid", null), services),
-                new OrgViewModel(new CloudFoundryOrganization("initial org 3", "initial org 3 guid", null), services)
+                new OrgViewModel(new CloudFoundryOrganization("initial org 1", "initial org 1 guid", null, "fake spaces url"), services),
+                new OrgViewModel(new CloudFoundryOrganization("initial org 2", "initial org 2 guid", null, "fake spaces url"), services),
+                new OrgViewModel(new CloudFoundryOrganization("initial org 3", "initial org 3 guid", null, "fake spaces url"), services)
             };
 
             var newOrgsList = new List<CloudFoundryOrganization>
             {
-                new CloudFoundryOrganization("initial org 1", "initial org 1 guid", null),
-                new CloudFoundryOrganization("initial org 2", "initial org 2 guid", null)
+                new CloudFoundryOrganization("initial org 1", "initial org 1 guid", null, "fake spaces url"),
+                new CloudFoundryOrganization("initial org 2", "initial org 2 guid", null, "fake spaces url")
             };
 
             var fakeSuccessResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: true, content: newOrgsList);
@@ -195,8 +195,8 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         {
             var fakeOrgsList = new List<CloudFoundryOrganization>
             {
-                new CloudFoundryOrganization("fake org name 1","fake org id 1", fakeCfInstance),
-                new CloudFoundryOrganization("fake org name 2","fake org id 2", fakeCfInstance)
+                new CloudFoundryOrganization("fake org name 1","fake org id 1", fakeCfInstance, "fake spaces url"),
+                new CloudFoundryOrganization("fake org name 2","fake org id 2", fakeCfInstance, "fake spaces url")
             };
 
             var fakeSuccessResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: true, content: fakeOrgsList);
