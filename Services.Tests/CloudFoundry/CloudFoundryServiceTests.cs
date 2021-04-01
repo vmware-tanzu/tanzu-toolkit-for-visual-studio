@@ -313,7 +313,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
 
         [TestMethod]
         [TestCategory("GetSpaces")]
-        public async Task GetSpacesForOrgAsync_ReturnsFailedResult_WhenListSpacesFails()
+        public async Task GetSpacesForOrgAsync_ReturnsFailedResult_WhenSpacesResultReportsFailure()
         {
             var fakeFailedSpacesResult = new DetailedResult<List<Space>>(
                 content: new List<Space>(), // this is unrealistic if succeeded == false; testing just in case
@@ -326,11 +326,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
                     .Returns(fakeSuccessDetailedResult);
 
             mockCfCliService.Setup(mock => mock.
-                TargetOrg(fakeOrg.OrgName))
-                    .Returns(fakeSuccessDetailedResult);
-
-            mockCfCliService.Setup(mock => mock.
-                GetSpacesAsync())
+                GetSpacesAsync(fakeOrg.SpacesUrl))
                     .ReturnsAsync(fakeFailedSpacesResult);
 
             DetailedResult<List<CloudFoundrySpace>> result = await cfService.GetSpacesForOrgAsync(fakeOrg);
@@ -345,7 +341,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
 
         [TestMethod]
         [TestCategory("GetSpaces")]
-        public async Task GetSpacesForOrgAsync_ReturnsFailedResult_WhenListSpacesReturnsNoContent()
+        public async Task GetSpacesForOrgAsync_ReturnsFailedResult_WhenSpacesResultHasNoContent()
         {
             var fakeFailedSpacesResult = new DetailedResult<List<Space>>(
                 content: null,
@@ -358,11 +354,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
                     .Returns(fakeSuccessDetailedResult);
 
             mockCfCliService.Setup(mock => mock.
-                TargetOrg(fakeOrg.OrgName))
-                    .Returns(fakeSuccessDetailedResult);
-
-            mockCfCliService.Setup(mock => mock.
-                GetSpacesAsync())
+                GetSpacesAsync(fakeOrg.SpacesUrl))
                     .ReturnsAsync(fakeFailedSpacesResult);
 
             DetailedResult<List<CloudFoundrySpace>> result = await cfService.GetSpacesForOrgAsync(fakeOrg);
@@ -394,11 +386,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
                     .Returns(fakeSuccessDetailedResult);
 
             mockCfCliService.Setup(mock => mock.
-                TargetOrg(fakeOrg.OrgName))
-                    .Returns(fakeSuccessDetailedResult);
-
-            mockCfCliService.Setup(mock => mock.
-                GetSpacesAsync())
+                GetSpacesAsync(fakeOrg.SpacesUrl))
                     .ReturnsAsync(fakeSpacesDetailedResult);
 
             DetailedResult<List<CloudFoundrySpace>> result = await cfService.GetSpacesForOrgAsync(fakeOrg);
@@ -437,30 +425,6 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
 
             mockCfCliService.VerifyAll();
         }
-
-        [TestMethod]
-        [TestCategory("GetSpaces")]
-        public async Task GetSpacesForOrgAsync_ReturnsFailedResult_WhenTargetOrgFails()
-        {
-            mockCfCliService.Setup(mock => mock.
-                TargetApi(fakeOrg.ParentCf.ApiAddress, true))
-                    .Returns(fakeSuccessDetailedResult);
-
-            mockCfCliService.Setup(mock => mock.
-                TargetOrg(fakeOrg.OrgName))
-                    .Returns(fakeFailureDetailedResult);
-
-            DetailedResult<List<CloudFoundrySpace>> result = await cfService.GetSpacesForOrgAsync(fakeOrg);
-
-            Assert.IsNotNull(result);
-            Assert.IsFalse(result.Succeeded);
-            Assert.IsNull(result.Content);
-            Assert.AreEqual(fakeFailureDetailedResult.Explanation, result.Explanation);
-            Assert.AreEqual(fakeFailureDetailedResult.CmdDetails, result.CmdDetails);
-
-            mockCfCliService.VerifyAll();
-        }
-
 
 
         [TestMethod]

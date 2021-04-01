@@ -36,13 +36,12 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         public static string V6_TargetOrgCmd = "target -o";
         public static string V6_TargetSpaceCmd = "target -s";
         public static string V6_GetOrgsCmd = "curl /v2/organizations -v"; // -v prints api request details to stdout
-        public static string V6_GetSpacesCmd = "spaces";
         public static string V6_GetAppsCmd = "apps";
         public static string V6_StopAppCmd = "stop";
         public static string V6_StartAppCmd = "start";
         public static string V6_DeleteAppCmd = "delete -f"; // -f avoids confirmation prompt
         internal static string V6_GetOrgsRequestPath = "GET /v2/organizations";
-        internal static string V6_GetSpacesRequestPath = "GET /v2/spaces";
+        internal static string V6_GetSpacesRequestPath = "GET /v2/organizations"; // not a typo; spaces info returned from /v2/organizations/:guid/spaces
         internal static string V6_GetAppsRequestPath = "GET /v2/spaces"; // not a typo; app info returned when requesting space details
 
 
@@ -180,13 +179,13 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             }
         }
 
-        public async Task<DetailedResult<List<Space>>> GetSpacesAsync()
+        public async Task<DetailedResult<List<Space>>> GetSpacesAsync(string spacesUrl)
         {
             DetailedResult cmdResult = null;
 
             try
             {
-                string args = $"{V6_GetSpacesCmd} -v"; // -v prints api request details to stdout
+                string args = $"curl {spacesUrl} -v"; // -v prints api request details to stdout
                 cmdResult = await InvokeCfCliAsync(args);
 
                 if (!cmdResult.Succeeded)

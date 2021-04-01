@@ -152,17 +152,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
                         cmdDetails: targetApiResult.CmdDetails);
             }
 
-            var targetOrgResult = cfCliService.TargetOrg(org.OrgName);
-            if (!targetOrgResult.Succeeded)
-            {
-                return new DetailedResult<List<CloudFoundrySpace>>(
-                        content: null,
-                        succeeded: false,
-                        explanation: targetOrgResult.Explanation,
-                        cmdDetails: targetOrgResult.CmdDetails);
-            }
-
-            DetailedResult<List<CfCli.Models.Spaces.Space>> spacesDetailedResult = await cfCliService.GetSpacesAsync();
+            DetailedResult<List<CfCli.Models.Spaces.Space>> spacesDetailedResult = await cfCliService.GetSpacesAsync(org.SpacesUrl);
 
             if (!spacesDetailedResult.Succeeded || spacesDetailedResult.Content == null)
             {
