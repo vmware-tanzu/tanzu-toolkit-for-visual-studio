@@ -360,7 +360,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
             if (result.ExitCode == 0) return new DetailedResult(succeeded: true, cmdDetails: result);
 
-            string reason = $"Unable to execute `cf {arguments}`.";
+            string reason = string.IsNullOrEmpty(result.StdErr) ? $"Unable to execute `cf {arguments}`." : result.StdErr;
             return new DetailedResult(false, reason, cmdDetails: result);
         }
 
@@ -384,7 +384,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
             if (result.ExitCode == 0) return new DetailedResult(succeeded: true, cmdDetails: result);
 
-            string reason = $"Unable to execute `cf {arguments}`.";
+            string reason = string.IsNullOrEmpty(result.StdErr) ? $"Unable to execute `cf {arguments}`." : result.StdErr;
             return new DetailedResult(false, reason, cmdDetails: result);
         }
 

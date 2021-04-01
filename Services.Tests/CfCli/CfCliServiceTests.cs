@@ -80,10 +80,29 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             var result = await _sut.InvokeCfCliAsync(_fakeArguments, _fakeOutCallback, _fakeErrCallback);
 
             Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.Explanation.Contains($"Unable to execute `cf {_fakeArguments}`."));
+            Assert.IsTrue(result.Explanation.Contains(_fakeStdErr));
             Assert.IsTrue(result.CmdDetails.ExitCode == 1);
             Assert.IsTrue(result.CmdDetails.StdOut == _fakeStdOut);
             Assert.IsTrue(result.CmdDetails.StdErr == _fakeStdErr);
+        }
+
+        [TestMethod]
+        [TestCategory("InvokeCfCliAsync")]
+        public async Task InvokeCfCliAsync_ReturnsGenericExplanation_WhenProcessFailsWithoutStdErr()
+        {
+            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {_fakeArguments}";
+
+            mockCmdProcessService.Setup(mock => mock.
+              InvokeWindowlessCommandAsync(expectedCmdStr, null, _fakeOutCallback, _fakeErrCallback))
+                .ReturnsAsync(new CmdResult(_fakeStdOut, string.Empty, 1));
+
+            var result = await _sut.InvokeCfCliAsync(_fakeArguments, _fakeOutCallback, _fakeErrCallback);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsTrue(result.Explanation.Contains($"Unable to execute `cf {_fakeArguments}`."));
+            Assert.IsTrue(result.CmdDetails.ExitCode == 1);
+            Assert.IsTrue(result.CmdDetails.StdOut == _fakeStdOut);
+            Assert.IsTrue(result.CmdDetails.StdErr == string.Empty);
         }
         
         [TestMethod]
@@ -144,8 +163,28 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             DetailedResult result = _sut.ExecuteCfCliCommand(_fakeArguments);
 
             Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.Explanation.Contains($"Unable to execute `cf {_fakeArguments}`."));
+            Assert.IsTrue(result.Explanation.Contains(_fakeFailureResult.StdErr));
             Assert.AreEqual(_fakeFailureResult, result.CmdDetails);
+            Assert.IsTrue(result.CmdDetails.StdErr == _fakeFailureResult.StdErr);
+        }
+
+        [TestMethod]
+        [TestCategory("ExecuteCfCliCommand")]
+        public void ExecuteCfCliCommand_ReturnsGenericExplanation_WhenProcessFailsWithoutStdErr()
+        {
+            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {_fakeArguments}";
+
+            var fakeFailedResult = new CmdResult("junk output", string.Empty, 1);
+            mockCmdProcessService.Setup(mock => mock.
+              ExecuteWindowlessCommand(expectedCmdStr, null))
+                .Returns(fakeFailedResult);
+
+            DetailedResult result = _sut.ExecuteCfCliCommand(_fakeArguments);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsTrue(result.Explanation.Contains($"Unable to execute `cf {_fakeArguments}`."));
+            Assert.AreEqual(fakeFailedResult, result.CmdDetails);
+            Assert.IsTrue(result.CmdDetails.StdErr == string.Empty);
         }
 
         [TestMethod]
