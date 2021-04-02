@@ -165,6 +165,15 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
                 RemoveNonexistentOrgs(cfivm, currentOrgs);
                 AddNewOrgs(cfivm, currentOrgs);
+
+                if (cfivm.Children.Count == 0)
+                {
+                    cfivm.Children.Add(cfivm.EmptyPlaceholder);
+                }
+                else if (cfivm.Children.Count > 1 && cfivm.HasEmptyPlaceholder)
+                {
+                    cfivm.Children.Remove(cfivm.EmptyPlaceholder);
+                }
             }
         }
 
@@ -176,6 +185,15 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
                 RemoveNonexistentSpaces(ovm, currentSpaces);
                 AddNewSpaces(ovm, currentSpaces);
+
+                if (ovm.Children.Count == 0)
+                {
+                    ovm.Children.Add(ovm.EmptyPlaceholder);
+                }
+                else if (ovm.Children.Count > 1 && ovm.HasEmptyPlaceholder)
+                {
+                    ovm.Children.Remove(ovm.EmptyPlaceholder);
+                }
             }
         }
 
@@ -187,6 +205,15 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
                 RemoveNonexistentApps(svm, currentApps);
                 AddNewApps(svm, currentApps);
+
+                if (svm.Children.Count == 0)
+                {
+                    svm.Children.Add(svm.EmptyPlaceholder);
+                }
+                else if (svm.Children.Count > 1 && svm.HasEmptyPlaceholder)
+                {
+                    svm.Children.Remove(svm.EmptyPlaceholder);
+                }
             }
         }
 
