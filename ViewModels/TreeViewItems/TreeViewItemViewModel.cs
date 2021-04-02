@@ -51,7 +51,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
         public bool IsLoading { get => _isLoading; set => _isLoading = value; }
 
-        public PlaceholderViewModel LoadingPlaceholder { get; set; }
+        public bool HasEmptyPlaceholder { get; set; }
 
         /// <summary>
         /// Gets/sets whether the TreeViewItem 
@@ -116,6 +116,10 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
                 RaisePropertyChangedEvent("Children");
             }
         }
+
+        public virtual PlaceholderViewModel LoadingPlaceholder { get; protected set; }
+
+        public virtual PlaceholderViewModel EmptyPlaceholder { get; protected set; }
 
         /// <summary>
         /// Invoked when the child items need to be loaded on demand.

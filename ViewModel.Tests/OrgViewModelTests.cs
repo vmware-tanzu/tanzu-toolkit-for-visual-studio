@@ -45,6 +45,12 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         }
 
         [TestMethod]
+        public void Constructor_SetsEmptyPlaceholder()
+        {
+            Assert.AreEqual(OrgViewModel._emptySpacesPlaceholderMsg, _sut.EmptyPlaceholder.DisplayText);
+        }
+
+        [TestMethod]
         public async Task LoadChildren_UpdatesAllSpaces()
         {
             var initialSpacesList = new System.Collections.ObjectModel.ObservableCollection<TreeViewItemViewModel>
@@ -84,6 +90,8 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             Assert.AreEqual(1, _receivedEvents.Count);
             Assert.AreEqual("Children", _receivedEvents[0]);
+            
+            Assert.IsFalse(_sut.HasEmptyPlaceholder);
         }
 
         [TestMethod]
@@ -106,6 +114,9 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             Assert.AreEqual(1, _sut.Children.Count);
             Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
             Assert.AreEqual(OrgViewModel._emptySpacesPlaceholderMsg, _sut.Children[0].DisplayText);
+
+            Assert.AreEqual(_sut.EmptyPlaceholder, _sut.Children[0]);
+            Assert.IsTrue(_sut.HasEmptyPlaceholder);
 
             Assert.AreEqual(1, _receivedEvents.Count);
             Assert.AreEqual("Children", _receivedEvents[0]);

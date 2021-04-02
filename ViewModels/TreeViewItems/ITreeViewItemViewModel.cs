@@ -10,7 +10,8 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         bool IsExpanded { get; set; }
         bool IsSelected { get; set; }
         TreeViewItemViewModel Parent { get; }
-
+        PlaceholderViewModel LoadingPlaceholder { get; }
+        PlaceholderViewModel EmptyPlaceholder { get; }
         Task RefreshChildren();
     }
 }
