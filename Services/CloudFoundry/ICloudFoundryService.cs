@@ -21,5 +21,6 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
         Task<DetailedResult> StartAppAsync(CloudFoundryApp app, bool skipSsl = true);
         Task<DetailedResult> DeleteAppAsync(CloudFoundryApp app, bool skipSsl = true, bool removeRoutes = true);
         Task<DetailedResult> DeployAppAsync(CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, string appName, string appProjPath, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback);
+        void RemoveCloudFoundryInstance(string name);
     }
 }

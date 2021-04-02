@@ -545,6 +545,44 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
         }
 
 
+        [TestMethod]
+        [TestCategory("RemoveCloudFoundryInstance")]
+        public void RemoveCloudFoundryInstance_RemovesItemFromDictionary()
+        {
+            var sut = new CloudFoundryService(services)
+            {
+                CloudFoundryInstances = new Dictionary<string, CloudFoundryInstance>
+                {
+                    { fakeCfInstance.InstanceName, fakeCfInstance }
+                }
+            };
+
+            Assert.AreEqual(1, sut.CloudFoundryInstances.Count);
+
+            sut.RemoveCloudFoundryInstance(fakeCfInstance.InstanceName);
+            
+            Assert.AreEqual(0, sut.CloudFoundryInstances.Count);
+        }
+
+        [TestMethod]
+        [TestCategory("RemoveCloudFoundryInstance")]
+        public void RemoveCloudFoundryInstance_DoesNothing_WhenItemNotInDictionary()
+        {
+            var sut = new CloudFoundryService(services)
+            {
+                CloudFoundryInstances = new Dictionary<string, CloudFoundryInstance>
+                {
+                    { fakeCfInstance.InstanceName, fakeCfInstance }
+                }
+            };
+
+            Assert.AreEqual(1, sut.CloudFoundryInstances.Count);
+
+            sut.RemoveCloudFoundryInstance("nonexistent item");
+            
+            Assert.AreEqual(1, sut.CloudFoundryInstances.Count);
+        }
+
 
         [TestMethod]
         [TestCategory("StopApp")]

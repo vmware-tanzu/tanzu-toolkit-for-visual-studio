@@ -17,7 +17,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
         internal const string emptyOutputDirMessage = "Unable to locate app files; project output directory is empty. (Has your project already been compiled?)";
 
         public string LoginFailureMessage { get; } = "Login failed.";
-        public Dictionary<string, CloudFoundryInstance> CloudFoundryInstances { get; private set; }
+        public Dictionary<string, CloudFoundryInstance> CloudFoundryInstances { get; internal set; }
         public CloudFoundryInstance ActiveCloud { get; set; }
 
         public CloudFoundryService(IServiceProvider services)
@@ -32,6 +32,11 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
         {
             if (CloudFoundryInstances.ContainsKey(name)) throw new Exception($"The name {name} already exists.");
             CloudFoundryInstances.Add(name, new CloudFoundryInstance(name, apiAddress, accessToken));
+        }
+
+        public void RemoveCloudFoundryInstance(string name)
+        {
+            if (CloudFoundryInstances.ContainsKey(name)) CloudFoundryInstances.Remove(name);
         }
 
         public async Task<ConnectResult> ConnectToCFAsync(string targetApiAddress, string username, SecureString password, string httpProxy, bool skipSsl)

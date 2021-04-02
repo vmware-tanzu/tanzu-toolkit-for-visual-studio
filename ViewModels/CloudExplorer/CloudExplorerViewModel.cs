@@ -94,6 +94,11 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
             return true;
         }
 
+        public bool CanRemoveCloudConnecion(object arg)
+        {
+            return true;
+        }
+
 
         public void OpenLoginView(object parent)
         {
@@ -242,6 +247,15 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
                         }
                     }
                 }
+            }
+        }
+
+        public void RemoveCloudConnection(object arg)
+        {
+            if (arg is CfInstanceViewModel cloudConnection)
+            {
+                CloudFoundryService.RemoveCloudFoundryInstance(cloudConnection.DisplayText);
+                SyncCloudFoundryList();
             }
         }
 

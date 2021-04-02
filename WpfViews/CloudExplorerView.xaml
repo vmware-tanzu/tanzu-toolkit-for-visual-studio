@@ -85,7 +85,19 @@
                                           ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                         <Image Source="Resources/CloudFoundry.png" Stretch="Uniform" Height="16px" Width="16px" Margin="0,2,4,0"/>
-                        <TextBlock Text="{Binding DisplayText}" />
+                        <Button Content="{Binding DisplayText}" VerticalAlignment="Center" HorizontalAlignment="Center" 
+                                Background="Transparent" BorderThickness="0" Grid.Row="0" Grid.Column="1" 
+                                Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
+                            <Button.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Delete Connection" 
+                                              Command="{Binding PlacementTarget.Tag.RemoveCloudConnectionCommand, 
+                                                                RelativeSource={RelativeSource Mode=FindAncestor, 
+                                                                AncestorType=ContextMenu}}"
+                                              CommandParameter="{Binding Path=.}"/>
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                        </Button>
                     </StackPanel>
                 </HierarchicalDataTemplate>
 
