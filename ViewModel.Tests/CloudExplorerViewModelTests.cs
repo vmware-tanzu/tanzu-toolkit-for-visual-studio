@@ -97,14 +97,17 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public void OpenLoginView_UpdatesCloudFoundryInstances_AfterDialogCloses()
         {
+            var emptyCfsDict = new Dictionary<string, CloudFoundryInstance>();
             var fakeCfsDict = new Dictionary<string, CloudFoundryInstance>
             {
                 { "fake cf", new CloudFoundryInstance("fake cf", null, null) }
             };
 
-            Assert.AreEqual(0, vm.CloudFoundryList.Count);
+            mockCloudFoundryService.SetupSequence(mock => mock.CloudFoundryInstances)
+                .Returns(emptyCfsDict) // return empty on first request to avoid error due to temporary "single-cf" requirement.
+                .Returns(fakeCfsDict); // return fake cf on second request as mock result of having logged in.
 
-            mockCloudFoundryService.SetupGet(mock => mock.CloudFoundryInstances).Returns(fakeCfsDict);
+            Assert.AreEqual(0, vm.CloudFoundryList.Count);
 
             vm.OpenLoginView(null);
 

@@ -102,9 +102,20 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
         public void OpenLoginView(object parent)
         {
-            var result = DialogService.ShowDialog(typeof(AddCloudDialogViewModel).Name);
+            if (CloudFoundryService.CloudFoundryInstances.Count > 0)
+            {
+                var errorTitle = "Unable to add more TAS connections.";
+                var errorMsg = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
+                errorMsg += System.Environment.NewLine + "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Cloud Explorer & re-connecting to a new one.";
 
-            UpdateCloudFoundryInstances();
+                DialogService.DisplayErrorDialog(errorTitle, errorMsg);
+            }
+            else
+            {
+                DialogService.ShowDialog(typeof(AddCloudDialogViewModel).Name);
+
+                UpdateCloudFoundryInstances();
+            }
         }
 
         public async Task StopCfApp(object app)
