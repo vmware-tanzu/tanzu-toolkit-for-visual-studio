@@ -341,6 +341,22 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         }
 
         /// <summary>
+        /// Invokes `cf push` with the specified app name. Assumes the proper org & space have already been targeted.
+        /// </summary>
+        /// <param name="appName"></param>
+        /// <param name="stdOutCallback"></param>
+        /// <param name="stdErrCallback"></param>
+        /// <param name="appDir"></param>
+        /// <returns></returns>
+        public async Task<DetailedResult> PushAppAsync(string appName, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string appDir)
+        {
+            string args = $"push \"{appName}\"";
+            var pushResult = await RunCfCommandAsync(args, stdOutCallback, stdErrCallback, appDir);
+
+            return pushResult;
+        }
+
+        /// <summary>
         /// Initiate a new Cloud Foundry CLI command with the given arguments.
         /// Invoke the command prompt and wait for the process to exit before returning.
         /// Return true if no StdError was captured over the course of the process, false otherwise.
@@ -381,6 +397,20 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
             ICmdProcessService cmdProcessService = _services.GetRequiredService<ICmdProcessService>();
             CmdResult result = cmdProcessService.ExecuteWindowlessCommand(commandStr, workingDir);
+
+            if (result.ExitCode == 0) return new DetailedResult(succeeded: true, cmdDetails: result);
+
+            string reason = string.IsNullOrEmpty(result.StdErr) ? $"Unable to execute `cf {arguments}`." : result.StdErr;
+            return new DetailedResult(false, reason, cmdDetails: result);
+        }
+
+        private async Task<DetailedResult> RunCfCommandAsync(string arguments, StdOutDelegate stdOutCallback = null, StdErrDelegate stdErrCallback = null, string workingDir = null)
+        {
+            string pathToCfExe = _fileLocatorService.FullPathToCfExe;
+            if (string.IsNullOrEmpty(pathToCfExe)) return new DetailedResult(false, $"Unable to locate cf.exe.");
+
+            ICmdProcessService cmdProcessService = _services.GetRequiredService<ICmdProcessService>();
+            CmdResult result = await Task.Run(() => cmdProcessService.RunCommand(pathToCfExe, arguments, workingDir, stdOutCallback, stdErrCallback));
 
             if (result.ExitCode == 0) return new DetailedResult(succeeded: true, cmdDetails: result);
 

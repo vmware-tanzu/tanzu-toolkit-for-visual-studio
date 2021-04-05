@@ -825,5 +825,79 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
 
             mockCmdProcessService.VerifyAll();
         }
+
+
+        [TestMethod]
+        [TestCategory("PushApp")]
+        public async Task PushAppAsync_ReturnsSuccessResult_WhenCommandSucceeds()
+        {
+            var fakeAppName = "my fake app";
+            string expectedArgs = $"push \"{fakeAppName}\""; // ensure app name gets surrounded by quotes
+
+            mockCmdProcessService.Setup(m => m.
+                RunCommand(_fakePathToCfExe, expectedArgs, fakeProjectPath, null, null))
+                    .Returns(fakeSuccessCmdResult);
+
+            var result = await _sut.PushAppAsync(fakeAppName, null, null, fakeProjectPath);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.AreEqual(fakeSuccessCmdResult, result.CmdDetails);
+        }
+
+        [TestMethod]
+        [TestCategory("PushApp")]
+        public async Task PushAppAsync_ReturnsFailureResult_WhenCfExeCannotBeFound()
+        {
+            var fakeAppName = "my fake app";
+
+            mockFileLocatorService.SetupGet(m => m.
+                FullPathToCfExe)
+                    .Returns((string)null);
+
+            var result = await _sut.PushAppAsync(fakeAppName, null, null, fakeProjectPath);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNull(result.CmdDetails);
+            Assert.AreEqual("Unable to locate cf.exe.", result.Explanation);
+        }
+        
+        [TestMethod]
+        [TestCategory("PushApp")]
+        public async Task PushAppAsync_ReturnsFailureResult_WhenCfCmdFails()
+        {
+            var fakeAppName = "my fake app";
+            string expectedArgs = $"push \"{fakeAppName}\""; // ensure app name gets surrounded by quotes
+
+            mockCmdProcessService.Setup(m => m.
+                RunCommand(_fakePathToCfExe, expectedArgs, fakeProjectPath, null, null))
+                    .Returns(fakeFailureCmdResult);
+
+            var result = await _sut.PushAppAsync(fakeAppName, null, null, fakeProjectPath);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual(fakeFailureCmdResult.StdErr, result.Explanation);
+            Assert.AreEqual(fakeFailureCmdResult, result.CmdDetails);
+        }
+        
+        [TestMethod]
+        [TestCategory("PushApp")]
+        public async Task PushAppAsync_ReturnsGenericErrorMessage_WhenCfCmdFailsWithoutStdErr()
+        {
+            var fakeAppName = "my fake app";
+            string expectedArgs = $"push \"{fakeAppName}\""; // ensure app name gets surrounded by quotes
+            CmdResult mockFailedResult = new CmdResult("Something went wrong but there's no StdErr!", "", 1);
+
+            mockCmdProcessService.Setup(m => m.
+                RunCommand(_fakePathToCfExe, expectedArgs, fakeProjectPath, null, null))
+                    .Returns(mockFailedResult);
+
+            var result = await _sut.PushAppAsync(fakeAppName, null, null, fakeProjectPath);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual($"Unable to execute `cf {expectedArgs}`.", result.Explanation);
+            Assert.AreEqual(mockFailedResult, result.CmdDetails);
+        }
+
     }
 }
