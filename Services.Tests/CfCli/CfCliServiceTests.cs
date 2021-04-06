@@ -683,13 +683,13 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         [TestCategory("StopApp")]
         public async Task StopAppByNameAsync_ReturnsTrueResult_WhenCmdExitCodeIsZero()
         {
-            var fakeAppName = "fake-app";
-            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService.V6_StopAppCmd} {fakeAppName}";
+            var fakeAppName = "fake app name with spaces";
+            string expectedArgs = $"{CfCliService.V6_StopAppCmd} \"{fakeAppName}\""; // expect app name to be surrounded by double quotes
             CmdResult fakeSuccessResult = new CmdResult(_fakeStdOut, _fakeStdErr, 0);
 
             mockCmdProcessService.Setup(mock => mock.
-              InvokeWindowlessCommandAsync(expectedCmdStr, null, null, null))
-                .ReturnsAsync(fakeSuccessResult);
+              RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
+                .Returns(fakeSuccessResult);
 
             DetailedResult result = await _sut.StopAppByNameAsync(fakeAppName);
 
@@ -704,13 +704,13 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         [TestCategory("StopApp")]
         public async Task StopAppByNameAsync_ReturnsFalseResult_WhenCmdExitCodeIsNotZero()
         {
-            var fakeAppName = "fake-app";
-            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService.V6_StopAppCmd} {fakeAppName}";
+            var fakeAppName = "fake app name with spaces";
+            string expectedArgs = $"{CfCliService.V6_StopAppCmd} \"{fakeAppName}\""; // expect app name to be surrounded by double quotes
             CmdResult fakeFailureResult = new CmdResult(_fakeStdOut, _fakeStdErr, 1);
 
             mockCmdProcessService.Setup(mock => mock.
-              InvokeWindowlessCommandAsync(expectedCmdStr, null, null, null))
-                .ReturnsAsync(fakeFailureResult);
+              RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
+                .Returns(fakeFailureResult);
 
             DetailedResult result = await _sut.StopAppByNameAsync(fakeAppName);
 

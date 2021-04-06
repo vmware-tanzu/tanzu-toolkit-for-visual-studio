@@ -312,8 +312,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
         public async Task<DetailedResult> StopAppByNameAsync(string appName)
         {
-            string args = $"{V6_StopAppCmd} {appName}";
-            DetailedResult result = await InvokeCfCliAsync(args);
+            string args = $"{V6_StopAppCmd} \"{appName}\"";
+            DetailedResult result = await RunCfCommandAsync(args);
 
             if (!result.Succeeded) _logger.Error($"StopAppByNameAsync({appName}) failed during InvokeCfCliAsync: {result}");
 
