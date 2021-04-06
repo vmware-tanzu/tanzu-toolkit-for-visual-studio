@@ -71,7 +71,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         {
             string args = $"{V6_TargetApiCmd} {apiAddress}{(skipSsl ? " --skip-ssl-validation" : string.Empty)}";
             var result = ExecuteCfCliCommand(args);
-            
+
             if (!result.Succeeded) _logger.Error($"TargetApi({apiAddress}, {skipSsl}) failed: {result}");
 
             return result;
@@ -212,7 +212,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
                 }
 
                 var spaceResponsePages = GetJsonResponsePages<SpacesApiV2ResponsePage>(content, V6_GetSpacesRequestPath);
-                
+
                 /* check for unsuccessful json parsing */
                 if (spaceResponsePages == null)
                 {
@@ -376,7 +376,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
             if (result.ExitCode == 0) return new DetailedResult(succeeded: true, cmdDetails: result);
 
-            string reason = string.IsNullOrEmpty(result.StdErr) ? $"Unable to execute `cf {arguments}`." : result.StdErr;
+            string reason = result.StdErr;
+            if (string.IsNullOrEmpty(result.StdErr))
+            {
+                if (result.StdOut.Contains("FAILED")) reason = result.StdOut;
+
+                else reason = $"Unable to execute `cf {arguments}`.";
+            }
+
             return new DetailedResult(false, reason, cmdDetails: result);
         }
 
@@ -400,11 +407,18 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
             if (result.ExitCode == 0) return new DetailedResult(succeeded: true, cmdDetails: result);
 
-            string reason = string.IsNullOrEmpty(result.StdErr) ? $"Unable to execute `cf {arguments}`." : result.StdErr;
+            string reason = result.StdErr;
+            if (string.IsNullOrEmpty(result.StdErr))
+            {
+                if (result.StdOut.Contains("FAILED")) reason = result.StdOut;
+
+                else reason = $"Unable to execute `cf {arguments}`.";
+            }
+
             return new DetailedResult(false, reason, cmdDetails: result);
         }
 
-        private async Task<DetailedResult> RunCfCommandAsync(string arguments, StdOutDelegate stdOutCallback = null, StdErrDelegate stdErrCallback = null, string workingDir = null)
+        internal async Task<DetailedResult> RunCfCommandAsync(string arguments, StdOutDelegate stdOutCallback = null, StdErrDelegate stdErrCallback = null, string workingDir = null)
         {
             string pathToCfExe = _fileLocatorService.FullPathToCfExe;
             if (string.IsNullOrEmpty(pathToCfExe)) return new DetailedResult(false, $"Unable to locate cf.exe.");
@@ -414,7 +428,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
             if (result.ExitCode == 0) return new DetailedResult(succeeded: true, cmdDetails: result);
 
-            string reason = string.IsNullOrEmpty(result.StdErr) ? $"Unable to execute `cf {arguments}`." : result.StdErr;
+            string reason = result.StdErr;
+            if (string.IsNullOrEmpty(result.StdErr))
+            {
+                if (result.StdOut.Contains("FAILED")) reason = result.StdOut;
+
+                else reason = $"Unable to execute `cf {arguments}`.";
+            }
+
             return new DetailedResult(false, reason, cmdDetails: result);
         }
 
