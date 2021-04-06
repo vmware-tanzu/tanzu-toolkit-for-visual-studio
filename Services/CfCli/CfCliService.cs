@@ -322,8 +322,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
         public async Task<DetailedResult> StartAppByNameAsync(string appName)
         {
-            string args = $"{V6_StartAppCmd} {appName}";
-            DetailedResult result = await InvokeCfCliAsync(args);
+            string args = $"{V6_StartAppCmd} \"{appName}\"";
+            DetailedResult result = await RunCfCommandAsync(args);
 
             if (!result.Succeeded) _logger.Error($"StartAppByNameAsync({appName}) failed during InvokeCfCliAsync: {result}");
 

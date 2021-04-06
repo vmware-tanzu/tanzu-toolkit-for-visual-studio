@@ -727,13 +727,13 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         [TestCategory("StartApp")]
         public async Task StartAppByNameAsync_ReturnsTrueResult_WhenCmdExitCodeIsZero()
         {
-            var fakeAppName = "fake-app";
-            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService.V6_StartAppCmd} {fakeAppName}";
+            var fakeAppName = "fake app name with spaces";
+            string expectedCmdStr = $"{CfCliService.V6_StartAppCmd} \"{fakeAppName}\""; // expect app name to be surrounded by double quotes
             CmdResult fakeSuccessResult = new CmdResult(_fakeStdOut, _fakeStdErr, 0);
 
             mockCmdProcessService.Setup(mock => mock.
-              InvokeWindowlessCommandAsync(expectedCmdStr, null, null, null))
-                .ReturnsAsync(fakeSuccessResult);
+              RunCommand(_fakePathToCfExe, expectedCmdStr, null, null, null))
+                .Returns(fakeSuccessResult);
 
             DetailedResult result = await _sut.StartAppByNameAsync(fakeAppName);
 
@@ -748,13 +748,13 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         [TestCategory("StartApp")]
         public async Task StartAppByNameAsync_ReturnsFalseResult_WhenCmdExitCodeIsNotZero()
         {
-            var fakeAppName = "fake-app";
-            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService.V6_StartAppCmd} {fakeAppName}";
+            var fakeAppName = "fake app name with spaces";
+            string expectedCmdStr = $"{CfCliService.V6_StartAppCmd} \"{fakeAppName}\""; // expect app name to be surrounded by double quotes
             CmdResult fakeFailureResult = new CmdResult(_fakeStdOut, _fakeStdErr, 1);
 
             mockCmdProcessService.Setup(mock => mock.
-              InvokeWindowlessCommandAsync(expectedCmdStr, null, null, null))
-                .ReturnsAsync(fakeFailureResult);
+              RunCommand(_fakePathToCfExe, expectedCmdStr, null, null, null))
+                .Returns(fakeFailureResult);
 
             DetailedResult result = await _sut.StartAppByNameAsync(fakeAppName);
 
