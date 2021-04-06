@@ -332,8 +332,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
         public async Task<DetailedResult> DeleteAppByNameAsync(string appName, bool removeMappedRoutes = true)
         {
-            string args = $"{V6_DeleteAppCmd} {appName}{(removeMappedRoutes ? " -r" : string.Empty)}";
-            DetailedResult result = await InvokeCfCliAsync(args);
+            string args = $"{V6_DeleteAppCmd} \"{appName}\"{(removeMappedRoutes ? " -r" : string.Empty)}";
+            DetailedResult result = await RunCfCommandAsync(args);
 
             if (!result.Succeeded) _logger.Error($"DeleteAppByNameAsync({appName}, {removeMappedRoutes}) failed during InvokeCfCliAsync: {result}");
 
