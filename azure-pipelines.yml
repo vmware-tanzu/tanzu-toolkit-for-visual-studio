@@ -32,3 +32,6 @@ steps:
     testAssemblyVer2: '**\*test*.dll'
     searchFolder: '$(System.DefaultWorkingDirectory)'
 - task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: 'TanzuForVS\bin\Debug\Tanzu.Toolkit.VisualStudio.vsix'
+    ArtifactName: 'Tanzu.Toolkit.VisualStudio.vsix'
