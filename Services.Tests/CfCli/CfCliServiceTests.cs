@@ -535,6 +535,25 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.AreEqual(_sut._jsonParsingErrorMsg, result.Explanation);
             Assert.AreEqual(fakeFailureCmdResult, result.CmdDetails);
         }
+        
+        [TestMethod]
+        [TestCategory("GetOrgsAsync")]
+        public async Task GetOrgsAsync_ReturnsFailedResult_For401UnauthorizedResponse()
+        {
+            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetOrgsCmd}";
+            var fakeFailureCmdResult = new CmdResult(_fakeOrgs401Output, string.Empty, 0);
+
+            mockCmdProcessService.Setup(mock => mock.
+              InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
+                .ReturnsAsync(fakeFailureCmdResult);
+
+            DetailedResult<List<Org>> result = await _sut.GetOrgsAsync();
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNull(result.Content);
+            Assert.AreEqual(_sut._jsonParsingErrorMsg, result.Explanation);
+            Assert.AreEqual(fakeFailureCmdResult, result.CmdDetails);
+        }
 
         [TestMethod]
         [TestCategory("GetOrgsAsync")]
@@ -639,7 +658,27 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.IsNull(result.Explanation);
             Assert.AreEqual(_fakeNoSpacesCmdResult, result.CmdDetails);
         }
-        
+
+        [TestMethod]
+        [TestCategory("GetSpacesAsync")]
+        public async Task GetSpacesAsync_ReturnsFailedResult_For401UnauthorizedResponse()
+        {
+            var spacesURL = "junk";
+            string expectedArgs = $"\"{_fakePathToCfExe}\" curl {spacesURL} -v";
+            var fakeFailureCmdResult = new CmdResult(_fakeSpaces401Output, string.Empty, 0);
+
+            mockCmdProcessService.Setup(mock => mock.
+              InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
+                .ReturnsAsync(fakeFailureCmdResult);
+
+            DetailedResult<List<Space>> result = await _sut.GetSpacesAsync(spacesURL);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNull(result.Content);
+            Assert.AreEqual(_sut._jsonParsingErrorMsg, result.Explanation);
+            Assert.AreEqual(fakeFailureCmdResult, result.CmdDetails);
+        }
+
 
 
         [TestMethod]
@@ -726,6 +765,27 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.IsNull(result.Explanation);
             Assert.AreEqual(_fakeNoAppsCmdResult, result.CmdDetails);
         }
+
+        [TestMethod]
+        [TestCategory("GetAppsAsync")]
+        public async Task GetAppsAsync_ReturnsFailedResult_For401UnauthorizedResponse()
+        {
+            var appsURL = "junk";
+            string expectedArgs = $"\"{_fakePathToCfExe}\" curl {appsURL} -v";
+            var fakeFailureCmdResult = new CmdResult(_fakeApps401Output, string.Empty, 0);
+
+            mockCmdProcessService.Setup(mock => mock.
+              InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
+                .ReturnsAsync(fakeFailureCmdResult);
+
+            DetailedResult<List<App>> result = await _sut.GetAppsAsync(appsURL);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNull(result.Content);
+            Assert.AreEqual(_sut._jsonParsingErrorMsg, result.Explanation);
+            Assert.AreEqual(fakeFailureCmdResult, result.CmdDetails);
+        }
+
 
 
 

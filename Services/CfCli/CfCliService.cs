@@ -7,6 +7,7 @@ using System.Security;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Apps;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Orgs;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Spaces;
@@ -457,11 +458,11 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         ///     <para>A list of <typeparamref name="ResponseType"/> pages if successful.</para>
         ///     <para><c>null</c> otherwise.</para>
         /// </returns>
-        internal List<ResponseType> GetJsonResponsePages<ResponseType>(string content, string requestFilter)
+        internal List<TResponse> GetJsonResponsePages<TResponse>(string content, string requestFilter)
         {
             try
             {
-                var jsonResponses = new List<ResponseType>();
+                var jsonResponses = new List<TResponse>();
 
                 if (!content.Contains("REQUEST") || !content.Contains("RESPONSE") || !content.Contains(requestFilter))
                 {
@@ -498,7 +499,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
                                 substringLength);
 
                             /* try converting json-like string to `ResponseType` instance */
-                            ResponseType responsePage = JsonSerializer.Deserialize<ResponseType>(speculativeJsonStr);
+                            var responsePage = JsonSerializer.Deserialize<TResponse>(speculativeJsonStr);
 
                             jsonResponses.Add(responsePage);
                         }
@@ -508,6 +509,19 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
                             return null;
                         }
+                    }
+                }
+
+                if (jsonResponses.Count == 1)
+                {
+                    var response = jsonResponses[0] as ApiV2Response;
+
+                    if (response.next_url == null
+                        && response.prev_url == null
+                        && response.total_pages == 0
+                        && response.total_results == 0)
+                    {
+                        return null;
                     }
                 }
 
