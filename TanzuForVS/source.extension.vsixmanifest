@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="TanzuForVS.ff7b6f3e-0410-4ff9-a40a-a719ee9da901" Version="1.0" Language="en-US" Publisher="Company" />
-    <DisplayName>TanzuForVS</DisplayName>
-    <Description>Empty VSIX Project.</Description>
+    <Identity Id="TanzuToolkitForVisualStudio.ff7b6f3e-0410-4ff9-a40a-a719ee9da901" Version="0.0.1" Language="en-US" Publisher="VMware" />
+    <DisplayName>Tanzu Toolkit for Visual Studio</DisplayName>
+    <Description xml:space="preserve">Administer your Tanzu Application Service instances directly from within Visual Studio! 
+
+</Description>
+    <Preview>true</Preview>
   </Metadata>
   <Installation>
     <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[16.0, 17.0)" />

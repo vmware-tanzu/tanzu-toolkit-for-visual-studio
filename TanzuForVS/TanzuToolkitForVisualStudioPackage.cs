@@ -42,7 +42,7 @@ namespace Tanzu.Toolkit.VisualStudio
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [ProvideToolWindow(typeof(TanzuCloudExplorerToolWindow))]
     [ProvideToolWindow(typeof(OutputToolWindow))]
-    public sealed class TanzuForVSPackage : AsyncPackage
+    public sealed class TanzuToolkitForVisualStudioPackage : AsyncPackage
     {
         /// <summary>
         /// TanzuForVSPackage GUID string.
@@ -51,7 +51,7 @@ namespace Tanzu.Toolkit.VisualStudio
 
         private IServiceProvider serviceProvider;
 
-        public TanzuForVSPackage()
+        public TanzuToolkitForVisualStudioPackage()
         {
         }
 

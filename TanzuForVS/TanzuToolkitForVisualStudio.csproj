@@ -51,7 +51,7 @@
     <Compile Include="Commands\PushToCloudFoundryCommand.cs" />
     <Compile Include="OutputToolWindow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TanzuForVSPackage.cs" />
+    <Compile Include="TanzuToolkitForVisualStudioPackage.cs" />
     <Compile Include="TanzuCloudExplorerToolWindow.cs" />
     <Compile Include="Commands\TanzuCloudExplorerCommand.cs" />
   </ItemGroup>
@@ -108,7 +108,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <VSCTCompile Include="TanzuForVSPackage.vsct">
+    <VSCTCompile Include="TanzuToolkitForVisualStudioPackage.vsct">
       <ResourceName>Menus.ctmenu</ResourceName>
     </VSCTCompile>
   </ItemGroup>
