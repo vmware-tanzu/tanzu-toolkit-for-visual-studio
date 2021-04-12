@@ -8,7 +8,6 @@
 - [Install](#install)
 - [Usage](#usage)
 - [Contributing](#contributing)
-- [License](#license)
 - [Version Support](#version-support)
 - [Demo Video](#demo-video)
 - [Project Management](#project-management)
@@ -27,8 +26,10 @@ The `TanzuToolkitForVS` project provides a VSIX extension that allows Visual Stu
 
 
 ## Usage
-- 
-
+- The Tanzu Cloud Explorer is located under the 'View' tab in VS. This window is where you can sign into your cloud instance and manage it.
+- To deploy an app, right click on it and click 'Deploy to Tanzu application Service'. This will open up a new window, which allows you to choose the org and space for the app.
+  - After clicking the 'Deploy' button, you can view the output in the 'Tanzu Output' window.
+  - The newly deployed app will then show up in the Tanzu Cloud Explorer window.
 
 ## Contributing
 GitHub issues & pull requests are welcome! Please recognize that we are a small team with a limited capacity to engage heavily with open source contributions, so the best way to get new feature requests implemented is by contributing code. 
