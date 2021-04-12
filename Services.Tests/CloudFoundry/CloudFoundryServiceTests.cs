@@ -12,6 +12,7 @@ using Tanzu.Toolkit.VisualStudio.Services.CloudFoundry;
 using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
 using static Tanzu.Toolkit.VisualStudio.Services.OutputHandler.OutputHandler;
 using Metadata = Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Orgs.Metadata;
+using Semver;
 
 namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
 {
@@ -196,6 +197,192 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             var result = await cfService.ConnectToCFAsync(fakeValidTarget, fakeValidUsername, fakeValidPassword, fakeHttpProxy, skipSsl);
 
             mockCfCliService.VerifyAll();
+        }
+
+
+
+        [TestMethod]
+        [TestCategory("MatchCliVersionToApiVersion")]
+        public async Task MatchCliVersionToApiVersion_SetsCliVersionTo7_AndRaisesErrorDialog_WhenApiVersionCouldNotBeDetected()
+        {
+            mockCfCliService.Setup(mock => mock.
+                TargetApi(fakeValidTarget, true))
+                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
+
+            mockCfCliService.Setup(mock => mock.
+                GetOAuthToken()).Returns(fakeValidAccessToken);
+
+            mockCfCliService.Setup(mock => mock.
+                AuthenticateAsync(fakeValidUsername, fakeValidPassword))
+                    .ReturnsAsync(new DetailedResult(true, null, fakeSuccessCmdResult));
+
+            int expectedCliVersion = 7;
+
+            mockCfCliService.Setup(m => m.
+                GetApiVersion()).ReturnsAsync((SemVersion)null);
+
+            mockFileLocatorService.SetupSet(m => m.
+                CliVersion = expectedCliVersion).Verifiable();
+
+            ConnectResult result = await cfService.ConnectToCFAsync(fakeValidTarget, fakeValidUsername, fakeValidPassword, fakeHttpProxy, skipSsl);
+
+            mockFileLocatorService.VerifyAll();
+            mockCfCliService.VerifyAll();
+            mockDialogService.Verify(m => m.
+                DisplayErrorDialog(CloudFoundryService.ccApiVersionUndetectableErrTitle, CloudFoundryService.ccApiVersionUndetectableErrMsg),
+                    Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("MatchCliVersionToApiVersion")]
+        public async Task MatchCliVersionToApiVersion_SetsCliVersionTo6_WhenApiMajorVersionIs2_AndBetweenMinors_128_149()
+        {
+            mockCfCliService.Setup(mock => mock.
+                TargetApi(fakeValidTarget, true))
+                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
+
+            mockCfCliService.Setup(mock => mock.
+                GetOAuthToken()).Returns(fakeValidAccessToken);
+
+            mockCfCliService.Setup(mock => mock.
+                AuthenticateAsync(fakeValidUsername, fakeValidPassword))
+                    .ReturnsAsync(new DetailedResult(true, null, fakeSuccessCmdResult));
+
+            int expectedCliVersion = 6;
+            SemVersion[] versionInputs = new SemVersion[]
+            {
+                new SemVersion(major: 2, minor: 149, patch: 0),
+                new SemVersion(major: 2, minor: 138, patch: 0),
+                new SemVersion(major: 2, minor: 128, patch: 0),
+            };
+
+            foreach (SemVersion mockApiVersion in versionInputs)
+            {
+                mockCfCliService.Setup(m => m.
+                    GetApiVersion()).ReturnsAsync(mockApiVersion);
+
+                mockFileLocatorService.SetupSet(m => m.
+                    CliVersion = expectedCliVersion).Verifiable();
+
+                ConnectResult result = await cfService.ConnectToCFAsync(fakeValidTarget, fakeValidUsername, fakeValidPassword, fakeHttpProxy, skipSsl);
+
+                mockFileLocatorService.VerifyAll();
+                mockCfCliService.VerifyAll();
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("MatchCliVersionToApiVersion")]
+        public async Task MatchCliVersionToApiVersion_SetsCliVersionTo6_WhenApiMajorVersionIs3_AndBetweenMinors_63_84()
+        {
+            mockCfCliService.Setup(mock => mock.
+                TargetApi(fakeValidTarget, true))
+                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
+
+            mockCfCliService.Setup(mock => mock.
+                GetOAuthToken()).Returns(fakeValidAccessToken);
+
+            mockCfCliService.Setup(mock => mock.
+                AuthenticateAsync(fakeValidUsername, fakeValidPassword))
+                    .ReturnsAsync(new DetailedResult(true, null, fakeSuccessCmdResult));
+
+            int expectedCliVersion = 6;
+            SemVersion[] versionInputs = new SemVersion[]
+            {
+                new SemVersion(major: 3, minor: 84, patch: 0),
+                new SemVersion(major: 3, minor: 73, patch: 0),
+                new SemVersion(major: 3, minor: 63, patch: 0),
+            };
+
+            foreach (SemVersion mockApiVersion in versionInputs)
+            {
+                mockCfCliService.Setup(m => m.
+                    GetApiVersion()).ReturnsAsync(mockApiVersion);
+
+                mockFileLocatorService.SetupSet(m => m.
+                    CliVersion = expectedCliVersion).Verifiable();
+
+                ConnectResult result = await cfService.ConnectToCFAsync(fakeValidTarget, fakeValidUsername, fakeValidPassword, fakeHttpProxy, skipSsl);
+
+                mockFileLocatorService.VerifyAll();
+                mockCfCliService.VerifyAll();
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("MatchCliVersionToApiVersion")]
+        public async Task MatchCliVersionToApiVersion_SetsCliVersionTo7_WhenApiMajorVersionIs2_AndAtOrAboveMinorVersion_150()
+        {
+            mockCfCliService.Setup(mock => mock.
+                TargetApi(fakeValidTarget, true))
+                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
+
+            mockCfCliService.Setup(mock => mock.
+                GetOAuthToken()).Returns(fakeValidAccessToken);
+
+            mockCfCliService.Setup(mock => mock.
+                AuthenticateAsync(fakeValidUsername, fakeValidPassword))
+                    .ReturnsAsync(new DetailedResult(true, null, fakeSuccessCmdResult));
+
+            int expectedCliVersion = 7;
+            SemVersion[] versionInputs = new SemVersion[]
+            {
+                new SemVersion(major: 2, minor: 150, patch: 0),
+                new SemVersion(major: 2, minor: 189, patch: 0),
+                new SemVersion(major: 2, minor: 150, patch: 1),
+            };
+
+            foreach (SemVersion mockApiVersion in versionInputs)
+            {
+                mockCfCliService.Setup(m => m.
+                    GetApiVersion()).ReturnsAsync(mockApiVersion);
+
+                mockFileLocatorService.SetupSet(m => m.
+                    CliVersion = expectedCliVersion).Verifiable();
+
+                ConnectResult result = await cfService.ConnectToCFAsync(fakeValidTarget, fakeValidUsername, fakeValidPassword, fakeHttpProxy, skipSsl);
+
+                mockFileLocatorService.VerifyAll();
+                mockCfCliService.VerifyAll();
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("MatchCliVersionToApiVersion")]
+        public async Task MatchCliVersionToApiVersion_SetsCliVersionTo7_WhenApiMajorVersionIs3_AndAtOrAboveMinorVersion_85()
+        {
+            mockCfCliService.Setup(mock => mock.
+                TargetApi(fakeValidTarget, true))
+                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
+
+            mockCfCliService.Setup(mock => mock.
+                GetOAuthToken()).Returns(fakeValidAccessToken);
+
+            mockCfCliService.Setup(mock => mock.
+                AuthenticateAsync(fakeValidUsername, fakeValidPassword))
+                    .ReturnsAsync(new DetailedResult(true, null, fakeSuccessCmdResult));
+
+            int expectedCliVersion = 7;
+            SemVersion[] versionInputs = new SemVersion[]
+            {
+                new SemVersion(major: 3, minor: 85, patch: 0),
+                new SemVersion(major: 3, minor: 178, patch: 0),
+                new SemVersion(major: 3, minor: 85, patch: 1),
+            };
+
+            foreach (SemVersion mockApiVersion in versionInputs)
+            {
+                mockCfCliService.Setup(m => m.
+                    GetApiVersion()).ReturnsAsync(mockApiVersion);
+
+                mockFileLocatorService.SetupSet(m => m.
+                    CliVersion = expectedCliVersion).Verifiable();
+
+                ConnectResult result = await cfService.ConnectToCFAsync(fakeValidTarget, fakeValidUsername, fakeValidPassword, fakeHttpProxy, skipSsl);
+
+                mockFileLocatorService.VerifyAll();
+                mockCfCliService.VerifyAll();
+            }
         }
 
 
