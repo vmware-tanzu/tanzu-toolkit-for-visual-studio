@@ -203,7 +203,28 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
                     cmdDetails: targetApiResult.CmdDetails);
             }
 
-            DetailedResult<List<CfCli.Models.Apps.App>> appsDetailedResult = await cfCliService.GetAppsAsync(space.AppsUrl);
+            var targetOrgResult = cfCliService.TargetOrg(space.ParentOrg.OrgName);
+            if (!targetOrgResult.Succeeded)
+            {
+                return new DetailedResult<List<CloudFoundryApp>>(
+                    succeeded: false,
+                    content: null,
+                    explanation: targetOrgResult.Explanation,
+                    cmdDetails: targetOrgResult.CmdDetails);
+            }
+
+            var targetSpaceResult = cfCliService.TargetSpace(space.SpaceName);
+            if (!targetSpaceResult.Succeeded)
+            {
+                return new DetailedResult<List<CloudFoundryApp>>(
+                    succeeded: false,
+                    content: null,
+                    explanation: targetSpaceResult.Explanation,
+                    cmdDetails: targetSpaceResult.CmdDetails);
+            }
+
+
+            DetailedResult<List<CfCli.Models.Apps.App>> appsDetailedResult = await cfCliService.GetAppsAsync();
             
             if (!appsDetailedResult.Succeeded || appsDetailedResult.Content == null)
             {
@@ -217,9 +238,9 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             var apps = new List<CloudFoundryApp>();
             appsDetailedResult.Content.ForEach(delegate (CfCli.Models.Apps.App app)
             {
-                var appToAdd = new CloudFoundryApp(app.entity.name, app.metadata.guid, space)
+                var appToAdd = new CloudFoundryApp(app.name, app.guid, space)
                 {
-                    State = app.entity.state
+                    State = app.state
                 };
                 apps.Add(appToAdd);
             });

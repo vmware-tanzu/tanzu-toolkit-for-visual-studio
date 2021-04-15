@@ -247,13 +247,13 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             }
         }
 
-        public async Task<DetailedResult<List<App>>> GetAppsAsync(string appsUrl)
+        public async Task<DetailedResult<List<App>>> GetAppsAsync()
         {
             DetailedResult cmdResult = null;
 
             try
             {
-                string args = $"curl {appsUrl} -v"; // -v prints api request details to stdout
+                string args = $"{V6_GetAppsCmd} -v"; // -v prints api request details to stdout
                 cmdResult = await InvokeCfCliAsync(args);
 
                 if (!cmdResult.Succeeded)
@@ -282,7 +282,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
                 var appsResponses = GetJsonResponsePages<AppsApiV2Response>(content, V6_GetAppsRequestPath);
 
                 /* check for unsuccessful json parsing */
-                if (appsResponses == null)
+                if (appsResponses == null || 
+                    (appsResponses.Count > 0 && appsResponses[0].guid == null && appsResponses[0].name == null && appsResponses[0].services == null && appsResponses[0].apps == null))
                 {
                     _logger.Error($"GetAppsAsync() failed during response parsing. Used this delimeter: '{V6_GetAppsRequestPath}' to parse through: {cmdResult.CmdDetails.StdOut}");
 
@@ -296,7 +297,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
                 var appsList = new List<App>();
                 foreach (AppsApiV2Response response in appsResponses)
                 {
-                    foreach (App app in response.resources)
+                    foreach (App app in response.apps)
                     {
                         appsList.Add(app);
                     }
@@ -516,9 +517,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
                 if (jsonResponses.Count == 1)
                 {
-                    var response = jsonResponses[0] as ApiV2Response;
-
-                    if (response.next_url == null
+                    if (jsonResponses[0] is ApiV2Response response
+                        && response.next_url == null
                         && response.prev_url == null
                         && response.total_pages == 0
                         && response.total_results == 0)
