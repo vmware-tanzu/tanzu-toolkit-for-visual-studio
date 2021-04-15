@@ -579,39 +579,34 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         [TestCategory("GetSpacesAsync")]
         public async Task GetSpacesAsync_ReturnsSuccessfulResult_WhenCmdSucceeds()
         {
-            var fakeSpacesUrl = "fake/spaces/url";
-            string expectedArgs = $"\"{_fakePathToCfExe}\" curl {fakeSpacesUrl} -v";
-
-            var mockSpacesResult = new CmdResult(_fakeCurlSpacesOutput, string.Empty, 0);
-            var numMockSpaces = 3;
-
+            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetSpacesCmd} -v";
+            
             mockCmdProcessService.Setup(mock => mock.
               InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
-                .ReturnsAsync(mockSpacesResult);
+                .ReturnsAsync(_fakeSpacesCmdResult);
 
-            DetailedResult<List<Space>> result = await _sut.GetSpacesAsync(fakeSpacesUrl);
+            DetailedResult<List<Space>> result = await _sut.GetSpacesAsync();
 
             Assert.IsTrue(result.Succeeded);
             Assert.IsNull(result.Explanation);
-            Assert.AreEqual(mockSpacesResult, result.CmdDetails);
+            Assert.AreEqual(_fakeSpacesCmdResult, result.CmdDetails);
 
-            Assert.AreEqual(numMockSpaces, result.Content.Count);
-            Assert.AreEqual(_fakeCurledSpaceName1, result.Content[0].entity.name);
-            Assert.AreEqual(_fakeCurledSpaceGuid1, result.Content[0].metadata.guid);
+            Assert.AreEqual(numOrgsInFakeResponse, result.Content.Count);
+            Assert.AreEqual(_fakeSpaceName1, result.Content[0].entity.name);
+            Assert.AreEqual(_fakeSpaceGuid1, result.Content[0].metadata.guid);
         }
 
         [TestMethod]
         [TestCategory("GetSpacesAsync")]
         public async Task GetSpacesAsync_ReturnsFailedResult_WhenCmdResultReportsFailure()
         {
-            var fakeSpacesUrl = "fake/spaces/url";
-            string expectedArgs = $"\"{_fakePathToCfExe}\" curl {fakeSpacesUrl} -v";
+            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetSpacesCmd} -v";
 
             mockCmdProcessService.Setup(mock => mock.
               InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
                 .ReturnsAsync(fakeFailureCmdResult);
 
-            DetailedResult<List<Space>> result = await _sut.GetSpacesAsync(fakeSpacesUrl);
+            DetailedResult<List<Space>> result = await _sut.GetSpacesAsync();
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNull(result.Content);
@@ -623,8 +618,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         [TestCategory("GetSpacesAsync")]
         public async Task GetSpacesAsync_ReturnsFailedResult_WhenJsonParsingFails()
         {
-            var fakeSpacesUrl = "fake/spaces/url";
-            string expectedArgs = $"\"{_fakePathToCfExe}\" curl {fakeSpacesUrl} -v";
+            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetSpacesCmd} -v";
             var fakeInvalidJsonOutput = $"REQUEST {CfCliService.V6_GetSpacesRequestPath} asdf RESPONSE asdf";
             var fakeFailureCmdResult = new CmdResult(fakeInvalidJsonOutput, string.Empty, 0);
 
@@ -632,7 +626,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
               InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
                 .ReturnsAsync(fakeFailureCmdResult);
 
-            DetailedResult<List<Space>> result = await _sut.GetSpacesAsync(fakeSpacesUrl);
+            DetailedResult<List<Space>> result = await _sut.GetSpacesAsync();
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNull(result.Content);
@@ -644,14 +638,13 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         [TestCategory("GetSpacesAsync")]
         public async Task GetSpacesAsync_ReturnsFailedResult_WhenResponseContainsNoSpacesFound()
         {
-            var fakeSpacesUrl = "fake/spaces/url";
-            string expectedArgs = $"\"{_fakePathToCfExe}\" curl {fakeSpacesUrl} -v";
+            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetSpacesCmd} -v";
 
             mockCmdProcessService.Setup(mock => mock.
               InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
                 .ReturnsAsync(_fakeNoSpacesCmdResult);
 
-            var result = await _sut.GetSpacesAsync(fakeSpacesUrl);
+            var result = await _sut.GetSpacesAsync();
 
             Assert.IsTrue(result.Succeeded);
             CollectionAssert.AreEqual(new List<Space>(), result.Content);
@@ -663,15 +656,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         [TestCategory("GetSpacesAsync")]
         public async Task GetSpacesAsync_ReturnsFailedResult_For401UnauthorizedResponse()
         {
-            var spacesURL = "junk";
-            string expectedArgs = $"\"{_fakePathToCfExe}\" curl {spacesURL} -v";
+            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService.V6_GetSpacesCmd} -v";
             var fakeFailureCmdResult = new CmdResult(_fakeSpaces401Output, string.Empty, 0);
 
             mockCmdProcessService.Setup(mock => mock.
               InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
                 .ReturnsAsync(fakeFailureCmdResult);
 
-            DetailedResult<List<Space>> result = await _sut.GetSpacesAsync(spacesURL);
+            DetailedResult<List<Space>> result = await _sut.GetSpacesAsync();
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNull(result.Content);

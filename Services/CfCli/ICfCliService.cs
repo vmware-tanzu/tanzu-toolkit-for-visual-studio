@@ -17,7 +17,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         Task<DetailedResult> AuthenticateAsync(string username, SecureString password);
         DetailedResult ExecuteCfCliCommand(string arguments, string workingDir = null);
         Task<DetailedResult<List<Org>>> GetOrgsAsync();
-        Task<DetailedResult<List<Space>>> GetSpacesAsync(string spacesUrl);
+        Task<DetailedResult<List<Space>>> GetSpacesAsync();
         DetailedResult TargetOrg(string orgName);
         DetailedResult TargetSpace(string spaceName);
         Task<DetailedResult<List<App>>> GetAppsAsync(string appsUrl);
