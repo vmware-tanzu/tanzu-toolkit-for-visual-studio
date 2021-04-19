@@ -3,8 +3,10 @@ using EnvDTE80;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Shell;
 using System;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Tanzu.Toolkit.CloudFoundryApiClient;
 using Tanzu.Toolkit.VisualStudio.Commands;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli;
 using Tanzu.Toolkit.VisualStudio.Services.CloudFoundry;
@@ -103,6 +105,12 @@ namespace Tanzu.Toolkit.VisualStudio
 
         private void ConfigureServices(IServiceCollection services)
         {
+            /* Cloud Foundry API */
+            HttpClient httpClient = new HttpClient();
+            IUaaClient uaaClient = new UaaClient(httpClient);
+            services.AddSingleton(_ => uaaClient);
+            services.AddSingleton<ICfApiClient>(_ => new CfApiClient(uaaClient, httpClient));
+
             /* Services */
             services.AddSingleton<ICloudFoundryService, CloudFoundryService>();
             services.AddSingleton<IViewLocatorService, WpfViewLocatorService>();
