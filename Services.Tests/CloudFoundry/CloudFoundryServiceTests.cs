@@ -653,65 +653,74 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
 
             mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
         }
-
-
+        
 
         [TestMethod]
         [TestCategory("StartApp")]
-        public async Task StartAppAsync_ReturnsTrue_AndUpdatesAppState_WhenStartCmdSucceeds()
+        public async Task StartAppAsync_ReturnsSuccessfulResult_AndUpdatesAppState()
         {
             fakeApp.State = "STOPPED";
 
-            mockCfCliService.Setup(mock => mock.
-                TargetApi(fakeCfInstance.ApiAddress, true))
-                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
+            mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns(fakeValidAccessToken);
 
-            mockCfCliService.Setup(mock => mock.
-               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
-
-            mockCfCliService.Setup(mock => mock.
-               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
-
-            mockCfCliService.Setup(mock => mock.
-                StartAppByNameAsync(fakeApp.AppName))
-                    .ReturnsAsync(new DetailedResult(true, null, fakeSuccessCmdResult));
+            mockCfApiClient.Setup(m => m.
+                StartAppWithGuid(fakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, fakeValidAccessToken, fakeApp.AppId))
+                    .ReturnsAsync(true);
 
             DetailedResult result = await cfService.StartAppAsync(fakeApp);
 
             Assert.AreEqual("STARTED", fakeApp.State);
             Assert.IsTrue(result.Succeeded);
             Assert.IsNull(result.Explanation);
-            Assert.AreEqual(fakeSuccessCmdResult, result.CmdDetails);
+            Assert.IsNull(result.CmdDetails);
         }
 
         [TestMethod]
         [TestCategory("StartApp")]
-        public async Task StartAppAsync_ReturnsFailedResult_WhenStartCmdReportsFailure()
+        public async Task StartAppAsync_ReturnsFailedResult_WhenStartAppWithGuidReturnsFalse()
         {
-            var fakeExplanation = "junk";
+            mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns(fakeValidAccessToken);
 
-            mockCfCliService.Setup(mock => mock.
-                TargetApi(fakeCfInstance.ApiAddress, true))
-                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
-
-            mockCfCliService.Setup(mock => mock.
-               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
-
-            mockCfCliService.Setup(mock => mock.
-               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
-
-            mockCfCliService.Setup(mock => mock.
-                StartAppByNameAsync(fakeApp.AppName))
-                    .ReturnsAsync(new DetailedResult(false, fakeExplanation, fakeFailureCmdResult));
+            mockCfApiClient.Setup(m => m.
+                StartAppWithGuid(fakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, fakeValidAccessToken, fakeApp.AppId))
+                    .ReturnsAsync(false);
 
             DetailedResult result = await cfService.StartAppAsync(fakeApp);
 
             Assert.IsFalse(result.Succeeded);
-            Assert.AreEqual(fakeExplanation, result.Explanation);
-            Assert.AreEqual(fakeFailureCmdResult, result.CmdDetails);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsNull(result.CmdDetails);
+
+            mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
         }
 
+        [TestMethod]
+        [TestCategory("StartApp")]
+        public async Task StartAppAsync_ReturnsFailedResult_WhenStartAppWithGuidThrowsException()
+        {
+            var fakeExceptionMsg = "junk";
 
+            mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns(fakeValidAccessToken);
+
+            mockCfApiClient.Setup(m => m.
+                StartAppWithGuid(fakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, fakeValidAccessToken, fakeApp.AppId))
+                    .Throws(new Exception(fakeExceptionMsg));
+
+            DetailedResult result = await cfService.StartAppAsync(fakeApp);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsNull(result.CmdDetails);
+
+            mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+        }
 
 
         [TestMethod]

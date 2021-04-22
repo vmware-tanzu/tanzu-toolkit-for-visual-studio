@@ -232,39 +232,47 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             return false;
         }
 
-        public async Task<bool> StartAppWithGuid(string cfTarget, string accessToken, string appGuid)
+        /// <summary>
+        /// Issues a request to <paramref name="cfApiAddress"/> to start the app specified by <paramref name="appGuid"/>.
+        /// <para>
+        /// Exceptions:
+        /// <para>
+        /// Throws any exceptions encountered while creating/issuing request or deserializing response.
+        /// </para>
+        /// </para>
+        /// </summary>
+        /// <param name="cfApiAddress"></param>
+        /// <param name="accessToken"></param>
+        /// <param name="appGuid"></param>
+        /// <returns>
+        /// True if response status code indicates success and response contains an app state of "STARTED".
+        /// <para>False otherwise.</para>
+        /// </returns>
+        public async Task<bool> StartAppWithGuid(string cfApiAddress, string accessToken, string appGuid)
         {
-            try
+            // trust any certificate
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            ServicePointManager.ServerCertificateValidationCallback +=
+                (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+            var startAppPath = listAppsPath + $"/{appGuid}/actions/start";
+
+            var uri = new UriBuilder(cfApiAddress)
             {
-                // trust any certificate
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-                ServicePointManager.ServerCertificateValidationCallback +=
-                    (sender, cert, chain, sslPolicyErrors) => { return true; };
+                Path = startAppPath
+            };
 
-                var startAppPath = listAppsPath + $"/{appGuid}/actions/start";
+            var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString());
+            request.Headers.Add("Authorization", "Bearer " + accessToken);
 
-                var uri = new UriBuilder(cfTarget)
-                {
-                    Path = startAppPath
-                };
+            var response = await _httpClient.SendAsync(request);
+            if (!response.IsSuccessStatusCode) throw new Exception($"Response from POST `{startAppPath}` was {response.StatusCode}");
 
-                var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString());
-                request.Headers.Add("Authorization", "Bearer " + accessToken);
+            string resultContent = await response.Content.ReadAsStringAsync();
+            var result = JsonConvert.DeserializeObject<App>(resultContent);
 
-                var response = await _httpClient.SendAsync(request);
-                if (!response.IsSuccessStatusCode) throw new Exception($"Response from POST `{startAppPath}` was {response.StatusCode}");
-
-                string resultContent = await response.Content.ReadAsStringAsync();
-                var result = JsonConvert.DeserializeObject<App>(resultContent);
-
-                if (result.state == "STARTED") return true;
-                return false;
-            }
-            catch (Exception e)
-            {
-                System.Diagnostics.Debug.WriteLine(e);
-                return false;
-            }
+            if (result.state == "STARTED") return true;
+            return false;
         }
 
         public async Task<bool> DeleteAppWithGuid(string cfTarget, string accessToken, string appGuid)

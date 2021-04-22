@@ -388,24 +388,66 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
                 Succeeded = true,
             };
         }
-
+        
+        /// <summary>
+        /// Start <paramref name="app"/> using token from <see cref="CfCliService"/>.
+        /// </summary>
+        /// <param name="app"></param>
+        /// <param name="skipSsl"></param>
         public async Task<DetailedResult> StartAppAsync(CloudFoundryApp app, bool skipSsl = true)
         {
-            var targetApiResult = cfCliService.TargetApi(app.ParentSpace.ParentOrg.ParentCf.ApiAddress, skipSsl);
-            if (!targetApiResult.Succeeded) return new DetailedResult(false, targetApiResult.Explanation, targetApiResult.CmdDetails);
+            bool appWasStarted;
 
-            var targetOrgResult = cfCliService.TargetOrg(app.ParentSpace.ParentOrg.OrgName);
-            if (!targetOrgResult.Succeeded) return new DetailedResult(false, targetOrgResult.Explanation, targetOrgResult.CmdDetails);
+            string apiAddress = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
 
-            var targetSpaceResult = cfCliService.TargetSpace(app.ParentSpace.SpaceName);
-            if (!targetSpaceResult.Succeeded) return new DetailedResult(false, targetSpaceResult.Explanation, targetSpaceResult.CmdDetails);
+            var accessToken = cfCliService.GetOAuthToken();
+            if (accessToken == null)
+            {
+                var msg = $"CloudFoundryService attempted to start app '{app.AppName}' but was unable to look up an access token.";
+                logger.Error(msg);
 
-            DetailedResult startResult = await cfCliService.StartAppByNameAsync(app.AppName);
+                return new DetailedResult
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                };
+            }
 
-            if (!startResult.Succeeded) return new DetailedResult(false, startResult.Explanation, startResult.CmdDetails);
+            try
+            {
+                appWasStarted = await cfApiClient.StartAppWithGuid(apiAddress, accessToken, app.AppId);
+            }
+            catch (Exception originalException)
+            {
+                var msg = $"Something went wrong while trying to start app '{app.AppName}': {originalException.Message}.";
+
+                logger.Error(msg);
+
+                return new DetailedResult
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                };
+            }
+
+            if (!appWasStarted)
+            {
+                var msg = $"Attempted to start app '{app.AppName}' but it hasn't been started.";
+
+                logger.Error(msg);
+
+                return new DetailedResult
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                };
+            }
 
             app.State = "STARTED";
-            return startResult;
+            return new DetailedResult
+            {
+                Succeeded = true,
+            };
         }
 
         public async Task<DetailedResult> DeleteAppAsync(CloudFoundryApp app, bool skipSsl = true, bool removeRoutes = true)

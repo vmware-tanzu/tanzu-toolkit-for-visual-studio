@@ -465,11 +465,11 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         }
 
         [TestMethod]
-        public async Task StartAppWithGuid_ReturnsFalse_WhenStatusCodeIsNotASuccess()
+        public async Task StartAppWithGuid_ThrowsException_WhenStatusCodeIsNotASuccess()
         {
             string fakeAppGuid = "1234";
             string expectedPath = _fakeCfApiAddress + CfApiClient.listAppsPath + $"/{fakeAppGuid}/actions/start";
-            Exception resultException = null;
+            Exception expectedException = null;
 
             MockedRequest appsRequest = _mockHttp.Expect(expectedPath)
                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
@@ -477,19 +477,17 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 
             _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
-            bool startResult = true;
             try
             {
-                startResult = await _sut.StartAppWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
+                await _sut.StartAppWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
             }
             catch (Exception e)
             {
-                resultException = e;
+                expectedException = e;
             }
 
+            Assert.IsNotNull(expectedException);
             Assert.AreEqual(1, _mockHttp.GetMatchCount(appsRequest));
-            Assert.IsNull(resultException);
-            Assert.IsFalse(startResult);
         }
 
         [TestMethod]
