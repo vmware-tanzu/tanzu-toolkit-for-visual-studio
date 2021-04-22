@@ -36,13 +36,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         public static string V6_AuthenticateCmd = "auth";
         public static string V6_TargetOrgCmd = "target -o";
         public static string V6_TargetSpaceCmd = "target -s";
-        public static string V6_GetOrgsCmd = "curl /v2/organizations -v"; // -v prints api request details to stdout
+        public static string V6_GetOrgsCmd = "orgs";
+        public static string V6_GetSpacesCmd = "spaces";
         public static string V6_GetAppsCmd = "apps";
         public static string V6_StopAppCmd = "stop";
         public static string V6_StartAppCmd = "start";
         public static string V6_DeleteAppCmd = "delete -f"; // -f avoids confirmation prompt
         internal static string V6_GetOrgsRequestPath = "GET /v2/organizations";
-        internal static string V6_GetSpacesRequestPath = "GET /v2/organizations"; // not a typo; spaces info returned from /v2/organizations/:guid/spaces
+        internal static string V6_GetSpacesRequestPath = "GET /v2/spaces"; 
         internal static string V6_GetAppsRequestPath = "GET /v2/spaces"; // not a typo; app info returned from /v2/spaces/:guid/apps
 
 
@@ -122,7 +123,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
             try
             {
-                cmdResult = await InvokeCfCliAsync(V6_GetOrgsCmd);
+                string args = $"{V6_GetOrgsCmd} -v"; // -v prints api request details to stdout
+                cmdResult = await InvokeCfCliAsync(args);
 
                 if (!cmdResult.Succeeded)
                 {
@@ -180,13 +182,13 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             }
         }
 
-        public async Task<DetailedResult<List<Space>>> GetSpacesAsync(string spacesUrl)
+        public async Task<DetailedResult<List<Space>>> GetSpacesAsync()
         {
             DetailedResult cmdResult = null;
 
             try
             {
-                string args = $"curl {spacesUrl} -v"; // -v prints api request details to stdout
+                string args = $"{V6_GetSpacesCmd} -v"; // -v prints api request details to stdout
                 cmdResult = await InvokeCfCliAsync(args);
 
                 if (!cmdResult.Succeeded)
@@ -245,13 +247,13 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             }
         }
 
-        public async Task<DetailedResult<List<App>>> GetAppsAsync(string appsUrl)
+        public async Task<DetailedResult<List<App>>> GetAppsAsync()
         {
             DetailedResult cmdResult = null;
 
             try
             {
-                string args = $"curl {appsUrl} -v"; // -v prints api request details to stdout
+                string args = $"{V6_GetAppsCmd} -v"; // -v prints api request details to stdout
                 cmdResult = await InvokeCfCliAsync(args);
 
                 if (!cmdResult.Succeeded)
@@ -280,7 +282,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
                 var appsResponses = GetJsonResponsePages<AppsApiV2Response>(content, V6_GetAppsRequestPath);
 
                 /* check for unsuccessful json parsing */
-                if (appsResponses == null)
+                if (appsResponses == null || 
+                    (appsResponses.Count > 0 && appsResponses[0].guid == null && appsResponses[0].name == null && appsResponses[0].services == null && appsResponses[0].apps == null))
                 {
                     _logger.Error($"GetAppsAsync() failed during response parsing. Used this delimeter: '{V6_GetAppsRequestPath}' to parse through: {cmdResult.CmdDetails.StdOut}");
 
@@ -294,7 +297,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
                 var appsList = new List<App>();
                 foreach (AppsApiV2Response response in appsResponses)
                 {
-                    foreach (App app in response.resources)
+                    foreach (App app in response.apps)
                     {
                         appsList.Add(app);
                     }
@@ -514,9 +517,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
                 if (jsonResponses.Count == 1)
                 {
-                    var response = jsonResponses[0] as ApiV2Response;
-
-                    if (response.next_url == null
+                    if (jsonResponses[0] is ApiV2Response response
+                        && response.next_url == null
                         && response.prev_url == null
                         && response.total_pages == 0
                         && response.total_results == 0)

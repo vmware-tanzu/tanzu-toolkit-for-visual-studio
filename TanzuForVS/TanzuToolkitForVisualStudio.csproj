@@ -90,6 +90,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CloudFoundryApiClient\CloudFoundryApiClient.csproj">
+      <Project>{56A68904-C31A-45E7-8617-FB8FDCFB49CB}</Project>
+      <Name>CloudFoundryApiClient</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Models\Models.csproj">
       <Project>{9486bbee-472d-4d0a-9644-a34151f66f62}</Project>
       <Name>Models</Name>

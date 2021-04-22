@@ -33,8 +33,8 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         private const string fakeSpaceGuid = "fake-space-guid";
 
         protected static readonly CloudFoundryInstance fakeCfInstance = new CloudFoundryInstance(fakeCfName, fakeCfApiAddress, fakeAccessToken);
-        protected static readonly CloudFoundryOrganization fakeCfOrg = new CloudFoundryOrganization(fakeOrgName, fakeOrgGuid, fakeCfInstance, "fake spaces url");
-        protected static readonly CloudFoundrySpace fakeCfSpace = new CloudFoundrySpace(fakeSpaceName, fakeSpaceGuid, fakeCfOrg, "fake apps url");
+        protected static readonly CloudFoundryOrganization fakeCfOrg = new CloudFoundryOrganization(fakeOrgName, fakeOrgGuid, fakeCfInstance);
+        protected static readonly CloudFoundrySpace fakeCfSpace = new CloudFoundrySpace(fakeSpaceName, fakeSpaceGuid, fakeCfOrg);
 
         protected readonly List<CloudFoundryOrganization> emptyListOfOrgs = new List<CloudFoundryOrganization>();
         protected readonly List<CloudFoundrySpace> emptyListOfSpaces = new List<CloudFoundrySpace>();

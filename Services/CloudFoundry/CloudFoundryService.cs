@@ -1,19 +1,28 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
+using Tanzu.Toolkit.CloudFoundryApiClient;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models.OrgsResponse;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models.SpacesResponse;
 using Tanzu.Toolkit.VisualStudio.Models;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli;
 using Tanzu.Toolkit.VisualStudio.Services.FileLocator;
+using Tanzu.Toolkit.VisualStudio.Services.Logging;
 using static Tanzu.Toolkit.VisualStudio.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
 {
     public class CloudFoundryService : ICloudFoundryService
     {
+        private static ICfApiClient cfApiClient;
         private static ICfCliService cfCliService;
         private static IFileLocatorService _fileLocatorService;
+        private static ILogger logger;
+
         internal const string emptyOutputDirMessage = "Unable to locate app files; project output directory is empty. (Has your project already been compiled?)";
 
         public string LoginFailureMessage { get; } = "Login failed.";
@@ -24,8 +33,12 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
         {
             CloudFoundryInstances = new Dictionary<string, CloudFoundryInstance>();
 
+            cfApiClient = services.GetRequiredService<ICfApiClient>();
             cfCliService = services.GetRequiredService<ICfCliService>();
             _fileLocatorService = services.GetRequiredService<IFileLocatorService>();
+
+            var logSvc = services.GetRequiredService<ILoggingService>();
+            logger = logSvc.Logger;
         }
 
         public void AddCloudFoundryInstance(string name, string apiAddress, string accessToken)
@@ -102,123 +115,196 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             }
         }
 
+        /// <summary>
+        /// Requests orgs from <see cref="CfApiClient"/> using access token from <see cref="CfCliService"/>.
+        /// </summary>
+        /// <param name="cf"></param>
+        /// <param name="skipSsl"></param>
         public async Task<DetailedResult<List<CloudFoundryOrganization>>> GetOrgsForCfInstanceAsync(CloudFoundryInstance cf, bool skipSsl = true)
         {
-            var targetApiResult = cfCliService.TargetApi(cf.ApiAddress, skipSsl);
-            if (!targetApiResult.Succeeded)
-            {
-                return new DetailedResult<List<CloudFoundryOrganization>>(
-                        content: null,
-                        succeeded: false,
-                        explanation: targetApiResult.Explanation,
-                        cmdDetails: targetApiResult.CmdDetails);
-            }
+            List<Org> orgsFromApi;
+            var orgsToReturn = new List<CloudFoundryOrganization>();
 
-            DetailedResult<List<CfCli.Models.Orgs.Org>> orgsDetailedResult = await cfCliService.GetOrgsAsync();
+            string apiAddress = cf.ApiAddress;
 
-            if (!orgsDetailedResult.Succeeded || orgsDetailedResult.Content == null)
+            var accessToken = cfCliService.GetOAuthToken();
+            if (accessToken == null)
             {
-                return new DetailedResult<List<CloudFoundryOrganization>>(
-                        content: null,
-                        succeeded: false,
-                        explanation: orgsDetailedResult.Explanation,
-                        cmdDetails: orgsDetailedResult.CmdDetails);
-            }
+                var msg = $"CloudFoundryService attempted to get orgs for '{apiAddress}' but was unable to look up an access token.";
+                logger.Error(msg);
 
-            var orgs = new List<CloudFoundryOrganization>();
-            {
-                orgsDetailedResult.Content.ForEach(delegate (CfCli.Models.Orgs.Org org)
+                return new DetailedResult<List<CloudFoundryOrganization>>()
                 {
-                    orgs.Add(new CloudFoundryOrganization(
-                        org.entity.name, 
-                        org.metadata.guid, 
-                        cf,
-                        org.entity.spaces_url
-                    ));
-                });
+                    Succeeded = false,
+                    Explanation = msg,
+                };
             }
 
-            return new DetailedResult<List<CloudFoundryOrganization>>(
-                succeeded: true,
-                content: orgs,
-                explanation: null,
-                cmdDetails: orgsDetailedResult.CmdDetails);
+            try
+            {
+                orgsFromApi = await cfApiClient.ListOrgs(apiAddress, accessToken);
+            }
+            catch (Exception originalException)
+            {
+                var msg = $"Something went wrong while trying to request orgs from {apiAddress}: {originalException.Message}";
+                logger.Error(msg);
+
+                return new DetailedResult<List<CloudFoundryOrganization>>()
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                };
+            }
+
+            foreach (Org org in orgsFromApi)
+            {
+                if (org.Name == null)
+                {
+                    logger.Error("CloudFoundryService.GetOrgsForCfInstanceAsync encountered an org without a name; omitting it from the returned list of orgs.");
+                }
+                else if (org.Guid == null)
+                {
+                    logger.Error("CloudFoundryService.GetOrgsForCfInstanceAsync encountered an org without a guid; omitting it from the returned list of orgs.");
+                }
+                else
+                {
+                    orgsToReturn.Add(new CloudFoundryOrganization(org.Name, org.Guid, cf));
+                }
+            }
+
+            return new DetailedResult<List<CloudFoundryOrganization>>()
+            {
+                Succeeded = true,
+                Content = orgsToReturn,
+            };
         }
 
+        /// <summary>
+        /// Requests spaces for <paramref name="org"/> using access token from <see cref="CfCliService"/>.
+        /// </summary>
+        /// <param name="org"></param>
+        /// <param name="skipSsl"></param>
         public async Task<DetailedResult<List<CloudFoundrySpace>>> GetSpacesForOrgAsync(CloudFoundryOrganization org, bool skipSsl = true)
         {
-            var targetApiResult = cfCliService.TargetApi(org.ParentCf.ApiAddress, skipSsl);
-            if (!targetApiResult.Succeeded)
+            List<Space> spacesFromApi;
+            var spacesToReturn = new List<CloudFoundrySpace>();
+
+            string apiAddress = org.ParentCf.ApiAddress;
+
+            var accessToken = cfCliService.GetOAuthToken();
+            if (accessToken == null)
             {
-                return new DetailedResult<List<CloudFoundrySpace>>(
-                        content: null,
-                        succeeded: false,
-                        explanation: targetApiResult.Explanation,
-                        cmdDetails: targetApiResult.CmdDetails);
+                var msg = $"CloudFoundryService attempted to get spaces for '{org.OrgName}' but was unable to look up an access token.";
+                logger.Error(msg);
+
+                return new DetailedResult<List<CloudFoundrySpace>>()
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                };
             }
 
-            DetailedResult<List<CfCli.Models.Spaces.Space>> spacesDetailedResult = await cfCliService.GetSpacesAsync(org.SpacesUrl);
-
-            if (!spacesDetailedResult.Succeeded || spacesDetailedResult.Content == null)
+            try
             {
-                return new DetailedResult<List<CloudFoundrySpace>>(
-                        content: null,
-                        succeeded: false,
-                        explanation: spacesDetailedResult.Explanation,
-                        cmdDetails: spacesDetailedResult.CmdDetails);
+                spacesFromApi = await cfApiClient.ListSpacesForOrg(apiAddress, accessToken, org.OrgId);
+            }
+            catch (Exception originalException)
+            {
+                var msg = $"Something went wrong while trying to request spaces from {apiAddress}: {originalException.Message}";
+                logger.Error(msg);
+
+                return new DetailedResult<List<CloudFoundrySpace>>()
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                };
             }
 
-            var spaces = new List<CloudFoundrySpace>();
-            spacesDetailedResult.Content.ForEach(delegate (CfCli.Models.Spaces.Space space)
+            foreach (Space space in spacesFromApi)
             {
-                spaces.Add(new CloudFoundrySpace(space.entity.name, space.metadata.guid, org, space.entity.apps_url));
-            });
+                if (space.Name == null)
+                {
+                    logger.Error("CloudFoundryService.GetSpacesForOrgAsync encountered a space without a name; omitting it from the returned list of spaces.");
+                }
+                else if (space.Guid == null)
+                {
+                    logger.Error("CloudFoundryService.GetSpacesForOrgAsync encountered a space without a guid; omitting it from the returned list of spaces.");
+                }
+                else
+                {
+                    spacesToReturn.Add(new CloudFoundrySpace(space.Name, space.Guid, org));
+                }
+            }
 
-            return new DetailedResult<List<CloudFoundrySpace>>(
-                    succeeded: true,
-                    content: spaces,
-                    explanation: null,
-                    cmdDetails: spacesDetailedResult.CmdDetails);
+            return new DetailedResult<List<CloudFoundrySpace>>()
+            {
+                Succeeded = true,
+                Content = spacesToReturn,
+            };
         }
 
+        /// <summary>
+        /// Requests apps for <paramref name="space"/> using access token from <see cref="CfCliService"/>.
+        /// </summary>
+        /// <param name="space"></param>
+        /// <param name="skipSsl"></param>
         public async Task<DetailedResult<List<CloudFoundryApp>>> GetAppsForSpaceAsync(CloudFoundrySpace space, bool skipSsl = true)
         {
-            var targetApiResult = cfCliService.TargetApi(space.ParentOrg.ParentCf.ApiAddress, skipSsl);
-            if (!targetApiResult.Succeeded)
-            {
-                return new DetailedResult<List<CloudFoundryApp>>(
-                    succeeded: false,
-                    content: null,
-                    explanation: targetApiResult.Explanation,
-                    cmdDetails: targetApiResult.CmdDetails);
-            }
+            List<App> appsFromApi;
+            var appsToReturn = new List<CloudFoundryApp>();
 
-            DetailedResult<List<CfCli.Models.Apps.App>> appsDetailedResult = await cfCliService.GetAppsAsync(space.AppsUrl);
-            
-            if (!appsDetailedResult.Succeeded || appsDetailedResult.Content == null)
-            {
-                return new DetailedResult<List<CloudFoundryApp>>(
-                        content: null,
-                        succeeded: false,
-                        explanation: appsDetailedResult.Explanation,
-                        cmdDetails: appsDetailedResult.CmdDetails);
-            }
+            string apiAddress = space.ParentOrg.ParentCf.ApiAddress;
 
-            var apps = new List<CloudFoundryApp>();
-            appsDetailedResult.Content.ForEach(delegate (CfCli.Models.Apps.App app)
+            var accessToken = cfCliService.GetOAuthToken();
+            if (accessToken == null)
             {
-                var appToAdd = new CloudFoundryApp(app.entity.name, app.metadata.guid, space)
+                var msg = $"CloudFoundryService attempted to get apps for '{space.SpaceName}' but was unable to look up an access token.";
+                logger.Error(msg);
+
+                return new DetailedResult<List<CloudFoundryApp>>()
                 {
-                    State = app.entity.state
+                    Succeeded = false,
+                    Explanation = msg,
                 };
-                apps.Add(appToAdd);
-            });
+            }
 
-            return new DetailedResult<List<CloudFoundryApp>>(
-                succeeded: true,
-                content: apps,
-                explanation: null,
-                cmdDetails: appsDetailedResult.CmdDetails);
+            try
+            {
+                appsFromApi = await cfApiClient.ListAppsForSpace(apiAddress, accessToken, space.SpaceId);
+            }
+            catch (Exception originalException)
+            {
+                var msg = $"Something went wrong while trying to request apps from {apiAddress}: {originalException.Message}";
+                logger.Error(msg);
+
+                return new DetailedResult<List<CloudFoundryApp>>()
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                };
+            }
+
+            foreach (App app in appsFromApi)
+            {
+                if (app.Name == null)
+                {
+                    logger.Error("CloudFoundryService.GetAppsForSpaceAsync encountered an app without a name; omitting it from the returned list of apps.");
+                }
+                else if (app.Guid == null)
+                {
+                    logger.Error("CloudFoundryService.GetAppsForSpaceAsync encountered an app without a guid; omitting it from the returned list of apps.");
+                }
+                else
+                {
+                    appsToReturn.Add(new CloudFoundryApp(app.Name, app.Guid, space));
+                }
+            }
+
+            return new DetailedResult<List<CloudFoundryApp>>()
+            {
+                Succeeded = true,
+                Content = appsToReturn,
+            };
         }
 
         public static void FormatExceptionMessage(Exception ex, List<string> message)
@@ -242,61 +328,183 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             }
         }
 
+        /// <summary>
+        /// Stop <paramref name="app"/> using token from <see cref="CfCliService"/>.
+        /// </summary>
+        /// <param name="app"></param>
+        /// <param name="skipSsl"></param>
         public async Task<DetailedResult> StopAppAsync(CloudFoundryApp app, bool skipSsl = true)
         {
-            var targetApiResult = cfCliService.TargetApi(app.ParentSpace.ParentOrg.ParentCf.ApiAddress, skipSsl);
-            if (!targetApiResult.Succeeded) return new DetailedResult(false, targetApiResult.Explanation, targetApiResult.CmdDetails);
+            bool appWasStopped;
 
-            var targetOrgResult = cfCliService.TargetOrg(app.ParentSpace.ParentOrg.OrgName);
-            if (!targetOrgResult.Succeeded) return new DetailedResult(false, targetOrgResult.Explanation, targetOrgResult.CmdDetails);
+            string apiAddress = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
 
-            var targetSpaceResult = cfCliService.TargetSpace(app.ParentSpace.SpaceName);
-            if (!targetSpaceResult.Succeeded) return new DetailedResult(false, targetSpaceResult.Explanation, targetSpaceResult.CmdDetails);
+            var accessToken = cfCliService.GetOAuthToken();
+            if (accessToken == null)
+            {
+                var msg = $"CloudFoundryService attempted to stop app '{app.AppName}' but was unable to look up an access token.";
+                logger.Error(msg);
 
-            DetailedResult stopResult = await cfCliService.StopAppByNameAsync(app.AppName);
+                return new DetailedResult
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                };
+            }
 
-            if (!stopResult.Succeeded) return new DetailedResult(false, stopResult.Explanation, stopResult.CmdDetails);
+            try
+            {
+                appWasStopped = await cfApiClient.StopAppWithGuid(apiAddress, accessToken, app.AppId);
+            }
+            catch (Exception originalException)
+            {
+                var msg = $"Something went wrong while trying to stop app '{app.AppName}': {originalException.Message}.";
+
+                logger.Error(msg);
+
+                return new DetailedResult
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                };
+            }
+
+            if (!appWasStopped)
+            {
+                var msg = $"Attempted to stop app '{app.AppName}' but it hasn't been stopped.";
+
+                logger.Error(msg);
+
+                return new DetailedResult
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                };
+            }
 
             app.State = "STOPPED";
-            return stopResult;
+            return new DetailedResult
+            {
+                Succeeded = true,
+            };
         }
 
+        /// <summary>
+        /// Start <paramref name="app"/> using token from <see cref="CfCliService"/>.
+        /// </summary>
+        /// <param name="app"></param>
+        /// <param name="skipSsl"></param>
         public async Task<DetailedResult> StartAppAsync(CloudFoundryApp app, bool skipSsl = true)
         {
-            var targetApiResult = cfCliService.TargetApi(app.ParentSpace.ParentOrg.ParentCf.ApiAddress, skipSsl);
-            if (!targetApiResult.Succeeded) return new DetailedResult(false, targetApiResult.Explanation, targetApiResult.CmdDetails);
+            bool appWasStarted;
 
-            var targetOrgResult = cfCliService.TargetOrg(app.ParentSpace.ParentOrg.OrgName);
-            if (!targetOrgResult.Succeeded) return new DetailedResult(false, targetOrgResult.Explanation, targetOrgResult.CmdDetails);
+            string apiAddress = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
 
-            var targetSpaceResult = cfCliService.TargetSpace(app.ParentSpace.SpaceName);
-            if (!targetSpaceResult.Succeeded) return new DetailedResult(false, targetSpaceResult.Explanation, targetSpaceResult.CmdDetails);
+            var accessToken = cfCliService.GetOAuthToken();
+            if (accessToken == null)
+            {
+                var msg = $"CloudFoundryService attempted to start app '{app.AppName}' but was unable to look up an access token.";
+                logger.Error(msg);
 
-            DetailedResult startResult = await cfCliService.StartAppByNameAsync(app.AppName);
+                return new DetailedResult
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                };
+            }
 
-            if (!startResult.Succeeded) return new DetailedResult(false, startResult.Explanation, startResult.CmdDetails);
+            try
+            {
+                appWasStarted = await cfApiClient.StartAppWithGuid(apiAddress, accessToken, app.AppId);
+            }
+            catch (Exception originalException)
+            {
+                var msg = $"Something went wrong while trying to start app '{app.AppName}': {originalException.Message}.";
+
+                logger.Error(msg);
+
+                return new DetailedResult
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                };
+            }
+
+            if (!appWasStarted)
+            {
+                var msg = $"Attempted to start app '{app.AppName}' but it hasn't been started.";
+
+                logger.Error(msg);
+
+                return new DetailedResult
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                };
+            }
 
             app.State = "STARTED";
-            return startResult;
+            return new DetailedResult
+            {
+                Succeeded = true,
+            };
         }
 
         public async Task<DetailedResult> DeleteAppAsync(CloudFoundryApp app, bool skipSsl = true, bool removeRoutes = true)
         {
-            var targetApiResult = cfCliService.TargetApi(app.ParentSpace.ParentOrg.ParentCf.ApiAddress, skipSsl);
-            if (!targetApiResult.Succeeded) return new DetailedResult(false, targetApiResult.Explanation, targetApiResult.CmdDetails);
+            bool appWasDeleted;
 
-            var targetOrgResult = cfCliService.TargetOrg(app.ParentSpace.ParentOrg.OrgName);
-            if (!targetOrgResult.Succeeded) return new DetailedResult(false, targetOrgResult.Explanation, targetOrgResult.CmdDetails);
+            string apiAddress = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
 
-            var targetSpaceResult = cfCliService.TargetSpace(app.ParentSpace.SpaceName);
-            if (!targetSpaceResult.Succeeded) return new DetailedResult(false, targetSpaceResult.Explanation, targetSpaceResult.CmdDetails);
+            var accessToken = cfCliService.GetOAuthToken();
+            if (accessToken == null)
+            {
+                var msg = $"CloudFoundryService attempted to delete app '{app.AppName}' but was unable to look up an access token.";
+                logger.Error(msg);
 
-            DetailedResult deleteResult = await cfCliService.DeleteAppByNameAsync(app.AppName, removeRoutes);
+                return new DetailedResult
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                };
+            }
 
-            if (!deleteResult.Succeeded) return new DetailedResult(false, deleteResult.Explanation, deleteResult.CmdDetails);
+            try
+            {
+                appWasDeleted = await cfApiClient.DeleteAppWithGuid(apiAddress, accessToken, app.AppId);
+
+                if (!appWasDeleted)
+                {
+                    var msg = $"Attempted to delete app '{app.AppName}' but it hasn't been deleted.";
+
+                    logger.Error(msg);
+
+                    return new DetailedResult
+                    {
+                        Succeeded = false,
+                        Explanation = msg,
+                    };
+                }
+            }
+            catch (Exception originalException)
+            {
+                var msg = $"Something went wrong while trying to delete app '{app.AppName}': {originalException.Message}.";
+
+                logger.Error(msg);
+
+                return new DetailedResult
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                };
+            }
+
 
             app.State = "DELETED";
-            return deleteResult;
+            return new DetailedResult
+            {
+                Succeeded = true,
+            };
         }
 
         public async Task<DetailedResult> DeployAppAsync(CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, string appName, string appProjPath, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback)

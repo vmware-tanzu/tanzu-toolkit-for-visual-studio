@@ -5,6 +5,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services
 {
     public class DetailedResult
     {
+        public DetailedResult()
+        {
+        }
+
         public DetailedResult(bool succeeded, string explanation = null, CmdResult cmdDetails = null)
         {
             Succeeded = succeeded;
@@ -24,6 +28,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services
 
     public class DetailedResult<T> : DetailedResult
     {
+        public DetailedResult()
+        {
+        }
+
         public DetailedResult(T content, bool succeeded, string explanation = null, CmdResult cmdDetails = null) : base(succeeded, explanation, cmdDetails)
         {
             Content = content;

@@ -4,6 +4,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Security;
+using Tanzu.Toolkit.CloudFoundryApiClient;
 using Tanzu.Toolkit.VisualStudio.Models;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Apps;
@@ -19,6 +20,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests
     public abstract class ServicesTestSupport
     {
         protected IServiceProvider services;
+        protected Mock<ICfApiClient> mockCfApiClient;
         protected Mock<ICfCliService> mockCfCliService;
         protected Mock<ICmdProcessService> mockCmdProcessService;
         protected Mock<IFileLocatorService> mockFileLocatorService;
@@ -131,29 +133,30 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests
             {
                 new App
                 {
-                    entity = new Services.CfCli.Models.Apps.Entity{ name = app1Name },
-                    metadata = new Services.CfCli.Models.Apps.Metadata{ guid = app1Guid }
+                    name = app1Name,
+                    guid = app1Guid
                 },
                 new App
                 {
-                    entity = new Services.CfCli.Models.Apps.Entity{ name = app2Name },
-                    metadata = new Services.CfCli.Models.Apps.Metadata{ guid = app2Guid }
+                    name = app2Name,
+                    guid = app2Guid
                 },
                 new App
                 {
-                    entity = new Services.CfCli.Models.Apps.Entity{ name = app3Name },
-                    metadata = new Services.CfCli.Models.Apps.Metadata{ guid = app3Guid }
+                    name = app3Name,
+                    guid = app3Guid
                 },
                 new App
                 {
-                    entity = new Services.CfCli.Models.Apps.Entity{ name = app4Name },
-                    metadata = new Services.CfCli.Models.Apps.Metadata{ guid = app4Guid }
+                    name = app4Name,
+                    guid = app4Guid
                 }
             };
 
         protected ServicesTestSupport()
         {
             var services = new ServiceCollection();
+            mockCfApiClient = new Mock<ICfApiClient>();
             mockCfCliService = new Mock<ICfCliService>();
             mockCmdProcessService = new Mock<ICmdProcessService>();
             mockFileLocatorService = new Mock<IFileLocatorService>();
@@ -162,6 +165,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests
             mockLogger = new Mock<ILogger>();
             mockLoggingService.SetupGet(m => m.Logger).Returns(mockLogger.Object);
 
+            services.AddSingleton(mockCfApiClient.Object);
             services.AddSingleton(mockCfCliService.Object);
             services.AddSingleton(mockCmdProcessService.Object);
             services.AddSingleton(mockFileLocatorService.Object);
