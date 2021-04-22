@@ -80,6 +80,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests
         internal static readonly string app2Guid = "app-2-id";
         internal static readonly string app3Guid = "app-3-id";
         internal static readonly string app4Guid = "app-4-id";
+        internal static readonly string app1State = "STARTED";
+        internal static readonly string app2State = "STOPPED";
+        internal static readonly string app3State = "STARTED";
+        internal static readonly string app4State = "STOPPED";
 
         internal static readonly List<Org> mockOrgsResponse = new List<Org>
         {

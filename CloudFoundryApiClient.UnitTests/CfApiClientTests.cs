@@ -364,7 +364,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Exception resultException = null;
 
             MockedRequest cfStopAppRequest = _mockHttp.Expect(expectedPath)
-               .Respond("application/json", JsonConvert.SerializeObject(new App { state = "STOPPED" }));
+               .Respond("application/json", JsonConvert.SerializeObject(new App { State = "STOPPED" }));
 
             _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
@@ -391,7 +391,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Exception resultException = null;
 
             MockedRequest cfStopAppRequest = _mockHttp.Expect(expectedPath)
-               .Respond("application/json", JsonConvert.SerializeObject(new App { state = "fake state != STOPPED" }));
+               .Respond("application/json", JsonConvert.SerializeObject(new App { State = "fake state != STOPPED" }));
 
             _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
@@ -418,7 +418,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Exception resultException = null;
 
             MockedRequest cfStartAppRequest = _mockHttp.Expect(expectedPath)
-               .Respond("application/json", JsonConvert.SerializeObject(new App { state = "STARTED" }));
+               .Respond("application/json", JsonConvert.SerializeObject(new App { State = "STARTED" }));
 
             _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
@@ -445,7 +445,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Exception resultException = null;
 
             MockedRequest cfStartAppRequest = _mockHttp.Expect(expectedPath)
-               .Respond("application/json", JsonConvert.SerializeObject(new App { state = "fake state != STARTED" }));
+               .Respond("application/json", JsonConvert.SerializeObject(new App { State = "fake state != STARTED" }));
 
             _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 

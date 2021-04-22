@@ -25,7 +25,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             fakeCfInstance = new CloudFoundryInstance("fake cf", fakeValidTarget, fakeValidAccessToken);
             fakeOrg = new CloudFoundryOrganization("fake org", "fake org guid", fakeCfInstance);
             fakeSpace = new CloudFoundrySpace("fake space", "fake space guid", fakeOrg);
-            fakeApp = new CloudFoundryApp("fake app", "fake app guid", fakeSpace);
+            fakeApp = new CloudFoundryApp("fake app", "fake app guid", fakeSpace, null);
         }
 
         [TestCleanup]
@@ -472,30 +472,34 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
                 {
                     Name = app1Name,
                     Guid = app1Guid,
+                    State = app1State,
                 },
                 new CloudFoundryApiClient.Models.AppsResponse.App
                 {
                     Name = app2Name,
                     Guid = app2Guid,
+                    State = app2State,
                 },
                 new CloudFoundryApiClient.Models.AppsResponse.App
                 {
                     Name = app3Name,
                     Guid = app3Guid,
+                    State = app3State,
                 },
                 new CloudFoundryApiClient.Models.AppsResponse.App
                 {
                     Name = app4Name,
                     Guid = app4Guid,
+                    State = app4State,
                 },
             };
 
             var expectedResultContent = new List<CloudFoundryApp>
             {
-                new CloudFoundryApp(app1Name, app1Guid, fakeSpace),
-                new CloudFoundryApp(app2Name, app2Guid, fakeSpace),
-                new CloudFoundryApp(app3Name, app3Guid, fakeSpace),
-                new CloudFoundryApp(app4Name, app4Guid, fakeSpace)
+                new CloudFoundryApp(app1Name, app1Guid, fakeSpace, app1State),
+                new CloudFoundryApp(app2Name, app2Guid, fakeSpace, app2State),
+                new CloudFoundryApp(app3Name, app3Guid, fakeSpace, app3State),
+                new CloudFoundryApp(app4Name, app4Guid, fakeSpace, app4State)
             };
             
             mockCfCliService.Setup(m => m.
