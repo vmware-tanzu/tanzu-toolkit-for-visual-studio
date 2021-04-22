@@ -194,7 +194,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             var accessToken = cfCliService.GetOAuthToken();
             if (accessToken == null)
             {
-                var msg = $"CloudFoundryService attempted to get spaces for '{apiAddress}' but was unable to look up an access token.";
+                var msg = $"CloudFoundryService attempted to get spaces for '{org.OrgName}' but was unable to look up an access token.";
                 logger.Error(msg);
 
                 return new DetailedResult<List<CloudFoundrySpace>>()
@@ -258,7 +258,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             var accessToken = cfCliService.GetOAuthToken();
             if (accessToken == null)
             {
-                var msg = $"CloudFoundryService attempted to get apps for '{apiAddress}' but was unable to look up an access token.";
+                var msg = $"CloudFoundryService attempted to get apps for '{space.SpaceName}' but was unable to look up an access token.";
                 logger.Error(msg);
 
                 return new DetailedResult<List<CloudFoundryApp>>()
