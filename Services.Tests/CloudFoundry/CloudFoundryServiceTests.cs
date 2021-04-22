@@ -721,61 +721,73 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
 
             mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
         }
-
+        
 
         [TestMethod]
         [TestCategory("DeleteApp")]
-        public async Task DeleteAppAsync_ReturnsSuccessfulResult_AndUpdatesAppState_WhenDeleteCmdSucceeds()
+        public async Task DeleteAppAsync_ReturnsSuccessfulResult_AndUpdatesAppState()
         {
             fakeApp.State = "STOPPED";
 
-            mockCfCliService.Setup(mock => mock.
-                TargetApi(fakeCfInstance.ApiAddress, true))
-                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
+            mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns(fakeValidAccessToken);
 
-            mockCfCliService.Setup(mock => mock.
-               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
+            mockCfApiClient.Setup(m => m.
+                DeleteAppWithGuid(fakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, fakeValidAccessToken, fakeApp.AppId))
+                    .ReturnsAsync(true);
 
-            mockCfCliService.Setup(mock => mock.
-               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
-
-            mockCfCliService.Setup(mock => mock.
-                DeleteAppByNameAsync(fakeApp.AppName, true))
-                    .ReturnsAsync(new DetailedResult(true, null, fakeSuccessCmdResult));
-
-            var result = await cfService.DeleteAppAsync(fakeApp);
+            DetailedResult result = await cfService.DeleteAppAsync(fakeApp);
 
             Assert.AreEqual("DELETED", fakeApp.State);
             Assert.IsTrue(result.Succeeded);
             Assert.IsNull(result.Explanation);
-            Assert.AreEqual(fakeSuccessCmdResult, result.CmdDetails);
+            Assert.IsNull(result.CmdDetails);
         }
 
         [TestMethod]
         [TestCategory("DeleteApp")]
-        public async Task DeleteAppAsync_ReturnsFailedResult_WhenDeleteCmdReportsFailure()
+        public async Task DeleteAppAsync_ReturnsFailedResult_WhenDeleteAppWithGuidReturnsFalse()
         {
-            var fakeExplanation = "junk";
+            mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns(fakeValidAccessToken);
 
-            mockCfCliService.Setup(mock => mock.
-                TargetApi(fakeCfInstance.ApiAddress, true))
-                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
+            mockCfApiClient.Setup(m => m.
+                DeleteAppWithGuid(fakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, fakeValidAccessToken, fakeApp.AppId))
+                    .ReturnsAsync(false);
 
-            mockCfCliService.Setup(mock => mock.
-               TargetOrg(fakeOrg.OrgName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
-
-            mockCfCliService.Setup(mock => mock.
-               TargetSpace(fakeSpace.SpaceName)).Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
-
-            mockCfCliService.Setup(mock => mock.
-                DeleteAppByNameAsync(fakeApp.AppName, true))
-                    .ReturnsAsync(new DetailedResult(false, fakeExplanation, fakeFailureCmdResult));
-
-            var result = await cfService.DeleteAppAsync(fakeApp);
+            DetailedResult result = await cfService.DeleteAppAsync(fakeApp);
 
             Assert.IsFalse(result.Succeeded);
-            Assert.AreEqual(fakeExplanation, result.Explanation);
-            Assert.AreEqual(fakeFailureCmdResult, result.CmdDetails);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsNull(result.CmdDetails);
+
+            mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("DeleteApp")]
+        public async Task DeleteAppAsync_ReturnsFailedResult_WhenDeleteAppWithGuidThrowsException()
+        {
+            var fakeExceptionMsg = "junk";
+
+            mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns(fakeValidAccessToken);
+
+            mockCfApiClient.Setup(m => m.
+                DeleteAppWithGuid(fakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, fakeValidAccessToken, fakeApp.AppId))
+                    .Throws(new Exception(fakeExceptionMsg));
+
+            DetailedResult result = await cfService.DeleteAppAsync(fakeApp);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsNull(result.CmdDetails);
+
+            mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
         }
 
 

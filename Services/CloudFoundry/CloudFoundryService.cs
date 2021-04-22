@@ -388,7 +388,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
                 Succeeded = true,
             };
         }
-        
+
         /// <summary>
         /// Start <paramref name="app"/> using token from <see cref="CfCliService"/>.
         /// </summary>
@@ -452,21 +452,59 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
 
         public async Task<DetailedResult> DeleteAppAsync(CloudFoundryApp app, bool skipSsl = true, bool removeRoutes = true)
         {
-            var targetApiResult = cfCliService.TargetApi(app.ParentSpace.ParentOrg.ParentCf.ApiAddress, skipSsl);
-            if (!targetApiResult.Succeeded) return new DetailedResult(false, targetApiResult.Explanation, targetApiResult.CmdDetails);
+            bool appWasDeleted;
 
-            var targetOrgResult = cfCliService.TargetOrg(app.ParentSpace.ParentOrg.OrgName);
-            if (!targetOrgResult.Succeeded) return new DetailedResult(false, targetOrgResult.Explanation, targetOrgResult.CmdDetails);
+            string apiAddress = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
 
-            var targetSpaceResult = cfCliService.TargetSpace(app.ParentSpace.SpaceName);
-            if (!targetSpaceResult.Succeeded) return new DetailedResult(false, targetSpaceResult.Explanation, targetSpaceResult.CmdDetails);
+            var accessToken = cfCliService.GetOAuthToken();
+            if (accessToken == null)
+            {
+                var msg = $"CloudFoundryService attempted to delete app '{app.AppName}' but was unable to look up an access token.";
+                logger.Error(msg);
 
-            DetailedResult deleteResult = await cfCliService.DeleteAppByNameAsync(app.AppName, removeRoutes);
+                return new DetailedResult
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                };
+            }
 
-            if (!deleteResult.Succeeded) return new DetailedResult(false, deleteResult.Explanation, deleteResult.CmdDetails);
+            try
+            {
+                appWasDeleted = await cfApiClient.DeleteAppWithGuid(apiAddress, accessToken, app.AppId);
+
+                if (!appWasDeleted)
+                {
+                    var msg = $"Attempted to delete app '{app.AppName}' but it hasn't been deleted.";
+
+                    logger.Error(msg);
+
+                    return new DetailedResult
+                    {
+                        Succeeded = false,
+                        Explanation = msg,
+                    };
+                }
+            }
+            catch (Exception originalException)
+            {
+                var msg = $"Something went wrong while trying to delete app '{app.AppName}': {originalException.Message}.";
+
+                logger.Error(msg);
+
+                return new DetailedResult
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                };
+            }
+
 
             app.State = "DELETED";
-            return deleteResult;
+            return new DetailedResult
+            {
+                Succeeded = true,
+            };
         }
 
         public async Task<DetailedResult> DeployAppAsync(CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, string appName, string appProjPath, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback)

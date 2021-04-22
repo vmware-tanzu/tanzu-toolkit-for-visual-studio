@@ -518,8 +518,9 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         }
 
         [TestMethod]
-        public async Task DeleteAppWithGuid_ReturnsFalse_WhenStatusCodeIsNot202()
+        public async Task DeleteAppWithGuid_ThrowsException_WhenStatusCodeIsNot202()
         {
+            Exception expectedException = null;
             var fakeAppGuid = "my fake guid";
             string expectedPath = _fakeCfApiAddress + CfApiClient.deleteAppsPath + $"/{fakeAppGuid}";
 
@@ -528,20 +529,17 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 
             _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
-            Exception resultException = null;
-            bool appWasDeleted = true;
             try
             {
-                appWasDeleted = await _sut.DeleteAppWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
+                await _sut.DeleteAppWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
             }
             catch (Exception e)
             {
-                resultException = e;
+                expectedException = e;
             }
 
             Assert.AreEqual(1, _mockHttp.GetMatchCount(cfDeleteAppRequest));
-            Assert.IsNull(resultException);
-            Assert.IsFalse(appWasDeleted);
+            Assert.IsNotNull(expectedException);
         }
     }
 }

@@ -277,34 +277,26 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
 
         public async Task<bool> DeleteAppWithGuid(string cfTarget, string accessToken, string appGuid)
         {
-            try
+            // trust any certificate
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            ServicePointManager.ServerCertificateValidationCallback +=
+                (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+            var deleteAppPath = deleteAppsPath + $"/{appGuid}";
+
+            var uri = new UriBuilder(cfTarget)
             {
-                // trust any certificate
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-                ServicePointManager.ServerCertificateValidationCallback +=
-                    (sender, cert, chain, sslPolicyErrors) => { return true; };
+                Path = deleteAppPath
+            };
 
-                var deleteAppPath = deleteAppsPath + $"/{appGuid}";
+            var request = new HttpRequestMessage(HttpMethod.Delete, uri.ToString());
+            request.Headers.Add("Authorization", "Bearer " + accessToken);
 
-                var uri = new UriBuilder(cfTarget)
-                {
-                    Path = deleteAppPath
-                };
+            var response = await _httpClient.SendAsync(request);
+            if (response.StatusCode != HttpStatusCode.Accepted) throw new Exception($"Response from DELETE `{deleteAppPath}` was {response.StatusCode}");
 
-                var request = new HttpRequestMessage(HttpMethod.Delete, uri.ToString());
-                request.Headers.Add("Authorization", "Bearer " + accessToken);
-
-                var response = await _httpClient.SendAsync(request);
-                if (response.StatusCode != HttpStatusCode.Accepted) throw new Exception($"Response from DELETE `{deleteAppPath}` was {response.StatusCode}");
-
-                if (response.StatusCode == HttpStatusCode.Accepted) return true;
-                return false;
-            }
-            catch (Exception e)
-            {
-                System.Diagnostics.Debug.WriteLine(e);
-                return false;
-            }
+            if (response.StatusCode == HttpStatusCode.Accepted) return true;
+            return false;
         }
 
 
