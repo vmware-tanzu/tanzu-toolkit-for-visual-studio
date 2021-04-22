@@ -589,61 +589,69 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
 
         [TestMethod]
         [TestCategory("StopApp")]
-        public async Task StopAppAsync_ReturnsSuccessfulResult_AndUpdatesAppState_WhenStopCmdSucceeds()
+        public async Task StopAppAsync_ReturnsSuccessfulResult_AndUpdatesAppState()
         {
             fakeApp.State = "STARTED";
 
-            mockCfCliService.Setup(mock => mock.
-                TargetApi(fakeCfInstance.ApiAddress, true))
-                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
+            mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns(fakeValidAccessToken);
 
-            mockCfCliService.Setup(mock => mock.
-                TargetOrg(fakeOrg.OrgName))
-                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
-
-            mockCfCliService.Setup(mock => mock.
-                TargetSpace(fakeSpace.SpaceName))
-                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
-
-            mockCfCliService.Setup(mock => mock.
-                StopAppByNameAsync(fakeApp.AppName))
-                    .ReturnsAsync(new DetailedResult(true, null, fakeSuccessCmdResult));
+            mockCfApiClient.Setup(m => m.
+                StopAppWithGuid(fakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, fakeValidAccessToken, fakeApp.AppId))
+                    .ReturnsAsync(true);
 
             DetailedResult result = await cfService.StopAppAsync(fakeApp);
 
             Assert.AreEqual("STOPPED", fakeApp.State);
             Assert.IsTrue(result.Succeeded);
             Assert.IsNull(result.Explanation);
-            Assert.AreEqual(fakeSuccessCmdResult, result.CmdDetails);
+            Assert.IsNull(result.CmdDetails);
         }
 
         [TestMethod]
         [TestCategory("StopApp")]
-        public async Task StopAppAsync_ReturnsFailedResult_WhenStopCmdReportsFailure()
+        public async Task StopAppAsync_ReturnsFailedResult_WhenStopAppWithGuidReturnsFalse()
         {
-            var fakeExplanation = "junk";
+            mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns(fakeValidAccessToken);
 
-            mockCfCliService.Setup(mock => mock.
-                TargetApi(fakeCfInstance.ApiAddress, true))
-                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
-
-            mockCfCliService.Setup(mock => mock.
-                TargetOrg(fakeOrg.OrgName))
-                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
-
-            mockCfCliService.Setup(mock => mock.
-                TargetSpace(fakeSpace.SpaceName))
-                    .Returns(new DetailedResult(true, null, fakeSuccessCmdResult));
-
-            mockCfCliService.Setup(mock => mock.
-                StopAppByNameAsync(fakeApp.AppName))
-                    .ReturnsAsync(new DetailedResult(false, fakeExplanation, fakeFailureCmdResult));
+            mockCfApiClient.Setup(m => m.
+                StopAppWithGuid(fakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, fakeValidAccessToken, fakeApp.AppId))
+                    .ReturnsAsync(false);
 
             DetailedResult result = await cfService.StopAppAsync(fakeApp);
 
             Assert.IsFalse(result.Succeeded);
-            Assert.AreEqual(fakeExplanation, result.Explanation);
-            Assert.AreEqual(fakeFailureCmdResult, result.CmdDetails);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsNull(result.CmdDetails);
+
+            mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("StopApp")]
+        public async Task StopAppAsync_ReturnsFailedResult_WhenStopAppWithGuidThrowsException()
+        {
+            var fakeExceptionMsg = "junk";
+
+            mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns(fakeValidAccessToken);
+
+            mockCfApiClient.Setup(m => m.
+                StopAppWithGuid(fakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, fakeValidAccessToken, fakeApp.AppId))
+                    .Throws(new Exception(fakeExceptionMsg));
+
+            DetailedResult result = await cfService.StopAppAsync(fakeApp);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsNull(result.CmdDetails);
+
+            mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
         }
 
 

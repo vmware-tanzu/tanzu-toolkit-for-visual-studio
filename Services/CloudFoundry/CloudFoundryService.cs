@@ -328,23 +328,65 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             }
         }
 
+        /// <summary>
+        /// Stop <paramref name="app"/> using token from <see cref="CfCliService"/>.
+        /// </summary>
+        /// <param name="app"></param>
+        /// <param name="skipSsl"></param>
         public async Task<DetailedResult> StopAppAsync(CloudFoundryApp app, bool skipSsl = true)
         {
-            var targetApiResult = cfCliService.TargetApi(app.ParentSpace.ParentOrg.ParentCf.ApiAddress, skipSsl);
-            if (!targetApiResult.Succeeded) return new DetailedResult(false, targetApiResult.Explanation, targetApiResult.CmdDetails);
+            bool appWasStopped;
 
-            var targetOrgResult = cfCliService.TargetOrg(app.ParentSpace.ParentOrg.OrgName);
-            if (!targetOrgResult.Succeeded) return new DetailedResult(false, targetOrgResult.Explanation, targetOrgResult.CmdDetails);
+            string apiAddress = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
 
-            var targetSpaceResult = cfCliService.TargetSpace(app.ParentSpace.SpaceName);
-            if (!targetSpaceResult.Succeeded) return new DetailedResult(false, targetSpaceResult.Explanation, targetSpaceResult.CmdDetails);
+            var accessToken = cfCliService.GetOAuthToken();
+            if (accessToken == null)
+            {
+                var msg = $"CloudFoundryService attempted to stop app '{app.AppName}' but was unable to look up an access token.";
+                logger.Error(msg);
 
-            DetailedResult stopResult = await cfCliService.StopAppByNameAsync(app.AppName);
+                return new DetailedResult
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                };
+            }
 
-            if (!stopResult.Succeeded) return new DetailedResult(false, stopResult.Explanation, stopResult.CmdDetails);
+            try
+            {
+                appWasStopped = await cfApiClient.StopAppWithGuid(apiAddress, accessToken, app.AppId);
+            }
+            catch (Exception originalException)
+            {
+                var msg = $"Something went wrong while trying to stop app '{app.AppName}': {originalException.Message}.";
+
+                logger.Error(msg);
+
+                return new DetailedResult
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                };
+            }
+
+            if (!appWasStopped)
+            {
+                var msg = $"Attempted to stop app '{app.AppName}' but it hasn't been stopped.";
+
+                logger.Error(msg);
+
+                return new DetailedResult
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                };
+            }
 
             app.State = "STOPPED";
-            return stopResult;
+            return new DetailedResult
+            {
+                Succeeded = true,
+            };
         }
 
         public async Task<DetailedResult> StartAppAsync(CloudFoundryApp app, bool skipSsl = true)

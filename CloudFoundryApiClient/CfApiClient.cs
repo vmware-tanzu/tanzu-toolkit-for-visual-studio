@@ -37,6 +37,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             AccessToken = null;
         }
 
+
         /// <summary>
         /// LoginAsync contacts the auth server for the specified cfTarget
         /// </summary>
@@ -188,82 +189,47 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             return await GetRemainingPagesForType(firstPageHref, accessToken, new List<App>());
         }
 
-        private async Task<List<ResourceType>> GetRemainingPagesForType<ResourceType>(Href pageAddress, string accessToken, List<ResourceType> resultsSoFar)
+        /// <summary>
+        /// Issues a request to <paramref name="cfApiAddress"/> to stop the app specified by <paramref name="appGuid"/>.
+        /// <para>
+        /// Exceptions:
+        /// <para>
+        /// Throws any exceptions encountered while creating/issuing request or deserializing response.
+        /// </para>
+        /// </para>
+        /// </summary>
+        /// <param name="cfApiAddress"></param>
+        /// <param name="accessToken"></param>
+        /// <param name="appGuid"></param>
+        /// <returns>
+        /// True if response status code indicates success and response contains an app state of "STOPPED".
+        /// <para>False otherwise.</para>
+        /// </returns>
+        public async Task<bool> StopAppWithGuid(string cfApiAddress, string accessToken, string appGuid)
         {
-            if (pageAddress == null) return resultsSoFar;
+            // trust any certificate
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            ServicePointManager.ServerCertificateValidationCallback +=
+                (sender, cert, chain, sslPolicyErrors) => { return true; };
 
-            var request = new HttpRequestMessage(HttpMethod.Get, pageAddress.href);
+            var stopAppPath = listAppsPath + $"/{appGuid}/actions/stop";
+
+            var uri = new UriBuilder(cfApiAddress)
+            {
+                Path = stopAppPath
+            };
+
+            var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString());
             request.Headers.Add("Authorization", "Bearer " + accessToken);
 
             var response = await _httpClient.SendAsync(request);
-            if (!response.IsSuccessStatusCode) throw new Exception($"Response from GET `{pageAddress}` was {response.StatusCode}");
+            if (!response.IsSuccessStatusCode) throw new Exception($"Response from POST `{stopAppPath}` was {response.StatusCode}");
 
             string resultContent = await response.Content.ReadAsStringAsync();
+            var result = JsonConvert.DeserializeObject<App>(resultContent);
 
-            Href nextPageHref;
-
-            if (typeof(ResourceType) == typeof(Org))
-            {
-                var results = JsonConvert.DeserializeObject<OrgsResponse>(resultContent);
-                resultsSoFar.AddRange((IEnumerable<ResourceType>)results.Orgs.ToList());
-
-                nextPageHref = results.Pagination.next;
-            }
-            else if (typeof(ResourceType) == typeof(Space))
-            {
-                var results = JsonConvert.DeserializeObject<SpacesResponse>(resultContent);
-                resultsSoFar.AddRange((IEnumerable<ResourceType>)results.Spaces.ToList());
-
-                nextPageHref = results.Pagination.next;
-            }
-            else if (typeof(ResourceType) == typeof(App))
-            {
-                var results = JsonConvert.DeserializeObject<AppsResponse>(resultContent);
-                resultsSoFar.AddRange((IEnumerable<ResourceType>)results.Apps.ToList());
-
-                nextPageHref = results.Pagination.next;
-            }
-            else
-            {
-                throw new Exception($"ResourceType unknown: {typeof(ResourceType).Name}");
-            }
-
-            return await GetRemainingPagesForType(nextPageHref, accessToken, resultsSoFar);
-        }
-
-        public async Task<bool> StopAppWithGuid(string cfTarget, string accessToken, string appGuid)
-        {
-            try
-            {
-                // trust any certificate
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-                ServicePointManager.ServerCertificateValidationCallback +=
-                    (sender, cert, chain, sslPolicyErrors) => { return true; };
-
-                var stopAppPath = listAppsPath + $"/{appGuid}/actions/stop";
-
-                var uri = new UriBuilder(cfTarget)
-                {
-                    Path = stopAppPath
-                };
-
-                var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString());
-                request.Headers.Add("Authorization", "Bearer " + accessToken);
-
-                var response = await _httpClient.SendAsync(request);
-                if (!response.IsSuccessStatusCode) throw new Exception($"Response from POST `{stopAppPath}` was {response.StatusCode}");
-
-                string resultContent = await response.Content.ReadAsStringAsync();
-                var result = JsonConvert.DeserializeObject<App>(resultContent);
-
-                if (result.state == "STOPPED") return true;
-                return false;
-            }
-            catch (Exception e)
-            {
-                System.Diagnostics.Debug.WriteLine(e);
-                return false;
-            }
+            if (result.state == "STOPPED") return true;
+            return false;
         }
 
         public async Task<bool> StartAppWithGuid(string cfTarget, string accessToken, string appGuid)
@@ -375,5 +341,49 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
 
             return uriResult;
         }
+
+        private async Task<List<ResourceType>> GetRemainingPagesForType<ResourceType>(Href pageAddress, string accessToken, List<ResourceType> resultsSoFar)
+        {
+            if (pageAddress == null) return resultsSoFar;
+
+            var request = new HttpRequestMessage(HttpMethod.Get, pageAddress.href);
+            request.Headers.Add("Authorization", "Bearer " + accessToken);
+
+            var response = await _httpClient.SendAsync(request);
+            if (!response.IsSuccessStatusCode) throw new Exception($"Response from GET `{pageAddress}` was {response.StatusCode}");
+
+            string resultContent = await response.Content.ReadAsStringAsync();
+
+            Href nextPageHref;
+
+            if (typeof(ResourceType) == typeof(Org))
+            {
+                var results = JsonConvert.DeserializeObject<OrgsResponse>(resultContent);
+                resultsSoFar.AddRange((IEnumerable<ResourceType>)results.Orgs.ToList());
+
+                nextPageHref = results.Pagination.next;
+            }
+            else if (typeof(ResourceType) == typeof(Space))
+            {
+                var results = JsonConvert.DeserializeObject<SpacesResponse>(resultContent);
+                resultsSoFar.AddRange((IEnumerable<ResourceType>)results.Spaces.ToList());
+
+                nextPageHref = results.Pagination.next;
+            }
+            else if (typeof(ResourceType) == typeof(App))
+            {
+                var results = JsonConvert.DeserializeObject<AppsResponse>(resultContent);
+                resultsSoFar.AddRange((IEnumerable<ResourceType>)results.Apps.ToList());
+
+                nextPageHref = results.Pagination.next;
+            }
+            else
+            {
+                throw new Exception($"ResourceType unknown: {typeof(ResourceType).Name}");
+            }
+
+            return await GetRemainingPagesForType(nextPageHref, accessToken, resultsSoFar);
+        }
+
     }
 }
