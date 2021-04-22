@@ -1,21 +1,25 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
+using System.Runtime.Serialization;
 
 namespace Tanzu.Toolkit.CloudFoundryApiClient.Models.OrgsResponse
 {
+    [DataContract]
     public class OrgsResponse
     {
-        public Pagination pagination { get; set; }
-        [JsonProperty("resources")]
+        [DataMember(Name = "pagination")]
+        public Pagination Pagination { get; set; }
+        [DataMember(Name = "resources")]
         public Org[] Orgs { get; set; }
     }
 
     public class Org
     {
-        public string guid { get; set; }
+        [DataMember(Name = "guid")]
+        public string Guid { get; set; }
         public DateTime created_at { get; set; }
         public DateTime updated_at { get; set; }
-        public string name { get; set; }
+        [DataMember(Name = "name")]
+        public string Name { get; set; }
         public bool suspended { get; set; }
         public Relationships relationships { get; set; }
         public Links links { get; set; }

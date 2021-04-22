@@ -6,7 +6,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse
 
     public class AppsResponse
     {
-        public Pagination pagination { get; set; }
+        [JsonProperty("pagination")]
+        public Pagination Pagination { get; set; }
 
         [JsonProperty("resources")]
         public App[] Apps { get; set; }
@@ -14,8 +15,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse
 
     public class App
     {
-        public string guid { get; set; }
-        public string name { get; set; }
+        [JsonProperty("guid")]
+        public string Guid { get; set; }
+        [JsonProperty("name")]
+        public string Name { get; set; }
         public string state { get; set; }
         public DateTime created_at { get; set; }
         public DateTime updated_at { get; set; }

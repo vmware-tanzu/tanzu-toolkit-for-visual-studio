@@ -329,7 +329,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             fakeCfInstanceViewModel.Children = new ObservableCollection<TreeViewItemViewModel>
             {
-                new OrgViewModel(new CloudFoundryOrganization(fakeOrgName1, fakeOrgGuid1, fakeCfInstance, "fake spaces url"), services)
+                new OrgViewModel(new CloudFoundryOrganization(fakeOrgName1, fakeOrgGuid1, fakeCfInstance), services)
             };
 
             fakeCfInstanceViewModel.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
@@ -339,8 +339,8 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             var fakeOrgsList = new List<CloudFoundryOrganization>
             {
-                new CloudFoundryOrganization(fakeOrgName2, fakeOrgGuid2, fakeCfInstance, "fake spaces url"),
-                new CloudFoundryOrganization(fakeOrgName3, fakeOrgGuid3, fakeCfInstance, "fake spaces url")
+                new CloudFoundryOrganization(fakeOrgName2, fakeOrgGuid2, fakeCfInstance),
+                new CloudFoundryOrganization(fakeOrgName3, fakeOrgGuid3, fakeCfInstance)
             };
 
             var fakeSuccessResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: true, content: fakeOrgsList);
@@ -378,7 +378,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             fakeCfInstanceViewModel.Children = new ObservableCollection<TreeViewItemViewModel>
             {
-                new OrgViewModel(new CloudFoundryOrganization(fakeOrgName1, fakeOrgGuid1, fakeCfInstance, "fake spaces url"), services)
+                new OrgViewModel(new CloudFoundryOrganization(fakeOrgName1, fakeOrgGuid1, fakeCfInstance), services)
             };
 
             var newEmptyOrgsList = new List<CloudFoundryOrganization>();
@@ -414,7 +414,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             var newOrgsList = new List<CloudFoundryOrganization>
             {
-                new CloudFoundryOrganization(fakeOrgName1, fakeOrgGuid1, fakeCfInstance, "fake spaces url"),
+                new CloudFoundryOrganization(fakeOrgName1, fakeOrgGuid1, fakeCfInstance),
             };
 
             var fakeSuccessResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: true, content: newOrgsList);
@@ -436,7 +436,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task RefreshOrg_UpdatesChildrenOnOrgViewModel()
         {
-            var fakeOrg = new CloudFoundryOrganization("fake org name", "fake org id", null, "fake spaces url");
+            var fakeOrg = new CloudFoundryOrganization("fake org name", "fake org id", null);
             var fakeOrgViewModel = new OrgViewModel(fakeOrg, services);
 
             var fakeSpaceName1 = "fake space 1";
@@ -449,7 +449,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             fakeOrgViewModel.Children = new ObservableCollection<TreeViewItemViewModel>
             {
-                new SpaceViewModel(new CloudFoundrySpace(fakeSpaceName1, fakeSpaceGuid1, fakeOrg, "fake apps url"), services)
+                new SpaceViewModel(new CloudFoundrySpace(fakeSpaceName1, fakeSpaceGuid1, fakeOrg), services)
             };
 
             fakeOrgViewModel.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
@@ -463,8 +463,8 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             List<CloudFoundrySpace> fakeSpaceList = new List<CloudFoundrySpace>
             {
-                new CloudFoundrySpace(fakeSpaceName2, fakeSpaceGuid2, fakeOrg, "fake apps url"),
-                new CloudFoundrySpace(fakeSpaceName3, fakeSpaceGuid3, fakeOrg, "fake apps url")
+                new CloudFoundrySpace(fakeSpaceName2, fakeSpaceGuid2, fakeOrg),
+                new CloudFoundrySpace(fakeSpaceName3, fakeSpaceGuid3, fakeOrg)
             };
 
             var fakeSuccessResponse = new DetailedResult<List<CloudFoundrySpace>>
@@ -496,7 +496,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task RefreshOrg_AddsPlaceholder_ToOrgsThatBecameEmpty()
         {
-            var fakeOrg = new CloudFoundryOrganization("fake name", "fake id", null, "fake spaces url");
+            var fakeOrg = new CloudFoundryOrganization("fake name", "fake id", null);
             var fakeOrgViewModel = new OrgViewModel(fakeOrg, services);
 
             var fakeSpaceName1 = "fake space 1";
@@ -504,7 +504,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             fakeOrgViewModel.Children = new ObservableCollection<TreeViewItemViewModel>
             {
-                new SpaceViewModel(new CloudFoundrySpace(fakeSpaceName1, fakeSpaceGuid1, fakeOrg, "fake spaces url"), services)
+                new SpaceViewModel(new CloudFoundrySpace(fakeSpaceName1, fakeSpaceGuid1, fakeOrg), services)
             };
 
             var newEmptySpacesList = new List<CloudFoundrySpace>();
@@ -528,7 +528,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task RefreshOrg_RemovesPlaceholder_FromEmptyOrgsThatGainedChildren()
         {
-            var fakeOrg = new CloudFoundryOrganization("fake name", "fake id", null, "fake spaces url");
+            var fakeOrg = new CloudFoundryOrganization("fake name", "fake id", null);
             var fakeOrgViewModel = new OrgViewModel(fakeOrg, services);
 
             var fakeSpaceName1 = "fake space 1";
@@ -543,7 +543,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             var newSpacesList = new List<CloudFoundrySpace>
             {
-                new CloudFoundrySpace(fakeSpaceName1, fakeSpaceGuid1, fakeOrg, "fake spaces url"),
+                new CloudFoundrySpace(fakeSpaceName1, fakeSpaceGuid1, fakeOrg),
             };
 
             var fakeSuccessResult = new DetailedResult<List<CloudFoundrySpace>>(succeeded: true, content: newSpacesList);
@@ -565,7 +565,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task RefreshSpace_UpdatesChildrenOnSpaceViewModel()
         {
-            var fakeSpace = new CloudFoundrySpace("fake space name", "fake space id", null, "fake apps url");
+            var fakeSpace = new CloudFoundrySpace("fake space name", "fake space id", null);
             var fakeSpaceViewModel = new SpaceViewModel(fakeSpace, services);
 
             var fakeAppName1 = "fake app 1";
@@ -622,7 +622,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task RefreshSpace_AddsPlaceholder_ToSpacesThatBecameEmpty()
         {
-            var fakeSpace = new CloudFoundrySpace("fake name", "fake id", null, "fake apps url");
+            var fakeSpace = new CloudFoundrySpace("fake name", "fake id", null);
             var fakeSpaceViewModel = new SpaceViewModel(fakeSpace, services);
 
             var fakeAppName1 = "fake app 1";
@@ -654,7 +654,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task RefreshSpace_RemovesPlaceholder_FromEmptySpacesThatGainedChildren()
         {
-            var fakeSpace = new CloudFoundrySpace("fake name", "fake id", null, "fake apps url");
+            var fakeSpace = new CloudFoundrySpace("fake name", "fake id", null);
             var fakeSpaceViewModel = new SpaceViewModel(fakeSpace, services);
 
             var fakeAppName1 = "fake app 1";
@@ -695,12 +695,12 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             var fakeNewCfInstance = new CloudFoundryInstance("new cf", "http://new.api.address", "new-token");
             var cfivm = new CfInstanceViewModel(fakeInitialCfInstance, services);
 
-            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance, "fake spaces url");
-            var fakeNewOrg = new CloudFoundryOrganization("new org", "new org id", fakeInitialCfInstance, "fake spaces url");
+            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance);
+            var fakeNewOrg = new CloudFoundryOrganization("new org", "new org id", fakeInitialCfInstance);
             var ovm = new OrgViewModel(fakeInitialOrg, services);
 
-            var fakeInitialSpace = new CloudFoundrySpace("fake space name", "fake space id", fakeInitialOrg, "fake apps url");
-            var fakeNewSpace = new CloudFoundrySpace("new space", "new space id", fakeInitialOrg, "fake apps url");
+            var fakeInitialSpace = new CloudFoundrySpace("fake space name", "fake space id", fakeInitialOrg);
+            var fakeNewSpace = new CloudFoundrySpace("new space", "new space id", fakeInitialOrg);
             var svm = new SpaceViewModel(fakeInitialSpace, services);
 
             var fakeInitialApp = new CloudFoundryApp("fake app name", "fake app id", fakeInitialSpace);
@@ -833,7 +833,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address", "fake-token");
             var cfivm = new CfInstanceViewModel(fakeInitialCfInstance, services);
 
-            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance, "fake spaces url");
+            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance);
             var ovm = new OrgViewModel(fakeInitialOrg, services);
 
             var fakeCfDict = new Dictionary<string, CloudFoundryInstance>
@@ -878,10 +878,10 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address", "fake-token");
             var cfivm = new CfInstanceViewModel(fakeInitialCfInstance, services);
 
-            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance, "fake spaces url");
+            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance);
             var ovm = new OrgViewModel(fakeInitialOrg, services);
 
-            var fakeInitialSpace = new CloudFoundrySpace("fake space name", "fake space id", fakeInitialOrg, "fake apps url");
+            var fakeInitialSpace = new CloudFoundrySpace("fake space name", "fake space id", fakeInitialOrg);
             var svm = new SpaceViewModel(fakeInitialSpace, services);
 
             var fakeCfDict = new Dictionary<string, CloudFoundryInstance>
@@ -942,10 +942,10 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address", "fake-token");
             var cfivm = new CfInstanceViewModel(fakeInitialCfInstance, services);
 
-            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance, "fake spaces url");
+            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance);
             var ovm = new OrgViewModel(fakeInitialOrg, services);
 
-            var fakeInitialSpace = new CloudFoundrySpace("fake space name", "fake space id", fakeInitialOrg, "fake apps url");
+            var fakeInitialSpace = new CloudFoundrySpace("fake space name", "fake space id", fakeInitialOrg);
             var svm = new SpaceViewModel(fakeInitialSpace, services);
 
             var fakeInitialApp = new CloudFoundryApp("fake app name", "fake app id", fakeInitialSpace);
@@ -1030,7 +1030,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             cfivm.Children = new ObservableCollection<TreeViewItemViewModel> { cfivm.EmptyPlaceholder }; 
             cfivm.HasEmptyPlaceholder = true;
 
-            var fakeNewOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance, "fake spaces url");
+            var fakeNewOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance);
             var ovm = new OrgViewModel(fakeNewOrg, services);
 
             var fakeCfDict = new Dictionary<string, CloudFoundryInstance>
@@ -1076,14 +1076,14 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address", "fake-token");
             var cfivm = new CfInstanceViewModel(fakeInitialCfInstance, services);
 
-            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance, "fake spaces url");
+            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance);
             var ovm = new OrgViewModel(fakeInitialOrg, services);
 
             // simulate org initially having no space children
             ovm.Children = new ObservableCollection<TreeViewItemViewModel> { ovm.EmptyPlaceholder };
             ovm.HasEmptyPlaceholder = true;
 
-            var fakeNewSpace = new CloudFoundrySpace("fake space name", "fake space id", fakeInitialOrg, "fake apps url");
+            var fakeNewSpace = new CloudFoundrySpace("fake space name", "fake space id", fakeInitialOrg);
             var svm = new SpaceViewModel(fakeNewSpace, services);
 
             var fakeCfDict = new Dictionary<string, CloudFoundryInstance>
@@ -1146,10 +1146,10 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address", "fake-token");
             var cfivm = new CfInstanceViewModel(fakeInitialCfInstance, services);
 
-            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance, "fake spaces url");
+            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance);
             var ovm = new OrgViewModel(fakeInitialOrg, services);
 
-            var fakeInitialSpace = new CloudFoundrySpace("fake space name", "fake space id", fakeInitialOrg, "fake apps url");
+            var fakeInitialSpace = new CloudFoundrySpace("fake space name", "fake space id", fakeInitialOrg);
             var svm = new SpaceViewModel(fakeInitialSpace, services);
 
             // simulate space initially having no app children
@@ -1287,7 +1287,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             var cfivm = new CfInstanceViewModel(fakeCfInstance, services);
 
-            var fakeOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeCfInstance, "fake spaces url");
+            var fakeOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeCfInstance);
             var ovm = new OrgViewModel(fakeOrg, services);
 
             cfivm.Children = new ObservableCollection<TreeViewItemViewModel>
@@ -1358,10 +1358,10 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             var cfivm = new CfInstanceViewModel(fakeCfInstance, services);
 
-            var fakeOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeCfInstance, "fake spaces url");
+            var fakeOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeCfInstance);
             var ovm = new OrgViewModel(fakeOrg, services);
 
-            var fakeSpace = new CloudFoundrySpace("fake space name", "fake space id", fakeOrg, "fake apps url");
+            var fakeSpace = new CloudFoundrySpace("fake space name", "fake space id", fakeOrg);
             var svm = new SpaceViewModel(fakeSpace, services);
 
             cfivm.Children = new ObservableCollection<TreeViewItemViewModel>

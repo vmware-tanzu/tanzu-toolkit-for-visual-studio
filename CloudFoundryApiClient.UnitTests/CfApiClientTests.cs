@@ -15,12 +15,12 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
     {
         private CfApiClient _sut;
         private Mock<IUaaClient> _mockUaaClient = new Mock<IUaaClient>();
-        private static readonly MockHttpMessageHandler _mockHttp = new MockHttpMessageHandler();
+        private MockHttpMessageHandler _mockHttp;
 
         [TestInitialize()]
         public void TestInit()
         {
-            _mockHttp.ResetExpectations();
+            _mockHttp = new MockHttpMessageHandler();
             _mockHttp.Fallback.Throw(new InvalidOperationException("No matching mock handler"));
         }
 
@@ -160,7 +160,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         }
 
         [TestMethod()]
-        public async Task ListOrgs_ReturnsNull_WhenStatusCodeIsNotASuccess()
+        public async Task ListOrgs_ThrowsException_WhenStatusCodeIsNotASuccess()
         {
             string expectedPath = CfApiClient.listOrgsPath;
 
@@ -170,9 +170,17 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 
             _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
-            var result = await _sut.ListOrgs(_fakeCfApiAddress, _fakeAccessToken);
+            Exception expectedException = null;
+            try
+            {
+                var result = await _sut.ListOrgs(_fakeCfApiAddress, _fakeAccessToken);
+            }
+            catch (Exception ex)
+            {
+                expectedException = ex;
+            }
 
-            Assert.IsNull(result);
+            Assert.IsNotNull(expectedException);
             Assert.AreEqual(1, _mockHttp.GetMatchCount(orgsRequest));
         }
 
@@ -213,7 +221,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         }
 
         [TestMethod()]
-        public async Task ListSpacesWithGuid_ReturnsNull_WhenStatusCodeIsNotASuccess()
+        public async Task ListSpacesWithGuid_ThrowsException_WhenStatusCodeIsNotASuccess()
         {
             string expectedPath = CfApiClient.listSpacesPath;
 
@@ -223,9 +231,17 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 
             _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
-            var result = await _sut.ListSpacesForOrg(_fakeCfApiAddress, _fakeAccessToken, "orgGuid");
+            Exception expectedException = null;
+            try
+            {
+                var result = await _sut.ListSpacesForOrg(_fakeCfApiAddress, _fakeAccessToken, "orgGuid");
+            }
+            catch (Exception ex)
+            {
+                expectedException = ex;
+            }
 
-            Assert.IsNull(result);
+            Assert.IsNotNull(expectedException);
             Assert.AreEqual(1, _mockHttp.GetMatchCount(spacesRequest));
         }
 
@@ -260,7 +276,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         }
 
         [TestMethod()]
-        public async Task ListAppsWithGuid_ReturnsNull_WhenStatusCodeIsNotASuccess()
+        public async Task ListAppsWithGuid_ThrowsException_WhenStatusCodeIsNotASuccess()
         {
             string expectedPath = CfApiClient.listAppsPath;
 
@@ -270,9 +286,17 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 
             _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
-            var result = await _sut.ListAppsForSpace(_fakeCfApiAddress, _fakeAccessToken, "spaceGuid");
+            Exception expectedException = null;
+            try
+            {
+                var result = await _sut.ListAppsForSpace(_fakeCfApiAddress, _fakeAccessToken, "spaceGuid");
+            }
+            catch (Exception ex)
+            {
+                expectedException = ex;
+            }
 
-            Assert.IsNull(result);
+            Assert.IsNotNull(expectedException);
             Assert.AreEqual(1, _mockHttp.GetMatchCount(appsRequest));
         }
 

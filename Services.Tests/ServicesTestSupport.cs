@@ -4,6 +4,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Security;
+using Tanzu.Toolkit.CloudFoundryApiClient;
 using Tanzu.Toolkit.VisualStudio.Models;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Apps;
@@ -19,6 +20,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests
     public abstract class ServicesTestSupport
     {
         protected IServiceProvider services;
+        protected Mock<ICfApiClient> mockCfApiClient;
         protected Mock<ICfCliService> mockCfCliService;
         protected Mock<ICmdProcessService> mockCmdProcessService;
         protected Mock<IFileLocatorService> mockFileLocatorService;
@@ -154,6 +156,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests
         protected ServicesTestSupport()
         {
             var services = new ServiceCollection();
+            mockCfApiClient = new Mock<ICfApiClient>();
             mockCfCliService = new Mock<ICfCliService>();
             mockCmdProcessService = new Mock<ICmdProcessService>();
             mockFileLocatorService = new Mock<IFileLocatorService>();
@@ -162,6 +165,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests
             mockLogger = new Mock<ILogger>();
             mockLoggingService.SetupGet(m => m.Logger).Returns(mockLogger.Object);
 
+            services.AddSingleton(mockCfApiClient.Object);
             services.AddSingleton(mockCfCliService.Object);
             services.AddSingleton(mockCmdProcessService.Object);
             services.AddSingleton(mockFileLocatorService.Object);

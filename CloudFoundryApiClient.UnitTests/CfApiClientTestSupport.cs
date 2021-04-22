@@ -123,7 +123,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var nextHref = isLastPage ? null : new Href() { href = $"{apiAddress}{CfApiClient.listOrgsPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
             var previousHref = isFirstPage ? null : new Href() { href = $"{apiAddress}{CfApiClient.listOrgsPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
 
-            pagination = new Pagination
+            Pagination = new Pagination
             {
                 total_results = totalResults,
                 total_pages = totalPages,
@@ -143,8 +143,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                 {
                     orgs[i] = new Org
                     {
-                        name = $"fakeOrg{i + 1}",
-                        guid = $"fakeOrgId-{i + 1}"
+                        Name = $"fakeOrg{i + 1}",
+                        Guid = $"fakeOrgId-{i + 1}"
                     };
                 }
             }
@@ -156,8 +156,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                 {
                     orgs[i] = new Org
                     {
-                        name = $"fakeOrg{i + 1}",
-                        guid = $"fakeOrgId-{i + 1}"
+                        Name = $"fakeOrg{i + 1}",
+                        Guid = $"fakeOrgId-{i + 1}"
                     };
                 }
             }
@@ -178,7 +178,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var nextHref = isLastPage ? null : new Href() { href = $"{apiAddress}{CfApiClient.listSpacesPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
             var previousHref = isFirstPage ? null : new Href() { href = $"{apiAddress}{CfApiClient.listSpacesPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
 
-            pagination = new Pagination
+            Pagination = new Pagination
             {
                 total_results = totalResults,
                 total_pages = totalPages,
@@ -198,8 +198,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                 {
                     spaces[i] = new Space
                     {
-                        name = $"fakeSpace{i + 1}",
-                        guid = $"fakeSpaceId-{i + 1}"
+                        Name = $"fakeSpace{i + 1}",
+                        Guid = $"fakeSpaceId-{i + 1}"
                     };
                 }
             }
@@ -211,8 +211,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                 {
                     spaces[i] = new Space
                     {
-                        name = $"fakeSpace{i + 1}",
-                        guid = $"fakeSpaceId-{i + 1}"
+                        Name = $"fakeSpace{i + 1}",
+                        Guid = $"fakeSpaceId-{i + 1}"
                     };
                 }
             }
@@ -233,7 +233,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var nextHref = isLastPage ? null : new Href() { href = $"{apiAddress}{CfApiClient.listAppsPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
             var previousHref = isFirstPage ? null : new Href() { href = $"{apiAddress}{CfApiClient.listAppsPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
 
-            pagination = new Pagination
+            Pagination = new Pagination
             {
                 total_results = totalResults,
                 total_pages = totalPages,
@@ -253,7 +253,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                 {
                     apps[i] = new App
                     {
-                        name = $"fakeApp{i + 1}"
+                        Name = $"fakeApp{i + 1}"
                     };
                 }
             }
@@ -265,7 +265,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                 {
                     apps[i] = new App
                     {
-                        name = $"fakeApp{i + 1}"
+                        Name = $"fakeApp{i + 1}"
                     };
                 }
             }

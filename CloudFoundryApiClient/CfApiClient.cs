@@ -17,15 +17,15 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
     {
         public string AccessToken { get; private set; }
 
-        internal static readonly string listOrgsPath = "/v3/organizations";
-        internal static readonly string listSpacesPath = "/v3/spaces";
-        internal static readonly string listAppsPath = "/v3/apps";
-        internal static readonly string deleteAppsPath = "/v3/apps";
+        internal const string listOrgsPath = "/v3/organizations";
+        internal const string listSpacesPath = "/v3/spaces";
+        internal const string listAppsPath = "/v3/apps";
+        internal const string deleteAppsPath = "/v3/apps";
 
-        public static readonly string defaultAuthClientId = "cf";
-        public static readonly string defaultAuthClientSecret = "";
-        public static readonly string AuthServerLookupFailureMessage = "Unable to locate authentication server";
-        public static readonly string InvalidTargetUriMessage = "Invalid target URI";
+        public const string defaultAuthClientId = "cf";
+        public const string defaultAuthClientSecret = "";
+        public const string AuthServerLookupFailureMessage = "Unable to locate authentication server";
+        public const string InvalidTargetUriMessage = "Invalid target URI";
 
         private static IUaaClient _uaaClient;
         private static HttpClient _httpClient;
@@ -70,74 +70,35 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             }
         }
 
-        private async Task<Uri> GetAuthServerUriFromCfTarget(string cfTargetString)
+        /// <summary>
+        /// Recursively requests all pages of results for orgs on the Cloud Foundry instance as specified by <paramref name="cfApiAddress"/>.
+        /// <para>
+        /// Exceptions:
+        /// <para>
+        /// Throws any exceptions encountered while creating/issuing request or deserializing response.
+        /// </para>
+        /// </para>
+        /// </summary>
+        /// <param name="cfApiAddress"></param>
+        /// <param name="accessToken"></param>
+        /// <returns>List of <see cref="Org"/>s.</returns>
+        public async Task<List<Org>> ListOrgs(string cfApiAddress, string accessToken)
         {
-            try
+            // trust any certificate
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            ServicePointManager.ServerCertificateValidationCallback +=
+                (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+            var uri = new UriBuilder(cfApiAddress)
             {
-                Uri authServerUri = null;
+                Path = listOrgsPath,
+            };
 
-                var uri = new UriBuilder(cfTargetString)
-                {
-                    Path = "/",
-                    Port = -1
-                };
+            Href firstPageHref = new Href() { href = uri.ToString() };
 
-                var request = new HttpRequestMessage(HttpMethod.Get, uri.ToString());
+            List<Org> visibleOrgs = await GetRemainingPagesForType(firstPageHref, accessToken, new List<Org>());
 
-                var response = await _httpClient.SendAsync(request);
-
-                if (response.StatusCode == HttpStatusCode.OK)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var basicInfo = JsonConvert.DeserializeObject<BasicInfoResponse>(content);
-                    authServerUri = new Uri(basicInfo.links.login.href);
-                }
-
-                return authServerUri;
-            }
-            catch (Exception e)
-            {
-                e.Data.Add("MessageToDisplay", AuthServerLookupFailureMessage);
-                throw;
-            }
-        }
-
-        private Uri validateUriStringOrThrow(string uriString, string errorMessage)
-        {
-            Uri uriResult;
-            Uri.TryCreate(uriString, UriKind.Absolute, out uriResult);
-
-            if (uriResult == null) throw new Exception(errorMessage);
-
-            return uriResult;
-        }
-
-        public async Task<List<Org>> ListOrgs(string cfTarget, string accessToken)
-        {
-            try
-            {
-                // trust any certificate
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-                ServicePointManager.ServerCertificateValidationCallback +=
-                    (sender, cert, chain, sslPolicyErrors) => { return true; };
-
-                var uri = new UriBuilder(cfTarget)
-                {
-                    Path = listOrgsPath
-                };
-
-                Href firstPageHref = new Href() { href = uri.ToString() };
-
-                List<Org> visibleOrgs = await GetRemainingPagesForType(firstPageHref, accessToken, new List<Org>());
-
-                return visibleOrgs;
-            }
-            catch (Exception e)
-            {
-                System.Diagnostics.Debug.WriteLine(e);
-                return null;
-            }
-
+            return visibleOrgs;
         }
 
         public async Task<List<Space>> ListSpaces(string cfTarget, string accessToken)
@@ -165,56 +126,66 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             }
         }
 
-        public async Task<List<Space>> ListSpacesForOrg(string cfTarget, string accessToken, string orgGuid)
+        /// <summary>
+        /// Recursively requests all pages of results for spaces under the org specified by <paramref name="orgGuid"/>.
+        /// <para>
+        /// Exceptions:
+        /// <para>
+        /// Throws any exceptions encountered while creating/issuing request or deserializing response.
+        /// </para>
+        /// </para>
+        /// </summary>
+        /// <param name="cfApiAddress"></param>
+        /// <param name="accessToken"></param>
+        /// <param name="orgGuid"></param>
+        /// <returns>List of <see cref="Space"/>s.</returns>
+        public async Task<List<Space>> ListSpacesForOrg(string cfApiAddress, string accessToken, string orgGuid)
         {
-            try
+            // trust any certificate
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            ServicePointManager.ServerCertificateValidationCallback +=
+                (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+            var uri = new UriBuilder(cfApiAddress)
             {
-                // trust any certificate
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-                ServicePointManager.ServerCertificateValidationCallback +=
-                    (sender, cert, chain, sslPolicyErrors) => { return true; };
+                Path = listSpacesPath,
+                Query = $"organization_guids={orgGuid}"
+            };
 
-                var uri = new UriBuilder(cfTarget)
-                {
-                    Path = listSpacesPath,
-                    Query = $"organization_guids={orgGuid}"
-                };
+            Href firstPageHref = new Href() { href = uri.ToString() };
 
-                Href firstPageHref = new Href() { href = uri.ToString() };
-
-                return await GetRemainingPagesForType(firstPageHref, accessToken, new List<Space>());
-            }
-            catch (Exception e)
-            {
-                System.Diagnostics.Debug.WriteLine(e);
-                return null;
-            }
+            return await GetRemainingPagesForType(firstPageHref, accessToken, new List<Space>());
         }
 
+        /// <summary>
+        /// Recursively requests all pages of results for apps under the space specified by <paramref name="spaceGuid"/>.
+        /// <para>
+        /// Exceptions:
+        /// <para>
+        /// Throws any exceptions encountered while creating/issuing request or deserializing response.
+        /// </para>
+        /// </para>
+        /// </summary>
+        /// <param name="cfTarget"></param>
+        /// <param name="accessToken"></param>
+        /// <param name="spaceGuid"></param>
+        /// <returns>List of <see cref="App"/>s.</returns>
         public async Task<List<App>> ListAppsForSpace(string cfTarget, string accessToken, string spaceGuid)
         {
-            try
+            // trust any certificate
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            ServicePointManager.ServerCertificateValidationCallback +=
+                (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+            var uri = new UriBuilder(cfTarget)
             {
-                // trust any certificate
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-                ServicePointManager.ServerCertificateValidationCallback +=
-                    (sender, cert, chain, sslPolicyErrors) => { return true; };
+                Path = listAppsPath,
+                Query = $"space_guids={spaceGuid}"
+            };
 
-                var uri = new UriBuilder(cfTarget)
-                {
-                    Path = listAppsPath,
-                    Query = $"space_guids={spaceGuid}"
-                };
+            Href firstPageHref = new Href() { href = uri.ToString() };
 
-                Href firstPageHref = new Href() { href = uri.ToString() };
-
-                return await GetRemainingPagesForType(firstPageHref, accessToken, new List<App>());
-            }
-            catch (Exception e)
-            {
-                System.Diagnostics.Debug.WriteLine(e);
-                return null;
-            }
+            return await GetRemainingPagesForType(firstPageHref, accessToken, new List<App>());
         }
 
         private async Task<List<ResourceType>> GetRemainingPagesForType<ResourceType>(Href pageAddress, string accessToken, List<ResourceType> resultsSoFar)
@@ -236,21 +207,21 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
                 var results = JsonConvert.DeserializeObject<OrgsResponse>(resultContent);
                 resultsSoFar.AddRange((IEnumerable<ResourceType>)results.Orgs.ToList());
 
-                nextPageHref = results.pagination.next;
+                nextPageHref = results.Pagination.next;
             }
             else if (typeof(ResourceType) == typeof(Space))
             {
                 var results = JsonConvert.DeserializeObject<SpacesResponse>(resultContent);
                 resultsSoFar.AddRange((IEnumerable<ResourceType>)results.Spaces.ToList());
 
-                nextPageHref = results.pagination.next;
+                nextPageHref = results.Pagination.next;
             }
             else if (typeof(ResourceType) == typeof(App))
             {
                 var results = JsonConvert.DeserializeObject<AppsResponse>(resultContent);
                 resultsSoFar.AddRange((IEnumerable<ResourceType>)results.Apps.ToList());
 
-                nextPageHref = results.pagination.next;
+                nextPageHref = results.Pagination.next;
             }
             else
             {
@@ -360,6 +331,49 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
                 System.Diagnostics.Debug.WriteLine(e);
                 return false;
             }
+        }
+
+
+        private async Task<Uri> GetAuthServerUriFromCfTarget(string cfTargetString)
+        {
+            try
+            {
+                Uri authServerUri = null;
+
+                var uri = new UriBuilder(cfTargetString)
+                {
+                    Path = "/",
+                    Port = -1
+                };
+
+                var request = new HttpRequestMessage(HttpMethod.Get, uri.ToString());
+
+                var response = await _httpClient.SendAsync(request);
+
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var basicInfo = JsonConvert.DeserializeObject<BasicInfoResponse>(content);
+                    authServerUri = new Uri(basicInfo.links.login.href);
+                }
+
+                return authServerUri;
+            }
+            catch (Exception e)
+            {
+                e.Data.Add("MessageToDisplay", AuthServerLookupFailureMessage);
+                throw;
+            }
+        }
+
+        private Uri validateUriStringOrThrow(string uriString, string errorMessage)
+        {
+            Uri uriResult;
+            Uri.TryCreate(uriString, UriKind.Absolute, out uriResult);
+
+            if (uriResult == null) throw new Exception(errorMessage);
+
+            return uriResult;
         }
     }
 }

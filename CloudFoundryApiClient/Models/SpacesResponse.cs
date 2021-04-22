@@ -6,7 +6,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Models.SpacesResponse
 
     public class SpacesResponse
     {
-        public Pagination pagination { get; set; }
+        [JsonProperty("pagination")]
+        public Pagination Pagination { get; set; }
 
         [JsonProperty("resources")]
         public Space[] Spaces { get; set; }
@@ -14,10 +15,12 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Models.SpacesResponse
 
     public class Space
     {
-        public string guid { get; set; }
+        [JsonProperty("guid")]
+        public string Guid { get; set; }
         public DateTime created_at { get; set; }
         public DateTime updated_at { get; set; }
-        public string name { get; set; }
+        [JsonProperty("name")]
+        public string Name { get; set; }
         public Relationships relationships { get; set; }
         public Links links { get; set; }
         public Metadata metadata { get; set; }
