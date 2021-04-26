@@ -296,7 +296,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
                 }
                 else
                 {
-                    appsToReturn.Add(new CloudFoundryApp(app.Name, app.Guid, space));
+                    appsToReturn.Add(new CloudFoundryApp(app.Name, app.Guid, space, app.State.ToUpper()));
                 }
             }
 

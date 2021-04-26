@@ -118,7 +118,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task StopCfApp_CallsStopCfAppAsync()
         {
-            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
+            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
 
             mockCloudFoundryService.Setup(mock => mock.StopAppAsync(fakeApp, true)).ReturnsAsync(fakeSuccessDetailedResult);
 
@@ -139,7 +139,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task StopCfApp_DisplaysErrorDialog_WhenStopAppAsyncFails()
         {
-            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
+            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
 
             mockCloudFoundryService.Setup(mock => mock.
                 StopAppAsync(fakeApp, true))
@@ -158,7 +158,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task StopCfApp_LogsError_WhenStopAppAsyncFails()
         {
-            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
+            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
 
             mockCloudFoundryService.Setup(mock => mock.
                 StopAppAsync(fakeApp, true))
@@ -178,7 +178,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task StartCfApp_CallsStartAppAsync()
         {
-            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
+            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
 
             mockCloudFoundryService.Setup(mock => mock.StartAppAsync(fakeApp, true)).ReturnsAsync(fakeSuccessDetailedResult);
 
@@ -199,7 +199,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task StartCfApp_DisplaysErrorDialog_WhenStartAppAsyncFails()
         {
-            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
+            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
 
             mockCloudFoundryService.Setup(mock => mock.
                 StartAppAsync(fakeApp, true))
@@ -218,7 +218,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task StartCfApp_LogsError_WhenStartAppAsyncFails()
         {
-            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
+            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
 
             mockCloudFoundryService.Setup(mock => mock.
                 StartAppAsync(fakeApp, true))
@@ -238,7 +238,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task DeleteCfApp_CallsDeleteAppAsync()
         {
-            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
+            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
 
             mockCloudFoundryService.Setup(mock => mock.DeleteAppAsync(fakeApp, true, true)).ReturnsAsync(fakeSuccessDetailedResult);
 
@@ -259,7 +259,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task DeleteCfApp_DisplaysErrorDialog_WhenDeleteAppAsyncFails()
         {
-            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
+            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
 
             mockCloudFoundryService.Setup(mock => mock.
                 DeleteAppAsync(fakeApp, true, true))
@@ -279,7 +279,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task DeleteCfApp_LogsError_WhenDeleteAppAsyncFails()
         {
-            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
+            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
 
             mockCloudFoundryService.Setup(mock => mock.
                 DeleteAppAsync(fakeApp, true, true))
@@ -299,7 +299,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public void RefreshApp_RaisesPropertyChangedEventForIsStopped()
         {
-            CloudFoundryApp fakeApp = new CloudFoundryApp("fake app name", "fake app guid", null);
+            CloudFoundryApp fakeApp = new CloudFoundryApp("fake app name", "fake app guid", null, null);
             var avm = new AppViewModel(fakeApp, services);
 
             avm.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
@@ -578,7 +578,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             fakeSpaceViewModel.Children = new ObservableCollection<TreeViewItemViewModel>
             {
-                new AppViewModel(new CloudFoundryApp(fakeAppName1, fakeAppGuid1, fakeSpace), services)
+                new AppViewModel(new CloudFoundryApp(fakeAppName1, fakeAppGuid1, fakeSpace, null), services)
             };
 
             fakeSpaceViewModel.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
@@ -592,8 +592,8 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             var fakeAppsResponseContent = new List<CloudFoundryApp>
             {
-                new CloudFoundryApp(fakeAppName2, fakeAppGuid2, fakeSpace),
-                new CloudFoundryApp(fakeAppName3, fakeAppGuid3, fakeSpace)
+                new CloudFoundryApp(fakeAppName2, fakeAppGuid2, fakeSpace, null),
+                new CloudFoundryApp(fakeAppName3, fakeAppGuid3, fakeSpace, null)
             };
             var fakeAppsResult = new DetailedResult<List<CloudFoundryApp>>(
                 succeeded: true,
@@ -630,7 +630,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             fakeSpaceViewModel.Children = new ObservableCollection<TreeViewItemViewModel>
             {
-                new AppViewModel(new CloudFoundryApp(fakeAppName1, fakeAppGuid1, fakeSpace), services)
+                new AppViewModel(new CloudFoundryApp(fakeAppName1, fakeAppGuid1, fakeSpace, null), services)
             };
 
             var newEmptyAppsList = new List<CloudFoundryApp>();
@@ -669,7 +669,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             var newAppsList = new List<CloudFoundryApp>
             {
-                new CloudFoundryApp(fakeAppName1, fakeAppGuid1, fakeSpace),
+                new CloudFoundryApp(fakeAppName1, fakeAppGuid1, fakeSpace, null),
             };
 
             var fakeSuccessResult = new DetailedResult<List<CloudFoundryApp>>(succeeded: true, content: newAppsList);
@@ -703,8 +703,8 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             var fakeNewSpace = new CloudFoundrySpace("new space", "new space id", fakeInitialOrg);
             var svm = new SpaceViewModel(fakeInitialSpace, services);
 
-            var fakeInitialApp = new CloudFoundryApp("fake app name", "fake app id", fakeInitialSpace);
-            var fakeNewApp = new CloudFoundryApp("new app", "new app id", fakeInitialSpace);
+            var fakeInitialApp = new CloudFoundryApp("fake app name", "fake app id", fakeInitialSpace, null);
+            var fakeNewApp = new CloudFoundryApp("new app", "new app id", fakeInitialSpace, null);
             var avm = new AppViewModel(fakeInitialApp, services);
 
             var fakeCfDict = new Dictionary<string, CloudFoundryInstance>
@@ -948,7 +948,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             var fakeInitialSpace = new CloudFoundrySpace("fake space name", "fake space id", fakeInitialOrg);
             var svm = new SpaceViewModel(fakeInitialSpace, services);
 
-            var fakeInitialApp = new CloudFoundryApp("fake app name", "fake app id", fakeInitialSpace);
+            var fakeInitialApp = new CloudFoundryApp("fake app name", "fake app id", fakeInitialSpace, null);
             var avm = new AppViewModel(fakeInitialApp, services);
 
             var fakeCfDict = new Dictionary<string, CloudFoundryInstance>
@@ -1156,7 +1156,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             svm.Children = new ObservableCollection<TreeViewItemViewModel> { svm.EmptyPlaceholder };
             svm.HasEmptyPlaceholder = true;
 
-            var fakeNewApp = new CloudFoundryApp("fake app name", "fake app id", fakeInitialSpace);
+            var fakeNewApp = new CloudFoundryApp("fake app name", "fake app id", fakeInitialSpace, null);
             var avm = new AppViewModel(fakeNewApp, services);
 
             var fakeCfDict = new Dictionary<string, CloudFoundryInstance>

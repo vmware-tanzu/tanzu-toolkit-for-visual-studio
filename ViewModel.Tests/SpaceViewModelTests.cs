@@ -55,15 +55,15 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         {
             var initialAppsList = new System.Collections.ObjectModel.ObservableCollection<TreeViewItemViewModel>
             {
-                new AppViewModel(new CloudFoundryApp("initial app 1", null, null), services),
-                new AppViewModel(new CloudFoundryApp("initial app 2", null, null), services),
-                new AppViewModel(new CloudFoundryApp("initial app 3", null, null), services),
+                new AppViewModel(new CloudFoundryApp("initial app 1", null, null, null), services),
+                new AppViewModel(new CloudFoundryApp("initial app 2", null, null, null), services),
+                new AppViewModel(new CloudFoundryApp("initial app 3", null, null, null), services),
             };
 
             var newAppsList = new List<CloudFoundryApp>
             {
-                new CloudFoundryApp("initial app 1", null, null),
-                new CloudFoundryApp("initial app 2", null, null)
+                new CloudFoundryApp("initial app 1", null, null, null),
+                new CloudFoundryApp("initial app 2", null, null, null)
             };
             var fakeAppsResult = new DetailedResult<List<CloudFoundryApp>>(
                 succeeded: true,
@@ -143,8 +143,8 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         {
             var fakeAppsList = new List<CloudFoundryApp>
             {
-                new CloudFoundryApp("fake app name 1","fake app id 1", fakeCfSpace),
-                new CloudFoundryApp("fake app name 2","fake app id 2", fakeCfSpace)
+                new CloudFoundryApp("fake app name 1","fake app id 1", fakeCfSpace, null),
+                new CloudFoundryApp("fake app name 2","fake app id 2", fakeCfSpace, null),
             };
 
             var fakeAppsResult = new DetailedResult<List<CloudFoundryApp>>(

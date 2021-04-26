@@ -228,7 +228,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             string resultContent = await response.Content.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<App>(resultContent);
 
-            if (result.state == "STOPPED") return true;
+            if (result.State == "STOPPED") return true;
             return false;
         }
 
@@ -271,7 +271,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             string resultContent = await response.Content.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<App>(resultContent);
 
-            if (result.state == "STARTED") return true;
+            if (result.State == "STARTED") return true;
             return false;
         }
 

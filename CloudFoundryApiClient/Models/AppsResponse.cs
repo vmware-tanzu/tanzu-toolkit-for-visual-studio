@@ -19,7 +19,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse
         public string Guid { get; set; }
         [JsonProperty("name")]
         public string Name { get; set; }
-        public string state { get; set; }
+        [JsonProperty("state")]
+        public string State { get; set; }
         public DateTime created_at { get; set; }
         public DateTime updated_at { get; set; }
         public Lifecycle lifecycle { get; set; }
