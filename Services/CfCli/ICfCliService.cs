@@ -1,4 +1,4 @@
-﻿using Semver;
+﻿using System;
 using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
@@ -26,6 +26,6 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         Task<DetailedResult> StartAppByNameAsync(string appName);
         Task<DetailedResult> DeleteAppByNameAsync(string appName, bool removeMappedRoutes = true);
         Task<DetailedResult> PushAppAsync(string appName, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string appDir);
-        Task<SemVersion> GetApiVersion();
+        Task<Version> GetApiVersion();
     }
 }

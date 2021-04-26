@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Semver;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -125,7 +124,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
 
         private static async Task MatchCliVersionToApiVersion()
         {
-            SemVersion apiVersion = await cfCliService.GetApiVersion();
+            Version apiVersion = await cfCliService.GetApiVersion();
             if (apiVersion == null)
             {
                 _fileLocatorService.CliVersion = 7;
@@ -136,7 +135,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
                 switch (apiVersion.Major)
                 {
                     case 2:
-                        if (apiVersion < "2.128.0")
+                        if (apiVersion < new Version("2.128.0"))
                         {
                             _fileLocatorService.CliVersion = 6;
 
@@ -146,7 +145,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
                             logger.Information(errorMsg);
                             dialogService.DisplayErrorDialog(errorTitle, errorMsg);
                         }
-                        else if (apiVersion < "2.150.0")
+                        else if (apiVersion < new Version("2.150.0"))
                         {
                             _fileLocatorService.CliVersion = 6;
                         }
@@ -158,7 +157,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
                         break;
 
                     case 3:
-                        if (apiVersion < "3.63.0")
+                        if (apiVersion < new Version("3.63.0"))
                         {
                             _fileLocatorService.CliVersion = 6;
 
@@ -168,7 +167,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
                             logger.Information(errorMsg);
                             dialogService.DisplayErrorDialog(errorTitle, errorMsg);
                         }
-                        else if (apiVersion < "3.85.0")
+                        else if (apiVersion < new Version("3.85.0"))
                         {
                             _fileLocatorService.CliVersion = 6;
                         }
