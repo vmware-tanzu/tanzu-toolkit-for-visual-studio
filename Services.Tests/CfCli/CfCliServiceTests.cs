@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Semver;
+using System;
 using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
@@ -1087,7 +1087,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
 
         [TestMethod]
         [TestCategory("GetApiVersion")]
-        public async Task GetApiVersion_ReturnsSemVer_WhenApiCmdSucceeds()
+        public async Task GetApiVersion_ReturnsVersion_WhenApiCmdSucceeds()
         {
             var expectedArgs = "api";
 
@@ -1104,11 +1104,11 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
                 RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
                     .Returns(mockCmdResult);
 
-            SemVersion result = await _sut.GetApiVersion();
+            Version result = await _sut.GetApiVersion();
 
             Assert.AreEqual(result.Major, fakeMajorVersion);
             Assert.AreEqual(result.Minor, fakeMinorVersion);
-            Assert.AreEqual(result.Patch, fakePatchVersion);
+            Assert.AreEqual(result.Build, fakePatchVersion);
         }
 
         [TestMethod]
@@ -1121,7 +1121,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
                 RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
                     .Returns(fakeFailureCmdResult);
 
-            SemVersion result = await _sut.GetApiVersion();
+            Version result = await _sut.GetApiVersion();
 
             Assert.IsNull(result);
         }
@@ -1139,7 +1139,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
                 RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
                     .Returns(fakeFailureCmdResult);
 
-            SemVersion result = await _sut.GetApiVersion();
+            Version result = await _sut.GetApiVersion();
 
             Assert.IsNull(result);
         }

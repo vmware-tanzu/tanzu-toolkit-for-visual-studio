@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Semver;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -64,7 +63,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         /// <returns>
         /// <code>int[] versionNumbers</code>Array of integers: versionNumbers[0] = major version, versionNumbers[1] = minor, etc.
         /// </returns>
-        public async Task<SemVersion> GetApiVersion()
+        public async Task<Version> GetApiVersion()
         {
             DetailedResult result = await RunCfCommandAsync(V6_GetApiVersionCmd);
             if (!result.Succeeded) return null;
@@ -79,7 +78,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
                     .Replace(versionLabel, string.Empty)
                     .Replace(" ", string.Empty);
 
-                var version = SemVersion.Parse(versionString);
+                var version = new Version(versionString);
                 return version;
             }
             catch

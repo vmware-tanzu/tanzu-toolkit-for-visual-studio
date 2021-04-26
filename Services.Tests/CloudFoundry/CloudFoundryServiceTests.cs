@@ -2,17 +2,11 @@
 using Moq;
 using System;
 using System.Collections.Generic;
-using System.Security;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.VisualStudio.Models;
-using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Orgs;
-using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Spaces;
-using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Apps;
 using Tanzu.Toolkit.VisualStudio.Services.CloudFoundry;
 using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
 using static Tanzu.Toolkit.VisualStudio.Services.OutputHandler.OutputHandler;
-using Metadata = Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Orgs.Metadata;
-using Semver;
 
 namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
 {
@@ -219,7 +213,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             int expectedCliVersion = 7;
 
             mockCfCliService.Setup(m => m.
-                GetApiVersion()).ReturnsAsync((SemVersion)null);
+                GetApiVersion()).ReturnsAsync((Version)null);
 
             mockFileLocatorService.SetupSet(m => m.
                 CliVersion = expectedCliVersion).Verifiable();
@@ -249,14 +243,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
                     .ReturnsAsync(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             int expectedCliVersion = 6;
-            SemVersion[] versionInputs = new SemVersion[]
+            Version[] versionInputs = new Version[]
             {
-                new SemVersion(major: 2, minor: 149, patch: 0),
-                new SemVersion(major: 2, minor: 138, patch: 0),
-                new SemVersion(major: 2, minor: 128, patch: 0),
+                new Version(major: 2, minor: 149, build: 0),
+                new Version(major: 2, minor: 138, build: 0),
+                new Version(major: 2, minor: 128, build: 0),
             };
 
-            foreach (SemVersion mockApiVersion in versionInputs)
+            foreach (Version mockApiVersion in versionInputs)
             {
                 mockCfCliService.Setup(m => m.
                     GetApiVersion()).ReturnsAsync(mockApiVersion);
@@ -287,14 +281,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
                     .ReturnsAsync(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             int expectedCliVersion = 6;
-            SemVersion[] versionInputs = new SemVersion[]
+            Version[] versionInputs = new Version[]
             {
-                new SemVersion(major: 3, minor: 84, patch: 0),
-                new SemVersion(major: 3, minor: 73, patch: 0),
-                new SemVersion(major: 3, minor: 63, patch: 0),
+                new Version(major: 3, minor: 84, build: 0),
+                new Version(major: 3, minor: 73, build: 0),
+                new Version(major: 3, minor: 63, build: 0),
             };
 
-            foreach (SemVersion mockApiVersion in versionInputs)
+            foreach (Version mockApiVersion in versionInputs)
             {
                 mockCfCliService.Setup(m => m.
                     GetApiVersion()).ReturnsAsync(mockApiVersion);
@@ -325,14 +319,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
                     .ReturnsAsync(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             int expectedCliVersion = 7;
-            SemVersion[] versionInputs = new SemVersion[]
+            Version[] versionInputs = new Version[]
             {
-                new SemVersion(major: 2, minor: 150, patch: 0),
-                new SemVersion(major: 2, minor: 189, patch: 0),
-                new SemVersion(major: 2, minor: 150, patch: 1),
+                new Version(major: 2, minor: 150, build: 0),
+                new Version(major: 2, minor: 189, build: 0),
+                new Version(major: 2, minor: 150, build: 1),
             };
 
-            foreach (SemVersion mockApiVersion in versionInputs)
+            foreach (Version mockApiVersion in versionInputs)
             {
                 mockCfCliService.Setup(m => m.
                     GetApiVersion()).ReturnsAsync(mockApiVersion);
@@ -363,14 +357,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
                     .ReturnsAsync(new DetailedResult(true, null, fakeSuccessCmdResult));
 
             int expectedCliVersion = 7;
-            SemVersion[] versionInputs = new SemVersion[]
+            Version[] versionInputs = new Version[]
             {
-                new SemVersion(major: 3, minor: 85, patch: 0),
-                new SemVersion(major: 3, minor: 178, patch: 0),
-                new SemVersion(major: 3, minor: 85, patch: 1),
+                new Version(major: 3, minor: 85, build: 0),
+                new Version(major: 3, minor: 178, build: 0),
+                new Version(major: 3, minor: 85, build: 1),
             };
 
-            foreach (SemVersion mockApiVersion in versionInputs)
+            foreach (Version mockApiVersion in versionInputs)
             {
                 mockCfCliService.Setup(m => m.
                     GetApiVersion()).ReturnsAsync(mockApiVersion);
