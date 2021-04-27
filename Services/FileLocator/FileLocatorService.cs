@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace Tanzu.Toolkit.VisualStudio.Services.FileLocator
 {
@@ -56,7 +57,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.FileLocator
                         break;
                 }
 
-                return null;
+                throw new Exception($"Unable to locate cf.exe for CLI version {cliVersion}.");
             }
         }
 
