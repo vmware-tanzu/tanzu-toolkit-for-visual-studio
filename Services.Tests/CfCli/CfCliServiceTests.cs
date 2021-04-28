@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System;
 using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
@@ -105,7 +106,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.IsTrue(result.CmdDetails.StdOut == mockStdOutContainingFailedSubstring);
             Assert.IsTrue(result.CmdDetails.StdErr == string.Empty);
         }
-        
+
         [TestMethod]
         [TestCategory("InvokeCfCliAsync")]
         public async Task InvokeCfCliAsync_ReturnsGenericExplanation_WhenProcessFailsWithoutStdErr()
@@ -124,7 +125,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.IsTrue(result.CmdDetails.StdOut == _fakeStdOut);
             Assert.IsTrue(result.CmdDetails.StdErr == string.Empty);
         }
-        
+
         [TestMethod]
         [TestCategory("InvokeCfCliAsync")]
         public async Task InvokeCfCliAsync_ReturnsFalseResult_WhenCfExeCouldNotBeFound()
@@ -152,7 +153,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             mockCmdProcessService.Verify(mock => mock.InvokeWindowlessCommandAsync(expectedCmdStr, expectedWorkingDir, null, null), Times.Once());
         }
 
-        
+
         [TestMethod]
         [TestCategory("RunCfCommandAsync")]
         public async Task RunCfCommandAsync_ReturnsSuccessfulResult_WhenCmdProcessExitsWithZeroCode()
@@ -205,7 +206,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.IsTrue(result.CmdDetails.StdOut == mockStdOutContainingFailedSubstring);
             Assert.IsTrue(result.CmdDetails.StdErr == string.Empty);
         }
-        
+
         [TestMethod]
         [TestCategory("RunCfCommandAsync")]
         public async Task RunCfCommandAsync_ReturnsGenericExplanation_WhenProcessFailsWithoutStdErr()
@@ -222,7 +223,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.IsTrue(result.CmdDetails.StdOut == _fakeStdOut);
             Assert.IsTrue(result.CmdDetails.StdErr == string.Empty);
         }
-        
+
         [TestMethod]
         [TestCategory("RunCfCommandAsync")]
         public async Task RunCfCommandAsync_ReturnsFalseResult_WhenCfExeCouldNotBeFound()
@@ -305,7 +306,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.AreEqual(fakeFailedResult, result.CmdDetails);
             Assert.IsTrue(result.CmdDetails.StdErr == string.Empty);
         }
-        
+
         [TestMethod]
         [TestCategory("ExecuteCfCliCommand")]
         public void ExecuteCfCliCommand_ReturnsGenericExplanation_WhenProcessFailsWithoutStdErr()
@@ -535,7 +536,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.AreEqual(_sut._jsonParsingErrorMsg, result.Explanation);
             Assert.AreEqual(fakeFailureCmdResult, result.CmdDetails);
         }
-        
+
         [TestMethod]
         [TestCategory("GetOrgsAsync")]
         public async Task GetOrgsAsync_ReturnsFailedResult_For401UnauthorizedResponse()
@@ -904,7 +905,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.AreEqual(_fakeStdOut, result.CmdDetails.StdOut);
             Assert.AreEqual(_fakeStdErr, result.CmdDetails.StdErr);
         }
-        
+
 
 
         [TestMethod]
@@ -1045,7 +1046,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.IsNull(result.CmdDetails);
             Assert.AreEqual("Unable to locate cf.exe.", result.Explanation);
         }
-        
+
         [TestMethod]
         [TestCategory("PushApp")]
         public async Task PushAppAsync_ReturnsFailureResult_WhenCfCmdFails()
@@ -1063,7 +1064,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.AreEqual(fakeFailureCmdResult.StdErr, result.Explanation);
             Assert.AreEqual(fakeFailureCmdResult, result.CmdDetails);
         }
-        
+
         [TestMethod]
         [TestCategory("PushApp")]
         public async Task PushAppAsync_ReturnsGenericErrorMessage_WhenCfCmdFailsWithoutStdErr()
@@ -1083,5 +1084,64 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.AreEqual(mockFailedResult, result.CmdDetails);
         }
 
+
+        [TestMethod]
+        [TestCategory("GetApiVersion")]
+        public async Task GetApiVersion_ReturnsVersion_WhenApiCmdSucceeds()
+        {
+            var expectedArgs = "api";
+
+            var fakeMajorVersion = 1;
+            var fakeMinorVersion = 2;
+            var fakePatchVersion = 3;
+
+            string fakeCmdOutput = "api endpoint:   https://my.cool.api.com";
+            fakeCmdOutput += $"\napi version:    {fakeMajorVersion}.{fakeMinorVersion}.{fakePatchVersion}\n";
+
+            CmdResult mockCmdResult = new CmdResult(fakeCmdOutput, string.Empty, 0);
+
+            mockCmdProcessService.Setup(m => m.
+                RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
+                    .Returns(mockCmdResult);
+
+            Version result = await _sut.GetApiVersion();
+
+            Assert.AreEqual(result.Major, fakeMajorVersion);
+            Assert.AreEqual(result.Minor, fakeMinorVersion);
+            Assert.AreEqual(result.Build, fakePatchVersion);
+        }
+
+        [TestMethod]
+        [TestCategory("GetApiVersion")]
+        public async Task GetApiVersion_ReturnsNull_WhenApiCmdFails()
+        {
+            var expectedArgs = "api";
+
+            mockCmdProcessService.Setup(m => m.
+                RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
+                    .Returns(fakeFailureCmdResult);
+
+            Version result = await _sut.GetApiVersion();
+
+            Assert.IsNull(result);
+        }
+
+        [TestMethod]
+        [TestCategory("GetApiVersion")]
+        public async Task GetApiVersion_ReturnsNull_WhenOutputParsingFails()
+        {
+            var expectedArgs = "api";
+
+            string unparsableContent = "junk response";
+            CmdResult mockCmdResult = new CmdResult(unparsableContent, string.Empty, 0);
+
+            mockCmdProcessService.Setup(m => m.
+                RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
+                    .Returns(fakeFailureCmdResult);
+
+            Version result = await _sut.GetApiVersion();
+
+            Assert.IsNull(result);
+        }
     }
 }

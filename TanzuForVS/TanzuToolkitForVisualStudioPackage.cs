@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Shell;
 using System;
 using System.Net.Http;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Tanzu.Toolkit.CloudFoundryApiClient;
@@ -105,6 +106,8 @@ namespace Tanzu.Toolkit.VisualStudio
 
         private void ConfigureServices(IServiceCollection services)
         {
+            string assemblyBasePath = Path.GetDirectoryName(GetType().Assembly.Location);
+
             /* Cloud Foundry API */
             HttpClient httpClient = new HttpClient();
             IUaaClient uaaClient = new UaaClient(httpClient);
@@ -116,7 +119,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<IViewLocatorService, WpfViewLocatorService>();
             services.AddSingleton<IDialogService, WpfDialogService>();
             services.AddSingleton<ICfCliService, CfCliService>();
-            services.AddSingleton<IFileLocatorService, FileLocatorService>();
+            services.AddSingleton<IFileLocatorService>(new FileLocatorService(assemblyBasePath));
             services.AddSingleton<ILoggingService, LoggingService>();
 
             services.AddTransient<ICmdProcessService, CmdProcessService>();

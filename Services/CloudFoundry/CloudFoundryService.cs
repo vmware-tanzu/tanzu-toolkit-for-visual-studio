@@ -10,6 +10,7 @@ using Tanzu.Toolkit.CloudFoundryApiClient.Models.OrgsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.SpacesResponse;
 using Tanzu.Toolkit.VisualStudio.Models;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli;
+using Tanzu.Toolkit.VisualStudio.Services.Dialog;
 using Tanzu.Toolkit.VisualStudio.Services.FileLocator;
 using Tanzu.Toolkit.VisualStudio.Services.Logging;
 using static Tanzu.Toolkit.VisualStudio.Services.OutputHandler.OutputHandler;
@@ -21,9 +22,12 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
         private static ICfApiClient cfApiClient;
         private static ICfCliService cfCliService;
         private static IFileLocatorService _fileLocatorService;
+        private static IDialogService dialogService;
         private static ILogger logger;
 
         internal const string emptyOutputDirMessage = "Unable to locate app files; project output directory is empty. (Has your project already been compiled?)";
+        internal const string ccApiVersionUndetectableErrTitle = "Unable to detect Cloud Controller API version.";
+        internal const string ccApiVersionUndetectableErrMsg = "Failed to detect which version of the Cloud Controller API is being run on the provided instance; some features of this extension may not work properly.";
 
         public string LoginFailureMessage { get; } = "Login failed.";
         public Dictionary<string, CloudFoundryInstance> CloudFoundryInstances { get; internal set; }
@@ -36,6 +40,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             cfApiClient = services.GetRequiredService<ICfApiClient>();
             cfCliService = services.GetRequiredService<ICfCliService>();
             _fileLocatorService = services.GetRequiredService<IFileLocatorService>();
+            dialogService = services.GetRequiredService<IDialogService>();
 
             var logSvc = services.GetRequiredService<ILoggingService>();
             logger = logSvc.Logger;
@@ -100,6 +105,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
                            innerException: new Exception(authResult.CmdDetails.StdErr)));
                 }
 
+                await MatchCliVersionToApiVersion();
+
                 string accessToken = cfCliService.GetOAuthToken();
 
                 if (!string.IsNullOrEmpty(accessToken)) return new ConnectResult(true, null, accessToken);
@@ -112,6 +119,71 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
                 FormatExceptionMessage(e, errorMessages);
                 var errorMessage = string.Join(Environment.NewLine, errorMessages.ToArray());
                 return new ConnectResult(false, errorMessage, null);
+            }
+        }
+
+        private static async Task MatchCliVersionToApiVersion()
+        {
+            Version apiVersion = await cfCliService.GetApiVersion();
+            if (apiVersion == null)
+            {
+                _fileLocatorService.CliVersion = 7;
+                dialogService.DisplayErrorDialog(ccApiVersionUndetectableErrTitle, ccApiVersionUndetectableErrMsg);
+            }
+            else
+            {
+                switch (apiVersion.Major)
+                {
+                    case 2:
+                        if (apiVersion < new Version("2.128.0"))
+                        {
+                            _fileLocatorService.CliVersion = 6;
+
+                            string errorTitle = "API version not supported";
+                            string errorMsg = "Detected a Cloud Controller API version lower than the minimum supported version (2.128.0); some features of this extension may not work as expected for the given instance.";
+
+                            logger.Information(errorMsg);
+                            dialogService.DisplayErrorDialog(errorTitle, errorMsg);
+                        }
+                        else if (apiVersion < new Version("2.150.0"))
+                        {
+                            _fileLocatorService.CliVersion = 6;
+                        }
+                        else
+                        {
+                            _fileLocatorService.CliVersion = 7;
+                        }
+
+                        break;
+
+                    case 3:
+                        if (apiVersion < new Version("3.63.0"))
+                        {
+                            _fileLocatorService.CliVersion = 6;
+
+                            string errorTitle = "API version not supported";
+                            string errorMsg = "Detected a Cloud Controller API version lower than the minimum supported version (3.63.0); some features of this extension may not work as expected for the given instance.";
+
+                            logger.Information(errorMsg);
+                            dialogService.DisplayErrorDialog(errorTitle, errorMsg);
+                        }
+                        else if (apiVersion < new Version("3.85.0"))
+                        {
+                            _fileLocatorService.CliVersion = 6;
+                        }
+                        else
+                        {
+                            _fileLocatorService.CliVersion = 7;
+                        }
+
+                        break;
+
+                    default:
+                        _fileLocatorService.CliVersion = 7;
+                        logger.Information($"Detected an unexpected Cloud Controller API version: {apiVersion}. CLI version has been set to 7 by default.");
+
+                        break;
+                }
             }
         }
 
