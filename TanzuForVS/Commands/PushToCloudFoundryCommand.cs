@@ -1,14 +1,14 @@
 ﻿using EnvDTE;
 using EnvDTE80;
 using Microsoft;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.IO;
-using System.Threading.Tasks;
+using Tanzu.Toolkit.VisualStudio.Services.Dialog;
 using Tanzu.Toolkit.VisualStudio.ViewModels;
 using Tanzu.Toolkit.VisualStudio.WpfViews;
 using Task = System.Threading.Tasks.Task;
@@ -20,6 +20,8 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
     /// </summary>
     internal sealed class PushToCloudFoundryCommand
     {
+        private IDialogService dialogService;
+
         /// <summary>
         /// Command ID.
         /// </summary>
@@ -49,6 +51,8 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
 
             _services = services;
+
+            dialogService = services.GetRequiredService<IDialogService>();
 
             var menuCommandID = new CommandID(CommandSet, CommandId);
             var menuItem = new MenuCommand(Execute, menuCommandID);
@@ -115,21 +119,28 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                     string projectDirectory = Path.GetDirectoryName(proj.FullName);
 
                     string tfm = proj.Properties.Item("TargetFrameworkMoniker").Value.ToString();
-
-                    var viewModel = new DeploymentDialogViewModel(_services, projectDirectory, tfm);
-                    var view = new DeploymentDialogView(viewModel);
-
-                    var deployWindow = new DeploymentWindow
+                    if (tfm.StartsWith(".NETFramework") && !File.Exists(Path.Combine(projectDirectory, "Web.config")))
                     {
-                        Content = view
-                    };
-
-                    deployWindow.ShowModal();
-
-                    //* Actions to take after modal closes:
-                    if (viewModel.DeploymentInProgress) // don't open tool window if modal was closed via "X" button
+                        string msg = $"This project appears to target .NET Framework; deploying it to Tanzu Application Service requires a 'Web.config' file at it's base directory, but none was found in {projectDirectory}";
+                        dialogService.DisplayErrorDialog("Unable to deploy to Tanzu Application Service", msg);
+                    }
+                    else
                     {
-                        DisplayOutputToolWindow();
+                        var viewModel = new DeploymentDialogViewModel(_services, projectDirectory, tfm);
+                        var view = new DeploymentDialogView(viewModel);
+
+                        var deployWindow = new DeploymentWindow
+                        {
+                            Content = view
+                        };
+
+                        deployWindow.ShowModal();
+
+                        //* Actions to take after modal closes:
+                        if (viewModel.DeploymentInProgress) // don't open tool window if modal was closed via "X" button
+                        {
+                            DisplayOutputToolWindow();
+                        }
                     }
                 }
 
@@ -138,14 +149,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-                VsShellUtilities.ShowMessageBox(
-                    package,
-                    ex.ToString(),
-                            "Unable to push to Tanzu Application Service",
-                            OLEMSGICON.OLEMSGICON_CRITICAL,
-                            OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                            OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST
-                        );
+                dialogService.DisplayErrorDialog("Unable to deploy to Tanzu Application Service", ex.Message);
             }
         }
 
