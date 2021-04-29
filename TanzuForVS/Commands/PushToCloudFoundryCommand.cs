@@ -102,14 +102,21 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         {
             try
             {
+                // Ensure project file access happens on the main thread
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
                 var dte = (DTE2)await package.GetServiceAsync(typeof(DTE));
                 Assumes.Present(dte);
 
-                foreach (string projectPath in await GetSelectedProjectPathsAsync(dte))
+                var activeProjects = (Array)dte.ActiveSolutionProjects;
+
+                foreach (Project proj in activeProjects)
                 {
-                    var viewModel = new DeploymentDialogViewModel(_services, projectPath);
+                    string projectDirectory = Path.GetDirectoryName(proj.FullName);
+
+                    string tfm = proj.Properties.Item("TargetFrameworkMoniker").Value.ToString();
+
+                    var viewModel = new DeploymentDialogViewModel(_services, projectDirectory, tfm);
                     var view = new DeploymentDialogView(viewModel);
 
                     var deployWindow = new DeploymentWindow
@@ -125,6 +132,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                         DisplayOutputToolWindow();
                     }
                 }
+
             }
             catch (Exception ex)
             {
@@ -154,25 +162,6 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
 
             IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
             Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
-        }
-
-        private async Task<List<string>> GetSelectedProjectPathsAsync(DTE2 dte)
-        {
-            // Ensure project file access happens on the main thread
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
-            var projectPaths = new List<string>();
-            var activeProjects = (Array)dte.ActiveSolutionProjects;
-            foreach (Project proj in activeProjects)
-            {
-                string projectDirectory = Path.GetDirectoryName(proj.FullName);
-                string outputPath = proj.ConfigurationManager.ActiveConfiguration.Properties.Item("OutputPath").Value.ToString();
-                string pathToBinDirectory = Path.Combine(projectDirectory, outputPath);
-
-                projectPaths.Add(pathToBinDirectory);
-            }
-
-            return projectPaths;
         }
     }
 

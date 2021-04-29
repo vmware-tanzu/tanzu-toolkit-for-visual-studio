@@ -43,7 +43,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         public static string V6_StartAppCmd = "start";
         public static string V6_DeleteAppCmd = "delete -f"; // -f avoids confirmation prompt
         internal static string V6_GetOrgsRequestPath = "GET /v2/organizations";
-        internal static string V6_GetSpacesRequestPath = "GET /v2/spaces"; 
+        internal static string V6_GetSpacesRequestPath = "GET /v2/spaces";
         internal static string V6_GetAppsRequestPath = "GET /v2/spaces"; // not a typo; app info returned from /v2/spaces/:guid/apps
 
 
@@ -282,7 +282,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
                 var appsResponses = GetJsonResponsePages<AppsApiV2Response>(content, V6_GetAppsRequestPath);
 
                 /* check for unsuccessful json parsing */
-                if (appsResponses == null || 
+                if (appsResponses == null ||
                     (appsResponses.Count > 0 && appsResponses[0].guid == null && appsResponses[0].name == null && appsResponses[0].services == null && appsResponses[0].apps == null))
                 {
                     _logger.Error($"GetAppsAsync() failed during response parsing. Used this delimeter: '{V6_GetAppsRequestPath}' to parse through: {cmdResult.CmdDetails.StdOut}");
@@ -352,9 +352,13 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         /// <param name="stdErrCallback"></param>
         /// <param name="appDir"></param>
         /// <returns></returns>
-        public async Task<DetailedResult> PushAppAsync(string appName, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string appDir)
+        public async Task<DetailedResult> PushAppAsync(string appName, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string appDir, string buildpack = null, string stack = null)
         {
             string args = $"push \"{appName}\"";
+
+            if (buildpack != null) args += $" -b {buildpack}";
+            if (stack != null) args += $" -s {stack}";
+
             var pushResult = await RunCfCommandAsync(args, stdOutCallback, stdErrCallback, appDir);
 
             return pushResult;

@@ -18,6 +18,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
     [TestClass()]
     public class CloudFoundryServiceTests : ServicesTestSupport
     {
+        private bool defaultFullFWFlag = false;
+
         [TestInitialize()]
         public void TestInit()
         {
@@ -808,7 +810,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
 
             mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
-            DetailedResult result = await cfService.DeployAppAsync(fakeCfInstance, fakeOrg, fakeSpace, fakeApp.AppName, fakeProjectPath, stdOutCallback: null, stdErrCallback: null);
+            DetailedResult result = await cfService.DeployAppAsync(fakeCfInstance, fakeOrg, fakeSpace, fakeApp.AppName, fakeProjectPath, defaultFullFWFlag, stdOutCallback: null, stdErrCallback: null);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains(fakeFailureExplanation));
@@ -834,12 +836,12 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
                     .ReturnsAsync(fakeCfTargetResponse);
 
             mockCfCliService.Setup(mock =>
-                mock.PushAppAsync(fakeApp.AppName, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), It.IsAny<string>()))
+                mock.PushAppAsync(fakeApp.AppName, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), It.IsAny<string>(), null, null))
                     .ReturnsAsync(fakeCfPushResponse);
 
             mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
-            DetailedResult result = await cfService.DeployAppAsync(fakeCfInstance, fakeOrg, fakeSpace, fakeApp.AppName, fakeProjectPath, stdOutCallback: null, stdErrCallback: null);
+            DetailedResult result = await cfService.DeployAppAsync(fakeCfInstance, fakeOrg, fakeSpace, fakeApp.AppName, fakeProjectPath, defaultFullFWFlag, stdOutCallback: null, stdErrCallback: null);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains(fakeFailureExplanation));
@@ -849,7 +851,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
                     Times.Once);
 
             mockCfCliService.Verify(mock =>
-                mock.PushAppAsync(fakeApp.AppName, null, null, fakeProjectPath),
+                mock.PushAppAsync(fakeApp.AppName, null, null, fakeProjectPath, null, null),
                     Times.Once);
         }
 
@@ -867,12 +869,12 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
                     .ReturnsAsync(fakeCfTargetResponse);
 
             mockCfCliService.Setup(mock =>
-                mock.PushAppAsync(fakeApp.AppName, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), It.IsAny<string>()))
+                mock.PushAppAsync(fakeApp.AppName, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), It.IsAny<string>(), null, null))
                     .ReturnsAsync(fakeCfPushResponse);
 
             mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
-            DetailedResult result = await cfService.DeployAppAsync(fakeCfInstance, fakeOrg, fakeSpace, fakeApp.AppName, fakeProjectPath, stdOutCallback: null, stdErrCallback: null);
+            DetailedResult result = await cfService.DeployAppAsync(fakeCfInstance, fakeOrg, fakeSpace, fakeApp.AppName, fakeProjectPath, defaultFullFWFlag, stdOutCallback: null, stdErrCallback: null);
 
             Assert.IsTrue(result.Succeeded);
 
@@ -881,7 +883,43 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
                     Times.Once);
 
             mockCfCliService.Verify(mock =>
-                mock.PushAppAsync(fakeApp.AppName, null, null, fakeProjectPath),
+                mock.PushAppAsync(fakeApp.AppName, null, null, fakeProjectPath, null, null),
+                    Times.Once);
+        }
+        
+        [TestMethod]
+        [TestCategory("DeployApp")]
+        public async Task DeployAppAsync_SpecifiesHWCBuildpack_AndWindowsStack_WhenFullFWDeploymentIsTrue()
+        {
+            var cfTargetArgs = $"target -o {fakeOrg.OrgName} -s {fakeSpace.SpaceName}";
+
+            string expectedBuildpackValue = "hwc_buildpack";
+            string expectedStackValue = "windows";
+
+            var fakeCfTargetResponse = new DetailedResult(true);
+            var fakeCfPushResponse = new DetailedResult(true);
+
+            mockCfCliService.Setup(mock =>
+                mock.InvokeCfCliAsync(cfTargetArgs, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), It.IsAny<string>()))
+                    .ReturnsAsync(fakeCfTargetResponse);
+
+            mockCfCliService.Setup(mock =>
+                mock.PushAppAsync(fakeApp.AppName, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), It.IsAny<string>(), expectedBuildpackValue, expectedStackValue))
+                    .ReturnsAsync(fakeCfPushResponse);
+
+            mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
+
+            bool fullFWIndicator = true;
+            DetailedResult result = await cfService.DeployAppAsync(fakeCfInstance, fakeOrg, fakeSpace, fakeApp.AppName, fakeProjectPath, fullFWIndicator, stdOutCallback: null, stdErrCallback: null);
+
+            Assert.IsTrue(result.Succeeded);
+
+            mockCfCliService.Verify(mock =>
+                mock.InvokeCfCliAsync(cfTargetArgs, null, null, null),
+                    Times.Once);
+
+            mockCfCliService.Verify(mock =>
+                mock.PushAppAsync(fakeApp.AppName, null, null, fakeProjectPath, expectedBuildpackValue, expectedStackValue),
                     Times.Once);
         }
 
@@ -891,7 +929,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
         {
             mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(false);
 
-            var result = await cfService.DeployAppAsync(fakeCfInstance, fakeOrg, fakeSpace, fakeApp.AppName, fakeProjectPath, stdOutCallback: null, stdErrCallback: null);
+            var result = await cfService.DeployAppAsync(fakeCfInstance, fakeOrg, fakeSpace, fakeApp.AppName, fakeProjectPath, defaultFullFWFlag, stdOutCallback: null, stdErrCallback: null);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains(CloudFoundryService.emptyOutputDirMessage));
