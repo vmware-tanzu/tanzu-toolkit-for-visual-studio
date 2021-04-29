@@ -512,7 +512,11 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             if (!_fileLocatorService.DirContainsFiles(appProjPath)) return new DetailedResult(false, emptyOutputDirMessage);
 
             DetailedResult cfTargetResult = await cfCliService.InvokeCfCliAsync(arguments: $"target -o {targetOrg.OrgName} -s {targetSpace.SpaceName}", stdOutCallback, stdErrCallback);
-            if (!cfTargetResult.Succeeded) return new DetailedResult(false, $"Unable to target org '{targetOrg.OrgName}' or space '{targetSpace.SpaceName}'.\n{cfTargetResult.Explanation}");
+            if (!cfTargetResult.Succeeded)
+            {
+                logger.Error($"Unable to target org '{targetOrg.OrgName}' or space '{targetSpace.SpaceName}'.\n{cfTargetResult.Explanation}");
+                return new DetailedResult(false, $"Unable to target org '{targetOrg.OrgName}' or space '{targetSpace.SpaceName}'.\n{cfTargetResult.Explanation}");
+            }
 
             string buildpack = null;
             string stack = null;
@@ -523,7 +527,11 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             }
 
             DetailedResult cfPushResult = await cfCliService.PushAppAsync(appName, stdOutCallback, stdErrCallback, appProjPath, buildpack, stack);
-            if (!cfPushResult.Succeeded) return new DetailedResult(false, $"Successfully targeted org '{targetOrg.OrgName}' and space '{targetSpace.SpaceName}' but app deployment failed at the `cf push` stage.\n{cfPushResult.Explanation}");
+            if (!cfPushResult.Succeeded)
+            {
+                logger.Error($"Successfully targeted org '{targetOrg.OrgName}' and space '{targetSpace.SpaceName}' but app deployment failed at the `cf push` stage.\n{cfPushResult.Explanation}");
+                return new DetailedResult(false, cfPushResult.Explanation);
+            }
 
             return new DetailedResult(true, $"App successfully deploying to org '{targetOrg.OrgName}', space '{targetSpace.SpaceName}'...");
         }
