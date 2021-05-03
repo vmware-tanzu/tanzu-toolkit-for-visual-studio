@@ -54,6 +54,7 @@
     <Compile Include="TanzuToolkitForVisualStudioPackage.cs" />
     <Compile Include="TanzuCloudExplorerToolWindow.cs" />
     <Compile Include="Commands\TanzuCloudExplorerCommand.cs" />
+    <Compile Include="VisualStudioService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="source.extension.vsixmanifest">

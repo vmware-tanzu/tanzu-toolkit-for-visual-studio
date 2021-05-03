@@ -498,9 +498,17 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
     {
         public IViewModel ViewModel { get; }
 
+        public bool ShowMethodWasCalled { get; private set; }
+
         public FakeOutputView()
         {
             ViewModel = new OutputViewModel(services);
+            ShowMethodWasCalled = false;
+        }
+
+        public void Show()
+        {
+            ShowMethodWasCalled = true;
         }
     }
 }

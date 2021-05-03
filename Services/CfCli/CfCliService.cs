@@ -44,7 +44,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         public static string V6_StartAppCmd = "start";
         public static string V6_DeleteAppCmd = "delete -f"; // -f avoids confirmation prompt
         internal static string V6_GetOrgsRequestPath = "GET /v2/organizations";
-        internal static string V6_GetSpacesRequestPath = "GET /v2/spaces"; 
+        internal static string V6_GetSpacesRequestPath = "GET /v2/spaces";
         internal static string V6_GetAppsRequestPath = "GET /v2/spaces"; // not a typo; app info returned from /v2/spaces/:guid/apps
 
 
@@ -313,7 +313,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
                 var appsResponses = GetJsonResponsePages<AppsApiV2Response>(content, V6_GetAppsRequestPath);
 
                 /* check for unsuccessful json parsing */
-                if (appsResponses == null || 
+                if (appsResponses == null ||
                     (appsResponses.Count > 0 && appsResponses[0].guid == null && appsResponses[0].name == null && appsResponses[0].services == null && appsResponses[0].apps == null))
                 {
                     _logger.Error($"GetAppsAsync() failed during response parsing. Used this delimeter: '{V6_GetAppsRequestPath}' to parse through: {cmdResult.CmdDetails.StdOut}");
@@ -389,6 +389,20 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             var pushResult = await RunCfCommandAsync(args, stdOutCallback, stdErrCallback, appDir);
 
             return pushResult;
+        }
+
+        public async Task<DetailedResult<string>> GetRecentAppLogs(string appName)
+        {
+            var args = $"logs {appName} --recent";
+            var recentLogsResult = await RunCfCommandAsync(args);
+
+            var content = recentLogsResult.CmdDetails.StdOut;
+
+            var cmdDetails = recentLogsResult.CmdDetails;
+            var explanation = recentLogsResult.Explanation;
+            bool succeeded = recentLogsResult.Succeeded;
+
+            return new DetailedResult<string>(content, succeeded, explanation, cmdDetails);
         }
 
         /// <summary>

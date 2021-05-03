@@ -108,11 +108,16 @@ namespace Tanzu.Toolkit.VisualStudio
         {
             string assemblyBasePath = Path.GetDirectoryName(GetType().Assembly.Location);
 
+            /* VSIX package */
+            services.AddSingleton<AsyncPackage>(this);
+
+
             /* Cloud Foundry API */
             HttpClient httpClient = new HttpClient();
             IUaaClient uaaClient = new UaaClient(httpClient);
             services.AddSingleton(_ => uaaClient);
             services.AddSingleton<ICfApiClient>(_ => new CfApiClient(uaaClient, httpClient));
+
 
             /* Services */
             services.AddSingleton<ICloudFoundryService, CloudFoundryService>();
@@ -121,6 +126,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<ICfCliService, CfCliService>();
             services.AddSingleton<IFileLocatorService>(new FileLocatorService(assemblyBasePath));
             services.AddSingleton<ILoggingService, LoggingService>();
+            services.AddSingleton<IVisualStudioService, VisualStudioService>();
 
             services.AddTransient<ICmdProcessService, CmdProcessService>();
 

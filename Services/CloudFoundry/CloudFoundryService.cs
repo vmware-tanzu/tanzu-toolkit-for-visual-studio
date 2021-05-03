@@ -592,5 +592,34 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             return new DetailedResult(true, $"App successfully deploying to org '{targetOrg.OrgName}', space '{targetSpace.SpaceName}'...");
         }
 
+        public async Task<DetailedResult<string>> GetRecentLogs(CloudFoundryApp app)
+        {
+            /* CAUTION: these operations should happen atomically; 
+             * if different threads all try to target orgs/spaces at the same time there's a risk of
+             * getting unexpected results due to a race conditions for these values in .cf/config.json: 
+             *      - "Target" (api address)
+             *      - "OrganizationFields" (info about the currently-targeted org)
+             *      - "SpaceFields" (info about the currently-targeted space)
+             */
+
+
+            var targetOrgResult = cfCliService.TargetOrg(app.ParentSpace.ParentOrg.OrgName);
+            if (!targetOrgResult.Succeeded) return new DetailedResult<string>(
+                content: null, 
+                succeeded: false, 
+                targetOrgResult.Explanation, 
+                targetOrgResult.CmdDetails
+            );
+
+            var targetSpaceResult = cfCliService.TargetSpace(app.ParentSpace.SpaceName);
+            if (!targetSpaceResult.Succeeded) return new DetailedResult<string>(
+                content: null,
+                succeeded: false,
+                targetSpaceResult.Explanation,
+                targetSpaceResult.CmdDetails
+            );
+
+            return await cfCliService.GetRecentAppLogs(app.AppName);
+        }
     }
 }
