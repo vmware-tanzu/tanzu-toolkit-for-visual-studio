@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Tanzu.Toolkit.VisualStudio.Models;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
+using static Tanzu.Toolkit.VisualStudio.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.VisualStudio.ViewModels
 {
@@ -99,6 +100,11 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
             return true;
         }
 
+        public bool CanDisplayRecentAppLogs(object arg)
+        {
+            return true;
+        }
+
 
         public void OpenLoginView(object parent)
         {
@@ -154,6 +160,32 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
                     Logger.Error(_deleteAppErrorMsg + " {AppName}. {DeleteResult}", cfApp.AppName, deleteResult.ToString());
                     DialogService.DisplayErrorDialog($"{_deleteAppErrorMsg} {cfApp.AppName}.", deleteResult.Explanation);
                 }
+            }
+        }
+
+        public async Task DisplayRecentAppLogs(object app)
+        {
+            if (app is CloudFoundryApp cfApp)
+            {
+                var recentLogsResult = await CloudFoundryService.GetRecentLogs(cfApp);
+                if (!recentLogsResult.Succeeded)
+                {
+                    Logger.Error($"Unable to retrieve recent logs for {cfApp.AppName}. {recentLogsResult.Explanation}. {recentLogsResult.CmdDetails}");
+                    DialogService.DisplayErrorDialog($"Unable to retrieve recent logs for {cfApp.AppName}.", recentLogsResult.Explanation);
+                }
+                else
+                {
+                    IView outputView = ViewLocatorService.NavigateTo(nameof(OutputViewModel)) as IView;
+                    var outputViewModel = outputView?.ViewModel as IOutputViewModel;
+
+                    outputView.Show();
+
+                    outputViewModel.AppendLine(recentLogsResult.Content);
+                }
+            }
+            else
+            {
+                Logger.Error($"CloudExplorerViewModel.GetRecentAppLogs received expected argument 'app' to be of type '{typeof(CloudFoundryApp)}', but instead received type '{app.GetType()}'.");
             }
         }
 

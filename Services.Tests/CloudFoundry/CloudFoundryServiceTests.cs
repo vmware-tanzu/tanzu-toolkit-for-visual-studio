@@ -1116,6 +1116,98 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CloudFoundry
             Assert.IsTrue(result.Explanation.Contains(CloudFoundryService.emptyOutputDirMessage));
             mockFileLocatorService.VerifyAll();
         }
+        
+
+        [TestMethod]
+        [TestCategory("GetRecentLogs")]
+        public async Task GetRecentLogs_ReturnsSuccessResult_WhenWrappedMethodSucceeds()
+        {
+            mockCfCliService.Setup(m => m.
+                TargetOrg(fakeApp.ParentSpace.ParentOrg.OrgName))
+                    .Returns(fakeSuccessDetailedResult);
+            
+            mockCfCliService.Setup(m => m.
+                TargetSpace(fakeApp.ParentSpace.SpaceName))
+                    .Returns(fakeSuccessDetailedResult);
+
+            var logsStub = "These are fake app logs!\n[12:16:04] App took a nap.";
+            var fakeLogsResult = new DetailedResult<string>(logsStub, true, null, fakeSuccessCmdResult);
+
+            mockCfCliService.Setup(m => m
+                .GetRecentAppLogs(fakeApp.AppName))
+                    .ReturnsAsync(fakeLogsResult);
+
+            var result = await cfService.GetRecentLogs(fakeApp);
+
+            Assert.AreEqual(result.Content, logsStub);
+            Assert.AreEqual(result.Succeeded, fakeLogsResult.Succeeded);
+            Assert.AreEqual(result.Explanation, fakeLogsResult.Explanation);
+            Assert.AreEqual(result.CmdDetails, fakeLogsResult.CmdDetails);
+        }
+
+        [TestMethod]
+        [TestCategory("GetRecentLogs")]
+        public async Task GetRecentLogs_ReturnsFailedResult_WhenWrappedMethodFails()
+        {
+            mockCfCliService.Setup(m => m.
+                TargetOrg(fakeApp.ParentSpace.ParentOrg.OrgName))
+                    .Returns(fakeSuccessDetailedResult);
+            
+            mockCfCliService.Setup(m => m.
+                TargetSpace(fakeApp.ParentSpace.SpaceName))
+                    .Returns(fakeSuccessDetailedResult);
+
+            string fakeLogs = null;
+            var fakeErrorMsg = "something went wrong";
+            var fakeLogsResult = new DetailedResult<string>(fakeLogs, false, fakeErrorMsg, fakeFailureCmdResult);
+
+            mockCfCliService.Setup(m => m
+                .GetRecentAppLogs(fakeApp.AppName))
+                    .ReturnsAsync(fakeLogsResult);
+
+            var result = await cfService.GetRecentLogs(fakeApp);
+
+            Assert.IsNull(result.Content);
+            Assert.AreEqual(result.Succeeded, fakeLogsResult.Succeeded);
+            Assert.AreEqual(result.Explanation, fakeLogsResult.Explanation);
+            Assert.AreEqual(result.CmdDetails, fakeLogsResult.CmdDetails);
+        }
+        
+        [TestMethod]
+        [TestCategory("GetRecentLogs")]
+        public async Task GetRecentLogs_ReturnsFailedResult_WhenTargetOrgFails()
+        {
+            mockCfCliService.Setup(m => m.
+                TargetOrg(fakeApp.ParentSpace.ParentOrg.OrgName))
+                    .Returns(fakeFailureDetailedResult);
+
+            var result = await cfService.GetRecentLogs(fakeApp);
+
+            Assert.IsNull(result.Content);
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual(result.Explanation, fakeFailureDetailedResult.Explanation);
+            Assert.AreEqual(result.CmdDetails, fakeFailureDetailedResult.CmdDetails);
+        }
+        
+        [TestMethod]
+        [TestCategory("GetRecentLogs")]
+        public async Task GetRecentLogs_ReturnsFailedResult_WhenTargetSpaceFails()
+        {
+            mockCfCliService.Setup(m => m.
+                TargetOrg(fakeApp.ParentSpace.ParentOrg.OrgName))
+                    .Returns(fakeSuccessDetailedResult);
+            
+            mockCfCliService.Setup(m => m.
+                TargetSpace(fakeApp.ParentSpace.SpaceName))
+                    .Returns(fakeFailureDetailedResult);
+
+            var result = await cfService.GetRecentLogs(fakeApp);
+
+            Assert.IsNull(result.Content);
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual(result.Explanation, fakeFailureDetailedResult.Explanation);
+            Assert.AreEqual(result.CmdDetails, fakeFailureDetailedResult.CmdDetails);
+        }
 
     }
 }

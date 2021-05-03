@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
 using Tanzu.Toolkit.VisualStudio.Services.ViewLocator;
 
 namespace Tanzu.Toolkit.VisualStudio.WpfViews.Services
@@ -32,5 +33,6 @@ namespace Tanzu.Toolkit.VisualStudio.WpfViews.Services
         {
             return "I" + viewModelName.Substring(0, viewModelName.Length - 5);  // prepend I and remove "Model"
         }
+
     }
 }
