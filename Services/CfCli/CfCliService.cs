@@ -395,6 +395,20 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             return pushResult;
         }
 
+        public async Task<DetailedResult<string>> GetRecentAppLogs(string appName)
+        {
+            var args = $"logs {appName} --recent";
+            var recentLogsResult = await RunCfCommandAsync(args);
+
+            var content = recentLogsResult.CmdDetails.StdOut;
+
+            var cmdDetails = recentLogsResult.CmdDetails;
+            var explanation = recentLogsResult.Explanation;
+            bool succeeded = recentLogsResult.Succeeded;
+
+            return new DetailedResult<string>(content, succeeded, explanation, cmdDetails);
+        }
+
         /// <summary>
         /// Initiate a new Cloud Foundry CLI command with the given arguments.
         /// Invoke the command prompt and wait for the process to exit before returning.
