@@ -30,6 +30,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         internal readonly string _jsonParsingErrorMsg = $"Unable to parse response from Cloud Foundry API.";
 
         /* CF CLI V6 CONSTANTS */
+        public static string V6_GetApiVersionCmd = "api";
         public static string V6_GetCliVersionCmd = "version";
         public static string V6_GetOAuthTokenCmd = "oauth-token";
         public static string V6_TargetApiCmd = "api";
@@ -55,6 +56,36 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             _logger = logSvc.Logger;
         }
 
+
+        /// <summary>
+        /// Invokes the `cf api` command to access the currently-running version of the Cloud Controller API.
+        /// </summary>
+        /// <returns>
+        /// <code>int[] versionNumbers</code>Array of integers: versionNumbers[0] = major version, versionNumbers[1] = minor, etc.
+        /// </returns>
+        public async Task<Version> GetApiVersion()
+        {
+            DetailedResult result = await RunCfCommandAsync(V6_GetApiVersionCmd);
+            if (!result.Succeeded) return null;
+
+            try
+            {
+                const string versionLabel = "api version:";
+                var content = result.CmdDetails.StdOut.ToLower();
+
+                var versionString = content.Substring(content.IndexOf(versionLabel))
+                    .Replace("\n", string.Empty)
+                    .Replace(versionLabel, string.Empty)
+                    .Replace(" ", string.Empty);
+
+                var version = new Version(versionString);
+                return version;
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
         public string GetOAuthToken()
         {

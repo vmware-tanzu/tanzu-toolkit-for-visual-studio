@@ -12,6 +12,7 @@ using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Orgs;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Spaces;
 using Tanzu.Toolkit.VisualStudio.Services.CloudFoundry;
 using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
+using Tanzu.Toolkit.VisualStudio.Services.Dialog;
 using Tanzu.Toolkit.VisualStudio.Services.FileLocator;
 using Tanzu.Toolkit.VisualStudio.Services.Logging;
 
@@ -22,6 +23,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests
         protected IServiceProvider services;
         protected Mock<ICfApiClient> mockCfApiClient;
         protected Mock<ICfCliService> mockCfCliService;
+        protected Mock<IDialogService> mockDialogService;
         protected Mock<ICmdProcessService> mockCmdProcessService;
         protected Mock<IFileLocatorService> mockFileLocatorService;
         protected Mock<ILoggingService> mockLoggingService;
@@ -162,6 +164,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests
             var services = new ServiceCollection();
             mockCfApiClient = new Mock<ICfApiClient>();
             mockCfCliService = new Mock<ICfCliService>();
+            mockDialogService = new Mock<IDialogService>();
             mockCmdProcessService = new Mock<ICmdProcessService>();
             mockFileLocatorService = new Mock<IFileLocatorService>();
             mockLoggingService = new Mock<ILoggingService>();
@@ -171,6 +174,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests
 
             services.AddSingleton(mockCfApiClient.Object);
             services.AddSingleton(mockCfCliService.Object);
+            services.AddSingleton(mockDialogService.Object);
             services.AddSingleton(mockCmdProcessService.Object);
             services.AddSingleton(mockFileLocatorService.Object);
             services.AddSingleton(mockLoggingService.Object);
