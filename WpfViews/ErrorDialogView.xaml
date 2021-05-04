@@ -6,19 +6,32 @@
         xmlns:local="clr-namespace:Tanzu.Toolkit.VisualStudio.WpfViews"
         mc:Ignorable="d"
         Title="{Binding Title}" 
-        Icon="Resources/redx1.png"
-        Height="286.957" Width="372.173">
+        Height="280" Width="372"
+        Name="ErrorDialogViewElement"
+        ResizeMode="NoResize"
+        WindowStyle="ToolWindow">
+
 
 
     <Grid>
-        <TextBlock Text="{Binding Message}"/>
-        <ScrollViewer x:Name="OutputScrollViewer" Background="White" VerticalScrollBarVisibility="Auto">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="200"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <ScrollViewer Grid.Row="0" Margin="0,0,0,10" x:Name="OutputScrollViewer" Background="White" VerticalScrollBarVisibility="Auto">
             <TextBox
-                Text="{Binding OutputContent}"
-                Margin="4"
+                Text="{Binding Message}"
                 IsReadOnly="True"
-                TextChanged="TextBox_TextChanged"
                 />
         </ScrollViewer>
+
+        <Button Grid.Row="1" Content="Close" Width="100" HorizontalAlignment="Center"
+                Command="{Binding CloseCommand, ElementName=ErrorDialogViewElement}" 
+                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+          />
+        
+
     </Grid>
 </Window>
