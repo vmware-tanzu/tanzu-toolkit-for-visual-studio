@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System;
+﻿using System;
 using Tanzu.Toolkit.VisualStudio.Services.ViewLocator;
 
 namespace Tanzu.Toolkit.VisualStudio.WpfViews.Services
