@@ -8,19 +8,19 @@ using Tanzu.Toolkit.VisualStudio.WpfViews.Services;
 
 namespace Tanzu.Toolkit.VisualStudio
 {
-    public class VisualStudioService : IVisualStudioService
+    public class VsToolWindowService : IViewService
     {
         private readonly AsyncPackage package;
         private readonly ILogger logger;
 
-        public VisualStudioService(AsyncPackage package, ILoggingService loggingService)
+        public VsToolWindowService(AsyncPackage package, ILoggingService loggingService)
         {
             this.package = package;
 
             logger = loggingService.Logger;
         }
 
-        public void DisplayToolWindowForView(Type viewType)
+        public void DisplayViewByType(Type viewType)
         {
             try
             {

@@ -126,7 +126,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<ICfCliService, CfCliService>();
             services.AddSingleton<IFileLocatorService>(new FileLocatorService(assemblyBasePath));
             services.AddSingleton<ILoggingService, LoggingService>();
-            services.AddSingleton<IVisualStudioService, VisualStudioService>();
+            services.AddSingleton<IViewService, VsToolWindowService>();
 
             services.AddTransient<ICmdProcessService, CmdProcessService>();
 

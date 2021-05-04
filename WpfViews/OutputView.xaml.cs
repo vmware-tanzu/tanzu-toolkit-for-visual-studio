@@ -30,8 +30,8 @@ namespace Tanzu.Toolkit.VisualStudio.WpfViews
 
         public void Show()
         {
-            var visualStudioService = _services.GetRequiredService<IVisualStudioService>();
-            visualStudioService.DisplayToolWindowForView(GetType());
+            var viewService = _services.GetRequiredService<IViewService>();
+            viewService.DisplayViewByType(GetType());
         }
 
         /// <summary>
