@@ -75,7 +75,7 @@
     <Compile Include="OutputView.xaml.cs">
       <DependentUpon>OutputView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="IVisualStudioService.cs" />
+    <Compile Include="IViewService.cs" />
     <Compile Include="Services\WpfDialogResult.cs" />
     <Compile Include="Services\WpfDialogService.cs" />
     <Compile Include="Services\WpfViewLocatorService.cs" />
