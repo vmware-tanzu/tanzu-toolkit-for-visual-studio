@@ -24,6 +24,11 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
             {
                 DisplayText = _loadingMsg
             };
+
+            EmptyPlaceholder = new PlaceholderViewModel(parent: this, Services)
+            {
+                DisplayText = _emptySpacesPlaceholderMsg
+            };
         }
 
         internal protected override async Task LoadChildren()
@@ -36,13 +41,11 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
                 {
                     var noChildrenList = new ObservableCollection<TreeViewItemViewModel>
                     {
-                        new PlaceholderViewModel(parent: this, Services)
-                        {
-                            DisplayText = _emptySpacesPlaceholderMsg
-                        }
+                        EmptyPlaceholder,
                     };
 
                     Children = noChildrenList;
+                    HasEmptyPlaceholder = true;
                 }
                 else
                 {
@@ -54,6 +57,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
                     }
 
                     Children = updatedSpacesList;
+                    HasEmptyPlaceholder = false;
                 }
 
                 IsLoading = false;

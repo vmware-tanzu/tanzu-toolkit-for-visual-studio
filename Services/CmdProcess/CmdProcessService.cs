@@ -51,6 +51,37 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CmdProcess
 
             return new CmdResult(StdOutAggregator, StdErrAggregator, process.ExitCode);
         }
+        
+        public CmdResult RunCommand(string executableFilePath, string arguments, string workingDir, StdOutDelegate stdOutDelegate, StdErrDelegate stdErrDelegate)
+        {
+            //* Create your Process
+            Process process = new Process();
+            process.StartInfo.FileName = executableFilePath;
+            process.StartInfo.Arguments = arguments;
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardError = true;
+            process.StartInfo.CreateNoWindow = true;
+            if (workingDir != null) process.StartInfo.WorkingDirectory = workingDir;
+
+            //* Set your output and error (asynchronous) handlers
+            StdOutCallback = stdOutDelegate;
+            StdErrCallback = stdErrDelegate;
+            StdOutAggregator = "";
+            StdErrAggregator = "";
+            process.OutputDataReceived += new DataReceivedEventHandler(OutputRecorder);
+            process.ErrorDataReceived += new DataReceivedEventHandler(ErrorRecorder);
+
+            //* Start process and handlers
+            process.Start();
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+
+            // Begin blocking call
+            process.WaitForExit();
+
+            return new CmdResult(StdOutAggregator, StdErrAggregator, process.ExitCode);
+        }
 
         public CmdResult ExecuteWindowlessCommand(string arguments, string workingDir)
         {

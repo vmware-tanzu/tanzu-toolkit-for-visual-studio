@@ -7,6 +7,7 @@ using System.Security;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Apps;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Orgs;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Spaces;
@@ -29,6 +30,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         internal readonly string _jsonParsingErrorMsg = $"Unable to parse response from Cloud Foundry API.";
 
         /* CF CLI V6 CONSTANTS */
+        public static string V6_GetApiVersionCmd = "api";
         public static string V6_GetCliVersionCmd = "version";
         public static string V6_GetOAuthTokenCmd = "oauth-token";
         public static string V6_TargetApiCmd = "api";
@@ -42,8 +44,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         public static string V6_StartAppCmd = "start";
         public static string V6_DeleteAppCmd = "delete -f"; // -f avoids confirmation prompt
         internal static string V6_GetOrgsRequestPath = "GET /v2/organizations";
-        internal static string V6_GetSpacesRequestPath = "GET /v2/spaces";
-        internal static string V6_GetAppsRequestPath = "GET /v2/spaces"; // not a typo; app info returned when requesting space details
+        internal static string V6_GetSpacesRequestPath = "GET /v2/spaces"; 
+        internal static string V6_GetAppsRequestPath = "GET /v2/spaces"; // not a typo; app info returned from /v2/spaces/:guid/apps
 
 
         public CfCliService(IServiceProvider services)
@@ -54,6 +56,36 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
             _logger = logSvc.Logger;
         }
 
+
+        /// <summary>
+        /// Invokes the `cf api` command to access the currently-running version of the Cloud Controller API.
+        /// </summary>
+        /// <returns>
+        /// <code>int[] versionNumbers</code>Array of integers: versionNumbers[0] = major version, versionNumbers[1] = minor, etc.
+        /// </returns>
+        public async Task<Version> GetApiVersion()
+        {
+            DetailedResult result = await RunCfCommandAsync(V6_GetApiVersionCmd);
+            if (!result.Succeeded) return null;
+
+            try
+            {
+                const string versionLabel = "api version:";
+                var content = result.CmdDetails.StdOut.ToLower();
+
+                var versionString = content.Substring(content.IndexOf(versionLabel))
+                    .Replace("\n", string.Empty)
+                    .Replace(versionLabel, string.Empty)
+                    .Replace(" ", string.Empty);
+
+                var version = new Version(versionString);
+                return version;
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
         public string GetOAuthToken()
         {
@@ -72,7 +104,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         {
             string args = $"{V6_TargetApiCmd} {apiAddress}{(skipSsl ? " --skip-ssl-validation" : string.Empty)}";
             var result = ExecuteCfCliCommand(args);
-            
+
             if (!result.Succeeded) _logger.Error($"TargetApi({apiAddress}, {skipSsl}) failed: {result}");
 
             return result;
@@ -214,7 +246,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
                 }
 
                 var spaceResponsePages = GetJsonResponsePages<SpacesApiV2ResponsePage>(content, V6_GetSpacesRequestPath);
-                
+
                 /* check for unsuccessful json parsing */
                 if (spaceResponsePages == null)
                 {
@@ -281,7 +313,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
                 var appsResponses = GetJsonResponsePages<AppsApiV2Response>(content, V6_GetAppsRequestPath);
 
                 /* check for unsuccessful json parsing */
-                if (appsResponses == null)
+                if (appsResponses == null || 
+                    (appsResponses.Count > 0 && appsResponses[0].guid == null && appsResponses[0].name == null && appsResponses[0].services == null && appsResponses[0].apps == null))
                 {
                     _logger.Error($"GetAppsAsync() failed during response parsing. Used this delimeter: '{V6_GetAppsRequestPath}' to parse through: {cmdResult.CmdDetails.StdOut}");
 
@@ -314,8 +347,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
         public async Task<DetailedResult> StopAppByNameAsync(string appName)
         {
-            string args = $"{V6_StopAppCmd} {appName}";
-            DetailedResult result = await InvokeCfCliAsync(args);
+            string args = $"{V6_StopAppCmd} \"{appName}\"";
+            DetailedResult result = await RunCfCommandAsync(args);
 
             if (!result.Succeeded) _logger.Error($"StopAppByNameAsync({appName}) failed during InvokeCfCliAsync: {result}");
 
@@ -324,8 +357,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
         public async Task<DetailedResult> StartAppByNameAsync(string appName)
         {
-            string args = $"{V6_StartAppCmd} {appName}";
-            DetailedResult result = await InvokeCfCliAsync(args);
+            string args = $"{V6_StartAppCmd} \"{appName}\"";
+            DetailedResult result = await RunCfCommandAsync(args);
 
             if (!result.Succeeded) _logger.Error($"StartAppByNameAsync({appName}) failed during InvokeCfCliAsync: {result}");
 
@@ -334,12 +367,28 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
         public async Task<DetailedResult> DeleteAppByNameAsync(string appName, bool removeMappedRoutes = true)
         {
-            string args = $"{V6_DeleteAppCmd} {appName}{(removeMappedRoutes ? " -r" : string.Empty)}";
-            DetailedResult result = await InvokeCfCliAsync(args);
+            string args = $"{V6_DeleteAppCmd} \"{appName}\"{(removeMappedRoutes ? " -r" : string.Empty)}";
+            DetailedResult result = await RunCfCommandAsync(args);
 
             if (!result.Succeeded) _logger.Error($"DeleteAppByNameAsync({appName}, {removeMappedRoutes}) failed during InvokeCfCliAsync: {result}");
 
             return result;
+        }
+
+        /// <summary>
+        /// Invokes `cf push` with the specified app name. Assumes the proper org & space have already been targeted.
+        /// </summary>
+        /// <param name="appName"></param>
+        /// <param name="stdOutCallback"></param>
+        /// <param name="stdErrCallback"></param>
+        /// <param name="appDir"></param>
+        /// <returns></returns>
+        public async Task<DetailedResult> PushAppAsync(string appName, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string appDir)
+        {
+            string args = $"push \"{appName}\"";
+            var pushResult = await RunCfCommandAsync(args, stdOutCallback, stdErrCallback, appDir);
+
+            return pushResult;
         }
 
         /// <summary>
@@ -362,7 +411,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
             if (result.ExitCode == 0) return new DetailedResult(succeeded: true, cmdDetails: result);
 
-            string reason = $"Unable to execute `cf {arguments}`.";
+            string reason = result.StdErr;
+            if (string.IsNullOrEmpty(result.StdErr))
+            {
+                if (result.StdOut.Contains("FAILED")) reason = result.StdOut;
+
+                else reason = $"Unable to execute `cf {arguments}`.";
+            }
+
             return new DetailedResult(false, reason, cmdDetails: result);
         }
 
@@ -386,7 +442,35 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
             if (result.ExitCode == 0) return new DetailedResult(succeeded: true, cmdDetails: result);
 
-            string reason = $"Unable to execute `cf {arguments}`.";
+            string reason = result.StdErr;
+            if (string.IsNullOrEmpty(result.StdErr))
+            {
+                if (result.StdOut.Contains("FAILED")) reason = result.StdOut;
+
+                else reason = $"Unable to execute `cf {arguments}`.";
+            }
+
+            return new DetailedResult(false, reason, cmdDetails: result);
+        }
+
+        internal async Task<DetailedResult> RunCfCommandAsync(string arguments, StdOutDelegate stdOutCallback = null, StdErrDelegate stdErrCallback = null, string workingDir = null)
+        {
+            string pathToCfExe = _fileLocatorService.FullPathToCfExe;
+            if (string.IsNullOrEmpty(pathToCfExe)) return new DetailedResult(false, $"Unable to locate cf.exe.");
+
+            ICmdProcessService cmdProcessService = _services.GetRequiredService<ICmdProcessService>();
+            CmdResult result = await Task.Run(() => cmdProcessService.RunCommand(pathToCfExe, arguments, workingDir, stdOutCallback, stdErrCallback));
+
+            if (result.ExitCode == 0) return new DetailedResult(succeeded: true, cmdDetails: result);
+
+            string reason = result.StdErr;
+            if (string.IsNullOrEmpty(result.StdErr))
+            {
+                if (result.StdOut.Contains("FAILED")) reason = result.StdOut;
+
+                else reason = $"Unable to execute `cf {arguments}`.";
+            }
+
             return new DetailedResult(false, reason, cmdDetails: result);
         }
 
@@ -408,11 +492,11 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         ///     <para>A list of <typeparamref name="ResponseType"/> pages if successful.</para>
         ///     <para><c>null</c> otherwise.</para>
         /// </returns>
-        internal List<ResponseType> GetJsonResponsePages<ResponseType>(string content, string requestFilter)
+        internal List<TResponse> GetJsonResponsePages<TResponse>(string content, string requestFilter)
         {
             try
             {
-                var jsonResponses = new List<ResponseType>();
+                var jsonResponses = new List<TResponse>();
 
                 if (!content.Contains("REQUEST") || !content.Contains("RESPONSE") || !content.Contains(requestFilter))
                 {
@@ -449,7 +533,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
                                 substringLength);
 
                             /* try converting json-like string to `ResponseType` instance */
-                            ResponseType responsePage = JsonSerializer.Deserialize<ResponseType>(speculativeJsonStr);
+                            var responsePage = JsonSerializer.Deserialize<TResponse>(speculativeJsonStr);
 
                             jsonResponses.Add(responsePage);
                         }
@@ -459,6 +543,18 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
 
                             return null;
                         }
+                    }
+                }
+
+                if (jsonResponses.Count == 1)
+                {
+                    if (jsonResponses[0] is ApiV2Response response
+                        && response.next_url == null
+                        && response.prev_url == null
+                        && response.total_pages == 0
+                        && response.total_results == 0)
+                    {
+                        return null;
                     }
                 }
 

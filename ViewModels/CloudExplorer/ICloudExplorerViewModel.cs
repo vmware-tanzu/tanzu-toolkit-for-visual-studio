@@ -27,5 +27,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         bool CanRefreshSpace(object arg);
         Task RefreshAllCloudConnections(object arg);
         bool CanRefreshAllCloudConnections(object arg);
+        void RemoveCloudConnection(object arg);
+        bool CanRemoveCloudConnecion(object arg);
     }
 }

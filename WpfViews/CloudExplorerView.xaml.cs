@@ -16,6 +16,7 @@ namespace Tanzu.Toolkit.VisualStudio.WpfViews
         public ICommand DeleteCfAppCommand { get; }
         public ICommand RefreshSpaceCommand { get; }
         public ICommand RefreshAllCommand { get; }
+        public ICommand RemoveCloudConnectionCommand { get; }
 
         public CloudExplorerView()
         {
@@ -30,6 +31,7 @@ namespace Tanzu.Toolkit.VisualStudio.WpfViews
             DeleteCfAppCommand = new AsyncDelegatingCommand(viewModel.DeleteCfApp, viewModel.CanDeleteCfApp);
             RefreshSpaceCommand = new AsyncDelegatingCommand(viewModel.RefreshSpace, viewModel.CanRefreshSpace);
             RefreshAllCommand = new AsyncDelegatingCommand(viewModel.RefreshAllCloudConnections, viewModel.CanRefreshAllCloudConnections);
+            RemoveCloudConnectionCommand = new DelegatingCommand(viewModel.RemoveCloudConnection, viewModel.CanRemoveCloudConnecion);
 
             DataContext = viewModel;
             InitializeComponent();

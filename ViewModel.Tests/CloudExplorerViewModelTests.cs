@@ -97,14 +97,17 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public void OpenLoginView_UpdatesCloudFoundryInstances_AfterDialogCloses()
         {
+            var emptyCfsDict = new Dictionary<string, CloudFoundryInstance>();
             var fakeCfsDict = new Dictionary<string, CloudFoundryInstance>
             {
                 { "fake cf", new CloudFoundryInstance("fake cf", null, null) }
             };
 
-            Assert.AreEqual(0, vm.CloudFoundryList.Count);
+            mockCloudFoundryService.SetupSequence(mock => mock.CloudFoundryInstances)
+                .Returns(emptyCfsDict) // return empty on first request to avoid error due to temporary "single-cf" requirement.
+                .Returns(fakeCfsDict); // return fake cf on second request as mock result of having logged in.
 
-            mockCloudFoundryService.SetupGet(mock => mock.CloudFoundryInstances).Returns(fakeCfsDict);
+            Assert.AreEqual(0, vm.CloudFoundryList.Count);
 
             vm.OpenLoginView(null);
 
@@ -115,7 +118,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task StopCfApp_CallsStopCfAppAsync()
         {
-            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
+            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
 
             mockCloudFoundryService.Setup(mock => mock.StopAppAsync(fakeApp, true)).ReturnsAsync(fakeSuccessDetailedResult);
 
@@ -136,7 +139,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task StopCfApp_DisplaysErrorDialog_WhenStopAppAsyncFails()
         {
-            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
+            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
 
             mockCloudFoundryService.Setup(mock => mock.
                 StopAppAsync(fakeApp, true))
@@ -151,11 +154,11 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
               DisplayErrorDialog(expectedErrorTitle, expectedErrorMsg),
                 Times.Once);
         }
-        
+
         [TestMethod]
         public async Task StopCfApp_LogsError_WhenStopAppAsyncFails()
         {
-            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
+            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
 
             mockCloudFoundryService.Setup(mock => mock.
                 StopAppAsync(fakeApp, true))
@@ -175,7 +178,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task StartCfApp_CallsStartAppAsync()
         {
-            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
+            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
 
             mockCloudFoundryService.Setup(mock => mock.StartAppAsync(fakeApp, true)).ReturnsAsync(fakeSuccessDetailedResult);
 
@@ -196,7 +199,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task StartCfApp_DisplaysErrorDialog_WhenStartAppAsyncFails()
         {
-            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
+            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
 
             mockCloudFoundryService.Setup(mock => mock.
                 StartAppAsync(fakeApp, true))
@@ -215,7 +218,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task StartCfApp_LogsError_WhenStartAppAsyncFails()
         {
-            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
+            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
 
             mockCloudFoundryService.Setup(mock => mock.
                 StartAppAsync(fakeApp, true))
@@ -235,7 +238,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task DeleteCfApp_CallsDeleteAppAsync()
         {
-            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
+            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
 
             mockCloudFoundryService.Setup(mock => mock.DeleteAppAsync(fakeApp, true, true)).ReturnsAsync(fakeSuccessDetailedResult);
 
@@ -256,7 +259,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task DeleteCfApp_DisplaysErrorDialog_WhenDeleteAppAsyncFails()
         {
-            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
+            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
 
             mockCloudFoundryService.Setup(mock => mock.
                 DeleteAppAsync(fakeApp, true, true))
@@ -276,7 +279,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task DeleteCfApp_LogsError_WhenDeleteAppAsyncFails()
         {
-            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null);
+            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
 
             mockCloudFoundryService.Setup(mock => mock.
                 DeleteAppAsync(fakeApp, true, true))
@@ -296,7 +299,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public void RefreshApp_RaisesPropertyChangedEventForIsStopped()
         {
-            CloudFoundryApp fakeApp = new CloudFoundryApp("fake app name", "fake app guid", null);
+            CloudFoundryApp fakeApp = new CloudFoundryApp("fake app name", "fake app guid", null, null);
             var avm = new AppViewModel(fakeApp, services);
 
             avm.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
@@ -313,7 +316,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task RefreshCfInstance_UpdatesChildrenOnCfInstanceViewModel()
         {
-            var fakeCfInstance = new CloudFoundryInstance("fake space name", "fake space id", null);
+            var fakeCfInstance = new CloudFoundryInstance("fake name", "fake id", null);
             var fakeCfInstanceViewModel = new CfInstanceViewModel(fakeCfInstance, services);
 
             var fakeOrgName1 = "fake org 1";
@@ -362,6 +365,72 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             Assert.AreEqual(0, receivedEvents.Count);
 
             mockCloudFoundryService.VerifyAll();
+        }
+        
+        [TestMethod]
+        public async Task RefreshCfInstance_AddsPlaceholder_ToCFsThatBecameEmpty()
+        {
+            var fakeCfInstance = new CloudFoundryInstance("fake name", "fake id", null);
+            var fakeCfInstanceViewModel = new CfInstanceViewModel(fakeCfInstance, services);
+
+            var fakeOrgName1 = "fake org 1";
+            var fakeOrgGuid1 = "fake org 1";
+
+            fakeCfInstanceViewModel.Children = new ObservableCollection<TreeViewItemViewModel>
+            {
+                new OrgViewModel(new CloudFoundryOrganization(fakeOrgName1, fakeOrgGuid1, fakeCfInstance), services)
+            };
+
+            var newEmptyOrgsList = new List<CloudFoundryOrganization>();
+
+            var fakeNoOrgsResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: true, content: newEmptyOrgsList);
+
+            Assert.AreEqual(1, fakeCfInstanceViewModel.Children.Count);
+            OrgViewModel firstChildOrg = (OrgViewModel)fakeCfInstanceViewModel.Children[0];
+            Assert.AreEqual(fakeOrgName1, firstChildOrg.Org.OrgName);
+
+            mockCloudFoundryService.Setup(mock => mock.
+                GetOrgsForCfInstanceAsync(fakeCfInstance, true))
+                    .ReturnsAsync(fakeNoOrgsResult);
+
+            await vm.RefreshCfInstance(fakeCfInstanceViewModel);
+
+            Assert.AreEqual(1, fakeCfInstanceViewModel.Children.Count);
+            Assert.AreEqual(typeof(PlaceholderViewModel), fakeCfInstanceViewModel.Children[0].GetType());
+        }
+        
+        [TestMethod]
+        public async Task RefreshCfInstance_RemovesPlaceholder_FromEmptyCFsThatGainedChildren()
+        {
+            var fakeCfInstance = new CloudFoundryInstance("fake name", "fake id", null);
+            var fakeCfInstanceViewModel = new CfInstanceViewModel(fakeCfInstance, services);
+
+            // simulate cf initially having no org children
+            fakeCfInstanceViewModel.Children = new ObservableCollection<TreeViewItemViewModel> { fakeCfInstanceViewModel.EmptyPlaceholder };
+            fakeCfInstanceViewModel.HasEmptyPlaceholder = true;
+
+            var fakeOrgName1 = "fake org 1";
+            var fakeOrgGuid1 = "fake org 1";
+
+            var newOrgsList = new List<CloudFoundryOrganization>
+            {
+                new CloudFoundryOrganization(fakeOrgName1, fakeOrgGuid1, fakeCfInstance),
+            };
+
+            var fakeSuccessResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: true, content: newOrgsList);
+
+            mockCloudFoundryService.Setup(mock => mock.
+                GetOrgsForCfInstanceAsync(fakeCfInstance, true))
+                    .ReturnsAsync(fakeSuccessResult);
+
+            Assert.AreEqual(1, fakeCfInstanceViewModel.Children.Count);
+            Assert.AreEqual(typeof(PlaceholderViewModel), fakeCfInstanceViewModel.Children[0].GetType());
+
+            await vm.RefreshCfInstance(fakeCfInstanceViewModel);
+
+            Assert.AreEqual(1, fakeCfInstanceViewModel.Children.Count);
+            var child = fakeCfInstanceViewModel.Children[0];
+            Assert.AreEqual(typeof(OrgViewModel), child.GetType());
         }
 
         [TestMethod]
@@ -423,6 +492,75 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             mockCloudFoundryService.VerifyAll();
         }
+        
+        [TestMethod]
+        public async Task RefreshOrg_AddsPlaceholder_ToOrgsThatBecameEmpty()
+        {
+            var fakeOrg = new CloudFoundryOrganization("fake name", "fake id", null);
+            var fakeOrgViewModel = new OrgViewModel(fakeOrg, services);
+
+            var fakeSpaceName1 = "fake space 1";
+            var fakeSpaceGuid1 = "fake space 1";
+
+            fakeOrgViewModel.Children = new ObservableCollection<TreeViewItemViewModel>
+            {
+                new SpaceViewModel(new CloudFoundrySpace(fakeSpaceName1, fakeSpaceGuid1, fakeOrg), services)
+            };
+
+            var newEmptySpacesList = new List<CloudFoundrySpace>();
+
+            var fakeNoSpacesResult = new DetailedResult<List<CloudFoundrySpace>>(succeeded: true, content: newEmptySpacesList);
+
+            Assert.AreEqual(1, fakeOrgViewModel.Children.Count);
+            SpaceViewModel firstChildSpace = (SpaceViewModel)fakeOrgViewModel.Children[0];
+            Assert.AreEqual(fakeSpaceName1, firstChildSpace.Space.SpaceName);
+
+            mockCloudFoundryService.Setup(mock => mock.
+                GetSpacesForOrgAsync(fakeOrg, true))
+                    .ReturnsAsync(fakeNoSpacesResult);
+
+            await vm.RefreshOrg(fakeOrgViewModel);
+
+            Assert.AreEqual(1, fakeOrgViewModel.Children.Count);
+            Assert.AreEqual(typeof(PlaceholderViewModel), fakeOrgViewModel.Children[0].GetType());
+        }
+        
+        [TestMethod]
+        public async Task RefreshOrg_RemovesPlaceholder_FromEmptyOrgsThatGainedChildren()
+        {
+            var fakeOrg = new CloudFoundryOrganization("fake name", "fake id", null);
+            var fakeOrgViewModel = new OrgViewModel(fakeOrg, services);
+
+            var fakeSpaceName1 = "fake space 1";
+            var fakeSpaceGuid1 = "fake space 1";
+
+            // simulate org initially having no space children
+            fakeOrgViewModel.HasEmptyPlaceholder = true;
+            fakeOrgViewModel.Children = new ObservableCollection<TreeViewItemViewModel>
+            {
+                fakeOrgViewModel.EmptyPlaceholder,
+            };
+
+            var newSpacesList = new List<CloudFoundrySpace>
+            {
+                new CloudFoundrySpace(fakeSpaceName1, fakeSpaceGuid1, fakeOrg),
+            };
+
+            var fakeSuccessResult = new DetailedResult<List<CloudFoundrySpace>>(succeeded: true, content: newSpacesList);
+
+            mockCloudFoundryService.Setup(mock => mock.
+                GetSpacesForOrgAsync(fakeOrg, true))
+                    .ReturnsAsync(fakeSuccessResult);
+
+            Assert.AreEqual(1, fakeOrgViewModel.Children.Count);
+            Assert.AreEqual(typeof(PlaceholderViewModel), fakeOrgViewModel.Children[0].GetType());
+
+            await vm.RefreshOrg(fakeOrgViewModel);
+
+            Assert.AreEqual(1, fakeOrgViewModel.Children.Count);
+            var child = fakeOrgViewModel.Children[0];
+            Assert.AreEqual(typeof(SpaceViewModel), child.GetType());
+        }
 
         [TestMethod]
         public async Task RefreshSpace_UpdatesChildrenOnSpaceViewModel()
@@ -440,7 +578,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             fakeSpaceViewModel.Children = new ObservableCollection<TreeViewItemViewModel>
             {
-                new AppViewModel(new CloudFoundryApp(fakeAppName1, fakeAppGuid1, fakeSpace), services)
+                new AppViewModel(new CloudFoundryApp(fakeAppName1, fakeAppGuid1, fakeSpace, null), services)
             };
 
             fakeSpaceViewModel.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
@@ -454,8 +592,8 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             var fakeAppsResponseContent = new List<CloudFoundryApp>
             {
-                new CloudFoundryApp(fakeAppName2, fakeAppGuid2, fakeSpace),
-                new CloudFoundryApp(fakeAppName3, fakeAppGuid3, fakeSpace)
+                new CloudFoundryApp(fakeAppName2, fakeAppGuid2, fakeSpace, null),
+                new CloudFoundryApp(fakeAppName3, fakeAppGuid3, fakeSpace, null)
             };
             var fakeAppsResult = new DetailedResult<List<CloudFoundryApp>>(
                 succeeded: true,
@@ -480,6 +618,75 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             mockCloudFoundryService.VerifyAll();
         }
+        
+        [TestMethod]
+        public async Task RefreshSpace_AddsPlaceholder_ToSpacesThatBecameEmpty()
+        {
+            var fakeSpace = new CloudFoundrySpace("fake name", "fake id", null);
+            var fakeSpaceViewModel = new SpaceViewModel(fakeSpace, services);
+
+            var fakeAppName1 = "fake app 1";
+            var fakeAppGuid1 = "fake app 1";
+
+            fakeSpaceViewModel.Children = new ObservableCollection<TreeViewItemViewModel>
+            {
+                new AppViewModel(new CloudFoundryApp(fakeAppName1, fakeAppGuid1, fakeSpace, null), services)
+            };
+
+            var newEmptyAppsList = new List<CloudFoundryApp>();
+
+            var fakeNoAppsResult = new DetailedResult<List<CloudFoundryApp>>(succeeded: true, content: newEmptyAppsList);
+
+            Assert.AreEqual(1, fakeSpaceViewModel.Children.Count);
+            AppViewModel firstChildApp = (AppViewModel)fakeSpaceViewModel.Children[0];
+            Assert.AreEqual(fakeAppName1, firstChildApp.App.AppName);
+
+            mockCloudFoundryService.Setup(mock => mock.
+                GetAppsForSpaceAsync(fakeSpace, true))
+                    .ReturnsAsync(fakeNoAppsResult);
+
+            await vm.RefreshSpace(fakeSpaceViewModel);
+
+            Assert.AreEqual(1, fakeSpaceViewModel.Children.Count);
+            Assert.AreEqual(typeof(PlaceholderViewModel), fakeSpaceViewModel.Children[0].GetType());
+        }
+        
+        [TestMethod]
+        public async Task RefreshSpace_RemovesPlaceholder_FromEmptySpacesThatGainedChildren()
+        {
+            var fakeSpace = new CloudFoundrySpace("fake name", "fake id", null);
+            var fakeSpaceViewModel = new SpaceViewModel(fakeSpace, services);
+
+            var fakeAppName1 = "fake app 1";
+            var fakeAppGuid1 = "fake app 1";
+
+            // simulate space initially having no app children
+            fakeSpaceViewModel.HasEmptyPlaceholder = true;
+            fakeSpaceViewModel.Children = new ObservableCollection<TreeViewItemViewModel>
+            {
+                fakeSpaceViewModel.EmptyPlaceholder,
+            };
+
+            var newAppsList = new List<CloudFoundryApp>
+            {
+                new CloudFoundryApp(fakeAppName1, fakeAppGuid1, fakeSpace, null),
+            };
+
+            var fakeSuccessResult = new DetailedResult<List<CloudFoundryApp>>(succeeded: true, content: newAppsList);
+
+            mockCloudFoundryService.Setup(mock => mock.
+                GetAppsForSpaceAsync(fakeSpace, true))
+                    .ReturnsAsync(fakeSuccessResult);
+
+            Assert.AreEqual(1, fakeSpaceViewModel.Children.Count);
+            Assert.AreEqual(typeof(PlaceholderViewModel), fakeSpaceViewModel.Children[0].GetType());
+
+            await vm.RefreshSpace(fakeSpaceViewModel);
+
+            Assert.AreEqual(1, fakeSpaceViewModel.Children.Count);
+            var child = fakeSpaceViewModel.Children[0];
+            Assert.AreEqual(typeof(AppViewModel), child.GetType());
+        }
 
         [TestMethod]
         public async Task RefreshAllCloudConnections_RefreshesEachTreeViewItemViewModel()
@@ -496,8 +703,8 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             var fakeNewSpace = new CloudFoundrySpace("new space", "new space id", fakeInitialOrg);
             var svm = new SpaceViewModel(fakeInitialSpace, services);
 
-            var fakeInitialApp = new CloudFoundryApp("fake app name", "fake app id", fakeInitialSpace);
-            var fakeNewApp = new CloudFoundryApp("new app", "new app id", fakeInitialSpace);
+            var fakeInitialApp = new CloudFoundryApp("fake app name", "fake app id", fakeInitialSpace, null);
+            var fakeNewApp = new CloudFoundryApp("new app", "new app id", fakeInitialSpace, null);
             var avm = new AppViewModel(fakeInitialApp, services);
 
             var fakeCfDict = new Dictionary<string, CloudFoundryInstance>
@@ -618,6 +825,408 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             // No need to get children for spaces that were just added by refresh.
             mockCloudFoundryService.Verify(mock => mock.
                 GetAppsForSpaceAsync(fakeNewSpace, true), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task RefreshAllCloudConnections_AddsPlaceholder_ToCFsThatBecameEmpty()
+        {
+            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address", "fake-token");
+            var cfivm = new CfInstanceViewModel(fakeInitialCfInstance, services);
+
+            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance);
+            var ovm = new OrgViewModel(fakeInitialOrg, services);
+
+            var fakeCfDict = new Dictionary<string, CloudFoundryInstance>
+            {
+                { "fake cf name", fakeInitialCfInstance },
+            };
+
+            var fakeEmptyOrgsResult = new DetailedResult<List<CloudFoundryOrganization>>
+            (
+                succeeded: true,
+                content: new List<CloudFoundryOrganization>(), // simulate cf having lost all orgs before refresh
+                explanation: null,
+                cmdDetails: fakeSuccessCmdResult
+            );
+
+            mockCloudFoundryService.SetupGet(mock => mock.
+                CloudFoundryInstances)
+                    .Returns(fakeCfDict);
+
+            mockCloudFoundryService.Setup(mock => mock.
+                GetOrgsForCfInstanceAsync(fakeInitialCfInstance, true))
+                    .ReturnsAsync(fakeEmptyOrgsResult);
+
+            cfivm.Children = new ObservableCollection<TreeViewItemViewModel> { ovm }; // simulate cf initially having 1 org child
+
+            vm.CloudFoundryList = new ObservableCollection<CfInstanceViewModel> { cfivm };
+
+            Assert.AreEqual(1, cfivm.Children.Count);
+            Assert.AreEqual(typeof(OrgViewModel), cfivm.Children[0].GetType());
+
+            await vm.RefreshAllCloudConnections(null);
+
+            Assert.AreEqual(1, cfivm.Children.Count);
+
+            Assert.AreEqual(typeof(PlaceholderViewModel), cfivm.Children[0].GetType());
+            Assert.AreEqual(CfInstanceViewModel._emptyOrgsPlaceholderMsg, cfivm.Children[0].DisplayText);
+        }
+
+        [TestMethod]
+        public async Task RefreshAllCloudConnections_AddsPlaceholder_ToOrgsThatBecameEmpty()
+        {
+            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address", "fake-token");
+            var cfivm = new CfInstanceViewModel(fakeInitialCfInstance, services);
+
+            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance);
+            var ovm = new OrgViewModel(fakeInitialOrg, services);
+
+            var fakeInitialSpace = new CloudFoundrySpace("fake space name", "fake space id", fakeInitialOrg);
+            var svm = new SpaceViewModel(fakeInitialSpace, services);
+
+            var fakeCfDict = new Dictionary<string, CloudFoundryInstance>
+            {
+                { "fake cf name", fakeInitialCfInstance },
+            };
+
+            var fakeSuccessfulOrgsResult = new DetailedResult<List<CloudFoundryOrganization>>
+            (
+                succeeded: true,
+                content: new List<CloudFoundryOrganization>
+                {
+                    fakeInitialOrg,
+                },
+                explanation: null,
+                cmdDetails: fakeSuccessCmdResult
+            );
+
+            var fakeNoSpacesResult = new DetailedResult<List<CloudFoundrySpace>>
+            (
+                succeeded: true,
+                content: new List<CloudFoundrySpace>(), // simulate org having lost all spaces before refresh
+                explanation: null,
+                cmdDetails: fakeSuccessCmdResult
+            );
+
+            mockCloudFoundryService.SetupGet(mock => mock.
+                CloudFoundryInstances)
+                    .Returns(fakeCfDict);
+
+            mockCloudFoundryService.Setup(mock => mock.
+                GetOrgsForCfInstanceAsync(fakeInitialCfInstance, true))
+                    .ReturnsAsync(fakeSuccessfulOrgsResult);
+
+            mockCloudFoundryService.Setup(mock => mock.
+                GetSpacesForOrgAsync(fakeInitialOrg, true))
+                    .ReturnsAsync(fakeNoSpacesResult);
+
+            cfivm.Children = new ObservableCollection<TreeViewItemViewModel> { ovm };
+
+            ovm.Children = new ObservableCollection<TreeViewItemViewModel> { svm }; // simulate org initially having 1 space child
+
+            vm.CloudFoundryList = new ObservableCollection<CfInstanceViewModel> { cfivm };
+
+            Assert.AreEqual(1, ovm.Children.Count);
+            Assert.AreEqual(typeof(SpaceViewModel), ovm.Children[0].GetType());
+
+            await vm.RefreshAllCloudConnections(null);
+
+            Assert.AreEqual(1, ovm.Children.Count);
+            Assert.AreEqual(typeof(PlaceholderViewModel), ovm.Children[0].GetType());
+            Assert.AreEqual(OrgViewModel._emptySpacesPlaceholderMsg, ovm.Children[0].DisplayText);
+        }
+
+        [TestMethod]
+        public async Task RefreshAllCloudConnections_AddsPlaceholder_ToSpacesThatBecameEmpty()
+        {
+            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address", "fake-token");
+            var cfivm = new CfInstanceViewModel(fakeInitialCfInstance, services);
+
+            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance);
+            var ovm = new OrgViewModel(fakeInitialOrg, services);
+
+            var fakeInitialSpace = new CloudFoundrySpace("fake space name", "fake space id", fakeInitialOrg);
+            var svm = new SpaceViewModel(fakeInitialSpace, services);
+
+            var fakeInitialApp = new CloudFoundryApp("fake app name", "fake app id", fakeInitialSpace, null);
+            var avm = new AppViewModel(fakeInitialApp, services);
+
+            var fakeCfDict = new Dictionary<string, CloudFoundryInstance>
+            {
+                { "fake cf name", fakeInitialCfInstance },
+            };
+
+            var fakeSuccessfulOrgsResult = new DetailedResult<List<CloudFoundryOrganization>>
+            (
+                succeeded: true,
+                content: new List<CloudFoundryOrganization>
+                {
+                    fakeInitialOrg,
+                },
+                explanation: null,
+                cmdDetails: fakeSuccessCmdResult
+            );
+
+            var fakeSuccessfulSpacesResult = new DetailedResult<List<CloudFoundrySpace>>
+            (
+                succeeded: true,
+                content: new List<CloudFoundrySpace>
+                {
+                    fakeInitialSpace,
+                },
+                explanation: null,
+                cmdDetails: fakeSuccessCmdResult
+            );
+
+            var fakeNoAppsResult = new DetailedResult<List<CloudFoundryApp>>
+            (
+                succeeded: true,
+                content: new List<CloudFoundryApp>(), // simulate space having lost all apps before refresh
+                explanation: null,
+                cmdDetails: fakeSuccessCmdResult
+            );
+
+            mockCloudFoundryService.SetupGet(mock => mock.
+                CloudFoundryInstances)
+                    .Returns(fakeCfDict);
+
+            mockCloudFoundryService.Setup(mock => mock.
+                GetOrgsForCfInstanceAsync(fakeInitialCfInstance, true))
+                    .ReturnsAsync(fakeSuccessfulOrgsResult);
+
+            mockCloudFoundryService.Setup(mock => mock.
+                GetSpacesForOrgAsync(fakeInitialOrg, true))
+                    .ReturnsAsync(fakeSuccessfulSpacesResult);
+
+            mockCloudFoundryService.Setup(mock => mock.
+                GetAppsForSpaceAsync(fakeInitialSpace, true))
+                    .ReturnsAsync(fakeNoAppsResult);
+
+            cfivm.Children = new ObservableCollection<TreeViewItemViewModel> { ovm };
+
+            ovm.Children = new ObservableCollection<TreeViewItemViewModel> { svm };
+
+            svm.Children = new ObservableCollection<TreeViewItemViewModel> { avm }; // simulate space initially having 1 app child
+
+            vm.CloudFoundryList = new ObservableCollection<CfInstanceViewModel> { cfivm };
+
+            Assert.AreEqual(1, svm.Children.Count);
+            Assert.AreEqual(typeof(AppViewModel), svm.Children[0].GetType());
+
+            await vm.RefreshAllCloudConnections(null);
+
+            Assert.AreEqual(1, svm.Children.Count);
+            Assert.AreEqual(typeof(PlaceholderViewModel), svm.Children[0].GetType());
+            Assert.AreEqual(SpaceViewModel.emptyAppsPlaceholderMsg, svm.Children[0].DisplayText);
+        }
+
+        [TestMethod]
+        public async Task RefreshAllCloudConnections_RemovesPlaceholder_FromEmptyCFsThatGainedChildren()
+        {
+            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address", "fake-token");
+            var cfivm = new CfInstanceViewModel(fakeInitialCfInstance, services);
+            
+            // simulate cf initially having no org children
+            cfivm.Children = new ObservableCollection<TreeViewItemViewModel> { cfivm.EmptyPlaceholder }; 
+            cfivm.HasEmptyPlaceholder = true;
+
+            var fakeNewOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance);
+            var ovm = new OrgViewModel(fakeNewOrg, services);
+
+            var fakeCfDict = new Dictionary<string, CloudFoundryInstance>
+            {
+                { "fake cf name", fakeInitialCfInstance },
+            };
+
+            var fakeSuccessfulOrgsResult = new DetailedResult<List<CloudFoundryOrganization>>
+            (
+                succeeded: true,
+                content: new List<CloudFoundryOrganization>
+                {
+                    fakeNewOrg, // simulate cf having gained an org child before refresh
+                }, 
+                explanation: null,
+                cmdDetails: fakeSuccessCmdResult
+            );
+
+            vm.CloudFoundryList = new ObservableCollection<CfInstanceViewModel> { cfivm };
+
+            mockCloudFoundryService.SetupGet(mock => mock.
+                CloudFoundryInstances)
+                    .Returns(fakeCfDict);
+
+            mockCloudFoundryService.Setup(mock => mock.
+                GetOrgsForCfInstanceAsync(fakeInitialCfInstance, true))
+                    .ReturnsAsync(fakeSuccessfulOrgsResult);
+
+
+            Assert.AreEqual(1, cfivm.Children.Count);
+            Assert.AreEqual(typeof(PlaceholderViewModel), cfivm.Children[0].GetType());
+            Assert.AreEqual(CfInstanceViewModel._emptyOrgsPlaceholderMsg, cfivm.Children[0].DisplayText);
+
+            await vm.RefreshAllCloudConnections(null);
+
+            Assert.AreEqual(1, cfivm.Children.Count);
+            Assert.AreEqual(typeof(OrgViewModel), cfivm.Children[0].GetType());
+        }
+
+        [TestMethod]
+        public async Task RefreshAllCloudConnections_RemovesPlaceholder_FromEmptyOrgsThatGainedChildren()
+        {
+            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address", "fake-token");
+            var cfivm = new CfInstanceViewModel(fakeInitialCfInstance, services);
+
+            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance);
+            var ovm = new OrgViewModel(fakeInitialOrg, services);
+
+            // simulate org initially having no space children
+            ovm.Children = new ObservableCollection<TreeViewItemViewModel> { ovm.EmptyPlaceholder };
+            ovm.HasEmptyPlaceholder = true;
+
+            var fakeNewSpace = new CloudFoundrySpace("fake space name", "fake space id", fakeInitialOrg);
+            var svm = new SpaceViewModel(fakeNewSpace, services);
+
+            var fakeCfDict = new Dictionary<string, CloudFoundryInstance>
+            {
+                { "fake cf name", fakeInitialCfInstance },
+            };
+
+            var fakeSuccessfulOrgsResult = new DetailedResult<List<CloudFoundryOrganization>>
+            (
+                succeeded: true,
+                content: new List<CloudFoundryOrganization>
+                {
+                    fakeInitialOrg, 
+                },
+                explanation: null,
+                cmdDetails: fakeSuccessCmdResult
+            );
+            
+            var fakeSuccessfulSpacesResult = new DetailedResult<List<CloudFoundrySpace>>
+            (
+                succeeded: true,
+                content: new List<CloudFoundrySpace>
+                {
+                    fakeNewSpace, // simulate org having gained a space child before refresh 
+                },
+                explanation: null,
+                cmdDetails: fakeSuccessCmdResult
+            );
+
+            mockCloudFoundryService.SetupGet(mock => mock.
+                CloudFoundryInstances)
+                    .Returns(fakeCfDict);
+
+            mockCloudFoundryService.Setup(mock => mock.
+                GetOrgsForCfInstanceAsync(fakeInitialCfInstance, true))
+                    .ReturnsAsync(fakeSuccessfulOrgsResult);
+            
+            mockCloudFoundryService.Setup(mock => mock.
+                GetSpacesForOrgAsync(fakeInitialOrg, true))
+                    .ReturnsAsync(fakeSuccessfulSpacesResult);
+
+            cfivm.Children = new ObservableCollection<TreeViewItemViewModel> { ovm }; 
+            ovm.Children = new ObservableCollection<TreeViewItemViewModel> { ovm.EmptyPlaceholder }; // simulate org initially having no space children
+
+            vm.CloudFoundryList = new ObservableCollection<CfInstanceViewModel> { cfivm };
+
+            Assert.AreEqual(1, ovm.Children.Count);
+            Assert.AreEqual(typeof(PlaceholderViewModel), ovm.Children[0].GetType());
+            Assert.AreEqual(OrgViewModel._emptySpacesPlaceholderMsg, ovm.Children[0].DisplayText);
+
+            await vm.RefreshAllCloudConnections(null);
+
+            Assert.AreEqual(1, ovm.Children.Count);
+            Assert.AreEqual(typeof(SpaceViewModel), ovm.Children[0].GetType());
+        }
+
+        [TestMethod]
+        public async Task RefreshAllCloudConnections_RemovesPlaceholder_FromEmptySpacesThatGainedChildren()
+        {
+            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address", "fake-token");
+            var cfivm = new CfInstanceViewModel(fakeInitialCfInstance, services);
+
+            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance);
+            var ovm = new OrgViewModel(fakeInitialOrg, services);
+
+            var fakeInitialSpace = new CloudFoundrySpace("fake space name", "fake space id", fakeInitialOrg);
+            var svm = new SpaceViewModel(fakeInitialSpace, services);
+
+            // simulate space initially having no app children
+            svm.Children = new ObservableCollection<TreeViewItemViewModel> { svm.EmptyPlaceholder };
+            svm.HasEmptyPlaceholder = true;
+
+            var fakeNewApp = new CloudFoundryApp("fake app name", "fake app id", fakeInitialSpace, null);
+            var avm = new AppViewModel(fakeNewApp, services);
+
+            var fakeCfDict = new Dictionary<string, CloudFoundryInstance>
+            {
+                { "fake cf name", fakeInitialCfInstance },
+            };
+
+            var fakeSuccessfulOrgsResult = new DetailedResult<List<CloudFoundryOrganization>>
+            (
+                succeeded: true,
+                content: new List<CloudFoundryOrganization>
+                {
+                    fakeInitialOrg,
+                },
+                explanation: null,
+                cmdDetails: fakeSuccessCmdResult
+            );
+
+            var fakeSuccessfulSpacesResult = new DetailedResult<List<CloudFoundrySpace>>
+            (
+                succeeded: true,
+                content: new List<CloudFoundrySpace>
+                {
+                    fakeInitialSpace, 
+                },
+                explanation: null,
+                cmdDetails: fakeSuccessCmdResult
+            );
+
+            var fakeSuccessfulAppsResult = new DetailedResult<List<CloudFoundryApp>>
+            (
+                succeeded: true,
+                content: new List<CloudFoundryApp>
+                {
+                    fakeNewApp, // simulate space having gained an app child before refresh 
+                },
+                explanation: null,
+                cmdDetails: fakeSuccessCmdResult
+            );
+
+            mockCloudFoundryService.SetupGet(mock => mock.
+                CloudFoundryInstances)
+                    .Returns(fakeCfDict);
+
+            mockCloudFoundryService.Setup(mock => mock.
+                GetOrgsForCfInstanceAsync(fakeInitialCfInstance, true))
+                    .ReturnsAsync(fakeSuccessfulOrgsResult);
+
+            mockCloudFoundryService.Setup(mock => mock.
+                GetSpacesForOrgAsync(fakeInitialOrg, true))
+                    .ReturnsAsync(fakeSuccessfulSpacesResult);
+            
+            mockCloudFoundryService.Setup(mock => mock.
+                GetAppsForSpaceAsync(fakeInitialSpace, true))
+                    .ReturnsAsync(fakeSuccessfulAppsResult);
+
+            cfivm.Children = new ObservableCollection<TreeViewItemViewModel> { ovm };
+            ovm.Children = new ObservableCollection<TreeViewItemViewModel> { svm }; 
+            svm.Children = new ObservableCollection<TreeViewItemViewModel> { svm.EmptyPlaceholder }; // simulate space initially having no app children
+
+            vm.CloudFoundryList = new ObservableCollection<CfInstanceViewModel> { cfivm };
+
+            Assert.AreEqual(1, svm.Children.Count);
+            Assert.AreEqual(typeof(PlaceholderViewModel), svm.Children[0].GetType());
+            Assert.AreEqual(SpaceViewModel.emptyAppsPlaceholderMsg, svm.Children[0].DisplayText);
+
+            await vm.RefreshAllCloudConnections(null);
+
+            Assert.AreEqual(1, svm.Children.Count);
+            Assert.AreEqual(typeof(AppViewModel), svm.Children[0].GetType());
         }
 
         [TestMethod]

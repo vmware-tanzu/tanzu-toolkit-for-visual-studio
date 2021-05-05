@@ -4,6 +4,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Security;
+using Tanzu.Toolkit.CloudFoundryApiClient;
 using Tanzu.Toolkit.VisualStudio.Models;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Apps;
@@ -11,6 +12,7 @@ using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Orgs;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Spaces;
 using Tanzu.Toolkit.VisualStudio.Services.CloudFoundry;
 using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
+using Tanzu.Toolkit.VisualStudio.Services.Dialog;
 using Tanzu.Toolkit.VisualStudio.Services.FileLocator;
 using Tanzu.Toolkit.VisualStudio.Services.Logging;
 
@@ -19,7 +21,9 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests
     public abstract class ServicesTestSupport
     {
         protected IServiceProvider services;
+        protected Mock<ICfApiClient> mockCfApiClient;
         protected Mock<ICfCliService> mockCfCliService;
+        protected Mock<IDialogService> mockDialogService;
         protected Mock<ICmdProcessService> mockCmdProcessService;
         protected Mock<IFileLocatorService> mockFileLocatorService;
         protected Mock<ILoggingService> mockLoggingService;
@@ -52,6 +56,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests
         internal static readonly string org2Guid = "org-2-id";
         internal static readonly string org3Guid = "org-3-id";
         internal static readonly string org4Guid = "org-4-id";
+        internal static readonly string org1SpacesUrl = "fake spaces url 1";
+        internal static readonly string org2SpacesUrl = "fake spaces url 2";
+        internal static readonly string org3SpacesUrl = "fake spaces url 3";
+        internal static readonly string org4SpacesUrl = "fake spaces url 4";
 
         internal static readonly string space1Name = "space1";
         internal static readonly string space2Name = "space2";
@@ -61,6 +69,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests
         internal static readonly string space2Guid = "space-2-id";
         internal static readonly string space3Guid = "space-3-id";
         internal static readonly string space4Guid = "space-4-id";
+        internal static readonly string space1AppsUrl = "fake apps url 1";
+        internal static readonly string space2AppsUrl = "fake apps url 2";
+        internal static readonly string space3AppsUrl = "fake apps url 3";
+        internal static readonly string space4AppsUrl = "fake apps url 4";
 
         internal static readonly string app1Name = "app1";
         internal static readonly string app2Name = "app2";
@@ -70,27 +82,31 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests
         internal static readonly string app2Guid = "app-2-id";
         internal static readonly string app3Guid = "app-3-id";
         internal static readonly string app4Guid = "app-4-id";
+        internal static readonly string app1State = "STARTED";
+        internal static readonly string app2State = "STOPPED";
+        internal static readonly string app3State = "STARTED";
+        internal static readonly string app4State = "STOPPED";
 
         internal static readonly List<Org> mockOrgsResponse = new List<Org>
         {
             new Org
             {
-                entity = new Services.CfCli.Models.Orgs.Entity{ name = org1Name },
+                entity = new Services.CfCli.Models.Orgs.Entity{ name = org1Name, spaces_url = org1SpacesUrl },
                 metadata = new Services.CfCli.Models.Orgs.Metadata{ guid = org1Guid }
             },
             new Org
             {
-                entity = new Services.CfCli.Models.Orgs.Entity{ name = org2Name },
+                entity = new Services.CfCli.Models.Orgs.Entity{ name = org2Name, spaces_url = org2SpacesUrl },
                 metadata = new Services.CfCli.Models.Orgs.Metadata{ guid = org2Guid }
             },
             new Org
             {
-                entity = new Services.CfCli.Models.Orgs.Entity{ name = org3Name },
+                entity = new Services.CfCli.Models.Orgs.Entity{ name = org3Name, spaces_url = org3SpacesUrl },
                 metadata = new Services.CfCli.Models.Orgs.Metadata{ guid = org3Guid }
             },
             new Org
             {
-                entity = new Services.CfCli.Models.Orgs.Entity{ name = org4Name },
+                entity = new Services.CfCli.Models.Orgs.Entity{ name = org4Name, spaces_url = org4SpacesUrl },
                 metadata = new Services.CfCli.Models.Orgs.Metadata{ guid = org4Guid }
             }
             };
@@ -99,22 +115,22 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests
         {
             new Space
             {
-                entity = new Services.CfCli.Models.Spaces.Entity{ name = space1Name },
+                entity = new Services.CfCli.Models.Spaces.Entity{ name = space1Name, apps_url = space1AppsUrl },
                 metadata = new Services.CfCli.Models.Spaces.Metadata{ guid = space1Guid }
             },
             new Space
             {
-                entity = new Services.CfCli.Models.Spaces.Entity{ name = space2Name },
+                entity = new Services.CfCli.Models.Spaces.Entity{ name = space2Name, apps_url = space2AppsUrl },
                 metadata = new Services.CfCli.Models.Spaces.Metadata{ guid = space2Guid }
             },
             new Space
             {
-                entity = new Services.CfCli.Models.Spaces.Entity{ name = space3Name },
+                entity = new Services.CfCli.Models.Spaces.Entity{ name = space3Name, apps_url = space3AppsUrl },
                 metadata = new Services.CfCli.Models.Spaces.Metadata{ guid = space3Guid }
             },
             new Space
             {
-                entity = new Services.CfCli.Models.Spaces.Entity{ name = space4Name },
+                entity = new Services.CfCli.Models.Spaces.Entity{ name = space4Name, apps_url = space4AppsUrl },
                 metadata = new Services.CfCli.Models.Spaces.Metadata{ guid = space4Guid }
             }
         };
@@ -146,7 +162,9 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests
         protected ServicesTestSupport()
         {
             var services = new ServiceCollection();
+            mockCfApiClient = new Mock<ICfApiClient>();
             mockCfCliService = new Mock<ICfCliService>();
+            mockDialogService = new Mock<IDialogService>();
             mockCmdProcessService = new Mock<ICmdProcessService>();
             mockFileLocatorService = new Mock<IFileLocatorService>();
             mockLoggingService = new Mock<ILoggingService>();
@@ -154,7 +172,9 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests
             mockLogger = new Mock<ILogger>();
             mockLoggingService.SetupGet(m => m.Logger).Returns(mockLogger.Object);
 
+            services.AddSingleton(mockCfApiClient.Object);
             services.AddSingleton(mockCfCliService.Object);
+            services.AddSingleton(mockDialogService.Object);
             services.AddSingleton(mockCmdProcessService.Object);
             services.AddSingleton(mockFileLocatorService.Object);
             services.AddSingleton(mockLoggingService.Object);

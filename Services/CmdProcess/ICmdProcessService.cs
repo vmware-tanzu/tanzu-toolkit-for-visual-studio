@@ -7,5 +7,6 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CmdProcess
     {
         CmdResult ExecuteWindowlessCommand(string arguments, string workingDir);
         Task<CmdResult> InvokeWindowlessCommandAsync(string arguments, string workingDir, StdOutDelegate stdOutDelegate, StdErrDelegate stdErrDelegate);
+        CmdResult RunCommand(string executableFilePath, string arguments, string workingDir, StdOutDelegate stdOutDelegate, StdErrDelegate stdErrDelegate);
     }
 }

@@ -22,7 +22,12 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
             LoadingPlaceholder = new PlaceholderViewModel(parent: this, services)
             {
-                DisplayText = _loadingMsg
+                DisplayText = _loadingMsg,
+            };
+
+            EmptyPlaceholder = new PlaceholderViewModel(parent: this, Services)
+            {
+                DisplayText = _emptyOrgsPlaceholderMsg,
             };
         }
 
@@ -36,13 +41,11 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
                 {
                     var noChildrenList = new ObservableCollection<TreeViewItemViewModel>
                     {
-                        new PlaceholderViewModel(parent: this, Services)
-                        {
-                            DisplayText = _emptyOrgsPlaceholderMsg
-                        }
+                        EmptyPlaceholder,
                     };
 
                     Children = noChildrenList;
+                    HasEmptyPlaceholder = true;
                 }
                 else
                 {
@@ -54,6 +57,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
                     }
 
                     Children = updatedOrgsList;
+                    HasEmptyPlaceholder = false;
                 }
 
                 IsLoading = false;

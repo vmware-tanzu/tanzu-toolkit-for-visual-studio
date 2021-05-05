@@ -43,6 +43,12 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         {
             Assert.AreEqual(CfInstanceViewModel._loadingMsg, _sut.LoadingPlaceholder.DisplayText);
         }
+        
+        [TestMethod]
+        public void Constructor_SetsEmptyPlaceholder()
+        {
+            Assert.AreEqual(CfInstanceViewModel._emptyOrgsPlaceholderMsg, _sut.EmptyPlaceholder.DisplayText);
+        }
 
         [TestMethod]
         public async Task LoadChildren_UpdatesAllOrgs()
@@ -79,6 +85,8 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
 
             Assert.AreEqual(1, _receivedEvents.Count);
             Assert.AreEqual("Children", _receivedEvents[0]);
+
+            Assert.IsFalse(_sut.HasEmptyPlaceholder);
         }
 
         [TestMethod]
@@ -95,6 +103,9 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             Assert.AreEqual(1, _sut.Children.Count);
             Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
             Assert.AreEqual(CfInstanceViewModel._emptyOrgsPlaceholderMsg, _sut.Children[0].DisplayText);
+
+            Assert.AreEqual(_sut.EmptyPlaceholder, _sut.Children[0]);
+            Assert.IsTrue(_sut.HasEmptyPlaceholder);
 
             Assert.AreEqual(1, _receivedEvents.Count);
             Assert.AreEqual("Children", _receivedEvents[0]);

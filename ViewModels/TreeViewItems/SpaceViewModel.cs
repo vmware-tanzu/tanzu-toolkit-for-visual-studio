@@ -24,6 +24,11 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
             {
                 DisplayText = loadingMsg
             };
+
+            EmptyPlaceholder = new PlaceholderViewModel(parent: this, Services)
+            {
+                DisplayText = emptyAppsPlaceholderMsg
+            };
         }
 
         internal protected override async Task LoadChildren()
@@ -37,13 +42,11 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
                 {
                     var noChildrenList = new ObservableCollection<TreeViewItemViewModel>
                     {
-                        new PlaceholderViewModel(parent: this, Services)
-                        {
-                            DisplayText = emptyAppsPlaceholderMsg
-                        }
+                        EmptyPlaceholder,
                     };
 
                     Children = noChildrenList;
+                    HasEmptyPlaceholder = true;
                 }
                 else
                 {
@@ -51,6 +54,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
                     foreach (CloudFoundryApp app in appsResult.Content) updatedAppsList.Add(new AppViewModel(app, Services));
 
                     Children = updatedAppsList;
+                    HasEmptyPlaceholder = false;
                 }
 
                 IsLoading = false;

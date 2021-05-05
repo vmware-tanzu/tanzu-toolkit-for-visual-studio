@@ -17,6 +17,11 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
         internal static readonly string _fakeNoSpacesOutput = File.ReadAllText("CfCli/FakeNoSpacesOutput.txt");
         internal static readonly string _fakeManyAppsOutput = File.ReadAllText("CfCli/FakeManyAppsOutput.txt");
         internal static readonly string _fakeNoAppsOutput = File.ReadAllText("CfCli/FakeNoAppsOutput.txt");
+        internal static readonly string _fakeCurlSpacesOutput = File.ReadAllText("CfCli/FakeCurlSpacesOutput.txt");
+        internal static readonly string _fakeCurlAppsOutput = File.ReadAllText("CfCli/FakeCurlAppsOutput.txt");
+        internal static readonly string _fakeOrgs401Output = File.ReadAllText("CfCli/GetV2Orgs401Output.txt");
+        internal static readonly string _fakeSpaces401Output = File.ReadAllText("CfCli/GetV2Spaces401Output.txt");
+        internal static readonly string _fakeApps401Output = File.ReadAllText("CfCli/GetV2Apps401Output.txt");
 
         internal static readonly int numOrgsInFakeResponse = 54;
 

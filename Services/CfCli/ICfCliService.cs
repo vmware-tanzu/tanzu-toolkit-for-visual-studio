@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Apps;
@@ -24,5 +25,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         Task<DetailedResult> StopAppByNameAsync(string appName);
         Task<DetailedResult> StartAppByNameAsync(string appName);
         Task<DetailedResult> DeleteAppByNameAsync(string appName, bool removeMappedRoutes = true);
+        Task<DetailedResult> PushAppAsync(string appName, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string appDir);
+        Task<Version> GetApiVersion();
     }
 }

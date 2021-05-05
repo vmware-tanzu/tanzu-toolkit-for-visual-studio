@@ -2,13 +2,14 @@
 
 namespace Tanzu.Toolkit.VisualStudio.Services.CfCli.Models.Orgs
 {
-    public class OrgsApiV2ResponsePage
+    public class OrgsApiV2ResponsePage : ApiV2Response
     {
-        public object next_url { get; set; }
-        public object prev_url { get; set; }
+        public override string next_url { get; set; }
+        public override string prev_url { get; set; }
+        public override int total_pages { get; set; }
+        public override int total_results { get; set; }
+        
         public Org[] resources { get; set; }
-        public int total_pages { get; set; }
-        public int total_results { get; set; }
     }
 
     public class Org

@@ -1,0 +1,187 @@
+
+REQUEST: [2021-04-01T13:56:41-04:00]
+GET /v2/spaces/64b6cd27-158f-42cb-827c-7d5d5ced6ad7/apps HTTP/1.1
+Host: api.sys.jamestown.cf-app.com
+Accept: application/json
+Authorization: [PRIVATE DATA HIDDEN]
+Content-Type: application/json
+User-Agent: go-cli 6.51.0+2acd15650.2020-04-07 / darwin
+
+
+RESPONSE: [2021-04-01T13:56:42-04:00]
+HTTP/1.1 200 OK
+Connection: close
+Content-Length: 6375
+Content-Type: application/json;charset=utf-8
+Date: Thu, 01 Apr 2021 17:56:42 GMT
+Server: nginx
+X-Content-Type-Options: nosniff
+X-Vcap-Request-Id: 4472a41b-4b82-4aba-7ac3-2f657516ef68::23f9cb63-765e-4728-b9ea-7925f2837d1f
+
+{
+  "total_results": 3,
+  "total_pages": 1,
+  "prev_url": null,
+  "next_url": null,
+  "resources": [
+    {
+      "metadata": {
+        "guid": "9a3508f9-dd3e-4b0e-abcd-72b9434ea02d",
+        "url": "/v2/apps/9a3508f9-dd3e-4b0e-abcd-72b9434ea02d",
+        "created_at": "2021-03-31T17:50:06Z",
+        "updated_at": "2021-03-31T17:50:59Z"
+      },
+      "entity": {
+        "name": "test-app-1-1-1",
+        "production": false,
+        "space_guid": "64b6cd27-158f-42cb-827c-7d5d5ced6ad7",
+        "stack_guid": "a55b7929-af0d-4485-af63-b16479eb8995",
+        "buildpack": null,
+        "detected_buildpack": "dotnet-core",
+        "detected_buildpack_guid": "63d91ed2-a095-42be-b79b-165eb6ee7fbf",
+        "environment_json": {
+
+        },
+        "memory": 1024,
+        "instances": 1,
+        "disk_quota": 1024,
+        "state": "STARTED",
+        "version": "2cdadbd9-d968-4e7e-bee1-6d628946ec1b",
+        "command": null,
+        "console": false,
+        "debug": null,
+        "staging_task_id": "b2eb222b-0936-4353-ac4a-b8b7485dc75c",
+        "package_state": "STAGED",
+        "health_check_type": "port",
+        "health_check_timeout": null,
+        "health_check_http_endpoint": null,
+        "staging_failed_reason": null,
+        "staging_failed_description": null,
+        "diego": true,
+        "docker_image": null,
+        "docker_credentials": {
+          "username": null,
+          "password": null
+        },
+        "package_updated_at": "2021-03-31T17:50:07Z",
+        "detected_start_command": "cd ${DEPS_DIR}/0/dotnet_publish && exec ./DeleteMe --server.urls http://0.0.0.0:${PORT}",
+        "enable_ssh": true,
+        "ports": [
+          8080
+        ],
+        "space_url": "/v2/spaces/64b6cd27-158f-42cb-827c-7d5d5ced6ad7",
+        "stack_url": "/v2/stacks/a55b7929-af0d-4485-af63-b16479eb8995",
+        "routes_url": "/v2/apps/9a3508f9-dd3e-4b0e-abcd-72b9434ea02d/routes",
+        "events_url": "/v2/apps/9a3508f9-dd3e-4b0e-abcd-72b9434ea02d/events",
+        "service_bindings_url": "/v2/apps/9a3508f9-dd3e-4b0e-abcd-72b9434ea02d/service_bindings",
+        "route_mappings_url": "/v2/apps/9a3508f9-dd3e-4b0e-abcd-72b9434ea02d/route_mappings"
+      }
+    },
+    {
+      "metadata": {
+        "guid": "8c5f98d4-a1c5-4e54-854d-6f82aa89364c",
+        "url": "/v2/apps/8c5f98d4-a1c5-4e54-854d-6f82aa89364c",
+        "created_at": "2021-03-31T17:51:15Z",
+        "updated_at": "2021-03-31T17:52:03Z"
+      },
+      "entity": {
+        "name": "test-app-1-1-2",
+        "production": false,
+        "space_guid": "64b6cd27-158f-42cb-827c-7d5d5ced6ad7",
+        "stack_guid": "a55b7929-af0d-4485-af63-b16479eb8995",
+        "buildpack": null,
+        "detected_buildpack": "dotnet-core",
+        "detected_buildpack_guid": "63d91ed2-a095-42be-b79b-165eb6ee7fbf",
+        "environment_json": {
+
+        },
+        "memory": 1024,
+        "instances": 1,
+        "disk_quota": 1024,
+        "state": "STARTED",
+        "version": "3f54013a-c01d-4910-ba99-ea8c695f2a59",
+        "command": null,
+        "console": false,
+        "debug": null,
+        "staging_task_id": "29197424-5174-4004-b158-eab5944acccf",
+        "package_state": "STAGED",
+        "health_check_type": "port",
+        "health_check_timeout": null,
+        "health_check_http_endpoint": null,
+        "staging_failed_reason": null,
+        "staging_failed_description": null,
+        "diego": true,
+        "docker_image": null,
+        "docker_credentials": {
+          "username": null,
+          "password": null
+        },
+        "package_updated_at": "2021-03-31T17:51:16Z",
+        "detected_start_command": "cd ${DEPS_DIR}/0/dotnet_publish && exec ./DeleteMe --server.urls http://0.0.0.0:${PORT}",
+        "enable_ssh": true,
+        "ports": [
+          8080
+        ],
+        "space_url": "/v2/spaces/64b6cd27-158f-42cb-827c-7d5d5ced6ad7",
+        "stack_url": "/v2/stacks/a55b7929-af0d-4485-af63-b16479eb8995",
+        "routes_url": "/v2/apps/8c5f98d4-a1c5-4e54-854d-6f82aa89364c/routes",
+        "events_url": "/v2/apps/8c5f98d4-a1c5-4e54-854d-6f82aa89364c/events",
+        "service_bindings_url": "/v2/apps/8c5f98d4-a1c5-4e54-854d-6f82aa89364c/service_bindings",
+        "route_mappings_url": "/v2/apps/8c5f98d4-a1c5-4e54-854d-6f82aa89364c/route_mappings"
+      }
+    },
+    {
+      "metadata": {
+        "guid": "11c93d24-459e-4928-a9d8-5304842bf438",
+        "url": "/v2/apps/11c93d24-459e-4928-a9d8-5304842bf438",
+        "created_at": "2021-03-31T17:52:19Z",
+        "updated_at": "2021-03-31T17:53:06Z"
+      },
+      "entity": {
+        "name": "test-app-1-1-3",
+        "production": false,
+        "space_guid": "64b6cd27-158f-42cb-827c-7d5d5ced6ad7",
+        "stack_guid": "a55b7929-af0d-4485-af63-b16479eb8995",
+        "buildpack": null,
+        "detected_buildpack": "dotnet-core",
+        "detected_buildpack_guid": "63d91ed2-a095-42be-b79b-165eb6ee7fbf",
+        "environment_json": {
+
+        },
+        "memory": 1024,
+        "instances": 1,
+        "disk_quota": 1024,
+        "state": "STARTED",
+        "version": "d5118bad-b5a0-4b50-ab13-7bafc80371fb",
+        "command": null,
+        "console": false,
+        "debug": null,
+        "staging_task_id": "c63dacf4-17aa-45dd-8cb3-a1a66511a841",
+        "package_state": "STAGED",
+        "health_check_type": "port",
+        "health_check_timeout": null,
+        "health_check_http_endpoint": null,
+        "staging_failed_reason": null,
+        "staging_failed_description": null,
+        "diego": true,
+        "docker_image": null,
+        "docker_credentials": {
+          "username": null,
+          "password": null
+        },
+        "package_updated_at": "2021-03-31T17:52:20Z",
+        "detected_start_command": "cd ${DEPS_DIR}/0/dotnet_publish && exec ./DeleteMe --server.urls http://0.0.0.0:${PORT}",
+        "enable_ssh": true,
+        "ports": [
+          8080
+        ],
+        "space_url": "/v2/spaces/64b6cd27-158f-42cb-827c-7d5d5ced6ad7",
+        "stack_url": "/v2/stacks/a55b7929-af0d-4485-af63-b16479eb8995",
+        "routes_url": "/v2/apps/11c93d24-459e-4928-a9d8-5304842bf438/routes",
+        "events_url": "/v2/apps/11c93d24-459e-4928-a9d8-5304842bf438/events",
+        "service_bindings_url": "/v2/apps/11c93d24-459e-4928-a9d8-5304842bf438/service_bindings",
+        "route_mappings_url": "/v2/apps/11c93d24-459e-4928-a9d8-5304842bf438/route_mappings"
+      }
+    }
+  ]
+}

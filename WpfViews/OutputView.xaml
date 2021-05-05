@@ -14,6 +14,7 @@
         <ScrollViewer x:Name="OutputScrollViewer" Background="White" VerticalScrollBarVisibility="Auto">
             <TextBox
                 Text="{Binding OutputContent}"
+                FontFamily="Courier New"
                 Margin="4"
                 IsReadOnly="True"
                 TextChanged="TextBox_TextChanged"

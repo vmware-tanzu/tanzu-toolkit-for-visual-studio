@@ -51,7 +51,7 @@
     <Compile Include="Commands\PushToCloudFoundryCommand.cs" />
     <Compile Include="OutputToolWindow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TanzuForVSPackage.cs" />
+    <Compile Include="TanzuToolkitForVisualStudioPackage.cs" />
     <Compile Include="TanzuCloudExplorerToolWindow.cs" />
     <Compile Include="Commands\TanzuCloudExplorerCommand.cs" />
   </ItemGroup>
@@ -90,6 +90,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CloudFoundryApiClient\CloudFoundryApiClient.csproj">
+      <Project>{56A68904-C31A-45E7-8617-FB8FDCFB49CB}</Project>
+      <Name>CloudFoundryApiClient</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Models\Models.csproj">
       <Project>{9486bbee-472d-4d0a-9644-a34151f66f62}</Project>
       <Name>Models</Name>
@@ -108,14 +112,18 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <VSCTCompile Include="TanzuForVSPackage.vsct">
+    <VSCTCompile Include="TanzuToolkitForVisualStudioPackage.vsct">
       <ResourceName>Menus.ctmenu</ResourceName>
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\cf7.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <Content Include="Resources\DeployApp.png" />
     <Content Include="Resources\tanzu16.png" />
-    <Content Include="Resources\cf.exe" CopyToOutputDirectory="PreserveNewest">
+    <Content Include="Resources\cf6.exe" CopyToOutputDirectory="PreserveNewest">
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
   </ItemGroup>

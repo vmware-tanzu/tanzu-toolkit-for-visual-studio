@@ -31,7 +31,6 @@
                 Command="{Binding CloseCommand, ElementName=ErrorDialogViewElement}" 
                 CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
           />
-        
-
+       
     </Grid>
 </Window>

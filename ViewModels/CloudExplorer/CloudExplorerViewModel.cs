@@ -94,12 +94,28 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
             return true;
         }
 
+        public bool CanRemoveCloudConnecion(object arg)
+        {
+            return true;
+        }
+
 
         public void OpenLoginView(object parent)
         {
-            var result = DialogService.ShowDialog(typeof(AddCloudDialogViewModel).Name);
+            if (CloudFoundryService.CloudFoundryInstances.Count > 0)
+            {
+                var errorTitle = "Unable to add more TAS connections.";
+                var errorMsg = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
+                errorMsg += System.Environment.NewLine + "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Cloud Explorer & re-connecting to a new one.";
 
-            UpdateCloudFoundryInstances();
+                DialogService.DisplayErrorDialog(errorTitle, errorMsg);
+            }
+            else
+            {
+                DialogService.ShowDialog(typeof(AddCloudDialogViewModel).Name);
+
+                UpdateCloudFoundryInstances();
+            }
         }
 
         public async Task StopCfApp(object app)
@@ -149,6 +165,15 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
                 RemoveNonexistentOrgs(cfivm, currentOrgs);
                 AddNewOrgs(cfivm, currentOrgs);
+
+                if (cfivm.Children.Count == 0)
+                {
+                    cfivm.Children.Add(cfivm.EmptyPlaceholder);
+                }
+                else if (cfivm.Children.Count > 1 && cfivm.HasEmptyPlaceholder)
+                {
+                    cfivm.Children.Remove(cfivm.EmptyPlaceholder);
+                }
             }
         }
 
@@ -160,6 +185,15 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
                 RemoveNonexistentSpaces(ovm, currentSpaces);
                 AddNewSpaces(ovm, currentSpaces);
+
+                if (ovm.Children.Count == 0)
+                {
+                    ovm.Children.Add(ovm.EmptyPlaceholder);
+                }
+                else if (ovm.Children.Count > 1 && ovm.HasEmptyPlaceholder)
+                {
+                    ovm.Children.Remove(ovm.EmptyPlaceholder);
+                }
             }
         }
 
@@ -171,6 +205,15 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
 
                 RemoveNonexistentApps(svm, currentApps);
                 AddNewApps(svm, currentApps);
+
+                if (svm.Children.Count == 0)
+                {
+                    svm.Children.Add(svm.EmptyPlaceholder);
+                }
+                else if (svm.Children.Count > 1 && svm.HasEmptyPlaceholder)
+                {
+                    svm.Children.Remove(svm.EmptyPlaceholder);
+                }
             }
         }
 
@@ -242,6 +285,15 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
                         }
                     }
                 }
+            }
+        }
+
+        public void RemoveCloudConnection(object arg)
+        {
+            if (arg is CfInstanceViewModel cloudConnection)
+            {
+                CloudFoundryService.RemoveCloudFoundryInstance(cloudConnection.DisplayText);
+                SyncCloudFoundryList();
             }
         }
 
