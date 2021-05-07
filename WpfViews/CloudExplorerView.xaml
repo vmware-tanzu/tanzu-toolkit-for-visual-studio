@@ -182,7 +182,7 @@
                                             <Image Source="Resources/DeleteApp.png" ></Image>
                                         </MenuItem.Icon>
                                     </MenuItem>
-                                    <MenuItem Header="Get Recent Logs" 
+                                    <MenuItem Header="View Recent Logs" 
                                               Command="{Binding PlacementTarget.Tag.DisplayRecentAppLogsCommand, 
                                                                 RelativeSource={RelativeSource Mode=FindAncestor, 
                                                                 AncestorType=ContextMenu}}"
