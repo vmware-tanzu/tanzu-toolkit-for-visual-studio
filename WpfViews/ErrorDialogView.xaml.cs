@@ -29,7 +29,7 @@ namespace Tanzu.Toolkit.VisualStudio.WpfViews
         }
         public void CloseCommandHandler(object sender)
         {
-            this.Close();
+            Close();
         }
 
     }
