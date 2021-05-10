@@ -579,15 +579,31 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             };
         }
 
-        public async Task<DetailedResult> DeployAppAsync(CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, string appName, string appProjPath, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback)
+        public async Task<DetailedResult> DeployAppAsync(CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, string appName, string appProjPath, bool fullFrameworkDeployment, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback)
         {
             if (!_fileLocatorService.DirContainsFiles(appProjPath)) return new DetailedResult(false, emptyOutputDirMessage);
 
             DetailedResult cfTargetResult = await cfCliService.InvokeCfCliAsync(arguments: $"target -o {targetOrg.OrgName} -s {targetSpace.SpaceName}", stdOutCallback, stdErrCallback);
-            if (!cfTargetResult.Succeeded) return new DetailedResult(false, $"Unable to target org '{targetOrg.OrgName}' or space '{targetSpace.SpaceName}'.\n{cfTargetResult.Explanation}");
+            if (!cfTargetResult.Succeeded)
+            {
+                logger.Error($"Unable to target org '{targetOrg.OrgName}' or space '{targetSpace.SpaceName}'.\n{cfTargetResult.Explanation}");
+                return new DetailedResult(false, $"Unable to target org '{targetOrg.OrgName}' or space '{targetSpace.SpaceName}'.\n{cfTargetResult.Explanation}");
+            }
 
-            DetailedResult cfPushResult = await cfCliService.PushAppAsync(appName, stdOutCallback, stdErrCallback, appProjPath);
-            if (!cfPushResult.Succeeded) return new DetailedResult(false, $"Successfully targeted org '{targetOrg.OrgName}' and space '{targetSpace.SpaceName}' but app deployment failed at the `cf push` stage.\n{cfPushResult.Explanation}");
+            string buildpack = null;
+            string stack = null;
+            if (fullFrameworkDeployment)
+            {
+                buildpack = "hwc_buildpack";
+                stack = "windows";
+            }
+
+            DetailedResult cfPushResult = await cfCliService.PushAppAsync(appName, stdOutCallback, stdErrCallback, appProjPath, buildpack, stack);
+            if (!cfPushResult.Succeeded)
+            {
+                logger.Error($"Successfully targeted org '{targetOrg.OrgName}' and space '{targetSpace.SpaceName}' but app deployment failed at the `cf push` stage.\n{cfPushResult.Explanation}");
+                return new DetailedResult(false, cfPushResult.Explanation);
+            }
 
             return new DetailedResult(true, $"App successfully deploying to org '{targetOrg.OrgName}', space '{targetSpace.SpaceName}'...");
         }
