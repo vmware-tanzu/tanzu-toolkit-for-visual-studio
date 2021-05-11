@@ -24,7 +24,7 @@
 
 	<!--The Commands section is where commands, menus, and menu groups are defined.
       This section uses a Guid to identify the package that provides the command defined inside it. -->
-	<Commands package="guidTanzuForVSPackage">
+	<Commands package="guidTanzuToolkitPackage">
 		<!-- Inside this section we have different sub-sections: one for the menus, another
     for the menu groups, one for the buttons (the actual commands), one for the combos
     and the last one for the bitmaps used. Each element is identified by a command id that
@@ -34,23 +34,23 @@
     with command ids defined by other packages. -->
 
     <Groups>
-      <Group guid="guidTanzuForVSPackageCmdSet" id="ProjContextMenuGroup" priority="0x0100">
+      <Group guid="guidTanzuToolkitPackageCmdSet" id="ProjContextMenuGroup" priority="0x0100">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_PROJNODE" />
       </Group>
-      <Group guid="guidTanzuForVSPackageCmdSet" id="ViewMenuGroup" priority="0x0800">
+      <Group guid="guidTanzuToolkitPackageCmdSet" id="ViewMenuGroup" priority="0x0800">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_VIEW" />
       </Group>
-      <Group guid="guidTanzuForVSPackageCmdSet" id="ExtensionsMenuGroup" priority="0x0600">
+      <Group guid="guidTanzuToolkitPackageCmdSet" id="ExtensionsMenuGroup" priority="0x0600">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_EXTENSIONS" />
       </Group>
-      <Group guid="guidTanzuForVSPackageCmdSet" id="ToolkitExtSubmenuGroup" priority="0x0600">
-        <Parent guid="guidTanzuForVSPackageCmdSet" id="TanzuToolkitMenu"/>
+      <Group guid="guidTanzuToolkitPackageCmdSet" id="ToolkitExtSubmenuGroup" priority="0x0600">
+        <Parent guid="guidTanzuToolkitPackageCmdSet" id="TanzuToolkitMenu"/>
       </Group>
     </Groups>
 
     <Menus>
-      <Menu guid="guidTanzuForVSPackageCmdSet" id="TanzuToolkitMenu" priority="0x700" type="Menu">
-        <Parent guid="guidTanzuForVSPackageCmdSet" id="ExtensionsMenuGroup" />
+      <Menu guid="guidTanzuToolkitPackageCmdSet" id="TanzuToolkitMenu" priority="0x700" type="Menu">
+        <Parent guid="guidTanzuToolkitPackageCmdSet" id="ExtensionsMenuGroup" />
         <Strings>
           <ButtonText>Tanzu Toolkit</ButtonText>
         </Strings>
@@ -68,32 +68,32 @@
               <CommandFlag>DefaultInvisible</CommandFlag>
               <CommandFlag>DynamicVisibility</CommandFlag>
           If you do not want an image next to your command, remove the Icon node /> -->
-			<Button guid="guidTanzuForVSPackageCmdSet" id="CloudExplorerCommandId" priority="0x0100" type="Button">
-				<Parent guid="guidTanzuForVSPackageCmdSet" id="ViewMenuGroup" />
+			<Button guid="guidTanzuToolkitPackageCmdSet" id="CloudExplorerCommandId" priority="0x0100" type="Button">
+				<Parent guid="guidTanzuToolkitPackageCmdSet" id="ViewMenuGroup" />
 				<Icon guid="guidImages" id="bmpPic1" />
 				<Strings>
 					<ButtonText>Tanzu Cloud Explorer</ButtonText>
 				</Strings>
 			</Button>
       
-			<Button guid="guidTanzuForVSPackageCmdSet" id="PushToCloudFoundryCommandId" priority="0x0100" type="Button">
-        <Parent guid="guidTanzuForVSPackageCmdSet" id="ProjContextMenuGroup" />
+			<Button guid="guidTanzuToolkitPackageCmdSet" id="PushToCloudFoundryCommandId" priority="0x0100" type="Button">
+        <Parent guid="guidTanzuToolkitPackageCmdSet" id="ProjContextMenuGroup" />
         <Icon guid="guidImages1" id="bmpPic1" />
 				<Strings>
           <ButtonText>Deploy To Tanzu Application Service</ButtonText>
         </Strings>
 			</Button>
       
-      <Button guid="guidTanzuForVSPackageCmdSet" id="OutputWindowCommandId" priority="0x0101" type="Button">
-        <Parent guid="guidTanzuForVSPackageCmdSet" id="ViewMenuGroup" />
+      <Button guid="guidTanzuToolkitPackageCmdSet" id="OutputWindowCommandId" priority="0x0101" type="Button">
+        <Parent guid="guidTanzuToolkitPackageCmdSet" id="ViewMenuGroup" />
         <Icon guid="guidImages2" id="bmpPic1" />
         <Strings>
           <ButtonText>Tanzu Output Window</ButtonText>
         </Strings>
       </Button>
       
-      <Button guid="guidTanzuForVSPackageCmdSet" id="OpenLogsCommandId" priority="0x0100" type="Button">
-        <Parent guid="guidTanzuForVSPackageCmdSet" id="ToolkitExtSubmenuGroup" />
+      <Button guid="guidTanzuToolkitPackageCmdSet" id="OpenLogsCommandId" priority="0x0100" type="Button">
+        <Parent guid="guidTanzuToolkitPackageCmdSet" id="ToolkitExtSubmenuGroup" />
         <Icon guid="ImageCatalogGuid" id="Log" />
         <CommandFlag>IconIsMoniker</CommandFlag>
         <Strings>
@@ -117,10 +117,10 @@
 
 	<Symbols>
 		<!-- This is the package guid. -->
-		<GuidSymbol name="guidTanzuForVSPackage" value="{9419e55b-9e82-4d87-8ee5-70871b01b7cc}" />
+		<GuidSymbol name="guidTanzuToolkitPackage" value="{9419e55b-9e82-4d87-8ee5-70871b01b7cc}" />
 
 		<!-- This is the guid used to group the menu commands together -->
-		<GuidSymbol name="guidTanzuForVSPackageCmdSet" value="{f91c88fb-6e17-42a6-878d-f4d16ead7625}">
+		<GuidSymbol name="guidTanzuToolkitPackageCmdSet" value="{f91c88fb-6e17-42a6-878d-f4d16ead7625}">
       
 			<IDSymbol name="CloudExplorerCommandId" value="256" />
 			<IDSymbol name="PushToCloudFoundryCommandId" value="257" />
