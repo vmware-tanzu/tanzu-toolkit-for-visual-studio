@@ -173,9 +173,6 @@
     <Resource Include="Resources\AddCloud.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\redx1.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\StatusError.png" />
   </ItemGroup>
   <ItemGroup>
