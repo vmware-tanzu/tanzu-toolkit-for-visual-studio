@@ -579,18 +579,63 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             };
         }
 
-        public async Task<DetailedResult> DeployAppAsync(CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, string appName, string appProjPath, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback)
+        public async Task<DetailedResult> DeployAppAsync(CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, string appName, string appProjPath, bool fullFrameworkDeployment, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback)
         {
             if (!_fileLocatorService.DirContainsFiles(appProjPath)) return new DetailedResult(false, emptyOutputDirMessage);
 
             DetailedResult cfTargetResult = await cfCliService.InvokeCfCliAsync(arguments: $"target -o {targetOrg.OrgName} -s {targetSpace.SpaceName}", stdOutCallback, stdErrCallback);
-            if (!cfTargetResult.Succeeded) return new DetailedResult(false, $"Unable to target org '{targetOrg.OrgName}' or space '{targetSpace.SpaceName}'.\n{cfTargetResult.Explanation}");
+            if (!cfTargetResult.Succeeded)
+            {
+                logger.Error($"Unable to target org '{targetOrg.OrgName}' or space '{targetSpace.SpaceName}'.\n{cfTargetResult.Explanation}");
+                return new DetailedResult(false, $"Unable to target org '{targetOrg.OrgName}' or space '{targetSpace.SpaceName}'.\n{cfTargetResult.Explanation}");
+            }
 
-            DetailedResult cfPushResult = await cfCliService.PushAppAsync(appName, stdOutCallback, stdErrCallback, appProjPath);
-            if (!cfPushResult.Succeeded) return new DetailedResult(false, $"Successfully targeted org '{targetOrg.OrgName}' and space '{targetSpace.SpaceName}' but app deployment failed at the `cf push` stage.\n{cfPushResult.Explanation}");
+            string buildpack = null;
+            string stack = null;
+            if (fullFrameworkDeployment)
+            {
+                buildpack = "hwc_buildpack";
+                stack = "windows";
+            }
+
+            DetailedResult cfPushResult = await cfCliService.PushAppAsync(appName, stdOutCallback, stdErrCallback, appProjPath, buildpack, stack);
+            if (!cfPushResult.Succeeded)
+            {
+                logger.Error($"Successfully targeted org '{targetOrg.OrgName}' and space '{targetSpace.SpaceName}' but app deployment failed at the `cf push` stage.\n{cfPushResult.Explanation}");
+                return new DetailedResult(false, cfPushResult.Explanation);
+            }
 
             return new DetailedResult(true, $"App successfully deploying to org '{targetOrg.OrgName}', space '{targetSpace.SpaceName}'...");
         }
 
+        public async Task<DetailedResult<string>> GetRecentLogs(CloudFoundryApp app)
+        {
+            /* CAUTION: these operations should happen atomically; 
+             * if different threads all try to target orgs/spaces at the same time there's a risk of
+             * getting unexpected results due to a race conditions for these values in .cf/config.json: 
+             *      - "Target" (api address)
+             *      - "OrganizationFields" (info about the currently-targeted org)
+             *      - "SpaceFields" (info about the currently-targeted space)
+             */
+
+
+            var targetOrgResult = cfCliService.TargetOrg(app.ParentSpace.ParentOrg.OrgName);
+            if (!targetOrgResult.Succeeded) return new DetailedResult<string>(
+                content: null, 
+                succeeded: false, 
+                targetOrgResult.Explanation, 
+                targetOrgResult.CmdDetails
+            );
+
+            var targetSpaceResult = cfCliService.TargetSpace(app.ParentSpace.SpaceName);
+            if (!targetSpaceResult.Succeeded) return new DetailedResult<string>(
+                content: null,
+                succeeded: false,
+                targetSpaceResult.Explanation,
+                targetSpaceResult.CmdDetails
+            );
+
+            return await cfCliService.GetRecentAppLogs(app.AppName);
+        }
     }
 }

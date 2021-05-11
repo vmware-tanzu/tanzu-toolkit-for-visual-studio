@@ -90,6 +90,7 @@
     <Compile Include="OutputView.xaml.cs">
       <DependentUpon>OutputView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="IViewService.cs" />
     <Compile Include="Services\WpfDialogResult.cs" />
     <Compile Include="Services\WpfDialogService.cs" />
     <Compile Include="Services\WpfViewLocatorService.cs" />
@@ -191,6 +192,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\StatusError.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Log.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

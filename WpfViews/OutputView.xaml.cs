@@ -1,5 +1,8 @@
-﻿using System.Windows.Controls;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Windows.Controls;
 using Tanzu.Toolkit.VisualStudio.ViewModels;
+using Tanzu.Toolkit.VisualStudio.WpfViews.Services;
 
 namespace Tanzu.Toolkit.VisualStudio.WpfViews
 {
@@ -8,6 +11,8 @@ namespace Tanzu.Toolkit.VisualStudio.WpfViews
     /// </summary>
     public partial class OutputView : UserControl, IOutputView, IView
     {
+        private IServiceProvider _services;
+
         public IViewModel ViewModel { get; private set; }
 
         public OutputView()
@@ -15,11 +20,18 @@ namespace Tanzu.Toolkit.VisualStudio.WpfViews
             InitializeComponent();
         }
 
-        public OutputView(IOutputViewModel viewModel)
+        public OutputView(IOutputViewModel viewModel, IServiceProvider services)
         {
+            _services = services;
             DataContext = viewModel;
             ViewModel = viewModel as IViewModel;
             InitializeComponent();
+        }
+
+        public void Show()
+        {
+            var viewService = _services.GetRequiredService<IViewService>();
+            viewService.DisplayViewByType(GetType());
         }
 
         /// <summary>

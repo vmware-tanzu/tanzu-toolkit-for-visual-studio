@@ -18,8 +18,10 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         private CloudFoundrySpace _fakeSpace = new CloudFoundrySpace("", "", _fakeOrg);
         private const string _fakeAppName = "fake app name";
         private const string _fakeProjPath = "this\\is\\a\\fake\\path\\to\\a\\project\\directory";
-        private DeploymentDialogViewModel _sut;
+        private const string fakeTargetFrameworkMoniker = "junk";
+        private DeploymentDialogViewModel sut;
         private List<string> _receivedEvents;
+        private bool defaultFullFWFlag = false;
 
         [TestInitialize]
         public void TestInit()
@@ -34,10 +36,10 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                 mock.NavigateTo(nameof(OutputViewModel), null))
                     .Returns(new FakeOutputView());
 
-            _sut = new DeploymentDialogViewModel(services, _fakeProjPath);
+            sut = new DeploymentDialogViewModel(services, _fakeProjPath, fakeTargetFrameworkMoniker);
 
             _receivedEvents = new List<string>();
-            _sut.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
+            sut.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
             {
                 _receivedEvents.Add(e.PropertyName);
             };
@@ -54,7 +56,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod()]
         public void DeploymentDialogViewModel_GetsListOfCfsFromCfService_WhenConstructed()
         {
-            var vm = new DeploymentDialogViewModel(services, _fakeProjPath);
+            var vm = new DeploymentDialogViewModel(services, _fakeProjPath, fakeTargetFrameworkMoniker);
 
             Assert.IsNotNull(vm.CfInstanceOptions);
             Assert.AreEqual(0, vm.CfInstanceOptions.Count);
@@ -65,7 +67,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod()]
         public void DeploymentDialogViewModel_SetsCfOrgOptionsToEmptyList_WhenConstructed()
         {
-            var vm = new DeploymentDialogViewModel(services, _fakeProjPath);
+            var vm = new DeploymentDialogViewModel(services, _fakeProjPath, fakeTargetFrameworkMoniker);
 
             Assert.IsNotNull(vm.CfOrgOptions);
             Assert.AreEqual(0, vm.CfOrgOptions.Count);
@@ -74,94 +76,95 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod()]
         public void DeploymentDialogViewModel_SetsCfSpaceOptionsToEmptyList_WhenConstructed()
         {
-            var vm = new DeploymentDialogViewModel(services, _fakeProjPath);
+            var vm = new DeploymentDialogViewModel(services, _fakeProjPath, fakeTargetFrameworkMoniker);
 
             Assert.IsNotNull(vm.CfSpaceOptions);
             Assert.AreEqual(0, vm.CfSpaceOptions.Count);
         }
 
+
         [TestMethod]
         public void DeployApp_UpdatesDeploymentStatus_WhenAppNameEmpty()
         {
             var receivedEvents = new List<string>();
-            _sut.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
+            sut.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
             {
                 receivedEvents.Add(e.PropertyName);
             };
 
-            _sut.AppName = string.Empty;
-            _sut.SelectedCf = _fakeCfInstance;
-            _sut.SelectedOrg = _fakeOrg;
-            _sut.SelectedSpace = _fakeSpace;
+            sut.AppName = string.Empty;
+            sut.SelectedCf = _fakeCfInstance;
+            sut.SelectedOrg = _fakeOrg;
+            sut.SelectedSpace = _fakeSpace;
 
-            _sut.DeployApp(null);
+            sut.DeployApp(null);
 
             Assert.IsTrue(receivedEvents.Contains("DeploymentStatus"));
-            Assert.IsTrue(_sut.DeploymentStatus.Contains("An error occurred:"));
-            Assert.IsTrue(_sut.DeploymentStatus.Contains(DeploymentDialogViewModel.appNameEmptyMsg));
+            Assert.IsTrue(sut.DeploymentStatus.Contains("An error occurred:"));
+            Assert.IsTrue(sut.DeploymentStatus.Contains(DeploymentDialogViewModel.appNameEmptyMsg));
         }
 
         [TestMethod]
         public void DeployApp_UpdatesDeploymentStatus_WhenTargetCfEmpty()
         {
             var receivedEvents = new List<string>();
-            _sut.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
+            sut.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
             {
                 receivedEvents.Add(e.PropertyName);
             };
 
-            _sut.AppName = "fake app name";
-            _sut.SelectedCf = null;
-            _sut.SelectedOrg = _fakeOrg;
-            _sut.SelectedSpace = _fakeSpace;
+            sut.AppName = "fake app name";
+            sut.SelectedCf = null;
+            sut.SelectedOrg = _fakeOrg;
+            sut.SelectedSpace = _fakeSpace;
 
-            _sut.DeployApp(null);
+            sut.DeployApp(null);
 
             Assert.IsTrue(receivedEvents.Contains("DeploymentStatus"));
-            Assert.IsTrue(_sut.DeploymentStatus.Contains("An error occurred:"));
-            Assert.IsTrue(_sut.DeploymentStatus.Contains(DeploymentDialogViewModel.targetEmptyMsg));
+            Assert.IsTrue(sut.DeploymentStatus.Contains("An error occurred:"));
+            Assert.IsTrue(sut.DeploymentStatus.Contains(DeploymentDialogViewModel.targetEmptyMsg));
         }
 
         [TestMethod]
         public void DeployApp_UpdatesDeploymentStatus_WhenTargetOrgEmpty()
         {
             var receivedEvents = new List<string>();
-            _sut.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
+            sut.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
             {
                 receivedEvents.Add(e.PropertyName);
             };
 
-            _sut.AppName = "fake app name";
-            _sut.SelectedCf = _fakeCfInstance;
-            _sut.SelectedOrg = null;
-            _sut.SelectedSpace = _fakeSpace;
+            sut.AppName = "fake app name";
+            sut.SelectedCf = _fakeCfInstance;
+            sut.SelectedOrg = null;
+            sut.SelectedSpace = _fakeSpace;
 
-            _sut.DeployApp(null);
+            sut.DeployApp(null);
 
             Assert.IsTrue(receivedEvents.Contains("DeploymentStatus"));
-            Assert.IsTrue(_sut.DeploymentStatus.Contains("An error occurred:"));
-            Assert.IsTrue(_sut.DeploymentStatus.Contains(DeploymentDialogViewModel.orgEmptyMsg));
+            Assert.IsTrue(sut.DeploymentStatus.Contains("An error occurred:"));
+            Assert.IsTrue(sut.DeploymentStatus.Contains(DeploymentDialogViewModel.orgEmptyMsg));
         }
 
         [TestMethod]
         public void DeployApp_UpdatesDeploymentStatus_WhenTargetSpaceEmpty()
         {
             var receivedEvents = new List<string>();
-            _sut.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
+            sut.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
             {
                 receivedEvents.Add(e.PropertyName);
             };
 
-            _sut.AppName = "fake app name";
-            _sut.SelectedCf = _fakeCfInstance;
-            _sut.SelectedOrg = _fakeOrg;
-            _sut.SelectedSpace = null;
+            sut.AppName = "fake app name";
+            sut.SelectedCf = _fakeCfInstance;
+            sut.SelectedOrg = _fakeOrg;
+            sut.SelectedSpace = null;
 
-            _sut.DeployApp(null);
+            sut.DeployApp(null);
 
             Assert.IsTrue(receivedEvents.Contains("DeploymentStatus"));
-            Assert.IsTrue(_sut.DeploymentStatus.Contains("An error occurred:"));
-            Assert.IsTrue(_sut.DeploymentStatus.Contains(DeploymentDialogViewModel.spaceEmptyMsg));
+            Assert.IsTrue(sut.DeploymentStatus.Contains("An error occurred:"));
+            Assert.IsTrue(sut.DeploymentStatus.Contains(DeploymentDialogViewModel.spaceEmptyMsg));
         }
 
         [TestMethod]
@@ -169,75 +172,101 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         {
             var dw = new object();
 
-            _sut.AppName = _fakeAppName;
-            _sut.SelectedCf = _fakeCfInstance;
-            _sut.SelectedOrg = _fakeOrg;
-            _sut.SelectedSpace = _fakeSpace;
+            sut.AppName = _fakeAppName;
+            sut.SelectedCf = _fakeCfInstance;
+            sut.SelectedOrg = _fakeOrg;
+            sut.SelectedSpace = _fakeSpace;
 
-            _sut.DeployApp(dw);
+            sut.DeployApp(dw);
             mockDialogService.Verify(mock => mock.CloseDialog(dw, true), Times.Once);
+        }
+
+        [TestMethod()]
+        public async Task DeploymentDialogViewModel_IndicatesFullFWDeployment_WhenTFMStartsWith_NETFramework()
+        {
+            string targetFrameworkMoniker = ".NETFramework";
+            sut = new DeploymentDialogViewModel(services, _fakeProjPath, targetFrameworkMoniker)
+            {
+                AppName = _fakeAppName,
+                SelectedCf = _fakeCfInstance,
+                SelectedOrg = _fakeOrg,
+                SelectedSpace = _fakeSpace
+            };
+
+            bool expectedFullFWFlag = true;
+
+            mockCloudFoundryService.Setup(m => m.
+                DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath,
+                    expectedFullFWFlag,
+                    It.IsAny<StdOutDelegate>(),
+                    It.IsAny<StdErrDelegate>()))
+                .ReturnsAsync(fakeSuccessDetailedResult);
+            
+            await sut.StartDeployment();
+
+            mockCloudFoundryService.VerifyAll();
         }
 
         [TestMethod]
         public async Task StartDeploymentTask_UpdatesDeploymentInProgress_WhenComplete()
         {
             var receivedEvents = new List<string>();
-            _sut.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
+            sut.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
             {
                 receivedEvents.Add(e.PropertyName);
             };
 
             mockCloudFoundryService.Setup(mock =>
-                mock.DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath,
+                mock.DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, defaultFullFWFlag,
                                     It.IsAny<StdOutDelegate>(),
                                     It.IsAny<StdErrDelegate>()))
                     .ReturnsAsync(fakeSuccessDetailedResult);
 
-            _sut.AppName = _fakeAppName;
-            _sut.SelectedCf = _fakeCfInstance;
-            _sut.SelectedOrg = _fakeOrg;
-            _sut.SelectedSpace = _fakeSpace;
+            sut.AppName = _fakeAppName;
+            sut.SelectedCf = _fakeCfInstance;
+            sut.SelectedOrg = _fakeOrg;
+            sut.SelectedSpace = _fakeSpace;
 
-            _sut.DeploymentInProgress = true;
+            sut.DeploymentInProgress = true;
 
-            await _sut.StartDeployment();
+            await sut.StartDeployment();
 
-            Assert.IsFalse(_sut.DeploymentInProgress);
+            Assert.IsFalse(sut.DeploymentInProgress);
         }
 
         [TestMethod]
         public async Task StartDeploymentTask_PassesOutputViewModelAppendLineMethod_AsCallbacks()
         {
-            _sut.AppName = _fakeAppName;
-            _sut.SelectedCf = _fakeCfInstance;
-            _sut.SelectedOrg = _fakeOrg;
-            _sut.SelectedSpace = _fakeSpace;
+            sut.AppName = _fakeAppName;
+            sut.SelectedCf = _fakeCfInstance;
+            sut.SelectedOrg = _fakeOrg;
+            sut.SelectedSpace = _fakeSpace;
 
-            StdOutDelegate expectedStdOutCallback = _sut.outputViewModel.AppendLine;
-            StdErrDelegate expectedStdErrCallback = _sut.outputViewModel.AppendLine;
+            StdOutDelegate expectedStdOutCallback = sut.outputViewModel.AppendLine;
+            StdErrDelegate expectedStdErrCallback = sut.outputViewModel.AppendLine;
 
             mockCloudFoundryService.Setup(mock => mock.
-              DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath,
+              DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, defaultFullFWFlag,
                              expectedStdOutCallback,
                              expectedStdErrCallback))
                 .ReturnsAsync(fakeSuccessDetailedResult);
 
-            await _sut.StartDeployment();
+            await sut.StartDeployment();
         }
 
         [TestMethod]
         public async Task StartDeploymentTask_LogsError_WhenDeployResultReportsFailure()
         {
-            _sut.AppName = _fakeAppName;
-            _sut.SelectedCf = _fakeCfInstance;
-            _sut.SelectedOrg = _fakeOrg;
-            _sut.SelectedSpace = _fakeSpace;
+            sut.AppName = _fakeAppName;
+            sut.SelectedCf = _fakeCfInstance;
+            sut.SelectedOrg = _fakeOrg;
+            sut.SelectedSpace = _fakeSpace;
 
-            StdOutDelegate expectedStdOutCallback = _sut.outputViewModel.AppendLine;
-            StdErrDelegate expectedStdErrCallback = _sut.outputViewModel.AppendLine;
+            StdOutDelegate expectedStdOutCallback = sut.outputViewModel.AppendLine;
+            StdErrDelegate expectedStdErrCallback = sut.outputViewModel.AppendLine;
 
             mockCloudFoundryService.Setup(mock => mock.
-                DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath,
+                DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, defaultFullFWFlag,
                              expectedStdOutCallback,
                              expectedStdErrCallback))
                     .ReturnsAsync(fakeFailureDetailedResult);
@@ -248,7 +277,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             mockDialogService.Setup(mock => mock.
                 DisplayErrorDialog(expectedErrorTitle, expectedErrorMsg));
 
-            await _sut.StartDeployment();
+            await sut.StartDeployment();
 
             var logPropVal1 = "{AppName}";
             var logPropVal2 = "{TargetApi}";
@@ -265,16 +294,16 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task StartDeploymentTask_DisplaysErrorDialog_WhenDeployResultReportsFailure()
         {
-            _sut.AppName = _fakeAppName;
-            _sut.SelectedCf = _fakeCfInstance;
-            _sut.SelectedOrg = _fakeOrg;
-            _sut.SelectedSpace = _fakeSpace;
+            sut.AppName = _fakeAppName;
+            sut.SelectedCf = _fakeCfInstance;
+            sut.SelectedOrg = _fakeOrg;
+            sut.SelectedSpace = _fakeSpace;
 
-            StdOutDelegate expectedStdOutCallback = _sut.outputViewModel.AppendLine;
-            StdErrDelegate expectedStdErrCallback = _sut.outputViewModel.AppendLine;
+            StdOutDelegate expectedStdOutCallback = sut.outputViewModel.AppendLine;
+            StdErrDelegate expectedStdErrCallback = sut.outputViewModel.AppendLine;
 
             mockCloudFoundryService.Setup(mock => mock.
-                DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath,
+                DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, defaultFullFWFlag,
                              expectedStdOutCallback,
                              expectedStdErrCallback))
                     .ReturnsAsync(fakeFailureDetailedResult);
@@ -285,7 +314,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             mockDialogService.Setup(mock => mock.
                 DisplayErrorDialog(expectedErrorTitle, expectedErrorMsg));
 
-            await _sut.StartDeployment();
+            await sut.StartDeployment();
         }
 
         [TestMethod]
@@ -303,14 +332,14 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                 GetOrgsForCfInstanceAsync(fakeCfInstance, true))
                     .ReturnsAsync(fakeSuccessfulOrgsResponse);
 
-            _sut.SelectedCf = fakeCfInstance;
+            sut.SelectedCf = fakeCfInstance;
 
-            Assert.AreEqual(0, _sut.CfOrgOptions.Count);
+            Assert.AreEqual(0, sut.CfOrgOptions.Count);
 
-            await _sut.UpdateCfOrgOptions();
+            await sut.UpdateCfOrgOptions();
 
-            Assert.AreEqual(1, _sut.CfOrgOptions.Count);
-            Assert.AreEqual(fakeCfOrg, _sut.CfOrgOptions[0]);
+            Assert.AreEqual(1, sut.CfOrgOptions.Count);
+            Assert.AreEqual(fakeCfOrg, sut.CfOrgOptions[0]);
 
             Assert.IsTrue(_receivedEvents.Contains("CfOrgOptions"));
         }
@@ -318,11 +347,11 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task UpdateCfOrgOptions_SetsCfOrgOptionsToEmptyList_WhenSelectedCfIsNull()
         {
-            _sut.SelectedCf = null;
+            sut.SelectedCf = null;
 
-            await _sut.UpdateCfOrgOptions();
+            await sut.UpdateCfOrgOptions();
 
-            Assert.AreEqual(0, _sut.CfOrgOptions.Count);
+            Assert.AreEqual(0, sut.CfOrgOptions.Count);
 
             Assert.IsTrue(_receivedEvents.Contains("CfOrgOptions"));
         }
@@ -345,13 +374,13 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             mockDialogService.Setup(mock => mock.
                 DisplayErrorDialog(DeploymentDialogViewModel.getOrgsFailureMsg, fakeExplanation));
 
-            _sut.SelectedCf = fakeCfInstance;
-            var initialOrgOptions = _sut.CfOrgOptions;
+            sut.SelectedCf = fakeCfInstance;
+            var initialOrgOptions = sut.CfOrgOptions;
 
-            await _sut.UpdateCfOrgOptions();
+            await sut.UpdateCfOrgOptions();
 
             mockDialogService.VerifyAll();
-            Assert.AreEqual(initialOrgOptions, _sut.CfOrgOptions);
+            Assert.AreEqual(initialOrgOptions, sut.CfOrgOptions);
         }
         
         [TestMethod]
@@ -372,10 +401,10 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             mockDialogService.Setup(mock => mock.
                 DisplayErrorDialog(DeploymentDialogViewModel.getOrgsFailureMsg, fakeExplanation));
 
-            _sut.SelectedCf = fakeCfInstance;
-            var initialOrgOptions = _sut.CfOrgOptions;
+            sut.SelectedCf = fakeCfInstance;
+            var initialOrgOptions = sut.CfOrgOptions;
 
-            await _sut.UpdateCfOrgOptions();
+            await sut.UpdateCfOrgOptions();
 
             mockLogger.Verify(m => m.
                 Error($"{DeploymentDialogViewModel.getOrgsFailureMsg}. {fakeFailedOrgsResponse}"),
@@ -398,15 +427,15 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
                 GetSpacesForOrgAsync(fakeCfOrg, true))
                     .ReturnsAsync(fakeSuccessfulSpacesResponse);
 
-            _sut.SelectedCf = fakeCfInstance;
-            _sut.SelectedOrg = fakeCfOrg;
+            sut.SelectedCf = fakeCfInstance;
+            sut.SelectedOrg = fakeCfOrg;
 
-            Assert.AreEqual(0, _sut.CfSpaceOptions.Count);
+            Assert.AreEqual(0, sut.CfSpaceOptions.Count);
 
-            await _sut.UpdateCfSpaceOptions();
+            await sut.UpdateCfSpaceOptions();
 
-            Assert.AreEqual(1, _sut.CfSpaceOptions.Count);
-            Assert.AreEqual(fakeCfSpace, _sut.CfSpaceOptions[0]);
+            Assert.AreEqual(1, sut.CfSpaceOptions.Count);
+            Assert.AreEqual(fakeCfSpace, sut.CfSpaceOptions[0]);
 
             Assert.IsTrue(_receivedEvents.Contains("CfSpaceOptions"));
         }
@@ -414,11 +443,11 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task UpdateCfSpaceOptions_SetsCfSpaceOptionsToEmptyList_WhenSelectedCfIsNull()
         {
-            _sut.SelectedCf = null;
+            sut.SelectedCf = null;
 
-            await _sut.UpdateCfSpaceOptions();
+            await sut.UpdateCfSpaceOptions();
 
-            Assert.AreEqual(0, _sut.CfSpaceOptions.Count);
+            Assert.AreEqual(0, sut.CfSpaceOptions.Count);
 
             Assert.IsTrue(_receivedEvents.Contains("CfSpaceOptions"));
         }
@@ -426,11 +455,11 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
         [TestMethod]
         public async Task UpdateCfSpaceOptions_SetsCfSpaceOptionsToEmptyList_WhenSelectedOrgIsNull()
         {
-            _sut.SelectedOrg = null;
+            sut.SelectedOrg = null;
 
-            await _sut.UpdateCfSpaceOptions();
+            await sut.UpdateCfSpaceOptions();
 
-            Assert.AreEqual(0, _sut.CfSpaceOptions.Count);
+            Assert.AreEqual(0, sut.CfSpaceOptions.Count);
 
             Assert.IsTrue(_receivedEvents.Contains("CfSpaceOptions"));
         }
@@ -453,11 +482,11 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             mockDialogService.Setup(mock => mock.
                 DisplayErrorDialog(DeploymentDialogViewModel.getSpacesFailureMsg, fakeExplanation));
 
-            _sut.SelectedCf = fakeCfInstance;
-            _sut.SelectedOrg = fakeCfOrg;
-            var initialSpaceOptions = _sut.CfSpaceOptions;
+            sut.SelectedCf = fakeCfInstance;
+            sut.SelectedOrg = fakeCfOrg;
+            var initialSpaceOptions = sut.CfSpaceOptions;
 
-            await _sut.UpdateCfSpaceOptions();
+            await sut.UpdateCfSpaceOptions();
 
             mockLogger.Verify(m => m.
                 Error($"{DeploymentDialogViewModel.getSpacesFailureMsg}. {fakeFailedSpacesResponse}"),
@@ -482,14 +511,14 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             mockDialogService.Setup(mock => mock.
                 DisplayErrorDialog(DeploymentDialogViewModel.getSpacesFailureMsg, fakeExplanation));
 
-            _sut.SelectedCf = fakeCfInstance;
-            _sut.SelectedOrg = fakeCfOrg;
-            var initialSpaceOptions = _sut.CfSpaceOptions;
+            sut.SelectedCf = fakeCfInstance;
+            sut.SelectedOrg = fakeCfOrg;
+            var initialSpaceOptions = sut.CfSpaceOptions;
 
-            await _sut.UpdateCfSpaceOptions();
+            await sut.UpdateCfSpaceOptions();
 
             mockDialogService.VerifyAll();
-            Assert.AreEqual(initialSpaceOptions, _sut.CfSpaceOptions);
+            Assert.AreEqual(initialSpaceOptions, sut.CfSpaceOptions);
         }
 
     }
@@ -498,9 +527,17 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
     {
         public IViewModel ViewModel { get; }
 
+        public bool ShowMethodWasCalled { get; private set; }
+
         public FakeOutputView()
         {
             ViewModel = new OutputViewModel(services);
+            ShowMethodWasCalled = false;
+        }
+
+        public void Show()
+        {
+            ShowMethodWasCalled = true;
         }
     }
 }

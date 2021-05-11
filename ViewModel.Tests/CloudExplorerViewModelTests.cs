@@ -1,6 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -1441,5 +1440,58 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels.Tests
             mockCloudFoundryService.VerifyAll();
         }
 
+        [TestMethod]
+        public async Task DisplayRecentAppLogs_LogsError_WhenArgumentTypeIsNotApp()
+        {
+            await vm.DisplayRecentAppLogs(new object());
+            mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task DisplayRecentAppLogs_DisplaysErrorDialog_WhenLogsCmdFails()
+        {
+            var fakeApp = new CloudFoundryApp("junk", "junk", null, "junk");
+            var fakeLogsResult = new DetailedResult<string>(content: null, succeeded: false, explanation: ":(", cmdDetails: fakeFailureCmdResult);
+
+            mockViewLocatorService.Setup(m => m.
+                NavigateTo(nameof(OutputViewModel), null))
+                    .Callback(() => Assert.Fail("Output view does not need to be retrieved."));
+
+            mockCloudFoundryService.Setup(m => m.
+                GetRecentLogs(fakeApp))
+                    .ReturnsAsync(fakeLogsResult);
+
+            await vm.DisplayRecentAppLogs(fakeApp);
+
+            mockLogger.Verify(m => m.
+                Error(It.Is<string>(s => s.Contains(fakeLogsResult.Explanation))), 
+                    Times.Once);
+
+            mockDialogService.Verify(m => m.
+                DisplayErrorDialog(It.Is<string>(s => s.Contains(fakeApp.AppName)), It.Is<string>(s => s.Contains(fakeLogsResult.Explanation))), 
+                    Times.Once);
+        }
+
+        [TestMethod]
+        public async Task DisplayRecentAppLogs_CallsViewShowMethod_WhenLogsCmdSucceeds()
+        {
+            var fakeApp = new CloudFoundryApp("junk","junk",null,"junk");
+            var fakeView = new FakeOutputView();
+            var fakeLogsResult = new DetailedResult<string>(content: "fake logs", succeeded: true, explanation: null, cmdDetails: fakeSuccessCmdResult);
+
+            mockViewLocatorService.Setup(m => m.
+                NavigateTo(nameof(OutputViewModel), null))
+                    .Returns(fakeView);
+
+            mockCloudFoundryService.Setup(m => m.
+                GetRecentLogs(fakeApp))
+                    .ReturnsAsync(fakeLogsResult);
+
+            Assert.IsFalse(fakeView.ShowMethodWasCalled);
+
+            await vm.DisplayRecentAppLogs(fakeApp);
+
+            Assert.IsTrue(fakeView.ShowMethodWasCalled);
+        }
     }
 }

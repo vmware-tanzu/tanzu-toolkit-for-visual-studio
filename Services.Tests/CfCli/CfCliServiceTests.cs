@@ -1029,8 +1029,65 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.IsNull(result.Explanation);
             Assert.AreEqual(fakeSuccessCmdResult, result.CmdDetails);
         }
-
+        
         [TestMethod]
+        [TestCategory("PushApp")]
+        public async Task PushAppAsync_AddsSFlag_WhenGivenAStackParam()
+        {
+            var fakeAppName = "my fake app";
+            var fakeStackValue = "my-cool-stack-name";
+            string expectedArgs = $"push \"{fakeAppName}\" -s {fakeStackValue}"; // ensure app name gets surrounded by quotes
+
+            mockCmdProcessService.Setup(m => m.
+                RunCommand(_fakePathToCfExe, expectedArgs, fakeProjectPath, null, null))
+                    .Returns(fakeSuccessCmdResult);
+
+            var result = await _sut.PushAppAsync(fakeAppName, null, null, fakeProjectPath, stack: fakeStackValue);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.AreEqual(fakeSuccessCmdResult, result.CmdDetails);
+        }
+        
+        [TestMethod]
+        [TestCategory("PushApp")]
+        public async Task PushAppAsync_AddsBFlag_WhenGivenABuildpackParam()
+        {
+            var fakeAppName = "my fake app";
+            var fakeBuildpackValue = "my-cool-buildpack";
+            string expectedArgs = $"push \"{fakeAppName}\" -b {fakeBuildpackValue}"; // ensure app name gets surrounded by quotes
+
+            mockCmdProcessService.Setup(m => m.
+                RunCommand(_fakePathToCfExe, expectedArgs, fakeProjectPath, null, null))
+                    .Returns(fakeSuccessCmdResult);
+
+            var result = await _sut.PushAppAsync(fakeAppName, null, null, fakeProjectPath, buildpack: fakeBuildpackValue);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.AreEqual(fakeSuccessCmdResult, result.CmdDetails);
+        }
+        
+        [TestMethod]
+        [TestCategory("PushApp")]
+        public async Task PushAppAsync_AddsMultipleFlags_WhenGivenMultipleOptionalParams()
+        {
+            var fakeAppName = "my fake app";
+            var fakeStackValue = "my-cool-stack";
+            var fakeBuildpackValue = "my-cool-buildpack";
+            string expectedArgs = $"push \"{fakeAppName}\" -b {fakeBuildpackValue} -s {fakeStackValue}"; // ensure app name gets surrounded by quotes
+
+            mockCmdProcessService.Setup(m => m.
+                RunCommand(_fakePathToCfExe, expectedArgs, fakeProjectPath, null, null))
+                    .Returns(fakeSuccessCmdResult);
+
+            var result = await _sut.PushAppAsync(fakeAppName, null, null, fakeProjectPath, buildpack: fakeBuildpackValue, stack: fakeStackValue);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.AreEqual(fakeSuccessCmdResult, result.CmdDetails);
+        }
+        
         [TestCategory("PushApp")]
         public async Task PushAppAsync_ReturnsFailureResult_WhenCfExeCannotBeFound()
         {
@@ -1143,5 +1200,54 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
 
             Assert.IsNull(result);
         }
+
+
+        [TestMethod]
+        [TestCategory("GetRecentAppLogs")]
+        public async Task GetRecentAppLogs_ReturnsSuccessResult_WhenLogsCmdSucceeds()
+        {
+            var fakeAppName = "junk";
+            var expectedArgs = $"logs {fakeAppName} --recent";
+
+            string fakeCmdOutput = "These are fake app logs\nYabadabbadoo";
+
+            CmdResult mockCmdResult = new CmdResult(fakeCmdOutput, string.Empty, 0);
+
+            mockCmdProcessService.Setup(m => m.
+                RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
+                    .Returns(mockCmdResult);
+
+            var result = await _sut.GetRecentAppLogs(fakeAppName);
+
+            Assert.AreEqual(result.Content, fakeCmdOutput);
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.AreEqual(mockCmdResult, result.CmdDetails);
+        }
+        
+        [TestMethod]
+        [TestCategory("GetRecentAppLogs")]
+        public async Task GetRecentAppLogs_ReturnsFailureResult_WhenLogsCmdExitCodeIsNotZero()
+        {
+            var fakeAppName = "junk";
+            var expectedArgs = $"logs {fakeAppName} --recent";
+
+            string fakeCmdOutput = "These are fake app logs\nYabadabbadoo";
+
+            var errorMsg = "junk err";
+            CmdResult mockCmdResult = new CmdResult(fakeCmdOutput, errorMsg, 1);
+
+            mockCmdProcessService.Setup(m => m.
+                RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
+                    .Returns(mockCmdResult);
+
+            var result = await _sut.GetRecentAppLogs(fakeAppName);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual(result.Content, fakeCmdOutput);
+            Assert.AreEqual(mockCmdResult.StdErr, result.Explanation);
+            Assert.AreEqual(mockCmdResult, result.CmdDetails);
+        }
+
     }
 }

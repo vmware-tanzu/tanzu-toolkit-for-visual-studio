@@ -32,5 +32,6 @@ namespace Tanzu.Toolkit.VisualStudio.WpfViews.Services
         {
             return "I" + viewModelName.Substring(0, viewModelName.Length - 5);  // prepend I and remove "Model"
         }
+
     }
 }

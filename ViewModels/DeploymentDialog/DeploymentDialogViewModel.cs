@@ -19,19 +19,24 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         internal const string deploymentErrorMsg = "Unable to deploy app:";
         internal const string getOrgsFailureMsg = "Unable to fetch orgs.";
         internal const string getSpacesFailureMsg = "Unable to fetch spaces.";
+
         private readonly string projDir;
+        private readonly string projTargetFramework;
         private string status;
         private string appName;
+        private readonly bool fullFrameworkDeployment = false;
+
         private List<CloudFoundryInstance> cfInstances;
         private List<CloudFoundryOrganization> cfOrgs;
         private List<CloudFoundrySpace> cfSpaces;
         private CloudFoundryInstance selectedCf;
         private CloudFoundryOrganization selectedOrg;
         private CloudFoundrySpace selectedSpace;
+
         internal IOutputViewModel outputViewModel;
 
 
-        public DeploymentDialogViewModel(IServiceProvider services, string directoryOfProjectToDeploy)
+        public DeploymentDialogViewModel(IServiceProvider services, string directoryOfProjectToDeploy, string targetFrameworkMoniker)
             : base(services)
         {
             IView outputView = ViewLocatorService.NavigateTo(nameof(OutputViewModel)) as IView;
@@ -42,6 +47,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
             SelectedCf = null;
             projDir = directoryOfProjectToDeploy;
 
+            if (targetFrameworkMoniker.StartsWith(".NETFramework")) fullFrameworkDeployment = true;
 
             UpdateCfInstanceOptions();
             CfOrgOptions = new List<CloudFoundryOrganization>();
@@ -197,6 +203,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
                 SelectedSpace,
                 AppName,
                 projDir,
+                fullFrameworkDeployment,
                 stdOutCallback: outputViewModel.AppendLine,
                 stdErrCallback: outputViewModel.AppendLine
             );

@@ -29,5 +29,7 @@ namespace Tanzu.Toolkit.VisualStudio.ViewModels
         bool CanRefreshAllCloudConnections(object arg);
         void RemoveCloudConnection(object arg);
         bool CanRemoveCloudConnecion(object arg);
+        Task DisplayRecentAppLogs(object app);
+        bool CanDisplayRecentAppLogs(object arg);
     }
 }
