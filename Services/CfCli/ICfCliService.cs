@@ -25,7 +25,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         Task<DetailedResult> StopAppByNameAsync(string appName);
         Task<DetailedResult> StartAppByNameAsync(string appName);
         Task<DetailedResult> DeleteAppByNameAsync(string appName, bool removeMappedRoutes = true);
-        Task<DetailedResult> PushAppAsync(string appName, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string appDir);
+        Task<DetailedResult> PushAppAsync(string appName, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string appDir, string buildpack = null, string stack = null);
         Task<Version> GetApiVersion();
         Task<DetailedResult<string>> GetRecentAppLogs(string appName);
     }

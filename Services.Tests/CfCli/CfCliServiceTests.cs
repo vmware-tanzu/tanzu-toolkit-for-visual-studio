@@ -1029,8 +1029,65 @@ namespace Tanzu.Toolkit.VisualStudio.Services.Tests.CfCli
             Assert.IsNull(result.Explanation);
             Assert.AreEqual(fakeSuccessCmdResult, result.CmdDetails);
         }
-
+        
         [TestMethod]
+        [TestCategory("PushApp")]
+        public async Task PushAppAsync_AddsSFlag_WhenGivenAStackParam()
+        {
+            var fakeAppName = "my fake app";
+            var fakeStackValue = "my-cool-stack-name";
+            string expectedArgs = $"push \"{fakeAppName}\" -s {fakeStackValue}"; // ensure app name gets surrounded by quotes
+
+            mockCmdProcessService.Setup(m => m.
+                RunCommand(_fakePathToCfExe, expectedArgs, fakeProjectPath, null, null))
+                    .Returns(fakeSuccessCmdResult);
+
+            var result = await _sut.PushAppAsync(fakeAppName, null, null, fakeProjectPath, stack: fakeStackValue);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.AreEqual(fakeSuccessCmdResult, result.CmdDetails);
+        }
+        
+        [TestMethod]
+        [TestCategory("PushApp")]
+        public async Task PushAppAsync_AddsBFlag_WhenGivenABuildpackParam()
+        {
+            var fakeAppName = "my fake app";
+            var fakeBuildpackValue = "my-cool-buildpack";
+            string expectedArgs = $"push \"{fakeAppName}\" -b {fakeBuildpackValue}"; // ensure app name gets surrounded by quotes
+
+            mockCmdProcessService.Setup(m => m.
+                RunCommand(_fakePathToCfExe, expectedArgs, fakeProjectPath, null, null))
+                    .Returns(fakeSuccessCmdResult);
+
+            var result = await _sut.PushAppAsync(fakeAppName, null, null, fakeProjectPath, buildpack: fakeBuildpackValue);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.AreEqual(fakeSuccessCmdResult, result.CmdDetails);
+        }
+        
+        [TestMethod]
+        [TestCategory("PushApp")]
+        public async Task PushAppAsync_AddsMultipleFlags_WhenGivenMultipleOptionalParams()
+        {
+            var fakeAppName = "my fake app";
+            var fakeStackValue = "my-cool-stack";
+            var fakeBuildpackValue = "my-cool-buildpack";
+            string expectedArgs = $"push \"{fakeAppName}\" -b {fakeBuildpackValue} -s {fakeStackValue}"; // ensure app name gets surrounded by quotes
+
+            mockCmdProcessService.Setup(m => m.
+                RunCommand(_fakePathToCfExe, expectedArgs, fakeProjectPath, null, null))
+                    .Returns(fakeSuccessCmdResult);
+
+            var result = await _sut.PushAppAsync(fakeAppName, null, null, fakeProjectPath, buildpack: fakeBuildpackValue, stack: fakeStackValue);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.AreEqual(fakeSuccessCmdResult, result.CmdDetails);
+        }
+        
         [TestCategory("PushApp")]
         public async Task PushAppAsync_ReturnsFailureResult_WhenCfExeCannotBeFound()
         {

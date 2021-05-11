@@ -383,9 +383,13 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         /// <param name="stdErrCallback"></param>
         /// <param name="appDir"></param>
         /// <returns></returns>
-        public async Task<DetailedResult> PushAppAsync(string appName, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string appDir)
+        public async Task<DetailedResult> PushAppAsync(string appName, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string appDir, string buildpack = null, string stack = null)
         {
             string args = $"push \"{appName}\"";
+
+            if (buildpack != null) args += $" -b {buildpack}";
+            if (stack != null) args += $" -s {stack}";
+
             var pushResult = await RunCfCommandAsync(args, stdOutCallback, stdErrCallback, appDir);
 
             return pushResult;
