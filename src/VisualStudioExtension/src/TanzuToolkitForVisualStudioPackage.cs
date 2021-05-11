@@ -48,7 +48,7 @@ namespace Tanzu.Toolkit.VisualStudio
     public sealed class TanzuToolkitForVisualStudioPackage : AsyncPackage
     {
         /// <summary>
-        /// TanzuForVSPackage GUID string.
+        /// TanzuToolkitPackage GUID string.
         /// </summary>
         public const string PackageGuidString = "9419e55b-9e82-4d87-8ee5-70871b01b7cc";
 
