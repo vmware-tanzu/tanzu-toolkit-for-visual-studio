@@ -1,8 +1,8 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
 
@@ -17,10 +17,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestInitialize]
         public void TestInit()
         {
-            _sut = new SpaceViewModel(fakeCfSpace, services);
+            RenewMockServices();
+
+            _sut = new SpaceViewModel(FakeCfSpace, Services);
 
             _receivedEvents = new List<string>();
-            _sut.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
+            _sut.PropertyChanged += (sender, e) =>
             {
                 _receivedEvents.Add(e.PropertyName);
             };
@@ -29,25 +31,25 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCleanup]
         public void TestCleanup()
         {
-            mockCloudFoundryService.VerifyAll();
+            MockCloudFoundryService.VerifyAll();
         }
 
         [TestMethod]
         public void Constructor_SetsDisplayTextToSpaceName()
         {
-            Assert.AreEqual(fakeCfSpace.SpaceName, _sut.DisplayText);
+            Assert.AreEqual(FakeCfSpace.SpaceName, _sut.DisplayText);
         }
 
         [TestMethod]
         public void Constructor_SetsLoadingPlaceholder()
         {
-            Assert.AreEqual(SpaceViewModel.loadingMsg, _sut.LoadingPlaceholder.DisplayText);
+            Assert.AreEqual(SpaceViewModel.LoadingMsg, _sut.LoadingPlaceholder.DisplayText);
         }
 
         [TestMethod]
         public void Constructor_SetsEmptyPlaceholder()
         {
-            Assert.AreEqual(SpaceViewModel.emptyAppsPlaceholderMsg, _sut.EmptyPlaceholder.DisplayText);
+            Assert.AreEqual(SpaceViewModel.EmptyAppsPlaceholderMsg, _sut.EmptyPlaceholder.DisplayText);
         }
 
         [TestMethod]
@@ -55,28 +57,28 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             var initialAppsList = new System.Collections.ObjectModel.ObservableCollection<TreeViewItemViewModel>
             {
-                new AppViewModel(new CloudFoundryApp("initial app 1", null, null, null), services),
-                new AppViewModel(new CloudFoundryApp("initial app 2", null, null, null), services),
-                new AppViewModel(new CloudFoundryApp("initial app 3", null, null, null), services),
+                new AppViewModel(new CloudFoundryApp("initial app 1", null, null, null), Services),
+                new AppViewModel(new CloudFoundryApp("initial app 2", null, null, null), Services),
+                new AppViewModel(new CloudFoundryApp("initial app 3", null, null, null), Services),
             };
 
             var newAppsList = new List<CloudFoundryApp>
             {
                 new CloudFoundryApp("initial app 1", null, null, null),
-                new CloudFoundryApp("initial app 2", null, null, null)
+                new CloudFoundryApp("initial app 2", null, null, null),
             };
             var fakeAppsResult = new DetailedResult<List<CloudFoundryApp>>(
                 succeeded: true,
                 content: newAppsList,
                 explanation: null,
-                cmdDetails: fakeSuccessCmdResult);
+                cmdDetails: FakeSuccessCmdResult);
 
             _sut.Children = initialAppsList;
 
             /* erase record of initial "Children" event */
             _receivedEvents.Clear();
 
-            mockCloudFoundryService.Setup(mock => mock.
+            MockCloudFoundryService.Setup(mock => mock.
                 GetAppsForSpaceAsync(_sut.Space, true))
                     .ReturnsAsync(fakeAppsResult);
 
@@ -97,11 +99,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             var fakeAppsResult = new DetailedResult<List<CloudFoundryApp>>(
                 succeeded: true,
-                content: emptyListOfApps,
+                content: EmptyListOfApps,
                 explanation: null,
-                cmdDetails: fakeSuccessCmdResult);
-            
-            mockCloudFoundryService.Setup(mock => mock.
+                cmdDetails: FakeSuccessCmdResult);
+
+            MockCloudFoundryService.Setup(mock => mock.
                 GetAppsForSpaceAsync(_sut.Space, true))
                     .ReturnsAsync(fakeAppsResult);
 
@@ -109,7 +111,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.AreEqual(1, _sut.Children.Count);
             Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
-            Assert.AreEqual(SpaceViewModel.emptyAppsPlaceholderMsg, _sut.Children[0].DisplayText);
+            Assert.AreEqual(SpaceViewModel.EmptyAppsPlaceholderMsg, _sut.Children[0].DisplayText);
 
             Assert.AreEqual(_sut.EmptyPlaceholder, _sut.Children[0]);
             Assert.IsTrue(_sut.HasEmptyPlaceholder);
@@ -123,11 +125,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             var fakeAppsResult = new DetailedResult<List<CloudFoundryApp>>(
                 succeeded: true,
-                content: emptyListOfApps,
+                content: EmptyListOfApps,
                 explanation: null,
-                cmdDetails: fakeSuccessCmdResult);
+                cmdDetails: FakeSuccessCmdResult);
 
-            mockCloudFoundryService.Setup(mock => mock.
+            MockCloudFoundryService.Setup(mock => mock.
                 GetAppsForSpaceAsync(_sut.Space, true))
                     .ReturnsAsync(fakeAppsResult);
 
@@ -143,17 +145,17 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             var fakeAppsList = new List<CloudFoundryApp>
             {
-                new CloudFoundryApp("fake app name 1","fake app id 1", fakeCfSpace, null),
-                new CloudFoundryApp("fake app name 2","fake app id 2", fakeCfSpace, null),
+                new CloudFoundryApp("fake app name 1", "fake app id 1", FakeCfSpace, null),
+                new CloudFoundryApp("fake app name 2", "fake app id 2", FakeCfSpace, null),
             };
 
             var fakeAppsResult = new DetailedResult<List<CloudFoundryApp>>(
                 succeeded: true,
                 content: fakeAppsList,
                 explanation: null,
-                cmdDetails: fakeSuccessCmdResult);
+                cmdDetails: FakeSuccessCmdResult);
 
-            mockCloudFoundryService.Setup(mock => mock.
+            MockCloudFoundryService.Setup(mock => mock.
                 GetAppsForSpaceAsync(_sut.Space, true))
                     .ReturnsAsync(fakeAppsResult);
 
@@ -180,9 +182,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 succeeded: false,
                 content: null,
                 explanation: "junk",
-                cmdDetails: fakeFailureCmdResult);
+                cmdDetails: FakeFailureCmdResult);
 
-            mockCloudFoundryService.Setup(mock => mock.
+            MockCloudFoundryService.Setup(mock => mock.
               GetAppsForSpaceAsync(_sut.Space, true))
                 .ReturnsAsync(fakeFailedResult);
 
@@ -190,7 +192,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsFalse(_sut.IsLoading);
 
-            mockDialogService.Verify(mock => mock.
+            MockDialogService.Verify(mock => mock.
               DisplayErrorDialog(SpaceViewModel._getAppsFailureMsg, fakeFailedResult.Explanation),
                 Times.Once);
         }
@@ -202,17 +204,17 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 succeeded: false,
                 content: null,
                 explanation: "junk",
-                cmdDetails: fakeFailureCmdResult);
+                cmdDetails: FakeFailureCmdResult);
 
-            mockCloudFoundryService.Setup(mock => mock.
+            MockCloudFoundryService.Setup(mock => mock.
               GetAppsForSpaceAsync(_sut.Space, true))
                 .ReturnsAsync(fakeFailedResult);
 
             var result = await _sut.FetchChildren();
 
-            CollectionAssert.AreEqual(emptyListOfApps, result);
+            CollectionAssert.AreEqual(EmptyListOfApps, result);
 
-            mockDialogService.Verify(mock => mock.
+            MockDialogService.Verify(mock => mock.
               DisplayErrorDialog(SpaceViewModel._getAppsFailureMsg, fakeFailedResult.Explanation),
                 Times.Once);
         }

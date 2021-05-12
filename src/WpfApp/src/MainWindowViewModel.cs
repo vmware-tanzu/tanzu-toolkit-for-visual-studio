@@ -7,13 +7,13 @@ namespace Tanzu.Toolkit.WpfApp
 {
     public class MainWindowViewModel : AbstractViewModel, IMainWindowViewModel
     {
-        private string commandInput;
+        private string _commandInput;
 
-        private string commandOutput = "Initial value (delete me)";
+        private string _commandOutput = "Initial value (delete me)";
 
-        private string commandStdOut;
+        private string _commandStdOut;
 
-        private string commandStdErr;
+        private string _commandStdErr;
 
         public MainWindowViewModel(IServiceProvider services)
             : base(services)
@@ -24,11 +24,11 @@ namespace Tanzu.Toolkit.WpfApp
         {
             get
             {
-                return commandInput;
+                return _commandInput;
             }
             set
             {
-                commandInput = value;
+                _commandInput = value;
                 RaisePropertyChangedEvent("CommandInput");
             }
         }
@@ -37,26 +37,25 @@ namespace Tanzu.Toolkit.WpfApp
         {
             get
             {
-                return commandOutput;
+                return _commandOutput;
             }
             set
             {
-                commandOutput = value;
+                _commandOutput = value;
                 RaisePropertyChangedEvent("CommandOutput");
             }
         }
-
 
         public string CommandStdOut
         {
             get
             {
-                return commandStdOut;
+                return _commandStdOut;
             }
 
             set
             {
-                commandStdOut = value;
+                _commandStdOut = value;
                 RaisePropertyChangedEvent("CommandStdOut");
             }
         }
@@ -65,15 +64,14 @@ namespace Tanzu.Toolkit.WpfApp
         {
             get
             {
-                return commandStdErr;
+                return _commandStdErr;
             }
             set
             {
-                commandStdErr = value;
+                _commandStdErr = value;
                 RaisePropertyChangedEvent("CommandStdErr");
             }
         }
-
 
         public bool CanOpenCloudExplorer(object arg)
         {
@@ -127,16 +125,23 @@ namespace Tanzu.Toolkit.WpfApp
             {
                 cfCliCommandName = Path.GetFullPath(pathToCfCliV7 + @"\cf.exe");
             }
-            else return;
+            else
+            {
+                return;
+            }
 
-            if (arguments.StartsWith("cf ")) arguments = arguments.Remove(0, 3);
+            if (arguments.StartsWith("cf "))
+            {
+                arguments = arguments.Remove(0, 3);
+            }
+
             string commandStr = '"' + cfCliCommandName + '"' + ' ' + arguments;
             ExecuteWindowlessCommand(commandStr, workingDir);
         }
 
         private void ExecuteWindowlessCommand(string arguments, string workingDir)
         {
-            //* Create your Process
+            // * Create your Process
             Process process = new Process();
             process.StartInfo.FileName = "cmd.exe";
             process.StartInfo.Arguments = "/c " + arguments;
@@ -146,11 +151,11 @@ namespace Tanzu.Toolkit.WpfApp
             process.StartInfo.CreateNoWindow = true;
             process.StartInfo.WorkingDirectory = workingDir;
 
-            //* Set your output and error (asynchronous) handlers
+            // * Set your output and error (asynchronous) handlers
             process.OutputDataReceived += new DataReceivedEventHandler(OutputHandler);
             process.ErrorDataReceived += new DataReceivedEventHandler(ErrorHandler);
 
-            //* Start process and handlers
+            // * Start process and handlers
             process.Start();
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
@@ -158,7 +163,7 @@ namespace Tanzu.Toolkit.WpfApp
 
         private void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
         {
-            //* Do your stuff with the output (write to console/log/StringBuilder)
+            // * Do your stuff with the output (write to console/log/StringBuilder)
             if (outLine.Data != null)
             {
                 CommandOutput += "> " + outLine.Data + '\n';
@@ -167,12 +172,11 @@ namespace Tanzu.Toolkit.WpfApp
 
         private void ErrorHandler(object sendingProcess, DataReceivedEventArgs outLine)
         {
-            //* Do your stuff with the output (write to console/log/StringBuilder)
+            // * Do your stuff with the output (write to console/log/StringBuilder)
             if (outLine.Data != null)
             {
                 CommandOutput += "###ERROR###: " + outLine.Data + '\n';
             }
         }
-
     }
 }

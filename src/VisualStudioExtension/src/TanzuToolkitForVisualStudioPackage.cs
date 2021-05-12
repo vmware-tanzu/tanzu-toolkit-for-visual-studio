@@ -1,14 +1,13 @@
-﻿using EnvDTE;
+﻿using System;
+using System.IO;
+using System.Net.Http;
+using System.Runtime.InteropServices;
+using System.Threading;
+using EnvDTE;
 using EnvDTE80;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Shell;
-using System;
-using System.Net.Http;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Threading;
 using Tanzu.Toolkit.CloudFoundryApiClient;
-using Tanzu.Toolkit.VisualStudio.Commands;
 using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.CmdProcess;
@@ -16,10 +15,11 @@ using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.FileLocator;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.ViewLocator;
+using Tanzu.Toolkit.ViewModels;
+using Tanzu.Toolkit.VisualStudio.Commands;
 using Tanzu.Toolkit.WpfViews;
 using Tanzu.Toolkit.WpfViews.Services;
 using Task = System.Threading.Tasks.Task;
-using Tanzu.Toolkit.ViewModels;
 
 namespace Tanzu.Toolkit.VisualStudio
 {
@@ -52,13 +52,11 @@ namespace Tanzu.Toolkit.VisualStudio
         /// </summary>
         public const string PackageGuidString = "9419e55b-9e82-4d87-8ee5-70871b01b7cc";
 
-        private IServiceProvider serviceProvider;
+        private IServiceProvider _serviceProvider;
 
         public TanzuToolkitForVisualStudioPackage()
         {
         }
-
-        #region Package Members
 
         /// <summary>
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
@@ -74,21 +72,21 @@ namespace Tanzu.Toolkit.VisualStudio
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
             await TanzuCloudExplorerCommand.InitializeAsync(this);
-            await PushToCloudFoundryCommand.InitializeAsync(this, serviceProvider);
+            await PushToCloudFoundryCommand.InitializeAsync(this, _serviceProvider);
             await OutputWindowCommand.InitializeAsync(this);
-            await OpenLogsCommand.InitializeAsync(this, serviceProvider);
+            await OpenLogsCommand.InitializeAsync(this, _serviceProvider);
         }
 
         protected override object GetService(Type serviceType)
         {
-            if (serviceProvider == null)
+            if (_serviceProvider == null)
             {
                 var collection = new ServiceCollection();
                 ConfigureServices(collection);
-                serviceProvider = collection.BuildServiceProvider();
+                _serviceProvider = collection.BuildServiceProvider();
             }
 
-            var result = serviceProvider.GetService(serviceType);
+            var result = _serviceProvider.GetService(serviceType);
             if (result != null)
             {
                 return result;
@@ -102,8 +100,6 @@ namespace Tanzu.Toolkit.VisualStudio
             return GetService(toolWindowType) as WindowPane;
         }
 
-        #endregion
-
         private void ConfigureServices(IServiceCollection services)
         {
             string assemblyBasePath = Path.GetDirectoryName(GetType().Assembly.Location);
@@ -111,13 +107,11 @@ namespace Tanzu.Toolkit.VisualStudio
             /* VSIX package */
             services.AddSingleton<AsyncPackage>(this);
 
-
             /* Cloud Foundry API */
             HttpClient httpClient = new HttpClient();
             IUaaClient uaaClient = new UaaClient(httpClient);
             services.AddSingleton(_ => uaaClient);
             services.AddSingleton<ICfApiClient>(_ => new CfApiClient(uaaClient, httpClient));
-
 
             /* Services */
             services.AddSingleton<ICloudFoundryService, CloudFoundryService>();
@@ -134,7 +128,6 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddTransient<TanzuCloudExplorerToolWindow>();
             services.AddTransient<OutputToolWindow>();
 
-
             /* View Models */
             services.AddSingleton<IOutputViewModel, OutputViewModel>();
             services.AddSingleton<ICloudExplorerViewModel, CloudExplorerViewModel>();
@@ -142,7 +135,6 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddTransient<IDeploymentDialogViewModel, DeploymentDialogViewModel>();
             services.AddTransient<IAddCloudDialogViewModel, AddCloudDialogViewModel>();
             services.AddTransient<IErrorDialogViewModel, ErrorDialogViewModel>();
-
 
             /* Views */
             services.AddSingleton<IOutputView, OutputView>();

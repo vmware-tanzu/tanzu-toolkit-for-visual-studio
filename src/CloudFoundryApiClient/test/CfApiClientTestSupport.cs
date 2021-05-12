@@ -17,7 +17,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         internal static readonly string _fakeCfPassword = "pass";
         internal static readonly string _fakeAccessToken = "fakeToken";
 
-
         internal static readonly string _fakeBasicInfoJsonResponse = JsonConvert.SerializeObject(new FakeBasicInfoResponse(
                 loginHref: _fakeLoginAddress,
                 uaaHref: _fakeUaaAddress));
@@ -93,44 +92,44 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             resultsPerPage: 50));
     }
 
-    class FakeBasicInfoResponse : BasicInfoResponse
+    internal class FakeBasicInfoResponse : BasicInfoResponse
     {
         public FakeBasicInfoResponse(string loginHref, string uaaHref) : base()
         {
-            links = new Models.BasicInfoResponse.Links
+            Links = new Models.BasicInfoResponse.Links
             {
-                login = new Href
+                Login = new HypertextReference
                 {
-                    href = loginHref
+                    Href = loginHref,
                 },
-                uaa = new Href
+                Uaa = new HypertextReference
                 {
-                    href = uaaHref
-                }
+                    Href = uaaHref,
+                },
             };
         }
     }
 
-    class FakeOrgsResponse : OrgsResponse
+    internal class FakeOrgsResponse : OrgsResponse
     {
         public FakeOrgsResponse(string apiAddress, int pageNum, int totalResults, int totalPages, int resultsPerPage) : base()
         {
             bool isFirstPage = pageNum == 1;
             bool isLastPage = pageNum == totalPages;
 
-            var firstHref = new Href() { href = $"{apiAddress}{CfApiClient.listOrgsPath}?page=1&per_page={resultsPerPage}" };
-            var lastHref = new Href() { href = $"{apiAddress}{CfApiClient.listOrgsPath}?page={totalPages}&per_page={resultsPerPage}" };
-            var nextHref = isLastPage ? null : new Href() { href = $"{apiAddress}{CfApiClient.listOrgsPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
-            var previousHref = isFirstPage ? null : new Href() { href = $"{apiAddress}{CfApiClient.listOrgsPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
+            var firstHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListOrgsPath}?page=1&per_page={resultsPerPage}" };
+            var lastHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListOrgsPath}?page={totalPages}&per_page={resultsPerPage}" };
+            var nextHref = isLastPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListOrgsPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
+            var previousHref = isFirstPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListOrgsPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
 
             Pagination = new Pagination
             {
-                total_results = totalResults,
-                total_pages = totalPages,
-                first = firstHref,
-                last = lastHref,
-                next = nextHref,
-                previous = previousHref
+                Total_results = totalResults,
+                Total_pages = totalPages,
+                First = firstHref,
+                Last = lastHref,
+                Next = nextHref,
+                Previous = previousHref,
             };
 
             Org[] orgs;
@@ -144,7 +143,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                     orgs[i] = new Org
                     {
                         Name = $"fakeOrg{i + 1}",
-                        Guid = $"fakeOrgId-{i + 1}"
+                        Guid = $"fakeOrgId-{i + 1}",
                     };
                 }
             }
@@ -157,7 +156,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                     orgs[i] = new Org
                     {
                         Name = $"fakeOrg{i + 1}",
-                        Guid = $"fakeOrgId-{i + 1}"
+                        Guid = $"fakeOrgId-{i + 1}",
                     };
                 }
             }
@@ -166,26 +165,26 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         }
     }
 
-    class FakeSpacesResponse : SpacesResponse
+    internal class FakeSpacesResponse : SpacesResponse
     {
         public FakeSpacesResponse(string apiAddress, int pageNum, int totalResults, int totalPages, int resultsPerPage) : base()
         {
             bool isFirstPage = pageNum == 1;
             bool isLastPage = pageNum == totalPages;
 
-            var firstHref = new Href() { href = $"{apiAddress}{CfApiClient.listSpacesPath}?page=1&per_page={resultsPerPage}" };
-            var lastHref = new Href() { href = $"{apiAddress}{CfApiClient.listSpacesPath}?page={totalPages}&per_page={resultsPerPage}" };
-            var nextHref = isLastPage ? null : new Href() { href = $"{apiAddress}{CfApiClient.listSpacesPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
-            var previousHref = isFirstPage ? null : new Href() { href = $"{apiAddress}{CfApiClient.listSpacesPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
+            var firstHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListSpacesPath}?page=1&per_page={resultsPerPage}" };
+            var lastHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListSpacesPath}?page={totalPages}&per_page={resultsPerPage}" };
+            var nextHref = isLastPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListSpacesPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
+            var previousHref = isFirstPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListSpacesPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
 
             Pagination = new Pagination
             {
-                total_results = totalResults,
-                total_pages = totalPages,
-                first = firstHref,
-                last = lastHref,
-                next = nextHref,
-                previous = previousHref
+                Total_results = totalResults,
+                Total_pages = totalPages,
+                First = firstHref,
+                Last = lastHref,
+                Next = nextHref,
+                Previous = previousHref,
             };
 
             Space[] spaces;
@@ -199,7 +198,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                     spaces[i] = new Space
                     {
                         Name = $"fakeSpace{i + 1}",
-                        Guid = $"fakeSpaceId-{i + 1}"
+                        Guid = $"fakeSpaceId-{i + 1}",
                     };
                 }
             }
@@ -212,7 +211,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                     spaces[i] = new Space
                     {
                         Name = $"fakeSpace{i + 1}",
-                        Guid = $"fakeSpaceId-{i + 1}"
+                        Guid = $"fakeSpaceId-{i + 1}",
                     };
                 }
             }
@@ -221,26 +220,26 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         }
     }
 
-    class FakeAppsResponse : AppsResponse
+    internal class FakeAppsResponse : AppsResponse
     {
         public FakeAppsResponse(string apiAddress, int pageNum, int totalResults, int totalPages, int resultsPerPage) : base()
         {
             bool isFirstPage = pageNum == 1;
             bool isLastPage = pageNum == totalPages;
 
-            var firstHref = new Href() { href = $"{apiAddress}{CfApiClient.listAppsPath}?page=1&per_page={resultsPerPage}" };
-            var lastHref = new Href() { href = $"{apiAddress}{CfApiClient.listAppsPath}?page={totalPages}&per_page={resultsPerPage}" };
-            var nextHref = isLastPage ? null : new Href() { href = $"{apiAddress}{CfApiClient.listAppsPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
-            var previousHref = isFirstPage ? null : new Href() { href = $"{apiAddress}{CfApiClient.listAppsPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
+            var firstHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListAppsPath}?page=1&per_page={resultsPerPage}" };
+            var lastHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListAppsPath}?page={totalPages}&per_page={resultsPerPage}" };
+            var nextHref = isLastPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListAppsPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
+            var previousHref = isFirstPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListAppsPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
 
             Pagination = new Pagination
             {
-                total_results = totalResults,
-                total_pages = totalPages,
-                first = firstHref,
-                last = lastHref,
-                next = nextHref,
-                previous = previousHref
+                Total_results = totalResults,
+                Total_pages = totalPages,
+                First = firstHref,
+                Last = lastHref,
+                Next = nextHref,
+                Previous = previousHref,
             };
 
             App[] apps;
@@ -253,7 +252,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                 {
                     apps[i] = new App
                     {
-                        Name = $"fakeApp{i + 1}"
+                        Name = $"fakeApp{i + 1}",
                     };
                 }
             }
@@ -265,7 +264,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                 {
                     apps[i] = new App
                     {
-                        Name = $"fakeApp{i + 1}"
+                        Name = $"fakeApp{i + 1}",
                     };
                 }
             }
@@ -273,5 +272,4 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Apps = apps;
         }
     }
-
 }

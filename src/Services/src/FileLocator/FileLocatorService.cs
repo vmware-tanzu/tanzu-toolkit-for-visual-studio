@@ -5,37 +5,37 @@ namespace Tanzu.Toolkit.Services.FileLocator
 {
     public class FileLocatorService : IFileLocatorService
     {
-        const string _cfCliV6ExeName = "cf6.exe";
-        const string _cfCliV6Dir = "Resources";
-        const string _cfCliV7ExeName = "cf7.exe";
-        const string _cfCliV7Dir = "Resources";
-        const string _defaultLogsFileName = "toolkit-diagnostics.log";
-        const string _defaultLogsDir = "Logs";
-        private int cliVersion = 7;
-        private readonly string pathToCf6Exe;
-        private readonly string pathToCf7Exe;
+        private const string _cfCliV6ExeName = "cf6.exe";
+        private const string _cfCliV6Dir = "Resources";
+        private const string _cfCliV7ExeName = "cf7.exe";
+        private const string _cfCliV7Dir = "Resources";
+        private const string _defaultLogsFileName = "toolkit-diagnostics.log";
+        private const string _defaultLogsDir = "Logs";
+        private int _cliVersion = 7;
+        private readonly string _pathToCf6Exe;
+        private readonly string _pathToCf7Exe;
         private readonly string _vsixBaseDirPath;
 
         public FileLocatorService(string vsixBaseDirPath)
         {
             _vsixBaseDirPath = vsixBaseDirPath;
 
-            pathToCf7Exe = Path.Combine(VsixPackageBaseDir, _cfCliV7Dir, _cfCliV7ExeName);
-            pathToCf6Exe = Path.Combine(VsixPackageBaseDir, _cfCliV6Dir, _cfCliV6ExeName);
+            _pathToCf7Exe = Path.Combine(VsixPackageBaseDir, _cfCliV7Dir, _cfCliV7ExeName);
+            _pathToCf6Exe = Path.Combine(VsixPackageBaseDir, _cfCliV6Dir, _cfCliV6ExeName);
         }
 
         public int CliVersion
         {
-            get => cliVersion;
+            get => _cliVersion;
             set
             {
                 switch (value)
                 {
                     case 6:
-                        cliVersion = 6;
+                        _cliVersion = 6;
                         break;
                     case 7:
-                        cliVersion = 7;
+                        _cliVersion = 7;
                         break;
                     default:
                         break;
@@ -47,17 +47,25 @@ namespace Tanzu.Toolkit.Services.FileLocator
         {
             get
             {
-                switch (cliVersion)
+                switch (_cliVersion)
                 {
                     case 6:
-                        if (File.Exists(pathToCf6Exe)) return pathToCf6Exe;
+                        if (File.Exists(_pathToCf6Exe))
+                        {
+                            return _pathToCf6Exe;
+                        }
+
                         break;
                     case 7:
-                        if (File.Exists(pathToCf7Exe)) return pathToCf7Exe;
+                        if (File.Exists(_pathToCf7Exe))
+                        {
+                            return _pathToCf7Exe;
+                        }
+
                         break;
                 }
 
-                throw new Exception($"Unable to locate cf.exe for CLI version {cliVersion}.");
+                throw new Exception($"Unable to locate cf.exe for CLI version {_cliVersion}.");
             }
         }
 

@@ -8,14 +8,13 @@ namespace Tanzu.Toolkit.ViewModels
     {
         public const string TargetEmptyMessage = "Invalid URI: The URI is empty.";
         public const string TargetInvalidFormatMessage = "Invalid URI: The format of the URI could not be determined.";
-        private string target;
-        private string username;
-        private string httpProxy;
-        private bool skipSsl;
-        private bool hasErrors;
-        private string errorMessage;
-        private string instanceName;
-
+        private string _target;
+        private string _username;
+        private string _httpProxy;
+        private bool _skipSsl;
+        private bool _hasErrors;
+        private string _errorMessage;
+        private string _instanceName;
 
         public AddCloudDialogViewModel(IServiceProvider services)
             : base(services)
@@ -25,78 +24,82 @@ namespace Tanzu.Toolkit.ViewModels
 
         public string InstanceName
         {
-            get => instanceName;
+            get => _instanceName;
 
             set
             {
-                instanceName = value;
+                _instanceName = value;
                 RaisePropertyChangedEvent("InstanceName");
             }
         }
 
         public string Target
         {
-            get => target;
+            get => _target;
 
             set
             {
-                target = value;
+                _target = value;
                 RaisePropertyChangedEvent("Target");
             }
         }
 
         public string Username
         {
-            get => username;
+            get => _username;
 
             set
             {
-                username = value;
+                _username = value;
                 RaisePropertyChangedEvent("Username");
             }
         }
 
         public string HttpProxy
         {
-            get => httpProxy;
+            get => _httpProxy;
 
             set
             {
-                httpProxy = value;
+                _httpProxy = value;
                 RaisePropertyChangedEvent("HttpProxy");
             }
         }
 
         public bool SkipSsl
         {
-            get => skipSsl;
+            get => _skipSsl;
 
             set
             {
-                skipSsl = value;
+                _skipSsl = value;
                 RaisePropertyChangedEvent("SkipSsl");
             }
         }
 
         public bool HasErrors
         {
-            get => hasErrors;
+            get => _hasErrors;
 
             set
             {
-                hasErrors = value;
+                _hasErrors = value;
                 RaisePropertyChangedEvent("HasErrors");
             }
         }
 
         public string ErrorMessage
         {
-            get => errorMessage;
+            get => _errorMessage;
 
             set
             {
-                errorMessage = value;
-                if (!string.IsNullOrEmpty(value)) HasErrors = true;
+                _errorMessage = value;
+                if (!string.IsNullOrEmpty(value))
+                {
+                    HasErrors = true;
+                }
+
                 RaisePropertyChangedEvent("ErrorMessage");
             }
         }
@@ -112,7 +115,10 @@ namespace Tanzu.Toolkit.ViewModels
         {
             HasErrors = false;
 
-            if (!VerifyTarget()) return;
+            if (!VerifyTarget())
+            {
+                return;
+            }
 
             var result = await CloudFoundryService.ConnectToCFAsync(Target, Username, GetPassword(), HttpProxy, SkipSsl);
             ErrorMessage = result.ErrorMessage;
@@ -130,7 +136,10 @@ namespace Tanzu.Toolkit.ViewModels
                 }
             }
 
-            if (!HasErrors) DialogService.CloseDialog(arg, true);
+            if (!HasErrors)
+            {
+                DialogService.CloseDialog(arg, true);
+            }
         }
 
         private bool VerifyTarget()
@@ -153,7 +162,5 @@ namespace Tanzu.Toolkit.ViewModels
 
             return true;
         }
-
     }
 }
-

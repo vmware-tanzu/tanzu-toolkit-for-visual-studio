@@ -1,9 +1,8 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
+using Newtonsoft.Json;
 
 namespace Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse
 {
-
     public class AppsResponse
     {
         [JsonProperty("pagination")]
@@ -21,73 +20,74 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse
         public string Name { get; set; }
         [JsonProperty("state")]
         public string State { get; set; }
-        public DateTime created_at { get; set; }
-        public DateTime updated_at { get; set; }
-        public Lifecycle lifecycle { get; set; }
-        public Relationships relationships { get; set; }
-        public Links links { get; set; }
-        public Metadata metadata { get; set; }
+        public DateTime Created_at { get; set; }
+        public DateTime Updated_at { get; set; }
+        public Lifecycle Lifecycle { get; set; }
+        public Relationships Relationships { get; set; }
+        public Links Links { get; set; }
+        public Metadata Metadata { get; set; }
     }
 
     public class Lifecycle
     {
-        public string type { get; set; }
-        public Data data { get; set; }
+        public string Type { get; set; }
+        public Data Data { get; set; }
     }
 
     public class Data
     {
-        public string[] buildpacks { get; set; }
-        public string stack { get; set; }
+        public string[] Buildpacks { get; set; }
+        public string Stack { get; set; }
     }
 
     public class Relationships
     {
-        public SpaceParent space { get; set; }
+        public SpaceParent Space { get; set; }
     }
 
     public class SpaceParent
     {
-        public Data1 data { get; set; }
+        public Data1 Data { get; set; }
     }
 
     public class Data1
     {
-        public string guid { get; set; }
+        public string Guid { get; set; }
     }
 
     public class Links
     {
-        public Href self { get; set; }
-        public Href environment_variables { get; set; }
-        public Href space { get; set; }
-        public Href processes { get; set; }
-        public Href packages { get; set; }
-        public Href current_droplet { get; set; }
-        public Href droplets { get; set; }
-        public Href tasks { get; set; }
-        public Start start { get; set; }
-        public Stop stop { get; set; }
-        public Href revisions { get; set; }
-        public Href deployed_revisions { get; set; }
-        public Href features { get; set; }
+        public HypertextReference Self { get; set; }
+        public HypertextReference Environment_variables { get; set; }
+        public HypertextReference Space { get; set; }
+        public HypertextReference Processes { get; set; }
+        public HypertextReference Packages { get; set; }
+        public HypertextReference Current_droplet { get; set; }
+        public HypertextReference Droplets { get; set; }
+        public HypertextReference Tasks { get; set; }
+        public Start Start { get; set; }
+        public Stop Stop { get; set; }
+        public HypertextReference Revisions { get; set; }
+        public HypertextReference Deployed_revisions { get; set; }
+        public HypertextReference Features { get; set; }
     }
+
     public class Start
     {
-        public string href { get; set; }
-        public string method { get; set; }
+        public string Href { get; set; }
+        public string Method { get; set; }
     }
 
     public class Stop
     {
-        public string href { get; set; }
-        public string method { get; set; }
+        public string Href { get; set; }
+        public string Method { get; set; }
     }
 
     public class Metadata
     {
-        public Labels labels { get; set; }
-        public Annotations annotations { get; set; }
+        public Labels Labels { get; set; }
+        public Annotations Annotations { get; set; }
     }
 
     public class Labels
@@ -97,5 +97,4 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse
     public class Annotations
     {
     }
-
 }

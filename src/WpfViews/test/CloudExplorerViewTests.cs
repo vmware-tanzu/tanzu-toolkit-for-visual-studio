@@ -1,5 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.WpfViews.Commands;
@@ -25,8 +25,8 @@ namespace Tanzu.Toolkit.WpfViews.Tests
             var stopAppCommand = view.StopCfAppCommand as AsyncDelegatingCommand;
             Assert.IsNotNull(openLoginCommand);
             Assert.IsNotNull(stopAppCommand);
-            Assert.AreEqual(vm, openLoginCommand.action.Target);
-            Assert.AreEqual(vm, stopAppCommand.action.Target);
+            Assert.AreEqual(vm, openLoginCommand.Action.Target);
+            Assert.AreEqual(vm, stopAppCommand.Action.Target);
         }
     }
 }

@@ -5,7 +5,7 @@ using Tanzu.Toolkit.WpfViews.Commands;
 namespace Tanzu.Toolkit.WpfApp
 {
     /// <summary>
-    /// Interaction logic for MainWindowView.xaml
+    /// Interaction logic for MainWindowView.xaml.
     /// </summary>
     public partial class MainWindowView : Window, IMainWindowView
     {
@@ -26,6 +26,5 @@ namespace Tanzu.Toolkit.WpfApp
         public ICommand OpenCloudExplorerCommand { get; }
         public ICommand InvokeCommandPromptCommand { get; }
         public ICommand InvokeCfCliCommand { get; }
-
     }
 }

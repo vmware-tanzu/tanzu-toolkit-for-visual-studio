@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Serilog;
-using System;
-using System.Collections.Generic;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CloudFoundry;
@@ -15,55 +15,59 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 {
     public abstract class ViewModelTestSupport
     {
-        protected IServiceProvider services;
+        protected IServiceProvider Services { get; set; }
 
-        protected Mock<ICloudFoundryService> mockCloudFoundryService;
-        protected Mock<IDialogService> mockDialogService;
-        protected Mock<IViewLocatorService> mockViewLocatorService;
-        protected Mock<ILoggingService> mockLoggingService;
+        protected Mock<ICloudFoundryService> MockCloudFoundryService { get; set; }
+        protected Mock<IDialogService> MockDialogService { get; set; }
+        protected Mock<IViewLocatorService> MockViewLocatorService { get; set; }
+        protected Mock<ILoggingService> MockLoggingService { get; set; }
+        protected Mock<ILogger> MockLogger { get; set; }
 
-        protected Mock<ILogger> mockLogger;
+        protected const string FakeCfName = "fake cf name";
+        protected const string FakeCfApiAddress = "http://fake.api.address";
+        protected const string FakeAccessToken = "fake.access.token";
+        protected const string FakeOrgName = "fake org name";
+        protected const string FakeOrgGuid = "fake-org-guid";
+        protected const string FakeSpaceName = "fake space name";
+        protected const string FakeSpaceGuid = "fake-space-guid";
 
-        protected const string fakeCfName = "fake cf name";
-        protected const string fakeCfApiAddress = "http://fake.api.address";
-        protected const string fakeAccessToken = "fake.access.token";
-        private const string fakeOrgName = "fake org name";
-        private const string fakeOrgGuid = "fake-org-guid";
-        private const string fakeSpaceName = "fake space name";
-        private const string fakeSpaceGuid = "fake-space-guid";
+        protected static readonly CloudFoundryInstance FakeCfInstance = new CloudFoundryInstance(FakeCfName, FakeCfApiAddress, FakeAccessToken);
+        protected static readonly CloudFoundryOrganization FakeCfOrg = new CloudFoundryOrganization(FakeOrgName, FakeOrgGuid, FakeCfInstance);
+        protected static readonly CloudFoundrySpace FakeCfSpace = new CloudFoundrySpace(FakeSpaceName, FakeSpaceGuid, FakeCfOrg);
 
-        protected static readonly CloudFoundryInstance fakeCfInstance = new CloudFoundryInstance(fakeCfName, fakeCfApiAddress, fakeAccessToken);
-        protected static readonly CloudFoundryOrganization fakeCfOrg = new CloudFoundryOrganization(fakeOrgName, fakeOrgGuid, fakeCfInstance);
-        protected static readonly CloudFoundrySpace fakeCfSpace = new CloudFoundrySpace(fakeSpaceName, fakeSpaceGuid, fakeCfOrg);
+        protected static readonly List<CloudFoundryOrganization> EmptyListOfOrgs = new List<CloudFoundryOrganization>();
+        protected static readonly List<CloudFoundrySpace> EmptyListOfSpaces = new List<CloudFoundrySpace>();
+        protected static readonly List<CloudFoundryApp> EmptyListOfApps = new List<CloudFoundryApp>();
 
-        protected readonly List<CloudFoundryOrganization> emptyListOfOrgs = new List<CloudFoundryOrganization>();
-        protected readonly List<CloudFoundrySpace> emptyListOfSpaces = new List<CloudFoundrySpace>();
-        protected readonly List<CloudFoundryApp> emptyListOfApps = new List<CloudFoundryApp>();
+        protected static readonly CmdResult FakeSuccessCmdResult = new CmdResult("junk output", "junk error", 0);
+        protected static readonly CmdResult FakeFailureCmdResult = new CmdResult("junk output", "junk error", 1);
 
-        internal static readonly CmdResult fakeSuccessCmdResult = new CmdResult("junk output", "junk error", 0);
-        internal static readonly CmdResult fakeFailureCmdResult = new CmdResult("junk output", "junk error", 1);
-
-        internal static readonly DetailedResult fakeSuccessDetailedResult = new DetailedResult(true, null, fakeSuccessCmdResult);
-        internal static readonly DetailedResult fakeFailureDetailedResult = new DetailedResult(false, "junk error", fakeFailureCmdResult);
+        protected static readonly DetailedResult FakeSuccessDetailedResult = new DetailedResult(true, null, FakeSuccessCmdResult);
+        protected static readonly DetailedResult FakeFailureDetailedResult = new DetailedResult(false, "junk error", FakeFailureCmdResult);
 
         protected ViewModelTestSupport()
         {
+            RenewMockServices();
+        }
+
+        protected void RenewMockServices()
+        {
             var services = new ServiceCollection();
 
-            mockCloudFoundryService = new Mock<ICloudFoundryService>();
-            mockDialogService = new Mock<IDialogService>();
-            mockViewLocatorService = new Mock<IViewLocatorService>();
-            mockLoggingService = new Mock<ILoggingService>();
+            MockCloudFoundryService = new Mock<ICloudFoundryService>();
+            MockDialogService = new Mock<IDialogService>();
+            MockViewLocatorService = new Mock<IViewLocatorService>();
+            MockLoggingService = new Mock<ILoggingService>();
 
-            mockLogger = new Mock<ILogger>();
-            mockLoggingService.SetupGet(m => m.Logger).Returns(mockLogger.Object);
+            MockLogger = new Mock<ILogger>();
+            MockLoggingService.SetupGet(m => m.Logger).Returns(MockLogger.Object);
 
-            services.AddSingleton(mockCloudFoundryService.Object);
-            services.AddSingleton(mockDialogService.Object);
-            services.AddSingleton(mockViewLocatorService.Object);
-            services.AddSingleton(mockLoggingService.Object);
+            services.AddSingleton(MockCloudFoundryService.Object);
+            services.AddSingleton(MockDialogService.Object);
+            services.AddSingleton(MockViewLocatorService.Object);
+            services.AddSingleton(MockLoggingService.Object);
 
-            this.services = services.BuildServiceProvider();
+            Services = services.BuildServiceProvider();
         }
     }
 }

@@ -18,7 +18,11 @@ namespace Tanzu.Toolkit.ViewModels
         {
             get
             {
-                if (App.State == "STOPPED") return true;
+                if (App.State == "STOPPED")
+                {
+                    return true;
+                }
+
                 return false;
             }
         }

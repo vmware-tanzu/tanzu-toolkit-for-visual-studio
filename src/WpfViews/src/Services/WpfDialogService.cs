@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System;
+﻿using System;
 using System.Windows;
+using Microsoft.Extensions.DependencyInjection;
 using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.ViewLocator;
 using Tanzu.Toolkit.ViewModels;
@@ -9,13 +9,13 @@ namespace Tanzu.Toolkit.WpfViews.Services
 {
     public class WpfDialogService : IDialogService
     {
-        public IServiceProvider ServiceProvider;
-        public IViewLocatorService ViewLocatorService;
+        private IServiceProvider _serviceProvider;
+        private IViewLocatorService _viewLocatorService;
 
         public WpfDialogService(IServiceProvider serviceProvider)
         {
-            ServiceProvider = serviceProvider;
-            ViewLocatorService = ServiceProvider.GetRequiredService<IViewLocatorService>();
+            _serviceProvider = serviceProvider;
+            _viewLocatorService = this._serviceProvider.GetRequiredService<IViewLocatorService>();
         }
 
         public void CloseDialog(object dialogWindow, bool result)
@@ -26,10 +26,10 @@ namespace Tanzu.Toolkit.WpfViews.Services
 
         public IDialogResult ShowDialog(string dialogName, object parameter = null)
         {
-            var dialog = ViewLocatorService.NavigateTo(dialogName, parameter) as DependencyObject;
+            var dialog = _viewLocatorService.NavigateTo(dialogName, parameter) as DependencyObject;
             var dialogWindow = Window.GetWindow(dialog);
             var result = dialogWindow.ShowDialog();
-            //dialogWindow.Parent = Application.Current.MainWindow;
+            // dialogWindow.Parent = Application.Current.MainWindow;
 
             return new WpfDialogResult() { Result = result };
         }
@@ -42,7 +42,7 @@ namespace Tanzu.Toolkit.WpfViews.Services
                 var viewModel = new ErrorDialogViewModel()
                 {
                     Title = errorTitle,
-                    Message = errorMsg
+                    Message = errorMsg,
                 };
 
                 var view = new ErrorDialogView(viewModel);

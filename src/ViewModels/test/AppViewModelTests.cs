@@ -4,10 +4,14 @@ using Tanzu.Toolkit.Models;
 namespace Tanzu.Toolkit.ViewModels.Tests
 {
     [TestClass]
-
     public class AppViewModelTests : ViewModelTestSupport
     {
-        private AppViewModel avm;
+        private AppViewModel _avm;
+        [TestInitialize]
+        public void TestInit()
+        {
+            RenewMockServices();
+        }
 
         [TestMethod]
         public void Constructor_SetsDisplayTextToAppName()
@@ -15,9 +19,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             string appName = "junk";
             var fakeApp = new CloudFoundryApp(appName, null, null, null);
 
-            avm = new AppViewModel(fakeApp, services);
+            _avm = new AppViewModel(fakeApp, Services);
 
-            Assert.AreEqual(appName, avm.DisplayText);
+            Assert.AreEqual(appName, _avm.DisplayText);
         }
 
         [TestMethod]
@@ -25,12 +29,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             var fakeApp = new CloudFoundryApp("fake name", "fake guid", null, null)
             {
-                State = "STOPPED"
+                State = "STOPPED",
             };
 
-            avm = new AppViewModel(fakeApp, services);
+            _avm = new AppViewModel(fakeApp, Services);
 
-            Assert.IsTrue(avm.IsStopped);
+            Assert.IsTrue(_avm.IsStopped);
         }
 
         [TestMethod]
@@ -38,12 +42,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             var fakeApp = new CloudFoundryApp("fake name", "fake guid", null, null)
             {
-                State = "anything-other-than-STOPPED"
+                State = "anything-other-than-STOPPED",
             };
 
-            avm = new AppViewModel(fakeApp, services);
+            _avm = new AppViewModel(fakeApp, Services);
 
-            Assert.IsFalse(avm.IsStopped);
+            Assert.IsFalse(_avm.IsStopped);
         }
     }
 }

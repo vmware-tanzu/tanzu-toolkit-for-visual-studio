@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Windows;
-using Tanzu.Toolkit.ViewModels;
 using System.Windows.Input;
+using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.WpfViews.Commands;
 
 namespace Tanzu.Toolkit.WpfViews
 {
     /// <summary>
-    /// Interaction logic for ErrorDialogView.xaml
+    /// Interaction logic for ErrorDialogView.xaml.
     /// </summary>
     public partial class ErrorDialogView : Window, IErrorDialogView
     {
@@ -25,14 +25,11 @@ namespace Tanzu.Toolkit.WpfViews
             CloseCommand = new DelegatingCommand(CloseCommandHandler, viewModel.CanClose);
             DataContext = viewModel;
             InitializeComponent();
-
         }
+
         public void CloseCommandHandler(object sender)
         {
             Close();
         }
-
     }
-    
-
 }

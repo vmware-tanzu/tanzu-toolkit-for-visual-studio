@@ -1,16 +1,16 @@
-﻿using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using System;
+﻿using System;
 using System.ComponentModel.Design;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using Task = System.Threading.Tasks.Task;
 
 namespace Tanzu.Toolkit.VisualStudio.Commands
 {
     /// <summary>
-    /// Command handler
+    /// Command handler.
     /// </summary>
     internal sealed class OutputWindowCommand
     {
@@ -27,17 +27,17 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         /// <summary>
         /// VS Package that provides this command, not null.
         /// </summary>
-        private readonly AsyncPackage package;
+        private readonly AsyncPackage _package;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OutputWindowCommand"/> class.
-        /// Adds our command handlers for menu (commands must exist in the command table file)
+        /// Adds our command handlers for menu (commands must exist in the command table file).
         /// </summary>
         /// <param name="package">Owner package, not null.</param>
         /// <param name="commandService">Command service to add command to, not null.</param>
         private OutputWindowCommand(AsyncPackage package, OleMenuCommandService commandService)
         {
-            this.package = package ?? throw new ArgumentNullException(nameof(package));
+            this._package = package ?? throw new ArgumentNullException(nameof(package));
             commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
 
             var menuCommandID = new CommandID(CommandSet, CommandId);
@@ -61,7 +61,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         {
             get
             {
-                return this.package;
+                return this._package;
             }
         }
 
@@ -90,8 +90,8 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
-            ToolWindowPane window = package.FindToolWindow(typeof(OutputToolWindow), 0, true);
-            if (null == window || null == window.Frame)
+            ToolWindowPane window = _package.FindToolWindow(typeof(OutputToolWindow), 0, true);
+            if (window == null || window.Frame == null)
             {
                 throw new NotSupportedException("Cannot create tool window");
             }

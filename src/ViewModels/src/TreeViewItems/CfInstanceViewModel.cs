@@ -31,7 +31,31 @@ namespace Tanzu.Toolkit.ViewModels
             };
         }
 
-        internal protected override async Task LoadChildren()
+        public async Task<ObservableCollection<OrgViewModel>> FetchChildren()
+        {
+            var newOrgsList = new ObservableCollection<OrgViewModel>();
+
+            var orgsResponse = await CloudFoundryService.GetOrgsForCfInstanceAsync(CloudFoundryInstance);
+
+            if (orgsResponse.Succeeded)
+            {
+                var orgs = new ObservableCollection<CloudFoundryOrganization>(orgsResponse.Content);
+
+                foreach (CloudFoundryOrganization org in orgs)
+                {
+                    var newOrg = new OrgViewModel(org, Services);
+                    newOrgsList.Add(newOrg);
+                }
+            }
+            else
+            {
+                DialogService.DisplayErrorDialog(_getOrgsFailureMsg, orgsResponse.Explanation);
+            }
+
+            return newOrgsList;
+        }
+
+        protected internal override async Task LoadChildren()
         {
             var orgsResponse = await CloudFoundryService.GetOrgsForCfInstanceAsync(CloudFoundryInstance);
 
@@ -71,31 +95,5 @@ namespace Tanzu.Toolkit.ViewModels
                 IsExpanded = false;
             }
         }
-
-
-        public async Task<ObservableCollection<OrgViewModel>> FetchChildren()
-        {
-            var newOrgsList = new ObservableCollection<OrgViewModel>();
-
-            var orgsResponse = await CloudFoundryService.GetOrgsForCfInstanceAsync(CloudFoundryInstance);
-
-            if (orgsResponse.Succeeded)
-            {
-                var orgs = new ObservableCollection<CloudFoundryOrganization>(orgsResponse.Content);
-
-                foreach (CloudFoundryOrganization org in orgs)
-                {
-                    var newOrg = new OrgViewModel(org, Services);
-                    newOrgsList.Add(newOrg);
-                }
-            }
-            else
-            {
-                DialogService.DisplayErrorDialog(_getOrgsFailureMsg, orgsResponse.Explanation);
-            }
-
-            return newOrgsList;
-        }
     }
-
 }
