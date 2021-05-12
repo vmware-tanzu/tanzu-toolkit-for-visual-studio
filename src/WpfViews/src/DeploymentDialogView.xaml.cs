@@ -6,7 +6,7 @@ using Tanzu.Toolkit.WpfViews.Commands;
 namespace Tanzu.Toolkit.WpfViews
 {
     /// <summary>
-    /// Interaction logic for DeploymentDialogView.xaml
+    /// Interaction logic for DeploymentDialogView.xaml.
     /// </summary>
     public partial class DeploymentDialogView : UserControl, IDeploymentDialogView
     {
@@ -43,6 +43,5 @@ namespace Tanzu.Toolkit.WpfViews
         {
             deploymentStatusText.ScrollToEnd();
         }
-
     }
 }

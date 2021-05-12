@@ -26,7 +26,7 @@ namespace Tanzu.Toolkit.WpfViews.Tests
             // Verify Login command points to view model
             var command = view.AddCloudCommand as AsyncDelegatingCommand;
             Assert.IsNotNull(command);
-            Assert.AreEqual(vm, command.action.Target);
+            Assert.AreEqual(vm, command.Action.Target);
 
             // Verify ViewModel callback for password
             Assert.IsNotNull(vm.GetPassword);

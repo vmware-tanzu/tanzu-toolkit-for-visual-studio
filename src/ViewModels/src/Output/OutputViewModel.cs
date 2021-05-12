@@ -4,7 +4,7 @@ namespace Tanzu.Toolkit.ViewModels
 {
     public class OutputViewModel : AbstractViewModel, IOutputViewModel
     {
-        private string outputContent;
+        private string _outputContent;
 
         public OutputViewModel(IServiceProvider services) : base(services)
         {
@@ -12,11 +12,11 @@ namespace Tanzu.Toolkit.ViewModels
 
         public string OutputContent
         {
-            get => outputContent;
+            get => _outputContent;
 
             set
             {
-                outputContent = value;
+                _outputContent = value;
                 RaisePropertyChangedEvent("OutputContent");
             }
         }

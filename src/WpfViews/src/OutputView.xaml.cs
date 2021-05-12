@@ -1,13 +1,13 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System;
+﻿using System;
 using System.Windows.Controls;
+using Microsoft.Extensions.DependencyInjection;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.WpfViews.Services;
 
 namespace Tanzu.Toolkit.WpfViews
 {
     /// <summary>
-    /// Interaction logic for OutputView.xaml
+    /// Interaction logic for OutputView.xaml.
     /// </summary>
     public partial class OutputView : UserControl, IOutputView, IView
     {
@@ -37,7 +37,7 @@ namespace Tanzu.Toolkit.WpfViews
         /// <summary>
         /// If scroll viewer is already scrolled all the way down, scroll to
         /// bottom after printing new line of content.
-        /// Otherwise, if scroll viewer is scrolled up more than 1 pixel above 
+        /// Otherwise, if scroll viewer is scrolled up more than 1 pixel above
         /// the bottom of the scrollable content, do not scroll.
         /// </summary>
         /// <param name="sender"></param>
@@ -50,7 +50,6 @@ namespace Tanzu.Toolkit.WpfViews
             {
                 OutputScrollViewer.ScrollToBottom();
             }
-
         }
     }
 }

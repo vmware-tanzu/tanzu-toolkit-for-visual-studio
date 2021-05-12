@@ -22,16 +22,40 @@ namespace Tanzu.Toolkit.ViewModels
 
             LoadingPlaceholder = new PlaceholderViewModel(parent: this, services)
             {
-                DisplayText = _loadingMsg
+                DisplayText = _loadingMsg,
             };
 
             EmptyPlaceholder = new PlaceholderViewModel(parent: this, Services)
             {
-                DisplayText = _emptySpacesPlaceholderMsg
+                DisplayText = _emptySpacesPlaceholderMsg,
             };
         }
 
-        internal protected override async Task LoadChildren()
+        public async Task<ObservableCollection<SpaceViewModel>> FetchChildren()
+        {
+            var newSpacesList = new ObservableCollection<SpaceViewModel>();
+
+            var spacesResponse = await CloudFoundryService.GetSpacesForOrgAsync(Org);
+
+            if (spacesResponse.Succeeded)
+            {
+                var spaces = new ObservableCollection<CloudFoundrySpace>(spacesResponse.Content);
+
+                foreach (CloudFoundrySpace space in spaces)
+                {
+                    var newSpace = new SpaceViewModel(space, Services);
+                    newSpacesList.Add(newSpace);
+                }
+            }
+            else
+            {
+                DialogService.DisplayErrorDialog(_getSpacesFailureMsg, spacesResponse.Explanation);
+            }
+
+            return newSpacesList;
+        }
+
+        protected internal override async Task LoadChildren()
         {
             var spacesResponse = await CloudFoundryService.GetSpacesForOrgAsync(Org);
 
@@ -70,32 +94,6 @@ namespace Tanzu.Toolkit.ViewModels
 
                 IsExpanded = false;
             }
-
-        }
-
-        public async Task<ObservableCollection<SpaceViewModel>> FetchChildren()
-        {
-            var newSpacesList = new ObservableCollection<SpaceViewModel>();
-
-            var spacesResponse = await CloudFoundryService.GetSpacesForOrgAsync(Org);
-
-            if (spacesResponse.Succeeded)
-            {
-                var spaces = new ObservableCollection<CloudFoundrySpace>(spacesResponse.Content);
-
-                foreach (CloudFoundrySpace space in spaces)
-                {
-                    var newSpace = new SpaceViewModel(space, Services);
-                    newSpacesList.Add(newSpace);
-                }
-            }
-            else
-            {
-                DialogService.DisplayErrorDialog(_getSpacesFailureMsg, spacesResponse.Explanation);
-            }
-
-            return newSpacesList;
         }
     }
-
 }

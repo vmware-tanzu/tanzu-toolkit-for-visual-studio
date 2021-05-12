@@ -14,6 +14,5 @@
             ParentSpace = parentSpace;
             State = state;
         }
-
     }
 }

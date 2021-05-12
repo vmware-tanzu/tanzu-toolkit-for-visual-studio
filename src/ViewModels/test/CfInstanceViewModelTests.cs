@@ -1,8 +1,7 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
 
@@ -17,25 +16,27 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestInitialize]
         public void TestInit()
         {
-            _sut = new CfInstanceViewModel(fakeCfInstance, services);
+            RenewMockServices();
+
+            _sut = new CfInstanceViewModel(FakeCfInstance, Services);
 
             _receivedEvents = new List<string>();
-            _sut.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
-                {
-                    _receivedEvents.Add(e.PropertyName);
-                };
+            _sut.PropertyChanged += (sender, e) =>
+            {
+                _receivedEvents.Add(e.PropertyName);
+            };
         }
 
         [TestCleanup]
         public void TestCleanup()
         {
-            mockCloudFoundryService.VerifyAll();
+            MockCloudFoundryService.VerifyAll();
         }
 
         [TestMethod]
         public void Constructor_SetsDisplayTextToInstanceName()
         {
-            Assert.AreEqual(fakeCfInstance.InstanceName, _sut.DisplayText);
+            Assert.AreEqual(FakeCfInstance.InstanceName, _sut.DisplayText);
         }
 
         [TestMethod]
@@ -43,7 +44,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             Assert.AreEqual(CfInstanceViewModel._loadingMsg, _sut.LoadingPlaceholder.DisplayText);
         }
-        
+
         [TestMethod]
         public void Constructor_SetsEmptyPlaceholder()
         {
@@ -55,15 +56,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             var initialOrgsList = new System.Collections.ObjectModel.ObservableCollection<TreeViewItemViewModel>
             {
-                new OrgViewModel(new CloudFoundryOrganization("initial org 1", "initial org 1 guid", null), services),
-                new OrgViewModel(new CloudFoundryOrganization("initial org 2", "initial org 2 guid", null), services),
-                new OrgViewModel(new CloudFoundryOrganization("initial org 3", "initial org 3 guid", null), services)
+                new OrgViewModel(new CloudFoundryOrganization("initial org 1", "initial org 1 guid", null), Services),
+                new OrgViewModel(new CloudFoundryOrganization("initial org 2", "initial org 2 guid", null), Services),
+                new OrgViewModel(new CloudFoundryOrganization("initial org 3", "initial org 3 guid", null), Services),
             };
 
             var newOrgsList = new List<CloudFoundryOrganization>
             {
                 new CloudFoundryOrganization("initial org 1", "initial org 1 guid", null),
-                new CloudFoundryOrganization("initial org 2", "initial org 2 guid", null)
+                new CloudFoundryOrganization("initial org 2", "initial org 2 guid", null),
             };
 
             var fakeSuccessResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: true, content: newOrgsList);
@@ -73,7 +74,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             /* erase record of initial "Children" event */
             _receivedEvents.Clear();
 
-            mockCloudFoundryService.Setup(mock => mock.
+            MockCloudFoundryService.Setup(mock => mock.
               GetOrgsForCfInstanceAsync(_sut.CloudFoundryInstance, true))
                 .ReturnsAsync(fakeSuccessResult);
 
@@ -92,9 +93,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         public async Task LoadChildren_AssignsNoOrgsPlaceholder_WhenThereAreNoOrgs()
         {
-            var fakeNoOrgsResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: true, content: emptyListOfOrgs);
+            var fakeNoOrgsResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: true, content: EmptyListOfOrgs);
 
-            mockCloudFoundryService.Setup(mock => mock.
+            MockCloudFoundryService.Setup(mock => mock.
               GetOrgsForCfInstanceAsync(_sut.CloudFoundryInstance, true))
                 .ReturnsAsync(fakeNoOrgsResult);
 
@@ -114,9 +115,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         public async Task LoadChildren_SetsIsLoadingToFalse_WhenOrgsRequestSucceeds()
         {
-            var fakeOrgsResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: true, content: emptyListOfOrgs);
+            var fakeOrgsResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: true, content: EmptyListOfOrgs);
 
-            mockCloudFoundryService.Setup(mock => mock.
+            MockCloudFoundryService.Setup(mock => mock.
               GetOrgsForCfInstanceAsync(_sut.CloudFoundryInstance, true))
                 .ReturnsAsync(fakeOrgsResult);
 
@@ -132,7 +133,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             var fakeFailedResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: false, content: null);
 
-            mockCloudFoundryService.Setup(mock => mock.
+            MockCloudFoundryService.Setup(mock => mock.
               GetOrgsForCfInstanceAsync(_sut.CloudFoundryInstance, true))
                 .ReturnsAsync(fakeFailedResult);
 
@@ -150,9 +151,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 succeeded: false,
                 content: null,
                 explanation: "junk",
-                cmdDetails: fakeFailureCmdResult);
+                cmdDetails: FakeFailureCmdResult);
 
-            mockCloudFoundryService.Setup(mock => mock.
+            MockCloudFoundryService.Setup(mock => mock.
               GetOrgsForCfInstanceAsync(_sut.CloudFoundryInstance, true))
                 .ReturnsAsync(fakeFailedResult);
 
@@ -160,7 +161,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsFalse(_sut.IsLoading);
 
-            mockDialogService.Verify(mock => mock.
+            MockDialogService.Verify(mock => mock.
               DisplayErrorDialog(CfInstanceViewModel._getOrgsFailureMsg, fakeFailedResult.Explanation),
                 Times.Once);
         }
@@ -168,12 +169,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         public async Task LoadChildren_CollapsesTreeViewItem_WhenOrgsRequestFails()
         {
-            var expandedViewModel = new CfInstanceViewModel(fakeCfInstance, services)
+            var expandedViewModel = new CfInstanceViewModel(FakeCfInstance, Services)
             {
-                IsExpanded = true
+                IsExpanded = true,
             };
 
-            expandedViewModel.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e)
+            expandedViewModel.PropertyChanged += (sender, e) =>
             {
                 _receivedEvents.Add(e.PropertyName);
             };
@@ -182,9 +183,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 succeeded: false,
                 content: null,
                 explanation: "junk",
-                cmdDetails: fakeFailureCmdResult);
+                cmdDetails: FakeFailureCmdResult);
 
-            mockCloudFoundryService.Setup(mock => mock.
+            MockCloudFoundryService.Setup(mock => mock.
               GetOrgsForCfInstanceAsync(expandedViewModel.CloudFoundryInstance, true))
                 .ReturnsAsync(fakeFailedResult);
 
@@ -196,7 +197,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsFalse(expandedViewModel.IsExpanded);
             Assert.IsTrue(_receivedEvents.Contains("IsExpanded"));
 
-            mockDialogService.Verify(mock => mock.
+            MockDialogService.Verify(mock => mock.
               DisplayErrorDialog(CfInstanceViewModel._getOrgsFailureMsg, fakeFailedResult.Explanation),
                 Times.Once);
         }
@@ -206,13 +207,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             var fakeOrgsList = new List<CloudFoundryOrganization>
             {
-                new CloudFoundryOrganization("fake org name 1","fake org id 1", fakeCfInstance),
-                new CloudFoundryOrganization("fake org name 2","fake org id 2", fakeCfInstance)
+                new CloudFoundryOrganization("fake org name 1", "fake org id 1", FakeCfInstance),
+                new CloudFoundryOrganization("fake org name 2", "fake org id 2", FakeCfInstance),
             };
 
             var fakeSuccessResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: true, content: fakeOrgsList);
 
-            mockCloudFoundryService.Setup(mock => mock.
+            MockCloudFoundryService.Setup(mock => mock.
               GetOrgsForCfInstanceAsync(_sut.CloudFoundryInstance, true))
                 .ReturnsAsync(fakeSuccessResult);
 
@@ -239,20 +240,19 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 succeeded: false,
                 content: null,
                 explanation: "junk",
-                cmdDetails: fakeFailureCmdResult);
+                cmdDetails: FakeFailureCmdResult);
 
-            mockCloudFoundryService.Setup(mock => mock.
+            MockCloudFoundryService.Setup(mock => mock.
               GetOrgsForCfInstanceAsync(_sut.CloudFoundryInstance, true))
                 .ReturnsAsync(fakeFailedResult);
 
             var result = await _sut.FetchChildren();
 
-            CollectionAssert.AreEqual(emptyListOfOrgs, result);
+            CollectionAssert.AreEqual(EmptyListOfOrgs, result);
 
-            mockDialogService.Verify(mock => mock.
+            MockDialogService.Verify(mock => mock.
               DisplayErrorDialog(CfInstanceViewModel._getOrgsFailureMsg, fakeFailedResult.Explanation),
                 Times.Once);
         }
     }
-
 }

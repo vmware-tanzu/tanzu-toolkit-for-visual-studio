@@ -1,5 +1,5 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tanzu.Toolkit.ViewModels.Tests
 {
@@ -9,13 +9,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestInitialize]
         public void TestInit()
         {
+            RenewMockServices();
         }
 
         [TestMethod]
         public void Constructor_Initializes()
         {
-            var vm = new TestAbstractViewModel(services);
-            Assert.AreSame(services, vm.Services);
+            var vm = new TestAbstractViewModel(Services);
+            Assert.AreSame(Services, vm.Services);
             Assert.IsNotNull(vm.DialogService);
             Assert.IsNotNull(vm.ViewLocatorService);
             Assert.IsNotNull(vm.CloudFoundryService);
@@ -23,7 +24,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
     }
 
-    class TestAbstractViewModel : AbstractViewModel
+    internal class TestAbstractViewModel : AbstractViewModel
     {
         public TestAbstractViewModel(IServiceProvider services) : base(services)
         {

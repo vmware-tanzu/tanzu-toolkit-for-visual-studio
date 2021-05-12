@@ -3,6 +3,5 @@
     public interface IViewModel
     {
         object ActiveView { get; set; }
-
     }
 }

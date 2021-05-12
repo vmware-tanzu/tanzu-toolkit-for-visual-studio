@@ -1,6 +1,6 @@
 ﻿namespace Tanzu.Toolkit.WpfApp
 {
-    interface IMainWindowView
+    public interface IMainWindowView
     {
     }
 }

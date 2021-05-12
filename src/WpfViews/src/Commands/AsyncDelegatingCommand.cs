@@ -6,11 +6,10 @@ namespace Tanzu.Toolkit.WpfViews.Commands
 {
     public class AsyncDelegatingCommand : ICommand
     {
-        internal readonly Predicate<object> canExecute;
+        public Func<object, Task> Action { get; private set; }
 
-        internal readonly Func<object, Task> action;
-
-        private EventHandler eventHandler;
+        private readonly Predicate<object> _canExecute;
+        private EventHandler _eventHandler;
 
         public AsyncDelegatingCommand(Func<object, Task> action)
             : this(action, null)
@@ -19,26 +18,27 @@ namespace Tanzu.Toolkit.WpfViews.Commands
 
         public AsyncDelegatingCommand(Func<object, Task> action, Predicate<object> canExecute)
         {
-            this.action = action;
-            this.canExecute = canExecute;
+            Action = action;
+            _canExecute = canExecute;
         }
 
         public event EventHandler CanExecuteChanged
         {
             add
             {
-                eventHandler += value;
+                _eventHandler += value;
                 CommandManager.RequerySuggested += value;
             }
             remove
             {
-                eventHandler -= value;
+                _eventHandler -= value;
                 CommandManager.RequerySuggested -= value;
             }
         }
+
         public void RaiseCanExecuteChanged()
         {
-            eventHandler?.Invoke(this, new EventArgs());
+            _eventHandler?.Invoke(this, new EventArgs());
         }
 
         internal bool IsExecuting { get; set; }
@@ -50,7 +50,7 @@ namespace Tanzu.Toolkit.WpfViews.Commands
                 return false;
             }
 
-            return canExecute == null ? true : canExecute(parameter);
+            return _canExecute == null ? true : _canExecute(parameter);
         }
 
         public async void Execute(object parameter)
@@ -59,9 +59,9 @@ namespace Tanzu.Toolkit.WpfViews.Commands
 
             try
             {
-                await action(parameter);
+                await Action(parameter);
             }
-            catch 
+            catch
             {
             }
 

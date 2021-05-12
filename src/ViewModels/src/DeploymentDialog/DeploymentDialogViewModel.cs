@@ -10,83 +10,81 @@ namespace Tanzu.Toolkit.ViewModels
 {
     public class DeploymentDialogViewModel : AbstractViewModel, IDeploymentDialogViewModel
     {
-        internal const string initialStatus = "Deployment hasn't started yet.";
-        internal const string appNameEmptyMsg = "App name not specified.";
-        internal const string targetEmptyMsg = "Target not specified.";
-        internal const string orgEmptyMsg = "Org not specified.";
-        internal const string spaceEmptyMsg = "Space not specified.";
-        internal const string deploymentSuccessMsg = "App was successfully deployed!\nYou can now close this window.";
-        internal const string deploymentErrorMsg = "Unable to deploy app:";
-        internal const string getOrgsFailureMsg = "Unable to fetch orgs.";
-        internal const string getSpacesFailureMsg = "Unable to fetch spaces.";
+        internal const string InitialStatus = "Deployment hasn't started yet.";
+        internal const string AppNameEmptyMsg = "App name not specified.";
+        internal const string TargetEmptyMsg = "Target not specified.";
+        internal const string OrgEmptyMsg = "Org not specified.";
+        internal const string SpaceEmptyMsg = "Space not specified.";
+        internal const string DeploymentSuccessMsg = "App was successfully deployed!\nYou can now close this window.";
+        internal const string DeploymentErrorMsg = "Unable to deploy app:";
+        internal const string GetOrgsFailureMsg = "Unable to fetch orgs.";
+        internal const string GetSpacesFailureMsg = "Unable to fetch spaces.";
+        internal IOutputViewModel OutputViewModel;
 
-        private readonly string projDir;
-        private readonly string projTargetFramework;
-        private string status;
-        private string appName;
-        private readonly bool fullFrameworkDeployment = false;
+        private readonly string _projDir;
+        private string _status;
+        private string _appName;
+        private readonly bool _fullFrameworkDeployment = false;
 
-        private List<CloudFoundryInstance> cfInstances;
-        private List<CloudFoundryOrganization> cfOrgs;
-        private List<CloudFoundrySpace> cfSpaces;
-        private CloudFoundryInstance selectedCf;
-        private CloudFoundryOrganization selectedOrg;
-        private CloudFoundrySpace selectedSpace;
-
-        internal IOutputViewModel outputViewModel;
-
+        private List<CloudFoundryInstance> _cfInstances;
+        private List<CloudFoundryOrganization> _cfOrgs;
+        private List<CloudFoundrySpace> _cfSpaces;
+        private CloudFoundryInstance _selectedCf;
+        private CloudFoundryOrganization _selectedOrg;
+        private CloudFoundrySpace _selectedSpace;
 
         public DeploymentDialogViewModel(IServiceProvider services, string directoryOfProjectToDeploy, string targetFrameworkMoniker)
             : base(services)
         {
-            IView outputView = ViewLocatorService.NavigateTo(nameof(OutputViewModel)) as IView;
-            outputViewModel = outputView?.ViewModel as IOutputViewModel;
+            IView outputView = ViewLocatorService.NavigateTo(nameof(ViewModels.OutputViewModel)) as IView;
+            OutputViewModel = outputView?.ViewModel as IOutputViewModel;
 
-            DeploymentStatus = initialStatus;
+            DeploymentStatus = InitialStatus;
             DeploymentInProgress = false;
             SelectedCf = null;
-            projDir = directoryOfProjectToDeploy;
+            _projDir = directoryOfProjectToDeploy;
 
-            if (targetFrameworkMoniker.StartsWith(".NETFramework")) fullFrameworkDeployment = true;
+            if (targetFrameworkMoniker.StartsWith(".NETFramework"))
+            {
+                _fullFrameworkDeployment = true;
+            }
 
             UpdateCfInstanceOptions();
             CfOrgOptions = new List<CloudFoundryOrganization>();
             CfSpaceOptions = new List<CloudFoundrySpace>();
         }
 
-
         public string AppName
         {
-            get => appName;
+            get => _appName;
 
             set
             {
-                appName = value;
+                _appName = value;
                 RaisePropertyChangedEvent("AppName");
             }
         }
 
         public string DeploymentStatus
         {
-
-            get => status;
+            get => _status;
 
             set
             {
-                status = value;
+                _status = value;
                 RaisePropertyChangedEvent("DeploymentStatus");
             }
         }
 
         public CloudFoundryInstance SelectedCf
         {
-            get => selectedCf;
+            get => _selectedCf;
 
             set
             {
-                if (value != selectedCf)
+                if (value != _selectedCf)
                 {
-                    selectedCf = value;
+                    _selectedCf = value;
 
                     // clear orgs & spaces
                     CfOrgOptions = new List<CloudFoundryOrganization>();
@@ -99,13 +97,13 @@ namespace Tanzu.Toolkit.ViewModels
 
         public CloudFoundryOrganization SelectedOrg
         {
-            get => selectedOrg;
+            get => _selectedOrg;
 
             set
             {
-                if (value != selectedOrg)
+                if (value != _selectedOrg)
                 {
-                    selectedOrg = value;
+                    _selectedOrg = value;
 
                     // clear spaces
                     CfSpaceOptions = new List<CloudFoundrySpace>();
@@ -117,13 +115,13 @@ namespace Tanzu.Toolkit.ViewModels
 
         public CloudFoundrySpace SelectedSpace
         {
-            get => selectedSpace;
+            get => _selectedSpace;
 
             set
             {
-                if (value != selectedSpace)
+                if (value != _selectedSpace)
                 {
-                    selectedSpace = value;
+                    _selectedSpace = value;
                 }
 
                 RaisePropertyChangedEvent("SelectedSpace");
@@ -132,39 +130,38 @@ namespace Tanzu.Toolkit.ViewModels
 
         public List<CloudFoundryInstance> CfInstanceOptions
         {
-            get => cfInstances;
+            get => _cfInstances;
 
             set
             {
-                cfInstances = value;
+                _cfInstances = value;
                 RaisePropertyChangedEvent("CfInstanceOptions");
             }
         }
 
         public List<CloudFoundryOrganization> CfOrgOptions
         {
-            get => cfOrgs;
+            get => _cfOrgs;
 
             set
             {
-                cfOrgs = value;
+                _cfOrgs = value;
                 RaisePropertyChangedEvent("CfOrgOptions");
             }
         }
 
         public List<CloudFoundrySpace> CfSpaceOptions
         {
-            get => cfSpaces;
+            get => _cfSpaces;
 
             set
             {
-                cfSpaces = value;
+                _cfSpaces = value;
                 RaisePropertyChangedEvent("CfSpaceOptions");
             }
         }
 
         public bool DeploymentInProgress { get; internal set; }
-
 
         public bool CanDeployApp(object arg)
         {
@@ -175,12 +172,27 @@ namespace Tanzu.Toolkit.ViewModels
         {
             try
             {
-                DeploymentStatus = initialStatus;
+                DeploymentStatus = InitialStatus;
 
-                if (string.IsNullOrEmpty(AppName)) throw new Exception(appNameEmptyMsg);
-                if (SelectedCf == null) throw new Exception(targetEmptyMsg);
-                if (SelectedOrg == null) throw new Exception(orgEmptyMsg);
-                if (SelectedSpace == null) throw new Exception(spaceEmptyMsg);
+                if (string.IsNullOrEmpty(AppName))
+                {
+                    throw new Exception(AppNameEmptyMsg);
+                }
+
+                if (SelectedCf == null)
+                {
+                    throw new Exception(TargetEmptyMsg);
+                }
+
+                if (SelectedOrg == null)
+                {
+                    throw new Exception(OrgEmptyMsg);
+                }
+
+                if (SelectedSpace == null)
+                {
+                    throw new Exception(SpaceEmptyMsg);
+                }
 
                 DeploymentStatus = "Waiting for app to deploy....";
 
@@ -193,38 +205,6 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 DeploymentStatus += $"\nAn error occurred: \n{e.Message}";
             }
-        }
-
-        internal async Task StartDeployment()
-        {
-            var deploymentResult = await CloudFoundryService.DeployAppAsync(
-                SelectedSpace.ParentOrg.ParentCf,
-                SelectedSpace.ParentOrg,
-                SelectedSpace,
-                AppName,
-                projDir,
-                fullFrameworkDeployment,
-                stdOutCallback: outputViewModel.AppendLine,
-                stdErrCallback: outputViewModel.AppendLine
-            );
-
-            if (!deploymentResult.Succeeded)
-            {
-                var errorTitle = $"{deploymentErrorMsg} {AppName}.";
-                var errorMsg = deploymentResult.Explanation;
-
-                Logger.Error(
-                    "DeploymentDialogViewModel initiated app deployment of {AppName} to target {TargetApi}.{TargetOrg}.{TargetSpace}; deployment result reported failure: {DplmtResult}.",
-                    AppName,
-                    SelectedSpace.ParentOrg.ParentCf.ApiAddress,
-                    SelectedSpace.ParentOrg.OrgName,
-                    SelectedSpace.SpaceName,
-                    deploymentResult.ToString()
-                );
-                DialogService.DisplayErrorDialog(errorTitle, errorMsg);
-            }
-
-            DeploymentInProgress = false;
         }
 
         public bool CanOpenLoginView(object arg)
@@ -256,8 +236,10 @@ namespace Tanzu.Toolkit.ViewModels
 
         public async Task UpdateCfOrgOptions()
         {
-            if (SelectedCf == null) CfOrgOptions = new List<CloudFoundryOrganization>();
-
+            if (SelectedCf == null)
+            {
+                CfOrgOptions = new List<CloudFoundryOrganization>();
+            }
             else
             {
                 var orgsResponse = await CloudFoundryService.GetOrgsForCfInstanceAsync(SelectedCf);
@@ -268,16 +250,18 @@ namespace Tanzu.Toolkit.ViewModels
                 }
                 else
                 {
-                    Logger.Error($"{getOrgsFailureMsg}. {orgsResponse}");
-                    DialogService.DisplayErrorDialog(getOrgsFailureMsg, orgsResponse.Explanation);
+                    Logger.Error($"{GetOrgsFailureMsg}. {orgsResponse}");
+                    DialogService.DisplayErrorDialog(GetOrgsFailureMsg, orgsResponse.Explanation);
                 }
             }
         }
 
         public async Task UpdateCfSpaceOptions()
         {
-            if (SelectedOrg == null || SelectedCf == null) CfSpaceOptions = new List<CloudFoundrySpace>();
-
+            if (SelectedOrg == null || SelectedCf == null)
+            {
+                CfSpaceOptions = new List<CloudFoundrySpace>();
+            }
             else
             {
                 var spacesResponse = await CloudFoundryService.GetSpacesForOrgAsync(SelectedOrg);
@@ -288,10 +272,40 @@ namespace Tanzu.Toolkit.ViewModels
                 }
                 else
                 {
-                    Logger.Error($"{getSpacesFailureMsg}. {spacesResponse}");
-                    DialogService.DisplayErrorDialog(getSpacesFailureMsg, spacesResponse.Explanation);
+                    Logger.Error($"{GetSpacesFailureMsg}. {spacesResponse}");
+                    DialogService.DisplayErrorDialog(GetSpacesFailureMsg, spacesResponse.Explanation);
                 }
             }
+        }
+
+        internal async Task StartDeployment()
+        {
+            var deploymentResult = await CloudFoundryService.DeployAppAsync(
+                SelectedSpace.ParentOrg.ParentCf,
+                SelectedSpace.ParentOrg,
+                SelectedSpace,
+                AppName,
+                _projDir,
+                _fullFrameworkDeployment,
+                stdOutCallback: OutputViewModel.AppendLine,
+                stdErrCallback: OutputViewModel.AppendLine);
+
+            if (!deploymentResult.Succeeded)
+            {
+                var errorTitle = $"{DeploymentErrorMsg} {AppName}.";
+                var errorMsg = deploymentResult.Explanation;
+
+                Logger.Error(
+                    "DeploymentDialogViewModel initiated app deployment of {AppName} to target {TargetApi}.{TargetOrg}.{TargetSpace}; deployment result reported failure: {DplmtResult}.",
+                    AppName,
+                    SelectedSpace.ParentOrg.ParentCf.ApiAddress,
+                    SelectedSpace.ParentOrg.OrgName,
+                    SelectedSpace.SpaceName,
+                    deploymentResult.ToString());
+                DialogService.DisplayErrorDialog(errorTitle, errorMsg);
+            }
+
+            DeploymentInProgress = false;
         }
     }
 }

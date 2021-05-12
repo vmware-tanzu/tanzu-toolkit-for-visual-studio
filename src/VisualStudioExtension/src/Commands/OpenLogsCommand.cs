@@ -1,30 +1,25 @@
-﻿using EnvDTE;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.Design;
+using System.IO;
+using EnvDTE;
 using EnvDTE80;
 using Microsoft;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Shell;
-using System;
-using System.IO;
-using System.ComponentModel.Design;
-using Tanzu.Toolkit.Services.FileLocator;
-using Task = System.Threading.Tasks.Task;
-using Tanzu.Toolkit.Services.Dialog;
-using System.Collections.Generic;
 using Serilog;
+using Tanzu.Toolkit.Services.Dialog;
+using Tanzu.Toolkit.Services.FileLocator;
 using Tanzu.Toolkit.Services.Logging;
+using Task = System.Threading.Tasks.Task;
 
 namespace Tanzu.Toolkit.VisualStudio.Commands
 {
     /// <summary>
-    /// Command handler
+    /// Command handler.
     /// </summary>
     internal sealed class OpenLogsCommand
     {
-        private static DTE2 _dte;
-        private static IFileLocatorService _fileLocatorService;
-        private static IDialogService _dialogService;
-        private static ILogger _logger;
-
         /// <summary>
         /// Command ID.
         /// </summary>
@@ -38,17 +33,22 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         /// <summary>
         /// VS Package that provides this command, not null.
         /// </summary>
-        private readonly AsyncPackage package;
+        private readonly AsyncPackage _package;
+
+        private static DTE2 _dte;
+        private static IFileLocatorService _fileLocatorService;
+        private static IDialogService _dialogService;
+        private static ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OpenLogsCommand"/> class.
-        /// Adds our command handlers for menu (commands must exist in the command table file)
+        /// Adds our command handlers for menu (commands must exist in the command table file).
         /// </summary>
         /// <param name="package">Owner package, not null.</param>
         /// <param name="commandService">Command service to add command to, not null.</param>
         private OpenLogsCommand(AsyncPackage package, OleMenuCommandService commandService)
         {
-            this.package = package ?? throw new ArgumentNullException(nameof(package));
+            this._package = package ?? throw new ArgumentNullException(nameof(package));
             commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
 
             var menuCommandID = new CommandID(CommandSet, CommandId);
@@ -82,7 +82,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         {
             get
             {
-                return this.package;
+                return this._package;
             }
         }
 
@@ -90,6 +90,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         /// Initializes the singleton instance of the command.
         /// </summary>
         /// <param name="package">Owner package, not null.</param>
+        /// <param name="services">IServiceProvider used to lookup auxiliary services.</param>
         public static async Task InitializeAsync(AsyncPackage package, IServiceProvider services)
         {
             // Switch to the main thread - the call to AddCommand in OpenLogsCommand's constructor requires
@@ -151,10 +152,10 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                     Window logsWindow = Dte.ItemOperations.OpenFile(tmpFilePath);
                     logsWindow.Document.ReadOnly = true;
 
-                    WindowEvents _windowEvents = Dte.Events.get_WindowEvents(logsWindow);
-                    _windowEvents.WindowClosing += OnWindowClosing;
+                    WindowEvents windowEvents = Dte.Events.get_WindowEvents(logsWindow);
+                    windowEvents.WindowClosing += OnWindowClosing;
 
-                    void OnWindowClosing(Window Window)
+                    void OnWindowClosing(Window window)
                     {
                         try
                         {
@@ -185,18 +186,22 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
 
             string[] logContents = File.ReadAllLines(tempFilePath);
 
-            List<string> extraInfo = new List<string>{
+            List<string> extraInfo = new List<string>
+            {
                 "==========================",
                 "This is a temporary copy of the log file located at:",
                 originalFilePath,
                 $"This file was created {DateTime.Now}; any logs recorded since then will not appear in this file.",
                 "This file will be deleted from the file system when this window is closed.",
-                "=========================="
+                "==========================",
             };
 
             // add explanation to the BEGINNING of the temp file
             List<string> newContents = extraInfo;
-            foreach (string s in logContents) newContents.Add(s);
+            foreach (string s in logContents)
+            {
+                newContents.Add(s);
+            }
 
             // remove original copy to allow extra info to be prepended
             File.Delete(tempFilePath);

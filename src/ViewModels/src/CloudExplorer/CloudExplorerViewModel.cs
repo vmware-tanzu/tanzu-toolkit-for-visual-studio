@@ -9,45 +9,43 @@ namespace Tanzu.Toolkit.ViewModels
 {
     public class CloudExplorerViewModel : AbstractViewModel, ICloudExplorerViewModel
     {
-        private bool hasCloudTargets;
-        private ObservableCollection<CfInstanceViewModel> cfs;
-        private IServiceProvider _services;
-
         internal static readonly string _stopAppErrorMsg = "Encountered an error while stopping app";
         internal static readonly string _startAppErrorMsg = "Encountered an error while starting app";
         internal static readonly string _deleteAppErrorMsg = "Encountered an error while deleting app";
+
+        private bool _hasCloudTargets;
+        private ObservableCollection<CfInstanceViewModel> _cfs;
+        private readonly IServiceProvider _services;
 
         public CloudExplorerViewModel(IServiceProvider services)
             : base(services)
         {
             _services = services;
-            cfs = new ObservableCollection<CfInstanceViewModel>();
+            _cfs = new ObservableCollection<CfInstanceViewModel>();
             HasCloudTargets = CloudFoundryService.CloudFoundryInstances.Keys.Count > 0;
         }
 
-
         public ObservableCollection<CfInstanceViewModel> CloudFoundryList
         {
-            get => cfs;
+            get => _cfs;
 
             set
             {
-                cfs = value;
+                _cfs = value;
                 RaisePropertyChangedEvent("CloudFoundryList");
             }
         }
 
         public bool HasCloudTargets
         {
-            get => hasCloudTargets;
+            get => _hasCloudTargets;
 
             set
             {
-                hasCloudTargets = value;
+                _hasCloudTargets = value;
                 RaisePropertyChangedEvent("HasCloudTargets");
             }
         }
-
 
         public bool CanOpenLoginView(object arg)
         {
@@ -103,7 +101,6 @@ namespace Tanzu.Toolkit.ViewModels
         {
             return true;
         }
-
 
         public void OpenLoginView(object parent)
         {
@@ -258,7 +255,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public async Task RefreshAllCloudConnections(object arg)
         {
-            // record original items before refreshing starts to  
+            // record original items before refreshing starts to
             // avoid unnecessary LoadChildren calls for *new* items
             var initalIds = new List<string>();
 
@@ -283,8 +280,8 @@ namespace Tanzu.Toolkit.ViewModels
                 }
             }
 
-            // before refreshing each cf instance, check the Model's record of Cloud 
-            // connections & make sure `CloudFoundryList` matches those values 
+            // before refreshing each cf instance, check the Model's record of Cloud
+            // connections & make sure `CloudFoundryList` matches those values
             SyncCloudFoundryList();
 
             foreach (CfInstanceViewModel cfivm in CloudFoundryList)
@@ -309,7 +306,10 @@ namespace Tanzu.Toolkit.ViewModels
 
                                     foreach (TreeViewItemViewModel spaceChild in svm.Children)
                                     {
-                                        if (spaceChild is AppViewModel avm) RefreshApp(avm);
+                                        if (spaceChild is AppViewModel avm)
+                                        {
+                                            RefreshApp(avm);
+                                        }
                                     }
                                 }
                             }
@@ -330,7 +330,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         /// <summary>
         /// Update CloudFoundryList with values from the Model's record of Cloud instances
-        /// Do not re-assign CloudFoundryList (avoid raising property changed event)
+        /// Do not re-assign CloudFoundryList (avoid raising property changed event).
         /// </summary>
         private void SyncCloudFoundryList()
         {
@@ -361,7 +361,10 @@ namespace Tanzu.Toolkit.ViewModels
                             && oldCf.CloudFoundryInstance.InstanceName == newCFIVM.CloudFoundryInstance.InstanceName;
                     });
 
-                    if (!cfWasAlreadyInCloudFoundryList) CloudFoundryList.Add(newCFIVM);
+                    if (!cfWasAlreadyInCloudFoundryList)
+                    {
+                        CloudFoundryList.Add(newCFIVM);
+                    }
                 }
             }
         }
@@ -378,16 +381,21 @@ namespace Tanzu.Toolkit.ViewModels
                     bool cfConnectionStillExists = updatedCfInstanceViewModelList.Any(cfivm => cfivm != null
                         && cfivm.CloudFoundryInstance.ApiAddress == oldCFIVM.CloudFoundryInstance.ApiAddress);
 
-                    if (!cfConnectionStillExists) cfsToRemove.Add(oldCFIVM);
+                    if (!cfConnectionStillExists)
+                    {
+                        cfsToRemove.Add(oldCFIVM);
+                    }
                 }
             }
 
-            foreach (CfInstanceViewModel cfivm in cfsToRemove) CloudFoundryList.Remove(cfivm);
+            foreach (CfInstanceViewModel cfivm in cfsToRemove)
+            {
+                CloudFoundryList.Remove(cfivm);
+            }
         }
 
-
         /// <summary>
-        /// Add any avms to svm.Children which are in currentApps but not in svm.Children
+        /// Add any avms to svm.Children which are in currentApps but not in svm.Children.
         /// </summary>
         /// <param name="svm"></param>
         /// <param name="currentApps"></param>
@@ -403,13 +411,16 @@ namespace Tanzu.Toolkit.ViewModels
                         return oldAVM != null && oldAVM.App.AppId == newAVM.App.AppId;
                     });
 
-                    if (!appInChildren) svm.Children.Add(newAVM);
+                    if (!appInChildren)
+                    {
+                        svm.Children.Add(newAVM);
+                    }
                 }
             }
         }
 
         /// <summary>
-        /// Remove all avms from svm.Children which don't appear in currentApps
+        /// Remove all avms from svm.Children which don't appear in currentApps.
         /// </summary>
         /// <param name="svm"></param>
         /// <param name="currentApps"></param>
@@ -423,15 +434,21 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     bool appStillExists = currentApps.Any(avm => avm != null && avm.App.AppId == oldAVM.App.AppId);
 
-                    if (!appStillExists) appsToRemove.Add(oldAVM);
+                    if (!appStillExists)
+                    {
+                        appsToRemove.Add(oldAVM);
+                    }
                 }
             }
 
-            foreach (AppViewModel avm in appsToRemove) svm.Children.Remove(avm);
+            foreach (AppViewModel avm in appsToRemove)
+            {
+                svm.Children.Remove(avm);
+            }
         }
 
         /// <summary>
-        /// Add any svms to ovm.Children which are in currentSpaces but not in ovm.Children
+        /// Add any svms to ovm.Children which are in currentSpaces but not in ovm.Children.
         /// </summary>
         /// <param name="ovm"></param>
         /// <param name="currentSpaces"></param>
@@ -447,13 +464,16 @@ namespace Tanzu.Toolkit.ViewModels
                         return oldSVM != null && oldSVM.Space.SpaceId == newSVM.Space.SpaceId;
                     });
 
-                    if (!spaceInChildren) ovm.Children.Add(newSVM);
+                    if (!spaceInChildren)
+                    {
+                        ovm.Children.Add(newSVM);
+                    }
                 }
             }
         }
 
         /// <summary>
-        /// Remove all svms from ovm.Children which don't appear in currentSpaces
+        /// Remove all svms from ovm.Children which don't appear in currentSpaces.
         /// </summary>
         /// <param name="ovm"></param>
         /// <param name="currentSpaces"></param>
@@ -467,15 +487,21 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     bool spaceStillExists = currentSpaces.Any(svm => svm != null && svm.Space.SpaceId == oldSVM.Space.SpaceId);
 
-                    if (!spaceStillExists) spacesToRemove.Add(oldSVM);
+                    if (!spaceStillExists)
+                    {
+                        spacesToRemove.Add(oldSVM);
+                    }
                 }
             }
 
-            foreach (SpaceViewModel svm in spacesToRemove) ovm.Children.Remove(svm);
+            foreach (SpaceViewModel svm in spacesToRemove)
+            {
+                ovm.Children.Remove(svm);
+            }
         }
 
         /// <summary>
-        /// add any ovms to cfivm.Children which are in currentOrgs but not in cfivm.Children
+        /// add any ovms to cfivm.Children which are in currentOrgs but not in cfivm.Children.
         /// </summary>
         /// <param name="cfivm"></param>
         /// <param name="currentOrgs"></param>
@@ -491,13 +517,16 @@ namespace Tanzu.Toolkit.ViewModels
                         return oldOVM != null && oldOVM.Org.OrgId == newOVM.Org.OrgId;
                     });
 
-                    if (!orgInChildren) cfivm.Children.Add(newOVM);
+                    if (!orgInChildren)
+                    {
+                        cfivm.Children.Add(newOVM);
+                    }
                 }
             }
         }
 
         /// <summary>
-        /// remove all ovms from cfivm.Children which don't appear in currentOrgs
+        /// remove all ovms from cfivm.Children which don't appear in currentOrgs.
         /// </summary>
         /// <param name="cfivm"></param>
         /// <param name="currentOrgs"></param>
@@ -511,11 +540,17 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     bool orgStillExists = currentOrgs.Any(ovm => ovm != null && ovm.Org.OrgId == oldOVM.Org.OrgId);
 
-                    if (!orgStillExists) orgsToRemove.Add(oldOVM);
+                    if (!orgStillExists)
+                    {
+                        orgsToRemove.Add(oldOVM);
+                    }
                 }
             }
 
-            foreach (OrgViewModel ovm in orgsToRemove) cfivm.Children.Remove(ovm);
+            foreach (OrgViewModel ovm in orgsToRemove)
+            {
+                cfivm.Children.Remove(ovm);
+            }
         }
 
         private void UpdateCloudFoundryInstances()
@@ -526,6 +561,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 updatedCfInstanceViewModelList.Add(new CfInstanceViewModel(cf, _services));
             }
+
             CloudFoundryList = updatedCfInstanceViewModelList;
 
             HasCloudTargets = CloudFoundryList.Count > 0;
