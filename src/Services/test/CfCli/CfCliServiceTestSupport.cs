@@ -23,7 +23,6 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         internal static readonly string _fakeSpaces401Output = File.ReadAllText("CfCli/GetV2Spaces401Output.txt");
         internal static readonly string _fakeApps401Output = File.ReadAllText("CfCli/GetV2Apps401Output.txt");
 
-        internal static readonly int numOrgsInFakeResponse = 54;
-
+        internal static readonly int _numOrgsInFakeResponse = 54;
     }
 }

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Tanzu.Toolkit.ViewModels
 {
-    interface ITreeViewItemViewModel : INotifyPropertyChanged
+    public interface ITreeViewItemViewModel : INotifyPropertyChanged
     {
         ObservableCollection<TreeViewItemViewModel> Children { get; }
         bool IsExpanded { get; set; }

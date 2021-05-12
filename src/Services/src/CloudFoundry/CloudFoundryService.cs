@@ -1,9 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Serilog;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using Tanzu.Toolkit.CloudFoundryApiClient;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.OrgsResponse;
@@ -21,15 +21,15 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 {
     public class CloudFoundryService : ICloudFoundryService
     {
-        private static ICfApiClient cfApiClient;
-        private static ICfCliService cfCliService;
-        private static IFileLocatorService _fileLocatorService;
-        private static IDialogService dialogService;
-        private static ILogger logger;
+        internal const string EmptyOutputDirMessage = "Unable to locate app files; project output directory is empty. (Has your project already been compiled?)";
+        internal const string CcApiVersionUndetectableErrTitle = "Unable to detect Cloud Controller API version.";
+        internal const string CcApiVersionUndetectableErrMsg = "Failed to detect which version of the Cloud Controller API is being run on the provided instance; some features of this extension may not work properly.";
 
-        internal const string emptyOutputDirMessage = "Unable to locate app files; project output directory is empty. (Has your project already been compiled?)";
-        internal const string ccApiVersionUndetectableErrTitle = "Unable to detect Cloud Controller API version.";
-        internal const string ccApiVersionUndetectableErrMsg = "Failed to detect which version of the Cloud Controller API is being run on the provided instance; some features of this extension may not work properly.";
+        private static ICfApiClient _cfApiClient;
+        private static ICfCliService _cfCliService;
+        private static IFileLocatorService _fileLocatorService;
+        private static IDialogService _dialogService;
+        private static ILogger _logger;
 
         public string LoginFailureMessage { get; } = "Login failed.";
         public Dictionary<string, CloudFoundryInstance> CloudFoundryInstances { get; internal set; }
@@ -39,37 +39,53 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         {
             CloudFoundryInstances = new Dictionary<string, CloudFoundryInstance>();
 
-            cfApiClient = services.GetRequiredService<ICfApiClient>();
-            cfCliService = services.GetRequiredService<ICfCliService>();
+            _cfApiClient = services.GetRequiredService<ICfApiClient>();
+            _cfCliService = services.GetRequiredService<ICfCliService>();
             _fileLocatorService = services.GetRequiredService<IFileLocatorService>();
-            dialogService = services.GetRequiredService<IDialogService>();
+            _dialogService = services.GetRequiredService<IDialogService>();
 
             var logSvc = services.GetRequiredService<ILoggingService>();
-            logger = logSvc.Logger;
+            _logger = logSvc.Logger;
         }
 
         public void AddCloudFoundryInstance(string name, string apiAddress, string accessToken)
         {
-            if (CloudFoundryInstances.ContainsKey(name)) throw new Exception($"The name {name} already exists.");
+            if (CloudFoundryInstances.ContainsKey(name))
+            {
+                throw new Exception($"The name {name} already exists.");
+            }
+
             CloudFoundryInstances.Add(name, new CloudFoundryInstance(name, apiAddress, accessToken));
         }
 
         public void RemoveCloudFoundryInstance(string name)
         {
-            if (CloudFoundryInstances.ContainsKey(name)) CloudFoundryInstances.Remove(name);
+            if (CloudFoundryInstances.ContainsKey(name))
+            {
+                CloudFoundryInstances.Remove(name);
+            }
         }
 
         public async Task<ConnectResult> ConnectToCFAsync(string targetApiAddress, string username, SecureString password, string httpProxy, bool skipSsl)
         {
-            if (string.IsNullOrEmpty(targetApiAddress)) throw new ArgumentException(nameof(targetApiAddress));
+            if (string.IsNullOrEmpty(targetApiAddress))
+            {
+                throw new ArgumentException(nameof(targetApiAddress));
+            }
 
-            if (string.IsNullOrEmpty(username)) throw new ArgumentException(nameof(username));
+            if (string.IsNullOrEmpty(username))
+            {
+                throw new ArgumentException(nameof(username));
+            }
 
-            if (password == null) throw new ArgumentNullException(nameof(password));
+            if (password == null)
+            {
+                throw new ArgumentNullException(nameof(password));
+            }
 
             try
             {
-                DetailedResult targetResult = cfCliService.TargetApi(targetApiAddress, skipSsl);
+                DetailedResult targetResult = _cfCliService.TargetApi(targetApiAddress, skipSsl);
                 bool unableToExecuteTargetCmd = targetResult.CmdDetails == null;
 
                 if (unableToExecuteTargetCmd)
@@ -88,7 +104,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                             innerException: new Exception(targetResult.CmdDetails.StdErr)));
                 }
 
-                DetailedResult authResult = await cfCliService.AuthenticateAsync(username, password);
+                DetailedResult authResult = await _cfCliService.AuthenticateAsync(username, password);
                 bool unableToExecuteAuthCmd = authResult.CmdDetails == null;
 
                 if (unableToExecuteAuthCmd)
@@ -109,9 +125,12 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 await MatchCliVersionToApiVersion();
 
-                string accessToken = cfCliService.GetOAuthToken();
+                string accessToken = _cfCliService.GetOAuthToken();
 
-                if (!string.IsNullOrEmpty(accessToken)) return new ConnectResult(true, null, accessToken);
+                if (!string.IsNullOrEmpty(accessToken))
+                {
+                    return new ConnectResult(true, null, accessToken);
+                }
 
                 throw new Exception(LoginFailureMessage);
             }
@@ -121,71 +140,6 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 FormatExceptionMessage(e, errorMessages);
                 var errorMessage = string.Join(Environment.NewLine, errorMessages.ToArray());
                 return new ConnectResult(false, errorMessage, null);
-            }
-        }
-
-        private static async Task MatchCliVersionToApiVersion()
-        {
-            Version apiVersion = await cfCliService.GetApiVersion();
-            if (apiVersion == null)
-            {
-                _fileLocatorService.CliVersion = 7;
-                dialogService.DisplayErrorDialog(ccApiVersionUndetectableErrTitle, ccApiVersionUndetectableErrMsg);
-            }
-            else
-            {
-                switch (apiVersion.Major)
-                {
-                    case 2:
-                        if (apiVersion < new Version("2.128.0"))
-                        {
-                            _fileLocatorService.CliVersion = 6;
-
-                            string errorTitle = "API version not supported";
-                            string errorMsg = "Detected a Cloud Controller API version lower than the minimum supported version (2.128.0); some features of this extension may not work as expected for the given instance.";
-
-                            logger.Information(errorMsg);
-                            dialogService.DisplayErrorDialog(errorTitle, errorMsg);
-                        }
-                        else if (apiVersion < new Version("2.150.0"))
-                        {
-                            _fileLocatorService.CliVersion = 6;
-                        }
-                        else
-                        {
-                            _fileLocatorService.CliVersion = 7;
-                        }
-
-                        break;
-
-                    case 3:
-                        if (apiVersion < new Version("3.63.0"))
-                        {
-                            _fileLocatorService.CliVersion = 6;
-
-                            string errorTitle = "API version not supported";
-                            string errorMsg = "Detected a Cloud Controller API version lower than the minimum supported version (3.63.0); some features of this extension may not work as expected for the given instance.";
-
-                            logger.Information(errorMsg);
-                            dialogService.DisplayErrorDialog(errorTitle, errorMsg);
-                        }
-                        else if (apiVersion < new Version("3.85.0"))
-                        {
-                            _fileLocatorService.CliVersion = 6;
-                        }
-                        else
-                        {
-                            _fileLocatorService.CliVersion = 7;
-                        }
-
-                        break;
-
-                    default:
-                        _fileLocatorService.CliVersion = 7;
-                        logger.Information($"Detected an unexpected Cloud Controller API version: {apiVersion}. CLI version has been set to 7 by default.");
-
-                        break;
-                }
             }
         }
 
@@ -201,11 +155,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
             string apiAddress = cf.ApiAddress;
 
-            var accessToken = cfCliService.GetOAuthToken();
+            var accessToken = _cfCliService.GetOAuthToken();
             if (accessToken == null)
             {
                 var msg = $"CloudFoundryService attempted to get orgs for '{apiAddress}' but was unable to look up an access token.";
-                logger.Error(msg);
+                _logger.Error(msg);
 
                 return new DetailedResult<List<CloudFoundryOrganization>>()
                 {
@@ -216,12 +170,12 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
             try
             {
-                orgsFromApi = await cfApiClient.ListOrgs(apiAddress, accessToken);
+                orgsFromApi = await _cfApiClient.ListOrgs(apiAddress, accessToken);
             }
             catch (Exception originalException)
             {
                 var msg = $"Something went wrong while trying to request orgs from {apiAddress}: {originalException.Message}";
-                logger.Error(msg);
+                _logger.Error(msg);
 
                 return new DetailedResult<List<CloudFoundryOrganization>>()
                 {
@@ -234,11 +188,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 if (org.Name == null)
                 {
-                    logger.Error("CloudFoundryService.GetOrgsForCfInstanceAsync encountered an org without a name; omitting it from the returned list of orgs.");
+                    _logger.Error("CloudFoundryService.GetOrgsForCfInstanceAsync encountered an org without a name; omitting it from the returned list of orgs.");
                 }
                 else if (org.Guid == null)
                 {
-                    logger.Error("CloudFoundryService.GetOrgsForCfInstanceAsync encountered an org without a guid; omitting it from the returned list of orgs.");
+                    _logger.Error("CloudFoundryService.GetOrgsForCfInstanceAsync encountered an org without a guid; omitting it from the returned list of orgs.");
                 }
                 else
                 {
@@ -265,11 +219,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
             string apiAddress = org.ParentCf.ApiAddress;
 
-            var accessToken = cfCliService.GetOAuthToken();
+            var accessToken = _cfCliService.GetOAuthToken();
             if (accessToken == null)
             {
                 var msg = $"CloudFoundryService attempted to get spaces for '{org.OrgName}' but was unable to look up an access token.";
-                logger.Error(msg);
+                _logger.Error(msg);
 
                 return new DetailedResult<List<CloudFoundrySpace>>()
                 {
@@ -280,12 +234,12 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
             try
             {
-                spacesFromApi = await cfApiClient.ListSpacesForOrg(apiAddress, accessToken, org.OrgId);
+                spacesFromApi = await _cfApiClient.ListSpacesForOrg(apiAddress, accessToken, org.OrgId);
             }
             catch (Exception originalException)
             {
                 var msg = $"Something went wrong while trying to request spaces from {apiAddress}: {originalException.Message}";
-                logger.Error(msg);
+                _logger.Error(msg);
 
                 return new DetailedResult<List<CloudFoundrySpace>>()
                 {
@@ -298,11 +252,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 if (space.Name == null)
                 {
-                    logger.Error("CloudFoundryService.GetSpacesForOrgAsync encountered a space without a name; omitting it from the returned list of spaces.");
+                    _logger.Error("CloudFoundryService.GetSpacesForOrgAsync encountered a space without a name; omitting it from the returned list of spaces.");
                 }
                 else if (space.Guid == null)
                 {
-                    logger.Error("CloudFoundryService.GetSpacesForOrgAsync encountered a space without a guid; omitting it from the returned list of spaces.");
+                    _logger.Error("CloudFoundryService.GetSpacesForOrgAsync encountered a space without a guid; omitting it from the returned list of spaces.");
                 }
                 else
                 {
@@ -329,11 +283,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
             string apiAddress = space.ParentOrg.ParentCf.ApiAddress;
 
-            var accessToken = cfCliService.GetOAuthToken();
+            var accessToken = _cfCliService.GetOAuthToken();
             if (accessToken == null)
             {
                 var msg = $"CloudFoundryService attempted to get apps for '{space.SpaceName}' but was unable to look up an access token.";
-                logger.Error(msg);
+                _logger.Error(msg);
 
                 return new DetailedResult<List<CloudFoundryApp>>()
                 {
@@ -344,12 +298,12 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
             try
             {
-                appsFromApi = await cfApiClient.ListAppsForSpace(apiAddress, accessToken, space.SpaceId);
+                appsFromApi = await _cfApiClient.ListAppsForSpace(apiAddress, accessToken, space.SpaceId);
             }
             catch (Exception originalException)
             {
                 var msg = $"Something went wrong while trying to request apps from {apiAddress}: {originalException.Message}";
-                logger.Error(msg);
+                _logger.Error(msg);
 
                 return new DetailedResult<List<CloudFoundryApp>>()
                 {
@@ -362,11 +316,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 if (app.Name == null)
                 {
-                    logger.Error("CloudFoundryService.GetAppsForSpaceAsync encountered an app without a name; omitting it from the returned list of apps.");
+                    _logger.Error("CloudFoundryService.GetAppsForSpaceAsync encountered an app without a name; omitting it from the returned list of apps.");
                 }
                 else if (app.Guid == null)
                 {
-                    logger.Error("CloudFoundryService.GetAppsForSpaceAsync encountered an app without a guid; omitting it from the returned list of apps.");
+                    _logger.Error("CloudFoundryService.GetAppsForSpaceAsync encountered an app without a guid; omitting it from the returned list of apps.");
                 }
                 else
                 {
@@ -413,11 +367,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
             string apiAddress = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
 
-            var accessToken = cfCliService.GetOAuthToken();
+            var accessToken = _cfCliService.GetOAuthToken();
             if (accessToken == null)
             {
                 var msg = $"CloudFoundryService attempted to stop app '{app.AppName}' but was unable to look up an access token.";
-                logger.Error(msg);
+                _logger.Error(msg);
 
                 return new DetailedResult
                 {
@@ -428,13 +382,13 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
             try
             {
-                appWasStopped = await cfApiClient.StopAppWithGuid(apiAddress, accessToken, app.AppId);
+                appWasStopped = await _cfApiClient.StopAppWithGuid(apiAddress, accessToken, app.AppId);
             }
             catch (Exception originalException)
             {
                 var msg = $"Something went wrong while trying to stop app '{app.AppName}': {originalException.Message}.";
 
-                logger.Error(msg);
+                _logger.Error(msg);
 
                 return new DetailedResult
                 {
@@ -447,7 +401,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 var msg = $"Attempted to stop app '{app.AppName}' but it hasn't been stopped.";
 
-                logger.Error(msg);
+                _logger.Error(msg);
 
                 return new DetailedResult
                 {
@@ -474,11 +428,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
             string apiAddress = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
 
-            var accessToken = cfCliService.GetOAuthToken();
+            var accessToken = _cfCliService.GetOAuthToken();
             if (accessToken == null)
             {
                 var msg = $"CloudFoundryService attempted to start app '{app.AppName}' but was unable to look up an access token.";
-                logger.Error(msg);
+                _logger.Error(msg);
 
                 return new DetailedResult
                 {
@@ -489,13 +443,13 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
             try
             {
-                appWasStarted = await cfApiClient.StartAppWithGuid(apiAddress, accessToken, app.AppId);
+                appWasStarted = await _cfApiClient.StartAppWithGuid(apiAddress, accessToken, app.AppId);
             }
             catch (Exception originalException)
             {
                 var msg = $"Something went wrong while trying to start app '{app.AppName}': {originalException.Message}.";
 
-                logger.Error(msg);
+                _logger.Error(msg);
 
                 return new DetailedResult
                 {
@@ -508,7 +462,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 var msg = $"Attempted to start app '{app.AppName}' but it hasn't been started.";
 
-                logger.Error(msg);
+                _logger.Error(msg);
 
                 return new DetailedResult
                 {
@@ -530,11 +484,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
             string apiAddress = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
 
-            var accessToken = cfCliService.GetOAuthToken();
+            var accessToken = _cfCliService.GetOAuthToken();
             if (accessToken == null)
             {
                 var msg = $"CloudFoundryService attempted to delete app '{app.AppName}' but was unable to look up an access token.";
-                logger.Error(msg);
+                _logger.Error(msg);
 
                 return new DetailedResult
                 {
@@ -545,13 +499,13 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
             try
             {
-                appWasDeleted = await cfApiClient.DeleteAppWithGuid(apiAddress, accessToken, app.AppId);
+                appWasDeleted = await _cfApiClient.DeleteAppWithGuid(apiAddress, accessToken, app.AppId);
 
                 if (!appWasDeleted)
                 {
                     var msg = $"Attempted to delete app '{app.AppName}' but it hasn't been deleted.";
 
-                    logger.Error(msg);
+                    _logger.Error(msg);
 
                     return new DetailedResult
                     {
@@ -564,7 +518,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 var msg = $"Something went wrong while trying to delete app '{app.AppName}': {originalException.Message}.";
 
-                logger.Error(msg);
+                _logger.Error(msg);
 
                 return new DetailedResult
                 {
@@ -572,7 +526,6 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                     Explanation = msg,
                 };
             }
-
 
             app.State = "DELETED";
             return new DetailedResult
@@ -583,12 +536,15 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
         public async Task<DetailedResult> DeployAppAsync(CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, string appName, string appProjPath, bool fullFrameworkDeployment, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback)
         {
-            if (!_fileLocatorService.DirContainsFiles(appProjPath)) return new DetailedResult(false, emptyOutputDirMessage);
+            if (!_fileLocatorService.DirContainsFiles(appProjPath))
+            {
+                return new DetailedResult(false, EmptyOutputDirMessage);
+            }
 
-            DetailedResult cfTargetResult = await cfCliService.InvokeCfCliAsync(arguments: $"target -o {targetOrg.OrgName} -s {targetSpace.SpaceName}", stdOutCallback, stdErrCallback);
+            DetailedResult cfTargetResult = await _cfCliService.InvokeCfCliAsync(arguments: $"target -o {targetOrg.OrgName} -s {targetSpace.SpaceName}", stdOutCallback, stdErrCallback);
             if (!cfTargetResult.Succeeded)
             {
-                logger.Error($"Unable to target org '{targetOrg.OrgName}' or space '{targetSpace.SpaceName}'.\n{cfTargetResult.Explanation}");
+                _logger.Error($"Unable to target org '{targetOrg.OrgName}' or space '{targetSpace.SpaceName}'.\n{cfTargetResult.Explanation}");
                 return new DetailedResult(false, $"Unable to target org '{targetOrg.OrgName}' or space '{targetSpace.SpaceName}'.\n{cfTargetResult.Explanation}");
             }
 
@@ -600,10 +556,10 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 stack = "windows";
             }
 
-            DetailedResult cfPushResult = await cfCliService.PushAppAsync(appName, stdOutCallback, stdErrCallback, appProjPath, buildpack, stack);
+            DetailedResult cfPushResult = await _cfCliService.PushAppAsync(appName, stdOutCallback, stdErrCallback, appProjPath, buildpack, stack);
             if (!cfPushResult.Succeeded)
             {
-                logger.Error($"Successfully targeted org '{targetOrg.OrgName}' and space '{targetSpace.SpaceName}' but app deployment failed at the `cf push` stage.\n{cfPushResult.Explanation}");
+                _logger.Error($"Successfully targeted org '{targetOrg.OrgName}' and space '{targetSpace.SpaceName}' but app deployment failed at the `cf push` stage.\n{cfPushResult.Explanation}");
                 return new DetailedResult(false, cfPushResult.Explanation);
             }
 
@@ -612,32 +568,100 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
         public async Task<DetailedResult<string>> GetRecentLogs(CloudFoundryApp app)
         {
-            /* CAUTION: these operations should happen atomically; 
+            /* CAUTION: these operations should happen atomically;
              * if different threads all try to target orgs/spaces at the same time there's a risk of
-             * getting unexpected results due to a race conditions for these values in .cf/config.json: 
+             * getting unexpected results due to a race conditions for these values in .cf/config.json:
              *      - "Target" (api address)
              *      - "OrganizationFields" (info about the currently-targeted org)
              *      - "SpaceFields" (info about the currently-targeted space)
              */
 
+            var targetOrgResult = _cfCliService.TargetOrg(app.ParentSpace.ParentOrg.OrgName);
+            if (!targetOrgResult.Succeeded)
+            {
+                return new DetailedResult<string>(
+                content: null,
+                succeeded: false,
+                targetOrgResult.Explanation,
+                targetOrgResult.CmdDetails);
+            }
 
-            var targetOrgResult = cfCliService.TargetOrg(app.ParentSpace.ParentOrg.OrgName);
-            if (!targetOrgResult.Succeeded) return new DetailedResult<string>(
-                content: null, 
-                succeeded: false, 
-                targetOrgResult.Explanation, 
-                targetOrgResult.CmdDetails
-            );
-
-            var targetSpaceResult = cfCliService.TargetSpace(app.ParentSpace.SpaceName);
-            if (!targetSpaceResult.Succeeded) return new DetailedResult<string>(
+            var targetSpaceResult = _cfCliService.TargetSpace(app.ParentSpace.SpaceName);
+            if (!targetSpaceResult.Succeeded)
+            {
+                return new DetailedResult<string>(
                 content: null,
                 succeeded: false,
                 targetSpaceResult.Explanation,
-                targetSpaceResult.CmdDetails
-            );
+                targetSpaceResult.CmdDetails);
+            }
 
-            return await cfCliService.GetRecentAppLogs(app.AppName);
+            return await _cfCliService.GetRecentAppLogs(app.AppName);
+        }
+
+        private static async Task MatchCliVersionToApiVersion()
+        {
+            Version apiVersion = await _cfCliService.GetApiVersion();
+            if (apiVersion == null)
+            {
+                _fileLocatorService.CliVersion = 7;
+                _dialogService.DisplayErrorDialog(CcApiVersionUndetectableErrTitle, CcApiVersionUndetectableErrMsg);
+            }
+            else
+            {
+                switch (apiVersion.Major)
+                {
+                    case 2:
+                        if (apiVersion < new Version("2.128.0"))
+                        {
+                            _fileLocatorService.CliVersion = 6;
+
+                            string errorTitle = "API version not supported";
+                            string errorMsg = "Detected a Cloud Controller API version lower than the minimum supported version (2.128.0); some features of this extension may not work as expected for the given instance.";
+
+                            _logger.Information(errorMsg);
+                            _dialogService.DisplayErrorDialog(errorTitle, errorMsg);
+                        }
+                        else if (apiVersion < new Version("2.150.0"))
+                        {
+                            _fileLocatorService.CliVersion = 6;
+                        }
+                        else
+                        {
+                            _fileLocatorService.CliVersion = 7;
+                        }
+
+                        break;
+
+                    case 3:
+                        if (apiVersion < new Version("3.63.0"))
+                        {
+                            _fileLocatorService.CliVersion = 6;
+
+                            string errorTitle = "API version not supported";
+                            string errorMsg = "Detected a Cloud Controller API version lower than the minimum supported version (3.63.0); some features of this extension may not work as expected for the given instance.";
+
+                            _logger.Information(errorMsg);
+                            _dialogService.DisplayErrorDialog(errorTitle, errorMsg);
+                        }
+                        else if (apiVersion < new Version("3.85.0"))
+                        {
+                            _fileLocatorService.CliVersion = 6;
+                        }
+                        else
+                        {
+                            _fileLocatorService.CliVersion = 7;
+                        }
+
+                        break;
+
+                    default:
+                        _fileLocatorService.CliVersion = 7;
+                        _logger.Information($"Detected an unexpected Cloud Controller API version: {apiVersion}. CLI version has been set to 7 by default.");
+
+                        break;
+                }
+            }
         }
     }
 }

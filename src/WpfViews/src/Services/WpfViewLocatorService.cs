@@ -5,11 +5,11 @@ namespace Tanzu.Toolkit.WpfViews.Services
 {
     public class WpfViewLocatorService : IViewLocatorService
     {
-        private readonly string viewNamespace;
+        private readonly string _viewNamespace;
 
         public IServiceProvider ServiceProvider { get; }
 
-        public string ViewNamespace => viewNamespace;
+        public string ViewNamespace => _viewNamespace;
 
         public string CurrentView { get; private set; }
 
@@ -17,13 +17,13 @@ namespace Tanzu.Toolkit.WpfViews.Services
         {
             ServiceProvider = serviceProvider;
             var lastIndex = typeof(WpfViewLocatorService).Namespace.LastIndexOf('.');
-            viewNamespace = typeof(WpfViewLocatorService).Namespace.Substring(0, lastIndex);
+            _viewNamespace = typeof(WpfViewLocatorService).Namespace.Substring(0, lastIndex);
         }
 
         public virtual object NavigateTo(string viewModelName, object parameter = null)
         {
             var viewTypeName = GetViewName(viewModelName);
-            var type = Type.GetType(viewNamespace + "." + viewTypeName);
+            var type = Type.GetType(_viewNamespace + "." + viewTypeName);
             CurrentView = viewTypeName;
             return ServiceProvider.GetService(type);
         }
@@ -32,6 +32,5 @@ namespace Tanzu.Toolkit.WpfViews.Services
         {
             return "I" + viewModelName.Substring(0, viewModelName.Length - 5);  // prepend I and remove "Model"
         }
-
     }
 }

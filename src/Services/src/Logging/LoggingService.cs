@@ -16,8 +16,8 @@ namespace Tanzu.Toolkit.Services.Logging
                     shared: true, // allow multiple processes to share same log file
                     fileSizeLimitBytes: 32768, // 32 KiB
                     rollOnFileSizeLimit: true,
-                    retainedFileCountLimit: 8
-                ).CreateLogger();
+                    retainedFileCountLimit: 8)
+                .CreateLogger();
 
             Logger.Information("Logging Service Initialized");
         }

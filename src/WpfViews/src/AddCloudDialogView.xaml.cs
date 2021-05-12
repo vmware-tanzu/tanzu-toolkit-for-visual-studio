@@ -7,14 +7,13 @@ using Tanzu.Toolkit.WpfViews.Commands;
 namespace Tanzu.Toolkit.WpfViews
 {
     /// <summary>
-    /// Interaction logic for AddCloudDialogView.xaml
+    /// Interaction logic for AddCloudDialogView.xaml.
     /// </summary>
     public partial class AddCloudDialogView : Window, IAddCloudDialogView
     {
         public AddCloudDialogView()
         {
             InitializeComponent();
-
         }
 
         public AddCloudDialogView(IAddCloudDialogViewModel viewModel)

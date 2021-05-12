@@ -1,10 +1,10 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.Token;
 
 namespace Tanzu.Toolkit.CloudFoundryApiClient
@@ -12,7 +12,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
     public class UaaClient : IUaaClient
     {
         private static HttpClient _httpClient;
-        private static bool skipSsl = true;
+        private static readonly bool _skipSsl = true;
         public Token Token { get; private set; }
 
         public UaaClient(HttpClient httpClient)
@@ -24,7 +24,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         {
             try
             {
-                if (skipSsl)
+                if (_skipSsl)
                 {
                     // trust any certificate
                     ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
@@ -61,7 +61,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
                 }
 
                 return result.StatusCode;
-
             }
             catch (Exception e)
             {

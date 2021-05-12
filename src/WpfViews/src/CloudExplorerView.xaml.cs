@@ -6,7 +6,7 @@ using Tanzu.Toolkit.WpfViews.Commands;
 namespace Tanzu.Toolkit.WpfViews
 {
     /// <summary>
-    /// Interaction logic for CloudExplorerView.xaml
+    /// Interaction logic for CloudExplorerView.xaml.
     /// </summary>
     public partial class CloudExplorerView : UserControl, ICloudExplorerView
     {
@@ -38,6 +38,5 @@ namespace Tanzu.Toolkit.WpfViews
             DataContext = viewModel;
             InitializeComponent();
         }
-
     }
 }

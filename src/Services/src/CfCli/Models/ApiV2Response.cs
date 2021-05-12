@@ -1,10 +1,16 @@
-﻿namespace Tanzu.Toolkit.Services.CfCli.Models
+﻿using System.Text.Json.Serialization;
+
+namespace Tanzu.Toolkit.Services.CfCli.Models
 {
     public abstract class ApiV2Response
     {
-        public abstract string next_url { get; set; }
-        public abstract string prev_url { get; set; }
-        public abstract int total_pages { get; set; }
-        public abstract int total_results { get; set; }
+        [JsonPropertyName("next_url")]
+        public abstract string NextUrl { get; set; }
+        [JsonPropertyName("prev_url")]
+        public abstract string PrevUrl { get; set; }
+        [JsonPropertyName("total_pages")]
+        public abstract int TotalPages { get; set; }
+        [JsonPropertyName("total_results")]
+        public abstract int TotalResults { get; set; }
     }
 }

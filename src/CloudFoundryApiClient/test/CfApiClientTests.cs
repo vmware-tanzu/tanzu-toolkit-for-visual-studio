@@ -1,36 +1,36 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using System.Net;
+using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Newtonsoft.Json;
 using RichardSzalay.MockHttp;
-using System;
-using System.Net;
-using System.Threading.Tasks;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.Token;
 
 namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 {
-    [TestClass()]
+    [TestClass]
     public class CfApiClientTests : CfApiClientTestSupport
     {
         private CfApiClient _sut;
-        private Mock<IUaaClient> _mockUaaClient = new Mock<IUaaClient>();
+        private readonly Mock<IUaaClient> _mockUaaClient = new Mock<IUaaClient>();
         private MockHttpMessageHandler _mockHttp;
 
-        [TestInitialize()]
+        [TestInitialize]
         public void TestInit()
         {
             _mockHttp = new MockHttpMessageHandler();
             _mockHttp.Fallback.Throw(new InvalidOperationException("No matching mock handler"));
         }
 
-        [TestCleanup()]
+        [TestCleanup]
         public void TestCleanup()
         {
             _mockHttp.VerifyNoOutstandingExpectation();
         }
 
-        [TestMethod()]
+        [TestMethod]
         public async Task LoginAsync_UpdatesAndReturnsAccessToken_WhenLoginSucceeds()
         {
             var expectedUri = new Uri(_fakeLoginAddress);
@@ -41,14 +41,14 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 
             _mockUaaClient.Setup(mock => mock.RequestAccessTokenAsync(
                 expectedUri,
-                CfApiClient.defaultAuthClientId,
-                CfApiClient.defaultAuthClientSecret,
+                CfApiClient.DefaultAuthClientId,
+                CfApiClient.DefaultAuthClientSecret,
                 _fakeCfUsername,
                 _fakeCfPassword))
                 .ReturnsAsync(HttpStatusCode.OK);
 
             _mockUaaClient.SetupGet(mock => mock.Token)
-                .Returns(new Token() { access_token = fakeAccessTokenContent });
+                .Returns(new Token() { Access_token = fakeAccessTokenContent });
 
             _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
@@ -62,7 +62,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Assert.AreEqual(1, _mockHttp.GetMatchCount(cfBasicInfoRequest));
         }
 
-        [TestMethod()]
+        [TestMethod]
         public async Task LoginAsync_ReturnsNull_AndDoesNotUpdateAccessToken_WhenLoginFails()
         {
             var expectedUri = new Uri(_fakeLoginAddress);
@@ -72,8 +72,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 
             _mockUaaClient.Setup(mock => mock.RequestAccessTokenAsync(
                 expectedUri,
-                CfApiClient.defaultAuthClientId,
-                CfApiClient.defaultAuthClientSecret,
+                CfApiClient.DefaultAuthClientId,
+                CfApiClient.DefaultAuthClientSecret,
                 _fakeCfUsername,
                 _fakeCfPassword))
                 .ReturnsAsync(HttpStatusCode.Unauthorized);
@@ -90,7 +90,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Assert.AreEqual(1, _mockHttp.GetMatchCount(cfBasicInfoRequest));
         }
 
-        [TestMethod()]
+        [TestMethod]
         public async Task LoginAsync_ThrowsException_WhenCfTargetIsMalformed()
         {
             Exception expectedException = null;
@@ -121,7 +121,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Assert.AreEqual(0, _mockHttp.GetMatchCount(catchallRequest));
         }
 
-        [TestMethod()]
+        [TestMethod]
         public async Task LoginAsync_ThrowsException_WhenBasicInfoRequestErrors()
         {
             Exception resultException = null;
@@ -146,9 +146,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Assert.IsTrue(resultException.Message.Contains(fakeHttpExceptionMessage));
             Assert.IsTrue(
                 resultException.Message.Contains(CfApiClient.AuthServerLookupFailureMessage)
-                || resultException.Data.Contains("MessageToDisplay")
-                    && resultException.Data["MessageToDisplay"].ToString().Contains(CfApiClient.AuthServerLookupFailureMessage)
-            );
+                || (resultException.Data.Contains("MessageToDisplay")
+                    && resultException.Data["MessageToDisplay"].ToString().Contains(CfApiClient.AuthServerLookupFailureMessage)));
 
             _mockUaaClient.Verify(mock =>
                 mock.RequestAccessTokenAsync(
@@ -159,10 +158,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                     It.IsAny<string>()), Times.Never);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public async Task ListOrgs_ThrowsException_WhenStatusCodeIsNotASuccess()
         {
-            string expectedPath = CfApiClient.listOrgsPath;
+            string expectedPath = CfApiClient.ListOrgsPath;
 
             MockedRequest orgsRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
@@ -184,10 +183,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Assert.AreEqual(1, _mockHttp.GetMatchCount(orgsRequest));
         }
 
-        [TestMethod()]
+        [TestMethod]
         public async Task ListOrgs_ReturnsListOfAllVisibleOrgs_WhenResponseContainsMultiplePages()
         {
-            string expectedPath = CfApiClient.listOrgsPath;
+            string expectedPath = CfApiClient.ListOrgsPath;
             string page2Identifier = "?page=2&per_page=3";
             string page3Identifier = "?page=3&per_page=3";
             string page4Identifier = "?page=4&per_page=3";
@@ -220,10 +219,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Assert.AreEqual(1, _mockHttp.GetMatchCount(orgsPage4Request));
         }
 
-        [TestMethod()]
+        [TestMethod]
         public async Task ListSpacesWithGuid_ThrowsException_WhenStatusCodeIsNotASuccess()
         {
-            string expectedPath = CfApiClient.listSpacesPath;
+            string expectedPath = CfApiClient.ListSpacesPath;
 
             MockedRequest spacesRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
@@ -245,10 +244,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Assert.AreEqual(1, _mockHttp.GetMatchCount(spacesRequest));
         }
 
-        [TestMethod()]
+        [TestMethod]
         public async Task ListSpacesWithGuid_ReturnsListOfAllVisibleSpaces_WhenResponseContainsMultiplePages()
         {
-            string expectedPath = CfApiClient.listSpacesPath;
+            string expectedPath = CfApiClient.ListSpacesPath;
             string page2Identifier = "?page=2&per_page=3";
             string page3Identifier = "?page=3&per_page=3";
 
@@ -275,10 +274,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Assert.AreEqual(1, _mockHttp.GetMatchCount(spacesPage3Request));
         }
 
-        [TestMethod()]
+        [TestMethod]
         public async Task ListAppsWithGuid_ThrowsException_WhenStatusCodeIsNotASuccess()
         {
-            string expectedPath = CfApiClient.listAppsPath;
+            string expectedPath = CfApiClient.ListAppsPath;
 
             MockedRequest appsRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
@@ -300,10 +299,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Assert.AreEqual(1, _mockHttp.GetMatchCount(appsRequest));
         }
 
-        [TestMethod()]
+        [TestMethod]
         public async Task ListAppsWithGuid_ReturnsListOfAllVisibleApps_WhenResponseContainsMultiplePages()
         {
-            string expectedPath = CfApiClient.listAppsPath;
+            string expectedPath = CfApiClient.ListAppsPath;
             string page2Identifier = "?page=2&per_page=50";
             string page3Identifier = "?page=3&per_page=50";
 
@@ -334,7 +333,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         public async Task StopAppWithGuid_ThrowsException_WhenStatusCodeIsNotASuccess()
         {
             string fakeAppGuid = "1234";
-            string expectedPath = _fakeCfApiAddress + CfApiClient.listAppsPath + $"/{fakeAppGuid}/actions/stop";
+            string expectedPath = _fakeCfApiAddress + CfApiClient.ListAppsPath + $"/{fakeAppGuid}/actions/stop";
             Exception expectedException = null;
 
             MockedRequest appsRequest = _mockHttp.Expect(expectedPath)
@@ -360,7 +359,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         public async Task StopAppWithGuid_ReturnsTrue_WhenAppStateIsSTOPPED()
         {
             string fakeAppGuid = "1234";
-            string expectedPath = _fakeCfApiAddress + CfApiClient.listAppsPath + $"/{fakeAppGuid}/actions/stop";
+            string expectedPath = _fakeCfApiAddress + CfApiClient.ListAppsPath + $"/{fakeAppGuid}/actions/stop";
             Exception resultException = null;
 
             MockedRequest cfStopAppRequest = _mockHttp.Expect(expectedPath)
@@ -387,7 +386,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         public async Task StopAppWithGuid_ReturnsFalse_WhenAppStateIsNotSTOPPED()
         {
             string fakeAppGuid = "1234";
-            string expectedPath = _fakeCfApiAddress + CfApiClient.listAppsPath + $"/{fakeAppGuid}/actions/stop";
+            string expectedPath = _fakeCfApiAddress + CfApiClient.ListAppsPath + $"/{fakeAppGuid}/actions/stop";
             Exception resultException = null;
 
             MockedRequest cfStopAppRequest = _mockHttp.Expect(expectedPath)
@@ -414,7 +413,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         public async Task StartAppWithGuid_ReturnsTrue_WhenAppStateIsSTARTED()
         {
             string fakeAppGuid = "1234";
-            string expectedPath = _fakeCfApiAddress + CfApiClient.listAppsPath + $"/{fakeAppGuid}/actions/start";
+            string expectedPath = _fakeCfApiAddress + CfApiClient.ListAppsPath + $"/{fakeAppGuid}/actions/start";
             Exception resultException = null;
 
             MockedRequest cfStartAppRequest = _mockHttp.Expect(expectedPath)
@@ -441,7 +440,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         public async Task StartAppWithGuid_ReturnsFalse_WhenAppStateIsNotSTARTED()
         {
             string fakeAppGuid = "1234";
-            string expectedPath = _fakeCfApiAddress + CfApiClient.listAppsPath + $"/{fakeAppGuid}/actions/start";
+            string expectedPath = _fakeCfApiAddress + CfApiClient.ListAppsPath + $"/{fakeAppGuid}/actions/start";
             Exception resultException = null;
 
             MockedRequest cfStartAppRequest = _mockHttp.Expect(expectedPath)
@@ -468,7 +467,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         public async Task StartAppWithGuid_ThrowsException_WhenStatusCodeIsNotASuccess()
         {
             string fakeAppGuid = "1234";
-            string expectedPath = _fakeCfApiAddress + CfApiClient.listAppsPath + $"/{fakeAppGuid}/actions/start";
+            string expectedPath = _fakeCfApiAddress + CfApiClient.ListAppsPath + $"/{fakeAppGuid}/actions/start";
             Exception expectedException = null;
 
             MockedRequest appsRequest = _mockHttp.Expect(expectedPath)
@@ -494,7 +493,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         public async Task DeleteAppWithGuid_ReturnsTrue_WhenStatusCodeIs202()
         {
             var fakeAppGuid = "my fake guid";
-            string expectedPath = _fakeCfApiAddress + CfApiClient.deleteAppsPath + $"/{fakeAppGuid}";
+            string expectedPath = _fakeCfApiAddress + CfApiClient.DeleteAppsPath + $"/{fakeAppGuid}";
 
             MockedRequest cfDeleteAppRequest = _mockHttp.Expect(expectedPath)
                .Respond(HttpStatusCode.Accepted);
@@ -522,7 +521,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         {
             Exception expectedException = null;
             var fakeAppGuid = "my fake guid";
-            string expectedPath = _fakeCfApiAddress + CfApiClient.deleteAppsPath + $"/{fakeAppGuid}";
+            string expectedPath = _fakeCfApiAddress + CfApiClient.DeleteAppsPath + $"/{fakeAppGuid}";
 
             MockedRequest cfDeleteAppRequest = _mockHttp.Expect(expectedPath)
                .Respond(HttpStatusCode.BadRequest);

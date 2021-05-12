@@ -1,17 +1,16 @@
 ﻿using System.Diagnostics;
 using System.Threading.Tasks;
-using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 using Tanzu.Toolkit.Services.OutputHandler;
-
+using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.Services.CmdProcess
 {
     public class CmdProcessService : ICmdProcessService
     {
-        StdOutDelegate StdOutCallback;
-        StdErrDelegate StdErrCallback;
-        private string StdOutAggregator = "";
-        private string StdErrAggregator = "";
+        private StdOutDelegate _stdOutCallback;
+        private StdErrDelegate _stdErrCallback;
+        private string _stdOutAggregator = "";
+        private string _stdErrAggregator = "";
 
         public CmdProcessService()
         {
@@ -25,7 +24,7 @@ namespace Tanzu.Toolkit.Services.CmdProcess
         /// <returns></returns>
         public async Task<CmdResult> InvokeWindowlessCommandAsync(string arguments, string workingDir, StdOutDelegate stdOutDelegate, StdErrDelegate stdErrDelegate)
         {
-            //* Create your Process
+            // Create Process
             Process process = new Process();
             process.StartInfo.FileName = "cmd.exe";
             process.StartInfo.Arguments = "/c " + arguments;
@@ -33,17 +32,20 @@ namespace Tanzu.Toolkit.Services.CmdProcess
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
             process.StartInfo.CreateNoWindow = true;
-            if (workingDir != null) process.StartInfo.WorkingDirectory = workingDir;
+            if (workingDir != null)
+            {
+                process.StartInfo.WorkingDirectory = workingDir;
+            }
 
-            //* Set your output and error (asynchronous) handlers
-            StdOutCallback = stdOutDelegate;
-            StdErrCallback = stdErrDelegate;
-            StdOutAggregator = "";
-            StdErrAggregator = "";
+            // Set output and error handlers
+            _stdOutCallback = stdOutDelegate;
+            _stdErrCallback = stdErrDelegate;
+            _stdOutAggregator = "";
+            _stdErrAggregator = "";
             process.OutputDataReceived += new DataReceivedEventHandler(OutputRecorder);
             process.ErrorDataReceived += new DataReceivedEventHandler(ErrorRecorder);
 
-            //* Start process and handlers
+            // Start process and handlers
             process.Start();
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
@@ -51,12 +53,12 @@ namespace Tanzu.Toolkit.Services.CmdProcess
             // Begin blocking call
             await Task.Run(() => process.WaitForExit());
 
-            return new CmdResult(StdOutAggregator, StdErrAggregator, process.ExitCode);
+            return new CmdResult(_stdOutAggregator, _stdErrAggregator, process.ExitCode);
         }
-        
+
         public CmdResult RunCommand(string executableFilePath, string arguments, string workingDir, StdOutDelegate stdOutDelegate, StdErrDelegate stdErrDelegate)
         {
-            //* Create your Process
+            // Create Process
             Process process = new Process();
             process.StartInfo.FileName = executableFilePath;
             process.StartInfo.Arguments = arguments;
@@ -64,17 +66,20 @@ namespace Tanzu.Toolkit.Services.CmdProcess
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
             process.StartInfo.CreateNoWindow = true;
-            if (workingDir != null) process.StartInfo.WorkingDirectory = workingDir;
+            if (workingDir != null)
+            {
+                process.StartInfo.WorkingDirectory = workingDir;
+            }
 
-            //* Set your output and error (asynchronous) handlers
-            StdOutCallback = stdOutDelegate;
-            StdErrCallback = stdErrDelegate;
-            StdOutAggregator = "";
-            StdErrAggregator = "";
+            // Set output and error handlers
+            _stdOutCallback = stdOutDelegate;
+            _stdErrCallback = stdErrDelegate;
+            _stdOutAggregator = "";
+            _stdErrAggregator = "";
             process.OutputDataReceived += new DataReceivedEventHandler(OutputRecorder);
             process.ErrorDataReceived += new DataReceivedEventHandler(ErrorRecorder);
 
-            //* Start process and handlers
+            // Start process and handlers
             process.Start();
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
@@ -82,12 +87,12 @@ namespace Tanzu.Toolkit.Services.CmdProcess
             // Begin blocking call
             process.WaitForExit();
 
-            return new CmdResult(StdOutAggregator, StdErrAggregator, process.ExitCode);
+            return new CmdResult(_stdOutAggregator, _stdErrAggregator, process.ExitCode);
         }
 
         public CmdResult ExecuteWindowlessCommand(string arguments, string workingDir)
         {
-            //* Create your Process
+            // Create Process
             Process process = new Process();
             process.StartInfo.FileName = "cmd.exe";
             process.StartInfo.Arguments = "/c " + arguments;
@@ -97,29 +102,29 @@ namespace Tanzu.Toolkit.Services.CmdProcess
             process.StartInfo.CreateNoWindow = true;
             process.StartInfo.WorkingDirectory = workingDir;
 
-            //* Set your output and error (asynchronous) handlers
-            StdOutAggregator = "";
-            StdErrAggregator = "";
+            // Set output and error handlers
+            _stdOutAggregator = "";
+            _stdErrAggregator = "";
             process.OutputDataReceived += new DataReceivedEventHandler(OutputRecorder);
             process.ErrorDataReceived += new DataReceivedEventHandler(ErrorRecorder);
 
-            //* Start process and handlers
+            // Start process and handlers
             process.Start();
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
 
             process.WaitForExit();
 
-            return new CmdResult(StdOutAggregator, StdErrAggregator, process.ExitCode);
+            return new CmdResult(_stdOutAggregator, _stdErrAggregator, process.ExitCode);
         }
-        
+
         private void OutputRecorder(object sendingProcess, DataReceivedEventArgs outLine)
         {
             string outContent = outLine.Data;
             if (outContent != null)
             {
-                StdOutAggregator += $"{outContent}\n";
-                StdOutCallback?.Invoke(outContent);
+                _stdOutAggregator += $"{outContent}\n";
+                _stdOutCallback?.Invoke(outContent);
             }
         }
 
@@ -128,10 +133,9 @@ namespace Tanzu.Toolkit.Services.CmdProcess
             string errContent = errLine.Data;
             if (errContent != null)
             {
-                StdErrAggregator += $"{errContent}\n";
-                StdErrCallback?.Invoke(errContent);
+                _stdErrAggregator += $"{errContent}\n";
+                _stdErrCallback?.Invoke(errContent);
             }
         }
-
     }
 }

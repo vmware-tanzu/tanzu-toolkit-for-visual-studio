@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Serilog;
-using System;
+﻿using System;
 using System.ComponentModel;
+using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.Logging;
@@ -11,7 +11,7 @@ namespace Tanzu.Toolkit.ViewModels
 {
     public abstract class AbstractViewModel : IViewModel, INotifyPropertyChanged
     {
-        private object activeView;
+        private object _activeView;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -39,12 +39,12 @@ namespace Tanzu.Toolkit.ViewModels
         {
             get
             {
-                return activeView;
+                return _activeView;
             }
 
             set
             {
-                activeView = value;
+                _activeView = value;
                 RaisePropertyChangedEvent("ActiveView");
             }
         }

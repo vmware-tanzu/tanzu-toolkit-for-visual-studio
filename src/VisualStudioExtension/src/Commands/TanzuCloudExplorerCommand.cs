@@ -10,7 +10,7 @@ using Task = System.Threading.Tasks.Task;
 namespace Tanzu.Toolkit.VisualStudio.Commands
 {
     /// <summary>
-    /// Command handler
+    /// Command handler.
     /// </summary>
     internal sealed class TanzuCloudExplorerCommand
     {
@@ -27,17 +27,17 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         /// <summary>
         /// VS Package that provides this command, not null.
         /// </summary>
-        private readonly AsyncPackage package;
+        private readonly AsyncPackage _package;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TanzuCloudExplorerCommand"/> class.
-        /// Adds our command handlers for menu (commands must exist in the command table file)
+        /// Adds our command handlers for menu (commands must exist in the command table file).
         /// </summary>
         /// <param name="package">Owner package, not null.</param>
         /// <param name="commandService">Command service to add command to, not null.</param>
         private TanzuCloudExplorerCommand(AsyncPackage package, OleMenuCommandService commandService)
         {
-            this.package = package ?? throw new ArgumentNullException(nameof(package));
+            this._package = package ?? throw new ArgumentNullException(nameof(package));
             commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
 
             var menuCommandID = new CommandID(CommandSet, CommandId);
@@ -61,7 +61,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         {
             get
             {
-                return package;
+                return _package;
             }
         }
 
@@ -91,8 +91,8 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             // Get the instance number 0 of this tool window. This window is single instance so this instance
             // is actually the only one.
             // The last flag is set to true so that if the tool window does not exists it will be created.
-            ToolWindowPane window = package.FindToolWindow(typeof(TanzuCloudExplorerToolWindow), 0, true);
-            if (null == window || null == window.Frame)
+            ToolWindowPane window = _package.FindToolWindow(typeof(TanzuCloudExplorerToolWindow), 0, true);
+            if (window == null || window.Frame == null)
             {
                 throw new NotSupportedException("Cannot create tool window");
             }

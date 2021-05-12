@@ -12,7 +12,7 @@ namespace Tanzu.Toolkit.Services.CfCli
     public interface ICfCliService
     {
         Task<DetailedResult> InvokeCfCliAsync(string arguments, StdOutDelegate stdOutCallback = null, StdErrDelegate stdErrCallback = null, string workingDir = null);
-        
+
         string GetOAuthToken();
         DetailedResult TargetApi(string apiAddress, bool skipSsl);
         Task<DetailedResult> AuthenticateAsync(string username, SecureString password);
