@@ -3,8 +3,16 @@ trigger:
 
 pool:
   vmImage: 'windows-2019'
-
+variables:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
 steps:
+# NuGet tool installer
+# Acquires a specific version of NuGet from the internet or the tools cache and adds it to the PATH. Use this task to change the version of NuGet used in the NuGet tasks.
+- task: NuGetToolInstaller@1
+  displayName: 'Use NuGet 5.8.x'
+  inputs:
+    versionSpec: 5.8.x
 
 # NuGet
 # Restore, pack, or push NuGet packages, or run a NuGet command. 
@@ -21,18 +29,27 @@ steps:
 - task: VSBuild@1
   inputs:
     solution: '**\*.sln' 
+    configuration: $(buildConfiguration)
 
-# Visual Studio Test
-# Run unit and functional tests (Selenium, Appium, Coded UI test, etc.) using the Visual Studio Test (VsTest) runner.
-# Test frameworks that have a Visual Studio test adapter such as MsTest, xUnit, NUnit, Chutzpah (for JavaScript tests using QUnit, Mocha and Jasmine), etc. can be run.
-# Tests can be distributed on multiple agents using this task (version 2).
-- task: VSTest@2
+- task: DotNetCoreCLI@2
+  displayName: Test
   inputs:
-    testSelector: 'testAssemblies'
-    testAssemblyVer2: '**\*test*.dll'
-    searchFolder: '$(System.DefaultWorkingDirectory)'
+    command: test 
+    projects: '**/test/*.Tests.csproj'
+    arguments: '--no-build --configuration $(buildConfiguration) --collect "XPlat Code Coverage" /p:CoverletOutputFormat=cobertura'
+- task: Palmmedia.reportgenerator.reportgenerator-build-release-task.reportgenerator@4
+  inputs:
+    reports: $(Agent.TempDirectory)/**/coverage.cobertura.xml
+    targetdir: $(build.artifactstagingdirectory)/TestResults/
+    reporttypes: Cobertura
+
+- task: PublishCodeCoverageResults@1
+  displayName: Publish Code Coverage Results
+  inputs:
+    codeCoverageTool: cobertura
+    summaryFileLocation: $(build.artifactstagingdirectory)/TestResults/cobertura.xml
 
 - task: PublishBuildArtifacts@1
   inputs:
-    PathtoPublish: 'src\VisualStudioExtension\src\bin\Debug\Tanzu.Toolkit.VisualStudio.vsix'
+    PathtoPublish: 'src\VisualStudioExtension\src\bin\$(buildConfiguration)\Tanzu.Toolkit.VisualStudio.vsix'
     ArtifactName: 'Tanzu.Toolkit.VisualStudio.vsix'
