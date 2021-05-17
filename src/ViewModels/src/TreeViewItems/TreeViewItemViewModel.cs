@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using Tanzu.Toolkit.Services.Threading;
 
 namespace Tanzu.Toolkit.ViewModels
 {
@@ -13,6 +15,7 @@ namespace Tanzu.Toolkit.ViewModels
         private TreeViewItemViewModel _parent;
         private ObservableCollection<TreeViewItemViewModel> _children;
         private bool _isLoading;
+        private IThreadingService _threadingService; 
 
         protected TreeViewItemViewModel(TreeViewItemViewModel parent, IServiceProvider services, bool childless = false)
             : base(services)
@@ -20,6 +23,8 @@ namespace Tanzu.Toolkit.ViewModels
             _parent = parent;
             _isExpanded = false;
             _isLoading = false;
+
+            _threadingService = services.GetRequiredService<IThreadingService>();
 
             if (!childless) // only create placeholder & assign children if this vm isn't a placeholder itself
             {
@@ -84,7 +89,7 @@ namespace Tanzu.Toolkit.ViewModels
                         };
 
                         // Lazily load the child items @ expansion time in a separate thread
-                        Task.Run(LoadChildren);
+                        _threadingService.StartTask(LoadChildren);
                     }
 
                     RaisePropertyChangedEvent("IsExpanded");
