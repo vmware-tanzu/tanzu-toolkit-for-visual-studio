@@ -2,25 +2,29 @@
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 
 namespace Tanzu.Toolkit.ViewModels.Tests
 {
     [TestClass]
     public class TreeViewItemViewModelTests : ViewModelTestSupport
     {
-        private TestTreeViewItemViewModel _collpased_tvivm;
-        private TestTreeViewItemViewModel _expanded_tvivm;
+        private TestTreeViewItemViewModel _collpasedTvivm;
+        private TestTreeViewItemViewModel _expandedTvivm;
 
         [TestInitialize]
         public void TestInit()
         {
             RenewMockServices();
 
-            _collpased_tvivm = new TestTreeViewItemViewModel(Services);
-            _expanded_tvivm = new TestTreeViewItemViewModel(Services)
+            _collpasedTvivm = new TestTreeViewItemViewModel(Services);
+            _expandedTvivm = new TestTreeViewItemViewModel(Services)
             {
                 IsExpanded = true,
             };
+
+            // ignore first mock task invocation caused by initial expansion
+            MockThreadingService.Invocations.Clear();
         }
 
         [TestMethod]
@@ -54,7 +58,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         public void Expansion_SetsIsLoadingToTrue_WhenNotAlreadyExpanded_AndWhenNotLoading()
         {
-            var sut = _collpased_tvivm;
+            var sut = _collpasedTvivm;
 
             Assert.IsFalse(sut.IsExpanded);
             Assert.IsFalse(sut.IsLoading);
@@ -65,52 +69,46 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        public async Task Expansion_LoadsChildren_WhenNotAlreadyExpanded_AndWhenNotLoading()
+        public void Expansion_LoadsChildren_WhenNotAlreadyExpanded_AndWhenNotLoading()
         {
-            var sut = _collpased_tvivm;
-            int initialCalls = sut.NumTimesChildrenLoaded;
+            var sut = _collpasedTvivm;
 
             Assert.IsFalse(sut.IsExpanded);
             Assert.IsFalse(sut.IsLoading);
 
-            await Task.Run(() => { sut.IsExpanded = true; });
+            sut.IsExpanded = true;
 
-            bool loadChildrenWasCalledOnce = sut.NumTimesChildrenLoaded == initialCalls + 1;
-            Assert.IsTrue(loadChildrenWasCalledOnce);
+            MockThreadingService.Verify(m => m.StartTask(It.IsAny<Func<Task>>()), Times.Once);
         }
 
         [TestMethod]
-        public async Task Expansion_DoesNotLoadChildren_WhenAlreadyExpanded()
+        public void Expansion_DoesNotLoadChildren_WhenAlreadyExpanded()
         {
-            var sut = _expanded_tvivm;
-            int initialCalls = sut.NumTimesChildrenLoaded;
+            var sut = _expandedTvivm;
 
             Assert.IsTrue(sut.IsExpanded);
 
-            await Task.Run(() => { sut.IsExpanded = true; });
+            sut.IsExpanded = true;
 
-            bool loadChildrenWasNeverCalled = sut.NumTimesChildrenLoaded == initialCalls;
-            Assert.IsTrue(loadChildrenWasNeverCalled);
+            MockThreadingService.Verify(m => m.StartTask(It.IsAny<Func<Task>>()), Times.Never);
         }
 
         [TestMethod]
-        public async Task Expansion_DoesNotLoadChildren_WhenAlreadyLoading()
+        public void Expansion_DoesNotLoadChildren_WhenAlreadyLoading()
         {
-            var sut = _collpased_tvivm;
-            int initialCalls = sut.NumTimesChildrenLoaded;
+            var sut = _collpasedTvivm;
 
             sut.IsLoading = true;
 
-            await Task.Run(() => { sut.IsExpanded = true; });
+            sut.IsExpanded = true;
 
-            bool loadChildrenWasNeverCalled = sut.NumTimesChildrenLoaded == initialCalls;
-            Assert.IsTrue(loadChildrenWasNeverCalled);
+            MockThreadingService.Verify(m => m.StartTask(It.IsAny<Func<Task>>()), Times.Never);
         }
 
         [TestMethod]
         public void Expansion_ReplacesChildrenWithLoadingPlaceholder_WhileChildrenLoad()
         {
-            var sut = _collpased_tvivm;
+            var sut = _collpasedTvivm;
             sut.Children = new ObservableCollection<TreeViewItemViewModel>()
             {
                 null,
@@ -131,23 +129,18 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
     internal class TestTreeViewItemViewModel : TreeViewItemViewModel
     {
+
         public TestTreeViewItemViewModel(IServiceProvider services) : base(null, services)
         {
-            NumTimesChildrenLoaded = 0;
         }
 
         public TestTreeViewItemViewModel(IServiceProvider services, bool childless) : base(null, services, childless)
         {
-            NumTimesChildrenLoaded = 0;
         }
 
-        public int NumTimesChildrenLoaded { get; set; }
-
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-        protected internal override async Task LoadChildren()
+        internal protected override async Task LoadChildren()
         {
-            NumTimesChildrenLoaded += 1;
+            await Task.Run(() => { });
         }
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     }
 }

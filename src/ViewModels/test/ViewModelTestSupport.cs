@@ -9,6 +9,7 @@ using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.CmdProcess;
 using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.Logging;
+using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
 
 namespace Tanzu.Toolkit.ViewModels.Tests
@@ -22,6 +23,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         protected Mock<IViewLocatorService> MockViewLocatorService { get; set; }
         protected Mock<ILoggingService> MockLoggingService { get; set; }
         protected Mock<ILogger> MockLogger { get; set; }
+        protected Mock<IThreadingService> MockThreadingService { get; set; }
 
         protected const string FakeCfName = "fake cf name";
         protected const string FakeCfApiAddress = "http://fake.api.address";
@@ -58,6 +60,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockDialogService = new Mock<IDialogService>();
             MockViewLocatorService = new Mock<IViewLocatorService>();
             MockLoggingService = new Mock<ILoggingService>();
+            MockThreadingService = new Mock<IThreadingService>();
 
             MockLogger = new Mock<ILogger>();
             MockLoggingService.SetupGet(m => m.Logger).Returns(MockLogger.Object);
@@ -66,6 +69,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             services.AddSingleton(MockDialogService.Object);
             services.AddSingleton(MockViewLocatorService.Object);
             services.AddSingleton(MockLoggingService.Object);
+            services.AddSingleton(MockThreadingService.Object);
 
             Services = services.BuildServiceProvider();
         }

@@ -14,6 +14,7 @@ using Tanzu.Toolkit.Services.CmdProcess;
 using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.FileLocator;
 using Tanzu.Toolkit.Services.Logging;
+using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.VisualStudio.Commands;
@@ -121,6 +122,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<IFileLocatorService>(new FileLocatorService(assemblyBasePath));
             services.AddSingleton<ILoggingService, LoggingService>();
             services.AddSingleton<IViewService, VsToolWindowService>();
+            services.AddSingleton<IThreadingService, ThreadingService>();
 
             services.AddTransient<ICmdProcessService, CmdProcessService>();
 
