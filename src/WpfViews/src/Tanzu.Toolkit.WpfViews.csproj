@@ -79,6 +79,7 @@
     <Compile Include="Services\UiDispatcherService.cs" />
     <Compile Include="Services\WpfDialogResult.cs" />
     <Compile Include="Services\WpfDialogService.cs" />
+    <Compile Include="Services\WpfDispatcherService.cs" />
     <Compile Include="Services\WpfViewLocatorService.cs" />
     <Compile Include="DeploymentDialogView.xaml.cs">
       <DependentUpon>DeploymentDialogView.xaml</DependentUpon>
