@@ -6,6 +6,7 @@ using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.Logging;
+using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
 
 namespace Tanzu.Toolkit.ViewModels
@@ -22,7 +23,9 @@ namespace Tanzu.Toolkit.ViewModels
             CloudFoundryService = services.GetRequiredService<ICloudFoundryService>();
             DialogService = services.GetRequiredService<IDialogService>();
             ViewLocatorService = services.GetRequiredService<IViewLocatorService>();
+            ThreadingService = services.GetRequiredService<IThreadingService>();
             UiDispatcherService = services.GetRequiredService<IUiDispatcherService>();
+            DispatcherService = services.GetRequiredService<IDispatcherService>();
             var logSvc = services.GetRequiredService<ILoggingService>();
             Logger = logSvc.Logger;
         }
@@ -33,7 +36,13 @@ namespace Tanzu.Toolkit.ViewModels
 
         public IViewLocatorService ViewLocatorService { get; }
         
+        public IThreadingService ThreadingService { get; }
+
+        
         public IUiDispatcherService UiDispatcherService { get; }
+
+        
+        public IDispatcherService DispatcherService { get; }
 
         public IDialogService DialogService { get; }
 
