@@ -125,6 +125,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<ILoggingService, LoggingService>();
             services.AddSingleton<IViewService, VsToolWindowService>();
             services.AddSingleton<IThreadingService, ThreadingService>();
+            services.AddSingleton<IDispatcherService, WpfDispatcherService>();
             services.AddSingleton<IUiDispatcherService, UiDispatcherService>();
 
             services.AddTransient<ICmdProcessService, CmdProcessService>();

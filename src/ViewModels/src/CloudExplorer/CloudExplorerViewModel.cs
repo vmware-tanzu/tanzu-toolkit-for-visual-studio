@@ -17,6 +17,7 @@ namespace Tanzu.Toolkit.ViewModels
         internal static readonly string _deleteAppErrorMsg = "Encountered an error while deleting app";
 
         private bool _hasCloudTargets;
+        private bool _isPolling = false;
         private ObservableCollection<CfInstanceViewModel> _cfs;
         private bool isRefreshingAll = false;
         private readonly IServiceProvider _services;
@@ -135,6 +136,12 @@ namespace Tanzu.Toolkit.ViewModels
                 DialogService.ShowDialog(typeof(AddCloudDialogViewModel).Name);
 
                 UpdateCloudFoundryInstances();
+
+                if (HasCloudTargets && !_isPolling)
+                {
+                    _isPolling = true;
+                    DispatcherService.StartUiBackgroundPoller(RefreshAllCloudConnections, null, 10);
+                }
             }
         }
 
