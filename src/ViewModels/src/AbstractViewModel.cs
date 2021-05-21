@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.Logging;
@@ -21,6 +22,7 @@ namespace Tanzu.Toolkit.ViewModels
             CloudFoundryService = services.GetRequiredService<ICloudFoundryService>();
             DialogService = services.GetRequiredService<IDialogService>();
             ViewLocatorService = services.GetRequiredService<IViewLocatorService>();
+            UiDispatcherService = services.GetRequiredService<IUiDispatcherService>();
             var logSvc = services.GetRequiredService<ILoggingService>();
             Logger = logSvc.Logger;
         }
@@ -30,6 +32,8 @@ namespace Tanzu.Toolkit.ViewModels
         public ICloudFoundryService CloudFoundryService { get; }
 
         public IViewLocatorService ViewLocatorService { get; }
+        
+        public IUiDispatcherService UiDispatcherService { get; }
 
         public IDialogService DialogService { get; }
 

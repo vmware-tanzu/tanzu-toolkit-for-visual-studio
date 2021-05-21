@@ -12,6 +12,7 @@ namespace Tanzu.Toolkit.ViewModels
         TreeViewItemViewModel Parent { get; }
         PlaceholderViewModel LoadingPlaceholder { get; }
         PlaceholderViewModel EmptyPlaceholder { get; }
+
         Task RefreshChildren();
     }
 }
