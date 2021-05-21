@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
 
@@ -14,8 +15,8 @@ namespace Tanzu.Toolkit.ViewModels
 
         public CloudFoundryInstance CloudFoundryInstance { get; }
 
-        public CfInstanceViewModel(CloudFoundryInstance cloudFoundryInstance, IServiceProvider services)
-            : base(null, services)
+        public CfInstanceViewModel(CloudFoundryInstance cloudFoundryInstance, IServiceProvider services, bool expanded = false)
+            : base(null, services, expanded: expanded)
         {
             CloudFoundryInstance = cloudFoundryInstance;
             DisplayText = CloudFoundryInstance.InstanceName;
@@ -95,5 +96,76 @@ namespace Tanzu.Toolkit.ViewModels
                 IsExpanded = false;
             }
         }
+
+        public override async Task RefreshChildren()
+        {
+            var freshOrgs = await FetchChildren();
+
+            RemoveNonexistentOrgs(freshOrgs);
+            AddNewOrgs(freshOrgs);
+
+            if (Children.Count == 0)
+            {
+                UiDispatcherService.RunOnUiThread(() => Children.Add(EmptyPlaceholder));
+            }
+            else if (Children.Count > 1 && HasEmptyPlaceholder)
+            {
+                UiDispatcherService.RunOnUiThread(() => Children.Remove(EmptyPlaceholder));
+            }
+        }
+
+        /// <summary>
+        /// add any ovms to cfivm.Children which are in currentOrgs but not in cfivm.Children.
+        /// </summary>
+        /// <param name="cfivm"></param>
+        /// <param name="freshOrgs"></param>
+        private void AddNewOrgs(ObservableCollection<OrgViewModel> freshOrgs)
+        {
+            foreach (OrgViewModel newOVM in freshOrgs)
+            {
+                if (newOVM != null)
+                {
+                    bool orgInChildren = Children.Any(ovm =>
+                    {
+                        var oldOVM = ovm as OrgViewModel;
+                        return oldOVM != null && oldOVM.Org.OrgId == newOVM.Org.OrgId;
+                    });
+
+                    if (!orgInChildren)
+                    {
+                        UiDispatcherService.RunOnUiThread(() => Children.Add(newOVM));
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// remove all ovms from cfivm.Children which don't appear in currentOrgs.
+        /// </summary>
+        /// <param name="cfivm"></param>
+        /// <param name="freshOrgs"></param>
+        private void RemoveNonexistentOrgs(ObservableCollection<OrgViewModel> freshOrgs)
+        {
+            var orgsToRemove = new ObservableCollection<OrgViewModel>();
+
+            foreach (TreeViewItemViewModel priorChild in Children)
+            {
+                if (priorChild is OrgViewModel oldOVM)
+                {
+                    bool orgStillExists = freshOrgs.Any(ovm => ovm != null && ovm.Org.OrgId == oldOVM.Org.OrgId);
+
+                    if (!orgStillExists)
+                    {
+                        orgsToRemove.Add(oldOVM);
+                    }
+                }
+            }
+
+            foreach (OrgViewModel ovm in orgsToRemove)
+            {
+                UiDispatcherService.RunOnUiThread(() => Children.Remove(ovm));
+            }
+        }
+
     }
 }

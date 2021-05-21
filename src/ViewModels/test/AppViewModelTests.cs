@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
 using Tanzu.Toolkit.Models;
 
 namespace Tanzu.Toolkit.ViewModels.Tests
@@ -6,11 +7,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
     [TestClass]
     public class AppViewModelTests : ViewModelTestSupport
     {
-        private AppViewModel _avm;
+        private AppViewModel _sut;
+        private List<string> _receivedEvents;
+
         [TestInitialize]
         public void TestInit()
         {
             RenewMockServices();
+            _receivedEvents = new List<string>();
         }
 
         [TestMethod]
@@ -19,9 +23,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             string appName = "junk";
             var fakeApp = new CloudFoundryApp(appName, null, null, null);
 
-            _avm = new AppViewModel(fakeApp, Services);
+            _sut = new AppViewModel(fakeApp, Services);
 
-            Assert.AreEqual(appName, _avm.DisplayText);
+            Assert.AreEqual(appName, _sut.DisplayText);
         }
 
         [TestMethod]
@@ -32,9 +36,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 State = "STOPPED",
             };
 
-            _avm = new AppViewModel(fakeApp, Services);
+            _sut = new AppViewModel(fakeApp, Services);
 
-            Assert.IsTrue(_avm.IsStopped);
+            Assert.IsTrue(_sut.IsStopped);
         }
 
         [TestMethod]
@@ -45,9 +49,27 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 State = "anything-other-than-STOPPED",
             };
 
-            _avm = new AppViewModel(fakeApp, Services);
+            _sut = new AppViewModel(fakeApp, Services);
 
-            Assert.IsFalse(_avm.IsStopped);
+            Assert.IsFalse(_sut.IsStopped);
         }
+
+        [TestMethod]
+        public void RefreshApp_RaisesPropertyChangedEventForIsStopped()
+        {
+            CloudFoundryApp fakeApp = new CloudFoundryApp("fake app name", "fake app guid", null, null);
+            _sut = new AppViewModel(fakeApp, Services);
+
+            _sut.PropertyChanged += (sender, e) =>
+            {
+                _receivedEvents.Add(e.PropertyName);
+            };
+
+            _sut.RefreshAppState();
+
+            Assert.AreEqual(1, _receivedEvents.Count);
+            Assert.AreEqual("IsStopped", _receivedEvents[0]);
+        }
+
     }
 }

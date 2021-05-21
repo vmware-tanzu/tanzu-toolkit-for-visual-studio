@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
 
@@ -14,8 +15,8 @@ namespace Tanzu.Toolkit.ViewModels
 
         public CloudFoundryOrganization Org { get; }
 
-        public OrgViewModel(CloudFoundryOrganization org, IServiceProvider services)
-            : base(null, services)
+        public OrgViewModel(CloudFoundryOrganization org, IServiceProvider services, bool expanded = false)
+            : base(null, services, expanded: expanded)
         {
             Org = org;
             DisplayText = Org.OrgName;
@@ -95,5 +96,76 @@ namespace Tanzu.Toolkit.ViewModels
                 IsExpanded = false;
             }
         }
+
+        public override async Task RefreshChildren()
+        {
+            var freshSpaces = await FetchChildren();
+
+            RemoveNonexistentSpaces(freshSpaces);
+            AddNewSpaces(freshSpaces);
+
+            if (Children.Count == 0)
+            {
+                UiDispatcherService.RunOnUiThread(() => Children.Add(EmptyPlaceholder));
+            }
+            else if (Children.Count > 1 && HasEmptyPlaceholder)
+            {
+                UiDispatcherService.RunOnUiThread(() => Children.Remove(EmptyPlaceholder));
+            }
+        }
+
+        /// <summary>
+        /// Add any svms to Children which are in freshSpaces but not in Children.
+        /// </summary>
+        /// <param name="ovm"></param>
+        /// <param name="freshSpaces"></param>
+        private void AddNewSpaces(ObservableCollection<SpaceViewModel> freshSpaces)
+        {
+            foreach (SpaceViewModel newSVM in freshSpaces)
+            {
+                if (newSVM != null)
+                {
+                    bool spaceInChildren = Children.Any(svm =>
+                    {
+                        var oldSVM = svm as SpaceViewModel;
+                        return oldSVM != null && oldSVM.Space.SpaceId == newSVM.Space.SpaceId;
+                    });
+
+                    if (!spaceInChildren)
+                    {
+                        UiDispatcherService.RunOnUiThread(() => Children.Add(newSVM));
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Remove all svms from Children which don't appear in freshSpaces.
+        /// </summary>
+        /// <param name="ovm"></param>
+        /// <param name="freshSpaces"></param>
+        private void RemoveNonexistentSpaces(ObservableCollection<SpaceViewModel> freshSpaces)
+        {
+            var spacesToRemove = new ObservableCollection<SpaceViewModel>();
+
+            foreach (TreeViewItemViewModel priorChild in Children)
+            {
+                if (priorChild is SpaceViewModel oldSVM)
+                {
+                    bool spaceStillExists = freshSpaces.Any(svm => svm != null && svm.Space.SpaceId == oldSVM.Space.SpaceId);
+
+                    if (!spaceStillExists)
+                    {
+                        spacesToRemove.Add(oldSVM);
+                    }
+                }
+            }
+
+            foreach (SpaceViewModel svm in spacesToRemove)
+            {
+                UiDispatcherService.RunOnUiThread(() => Children.Remove(svm));
+            }
+        }
+
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
 
@@ -13,8 +14,8 @@ namespace Tanzu.Toolkit.ViewModels
 
         public CloudFoundrySpace Space { get; }
 
-        public SpaceViewModel(CloudFoundrySpace space, IServiceProvider services)
-            : base(null, services)
+        public SpaceViewModel(CloudFoundrySpace space, IServiceProvider services, bool expanded = false)
+            : base(null, services, expanded: expanded)
         {
             Space = space;
             DisplayText = Space.SpaceName;
@@ -90,6 +91,11 @@ namespace Tanzu.Toolkit.ViewModels
 
                 IsExpanded = false;
             }
+        }
+
+        public override async Task RefreshChildren()
+        {
+            await LoadChildren();
         }
     }
 }
