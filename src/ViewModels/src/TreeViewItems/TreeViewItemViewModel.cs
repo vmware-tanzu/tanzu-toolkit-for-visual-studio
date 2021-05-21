@@ -15,13 +15,13 @@ namespace Tanzu.Toolkit.ViewModels
         private TreeViewItemViewModel _parent;
         private ObservableCollection<TreeViewItemViewModel> _children;
         private bool _isLoading;
-        private IThreadingService _threadingService; 
+        private IThreadingService _threadingService;
 
-        protected TreeViewItemViewModel(TreeViewItemViewModel parent, IServiceProvider services, bool childless = false)
+        protected TreeViewItemViewModel(TreeViewItemViewModel parent, IServiceProvider services, bool childless = false, bool expanded = false)
             : base(services)
         {
             _parent = parent;
-            _isExpanded = false;
+            _isExpanded = expanded;
             _isLoading = false;
 
             _threadingService = services.GetRequiredService<IThreadingService>();
@@ -142,19 +142,21 @@ namespace Tanzu.Toolkit.ViewModels
 
         public virtual PlaceholderViewModel EmptyPlaceholder { get; protected set; }
 
-        public async Task RefreshChildren()
-        {
-            await LoadChildren();
-        }
-
         /// <summary>
         /// Invoked when the child items need to be loaded on demand.
         /// Subclasses can override this to populate the Children collection.
         /// </summary>
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         protected internal virtual async Task LoadChildren()
         {
+            await Task.Run(() => Logger.Error("TreeViewItemViewModel.LoadChildren was called; this method should only ever be run by classes that inherit from TreeViewItemViewModel."));
         }
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+
+        /// <summary>
+        /// Implemented by inheriting classes to update children with fresh data.
+        /// </summary>
+        public virtual async Task RefreshChildren()
+        {
+            await Task.Run(() => Logger.Error("TreeViewItemViewModel.RefreshChildren was called; this method should only ever be run by classes that inherit from TreeViewItemViewModel."));
+        }
     }
 }
