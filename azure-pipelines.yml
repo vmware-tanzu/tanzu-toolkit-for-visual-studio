@@ -3,9 +3,11 @@ trigger:
 
 pool:
   vmImage: 'windows-2019'
+
 variables:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
 steps:
 # NuGet tool installer
 # Acquires a specific version of NuGet from the internet or the tools cache and adds it to the PATH. Use this task to change the version of NuGet used in the NuGet tasks.
@@ -28,7 +30,7 @@ steps:
 # Build with MSBuild and set the Visual Studio version property
 - task: VSBuild@1
   inputs:
-    solution: '**\*.sln' 
+    solution: '**/*.sln' 
     configuration: $(buildConfiguration)
 
 - task: DotNetCoreCLI@2
@@ -37,6 +39,7 @@ steps:
     command: test 
     projects: '**/test/*.Tests.csproj'
     arguments: '--no-build --configuration $(buildConfiguration) --collect "XPlat Code Coverage" /p:CoverletOutputFormat=cobertura'
+    
 - task: Palmmedia.reportgenerator.reportgenerator-build-release-task.reportgenerator@4
   inputs:
     reports: $(Agent.TempDirectory)/**/coverage.cobertura.xml
@@ -51,5 +54,5 @@ steps:
 
 - task: PublishBuildArtifacts@1
   inputs:
-    PathtoPublish: 'src\VisualStudioExtension\src\bin\$(buildConfiguration)\Tanzu.Toolkit.VisualStudio.vsix'
+    PathtoPublish: 'src/VisualStudioExtension/src/bin/$(buildConfiguration)/Tanzu.Toolkit.VisualStudio.vsix'
     ArtifactName: 'Tanzu.Toolkit.VisualStudio.vsix'
