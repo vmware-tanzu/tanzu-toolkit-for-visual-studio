@@ -26,9 +26,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             // to RunOnUiThread; do not delegate to the UI Dispatcher
             MockUiDispatcherService.Setup(mock => mock.
                 RunOnUiThread(It.IsAny<Action>()))
-                    .Callback<Action>(method =>
+                    .Callback<Action>(action =>
                     {
-                        method();
+                        action();
                     });
 
             // set up mock threading service to run whatever method is passed

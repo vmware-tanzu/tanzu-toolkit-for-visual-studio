@@ -31,10 +31,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             MockUiDispatcherService.Setup(mock => mock.
                 RunOnUiThread(It.IsAny<Action>()))
-                    .Callback<Action>(method =>
+                    .Callback<Action>(action =>
                     {
                         // Run whatever method is passed to MockUiDispatcherService.RunOnUiThread; do not delegate to the UI Dispatcher
-                        method();
+                        action();
                     });
         }
 
