@@ -329,8 +329,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsFalse(refreshedChildOrg2.IsExpanded); // children that aren't new shouldn't change expansion
             Assert.IsFalse(refreshedChildOrg2.IsExpanded); // new children should start collapsed
 
-            // property changed events should not be raised
-            Assert.AreEqual(0, _receivedEvents.Count);
+            // property changed events should only be raised for "IsRefreshing" (1 to set as true, 1 to set as false)
+            Assert.AreEqual(2, _receivedEvents.Count);
+            Assert.AreEqual("IsRefreshing", _receivedEvents[0]);
 
             MockCloudFoundryService.VerifyAll();
         }

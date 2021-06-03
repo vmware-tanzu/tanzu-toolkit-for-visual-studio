@@ -25,6 +25,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         protected Mock<ILogger> MockLogger { get; set; }
         protected Mock<IThreadingService> MockThreadingService { get; set; }
         protected Mock<IUiDispatcherService> MockUiDispatcherService { get; set; }
+        protected Mock<IDispatcherService> MockDispatcherService;
 
         protected const string FakeCfName = "fake cf name";
         protected const string FakeCfApiAddress = "http://fake.api.address";
@@ -63,6 +64,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockLoggingService = new Mock<ILoggingService>();
             MockThreadingService = new Mock<IThreadingService>();
             MockUiDispatcherService = new Mock<IUiDispatcherService>();
+            MockDispatcherService = new Mock<IDispatcherService>();
 
             MockLogger = new Mock<ILogger>();
             MockLoggingService.SetupGet(m => m.Logger).Returns(MockLogger.Object);
@@ -73,6 +75,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             services.AddSingleton(MockLoggingService.Object);
             services.AddSingleton(MockThreadingService.Object);
             services.AddSingleton(MockUiDispatcherService.Object);
+            services.AddSingleton(MockDispatcherService.Object);
 
             Services = services.BuildServiceProvider();
         }

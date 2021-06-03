@@ -9,36 +9,35 @@ namespace Tanzu.Toolkit.VisualStudio.WpfViews.Services
     {
         private bool _isPolling = false;
 
-        public void StartUiBackgroundPoller(Func<object, Task> method, object methodParam, int intervalInSeconds)
+        public bool IsPolling
+        {
+            get => _isPolling; 
+
+            set { _isPolling = value; }
+        }
+
+        public void StartUiBackgroundPoller(Action<object> pollingMethod, object methodParam, int intervalInSeconds)
         {
             var uiDispatcher = Application.Current.Dispatcher;
 
-            if (!_isPolling)
+            if (!IsPolling)
             {
-                _isPolling = true;
+                IsPolling = true;
 
                 var pollingTask = new Task(async () =>
                 {
-                    while (_isPolling)
+                    while (IsPolling)
                     {
                         await Task.Delay(TimeSpan.FromSeconds(intervalInSeconds));
 
-                        await uiDispatcher.InvokeAsync(async () =>
+                        uiDispatcher.Invoke(() =>
                         {
-                            await method(methodParam);
+                            pollingMethod(methodParam);
                         });
                     }
                 });
 
                 pollingTask.Start();
-            }
-        }
-
-        public void StopUiBackgroundUiPoller()
-        {
-            if (_isPolling)
-            {
-                _isPolling = false;
             }
         }
     }
