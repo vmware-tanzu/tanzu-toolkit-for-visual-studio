@@ -102,6 +102,9 @@
                                 </ContextMenu>
                             </Button.ContextMenu>
                         </Button>
+                        <TextBlock Grid.Row="0" Grid.Column="2"
+                           Visibility="{Binding Path=IsRefreshing, Converter={StaticResource Visibility}}" 
+                           Text="Getting orgs..."/>
                     </StackPanel>
                 </HierarchicalDataTemplate>
 
@@ -111,6 +114,9 @@
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                         <Image Source="Resources/CfOrg.png" Stretch="Uniform" Height="16px" Width="16px" Margin="0,2,4,0"/>
                         <TextBlock Text="{Binding DisplayText}" />
+                        <TextBlock Grid.Row="0" Grid.Column="2"
+                           Visibility="{Binding Path=IsRefreshing, Converter={StaticResource Visibility}}" 
+                           Text="Getting spaces..."/>
                     </StackPanel>
                 </HierarchicalDataTemplate>
 
@@ -132,6 +138,9 @@
                                 </ContextMenu>
                             </Button.ContextMenu>
                         </Button>
+                        <TextBlock Grid.Row="0" Grid.Column="2"
+                           Visibility="{Binding Path=IsRefreshing, Converter={StaticResource Visibility}}" 
+                           Text="Getting apps..."/>
                     </StackPanel>
                 </HierarchicalDataTemplate>
 
@@ -145,6 +154,7 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="20"></ColumnDefinition>
                             <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="20"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
 
                         <Image Source="Resources/CfAppRun.png" Stretch="Uniform" Height="16px" Width="16px" Margin="0,2,4,0"

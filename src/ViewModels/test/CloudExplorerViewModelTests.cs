@@ -342,10 +342,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var fakeInitialSpace = new CloudFoundrySpace("fake space name", "fake space id", fakeInitialOrg);
             var fakeInitialApp = new CloudFoundryApp("fake app name", "fake app id", fakeInitialSpace, "state1");
 
-            // These view models are fakes; they inherit from their respective tvivms but override `RefreshChildren`
-            // so that these tests are able to check how many times that method gets called (calling RefreshChildren
-            // on these fakes increments `NumRefreshes` by 1). These view models are constructed with expanded = true
-            // to make them eligible for refreshing.
+            /** These view models are fakes; they inherit from their respective tvivms but override `RefreshChildren`
+             * so that these tests are able to check how many times that method gets called (calling RefreshChildren
+             * on these fakes increments `NumRefreshes` by 1). These view models are constructed with expanded = true
+             * to make them eligible for refreshing.
+             */
             var cfivm = new FakeCfInstanceViewModel(fakeInitialCfInstance, Services, expanded: true);
             var ovm = new FakeOrgViewModel(fakeInitialOrg, Services, expanded: true);
             var svm = new FakeSpaceViewModel(fakeInitialSpace, Services, expanded: true);
@@ -454,8 +455,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.AreEqual(2, firstSpaceVm.Children.Count);
             AppViewModel firstAppVm = (AppViewModel)firstSpaceVm.Children[0];
             AppViewModel secondAppVm = (AppViewModel)firstSpaceVm.Children[1];
-            Assert.AreEqual(fakeUpdatedApp, firstAppVm.App);
-            Assert.AreEqual(fakeNewApp, secondAppVm.App);
+            Assert.AreEqual(fakeInitialApp.AppId, firstAppVm.App.AppId);
+            Assert.AreNotEqual(fakeInitialApp.State, firstAppVm.App.State);
+            Assert.AreEqual(fakeNewApp.AppId, secondAppVm.App.AppId);
 
             // ensure space refresh makes request for fresh apps
             MockCloudFoundryService.Verify(mock => mock.GetAppsForSpaceAsync(fakeInitialSpace, true), Times.Once);

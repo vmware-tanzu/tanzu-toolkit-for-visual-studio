@@ -5,7 +5,8 @@ namespace Tanzu.Toolkit.Services
 {
     public interface IDispatcherService
     {
-        void StartUiBackgroundPoller(Func<object, Task> method, object methodParam, int intervalInSeconds);
-        void StopUiBackgroundUiPoller();
+        bool IsPolling { get; set; }
+
+        void StartUiBackgroundPoller(Action<object> pollingMethod, object methodParam, int intervalInSeconds);
     }
 }
