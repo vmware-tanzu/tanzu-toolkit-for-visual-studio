@@ -19,7 +19,6 @@ namespace Tanzu.Toolkit.WpfViews.Tests
         protected Mock<IViewLocatorService> mockViewLocatorService;
         protected Mock<ILoggingService> mockLoggingService;
         protected Mock<IUiDispatcherService> mockUiDispatcherService;
-        protected Mock<IDispatcherService> mockDispatcherService;
         protected Mock<IThreadingService> mockThreadingService;
 
         protected ViewTestSupport()
@@ -30,7 +29,6 @@ namespace Tanzu.Toolkit.WpfViews.Tests
             mockViewLocatorService = new Mock<IViewLocatorService>();
             mockLoggingService = new Mock<ILoggingService>();
             mockUiDispatcherService = new Mock<IUiDispatcherService>();
-            mockDispatcherService = new Mock<IDispatcherService>();
             mockThreadingService = new Mock<IThreadingService>();
 
             services.AddSingleton(mockCloudFoundryService.Object);
@@ -38,7 +36,6 @@ namespace Tanzu.Toolkit.WpfViews.Tests
             services.AddSingleton(mockViewLocatorService.Object);
             services.AddSingleton(mockLoggingService.Object);
             services.AddSingleton(mockUiDispatcherService.Object);
-            services.AddSingleton(mockDispatcherService.Object);
             services.AddSingleton(mockThreadingService.Object);
             this.services = services.BuildServiceProvider();
         }

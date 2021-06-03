@@ -153,10 +153,9 @@ namespace Tanzu.Toolkit.ViewModels
 
                 UpdateCloudFoundryInstances();
 
-                if (HasCloudTargets && !DispatcherService.IsPolling)
+                if (HasCloudTargets && !ThreadingService.IsPolling)
                 {
-                    DispatcherService.IsPolling = true;
-                    DispatcherService.StartUiBackgroundPoller(RefreshAllItems, null, 10);
+                    ThreadingService.StartUiBackgroundPoller(RefreshAllItems, null, 10);
                 }
             }
         }

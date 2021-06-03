@@ -25,7 +25,6 @@ namespace Tanzu.Toolkit.ViewModels
             ViewLocatorService = services.GetRequiredService<IViewLocatorService>();
             ThreadingService = services.GetRequiredService<IThreadingService>();
             UiDispatcherService = services.GetRequiredService<IUiDispatcherService>();
-            DispatcherService = services.GetRequiredService<IDispatcherService>();
             var logSvc = services.GetRequiredService<ILoggingService>();
             Logger = logSvc.Logger;
         }
@@ -38,12 +37,8 @@ namespace Tanzu.Toolkit.ViewModels
         
         public IThreadingService ThreadingService { get; }
 
-        
         public IUiDispatcherService UiDispatcherService { get; }
-
         
-        public IDispatcherService DispatcherService { get; }
-
         public IDialogService DialogService { get; }
 
         public ILogger Logger { get; }
