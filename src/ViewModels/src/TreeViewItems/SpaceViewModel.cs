@@ -12,6 +12,33 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string LoadingMsg = "Loading apps...";
         internal static readonly string _getAppsFailureMsg = "Unable to load apps.";
 
+        private volatile bool _isRefreshing = false;
+        private readonly object _threadLock = new object();
+
+        /// <summary>
+        /// A thread-safe indicator of whether or not this <see cref="SpaceViewModel"/> is in the process of updating its children.
+        /// </summary>
+        public bool IsRefreshing
+        {
+            get
+            {
+                lock (_threadLock)
+                {
+                    return _isRefreshing;
+                }
+            }
+
+            private set
+            {
+                lock (_threadLock)
+                {
+                    _isRefreshing = value;
+                }
+
+                RaisePropertyChangedEvent("IsRefreshing");
+            }
+        }
+
         public CloudFoundrySpace Space { get; }
 
         public SpaceViewModel(CloudFoundrySpace space, IServiceProvider services, bool expanded = false)
@@ -95,7 +122,14 @@ namespace Tanzu.Toolkit.ViewModels
 
         public override async Task RefreshChildren()
         {
-            await LoadChildren();
+            if (!IsRefreshing)
+            {
+                IsRefreshing = true;
+
+                await LoadChildren();
+
+                IsRefreshing = false;
+            }
         }
     }
 }

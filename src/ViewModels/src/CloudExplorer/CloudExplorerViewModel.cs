@@ -17,9 +17,9 @@ namespace Tanzu.Toolkit.ViewModels
         internal static readonly string _deleteAppErrorMsg = "Encountered an error while deleting app";
 
         private bool _hasCloudTargets;
-        private bool _isPolling = false;
         private ObservableCollection<CfInstanceViewModel> _cfs;
-        private bool isRefreshingAll = false;
+        private volatile bool _isRefreshingAll = false;
+        private object _threadLock = new object();
         private readonly IServiceProvider _services;
         private readonly IThreadingService _threadingService;
 
@@ -55,13 +55,29 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
+        /// <summary>
+        /// A thread-safe indicator of whether or not this <see cref="CloudExplorerViewModel"/> 
+        /// is in the process of updating all <see cref="CfInstanceViewModel"/>s, 
+        /// <see cref="OrgViewModel"/>s, <see cref="SpaceViewModel"/>s & <see cref="AppViewModel"/>s.
+        /// </summary>
         public bool IsRefreshingAll
         {
-            get => isRefreshingAll;
+            get
+            {
+                lock (_threadLock)
+                {
+                    return _isRefreshingAll;
+                }
+            }
 
             internal set
             {
-                isRefreshingAll = value;
+
+                lock (_threadLock)
+                {
+                    _isRefreshingAll = value;
+                }
+
                 RaisePropertyChangedEvent("IsRefreshingAll");
             }
         }
@@ -137,10 +153,10 @@ namespace Tanzu.Toolkit.ViewModels
 
                 UpdateCloudFoundryInstances();
 
-                if (HasCloudTargets && !_isPolling)
+                if (HasCloudTargets && !DispatcherService.IsPolling)
                 {
-                    _isPolling = true;
-                    DispatcherService.StartUiBackgroundPoller(RefreshAllCloudConnections, null, 10);
+                    DispatcherService.IsPolling = true;
+                    DispatcherService.StartUiBackgroundPoller(RefreshAllItems, null, 10);
                 }
             }
         }
