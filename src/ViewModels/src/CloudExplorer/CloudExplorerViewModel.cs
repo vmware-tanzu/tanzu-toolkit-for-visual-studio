@@ -19,6 +19,7 @@ namespace Tanzu.Toolkit.ViewModels
         private bool _hasCloudTargets;
         private ObservableCollection<CfInstanceViewModel> _cfs;
         private volatile bool _isRefreshingAll = false;
+        private volatile int _numThreads = 0;
         private object _threadLock = new object();
         private readonly IServiceProvider _services;
         private readonly IThreadingService _threadingService;
@@ -252,7 +253,6 @@ namespace Tanzu.Toolkit.ViewModels
                 SyncCloudFoundryList();
 
                 object threadLock = new object();
-                int numThreads = 0;
 
                 foreach (CfInstanceViewModel cfivm in CloudFoundryList)
                 {
@@ -280,14 +280,14 @@ namespace Tanzu.Toolkit.ViewModels
 
                                                     lock (threadLock)
                                                     {
-                                                        if (numThreads < 1) throw new ArgumentOutOfRangeException();
-                                                        numThreads -= 1;
+                                                        if (_numThreads < 1) throw new ArgumentOutOfRangeException();
+                                                        _numThreads -= 1;
                                                     }
                                                 });
 
                                                 lock (threadLock)
                                                 {
-                                                    numThreads += 1;
+                                                    _numThreads += 1;
                                                 }
 
                                                 _threadingService.StartTask(() => Task.Run(() => refreshSpaceTask.Start())); // wrapped in extra task runner for ease of unit testing
@@ -296,14 +296,14 @@ namespace Tanzu.Toolkit.ViewModels
 
                                         lock (threadLock)
                                         {
-                                            if (numThreads < 1) throw new ArgumentOutOfRangeException();
-                                            numThreads -= 1;
+                                            if (_numThreads < 1) throw new ArgumentOutOfRangeException();
+                                            _numThreads -= 1;
                                         }
                                     });
 
                                     lock (threadLock)
                                     {
-                                        numThreads += 1;
+                                        _numThreads += 1;
                                     }
 
                                     _threadingService.StartTask(() => Task.Run(() => refreshOrgTask.Start())); // wrapped in extra task runner for ease of unit testing
@@ -312,14 +312,14 @@ namespace Tanzu.Toolkit.ViewModels
 
                             lock (threadLock)
                             {
-                                if (numThreads < 1) throw new ArgumentOutOfRangeException();
-                                numThreads -= 1;
+                                if (_numThreads < 1) throw new ArgumentOutOfRangeException();
+                                _numThreads -= 1;
                             }
                         });
 
                         lock (threadLock)
                         {
-                            numThreads += 1;
+                            _numThreads += 1;
                         }
 
                         _threadingService.StartTask(() => Task.Run(() => refreshCfTask.Start())); // wrapped in extra task runner for ease of unit testing
@@ -332,7 +332,7 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     lock (threadLock)
                     {
-                        threadsStillRunning = numThreads;
+                        threadsStillRunning = _numThreads;
                     }
 
                     Thread.Sleep(waitTime);
