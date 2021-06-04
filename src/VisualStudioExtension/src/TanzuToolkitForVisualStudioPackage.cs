@@ -13,6 +13,7 @@ using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.CmdProcess;
 using Tanzu.Toolkit.Services.Dialog;
+using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.FileLocator;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.Threading;
@@ -48,7 +49,7 @@ namespace Tanzu.Toolkit.VisualStudio
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [ProvideToolWindow(typeof(TanzuCloudExplorerToolWindow))]
     [ProvideToolWindow(typeof(OutputToolWindow))]
-    public sealed class TanzuToolkitForVisualStudioPackage : AsyncPackage
+    public class TanzuToolkitForVisualStudioPackage : AsyncPackage
     {
         /// <summary>
         /// TanzuToolkitPackage GUID string.
@@ -125,6 +126,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<ILoggingService, LoggingService>();
             services.AddSingleton<IViewService, VsToolWindowService>();
             services.AddSingleton<IThreadingService, ThreadingService>();
+            services.AddSingleton<IErrorDialog>(new ErrorDialogWindowService(this));
             services.AddSingleton<IUiDispatcherService, UiDispatcherService>();
 
             services.AddTransient<ICmdProcessService, CmdProcessService>();
@@ -139,7 +141,6 @@ namespace Tanzu.Toolkit.VisualStudio
 
             services.AddTransient<IDeploymentDialogViewModel, DeploymentDialogViewModel>();
             services.AddTransient<IAddCloudDialogViewModel, AddCloudDialogViewModel>();
-            services.AddTransient<IErrorDialogViewModel, ErrorDialogViewModel>();
 
             /* Views */
             services.AddSingleton<IOutputView, OutputView>();
@@ -147,7 +148,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddTransient<ICloudExplorerView, CloudExplorerView>();
             services.AddTransient<IDeploymentDialogView, DeploymentDialogView>();
             services.AddTransient<IAddCloudDialogView, AddCloudDialogView>();
-            services.AddTransient<IErrorDialogView, ErrorDialogView>();
+            
         }
     }
 }

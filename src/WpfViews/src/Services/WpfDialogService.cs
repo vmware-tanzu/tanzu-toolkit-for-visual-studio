@@ -33,21 +33,5 @@ namespace Tanzu.Toolkit.WpfViews.Services
 
             return new WpfDialogResult() { Result = result };
         }
-
-        public void DisplayErrorDialog(string errorTitle, string errorMsg)
-        {
-            /* Ensure dialog is displayed in UI thread */
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                var viewModel = new ErrorDialogViewModel()
-                {
-                    Title = errorTitle,
-                    Message = errorMsg,
-                };
-
-                var view = new ErrorDialogView(viewModel);
-                view.ShowDialog();
-            });
-        }
     }
 }

@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
+using Tanzu.Toolkit.Services.ErrorDialog;
 
 [assembly: InternalsVisibleTo("Tanzu.Toolkit.ViewModels.Tests")]
 
@@ -25,6 +27,7 @@ namespace Tanzu.Toolkit.ViewModels
         private string _status;
         private string _appName;
         private readonly bool _fullFrameworkDeployment = false;
+        private static IErrorDialog _dialogService;
 
         private List<CloudFoundryInstance> _cfInstances;
         private List<CloudFoundryOrganization> _cfOrgs;
@@ -36,6 +39,7 @@ namespace Tanzu.Toolkit.ViewModels
         public DeploymentDialogViewModel(IServiceProvider services, string directoryOfProjectToDeploy, string targetFrameworkMoniker)
             : base(services)
         {
+            _dialogService = services.GetRequiredService<IErrorDialog>();
             IView outputView = ViewLocatorService.NavigateTo(nameof(ViewModels.OutputViewModel)) as IView;
             OutputViewModel = outputView?.ViewModel as IOutputViewModel;
 
@@ -220,7 +224,7 @@ namespace Tanzu.Toolkit.ViewModels
                 var errorMsg = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
                 errorMsg += System.Environment.NewLine + "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Cloud Explorer & re-connecting to a new one.";
 
-                DialogService.DisplayErrorDialog(errorTitle, errorMsg);
+                _dialogService.DisplayErrorDialog(errorTitle, errorMsg);
             }
             else
             {
@@ -251,7 +255,7 @@ namespace Tanzu.Toolkit.ViewModels
                 else
                 {
                     Logger.Error($"{GetOrgsFailureMsg}. {orgsResponse}");
-                    DialogService.DisplayErrorDialog(GetOrgsFailureMsg, orgsResponse.Explanation);
+                    _dialogService.DisplayErrorDialog(GetOrgsFailureMsg, orgsResponse.Explanation);
                 }
             }
         }
@@ -273,7 +277,7 @@ namespace Tanzu.Toolkit.ViewModels
                 else
                 {
                     Logger.Error($"{GetSpacesFailureMsg}. {spacesResponse}");
-                    DialogService.DisplayErrorDialog(GetSpacesFailureMsg, spacesResponse.Explanation);
+                    _dialogService.DisplayErrorDialog(GetSpacesFailureMsg, spacesResponse.Explanation);
                 }
             }
         }
@@ -302,7 +306,7 @@ namespace Tanzu.Toolkit.ViewModels
                     SelectedSpace.ParentOrg.OrgName,
                     SelectedSpace.SpaceName,
                     deploymentResult.ToString());
-                DialogService.DisplayErrorDialog(errorTitle, errorMsg);
+                _dialogService.DisplayErrorDialog(errorTitle, errorMsg);
             }
 
             DeploymentInProgress = false;

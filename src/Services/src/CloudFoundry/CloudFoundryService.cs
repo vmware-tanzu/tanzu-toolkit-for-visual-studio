@@ -13,6 +13,7 @@ using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.Dialog;
+using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.FileLocator;
 using Tanzu.Toolkit.Services.Logging;
 using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
@@ -28,7 +29,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         private static ICfApiClient _cfApiClient;
         private static ICfCliService _cfCliService;
         private static IFileLocatorService _fileLocatorService;
-        private static IDialogService _dialogService;
+        private static IErrorDialog _dialogService;
         private static ILogger _logger;
 
         public string LoginFailureMessage { get; } = "Login failed.";
@@ -42,7 +43,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             _cfApiClient = services.GetRequiredService<ICfApiClient>();
             _cfCliService = services.GetRequiredService<ICfCliService>();
             _fileLocatorService = services.GetRequiredService<IFileLocatorService>();
-            _dialogService = services.GetRequiredService<IDialogService>();
+            _dialogService = services.GetRequiredService<IErrorDialog>();
 
             var logSvc = services.GetRequiredService<ILoggingService>();
             _logger = logSvc.Logger;

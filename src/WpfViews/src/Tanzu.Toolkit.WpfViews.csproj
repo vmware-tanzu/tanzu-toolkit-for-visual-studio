@@ -64,13 +64,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\AsyncDelegatingCommand.cs" />
-    <Compile Include="ErrorDialogView.xaml.cs">
-      <DependentUpon>ErrorDialogView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="ICloudExplorerView.cs" />
     <Compile Include="IAddCloudDialogView.cs" />
     <Compile Include="IDeploymentDialogView.cs" />
-    <Compile Include="IErrorDialogView.cs" />
     <Compile Include="IOutputView.cs" />
     <Compile Include="LoadingSpinnerSmall.cs" />
     <Compile Include="OutputView.xaml.cs">
@@ -101,10 +97,6 @@
       <DependentUpon>AddCloudDialogView.xaml</DependentUpon>
     </Compile>
     <Page Include="DeploymentDialogView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="ErrorDialogView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

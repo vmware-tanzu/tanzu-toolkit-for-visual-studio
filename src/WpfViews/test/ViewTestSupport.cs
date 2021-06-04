@@ -4,6 +4,7 @@ using Moq;
 using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.Dialog;
+using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
@@ -15,6 +16,7 @@ namespace Tanzu.Toolkit.WpfViews.Tests
         protected IServiceProvider services;
 
         protected Mock<ICloudFoundryService> mockCloudFoundryService;
+        protected Mock<IErrorDialog> mockErrorDialogService;
         protected Mock<IDialogService> mockDialogService;
         protected Mock<IViewLocatorService> mockViewLocatorService;
         protected Mock<ILoggingService> mockLoggingService;
@@ -25,6 +27,7 @@ namespace Tanzu.Toolkit.WpfViews.Tests
         {
             var services = new ServiceCollection();
             mockCloudFoundryService = new Mock<ICloudFoundryService>();
+            mockErrorDialogService = new Mock<IErrorDialog>();
             mockDialogService = new Mock<IDialogService>();
             mockViewLocatorService = new Mock<IViewLocatorService>();
             mockLoggingService = new Mock<ILoggingService>();
@@ -32,6 +35,7 @@ namespace Tanzu.Toolkit.WpfViews.Tests
             mockThreadingService = new Mock<IThreadingService>();
 
             services.AddSingleton(mockCloudFoundryService.Object);
+            services.AddSingleton(mockErrorDialogService.Object);
             services.AddSingleton(mockDialogService.Object);
             services.AddSingleton(mockViewLocatorService.Object);
             services.AddSingleton(mockLoggingService.Object);

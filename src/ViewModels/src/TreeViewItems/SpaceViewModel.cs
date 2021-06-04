@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
+using Tanzu.Toolkit.Services.ErrorDialog;
 
 namespace Tanzu.Toolkit.ViewModels
 {
@@ -11,6 +13,7 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string EmptyAppsPlaceholderMsg = "No apps";
         internal const string LoadingMsg = "Loading apps...";
         internal static readonly string _getAppsFailureMsg = "Unable to load apps.";
+        private static IErrorDialog _dialogService;
 
         private volatile bool _isRefreshing = false;
         private readonly object _threadLock = new object();
@@ -44,6 +47,7 @@ namespace Tanzu.Toolkit.ViewModels
         public SpaceViewModel(CloudFoundrySpace space, IServiceProvider services, bool expanded = false)
             : base(null, services, expanded: expanded)
         {
+            _dialogService = services.GetRequiredService<IErrorDialog>();
             Space = space;
             DisplayText = Space.SpaceName;
 
@@ -74,7 +78,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
-                DialogService.DisplayErrorDialog(_getAppsFailureMsg, appsResult.Explanation);
+                _dialogService.DisplayErrorDialog(_getAppsFailureMsg, appsResult.Explanation);
             }
 
             return newAppsList;
@@ -114,7 +118,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 IsLoading = false;
 
-                DialogService.DisplayErrorDialog(_getAppsFailureMsg, appsResult.Explanation);
+                _dialogService.DisplayErrorDialog(_getAppsFailureMsg, appsResult.Explanation);
 
                 IsExpanded = false;
             }
