@@ -1,9 +1,11 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
+using Tanzu.Toolkit.Services.ErrorDialog;
 
 namespace Tanzu.Toolkit.ViewModels
 {
@@ -12,6 +14,7 @@ namespace Tanzu.Toolkit.ViewModels
         internal static readonly string _stopAppErrorMsg = "Encountered an error while stopping app";
         internal static readonly string _startAppErrorMsg = "Encountered an error while starting app";
         internal static readonly string _deleteAppErrorMsg = "Encountered an error while deleting app";
+        private static IErrorDialog _dialogService;
 
         private bool _hasCloudTargets;
         private ObservableCollection<CfInstanceViewModel> _cfs;
@@ -20,6 +23,7 @@ namespace Tanzu.Toolkit.ViewModels
         public CloudExplorerViewModel(IServiceProvider services)
             : base(services)
         {
+            _dialogService = services.GetRequiredService<IErrorDialog>();
             _services = services;
             _cfs = new ObservableCollection<CfInstanceViewModel>();
             HasCloudTargets = CloudFoundryService.CloudFoundryInstances.Keys.Count > 0;
@@ -110,7 +114,7 @@ namespace Tanzu.Toolkit.ViewModels
                 var errorMsg = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
                 errorMsg += System.Environment.NewLine + "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Cloud Explorer & re-connecting to a new one.";
 
-                DialogService.DisplayErrorDialog(errorTitle, errorMsg);
+                _dialogService.DisplayErrorDialog(errorTitle, errorMsg);
             }
             else
             {
@@ -128,7 +132,7 @@ namespace Tanzu.Toolkit.ViewModels
                 if (!stopResult.Succeeded)
                 {
                     Logger.Error(_stopAppErrorMsg + " {AppName}. {StopResult}", cfApp.AppName, stopResult.ToString());
-                    DialogService.DisplayErrorDialog($"{_stopAppErrorMsg} {cfApp.AppName}.", stopResult.Explanation);
+                    _dialogService.DisplayErrorDialog($"{_stopAppErrorMsg} {cfApp.AppName}.", stopResult.Explanation);
                 }
             }
         }
@@ -141,7 +145,7 @@ namespace Tanzu.Toolkit.ViewModels
                 if (!startResult.Succeeded)
                 {
                     Logger.Error(_startAppErrorMsg + " {AppName}. {StartResult}", cfApp.AppName, startResult.ToString());
-                    DialogService.DisplayErrorDialog($"{_startAppErrorMsg} {cfApp.AppName}.", startResult.Explanation);
+                    _dialogService.DisplayErrorDialog($"{_startAppErrorMsg} {cfApp.AppName}.", startResult.Explanation);
                 }
             }
         }
@@ -154,7 +158,7 @@ namespace Tanzu.Toolkit.ViewModels
                 if (!deleteResult.Succeeded)
                 {
                     Logger.Error(_deleteAppErrorMsg + " {AppName}. {DeleteResult}", cfApp.AppName, deleteResult.ToString());
-                    DialogService.DisplayErrorDialog($"{_deleteAppErrorMsg} {cfApp.AppName}.", deleteResult.Explanation);
+                    _dialogService.DisplayErrorDialog($"{_deleteAppErrorMsg} {cfApp.AppName}.", deleteResult.Explanation);
                 }
             }
         }
@@ -167,7 +171,7 @@ namespace Tanzu.Toolkit.ViewModels
                 if (!recentLogsResult.Succeeded)
                 {
                     Logger.Error($"Unable to retrieve recent logs for {cfApp.AppName}. {recentLogsResult.Explanation}. {recentLogsResult.CmdDetails}");
-                    DialogService.DisplayErrorDialog($"Unable to retrieve recent logs for {cfApp.AppName}.", recentLogsResult.Explanation);
+                    _dialogService.DisplayErrorDialog($"Unable to retrieve recent logs for {cfApp.AppName}.", recentLogsResult.Explanation);
                 }
                 else
                 {

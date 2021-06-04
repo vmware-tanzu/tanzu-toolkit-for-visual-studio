@@ -46,6 +46,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ErrorDialogWindow.cs" />
     <Compile Include="Commands\OpenLogsCommand.cs" />
     <Compile Include="Commands\OutputWindowCommand.cs" />
     <Compile Include="Commands\PushToCloudFoundryCommand.cs" />

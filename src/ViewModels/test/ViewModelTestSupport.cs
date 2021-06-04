@@ -8,6 +8,7 @@ using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.CmdProcess;
 using Tanzu.Toolkit.Services.Dialog;
+using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
@@ -20,6 +21,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         protected Mock<ICloudFoundryService> MockCloudFoundryService { get; set; }
         protected Mock<IDialogService> MockDialogService { get; set; }
+        protected Mock<IErrorDialog> MockErrorDialogService { get; set; }
         protected Mock<IViewLocatorService> MockViewLocatorService { get; set; }
         protected Mock<ILoggingService> MockLoggingService { get; set; }
         protected Mock<ILogger> MockLogger { get; set; }

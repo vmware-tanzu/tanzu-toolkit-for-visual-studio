@@ -148,7 +148,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var expectedErrorTitle = $"{CloudExplorerViewModel._stopAppErrorMsg} {fakeApp.AppName}.";
             var expectedErrorMsg = FakeFailureDetailedResult.Explanation;
 
-            MockDialogService.Verify(mock => mock.
+            MockErrorDialogService.Verify(mock => mock.
               DisplayErrorDialog(expectedErrorTitle, expectedErrorMsg),
                 Times.Once);
         }
@@ -208,7 +208,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var expectedErrorTitle = $"{CloudExplorerViewModel._startAppErrorMsg} {fakeApp.AppName}.";
             var expectedErrorMsg = FakeFailureDetailedResult.Explanation;
 
-            MockDialogService.Verify(mock => mock.
+            MockErrorDialogService.Verify(mock => mock.
               DisplayErrorDialog(expectedErrorTitle, expectedErrorMsg),
                 Times.Once);
         }
@@ -268,7 +268,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var expectedErrorTitle = $"{CloudExplorerViewModel._deleteAppErrorMsg} {fakeApp.AppName}.";
             var expectedErrorMsg = FakeFailureDetailedResult.Explanation;
 
-            MockDialogService.Verify(mock => mock.
+            MockErrorDialogService.Verify(mock => mock.
               DisplayErrorDialog(expectedErrorTitle, expectedErrorMsg),
                 Times.Once);
         }
@@ -1426,7 +1426,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 Error(It.Is<string>(s => s.Contains(fakeLogsResult.Explanation))),
                     Times.Once);
 
-            MockDialogService.Verify(m => m.
+            MockErrorDialogService.Verify(m => m.
                 DisplayErrorDialog(It.Is<string>(s => s.Contains(fakeApp.AppName)), It.Is<string>(s => s.Contains(fakeLogsResult.Explanation))),
                     Times.Once);
         }

@@ -274,7 +274,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var expectedErrorTitle = $"{DeploymentDialogViewModel.DeploymentErrorMsg} {_fakeAppName}.";
             var expectedErrorMsg = $"{FakeFailureDetailedResult.Explanation}";
 
-            MockDialogService.Setup(mock => mock.
+            MockErrorDialogService.Setup(mock => mock.
                 DisplayErrorDialog(expectedErrorTitle, expectedErrorMsg));
 
             await _sut.StartDeployment();
@@ -311,7 +311,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var expectedErrorTitle = $"{DeploymentDialogViewModel.DeploymentErrorMsg} {_fakeAppName}.";
             var expectedErrorMsg = $"{FakeFailureDetailedResult.Explanation}";
 
-            MockDialogService.Setup(mock => mock.
+            MockErrorDialogService.Setup(mock => mock.
                 DisplayErrorDialog(expectedErrorTitle, expectedErrorMsg));
 
             await _sut.StartDeployment();
@@ -371,7 +371,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 GetOrgsForCfInstanceAsync(FakeCfInstance, true))
                     .ReturnsAsync(fakeFailedOrgsResponse);
 
-            MockDialogService.Setup(mock => mock.
+            MockErrorDialogService.Setup(mock => mock.
                 DisplayErrorDialog(DeploymentDialogViewModel.GetOrgsFailureMsg, fakeExplanation));
 
             _sut.SelectedCf = FakeCfInstance;
@@ -398,7 +398,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 GetOrgsForCfInstanceAsync(FakeCfInstance, true))
                     .ReturnsAsync(fakeFailedOrgsResponse);
 
-            MockDialogService.Setup(mock => mock.
+            MockErrorDialogService.Setup(mock => mock.
                 DisplayErrorDialog(DeploymentDialogViewModel.GetOrgsFailureMsg, fakeExplanation));
 
             _sut.SelectedCf = FakeCfInstance;
@@ -478,7 +478,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 GetSpacesForOrgAsync(FakeCfOrg, true))
                     .ReturnsAsync(fakeFailedSpacesResponse);
 
-            MockDialogService.Setup(mock => mock.
+            MockErrorDialogService.Setup(mock => mock.
                 DisplayErrorDialog(DeploymentDialogViewModel.GetSpacesFailureMsg, fakeExplanation));
 
             _sut.SelectedCf = FakeCfInstance;
@@ -507,7 +507,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 GetSpacesForOrgAsync(FakeCfOrg, true))
                     .ReturnsAsync(fakeFailedSpacesResponse);
 
-            MockDialogService.Setup(mock => mock.
+            MockErrorDialogService.Setup(mock => mock.
                 DisplayErrorDialog(DeploymentDialogViewModel.GetSpacesFailureMsg, fakeExplanation));
 
             _sut.SelectedCf = FakeCfInstance;

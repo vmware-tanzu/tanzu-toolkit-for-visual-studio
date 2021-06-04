@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
+using Tanzu.Toolkit.Services.ErrorDialog;
 
 namespace Tanzu.Toolkit.ViewModels
 {
@@ -11,12 +13,14 @@ namespace Tanzu.Toolkit.ViewModels
         internal static readonly string _emptyOrgsPlaceholderMsg = "No orgs";
         internal static readonly string _loadingMsg = "Loading orgs...";
         internal static readonly string _getOrgsFailureMsg = "Unable to load orgs";
+        private static IErrorDialog _dialogService;
 
         public CloudFoundryInstance CloudFoundryInstance { get; }
 
         public CfInstanceViewModel(CloudFoundryInstance cloudFoundryInstance, IServiceProvider services)
             : base(null, services)
         {
+            _dialogService = services.GetRequiredService<IErrorDialog>();
             CloudFoundryInstance = cloudFoundryInstance;
             DisplayText = CloudFoundryInstance.InstanceName;
 
@@ -49,7 +53,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
-                DialogService.DisplayErrorDialog(_getOrgsFailureMsg, orgsResponse.Explanation);
+                _dialogService.DisplayErrorDialog(_getOrgsFailureMsg, orgsResponse.Explanation);
             }
 
             return newOrgsList;
@@ -90,7 +94,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 IsLoading = false;
 
-                DialogService.DisplayErrorDialog(_getOrgsFailureMsg, orgsResponse.Explanation);
+                _dialogService.DisplayErrorDialog(_getOrgsFailureMsg, orgsResponse.Explanation);
 
                 IsExpanded = false;
             }

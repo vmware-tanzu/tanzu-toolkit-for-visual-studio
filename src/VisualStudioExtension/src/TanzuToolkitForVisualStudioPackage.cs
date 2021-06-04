@@ -12,6 +12,7 @@ using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.CmdProcess;
 using Tanzu.Toolkit.Services.Dialog;
+using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.FileLocator;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.Threading;
@@ -123,6 +124,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<ILoggingService, LoggingService>();
             services.AddSingleton<IViewService, VsToolWindowService>();
             services.AddSingleton<IThreadingService, ThreadingService>();
+            services.AddSingleton<IErrorDialog, ErrorDialogWindowService>();
 
             services.AddTransient<ICmdProcessService, CmdProcessService>();
 
@@ -136,7 +138,6 @@ namespace Tanzu.Toolkit.VisualStudio
 
             services.AddTransient<IDeploymentDialogViewModel, DeploymentDialogViewModel>();
             services.AddTransient<IAddCloudDialogViewModel, AddCloudDialogViewModel>();
-            services.AddTransient<IErrorDialogViewModel, ErrorDialogViewModel>();
 
             /* Views */
             services.AddSingleton<IOutputView, OutputView>();
@@ -144,7 +145,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddTransient<ICloudExplorerView, CloudExplorerView>();
             services.AddTransient<IDeploymentDialogView, DeploymentDialogView>();
             services.AddTransient<IAddCloudDialogView, AddCloudDialogView>();
-            services.AddTransient<IErrorDialogView, ErrorDialogView>();
+            
         }
     }
 }

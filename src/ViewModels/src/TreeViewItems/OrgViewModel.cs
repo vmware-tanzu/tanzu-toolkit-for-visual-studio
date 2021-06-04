@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
+using Tanzu.Toolkit.Services.ErrorDialog;
 
 namespace Tanzu.Toolkit.ViewModels
 {
@@ -11,12 +13,15 @@ namespace Tanzu.Toolkit.ViewModels
         internal static readonly string _emptySpacesPlaceholderMsg = "No spaces";
         internal static readonly string _loadingMsg = "Loading spaces...";
         internal static readonly string _getSpacesFailureMsg = "Unable to load spaces.";
+        private static IErrorDialog _dialogService;
 
         public CloudFoundryOrganization Org { get; }
 
         public OrgViewModel(CloudFoundryOrganization org, IServiceProvider services)
             : base(null, services)
         {
+            _dialogService = services.GetRequiredService<IErrorDialog>();
+
             Org = org;
             DisplayText = Org.OrgName;
 
@@ -49,7 +54,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
-                DialogService.DisplayErrorDialog(_getSpacesFailureMsg, spacesResponse.Explanation);
+                _dialogService.DisplayErrorDialog(_getSpacesFailureMsg, spacesResponse.Explanation);
             }
 
             return newSpacesList;
@@ -90,7 +95,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 IsLoading = false;
 
-                DialogService.DisplayErrorDialog(_getSpacesFailureMsg, spacesResponse.Explanation);
+                _dialogService.DisplayErrorDialog(_getSpacesFailureMsg, spacesResponse.Explanation);
 
                 IsExpanded = false;
             }

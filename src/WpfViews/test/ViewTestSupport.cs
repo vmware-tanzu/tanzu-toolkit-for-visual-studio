@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.Dialog;
+using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.ViewLocator;
 
@@ -13,7 +14,7 @@ namespace Tanzu.Toolkit.WpfViews.Tests
         protected IServiceProvider services;
 
         protected Mock<ICloudFoundryService> mockCloudFoundryService;
-        protected Mock<IDialogService> mockDialogService;
+        protected Mock<IErrorDialog> mockDialogService;
         protected Mock<IViewLocatorService> mockViewLocatorService;
         protected Mock<ILoggingService> mockLoggingService;
 
@@ -21,7 +22,7 @@ namespace Tanzu.Toolkit.WpfViews.Tests
         {
             var services = new ServiceCollection();
             mockCloudFoundryService = new Mock<ICloudFoundryService>();
-            mockDialogService = new Mock<IDialogService>();
+            mockDialogService = new Mock<IErrorDialog>();
             mockViewLocatorService = new Mock<IViewLocatorService>();
             mockLoggingService = new Mock<ILoggingService>();
 

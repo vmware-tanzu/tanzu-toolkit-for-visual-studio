@@ -161,7 +161,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsFalse(_sut.IsLoading);
 
-            MockDialogService.Verify(mock => mock.
+            MockErrorDialogService.Verify(mock => mock.
               DisplayErrorDialog(CfInstanceViewModel._getOrgsFailureMsg, fakeFailedResult.Explanation),
                 Times.Once);
         }
@@ -197,7 +197,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsFalse(expandedViewModel.IsExpanded);
             Assert.IsTrue(_receivedEvents.Contains("IsExpanded"));
 
-            MockDialogService.Verify(mock => mock.
+            MockErrorDialogService.Verify(mock => mock.
               DisplayErrorDialog(CfInstanceViewModel._getOrgsFailureMsg, fakeFailedResult.Explanation),
                 Times.Once);
         }
@@ -250,7 +250,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             CollectionAssert.AreEqual(EmptyListOfOrgs, result);
 
-            MockDialogService.Verify(mock => mock.
+            MockErrorDialogService.Verify(mock => mock.
               DisplayErrorDialog(CfInstanceViewModel._getOrgsFailureMsg, fakeFailedResult.Explanation),
                 Times.Once);
         }
