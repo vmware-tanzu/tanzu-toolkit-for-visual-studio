@@ -19,8 +19,8 @@ namespace Tanzu.Toolkit.ViewModels
         private bool _hasCloudTargets;
         private ObservableCollection<CfInstanceViewModel> _cfs;
         private volatile bool _isRefreshingAll = false;
-        private volatile int _numThreads = 0;
-        private object _threadLock = new object();
+        private volatile int _numRefreshThreads = 0;
+        private object _refreshLock = new object();
         private readonly IServiceProvider _services;
         private readonly IThreadingService _threadingService;
 
@@ -65,7 +65,7 @@ namespace Tanzu.Toolkit.ViewModels
         {
             get
             {
-                lock (_threadLock)
+                lock (_refreshLock)
                 {
                     return _isRefreshingAll;
                 }
@@ -74,7 +74,7 @@ namespace Tanzu.Toolkit.ViewModels
             internal set
             {
 
-                lock (_threadLock)
+                lock (_refreshLock)
                 {
                     _isRefreshingAll = value;
                 }
@@ -280,14 +280,14 @@ namespace Tanzu.Toolkit.ViewModels
 
                                                     lock (threadLock)
                                                     {
-                                                        if (_numThreads < 1) throw new ArgumentOutOfRangeException();
-                                                        _numThreads -= 1;
+                                                        if (_numRefreshThreads < 1) throw new ArgumentOutOfRangeException();
+                                                        _numRefreshThreads -= 1;
                                                     }
                                                 });
 
                                                 lock (threadLock)
                                                 {
-                                                    _numThreads += 1;
+                                                    _numRefreshThreads += 1;
                                                 }
 
                                                 _threadingService.StartTask(() => Task.Run(() => refreshSpaceTask.Start())); // wrapped in extra task runner for ease of unit testing
@@ -296,14 +296,14 @@ namespace Tanzu.Toolkit.ViewModels
 
                                         lock (threadLock)
                                         {
-                                            if (_numThreads < 1) throw new ArgumentOutOfRangeException();
-                                            _numThreads -= 1;
+                                            if (_numRefreshThreads < 1) throw new ArgumentOutOfRangeException();
+                                            _numRefreshThreads -= 1;
                                         }
                                     });
 
                                     lock (threadLock)
                                     {
-                                        _numThreads += 1;
+                                        _numRefreshThreads += 1;
                                     }
 
                                     _threadingService.StartTask(() => Task.Run(() => refreshOrgTask.Start())); // wrapped in extra task runner for ease of unit testing
@@ -312,14 +312,14 @@ namespace Tanzu.Toolkit.ViewModels
 
                             lock (threadLock)
                             {
-                                if (_numThreads < 1) throw new ArgumentOutOfRangeException();
-                                _numThreads -= 1;
+                                if (_numRefreshThreads < 1) throw new ArgumentOutOfRangeException();
+                                _numRefreshThreads -= 1;
                             }
                         });
 
                         lock (threadLock)
                         {
-                            _numThreads += 1;
+                            _numRefreshThreads += 1;
                         }
 
                         _threadingService.StartTask(() => Task.Run(() => refreshCfTask.Start())); // wrapped in extra task runner for ease of unit testing
@@ -332,7 +332,7 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     lock (threadLock)
                     {
-                        threadsStillRunning = _numThreads;
+                        threadsStillRunning = _numRefreshThreads;
                     }
 
                     Thread.Sleep(waitTime);
