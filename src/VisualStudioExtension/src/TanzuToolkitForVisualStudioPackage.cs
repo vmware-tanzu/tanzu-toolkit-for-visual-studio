@@ -47,7 +47,7 @@ namespace Tanzu.Toolkit.VisualStudio
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [ProvideToolWindow(typeof(TanzuCloudExplorerToolWindow))]
     [ProvideToolWindow(typeof(OutputToolWindow))]
-    public sealed class TanzuToolkitForVisualStudioPackage : AsyncPackage
+    public class TanzuToolkitForVisualStudioPackage : AsyncPackage
     {
         /// <summary>
         /// TanzuToolkitPackage GUID string.
@@ -124,7 +124,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<ILoggingService, LoggingService>();
             services.AddSingleton<IViewService, VsToolWindowService>();
             services.AddSingleton<IThreadingService, ThreadingService>();
-            services.AddSingleton<IErrorDialog, ErrorDialogWindowService>();
+            services.AddSingleton<IErrorDialog>(new ErrorDialogWindowService(this));
 
             services.AddTransient<ICmdProcessService, CmdProcessService>();
 

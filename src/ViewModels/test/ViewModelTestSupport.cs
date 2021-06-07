@@ -59,6 +59,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var services = new ServiceCollection();
 
             MockCloudFoundryService = new Mock<ICloudFoundryService>();
+            MockErrorDialogService = new Mock<IErrorDialog>();
             MockDialogService = new Mock<IDialogService>();
             MockViewLocatorService = new Mock<IViewLocatorService>();
             MockLoggingService = new Mock<ILoggingService>();
@@ -68,6 +69,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockLoggingService.SetupGet(m => m.Logger).Returns(MockLogger.Object);
 
             services.AddSingleton(MockCloudFoundryService.Object);
+            services.AddSingleton(MockErrorDialogService.Object);
             services.AddSingleton(MockDialogService.Object);
             services.AddSingleton(MockViewLocatorService.Object);
             services.AddSingleton(MockLoggingService.Object);
