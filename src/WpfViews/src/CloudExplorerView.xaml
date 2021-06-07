@@ -53,8 +53,12 @@
                    ToolTip="Refresh All Cloud Connections"/>
         </Button>
 
-        <Rectangle Grid.Row="1" Grid.ColumnSpan="3" Fill="White"/>
-        
+        <TextBlock Grid.Row="0" Grid.Column="2"
+                   Visibility="{Binding Path=IsRefreshingAll, Converter={StaticResource Visibility}}" 
+                   Text="Refreshing..."/>
+
+        <Rectangle Grid.Row="1" Grid.RowSpan="1" Grid.ColumnSpan="3" Fill="White"/>
+
         <TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" 
                  Margin="5"  IsReadOnly="True" 
                  TextWrapping="Wrap" BorderBrush="Transparent" 

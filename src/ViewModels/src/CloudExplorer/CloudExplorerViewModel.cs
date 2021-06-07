@@ -3,9 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services.ErrorDialog;
+
 
 namespace Tanzu.Toolkit.ViewModels
 {
@@ -18,13 +20,17 @@ namespace Tanzu.Toolkit.ViewModels
 
         private bool _hasCloudTargets;
         private ObservableCollection<CfInstanceViewModel> _cfs;
+        private bool isRefreshingAll = false;
         private readonly IServiceProvider _services;
+        private readonly IThreadingService _threadingService;
 
         public CloudExplorerViewModel(IServiceProvider services)
             : base(services)
         {
             _dialogService = services.GetRequiredService<IErrorDialog>();
             _services = services;
+            _threadingService = services.GetRequiredService<IThreadingService>();
+
             _cfs = new ObservableCollection<CfInstanceViewModel>();
             HasCloudTargets = CloudFoundryService.CloudFoundryInstances.Keys.Count > 0;
         }
@@ -48,6 +54,17 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 _hasCloudTargets = value;
                 RaisePropertyChangedEvent("HasCloudTargets");
+            }
+        }
+
+        public bool IsRefreshingAll
+        {
+            get => isRefreshingAll;
+
+            internal set
+            {
+                isRefreshingAll = value;
+                RaisePropertyChangedEvent("IsRefreshingAll");
             }
         }
 
@@ -91,7 +108,7 @@ namespace Tanzu.Toolkit.ViewModels
             return true;
         }
 
-        public bool CanRefreshAllCloudConnections(object arg)
+        public bool CanInitiateFullRefresh(object arg)
         {
             return true;
         }
@@ -189,138 +206,121 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public async Task RefreshCfInstance(object cfInstanceViewModel)
+        public void RefreshSpace(object arg)
         {
-            if (cfInstanceViewModel is CfInstanceViewModel cfivm)
+            if (arg is SpaceViewModel spaceViewModel)
             {
-                var currentOrgs = await cfivm.FetchChildren();
-
-                RemoveNonexistentOrgs(cfivm, currentOrgs);
-                AddNewOrgs(cfivm, currentOrgs);
-
-                if (cfivm.Children.Count == 0)
-                {
-                    cfivm.Children.Add(cfivm.EmptyPlaceholder);
-                }
-                else if (cfivm.Children.Count > 1 && cfivm.HasEmptyPlaceholder)
-                {
-                    cfivm.Children.Remove(cfivm.EmptyPlaceholder);
-                }
+                Task.Run(() => spaceViewModel.RefreshChildren());
             }
         }
 
-        public async Task RefreshOrg(object orgViewModel)
+        public void RefreshAllItems(object arg)
         {
-            if (orgViewModel is OrgViewModel ovm)
+            if (!IsRefreshingAll)
             {
-                var currentSpaces = await ovm.FetchChildren();
-
-                RemoveNonexistentSpaces(ovm, currentSpaces);
-                AddNewSpaces(ovm, currentSpaces);
-
-                if (ovm.Children.Count == 0)
-                {
-                    ovm.Children.Add(ovm.EmptyPlaceholder);
-                }
-                else if (ovm.Children.Count > 1 && ovm.HasEmptyPlaceholder)
-                {
-                    ovm.Children.Remove(ovm.EmptyPlaceholder);
-                }
+                _threadingService.StartTask(InitiateFullRefresh);
             }
         }
 
-        public async Task RefreshSpace(object spaceViewModel)
+        internal async Task InitiateFullRefresh()
         {
-            if (spaceViewModel is SpaceViewModel svm)
+            await Task.Run(() =>
             {
-                var currentApps = await svm.FetchChildren();
+                IsRefreshingAll = true;
 
-                RemoveNonexistentApps(svm, currentApps);
-                AddNewApps(svm, currentApps);
+                // before refreshing each cf instance, check the Model's record of Cloud
+                // connections & make sure `CloudFoundryList` matches those values
+                SyncCloudFoundryList();
 
-                if (svm.Children.Count == 0)
+                object threadLock = new object();
+                int numThreads = 0;
+
+                foreach (CfInstanceViewModel cfivm in CloudFoundryList)
                 {
-                    svm.Children.Add(svm.EmptyPlaceholder);
-                }
-                else if (svm.Children.Count > 1 && svm.HasEmptyPlaceholder)
-                {
-                    svm.Children.Remove(svm.EmptyPlaceholder);
-                }
-            }
-        }
-
-        public void RefreshApp(object appViewModel)
-        {
-            if (appViewModel is AppViewModel avm)
-            {
-                avm.SignalIsStoppedChanged();
-            }
-        }
-
-        public async Task RefreshAllCloudConnections(object arg)
-        {
-            // record original items before refreshing starts to
-            // avoid unnecessary LoadChildren calls for *new* items
-            var initalIds = new List<string>();
-
-            foreach (CfInstanceViewModel cfivm in CloudFoundryList)
-            {
-                initalIds.Add(cfivm.CloudFoundryInstance.InstanceId);
-
-                foreach (TreeViewItemViewModel cfChild in cfivm.Children)
-                {
-                    if (cfChild is OrgViewModel ovm)
+                    if (cfivm.IsExpanded)
                     {
-                        initalIds.Add(ovm.Org.OrgId);
-
-                        foreach (TreeViewItemViewModel orgChild in ovm.Children)
+                        var refreshCfTask = new Task(async () =>
                         {
-                            if (orgChild is SpaceViewModel svm)
+                            await cfivm.RefreshChildren();
+
+                            foreach (TreeViewItemViewModel cfChild in cfivm.Children)
                             {
-                                initalIds.Add(svm.Space.SpaceId);
-                            }
-                        }
-                    }
-                }
-            }
-
-            // before refreshing each cf instance, check the Model's record of Cloud
-            // connections & make sure `CloudFoundryList` matches those values
-            SyncCloudFoundryList();
-
-            foreach (CfInstanceViewModel cfivm in CloudFoundryList)
-            {
-                bool cfNotNew = initalIds.Contains(cfivm.CloudFoundryInstance.InstanceId);
-
-                if (cfNotNew)
-                {
-                    await RefreshCfInstance(cfivm);
-
-                    foreach (TreeViewItemViewModel cfChild in cfivm.Children)
-                    {
-                        if (cfChild is OrgViewModel ovm && initalIds.Contains(ovm.Org.OrgId))
-                        {
-                            await RefreshOrg(ovm);
-
-                            foreach (TreeViewItemViewModel orgChild in ovm.Children)
-                            {
-                                if (orgChild is SpaceViewModel svm && initalIds.Contains(svm.Space.SpaceId))
+                                if (cfChild is OrgViewModel ovm && cfChild.IsExpanded)
                                 {
-                                    await RefreshSpace(svm);
-
-                                    foreach (TreeViewItemViewModel spaceChild in svm.Children)
+                                    var refreshOrgTask = new Task(async () =>
                                     {
-                                        if (spaceChild is AppViewModel avm)
+                                        await ovm.RefreshChildren();
+
+                                        foreach (TreeViewItemViewModel orgChild in ovm.Children)
                                         {
-                                            RefreshApp(avm);
+                                            if (orgChild is SpaceViewModel svm && orgChild.IsExpanded)
+                                            {
+                                                var refreshSpaceTask = new Task(async () =>
+                                                {
+                                                    await svm.RefreshChildren();
+
+                                                    lock (threadLock)
+                                                    {
+                                                        if (numThreads < 1) throw new ArgumentOutOfRangeException();
+                                                        numThreads -= 1;
+                                                    }
+                                                });
+
+                                                lock (threadLock)
+                                                {
+                                                    numThreads += 1;
+                                                }
+
+                                                _threadingService.StartTask(() => Task.Run(() => refreshSpaceTask.Start())); // wrapped in extra task runner for ease of unit testing
+                                            }
                                         }
+
+                                        lock (threadLock)
+                                        {
+                                            if (numThreads < 1) throw new ArgumentOutOfRangeException();
+                                            numThreads -= 1;
+                                        }
+                                    });
+
+                                    lock (threadLock)
+                                    {
+                                        numThreads += 1;
                                     }
+
+                                    _threadingService.StartTask(() => Task.Run(() => refreshOrgTask.Start())); // wrapped in extra task runner for ease of unit testing
                                 }
                             }
+
+                            lock (threadLock)
+                            {
+                                if (numThreads < 1) throw new ArgumentOutOfRangeException();
+                                numThreads -= 1;
+                            }
+                        });
+
+                        lock (threadLock)
+                        {
+                            numThreads += 1;
                         }
+
+                        _threadingService.StartTask(() => Task.Run(() => refreshCfTask.Start())); // wrapped in extra task runner for ease of unit testing
                     }
                 }
-            }
+
+                int threadsStillRunning = 1;
+                int waitTime = 100;
+                while (threadsStillRunning > 0)
+                {
+                    lock (threadLock)
+                    {
+                        threadsStillRunning = numThreads;
+                    }
+
+                    Thread.Sleep(waitTime);
+                }
+
+                IsRefreshingAll = false;
+            });
         }
 
         public void RemoveCloudConnection(object arg)
@@ -367,7 +367,7 @@ namespace Tanzu.Toolkit.ViewModels
 
                     if (!cfWasAlreadyInCloudFoundryList)
                     {
-                        CloudFoundryList.Add(newCFIVM);
+                        UiDispatcherService.RunOnUiThread(() => CloudFoundryList.Add(newCFIVM));
                     }
                 }
             }
@@ -394,166 +394,7 @@ namespace Tanzu.Toolkit.ViewModels
 
             foreach (CfInstanceViewModel cfivm in cfsToRemove)
             {
-                CloudFoundryList.Remove(cfivm);
-            }
-        }
-
-        /// <summary>
-        /// Add any avms to svm.Children which are in currentApps but not in svm.Children.
-        /// </summary>
-        /// <param name="svm"></param>
-        /// <param name="currentApps"></param>
-        private static void AddNewApps(SpaceViewModel svm, ObservableCollection<AppViewModel> currentApps)
-        {
-            foreach (AppViewModel newAVM in currentApps)
-            {
-                if (newAVM != null)
-                {
-                    bool appInChildren = svm.Children.Any(avm =>
-                    {
-                        var oldAVM = avm as AppViewModel;
-                        return oldAVM != null && oldAVM.App.AppId == newAVM.App.AppId;
-                    });
-
-                    if (!appInChildren)
-                    {
-                        svm.Children.Add(newAVM);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Remove all avms from svm.Children which don't appear in currentApps.
-        /// </summary>
-        /// <param name="svm"></param>
-        /// <param name="currentApps"></param>
-        private static void RemoveNonexistentApps(SpaceViewModel svm, ObservableCollection<AppViewModel> currentApps)
-        {
-            var appsToRemove = new ObservableCollection<AppViewModel>();
-
-            foreach (TreeViewItemViewModel priorChild in svm.Children)
-            {
-                if (priorChild is AppViewModel oldAVM)
-                {
-                    bool appStillExists = currentApps.Any(avm => avm != null && avm.App.AppId == oldAVM.App.AppId);
-
-                    if (!appStillExists)
-                    {
-                        appsToRemove.Add(oldAVM);
-                    }
-                }
-            }
-
-            foreach (AppViewModel avm in appsToRemove)
-            {
-                svm.Children.Remove(avm);
-            }
-        }
-
-        /// <summary>
-        /// Add any svms to ovm.Children which are in currentSpaces but not in ovm.Children.
-        /// </summary>
-        /// <param name="ovm"></param>
-        /// <param name="currentSpaces"></param>
-        private static void AddNewSpaces(OrgViewModel ovm, ObservableCollection<SpaceViewModel> currentSpaces)
-        {
-            foreach (SpaceViewModel newSVM in currentSpaces)
-            {
-                if (newSVM != null)
-                {
-                    bool spaceInChildren = ovm.Children.Any(svm =>
-                    {
-                        var oldSVM = svm as SpaceViewModel;
-                        return oldSVM != null && oldSVM.Space.SpaceId == newSVM.Space.SpaceId;
-                    });
-
-                    if (!spaceInChildren)
-                    {
-                        ovm.Children.Add(newSVM);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Remove all svms from ovm.Children which don't appear in currentSpaces.
-        /// </summary>
-        /// <param name="ovm"></param>
-        /// <param name="currentSpaces"></param>
-        private static void RemoveNonexistentSpaces(OrgViewModel ovm, ObservableCollection<SpaceViewModel> currentSpaces)
-        {
-            var spacesToRemove = new ObservableCollection<SpaceViewModel>();
-
-            foreach (TreeViewItemViewModel priorChild in ovm.Children)
-            {
-                if (priorChild is SpaceViewModel oldSVM)
-                {
-                    bool spaceStillExists = currentSpaces.Any(svm => svm != null && svm.Space.SpaceId == oldSVM.Space.SpaceId);
-
-                    if (!spaceStillExists)
-                    {
-                        spacesToRemove.Add(oldSVM);
-                    }
-                }
-            }
-
-            foreach (SpaceViewModel svm in spacesToRemove)
-            {
-                ovm.Children.Remove(svm);
-            }
-        }
-
-        /// <summary>
-        /// add any ovms to cfivm.Children which are in currentOrgs but not in cfivm.Children.
-        /// </summary>
-        /// <param name="cfivm"></param>
-        /// <param name="currentOrgs"></param>
-        private static void AddNewOrgs(CfInstanceViewModel cfivm, ObservableCollection<OrgViewModel> currentOrgs)
-        {
-            foreach (OrgViewModel newOVM in currentOrgs)
-            {
-                if (newOVM != null)
-                {
-                    bool orgInChildren = cfivm.Children.Any(ovm =>
-                    {
-                        var oldOVM = ovm as OrgViewModel;
-                        return oldOVM != null && oldOVM.Org.OrgId == newOVM.Org.OrgId;
-                    });
-
-                    if (!orgInChildren)
-                    {
-                        cfivm.Children.Add(newOVM);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// remove all ovms from cfivm.Children which don't appear in currentOrgs.
-        /// </summary>
-        /// <param name="cfivm"></param>
-        /// <param name="currentOrgs"></param>
-        private static void RemoveNonexistentOrgs(CfInstanceViewModel cfivm, ObservableCollection<OrgViewModel> currentOrgs)
-        {
-            var orgsToRemove = new ObservableCollection<OrgViewModel>();
-
-            foreach (TreeViewItemViewModel priorChild in cfivm.Children)
-            {
-                if (priorChild is OrgViewModel oldOVM)
-                {
-                    bool orgStillExists = currentOrgs.Any(ovm => ovm != null && ovm.Org.OrgId == oldOVM.Org.OrgId);
-
-                    if (!orgStillExists)
-                    {
-                        orgsToRemove.Add(oldOVM);
-                    }
-                }
-            }
-
-            foreach (OrgViewModel ovm in orgsToRemove)
-            {
-                cfivm.Children.Remove(ovm);
+                UiDispatcherService.RunOnUiThread(() => CloudFoundryList.Remove(cfivm));
             }
         }
 

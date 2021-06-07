@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services.ErrorDialog;
@@ -16,8 +17,8 @@ namespace Tanzu.Toolkit.ViewModels
 
         public CloudFoundrySpace Space { get; }
 
-        public SpaceViewModel(CloudFoundrySpace space, IServiceProvider services)
-            : base(null, services)
+        public SpaceViewModel(CloudFoundrySpace space, IServiceProvider services, bool expanded = false)
+            : base(null, services, expanded: expanded)
         {
             _dialogService = services.GetRequiredService<IErrorDialog>();
             Space = space;
@@ -94,6 +95,11 @@ namespace Tanzu.Toolkit.ViewModels
 
                 IsExpanded = false;
             }
+        }
+
+        public override async Task RefreshChildren()
+        {
+            await LoadChildren();
         }
     }
 }
