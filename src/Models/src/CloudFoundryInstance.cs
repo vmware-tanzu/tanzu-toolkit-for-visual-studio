@@ -17,6 +17,5 @@ namespace Tanzu.Toolkit.Models
         public string InstanceId { get; set; }
         public string ApiAddress { get; set; }
         public string AccessToken { get; set; }
-        public ObservableCollection<CloudFoundryOrganization> Orgs { get; set; }
     }
 }
