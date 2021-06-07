@@ -8,6 +8,7 @@ using EnvDTE80;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Shell;
 using Tanzu.Toolkit.CloudFoundryApiClient;
+using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.CmdProcess;
@@ -19,6 +20,7 @@ using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.VisualStudio.Commands;
+using Tanzu.Toolkit.VisualStudio.WpfViews.Services;
 using Tanzu.Toolkit.WpfViews;
 using Tanzu.Toolkit.WpfViews.Services;
 using Task = System.Threading.Tasks.Task;
@@ -124,7 +126,11 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<ILoggingService, LoggingService>();
             services.AddSingleton<IViewService, VsToolWindowService>();
             services.AddSingleton<IThreadingService, ThreadingService>();
+
             services.AddSingleton<IErrorDialog>(new ErrorDialogWindowService(this));
+
+            services.AddSingleton<IUiDispatcherService, UiDispatcherService>();
+
 
             services.AddTransient<ICmdProcessService, CmdProcessService>();
 

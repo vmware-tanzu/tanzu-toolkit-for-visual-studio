@@ -27,7 +27,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public void SignalIsStoppedChanged()
+        public void RefreshAppState()
         {
             RaisePropertyChangedEvent("IsStopped");
         }
