@@ -125,7 +125,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool CanInitiateFullRefresh(object arg)
         {
-            return true;
+            return !IsRefreshingAll;
         }
 
         public bool CanRemoveCloudConnecion(object arg)
