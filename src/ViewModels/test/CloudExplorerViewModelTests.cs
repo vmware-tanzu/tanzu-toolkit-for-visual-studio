@@ -100,9 +100,17 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        public void CanRefreshAllCloudConnections_ReturnsTrue()
+        public void CanInitiateFullRefresh_ReturnsTrue_WhenNotRefreshing()
         {
+            _sut.IsRefreshingAll = false;
             Assert.IsTrue(_sut.CanInitiateFullRefresh(null));
+        }
+        
+        [TestMethod]
+        public void CanInitiateFullRefresh_ReturnsFalse_WhenRefreshing()
+        {
+            _sut.IsRefreshingAll = true;
+            Assert.IsFalse(_sut.CanInitiateFullRefresh(null));
         }
 
         [TestMethod]
