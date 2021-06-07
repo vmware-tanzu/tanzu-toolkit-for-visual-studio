@@ -3,30 +3,30 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30320.27
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualStudioExtension", "VisualStudioExtension\src\Tanzu.Toolkit.VisualStudioExtension.csproj", "{DEA3D5BC-294A-4BF3-8F81-2A8A8D51A869}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tanzu.Toolkit.VisualStudioExtension", "VisualStudioExtension\src\Tanzu.Toolkit.VisualStudioExtension.csproj", "{DEA3D5BC-294A-4BF3-8F81-2A8A8D51A869}"
 	ProjectSection(ProjectDependencies) = postProject
 		{9486BBEE-472D-4D0A-9644-A34151F66F62} = {9486BBEE-472D-4D0A-9644-A34151F66F62}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Services", "Services\src\Tanzu.Toolkit.Services.csproj", "{BCD3DD2E-6220-47A4-9C9D-9F71C2C715C0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tanzu.Toolkit.Services", "Services\src\Tanzu.Toolkit.Services.csproj", "{BCD3DD2E-6220-47A4-9C9D-9F71C2C715C0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Services.Tests", "Services\test\Tanzu.Toolkit.Services.Tests.csproj", "{F502CECC-8E43-4482-B4D2-0AA616A860E9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tanzu.Toolkit.Services.Tests", "Services\test\Tanzu.Toolkit.Services.Tests.csproj", "{F502CECC-8E43-4482-B4D2-0AA616A860E9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfViews", "WpfViews\src\Tanzu.Toolkit.WpfViews.csproj", "{B29DC0F4-4E27-4BDC-AF6F-FA43A7C5F264}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tanzu.Toolkit.WpfViews", "WpfViews\src\Tanzu.Toolkit.WpfViews.csproj", "{B29DC0F4-4E27-4BDC-AF6F-FA43A7C5F264}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfViews.Tests", "WpfViews\test\Tanzu.Toolkit.WpfViews.Tests.csproj", "{81403191-0059-4F2C-B7A3-0634DD8F4AC7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tanzu.Toolkit.WpfViews.Tests", "WpfViews\test\Tanzu.Toolkit.WpfViews.Tests.csproj", "{81403191-0059-4F2C-B7A3-0634DD8F4AC7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ViewModels", "ViewModels\src\Tanzu.Toolkit.ViewModels.csproj", "{00C263B7-7ADC-4D71-90A6-2C45F610C5A1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tanzu.Toolkit.ViewModels", "ViewModels\src\Tanzu.Toolkit.ViewModels.csproj", "{00C263B7-7ADC-4D71-90A6-2C45F610C5A1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ViewModels.Tests", "ViewModels\test\Tanzu.Toolkit.ViewModels.Tests.csproj", "{F3EB0E9D-3535-4C43-B003-8A9788308FBD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tanzu.Toolkit.ViewModels.Tests", "ViewModels\test\Tanzu.Toolkit.ViewModels.Tests.csproj", "{F3EB0E9D-3535-4C43-B003-8A9788308FBD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfApp", "WpfApp\src\Tanzu.Toolkit.WpfApp.csproj", "{73A694F8-D539-4D99-A480-349EB93D4E8B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tanzu.Toolkit.WpfApp", "WpfApp\src\Tanzu.Toolkit.WpfApp.csproj", "{73A694F8-D539-4D99-A480-349EB93D4E8B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Models", "Models\src\Tanzu.Toolkit.Models.csproj", "{9486BBEE-472D-4D0A-9644-A34151F66F62}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tanzu.Toolkit.Models", "Models\src\Tanzu.Toolkit.Models.csproj", "{9486BBEE-472D-4D0A-9644-A34151F66F62}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CloudFoundryApiClient", "CloudFoundryApiClient\src\Tanzu.Toolkit.CloudFoundryApiClient.csproj", "{56A68904-C31A-45E7-8617-FB8FDCFB49CB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tanzu.Toolkit.CloudFoundryApiClient", "CloudFoundryApiClient\src\Tanzu.Toolkit.CloudFoundryApiClient.csproj", "{56A68904-C31A-45E7-8617-FB8FDCFB49CB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CloudFoundryApiClient.Tests", "CloudFoundryApiClient\test\Tanzu.Toolkit.CloudFoundryApiClient.Tests.csproj", "{061321D9-7434-4DC7-81D9-07254772E2DC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tanzu.Toolkit.CloudFoundryApiClient.Tests", "CloudFoundryApiClient\test\Tanzu.Toolkit.CloudFoundryApiClient.Tests.csproj", "{061321D9-7434-4DC7-81D9-07254772E2DC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
