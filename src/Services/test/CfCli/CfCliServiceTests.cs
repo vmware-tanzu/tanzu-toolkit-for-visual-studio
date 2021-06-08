@@ -455,6 +455,39 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         }
 
         [TestMethod]
+        [TestCategory("ClearCachedAccessToken")]
+        public void ClearCachedAccessToken_MandatesFullTokenLookup_ForNextCallToGetOAuthToken()
+        {
+            var fakeTokenResult = new CmdResult(_fakeAccessToken, "", 0);
+
+            _mockCmdProcessService.Setup(m => m.ExecuteWindowlessCommand(It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null)).Returns(fakeTokenResult);
+
+            var firstResult = _sut.GetOAuthToken();
+            Assert.AreEqual(_fakeAccessToken, firstResult);
+            Assert.AreEqual(1, _mockCmdProcessService.Invocations.Count);
+            _mockCmdProcessService.Verify(m => m.ExecuteWindowlessCommand(It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null), Times.Once);
+
+            _mockCmdProcessService.Invocations.Clear();
+            _mockCmdProcessService.Reset();
+            Assert.AreEqual(0, _mockCmdProcessService.Invocations.Count);
+
+            var secondResult = _sut.GetOAuthToken();
+            Assert.AreEqual(_fakeAccessToken, secondResult);
+            Assert.AreEqual(0, _mockCmdProcessService.Invocations.Count);
+
+            // Now a token has been cached -- clear cache & expect CmdProcessService to be invoked again to get a fresh oauth-token.
+            _mockCmdProcessService.Invocations.Clear();
+            _mockCmdProcessService.Reset();
+
+            _sut.ClearCachedAccessToken();
+
+            var thirdResult = _sut.GetOAuthToken();
+            Assert.AreEqual(_fakeAccessToken, secondResult);
+            Assert.AreEqual(1, _mockCmdProcessService.Invocations.Count);
+            _mockCmdProcessService.Verify(m => m.ExecuteWindowlessCommand(It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null), Times.Once);
+        }
+
+        [TestMethod]
         [TestCategory("TargetApi")]
         public void TargetApi_ReturnsTrue_WhenCmdExitCodeIsZero()
         {
