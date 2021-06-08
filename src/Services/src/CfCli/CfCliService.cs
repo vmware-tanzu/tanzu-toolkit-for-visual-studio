@@ -138,6 +138,14 @@ namespace Tanzu.Toolkit.Services.CfCli
             return _cachedAccessToken;
         }
 
+        public void ClearCachedAccessToken()
+        {
+            lock (_tokenLock)
+            {
+                _cachedAccessToken = null;
+            }
+        }
+
         public DetailedResult TargetApi(string apiAddress, bool skipSsl)
         {
             string args = $"{_targetApiCmd} {apiAddress}{(skipSsl ? " --skip-ssl-validation" : string.Empty)}";
