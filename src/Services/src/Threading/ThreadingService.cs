@@ -12,7 +12,7 @@ namespace Tanzu.Toolkit.Services.Threading
         {
             get => _isPolling;
 
-            set { _isPolling = value; }
+            set => _isPolling = value;
         }
 
         public ThreadingService(IUiDispatcherService dispatcherService)
