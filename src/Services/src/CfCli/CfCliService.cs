@@ -99,33 +99,38 @@ namespace Tanzu.Toolkit.Services.CfCli
             {
                 lock (_tokenLock)
                 {
-                    try
+                    // double-check just in case the last thread to access this block changed these values
+                    // (prevents scenario where many threads wait for lock once token expires, then *all* try to refresh token)
+                    if (_cachedAccessToken == null || _accessTokenExpiration == null || DateTime.Compare(DateTime.Now, _accessTokenExpiration) >= 0)
                     {
-                        DetailedResult result = ExecuteCfCliCommand(_getOAuthTokenCmd);
-
-                        if (result == null)
+                        try
                         {
-                            return null;
-                        }
+                            DetailedResult result = ExecuteCfCliCommand(_getOAuthTokenCmd);
 
-                        if (result.CmdDetails.ExitCode != 0)
+                            if (result == null)
+                            {
+                                return null;
+                            }
+
+                            if (result.CmdDetails.ExitCode != 0)
+                            {
+                                _logger.Error($"GetOAuthToken failed: {result}");
+                                return null;
+                            }
+
+                            var accessToken = FormatToken(result.CmdDetails.StdOut);
+
+                            var handler = new JwtSecurityTokenHandler();
+                            var jsonToken = handler.ReadToken(accessToken);
+                            var token = jsonToken as JwtSecurityToken;
+
+                            _cachedAccessToken = accessToken;
+                            _accessTokenExpiration = token.ValidTo;
+                        }
+                        catch (Exception ex)
                         {
-                            _logger.Error($"GetOAuthToken failed: {result}");
-                            return null;
+                            _logger.Error($"Something went wrong while attempting to renew access token {ex.ToString()}");
                         }
-
-                        var accessToken = FormatToken(result.CmdDetails.StdOut);
-
-                        var handler = new JwtSecurityTokenHandler();
-                        var jsonToken = handler.ReadToken(accessToken);
-                        var token = jsonToken as JwtSecurityToken;
-
-                        _cachedAccessToken = accessToken;
-                        _accessTokenExpiration = token.ValidTo;
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.Error($"Something went wrong while attempting to renew access token {ex.ToString()}");
                     }
                 }
             }
