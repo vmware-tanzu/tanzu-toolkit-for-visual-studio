@@ -435,7 +435,58 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
         [TestMethod]
         [TestCategory("GetOrgs")]
-        public async Task GetOrgsForCfInstanceAsync_ReturnsFailedResult_WhenListOrgsThrowsException()
+        public async Task GetOrgsForCfInstanceAsync_RetriesWithFreshToken_WhenListOrgsThrowsException()
+        {
+            var fakeExceptionMsg = "junk";
+            var fakeOrgsResponse = new List<CloudFoundryApiClient.Models.OrgsResponse.Org>
+            {
+                new CloudFoundryApiClient.Models.OrgsResponse.Org
+                {
+                    Name = _org1Name,
+                    Guid = _org1Guid,
+                },
+                new CloudFoundryApiClient.Models.OrgsResponse.Org
+                {
+                    Name = _org2Name,
+                    Guid = _org2Guid,
+                },
+            };
+
+            var expectedResultContent = new List<CloudFoundryOrganization>
+            {
+                new CloudFoundryOrganization(_org1Name, _org1Guid, FakeCfInstance),
+                new CloudFoundryOrganization(_org2Name, _org2Guid, FakeCfInstance),
+            };
+
+            _mockCfCliService.SetupSequence(m => m.
+                GetOAuthToken())
+                    .Returns(expiredAccessToken) // simulate stale cached token on first attempt
+                    .Returns(_fakeValidAccessToken); // simulate fresh cached token on second attempt
+
+            _mockCfApiClient.Setup(m => m.
+                ListOrgs(FakeCfInstance.ApiAddress, expiredAccessToken))
+                    .Throws(new Exception(fakeExceptionMsg));
+
+            _mockCfApiClient.Setup(m => m.
+                ListOrgs(FakeCfInstance.ApiAddress, _fakeValidAccessToken))
+                    .ReturnsAsync(fakeOrgsResponse);
+
+            var result = await _sut.GetOrgsForCfInstanceAsync(FakeCfInstance);
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.AreEqual(null, result.CmdDetails);
+            Assert.AreEqual(expectedResultContent.Count, result.Content.Count);
+
+            _mockCfCliService.Verify(m => m.ClearCachedAccessToken(), Times.Once);
+            _mockCfApiClient.Verify(m => m.ListOrgs(FakeCfInstance.ApiAddress, It.IsAny<string>()), Times.Exactly(2));
+            _mockLogger.Verify(m => m.Information(It.Is<string>(s => s.Contains(fakeExceptionMsg) && s.Contains("retry"))), Times.Once);
+        }
+        
+        [TestMethod]
+        [TestCategory("GetOrgs")]
+        public async Task GetOrgsForCfInstanceAsync_ReturnsFailedResult_WhenListOrgsThrowsException_AndThereAreZeroRetriesLeft()
         {
             var fakeExceptionMsg = "junk";
 
@@ -447,7 +498,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 ListOrgs(FakeCfInstance.ApiAddress, _fakeValidAccessToken))
                     .Throws(new Exception(fakeExceptionMsg));
 
-            var result = await _sut.GetOrgsForCfInstanceAsync(FakeCfInstance);
+            var result = await _sut.GetOrgsForCfInstanceAsync(FakeCfInstance, retryAmount: 0);
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);

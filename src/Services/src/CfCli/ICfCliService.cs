@@ -28,5 +28,6 @@ namespace Tanzu.Toolkit.Services.CfCli
         Task<DetailedResult> PushAppAsync(string appName, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string appDir, string buildpack = null, string stack = null);
         Task<Version> GetApiVersion();
         Task<DetailedResult<string>> GetRecentAppLogs(string appName);
+        void ClearCachedAccessToken();
     }
 }

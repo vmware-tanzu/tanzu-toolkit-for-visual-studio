@@ -144,11 +144,14 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         }
 
         /// <summary>
-        /// Requests orgs from <see cref="CfApiClient"/> using access token from <see cref="CfCliService"/>.
+        /// Requests orgs from <see cref="CfApiClient"/> using access token from <see cref="CfCliService"/>. 
+        /// If any exceptions are thrown when trying to retrieve orgs, this method will clear the cached
+        /// access token on <see cref="CfCliService"/> and attempt to retrieve the orgs again using a 
+        /// fresh access token.
         /// </summary>
         /// <param name="cf"></param>
         /// <param name="skipSsl"></param>
-        public async Task<DetailedResult<List<CloudFoundryOrganization>>> GetOrgsForCfInstanceAsync(CloudFoundryInstance cf, bool skipSsl = true)
+        public async Task<DetailedResult<List<CloudFoundryOrganization>>> GetOrgsForCfInstanceAsync(CloudFoundryInstance cf, bool skipSsl = true, int retryAmount = 1)
         {
             List<Org> orgsFromApi;
             var orgsToReturn = new List<CloudFoundryOrganization>();
@@ -174,14 +177,24 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
             catch (Exception originalException)
             {
-                var msg = $"Something went wrong while trying to request orgs from {apiAddress}: {originalException.Message}";
-                _logger.Error(msg);
-
-                return new DetailedResult<List<CloudFoundryOrganization>>()
+                if (retryAmount > 0)
                 {
-                    Succeeded = false,
-                    Explanation = msg,
-                };
+                    _logger.Information($"GetOrgsForCfInstanceAsync caught an exception when trying to retrieve orgs: {originalException.Message}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).");
+                    _cfCliService.ClearCachedAccessToken();
+                    retryAmount -= 1;
+                    return await GetOrgsForCfInstanceAsync(cf, skipSsl, retryAmount);
+                }
+                else
+                {
+                    var msg = $"Something went wrong while trying to request orgs from {apiAddress}: {originalException.Message}";
+                    _logger.Error(msg);
+
+                    return new DetailedResult<List<CloudFoundryOrganization>>()
+                    {
+                        Succeeded = false,
+                        Explanation = msg,
+                    };
+                }
             }
 
             foreach (Org org in orgsFromApi)

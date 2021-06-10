@@ -24,33 +24,5 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         internal static readonly string _fakeApps401Output = File.ReadAllText("CfCli/GetV2Apps401Output.txt");
 
         internal static readonly int _numOrgsInFakeResponse = 54;
-
-        /** this fake JWT was created using these values:
-         * HEADER:
-         * {
-         * "typ": "JWT",
-         * "alg": "HS256"
-         * }
-         * 
-         * PAYLOAD:
-         * {
-         * "iss": "junk",
-         * "iat": 1623163938,
-         * "exp": 253370818338,
-         * "aud": "www.example.com",
-         * "sub": "jrocket@example.com",
-         * "GivenName": "Johnny",
-         * "Surname": "Rocket",
-         * "Email": "jrocket@example.com",
-         * "Role": [
-         * "Manager",
-         * "Project Administrator"
-         * ]
-         * }
-         * 
-         * SIGNING KEY:
-         * "qwertyuiopasdfghjklzxcvbnm123456"
-         */
-        internal static readonly string _fakeAccessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqdW5rIiwiaWF0IjoxNjIzMTYzOTM4LCJleHAiOjI1MzM3MDgxODMzOCwiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsIkdpdmVuTmFtZSI6IkpvaG5ueSIsIlN1cm5hbWUiOiJSb2NrZXQiLCJFbWFpbCI6Impyb2NrZXRAZXhhbXBsZS5jb20iLCJSb2xlIjpbIk1hbmFnZXIiLCJQcm9qZWN0IEFkbWluaXN0cmF0b3IiXX0.9ulEPk_mjvBivguELvlojZAUnrwkqUMnunFF6zlmKqc";
     }
 }
