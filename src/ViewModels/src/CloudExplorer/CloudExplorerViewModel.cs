@@ -264,7 +264,7 @@ namespace Tanzu.Toolkit.ViewModels
 
                             foreach (TreeViewItemViewModel cfChild in cfivm.Children)
                             {
-                                if (cfChild is OrgViewModel ovm && cfChild.IsExpanded)
+                                if (cfChild is OrgViewModel ovm && cfChild.IsExpanded && !cfChild.IsLoading)
                                 {
                                     var refreshOrgTask = new Task(async () =>
                                     {

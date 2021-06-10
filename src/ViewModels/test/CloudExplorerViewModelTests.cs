@@ -632,6 +632,68 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        public async Task InitiateFullRefresh_DoesNotAttemptToRefreshLoadingOrgs()
+        {
+            /** INTENTION:
+             * CloudExplorerViewModel starts off with 1 expanded cloudFoundryInstanceViewModel 
+             * "cfivm" which has 1 expanded but *loading* org child "ovm". cfivm should be 
+             * refreshed but the loading ovm should not be (defer to the loading task in progress).
+             */
+            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address", "fake-token");
+            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance);
+            var cfivm = new FakeCfInstanceViewModel(fakeInitialCfInstance, Services, expanded: true);
+            var ovm = new FakeOrgViewModel(fakeInitialOrg, Services, expanded: true)
+            {
+                IsLoading = true
+            };
+
+            cfivm.Children = new ObservableCollection<TreeViewItemViewModel>
+            {
+                ovm,
+            };
+
+            MockCloudFoundryService.SetupGet(mock => mock.
+                CloudFoundryInstances)
+                    .Returns(new Dictionary<string, CloudFoundryInstance>
+                    {
+                        { fakeInitialCfInstance.InstanceName, fakeInitialCfInstance },
+                    });
+
+            MockCloudFoundryService.Setup(mock => mock.
+                GetOrgsForCfInstanceAsync(fakeInitialCfInstance, true))
+                    .ReturnsAsync(new DetailedResult<List<CloudFoundryOrganization>>(
+                        succeeded: true,
+                        content: new List<CloudFoundryOrganization>
+                        {
+                            fakeInitialOrg,
+                        },
+                        explanation: null,
+                        cmdDetails: FakeSuccessCmdResult));
+
+            _sut.CloudFoundryList = new ObservableCollection<CfInstanceViewModel> { cfivm };
+
+            // pre-check: cloud explorer has 1 cf view model & it's expanded
+            Assert.AreEqual(1, _sut.CloudFoundryList.Count);
+            Assert.IsTrue(_sut.CloudFoundryList[0].IsExpanded);
+
+            // pre-check: cfivm has 1 child & it's loading
+            Assert.AreEqual(1, _sut.CloudFoundryList[0].Children.Count);
+            var orgChild = _sut.CloudFoundryList[0].Children[0];
+            Assert.IsTrue(orgChild.IsLoading);
+
+            await _sut.InitiateFullRefresh();
+
+            // ensure just 1 thread is started to refresh the cf view model
+            Assert.AreEqual(1, MockThreadingService.Invocations.Count);
+
+            // ensure RefreshChildren() was called once for cfivm
+            Assert.AreEqual(1, cfivm.NumRefreshes);
+
+            // ensure RefreshChildren() was never called for ovm
+            Assert.AreEqual(0, ovm.NumRefreshes);
+        }
+
+        [TestMethod]
         public async Task DisplayRecentAppLogs_LogsError_WhenArgumentTypeIsNotApp()
         {
             await _sut.DisplayRecentAppLogs(new object());
