@@ -105,7 +105,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.IsRefreshingAll = false;
             Assert.IsTrue(_sut.CanInitiateFullRefresh(null));
         }
-        
+
         [TestMethod]
         public void CanInitiateFullRefresh_ReturnsFalse_WhenRefreshing()
         {
@@ -327,7 +327,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.RefreshAllItems(null);
             MockThreadingService.Verify(m => m.StartTask(_sut.InitiateFullRefresh), Times.Once);
         }
-        
+
         [TestMethod]
         public void RefreshAllItems_DoesNotStartRefreshTask_WhenRefreshIsInProgress()
         {
@@ -570,7 +570,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             // pre-check: cloud explorer has 1 cf view model & it's expanded
             Assert.AreEqual(1, _sut.CloudFoundryList.Count);
             Assert.IsTrue(_sut.CloudFoundryList[0].IsExpanded);
-            
+
             // pre-check: cf view model has 1 org child & it's collapsed
             Assert.AreEqual(1, _sut.CloudFoundryList[0].Children.Count);
             Assert.IsFalse(_sut.CloudFoundryList[0].Children[0].IsExpanded);
@@ -583,6 +583,52 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             // ensure RefreshChildren() was called once for cfivm
             Assert.AreEqual(1, cfivm.NumRefreshes);
             Assert.AreEqual(0, ovm.NumRefreshes);
+        }
+
+        [TestMethod]
+        public async Task InitiateFullRefresh_DoesNotAttemptToRefreshLoadingCFs()
+        {
+            /** INTENTION:
+             * CloudExplorerViewModel starts off with 1 expanded but *loading* 
+             * cloudFoundryInstanceViewModel "cfivm" which has a loading placeholder
+             * as its only child. cfivm should not be refreshed (defer to the loading
+             * task in progress).
+             */
+            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address", "fake-token");
+            var cfivm = new FakeCfInstanceViewModel(fakeInitialCfInstance, Services, expanded: true)
+            {
+                IsLoading = true,
+            };
+
+            cfivm.Children = new ObservableCollection<TreeViewItemViewModel>
+            {
+                cfivm.LoadingPlaceholder,
+            };
+
+            MockCloudFoundryService.SetupGet(mock => mock.
+                CloudFoundryInstances)
+                    .Returns(new Dictionary<string, CloudFoundryInstance>
+                    {
+                        { fakeInitialCfInstance.InstanceName, fakeInitialCfInstance },
+                    });
+
+            _sut.CloudFoundryList = new ObservableCollection<CfInstanceViewModel> { cfivm };
+
+            // pre-check: cloud explorer has 1 cf view model & it's loading
+            Assert.AreEqual(1, _sut.CloudFoundryList.Count);
+            Assert.IsTrue(_sut.CloudFoundryList[0].IsExpanded);
+            Assert.IsTrue(_sut.CloudFoundryList[0].IsLoading);
+            Assert.AreEqual(1, _sut.CloudFoundryList[0].Children.Count);
+            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.CloudFoundryList[0].Children[0].GetType());
+            Assert.AreEqual(CfInstanceViewModel._loadingMsg, _sut.CloudFoundryList[0].Children[0].DisplayText);
+
+            await _sut.InitiateFullRefresh();
+
+            // ensure no threads are started to refresh the cf view model
+            Assert.AreEqual(0, MockThreadingService.Invocations.Count);
+
+            // ensure RefreshChildren() was never called for cfivm
+            Assert.AreEqual(0, cfivm.NumRefreshes);
         }
 
         [TestMethod]
