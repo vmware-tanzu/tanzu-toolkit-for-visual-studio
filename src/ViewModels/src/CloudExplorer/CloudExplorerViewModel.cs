@@ -256,7 +256,7 @@ namespace Tanzu.Toolkit.ViewModels
 
                 foreach (CfInstanceViewModel cfivm in CloudFoundryList)
                 {
-                    if (cfivm.IsExpanded)
+                    if (cfivm.IsExpanded && !cfivm.IsLoading)
                     {
                         var refreshCfTask = new Task(async () =>
                         {
