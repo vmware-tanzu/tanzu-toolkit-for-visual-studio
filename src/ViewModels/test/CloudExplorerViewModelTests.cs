@@ -388,7 +388,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             // simulate addition of new Org
             MockCloudFoundryService.Setup(mock => mock.
-                GetOrgsForCfInstanceAsync(fakeInitialCfInstance, true))
+                GetOrgsForCfInstanceAsync(fakeInitialCfInstance, true, 1))
                     .ReturnsAsync(new DetailedResult<List<CloudFoundryOrganization>>(
                         succeeded: true,
                         content: new List<CloudFoundryOrganization>
@@ -472,7 +472,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             // No need to get children for CFs that were just added by refresh.
             MockCloudFoundryService.Verify(mock => mock.
-                GetOrgsForCfInstanceAsync(fakeNewCfInstance, true), Times.Never);
+                GetOrgsForCfInstanceAsync(fakeNewCfInstance, true, It.IsAny<int>()), Times.Never);
 
             // No need to get children for orgs that were just added by refresh.
             MockCloudFoundryService.Verify(mock => mock.
@@ -505,7 +505,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     });
 
             MockCloudFoundryService.Setup(mock => mock.
-                GetOrgsForCfInstanceAsync(fakeInitialCfInstance, true))
+                GetOrgsForCfInstanceAsync(fakeInitialCfInstance, true, 1))
                     .ReturnsAsync(new DetailedResult<List<CloudFoundryOrganization>>(
                         succeeded: true,
                         content: new List<CloudFoundryOrganization>
@@ -555,7 +555,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     });
 
             MockCloudFoundryService.Setup(mock => mock.
-                GetOrgsForCfInstanceAsync(fakeInitialCfInstance, true))
+                GetOrgsForCfInstanceAsync(fakeInitialCfInstance, true, 1))
                     .ReturnsAsync(new DetailedResult<List<CloudFoundryOrganization>>(
                         succeeded: true,
                         content: new List<CloudFoundryOrganization>
@@ -660,7 +660,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     });
 
             MockCloudFoundryService.Setup(mock => mock.
-                GetOrgsForCfInstanceAsync(fakeInitialCfInstance, true))
+                GetOrgsForCfInstanceAsync(fakeInitialCfInstance, true, 1))
                     .ReturnsAsync(new DetailedResult<List<CloudFoundryOrganization>>(
                         succeeded: true,
                         content: new List<CloudFoundryOrganization>
@@ -730,7 +730,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     });
 
             MockCloudFoundryService.Setup(mock => mock.
-                GetOrgsForCfInstanceAsync(fakeInitialCfInstance, true))
+                GetOrgsForCfInstanceAsync(fakeInitialCfInstance, true, 1))
                     .ReturnsAsync(new DetailedResult<List<CloudFoundryOrganization>>(
                         succeeded: true,
                         content: new List<CloudFoundryOrganization>
