@@ -692,6 +692,97 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             // ensure RefreshChildren() was never called for ovm
             Assert.AreEqual(0, ovm.NumRefreshes);
         }
+        
+        [TestMethod]
+        public async Task InitiateFullRefresh_DoesNotAttemptToRefreshLoadingSpaces()
+        {
+            /** INTENTION:
+             * CloudExplorerViewModel starts off with 1 expanded cloudFoundryInstanceViewModel 
+             * "cfivm" which has 1 expanded org child "ovm". ovm has 1 expanded but *loading*
+             * space child "svm". cfivm & ovm should be refreshed but the loading svm should 
+             * not be refreshed (defer to the loading task in progress).
+             */
+            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address", "fake-token");
+            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance);
+            var fakeInitialSpace = new CloudFoundrySpace("fake space name", "fake space id", fakeInitialOrg);
+            var cfivm = new FakeCfInstanceViewModel(fakeInitialCfInstance, Services, expanded: true);
+            var ovm = new FakeOrgViewModel(fakeInitialOrg, Services, expanded: true);
+            var svm = new FakeSpaceViewModel(fakeInitialSpace, Services, expanded: true)
+            {
+                IsLoading = true,
+            };
+
+            cfivm.Children = new ObservableCollection<TreeViewItemViewModel>
+            {
+                ovm,
+            };
+
+            ovm.Children = new ObservableCollection<TreeViewItemViewModel>
+            {
+                svm,
+            };
+
+            MockCloudFoundryService.SetupGet(mock => mock.
+                CloudFoundryInstances)
+                    .Returns(new Dictionary<string, CloudFoundryInstance>
+                    {
+                        { fakeInitialCfInstance.InstanceName, fakeInitialCfInstance },
+                    });
+
+            MockCloudFoundryService.Setup(mock => mock.
+                GetOrgsForCfInstanceAsync(fakeInitialCfInstance, true))
+                    .ReturnsAsync(new DetailedResult<List<CloudFoundryOrganization>>(
+                        succeeded: true,
+                        content: new List<CloudFoundryOrganization>
+                        {
+                            fakeInitialOrg,
+                        },
+                        explanation: null,
+                        cmdDetails: FakeSuccessCmdResult));
+            
+            MockCloudFoundryService.Setup(mock => mock.
+                GetSpacesForOrgAsync(fakeInitialOrg, true))
+                    .ReturnsAsync(new DetailedResult<List<CloudFoundrySpace>>(
+                        succeeded: true,
+                        content: new List<CloudFoundrySpace>
+                        {
+                            fakeInitialSpace,
+                        },
+                        explanation: null,
+                        cmdDetails: FakeSuccessCmdResult));
+
+            _sut.CloudFoundryList = new ObservableCollection<CfInstanceViewModel> { cfivm };
+
+            // pre-check: cloud explorer has 1 cf view model & it's expanded
+            Assert.AreEqual(1, _sut.CloudFoundryList.Count);
+            var cf = _sut.CloudFoundryList[0];
+            Assert.IsTrue(cf.IsExpanded);
+            
+            // pre-check: cfivm has 1 org view model & it's expanded
+            Assert.AreEqual(1, cf.Children.Count);
+            var org = cf.Children[0];
+            Assert.IsTrue(org.IsExpanded);
+
+            // pre-check: ovm has 1 child & it's loading
+            Assert.AreEqual(1, org.Children.Count);
+            var space = org.Children[0];
+            Assert.IsTrue(space.IsExpanded);
+            Assert.IsTrue(space.IsLoading);
+
+            await _sut.InitiateFullRefresh();
+
+            // ensure just 2 threads are started: 1 to refresh cf, 1 to refresh org
+            Assert.AreEqual(2, MockThreadingService.Invocations.Count);
+
+            // ensure RefreshChildren() was called once for cfivm
+            Assert.AreEqual(1, cfivm.NumRefreshes);
+
+            // ensure RefreshChildren() was called once for ovm
+            Assert.AreEqual(1, ovm.NumRefreshes);
+
+            // ensure RefreshChildren() was never called for svm
+            Assert.AreEqual(0, svm.NumRefreshes);
+        }
 
         [TestMethod]
         public async Task DisplayRecentAppLogs_LogsError_WhenArgumentTypeIsNotApp()

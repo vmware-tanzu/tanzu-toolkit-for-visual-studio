@@ -272,7 +272,7 @@ namespace Tanzu.Toolkit.ViewModels
 
                                         foreach (TreeViewItemViewModel orgChild in ovm.Children)
                                         {
-                                            if (orgChild is SpaceViewModel svm && orgChild.IsExpanded)
+                                            if (orgChild is SpaceViewModel svm && orgChild.IsExpanded && !orgChild.IsLoading)
                                             {
                                                 var refreshSpaceTask = new Task(async () =>
                                                 {
