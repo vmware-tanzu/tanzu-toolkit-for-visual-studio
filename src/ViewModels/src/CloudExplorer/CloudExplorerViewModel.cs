@@ -16,7 +16,7 @@ namespace Tanzu.Toolkit.ViewModels
         internal static readonly string _stopAppErrorMsg = "Encountered an error while stopping app";
         internal static readonly string _startAppErrorMsg = "Encountered an error while starting app";
         internal static readonly string _deleteAppErrorMsg = "Encountered an error while deleting app";
-        private static IErrorDialog _dialogService;
+        
 
         private bool _hasCloudTargets;
         private ObservableCollection<CfInstanceViewModel> _cfs;
@@ -25,6 +25,7 @@ namespace Tanzu.Toolkit.ViewModels
         private object _refreshLock = new object();
         private readonly IServiceProvider _services;
         private readonly IThreadingService _threadingService;
+        private readonly IErrorDialog _dialogService;
 
         public CloudExplorerViewModel(IServiceProvider services)
             : base(services)

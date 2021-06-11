@@ -14,7 +14,7 @@ namespace Tanzu.Toolkit.ViewModels
         internal static readonly string _emptyOrgsPlaceholderMsg = "No orgs";
         internal static readonly string _loadingMsg = "Loading orgs...";
         internal static readonly string _getOrgsFailureMsg = "Unable to load orgs";
-        private static IErrorDialog _dialogService;
+        private readonly IErrorDialog _dialogService;
 
         private volatile bool _isRefreshing = false;
         private readonly object _threadLock = new object();

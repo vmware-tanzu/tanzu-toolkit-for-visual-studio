@@ -17,6 +17,7 @@ using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.FileLocator;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.Threading;
+using Tanzu.Toolkit.Services.ThemeService;
 using Tanzu.Toolkit.Services.ViewLocator;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.VisualStudio.Commands;
@@ -128,6 +129,8 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<IThreadingService, ThreadingService>();
             services.AddSingleton<IErrorDialog>(new ErrorDialogWindowService(this));
             services.AddSingleton<IUiDispatcherService, UiDispatcherService>();
+
+            services.AddSingleton<IThemeService, ThemeService>();
 
             services.AddTransient<ICmdProcessService, CmdProcessService>();
 

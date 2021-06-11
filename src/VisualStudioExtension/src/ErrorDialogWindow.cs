@@ -8,7 +8,7 @@ namespace Tanzu.Toolkit.VisualStudio
     public class ErrorDialogWindowService : TanzuToolkitForVisualStudioPackage, IErrorDialog
     {
         //private static IServiceProvider _serviceProvider;
-        private static AsyncPackage _asyncServiceProvider;
+        private readonly AsyncPackage _asyncServiceProvider;
 
         public ErrorDialogWindowService(AsyncPackage services)
         {

@@ -21,13 +21,14 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string DeploymentErrorMsg = "Unable to deploy app:";
         internal const string GetOrgsFailureMsg = "Unable to fetch orgs.";
         internal const string GetSpacesFailureMsg = "Unable to fetch spaces.";
-        internal IOutputViewModel OutputViewModel;
+        
 
         private readonly string _projDir;
         private string _status;
         private string _appName;
         private readonly bool _fullFrameworkDeployment = false;
-        private static IErrorDialog _dialogService;
+        private readonly IErrorDialog _dialogService;
+        internal IOutputViewModel OutputViewModel;
 
         private List<CloudFoundryInstance> _cfInstances;
         private List<CloudFoundryOrganization> _cfOrgs;
