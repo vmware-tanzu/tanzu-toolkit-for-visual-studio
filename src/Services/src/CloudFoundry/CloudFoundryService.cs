@@ -225,7 +225,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         /// </summary>
         /// <param name="org"></param>
         /// <param name="skipSsl"></param>
-        public async Task<DetailedResult<List<CloudFoundrySpace>>> GetSpacesForOrgAsync(CloudFoundryOrganization org, bool skipSsl = true)
+        public async Task<DetailedResult<List<CloudFoundrySpace>>> GetSpacesForOrgAsync(CloudFoundryOrganization org, bool skipSsl = true, int retryAmount = 1)
         {
             List<Space> spacesFromApi;
             var spacesToReturn = new List<CloudFoundrySpace>();
@@ -251,14 +251,24 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
             catch (Exception originalException)
             {
-                var msg = $"Something went wrong while trying to request spaces from {apiAddress}: {originalException.Message}";
-                _logger.Error(msg);
-
-                return new DetailedResult<List<CloudFoundrySpace>>()
+                if (retryAmount > 0)
                 {
-                    Succeeded = false,
-                    Explanation = msg,
-                };
+                    _logger.Information($"GetSpacesForOrgAsync caught an exception when trying to retrieve spaces: {originalException.Message}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).");
+                    _cfCliService.ClearCachedAccessToken();
+                    retryAmount -= 1;
+                    return await GetSpacesForOrgAsync(org, skipSsl, retryAmount);
+                }
+                else
+                {
+                    var msg = $"Something went wrong while trying to request spaces from {apiAddress}: {originalException.Message}";
+                    _logger.Error(msg);
+
+                    return new DetailedResult<List<CloudFoundrySpace>>()
+                    {
+                        Succeeded = false,
+                        Explanation = msg,
+                    };
+                }
             }
 
             foreach (Space space in spacesFromApi)

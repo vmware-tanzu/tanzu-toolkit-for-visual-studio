@@ -423,7 +423,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 cmdDetails: FakeSuccessCmdResult);
 
             MockCloudFoundryService.Setup(mock => mock.
-                GetSpacesForOrgAsync(FakeCfOrg, true))
+                GetSpacesForOrgAsync(FakeCfOrg, true, It.IsAny<int>()))
                     .ReturnsAsync(fakeSuccessfulSpacesResponse);
 
             _sut.SelectedCf = FakeCfInstance;
@@ -475,7 +475,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 cmdDetails: FakeFailureCmdResult);
 
             MockCloudFoundryService.Setup(mock => mock.
-                GetSpacesForOrgAsync(FakeCfOrg, true))
+                GetSpacesForOrgAsync(FakeCfOrg, true, It.IsAny<int>()))
                     .ReturnsAsync(fakeFailedSpacesResponse);
 
             MockDialogService.Setup(mock => mock.
@@ -504,7 +504,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 cmdDetails: FakeFailureCmdResult);
 
             MockCloudFoundryService.Setup(mock => mock.
-                GetSpacesForOrgAsync(FakeCfOrg, true))
+                GetSpacesForOrgAsync(FakeCfOrg, true, It.IsAny<int>()))
                     .ReturnsAsync(fakeFailedSpacesResponse);
 
             MockDialogService.Setup(mock => mock.

@@ -89,7 +89,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _receivedEvents.Clear();
 
             MockCloudFoundryService.Setup(mock => mock.
-                GetSpacesForOrgAsync(It.IsAny<CloudFoundryOrganization>(), true))
+                GetSpacesForOrgAsync(It.IsAny<CloudFoundryOrganization>(), true, It.IsAny<int>()))
                     .ReturnsAsync(fakeSucccessResponse);
 
             Assert.AreEqual(initialSpacesList.Count, _sut.Children.Count);
@@ -114,7 +114,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 cmdDetails: FakeSuccessCmdResult);
 
             MockCloudFoundryService.Setup(mock => mock.
-                GetSpacesForOrgAsync(It.IsAny<CloudFoundryOrganization>(), true))
+                GetSpacesForOrgAsync(It.IsAny<CloudFoundryOrganization>(), true, It.IsAny<int>()))
                     .ReturnsAsync(fakeNoSpacesResponse);
 
             await _sut.LoadChildren();
@@ -140,7 +140,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 cmdDetails: FakeSuccessCmdResult);
 
             MockCloudFoundryService.Setup(mock => mock.
-                GetSpacesForOrgAsync(_sut.Org, true))
+                GetSpacesForOrgAsync(_sut.Org, true, It.IsAny<int>()))
                     .ReturnsAsync(fakeNoSpacesResponse);
 
             _sut.IsLoading = true;
@@ -160,7 +160,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 cmdDetails: FakeFailureCmdResult);
 
             MockCloudFoundryService.Setup(mock => mock.
-              GetSpacesForOrgAsync(_sut.Org, true))
+              GetSpacesForOrgAsync(_sut.Org, true, It.IsAny<int>()))
                 .ReturnsAsync(fakeFailedResult);
 
             await _sut.LoadChildren();
@@ -188,7 +188,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 cmdDetails: FakeSuccessCmdResult);
 
             MockCloudFoundryService.Setup(mock => mock.
-                GetSpacesForOrgAsync(FakeCfOrg, true))
+                GetSpacesForOrgAsync(FakeCfOrg, true, It.IsAny<int>()))
                     .ReturnsAsync(fakeSuccessResponse);
 
             /* pre-check presence of placeholder */
@@ -217,7 +217,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 cmdDetails: FakeFailureCmdResult);
 
             MockCloudFoundryService.Setup(mock => mock.
-              GetSpacesForOrgAsync(_sut.Org, true))
+              GetSpacesForOrgAsync(_sut.Org, true, It.IsAny<int>()))
                 .ReturnsAsync(fakeFailedResult);
 
             var result = await _sut.FetchChildren();
@@ -275,7 +275,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsFalse(initialChildSpace3.IsExpanded);
 
             MockCloudFoundryService.Setup(mock => mock.
-                GetSpacesForOrgAsync(_sut.Org, true))
+                GetSpacesForOrgAsync(_sut.Org, true, It.IsAny<int>()))
                     .ReturnsAsync(fakeSuccessResult);
 
             _receivedEvents.Clear();
@@ -314,7 +314,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 cmdDetails: FakeSuccessCmdResult);
 
             MockCloudFoundryService.Setup(mock => mock.
-                GetSpacesForOrgAsync(_sut.Org, true))
+                GetSpacesForOrgAsync(_sut.Org, true, It.IsAny<int>()))
                     .ReturnsAsync(fakeNoSpacesResult);
 
             _sut.Children = new ObservableCollection<TreeViewItemViewModel> { svm }; // simulate org initially having 1 space child
@@ -349,7 +349,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 cmdDetails: FakeSuccessCmdResult);
 
             MockCloudFoundryService.Setup(mock => mock.
-                GetSpacesForOrgAsync(_sut.Org, true))
+                GetSpacesForOrgAsync(_sut.Org, true, It.IsAny<int>()))
                     .ReturnsAsync(fakeSuccessfulSpacesResult);
 
             _sut.Children = new ObservableCollection<TreeViewItemViewModel> { _sut.EmptyPlaceholder }; // simulate org initially having no space children
