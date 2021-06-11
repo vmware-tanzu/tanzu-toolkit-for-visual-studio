@@ -36,7 +36,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         /// </summary>
         private readonly AsyncPackage _package;
 
-        private static DTE2 _dte;
+        public static DTE2 Dte { get; private set; }
         private static IFileLocatorService _fileLocatorService;
         private static ILogger _logger;
         private static IErrorDialog _dialogService;
@@ -66,16 +66,6 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             private set;
         }
 
-        public static DTE2 Dte
-        {
-            get => _dte;
-
-            private set
-            {
-                _dte = value;
-            }
-        }
-
         /// <summary>
         /// Gets the service provider from the owner package.
         /// </summary>
@@ -88,7 +78,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         }
 
         /// <summary>
-        /// Initializes the singleton instance of the command.
+        /// Initializes the command.
         /// </summary>
         /// <param name="package">Owner package, not null.</param>
         /// <param name="services">IServiceProvider used to lookup auxiliary services.</param>
@@ -105,7 +95,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             _fileLocatorService = services.GetRequiredService<IFileLocatorService>();
             _dialogService = services.GetRequiredService<IErrorDialog>();
             var logSvc = services.GetRequiredService<ILoggingService>();
-
+             
             Assumes.Present(Dte);
             Assumes.Present(_fileLocatorService);
             Assumes.Present(_dialogService);

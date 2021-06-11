@@ -14,7 +14,7 @@ namespace Tanzu.Toolkit.ViewModels
         internal static readonly string _emptySpacesPlaceholderMsg = "No spaces";
         internal static readonly string _loadingMsg = "Loading spaces...";
         internal static readonly string _getSpacesFailureMsg = "Unable to load spaces.";
-        private static IErrorDialog _dialogService;
+        private readonly IErrorDialog _dialogService;
 
         public CloudFoundryOrganization Org { get; }
 

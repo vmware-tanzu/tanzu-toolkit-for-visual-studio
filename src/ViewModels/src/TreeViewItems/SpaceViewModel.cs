@@ -13,7 +13,7 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string EmptyAppsPlaceholderMsg = "No apps";
         internal const string LoadingMsg = "Loading apps...";
         internal static readonly string _getAppsFailureMsg = "Unable to load apps.";
-        private static IErrorDialog _dialogService;
+        private readonly IErrorDialog _dialogService;
 
         public CloudFoundrySpace Space { get; }
 
