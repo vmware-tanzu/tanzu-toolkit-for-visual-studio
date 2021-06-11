@@ -401,7 +401,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             // simulate addition of new Space
             MockCloudFoundryService.Setup(mock => mock.
-                GetSpacesForOrgAsync(fakeInitialOrg, true))
+                GetSpacesForOrgAsync(fakeInitialOrg, true, It.IsAny<int>()))
                     .ReturnsAsync(new DetailedResult<List<CloudFoundrySpace>>(
                 succeeded: true,
                 content: new List<CloudFoundrySpace>
@@ -476,7 +476,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             // No need to get children for orgs that were just added by refresh.
             MockCloudFoundryService.Verify(mock => mock.
-                GetSpacesForOrgAsync(fakeNewOrg, true), Times.Never);
+                GetSpacesForOrgAsync(fakeNewOrg, true, It.IsAny<int>()), Times.Never);
 
             // No need to get children for spaces that were just added by refresh.
             MockCloudFoundryService.Verify(mock => mock.
@@ -741,7 +741,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                         cmdDetails: FakeSuccessCmdResult));
             
             MockCloudFoundryService.Setup(mock => mock.
-                GetSpacesForOrgAsync(fakeInitialOrg, true))
+                GetSpacesForOrgAsync(fakeInitialOrg, true, It.IsAny<int>()))
                     .ReturnsAsync(new DetailedResult<List<CloudFoundrySpace>>(
                         succeeded: true,
                         content: new List<CloudFoundrySpace>

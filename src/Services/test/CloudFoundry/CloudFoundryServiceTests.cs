@@ -592,6 +592,83 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
         [TestMethod]
         [TestCategory("GetSpaces")]
+        public async Task GetSpacesForOrgAsync_RetriesWithFreshToken_WhenListSpacesThrowsException()
+        {
+            var fakeExceptionMsg = "junk";
+            var fakeSpacesResponse = new List<CloudFoundryApiClient.Models.SpacesResponse.Space>
+            {
+                new CloudFoundryApiClient.Models.SpacesResponse.Space
+                {
+                    Name = _space1Name,
+                    Guid = _space1Guid,
+                },
+                new CloudFoundryApiClient.Models.SpacesResponse.Space
+                {
+                    Name = _space2Name,
+                    Guid = _space2Guid,
+                },
+            };
+
+            var expectedResultContent = new List<CloudFoundrySpace>
+            {
+                new CloudFoundrySpace(_space1Name, _space1Guid, FakeOrg),
+                new CloudFoundrySpace(_space2Name, _space2Guid, FakeOrg),
+            };
+
+            _mockCfCliService.SetupSequence(m => m.
+                GetOAuthToken())
+                    .Returns(expiredAccessToken) // simulate stale cached token on first attempt
+                    .Returns(_fakeValidAccessToken); // simulate fresh cached token on second attempt
+
+            _mockCfApiClient.Setup(m => m.
+                ListSpacesForOrg(FakeOrg.ParentCf.ApiAddress, expiredAccessToken, FakeOrg.OrgId))
+                    .Throws(new Exception(fakeExceptionMsg));
+
+            _mockCfApiClient.Setup(m => m.
+                ListSpacesForOrg(FakeOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeOrg.OrgId))
+                    .ReturnsAsync(fakeSpacesResponse);
+
+            var result = await _sut.GetSpacesForOrgAsync(FakeOrg);
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.AreEqual(null, result.CmdDetails);
+            Assert.AreEqual(expectedResultContent.Count, result.Content.Count);
+
+            _mockCfCliService.Verify(m => m.ClearCachedAccessToken(), Times.Once);
+            _mockCfApiClient.Verify(m => m.ListSpacesForOrg(FakeOrg.ParentCf.ApiAddress, It.IsAny<string>(), FakeOrg.OrgId), Times.Exactly(2));
+            _mockLogger.Verify(m => m.Information(It.Is<string>(s => s.Contains(fakeExceptionMsg) && s.Contains("retry"))), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("GetSpaces")]
+        public async Task GetSpacesForOrgAsync_ReturnsFailedResult_WhenListSpacesForOrgThrowsException_AndThereAreZeroRetriesLeft()
+        {
+            var fakeExceptionMsg = "junk";
+
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns(_fakeValidAccessToken);
+
+            _mockCfApiClient.Setup(m => m.
+                ListSpacesForOrg(FakeOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeOrg.OrgId))
+                    .Throws(new Exception(fakeExceptionMsg));
+
+            var result = await _sut.GetSpacesForOrgAsync(FakeOrg, retryAmount: 0);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsNull(result.CmdDetails);
+            Assert.IsNull(result.Content);
+
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+        }
+        
+        [TestMethod]
+        [TestCategory("GetSpaces")]
         public async Task GetSpacesForOrgAsync_ReturnsFailedResult_WhenListSpacesForOrgThrowsException()
         {
             var fakeExceptionMsg = "junk";
