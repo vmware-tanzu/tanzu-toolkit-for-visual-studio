@@ -25,7 +25,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         private static readonly string _fakePathToCfExe = "this\\is\\a\\fake\\path";
         private static readonly string _fakeStdOut = "some output content";
         private static readonly string _fakeStdErr = "some error content";
-        private static readonly string _fakeRealisticTokenOutput = "bearer my.fake.token\n";
+        private static readonly string _fakeRealisticTokenOutput = $"bearer {_fakeAccessToken}\n";
         private static readonly CmdResult _fakeSuccessResult = new CmdResult("junk output", "junk error", 0);
         private static readonly CmdResult _fakeFailureResult = new CmdResult("junk output", "junk error", 1);
         private static readonly StdOutDelegate _fakeOutCallback = content => { };
@@ -406,6 +406,52 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var token = _sut.GetOAuthToken();
 
             Assert.IsFalse(token.Contains("\n"));
+        }
+
+        [TestMethod]
+        [TestCategory("GetOAuthToken")]
+        public void GetOAuthToken_CachesFirstTokenResult()
+        {
+            var fakeTokenResult = new CmdResult(_fakeAccessToken, "", 0);
+
+            _mockCmdProcessService.Setup(m => m.ExecuteWindowlessCommand(It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null)).Returns(fakeTokenResult);
+
+            var firstResult = _sut.GetOAuthToken();
+            Assert.AreEqual(_fakeAccessToken, firstResult);
+            Assert.AreEqual(1, _mockCmdProcessService.Invocations.Count);
+            _mockCmdProcessService.Verify(m => m.ExecuteWindowlessCommand(It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null), Times.Once);
+
+            _mockCmdProcessService.Invocations.Clear();
+            _mockCmdProcessService.Reset();
+            Assert.AreEqual(0, _mockCmdProcessService.Invocations.Count);
+
+            var secondResult = _sut.GetOAuthToken();
+            Assert.AreEqual(_fakeAccessToken, secondResult);
+            Assert.AreEqual(0, _mockCmdProcessService.Invocations.Count);
+        }
+
+        [TestMethod]
+        [TestCategory("GetOAuthToken")]
+        public void GetOAuthToken_ReturnsNull_AndLogsError_WhenJwtCannotBeDecoded()
+        {
+            var fakeTokenResult = new CmdResult("my.fake.jwt", "", 0);
+
+            _mockCmdProcessService.Setup(m => m.ExecuteWindowlessCommand(It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null)).Returns(fakeTokenResult);
+
+            Exception thrownException = null;
+            string result = "this should become null";
+            try
+            {
+                result = _sut.GetOAuthToken();
+            }
+            catch (Exception ex)
+            {
+                thrownException = ex;
+            }
+
+            Assert.IsNull(thrownException);
+            Assert.IsNull(result);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
         }
 
         [TestMethod]
