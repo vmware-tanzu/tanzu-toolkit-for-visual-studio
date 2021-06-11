@@ -59,11 +59,6 @@ namespace Tanzu.Toolkit.Services.Tests
         protected const string _app3State = "STARTED";
         protected const string _app4State = "STOPPED";
 
-        protected static readonly CloudFoundryInstance FakeCfInstance = new CloudFoundryInstance("fake cf", _fakeValidTarget, _fakeValidAccessToken);
-        protected static readonly CloudFoundryOrganization FakeOrg = new CloudFoundryOrganization("fake org", "fake org guid", FakeCfInstance);
-        protected static readonly CloudFoundrySpace FakeSpace = new CloudFoundrySpace("fake space", "fake space guid", FakeOrg);
-        protected static readonly CloudFoundryApp FakeApp = new CloudFoundryApp("fake app", "fake app guid", FakeSpace, null);
-
         protected static readonly string _fakeValidTarget = "https://my.fake.target";
         protected static readonly string _fakeValidUsername = "junk";
         protected static readonly SecureString _fakeValidPassword = new SecureString();
@@ -71,6 +66,11 @@ namespace Tanzu.Toolkit.Services.Tests
         protected static readonly bool _skipSsl = true;
         protected static readonly string _fakeValidAccessToken = "valid token";
         protected static readonly string _fakeProjectPath = "this\\is\\a\\fake\\path";
+
+        protected static readonly CloudFoundryInstance FakeCfInstance = new CloudFoundryInstance("fake cf", _fakeValidTarget, _fakeValidAccessToken);
+        protected static readonly CloudFoundryOrganization FakeOrg = new CloudFoundryOrganization("fake org", "fake org guid", FakeCfInstance);
+        protected static readonly CloudFoundrySpace FakeSpace = new CloudFoundrySpace("fake space", "fake space guid", FakeOrg);
+        protected static readonly CloudFoundryApp FakeApp = new CloudFoundryApp("fake app", "fake app guid", FakeSpace, null);
 
         protected static readonly CmdResult _fakeSuccessCmdResult = new CmdResult("junk output", "junk error", 0);
         protected static readonly CmdResult _fakeFailureCmdResult = new CmdResult("junk output", "junk error", 1);
