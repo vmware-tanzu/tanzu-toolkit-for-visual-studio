@@ -368,27 +368,6 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             };
         }
 
-        public static void FormatExceptionMessage(Exception ex, List<string> message)
-        {
-            var aex = ex as AggregateException;
-            if (aex != null)
-            {
-                foreach (Exception iex in aex.InnerExceptions)
-                {
-                    FormatExceptionMessage(iex, message);
-                }
-            }
-            else
-            {
-                message.Add(ex.Message);
-
-                if (ex.InnerException != null)
-                {
-                    FormatExceptionMessage(ex.InnerException, message);
-                }
-            }
-        }
-
         /// <summary>
         /// Stop <paramref name="app"/> using token from <see cref="CfCliService"/>.
         /// </summary>
@@ -630,6 +609,26 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
 
             return await _cfCliService.GetRecentAppLogs(app.AppName);
+        }
+
+        private void FormatExceptionMessage(Exception ex, List<string> message)
+        {
+            if (ex is AggregateException aex)
+            {
+                foreach (Exception iex in aex.InnerExceptions)
+                {
+                    FormatExceptionMessage(iex, message);
+                }
+            }
+            else
+            {
+                message.Add(ex.Message);
+
+                if (ex.InnerException != null)
+                {
+                    FormatExceptionMessage(ex.InnerException, message);
+                }
+            }
         }
 
         private static async Task MatchCliVersionToApiVersion()
