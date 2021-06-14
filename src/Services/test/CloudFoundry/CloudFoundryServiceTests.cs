@@ -775,6 +775,85 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
         [TestMethod]
         [TestCategory("GetApps")]
+        public async Task GetAppsForSpaceAsync_RetriesWithFreshToken_WhenListAppsThrowsException()
+        {
+            var fakeExceptionMsg = "junk";
+            var fakeAppsResponse = new List<CloudFoundryApiClient.Models.AppsResponse.App>
+            {
+                new CloudFoundryApiClient.Models.AppsResponse.App
+                {
+                    Name = _app1Name,
+                    Guid = _app1Guid,
+                    State = _app1State,
+                },
+                new CloudFoundryApiClient.Models.AppsResponse.App
+                {
+                    Name = _app2Name,
+                    Guid = _app2Guid,
+                    State = _app2State,
+                },
+            };
+
+            var expectedResultContent = new List<CloudFoundryApp>
+            {
+                new CloudFoundryApp(_app1Name, _app1Guid, FakeSpace, "fake state"),
+                new CloudFoundryApp(_app2Name, _app2Guid, FakeSpace, "fake state"),
+            };
+
+            _mockCfCliService.SetupSequence(m => m.
+                GetOAuthToken())
+                    .Returns(expiredAccessToken) // simulate stale cached token on first attempt
+                    .Returns(_fakeValidAccessToken); // simulate fresh cached token on second attempt
+
+            _mockCfApiClient.Setup(m => m.
+                ListAppsForSpace(FakeSpace.ParentOrg.ParentCf.ApiAddress, expiredAccessToken, FakeSpace.SpaceId))
+                    .Throws(new Exception(fakeExceptionMsg));
+
+            _mockCfApiClient.Setup(m => m.
+                ListAppsForSpace(FakeSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeSpace.SpaceId))
+                    .ReturnsAsync(fakeAppsResponse);
+
+            var result = await _sut.GetAppsForSpaceAsync(FakeSpace);
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.AreEqual(null, result.CmdDetails);
+            Assert.AreEqual(expectedResultContent.Count, result.Content.Count);
+
+            _mockCfCliService.Verify(m => m.ClearCachedAccessToken(), Times.Once);
+            _mockCfApiClient.Verify(m => m.ListAppsForSpace(FakeSpace.ParentOrg.ParentCf.ApiAddress, It.IsAny<string>(), FakeSpace.SpaceId), Times.Exactly(2));
+            _mockLogger.Verify(m => m.Information(It.Is<string>(s => s.Contains(fakeExceptionMsg) && s.Contains("retry"))), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("GetApps")]
+        public async Task GetAppsForSpaceAsync_ReturnsFailedResult_WhenListAppsForSpaceThrowsException_AndThereAreZeroRetriesLeft()
+        {
+            var fakeExceptionMsg = "junk";
+
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns(_fakeValidAccessToken);
+
+            _mockCfApiClient.Setup(m => m.
+                ListAppsForSpace(FakeSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeSpace.SpaceId))
+                    .Throws(new Exception(fakeExceptionMsg));
+
+            var result = await _sut.GetAppsForSpaceAsync(FakeSpace, retryAmount: 0);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsNull(result.CmdDetails);
+            Assert.IsNull(result.Content);
+
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("GetApps")]
         public async Task GetAppsForSpaceAsync_ReturnsFailedResult_WhenListAppsForSpaceThrowsException()
         {
             var fakeExceptionMsg = "junk";

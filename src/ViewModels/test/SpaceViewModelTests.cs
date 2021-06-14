@@ -89,7 +89,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _receivedEvents.Clear();
 
             MockCloudFoundryService.Setup(mock => mock.
-                GetAppsForSpaceAsync(_sut.Space, true))
+                GetAppsForSpaceAsync(_sut.Space, true, It.IsAny<int>()))
                     .ReturnsAsync(fakeAppsResult);
 
             Assert.AreEqual(initialAppsList.Count, _sut.Children.Count);
@@ -114,7 +114,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 cmdDetails: FakeSuccessCmdResult);
 
             MockCloudFoundryService.Setup(mock => mock.
-                GetAppsForSpaceAsync(_sut.Space, true))
+                GetAppsForSpaceAsync(_sut.Space, true, It.IsAny<int>()))
                     .ReturnsAsync(fakeAppsResult);
 
             await _sut.LoadChildren();
@@ -140,7 +140,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 cmdDetails: FakeSuccessCmdResult);
 
             MockCloudFoundryService.Setup(mock => mock.
-                GetAppsForSpaceAsync(_sut.Space, true))
+                GetAppsForSpaceAsync(_sut.Space, true, It.IsAny<int>()))
                     .ReturnsAsync(fakeAppsResult);
 
             _sut.IsLoading = true;
@@ -166,7 +166,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 cmdDetails: FakeSuccessCmdResult);
 
             MockCloudFoundryService.Setup(mock => mock.
-                GetAppsForSpaceAsync(_sut.Space, true))
+                GetAppsForSpaceAsync(_sut.Space, true, It.IsAny<int>()))
                     .ReturnsAsync(fakeAppsResult);
 
             /* pre-check presence of placeholder */
@@ -195,7 +195,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 cmdDetails: FakeFailureCmdResult);
 
             MockCloudFoundryService.Setup(mock => mock.
-              GetAppsForSpaceAsync(_sut.Space, true))
+              GetAppsForSpaceAsync(_sut.Space, true, It.IsAny<int>()))
                 .ReturnsAsync(fakeFailedResult);
 
             await _sut.LoadChildren();
@@ -217,7 +217,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 cmdDetails: FakeFailureCmdResult);
 
             MockCloudFoundryService.Setup(mock => mock.
-              GetAppsForSpaceAsync(_sut.Space, true))
+              GetAppsForSpaceAsync(_sut.Space, true, It.IsAny<int>()))
                 .ReturnsAsync(fakeFailedResult);
 
             var result = await _sut.FetchChildren();
@@ -278,7 +278,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.AreEqual(initialState3, initialChildApp3.App.State);
 
             MockCloudFoundryService.Setup(mock => mock.
-                GetAppsForSpaceAsync(_sut.Space, true))
+                GetAppsForSpaceAsync(_sut.Space, true, It.IsAny<int>()))
                     .ReturnsAsync(fakeSuccessResult);
 
             _receivedEvents.Clear();
@@ -318,7 +318,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 cmdDetails: FakeSuccessCmdResult);
 
             MockCloudFoundryService.Setup(mock => mock.
-                GetAppsForSpaceAsync(_sut.Space, true))
+                GetAppsForSpaceAsync(_sut.Space, true, It.IsAny<int>()))
                     .ReturnsAsync(fakeNoAppsResult);
 
             _sut.Children = new ObservableCollection<TreeViewItemViewModel> { avm }; // simulate space initially having 1 app child
@@ -354,7 +354,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 cmdDetails: FakeSuccessCmdResult);
 
             MockCloudFoundryService.Setup(mock => mock.
-                GetAppsForSpaceAsync(_sut.Space, true))
+                GetAppsForSpaceAsync(_sut.Space, true, It.IsAny<int>()))
                     .ReturnsAsync(fakeSuccessfulAppsResult);
 
             _sut.Children = new ObservableCollection<TreeViewItemViewModel> { _sut.EmptyPlaceholder }; // simulate space initially having no app children
@@ -404,7 +404,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 cmdDetails: FakeSuccessCmdResult);
 
             MockCloudFoundryService.Setup(mock => mock.
-                GetAppsForSpaceAsync(_sut.Space, true))
+                GetAppsForSpaceAsync(_sut.Space, true, It.IsAny<int>()))
                     .ReturnsAsync(fakeSuccessfulAppsResult);
 
             await _sut.RefreshChildren();

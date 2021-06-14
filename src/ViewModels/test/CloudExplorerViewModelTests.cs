@@ -414,7 +414,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             // simulate addition of new App + change of state for initial app
             MockCloudFoundryService.Setup(mock => mock.
-                GetAppsForSpaceAsync(fakeInitialSpace, true))
+                GetAppsForSpaceAsync(fakeInitialSpace, true, It.IsAny<int>()))
                     .ReturnsAsync(new DetailedResult<List<CloudFoundryApp>>(
                 succeeded: true,
                 content: new List<CloudFoundryApp>
@@ -468,7 +468,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.AreEqual(fakeNewApp.AppId, secondAppVm.App.AppId);
 
             // ensure space refresh makes request for fresh apps
-            MockCloudFoundryService.Verify(mock => mock.GetAppsForSpaceAsync(fakeInitialSpace, true), Times.Once);
+            MockCloudFoundryService.Verify(mock => mock.GetAppsForSpaceAsync(fakeInitialSpace, true, It.IsAny<int>()), Times.Once);
 
             // No need to get children for CFs that were just added by refresh.
             MockCloudFoundryService.Verify(mock => mock.
@@ -480,7 +480,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             // No need to get children for spaces that were just added by refresh.
             MockCloudFoundryService.Verify(mock => mock.
-                GetAppsForSpaceAsync(fakeNewSpace, true), Times.Never);
+                GetAppsForSpaceAsync(fakeNewSpace, true, It.IsAny<int>()), Times.Never);
         }
 
         [TestMethod]
