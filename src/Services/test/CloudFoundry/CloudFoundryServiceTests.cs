@@ -483,7 +483,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             _mockCfApiClient.Verify(m => m.ListOrgs(FakeCfInstance.ApiAddress, It.IsAny<string>()), Times.Exactly(2));
             _mockLogger.Verify(m => m.Information(It.Is<string>(s => s.Contains(fakeExceptionMsg) && s.Contains("retry"))), Times.Once);
         }
-        
+
         [TestMethod]
         [TestCategory("GetOrgs")]
         public async Task GetOrgsForCfInstanceAsync_ReturnsFailedResult_WhenListOrgsThrowsException_AndThereAreZeroRetriesLeft()
@@ -666,7 +666,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
         }
-        
+
         [TestMethod]
         [TestCategory("GetSpaces")]
         public async Task GetSpacesForOrgAsync_ReturnsFailedResult_WhenListSpacesForOrgThrowsException()
@@ -1060,6 +1060,61 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                     .Throws(new Exception(fakeExceptionMsg));
 
             DetailedResult result = await _sut.StopAppAsync(FakeApp);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsNull(result.CmdDetails);
+
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("StopApp")]
+        public async Task StopAppAsync_RetriesWithFreshToken_WhenStopAppWithGuidThrowsException()
+        {
+            var fakeExceptionMsg = "junk";
+
+            _mockCfCliService.SetupSequence(m => m.
+                GetOAuthToken())
+                    .Returns(expiredAccessToken) // simulate stale cached token on first attempt
+                    .Returns(_fakeValidAccessToken); // simulate fresh cached token on second attempt
+
+            _mockCfApiClient.Setup(m => m.
+                StopAppWithGuid(FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, expiredAccessToken, FakeApp.AppId))
+                    .Throws(new Exception(fakeExceptionMsg));
+
+            _mockCfApiClient.Setup(m => m.
+                StopAppWithGuid(FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
+                    .ReturnsAsync(true);
+
+            var result = await _sut.StopAppAsync(FakeApp);
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.IsNull(result.CmdDetails);
+
+            _mockCfCliService.Verify(m => m.ClearCachedAccessToken(), Times.Once);
+            _mockCfApiClient.Verify(m => m.StopAppWithGuid(FakeSpace.ParentOrg.ParentCf.ApiAddress, It.IsAny<string>(), FakeApp.AppId), Times.Exactly(2));
+            _mockLogger.Verify(m => m.Information(It.Is<string>(s => s.Contains(fakeExceptionMsg) && s.Contains("retry"))), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("StopApp")]
+        public async Task StopAppAsync_ReturnsFailedResult_WhenStopAppWithGuidThrowsException_AndThereAreZeroRetriesLeft()
+        {
+            var fakeExceptionMsg = "junk";
+
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns(_fakeValidAccessToken);
+
+            _mockCfApiClient.Setup(m => m.
+                StopAppWithGuid(FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
+                    .Throws(new Exception(fakeExceptionMsg));
+
+            DetailedResult result = await _sut.StopAppAsync(FakeApp, retryAmount: 0);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);

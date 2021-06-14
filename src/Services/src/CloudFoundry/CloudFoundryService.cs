@@ -382,10 +382,15 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
         /// <summary>
         /// Stop <paramref name="app"/> using token from <see cref="CfCliService"/>.
+        /// <para>
+        /// If any exceptions are thrown when trying to retrieve orgs, this method will clear the cached
+        /// access token on <see cref="CfCliService"/> and attempt to retrieve the orgs again using a 
+        /// fresh access token.
+        /// </para>
         /// </summary>
         /// <param name="app"></param>
         /// <param name="skipSsl"></param>
-        public async Task<DetailedResult> StopAppAsync(CloudFoundryApp app, bool skipSsl = true)
+        public async Task<DetailedResult> StopAppAsync(CloudFoundryApp app, bool skipSsl = true, int retryAmount = 1)
         {
             bool appWasStopped;
 
@@ -410,15 +415,25 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
             catch (Exception originalException)
             {
-                var msg = $"Something went wrong while trying to stop app '{app.AppName}': {originalException.Message}.";
-
-                _logger.Error(msg);
-
-                return new DetailedResult
+                if (retryAmount > 0)
                 {
-                    Succeeded = false,
-                    Explanation = msg,
-                };
+                    _logger.Information($"StopAppAsync caught an exception when trying to stop app '{app.AppName}': {originalException.Message}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).");
+                    _cfCliService.ClearCachedAccessToken();
+                    retryAmount -= 1;
+                    return await StopAppAsync(app, skipSsl, retryAmount);
+                }
+                else
+                {
+                    var msg = $"Something went wrong while trying to stop app '{app.AppName}': {originalException.Message}.";
+
+                    _logger.Error(msg);
+
+                    return new DetailedResult
+                    {
+                        Succeeded = false,
+                        Explanation = msg,
+                    };
+                }
             }
 
             if (!appWasStopped)
