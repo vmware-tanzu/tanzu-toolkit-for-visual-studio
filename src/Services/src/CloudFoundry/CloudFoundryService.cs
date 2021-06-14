@@ -299,7 +299,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         /// </summary>
         /// <param name="space"></param>
         /// <param name="skipSsl"></param>
-        public async Task<DetailedResult<List<CloudFoundryApp>>> GetAppsForSpaceAsync(CloudFoundrySpace space, bool skipSsl = true)
+        public async Task<DetailedResult<List<CloudFoundryApp>>> GetAppsForSpaceAsync(CloudFoundrySpace space, bool skipSsl = true, int retryAmount = 1)
         {
             List<App> appsFromApi;
             var appsToReturn = new List<CloudFoundryApp>();
@@ -325,14 +325,24 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
             catch (Exception originalException)
             {
-                var msg = $"Something went wrong while trying to request apps from {apiAddress}: {originalException.Message}";
-                _logger.Error(msg);
-
-                return new DetailedResult<List<CloudFoundryApp>>()
+                if (retryAmount > 0)
                 {
-                    Succeeded = false,
-                    Explanation = msg,
-                };
+                    _logger.Information($"GetAppsForSpaceAsync caught an exception when trying to retrieve apps: {originalException.Message}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).");
+                    _cfCliService.ClearCachedAccessToken();
+                    retryAmount -= 1;
+                    return await GetAppsForSpaceAsync(space, skipSsl, retryAmount);
+                }
+                else
+                {
+                    var msg = $"Something went wrong while trying to request apps from {apiAddress}: {originalException.Message}";
+                    _logger.Error(msg);
+
+                    return new DetailedResult<List<CloudFoundryApp>>()
+                    {
+                        Succeeded = false,
+                        Explanation = msg,
+                    };
+                }
             }
 
             foreach (App app in appsFromApi)
