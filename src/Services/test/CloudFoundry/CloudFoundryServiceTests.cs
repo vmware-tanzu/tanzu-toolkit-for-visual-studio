@@ -1192,6 +1192,61 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
+        [TestCategory("StartApp")]
+        public async Task StartAppAsync_RetriesWithFreshToken_WhenStartAppWithGuidThrowsException()
+        {
+            var fakeExceptionMsg = "junk";
+
+            _mockCfCliService.SetupSequence(m => m.
+                GetOAuthToken())
+                    .Returns(expiredAccessToken) // simulate stale cached token on first attempt
+                    .Returns(_fakeValidAccessToken); // simulate fresh cached token on second attempt
+
+            _mockCfApiClient.Setup(m => m.
+                StartAppWithGuid(FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, expiredAccessToken, FakeApp.AppId))
+                    .Throws(new Exception(fakeExceptionMsg));
+
+            _mockCfApiClient.Setup(m => m.
+                StartAppWithGuid(FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
+                    .ReturnsAsync(true);
+
+            var result = await _sut.StartAppAsync(FakeApp);
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.IsNull(result.CmdDetails);
+
+            _mockCfCliService.Verify(m => m.ClearCachedAccessToken(), Times.Once);
+            _mockCfApiClient.Verify(m => m.StartAppWithGuid(FakeSpace.ParentOrg.ParentCf.ApiAddress, It.IsAny<string>(), FakeApp.AppId), Times.Exactly(2));
+            _mockLogger.Verify(m => m.Information(It.Is<string>(s => s.Contains(fakeExceptionMsg) && s.Contains("retry"))), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("StartApp")]
+        public async Task StartAppAsync_ReturnsFailedResult_WhenStartAppWithGuidThrowsException_AndThereAreZeroRetriesLeft()
+        {
+            var fakeExceptionMsg = "junk";
+
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns(_fakeValidAccessToken);
+
+            _mockCfApiClient.Setup(m => m.
+                StartAppWithGuid(FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
+                    .Throws(new Exception(fakeExceptionMsg));
+
+            DetailedResult result = await _sut.StartAppAsync(FakeApp, retryAmount: 0);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsNull(result.CmdDetails);
+
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
         [TestCategory("DeleteApp")]
         public async Task DeleteAppAsync_ReturnsSuccessfulResult_AndUpdatesAppState()
         {
