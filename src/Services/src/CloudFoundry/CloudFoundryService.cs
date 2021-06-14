@@ -145,9 +145,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
         /// <summary>
         /// Requests orgs from <see cref="CfApiClient"/> using access token from <see cref="CfCliService"/>. 
+        /// <para>
         /// If any exceptions are thrown when trying to retrieve orgs, this method will clear the cached
         /// access token on <see cref="CfCliService"/> and attempt to retrieve the orgs again using a 
         /// fresh access token.
+        /// </para>
         /// </summary>
         /// <param name="cf"></param>
         /// <param name="skipSsl"></param>
@@ -222,6 +224,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
         /// <summary>
         /// Requests spaces for <paramref name="org"/> using access token from <see cref="CfCliService"/>.
+        /// <para>
+        /// If any exceptions are thrown when trying to retrieve orgs, this method will clear the cached
+        /// access token on <see cref="CfCliService"/> and attempt to retrieve the orgs again using a 
+        /// fresh access token.
+        /// </para>
         /// </summary>
         /// <param name="org"></param>
         /// <param name="skipSsl"></param>
@@ -296,6 +303,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
         /// <summary>
         /// Requests apps for <paramref name="space"/> using access token from <see cref="CfCliService"/>.
+        /// <para>
+        /// If any exceptions are thrown when trying to retrieve orgs, this method will clear the cached
+        /// access token on <see cref="CfCliService"/> and attempt to retrieve the orgs again using a 
+        /// fresh access token.
+        /// </para>
         /// </summary>
         /// <param name="space"></param>
         /// <param name="skipSsl"></param>
