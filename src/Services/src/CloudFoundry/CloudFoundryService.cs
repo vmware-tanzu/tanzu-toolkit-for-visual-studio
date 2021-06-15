@@ -225,8 +225,8 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         /// <summary>
         /// Requests spaces for <paramref name="org"/> using access token from <see cref="CfCliService"/>.
         /// <para>
-        /// If any exceptions are thrown when trying to retrieve orgs, this method will clear the cached
-        /// access token on <see cref="CfCliService"/> and attempt to retrieve the orgs again using a 
+        /// If any exceptions are thrown when trying to retrieve spaces, this method will clear the cached
+        /// access token on <see cref="CfCliService"/> and attempt to retrieve the spaces again using a 
         /// fresh access token.
         /// </para>
         /// </summary>
@@ -304,8 +304,8 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         /// <summary>
         /// Requests apps for <paramref name="space"/> using access token from <see cref="CfCliService"/>.
         /// <para>
-        /// If any exceptions are thrown when trying to retrieve orgs, this method will clear the cached
-        /// access token on <see cref="CfCliService"/> and attempt to retrieve the orgs again using a 
+        /// If any exceptions are thrown when trying to retrieve apps, this method will clear the cached
+        /// access token on <see cref="CfCliService"/> and attempt to retrieve the apps again using a 
         /// fresh access token.
         /// </para>
         /// </summary>
@@ -383,9 +383,9 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         /// <summary>
         /// Stop <paramref name="app"/> using token from <see cref="CfCliService"/>.
         /// <para>
-        /// If any exceptions are thrown when trying to retrieve orgs, this method will clear the cached
-        /// access token on <see cref="CfCliService"/> and attempt to retrieve the orgs again using a 
-        /// fresh access token.
+        /// If any exceptions are thrown when trying to stop, this method will clear the cached
+        /// access token on <see cref="CfCliService"/> and attempt to stop the app again using 
+        /// a fresh access token.
         /// </para>
         /// </summary>
         /// <param name="app"></param>
@@ -459,9 +459,9 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         /// <summary>
         /// Start <paramref name="app"/> using token from <see cref="CfCliService"/>.
         /// <para>
-        /// If any exceptions are thrown when trying to retrieve orgs, this method will clear the cached
-        /// access token on <see cref="CfCliService"/> and attempt to retrieve the orgs again using a 
-        /// fresh access token.
+        /// If any exceptions are thrown when trying to start, this method will clear the cached
+        /// access token on <see cref="CfCliService"/> and attempt to start the app again using 
+        /// a fresh access token.
         /// </para>
         /// </summary>
         /// <param name="app"></param>
@@ -535,9 +535,9 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         /// <summary>
         /// Delete <paramref name="app"/> using token from <see cref="CfCliService"/>.
         /// <para>
-        /// If any exceptions are thrown when trying to retrieve orgs, this method will clear the cached
-        /// access token on <see cref="CfCliService"/> and attempt to retrieve the orgs again using a 
-        /// fresh access token.
+        /// If any exceptions are thrown when trying to delete, this method will clear the cached
+        /// access token on <see cref="CfCliService"/> and attempt to delete the app again using 
+        /// a fresh access token.
         /// </para> 
         /// </summary>
         /// <param name="app"></param>
