@@ -532,7 +532,20 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             };
         }
 
-        public async Task<DetailedResult> DeleteAppAsync(CloudFoundryApp app, bool skipSsl = true, bool removeRoutes = true)
+        /// <summary>
+        /// Delete <paramref name="app"/> using token from <see cref="CfCliService"/>.
+        /// <para>
+        /// If any exceptions are thrown when trying to retrieve orgs, this method will clear the cached
+        /// access token on <see cref="CfCliService"/> and attempt to retrieve the orgs again using a 
+        /// fresh access token.
+        /// </para> 
+        /// </summary>
+        /// <param name="app"></param>
+        /// <param name="skipSsl"></param>
+        /// <param name="removeRoutes"></param>
+        /// <param name="retryAmount"></param>
+        /// <returns></returns>
+        public async Task<DetailedResult> DeleteAppAsync(CloudFoundryApp app, bool skipSsl = true, bool removeRoutes = true, int retryAmount = 1)
         {
             bool appWasDeleted;
 
@@ -570,15 +583,25 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
             catch (Exception originalException)
             {
-                var msg = $"Something went wrong while trying to delete app '{app.AppName}': {originalException.Message}.";
-
-                _logger.Error(msg);
-
-                return new DetailedResult
+                if (retryAmount > 0)
                 {
-                    Succeeded = false,
-                    Explanation = msg,
-                };
+                    _logger.Information($"StartAppAsync caught an exception when trying to start app '{app.AppName}': {originalException.Message}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).");
+                    _cfCliService.ClearCachedAccessToken();
+                    retryAmount -= 1;
+                    return await DeleteAppAsync(app, skipSsl, removeRoutes, retryAmount);
+                }
+                else
+                {
+                    var msg = $"Something went wrong while trying to delete app '{app.AppName}': {originalException.Message}.";
+
+                    _logger.Error(msg);
+
+                    return new DetailedResult
+                    {
+                        Succeeded = false,
+                        Explanation = msg,
+                    };
+                }
             }
 
             app.State = "DELETED";
