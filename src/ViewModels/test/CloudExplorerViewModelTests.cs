@@ -266,7 +266,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
 
-            MockCloudFoundryService.Setup(mock => mock.DeleteAppAsync(fakeApp, true, true)).ReturnsAsync(FakeSuccessDetailedResult);
+            MockCloudFoundryService.Setup(mock => mock.DeleteAppAsync(fakeApp, true, true, It.IsAny<int>())).ReturnsAsync(FakeSuccessDetailedResult);
 
             Exception shouldStayNull = null;
             try
@@ -288,7 +288,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
 
             MockCloudFoundryService.Setup(mock => mock.
-                DeleteAppAsync(fakeApp, true, true))
+                DeleteAppAsync(fakeApp, true, true, It.IsAny<int>()))
                     .ReturnsAsync(FakeFailureDetailedResult);
 
             await _sut.DeleteCfApp(fakeApp);
@@ -307,7 +307,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
 
             MockCloudFoundryService.Setup(mock => mock.
-                DeleteAppAsync(fakeApp, true, true))
+                DeleteAppAsync(fakeApp, true, true, It.IsAny<int>()))
                     .ReturnsAsync(FakeFailureDetailedResult);
 
             await _sut.DeleteCfApp(fakeApp);
