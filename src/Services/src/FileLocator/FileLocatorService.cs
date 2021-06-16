@@ -11,6 +11,8 @@ namespace Tanzu.Toolkit.Services.FileLocator
         private const string _cfCliV7Dir = "Resources";
         private const string _defaultLogsFileName = "toolkit-diagnostics.log";
         private const string _defaultLogsDir = "Logs";
+        private const string _defaultCfCliDir = ".cf";
+        private const string _defaultCfCliConfigFileName = "config.json";
         private int _cliVersion = 7;
         private readonly string _pathToCf6Exe;
         private readonly string _pathToCf7Exe;
@@ -87,6 +89,14 @@ namespace Tanzu.Toolkit.Services.FileLocator
             get
             {
                 return Path.Combine(VsixPackageBaseDir, _defaultLogsDir, _defaultLogsFileName);
+            }
+        }
+
+        public string PathToCfCliConfigFile
+        {
+            get
+            {
+                return Path.Combine(VsixPackageBaseDir, _defaultCfCliDir, _defaultCfCliConfigFileName);
             }
         }
     }

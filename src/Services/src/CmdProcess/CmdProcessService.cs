@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.Services.CmdProcess
@@ -10,7 +11,7 @@ namespace Tanzu.Toolkit.Services.CmdProcess
         private string _stdOutAggregator = "";
         private string _stdErrAggregator = "";
 
-        public CmdResult RunCommand(string executableFilePath, string arguments, string workingDir, StdOutDelegate stdOutDelegate, StdErrDelegate stdErrDelegate)
+        public CmdResult RunCommand(string executableFilePath, string arguments, string workingDir, StdOutDelegate stdOutDelegate, StdErrDelegate stdErrDelegate, Dictionary<string, string> envVars = null)
         {
             // Create Process
             Process process = new Process();
@@ -23,6 +24,15 @@ namespace Tanzu.Toolkit.Services.CmdProcess
             if (workingDir != null)
             {
                 process.StartInfo.WorkingDirectory = workingDir;
+            }
+
+            // Set environment variables
+            if (envVars != null)
+            {
+                foreach (string key in envVars.Keys)
+                {
+                    process.StartInfo.EnvironmentVariables[key] = envVars[key];
+                }
             }
 
             // Set output and error handlers
