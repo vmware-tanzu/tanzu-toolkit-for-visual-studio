@@ -6,6 +6,7 @@
         string VsixPackageBaseDir { get; }
         string PathToLogsFile { get; }
         int CliVersion { get; set; }
+        string PathToCfCliConfigFile { get; }
 
         bool DirContainsFiles(string dirPath);
     }

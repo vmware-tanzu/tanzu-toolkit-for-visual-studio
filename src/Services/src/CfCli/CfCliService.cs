@@ -44,7 +44,6 @@ namespace Tanzu.Toolkit.Services.CfCli
         internal const string _getSpacesRequestPath = "GET /v2/spaces";
         internal const string _getAppsRequestPath = "GET /v2/spaces"; // not a typo; app info returned from /v2/spaces/:guid/apps
 
-        private IServiceProvider Services { get; set; }
         private readonly IFileLocatorService _fileLocatorService;
         private readonly ILogger _logger;
 
@@ -53,8 +52,13 @@ namespace Tanzu.Toolkit.Services.CfCli
         private volatile string _cachedAccessToken = null;
         private DateTime _accessTokenExpiration = new DateTime(0);
 
-        public CfCliService(IServiceProvider services)
+        private string ConfigFilePath { get; }
+
+        private IServiceProvider Services { get; set; }
+
+        public CfCliService(string configFilePath, IServiceProvider services)
         {
+            ConfigFilePath = configFilePath;
             Services = services;
             _fileLocatorService = services.GetRequiredService<IFileLocatorService>();
             var logSvc = services.GetRequiredService<ILoggingService>();
@@ -526,7 +530,7 @@ namespace Tanzu.Toolkit.Services.CfCli
                 {
                     return new DetailedResult<string>(null, targetOrgResult.Succeeded, targetOrgResult.Explanation, targetOrgResult.CmdDetails);
                 }
-                
+
                 var targetSpaceResult = TargetSpace(spaceName);
                 if (!targetSpaceResult.Succeeded)
                 {
@@ -563,8 +567,12 @@ namespace Tanzu.Toolkit.Services.CfCli
                 return new DetailedResult(false, _cfExePathErrorMsg);
             }
 
+            var envVars = new Dictionary<string, string> {
+                { "CF_HOME", ConfigFilePath }
+            };
+
             ICmdProcessService cmdProcessService = Services.GetRequiredService<ICmdProcessService>();
-            CmdResult result = cmdProcessService.RunCommand(pathToCfExe, arguments, workingDir, null, null);
+            CmdResult result = cmdProcessService.RunCommand(pathToCfExe, arguments, workingDir, null, null, envVars);
 
             if (result.ExitCode == 0)
             {
@@ -604,8 +612,12 @@ namespace Tanzu.Toolkit.Services.CfCli
                 return new DetailedResult(false, $"Unable to locate cf.exe.");
             }
 
+            var envVars = new Dictionary<string, string> {
+                { "CF_HOME", ConfigFilePath }
+            };
+
             ICmdProcessService cmdProcessService = Services.GetRequiredService<ICmdProcessService>();
-            CmdResult result = await Task.Run(() => cmdProcessService.RunCommand(pathToCfExe, arguments, workingDir, stdOutCallback, stdErrCallback));
+            CmdResult result = await Task.Run(() => cmdProcessService.RunCommand(pathToCfExe, arguments, workingDir, stdOutCallback, stdErrCallback, envVars));
 
             if (result.ExitCode == 0)
             {
