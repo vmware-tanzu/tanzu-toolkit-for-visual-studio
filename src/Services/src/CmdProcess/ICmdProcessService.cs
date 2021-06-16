@@ -1,9 +1,10 @@
-﻿using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
+﻿using System.Collections.Generic;
+using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.Services.CmdProcess
 {
     public interface ICmdProcessService
     {
-        CmdResult RunCommand(string executableFilePath, string arguments, string workingDir, StdOutDelegate stdOutDelegate, StdErrDelegate stdErrDelegate);
+        CmdResult RunCommand(string executableFilePath, string arguments, string workingDir, StdOutDelegate stdOutDelegate, StdErrDelegate stdErrDelegate, Dictionary<string, string> envVars = null);
     }
 }

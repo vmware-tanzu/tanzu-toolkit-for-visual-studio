@@ -123,7 +123,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<ICloudFoundryService, CloudFoundryService>();
             services.AddSingleton<IViewLocatorService, WpfViewLocatorService>();
             services.AddSingleton<IDialogService, WpfDialogService>();
-            services.AddSingleton<ICfCliService, CfCliService>();
+            services.AddSingleton<ICfCliService>(provider => new CfCliService(assemblyBasePath, provider));
             services.AddSingleton<IFileLocatorService>(new FileLocatorService(assemblyBasePath));
             services.AddSingleton<ILoggingService, LoggingService>();
             services.AddSingleton<IViewService, VsToolWindowService>();
