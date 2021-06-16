@@ -16,6 +16,33 @@ namespace Tanzu.Toolkit.ViewModels
         internal static readonly string _getSpacesFailureMsg = "Unable to load spaces.";
         private readonly IErrorDialog _dialogService;
 
+        private volatile bool _isRefreshing = false;
+        private readonly object _threadLock = new object();
+
+        /// <summary>
+        /// A thread-safe indicator of whether or not this <see cref="OrgViewModel"/> is in the process of updating its children.
+        /// </summary>
+        public bool IsRefreshing
+        {
+            get
+            {
+                lock (_threadLock)
+                {
+                    return _isRefreshing;
+                }
+            }
+
+            private set
+            {
+                lock (_threadLock)
+                {
+                    _isRefreshing = value;
+                }
+
+                RaisePropertyChangedEvent("IsRefreshing");
+            }
+        }
+
         public CloudFoundryOrganization Org { get; }
 
         public OrgViewModel(CloudFoundryOrganization org, IServiceProvider services, bool expanded = false)
@@ -104,18 +131,25 @@ namespace Tanzu.Toolkit.ViewModels
 
         public override async Task RefreshChildren()
         {
-            var freshSpaces = await FetchChildren();
-
-            RemoveNonexistentSpaces(freshSpaces);
-            AddNewSpaces(freshSpaces);
-
-            if (Children.Count == 0)
+            if (!IsRefreshing)
             {
-                UiDispatcherService.RunOnUiThread(() => Children.Add(EmptyPlaceholder));
-            }
-            else if (Children.Count > 1 && HasEmptyPlaceholder)
-            {
-                UiDispatcherService.RunOnUiThread(() => Children.Remove(EmptyPlaceholder));
+                IsRefreshing = true;
+
+                var freshSpaces = await FetchChildren();
+
+                RemoveNonexistentSpaces(freshSpaces);
+                AddNewSpaces(freshSpaces);
+
+                if (Children.Count == 0)
+                {
+                    UiDispatcherService.RunOnUiThread(() => Children.Add(EmptyPlaceholder));
+                }
+                else if (Children.Count > 1 && HasEmptyPlaceholder)
+                {
+                    UiDispatcherService.RunOnUiThread(() => Children.Remove(EmptyPlaceholder));
+                }
+             
+                IsRefreshing = false;
             }
         }
 
