@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security;
 using System.Text.Json;
@@ -47,6 +48,10 @@ namespace Tanzu.Toolkit.Services.CfCli
         private readonly IFileLocatorService _fileLocatorService;
         private readonly ILogger _logger;
 
+        private object _tokenLock = new object();
+        private volatile string _cachedAccessToken = null;
+        private DateTime _accessTokenExpiration = new DateTime(0);
+
         public CfCliService(IServiceProvider services)
         {
             Services = services;
@@ -90,15 +95,47 @@ namespace Tanzu.Toolkit.Services.CfCli
 
         public string GetOAuthToken()
         {
-            DetailedResult result = ExecuteCfCliCommand(_getOAuthTokenCmd);
-
-            if (result.CmdDetails.ExitCode != 0)
+            if (_cachedAccessToken == null || _accessTokenExpiration == null || DateTime.Compare(DateTime.Now, _accessTokenExpiration) >= 0)
             {
-                _logger.Error($"GetOAuthToken failed: {result}");
-                return null;
+                lock (_tokenLock)
+                {
+                    // double-check just in case the last thread to access this block changed these values
+                    // (prevents scenario where many threads wait for lock once token expires, then *all* try to refresh token)
+                    if (_cachedAccessToken == null || _accessTokenExpiration == null || DateTime.Compare(DateTime.Now, _accessTokenExpiration) >= 0)
+                    {
+                        try
+                        {
+                            DetailedResult result = ExecuteCfCliCommand(_getOAuthTokenCmd);
+
+                            if (result == null)
+                            {
+                                return null;
+                            }
+
+                            if (result.CmdDetails.ExitCode != 0)
+                            {
+                                _logger.Error($"GetOAuthToken failed: {result}");
+                                return null;
+                            }
+
+                            var accessToken = FormatToken(result.CmdDetails.StdOut);
+
+                            var handler = new JwtSecurityTokenHandler();
+                            var jsonToken = handler.ReadToken(accessToken);
+                            var token = jsonToken as JwtSecurityToken;
+
+                            _cachedAccessToken = accessToken;
+                            _accessTokenExpiration = token.ValidTo;
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.Error($"Something went wrong while attempting to renew access token {ex.ToString()}");
+                        }
+                    }
+                }
             }
 
-            return FormatToken(result.CmdDetails.StdOut);
+            return _cachedAccessToken;
         }
 
         public DetailedResult TargetApi(string apiAddress, bool skipSsl)

@@ -295,9 +295,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.AreEqual(initialState2, refreshedChildApp1.App.State); // previous state shouldn't have changed
             Assert.AreNotEqual(initialState3, refreshedChildApp2.App.State); // previous state should have changed
 
-            // property changed event should be raised for Children (update UI)
-            Assert.AreEqual(1, _receivedEvents.Count);
-            Assert.AreEqual("Children", _receivedEvents[0]);
+            // property changed event should be raised once for Children (update UI) & twice for IsRefreshing (set true when starting, false when done)
+            Assert.AreEqual(3, _receivedEvents.Count);
+            Assert.AreEqual("IsRefreshing", _receivedEvents[0]);
+            Assert.AreEqual("Children", _receivedEvents[1]);
+            Assert.AreEqual("IsRefreshing", _receivedEvents[2]);
 
             MockCloudFoundryService.VerifyAll();
         }

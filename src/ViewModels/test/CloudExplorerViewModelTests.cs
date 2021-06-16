@@ -100,9 +100,17 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        public void CanRefreshAllCloudConnections_ReturnsTrue()
+        public void CanInitiateFullRefresh_ReturnsTrue_WhenNotRefreshing()
         {
+            _sut.IsRefreshingAll = false;
             Assert.IsTrue(_sut.CanInitiateFullRefresh(null));
+        }
+
+        [TestMethod]
+        public void CanInitiateFullRefresh_ReturnsFalse_WhenRefreshing()
+        {
+            _sut.IsRefreshingAll = true;
+            Assert.IsFalse(_sut.CanInitiateFullRefresh(null));
         }
 
         [TestMethod]
@@ -319,7 +327,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.RefreshAllItems(null);
             MockThreadingService.Verify(m => m.StartTask(_sut.InitiateFullRefresh), Times.Once);
         }
-        
+
         [TestMethod]
         public void RefreshAllItems_DoesNotStartRefreshTask_WhenRefreshIsInProgress()
         {
@@ -342,10 +350,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var fakeInitialSpace = new CloudFoundrySpace("fake space name", "fake space id", fakeInitialOrg);
             var fakeInitialApp = new CloudFoundryApp("fake app name", "fake app id", fakeInitialSpace, "state1");
 
-            // These view models are fakes; they inherit from their respective tvivms but override `RefreshChildren`
-            // so that these tests are able to check how many times that method gets called (calling RefreshChildren
-            // on these fakes increments `NumRefreshes` by 1). These view models are constructed with expanded = true
-            // to make them eligible for refreshing.
+            /** These view models are fakes; they inherit from their respective tvivms but override `RefreshChildren`
+             * so that these tests are able to check how many times that method gets called (calling RefreshChildren
+             * on these fakes increments `NumRefreshes` by 1). These view models are constructed with expanded = true
+             * to make them eligible for refreshing.
+             */
             var cfivm = new FakeCfInstanceViewModel(fakeInitialCfInstance, Services, expanded: true);
             var ovm = new FakeOrgViewModel(fakeInitialOrg, Services, expanded: true);
             var svm = new FakeSpaceViewModel(fakeInitialSpace, Services, expanded: true);
@@ -454,8 +463,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.AreEqual(2, firstSpaceVm.Children.Count);
             AppViewModel firstAppVm = (AppViewModel)firstSpaceVm.Children[0];
             AppViewModel secondAppVm = (AppViewModel)firstSpaceVm.Children[1];
-            Assert.AreEqual(fakeUpdatedApp, firstAppVm.App);
-            Assert.AreEqual(fakeNewApp, secondAppVm.App);
+            Assert.AreEqual(fakeInitialApp.AppId, firstAppVm.App.AppId);
+            Assert.AreNotEqual(fakeInitialApp.State, firstAppVm.App.State);
+            Assert.AreEqual(fakeNewApp.AppId, secondAppVm.App.AppId);
 
             // ensure space refresh makes request for fresh apps
             MockCloudFoundryService.Verify(mock => mock.GetAppsForSpaceAsync(fakeInitialSpace, true), Times.Once);
@@ -560,7 +570,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             // pre-check: cloud explorer has 1 cf view model & it's expanded
             Assert.AreEqual(1, _sut.CloudFoundryList.Count);
             Assert.IsTrue(_sut.CloudFoundryList[0].IsExpanded);
-            
+
             // pre-check: cf view model has 1 org child & it's collapsed
             Assert.AreEqual(1, _sut.CloudFoundryList[0].Children.Count);
             Assert.IsFalse(_sut.CloudFoundryList[0].Children[0].IsExpanded);
@@ -573,6 +583,205 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             // ensure RefreshChildren() was called once for cfivm
             Assert.AreEqual(1, cfivm.NumRefreshes);
             Assert.AreEqual(0, ovm.NumRefreshes);
+        }
+
+        [TestMethod]
+        public async Task InitiateFullRefresh_DoesNotAttemptToRefreshLoadingCFs()
+        {
+            /** INTENTION:
+             * CloudExplorerViewModel starts off with 1 expanded but *loading* 
+             * cloudFoundryInstanceViewModel "cfivm" which has a loading placeholder
+             * as its only child. cfivm should not be refreshed (defer to the loading
+             * task in progress).
+             */
+            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address", "fake-token");
+            var cfivm = new FakeCfInstanceViewModel(fakeInitialCfInstance, Services, expanded: true)
+            {
+                IsLoading = true,
+            };
+
+            cfivm.Children = new ObservableCollection<TreeViewItemViewModel>
+            {
+                cfivm.LoadingPlaceholder,
+            };
+
+            MockCloudFoundryService.SetupGet(mock => mock.
+                CloudFoundryInstances)
+                    .Returns(new Dictionary<string, CloudFoundryInstance>
+                    {
+                        { fakeInitialCfInstance.InstanceName, fakeInitialCfInstance },
+                    });
+
+            _sut.CloudFoundryList = new ObservableCollection<CfInstanceViewModel> { cfivm };
+
+            // pre-check: cloud explorer has 1 cf view model & it's loading
+            Assert.AreEqual(1, _sut.CloudFoundryList.Count);
+            Assert.IsTrue(_sut.CloudFoundryList[0].IsExpanded);
+            Assert.IsTrue(_sut.CloudFoundryList[0].IsLoading);
+            Assert.AreEqual(1, _sut.CloudFoundryList[0].Children.Count);
+            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.CloudFoundryList[0].Children[0].GetType());
+            Assert.AreEqual(CfInstanceViewModel._loadingMsg, _sut.CloudFoundryList[0].Children[0].DisplayText);
+
+            await _sut.InitiateFullRefresh();
+
+            // ensure no threads are started to refresh the cf view model
+            Assert.AreEqual(0, MockThreadingService.Invocations.Count);
+
+            // ensure RefreshChildren() was never called for cfivm
+            Assert.AreEqual(0, cfivm.NumRefreshes);
+        }
+
+        [TestMethod]
+        public async Task InitiateFullRefresh_DoesNotAttemptToRefreshLoadingOrgs()
+        {
+            /** INTENTION:
+             * CloudExplorerViewModel starts off with 1 expanded cloudFoundryInstanceViewModel 
+             * "cfivm" which has 1 expanded but *loading* org child "ovm". cfivm should be 
+             * refreshed but the loading ovm should not be (defer to the loading task in progress).
+             */
+            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address", "fake-token");
+            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance);
+            var cfivm = new FakeCfInstanceViewModel(fakeInitialCfInstance, Services, expanded: true);
+            var ovm = new FakeOrgViewModel(fakeInitialOrg, Services, expanded: true)
+            {
+                IsLoading = true
+            };
+
+            cfivm.Children = new ObservableCollection<TreeViewItemViewModel>
+            {
+                ovm,
+            };
+
+            MockCloudFoundryService.SetupGet(mock => mock.
+                CloudFoundryInstances)
+                    .Returns(new Dictionary<string, CloudFoundryInstance>
+                    {
+                        { fakeInitialCfInstance.InstanceName, fakeInitialCfInstance },
+                    });
+
+            MockCloudFoundryService.Setup(mock => mock.
+                GetOrgsForCfInstanceAsync(fakeInitialCfInstance, true))
+                    .ReturnsAsync(new DetailedResult<List<CloudFoundryOrganization>>(
+                        succeeded: true,
+                        content: new List<CloudFoundryOrganization>
+                        {
+                            fakeInitialOrg,
+                        },
+                        explanation: null,
+                        cmdDetails: FakeSuccessCmdResult));
+
+            _sut.CloudFoundryList = new ObservableCollection<CfInstanceViewModel> { cfivm };
+
+            // pre-check: cloud explorer has 1 cf view model & it's expanded
+            Assert.AreEqual(1, _sut.CloudFoundryList.Count);
+            Assert.IsTrue(_sut.CloudFoundryList[0].IsExpanded);
+
+            // pre-check: cfivm has 1 child & it's loading
+            Assert.AreEqual(1, _sut.CloudFoundryList[0].Children.Count);
+            var orgChild = _sut.CloudFoundryList[0].Children[0];
+            Assert.IsTrue(orgChild.IsLoading);
+
+            await _sut.InitiateFullRefresh();
+
+            // ensure just 1 thread is started to refresh the cf view model
+            Assert.AreEqual(1, MockThreadingService.Invocations.Count);
+
+            // ensure RefreshChildren() was called once for cfivm
+            Assert.AreEqual(1, cfivm.NumRefreshes);
+
+            // ensure RefreshChildren() was never called for ovm
+            Assert.AreEqual(0, ovm.NumRefreshes);
+        }
+        
+        [TestMethod]
+        public async Task InitiateFullRefresh_DoesNotAttemptToRefreshLoadingSpaces()
+        {
+            /** INTENTION:
+             * CloudExplorerViewModel starts off with 1 expanded cloudFoundryInstanceViewModel 
+             * "cfivm" which has 1 expanded org child "ovm". ovm has 1 expanded but *loading*
+             * space child "svm". cfivm & ovm should be refreshed but the loading svm should 
+             * not be refreshed (defer to the loading task in progress).
+             */
+            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address", "fake-token");
+            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance);
+            var fakeInitialSpace = new CloudFoundrySpace("fake space name", "fake space id", fakeInitialOrg);
+            var cfivm = new FakeCfInstanceViewModel(fakeInitialCfInstance, Services, expanded: true);
+            var ovm = new FakeOrgViewModel(fakeInitialOrg, Services, expanded: true);
+            var svm = new FakeSpaceViewModel(fakeInitialSpace, Services, expanded: true)
+            {
+                IsLoading = true,
+            };
+
+            cfivm.Children = new ObservableCollection<TreeViewItemViewModel>
+            {
+                ovm,
+            };
+
+            ovm.Children = new ObservableCollection<TreeViewItemViewModel>
+            {
+                svm,
+            };
+
+            MockCloudFoundryService.SetupGet(mock => mock.
+                CloudFoundryInstances)
+                    .Returns(new Dictionary<string, CloudFoundryInstance>
+                    {
+                        { fakeInitialCfInstance.InstanceName, fakeInitialCfInstance },
+                    });
+
+            MockCloudFoundryService.Setup(mock => mock.
+                GetOrgsForCfInstanceAsync(fakeInitialCfInstance, true))
+                    .ReturnsAsync(new DetailedResult<List<CloudFoundryOrganization>>(
+                        succeeded: true,
+                        content: new List<CloudFoundryOrganization>
+                        {
+                            fakeInitialOrg,
+                        },
+                        explanation: null,
+                        cmdDetails: FakeSuccessCmdResult));
+            
+            MockCloudFoundryService.Setup(mock => mock.
+                GetSpacesForOrgAsync(fakeInitialOrg, true))
+                    .ReturnsAsync(new DetailedResult<List<CloudFoundrySpace>>(
+                        succeeded: true,
+                        content: new List<CloudFoundrySpace>
+                        {
+                            fakeInitialSpace,
+                        },
+                        explanation: null,
+                        cmdDetails: FakeSuccessCmdResult));
+
+            _sut.CloudFoundryList = new ObservableCollection<CfInstanceViewModel> { cfivm };
+
+            // pre-check: cloud explorer has 1 cf view model & it's expanded
+            Assert.AreEqual(1, _sut.CloudFoundryList.Count);
+            var cf = _sut.CloudFoundryList[0];
+            Assert.IsTrue(cf.IsExpanded);
+            
+            // pre-check: cfivm has 1 org view model & it's expanded
+            Assert.AreEqual(1, cf.Children.Count);
+            var org = cf.Children[0];
+            Assert.IsTrue(org.IsExpanded);
+
+            // pre-check: ovm has 1 child & it's loading
+            Assert.AreEqual(1, org.Children.Count);
+            var space = org.Children[0];
+            Assert.IsTrue(space.IsExpanded);
+            Assert.IsTrue(space.IsLoading);
+
+            await _sut.InitiateFullRefresh();
+
+            // ensure just 2 threads are started: 1 to refresh cf, 1 to refresh org
+            Assert.AreEqual(2, MockThreadingService.Invocations.Count);
+
+            // ensure RefreshChildren() was called once for cfivm
+            Assert.AreEqual(1, cfivm.NumRefreshes);
+
+            // ensure RefreshChildren() was called once for ovm
+            Assert.AreEqual(1, ovm.NumRefreshes);
+
+            // ensure RefreshChildren() was never called for svm
+            Assert.AreEqual(0, svm.NumRefreshes);
         }
 
         [TestMethod]
