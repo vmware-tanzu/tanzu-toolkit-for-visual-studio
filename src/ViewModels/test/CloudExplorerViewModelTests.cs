@@ -602,7 +602,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 Error(It.Is<string>(s => s.Contains(fakeLogsResult.Explanation))),
                     Times.Once);
 
-            MockDialogService.Verify(m => m.
+            MockErrorDialogService.Verify(m => m.
                 DisplayErrorDialog(It.Is<string>(s => s.Contains(fakeApp.AppName)), It.Is<string>(s => s.Contains(fakeLogsResult.Explanation))),
                     Times.Once);
         }
@@ -671,9 +671,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         private int _numRefreshes = 0;
 
 
-            MockErrorDialogService.Verify(m => m.
-                DisplayErrorDialog(It.Is<string>(s => s.Contains(fakeApp.AppName)), It.Is<string>(s => s.Contains(fakeLogsResult.Explanation))),
-                    Times.Once);
 
         internal FakeSpaceViewModel(CloudFoundrySpace space, IServiceProvider services, bool expanded = false)
             : base(space, services, expanded)

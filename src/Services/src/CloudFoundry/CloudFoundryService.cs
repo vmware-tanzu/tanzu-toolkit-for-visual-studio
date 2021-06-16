@@ -600,7 +600,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             return await _cfCliService.GetRecentAppLogs(app.AppName);
         }
 
-        private static async Task MatchCliVersionToApiVersion()
+        private async Task MatchCliVersionToApiVersion()
         {
             Version apiVersion = await _cfCliService.GetApiVersion();
             if (apiVersion == null)
