@@ -1517,7 +1517,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             _mockCfCliService.Setup(m => m.
                 TargetSpace(FakeApp.ParentSpace.SpaceName))
-                    .Returns(_fakeSuccessDetailedResult);
+                    .ReturnsAsync(_fakeSuccessDetailedResult);
 
             var logsStub = "These are fake app logs!\n[12:16:04] App took a nap.";
             var fakeLogsResult = new DetailedResult<string>(logsStub, true, null, _fakeSuccessCmdResult);
@@ -1544,7 +1544,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             _mockCfCliService.Setup(m => m.
                 TargetSpace(FakeApp.ParentSpace.SpaceName))
-                    .Returns(_fakeSuccessDetailedResult);
+                    .ReturnsAsync(_fakeSuccessDetailedResult);
 
             string fakeLogs = null;
             var fakeErrorMsg = "something went wrong";
@@ -1588,7 +1588,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             _mockCfCliService.Setup(m => m.
                 TargetSpace(FakeApp.ParentSpace.SpaceName))
-                    .Returns(_fakeFailureDetailedResult);
+                    .ReturnsAsync(_fakeFailureDetailedResult);
 
             var result = await _sut.GetRecentLogs(FakeApp);
 
