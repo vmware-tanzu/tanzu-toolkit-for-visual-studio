@@ -577,11 +577,11 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("GetOrgsAsync")]
         public async Task GetOrgsAsync_ReturnsSuccessfulResult_WhenCmdSucceeds()
         {
-            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService._getOrgsCmd} -v";
+            string expectedArgs = $"{CfCliService._getOrgsCmd} -v";
 
             _mockCmdProcessService.Setup(mock => mock.
-              InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
-                .ReturnsAsync(_fakeOrgsCmdResult);
+              RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
+                .Returns(_fakeOrgsCmdResult);
 
             DetailedResult<List<Org>> result = await _sut.GetOrgsAsync();
 
@@ -598,11 +598,11 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("GetOrgsAsync")]
         public async Task GetOrgsAsync_ReturnsFailedResult_WhenCmdResultReportsFailure()
         {
-            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService._getOrgsCmd} -v";
+            string expectedArgs = $"{CfCliService._getOrgsCmd} -v";
 
             _mockCmdProcessService.Setup(mock => mock.
-              InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
-                .ReturnsAsync(_fakeFailureCmdResult);
+              RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
+                .Returns(_fakeFailureCmdResult);
 
             DetailedResult<List<Org>> result = await _sut.GetOrgsAsync();
 
@@ -616,13 +616,13 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("GetOrgsAsync")]
         public async Task GetOrgsAsync_ReturnsFailedResult_WhenJsonParsingFails()
         {
-            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService._getOrgsCmd} -v";
+            string expectedArgs = $"{CfCliService._getOrgsCmd} -v";
             var fakeInvalidJsonOutput = $"REQUEST {CfCliService._getOrgsRequestPath} asdf RESPONSE asdf";
             var fakeFailureCmdResult = new CmdResult(fakeInvalidJsonOutput, string.Empty, 0);
 
-            _mockCmdProcessService.Setup(mock => mock.
-              InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
-                .ReturnsAsync(fakeFailureCmdResult);
+            _mockCmdProcessService.Setup(mock => mock
+              .RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
+                .Returns(fakeFailureCmdResult);
 
             DetailedResult<List<Org>> result = await _sut.GetOrgsAsync();
 
@@ -636,12 +636,12 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("GetOrgsAsync")]
         public async Task GetOrgsAsync_ReturnsFailedResult_For401UnauthorizedResponse()
         {
-            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService._getOrgsCmd} -v";
+            string expectedArgs = $"{CfCliService._getOrgsCmd} -v";
             var fakeFailureCmdResult = new CmdResult(_fakeOrgs401Output, string.Empty, 0);
 
             _mockCmdProcessService.Setup(mock => mock.
-              InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
-                .ReturnsAsync(fakeFailureCmdResult);
+              RunCommand(_fakeProjectPath, expectedArgs, null, null, null))
+                .Returns(fakeFailureCmdResult);
 
             DetailedResult<List<Org>> result = await _sut.GetOrgsAsync();
 
@@ -655,11 +655,11 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("GetOrgsAsync")]
         public async Task GetOrgsAsync_ReturnsSuccessfulResult_WhenResponseContainsNoOrgsFound()
         {
-            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService._getOrgsCmd} -v";
+            string expectedArgs = $"{CfCliService._getOrgsCmd} -v";
 
             _mockCmdProcessService.Setup(mock => mock.
-              InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
-                .ReturnsAsync(_fakeNoOrgsCmdResult);
+              RunCommand(_fakeProjectPath, expectedArgs, null, null, null))
+                .Returns(_fakeNoOrgsCmdResult);
 
             var result = await _sut.GetOrgsAsync();
 
