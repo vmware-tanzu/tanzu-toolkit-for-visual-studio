@@ -1513,7 +1513,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         {
             _mockCfCliService.Setup(m => m.
                 TargetOrg(FakeApp.ParentSpace.ParentOrg.OrgName))
-                    .Returns(_fakeSuccessDetailedResult);
+                    .ReturnsAsync(_fakeSuccessDetailedResult);
 
             _mockCfCliService.Setup(m => m.
                 TargetSpace(FakeApp.ParentSpace.SpaceName))
@@ -1540,7 +1540,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         {
             _mockCfCliService.Setup(m => m.
                 TargetOrg(FakeApp.ParentSpace.ParentOrg.OrgName))
-                    .Returns(_fakeSuccessDetailedResult);
+                    .ReturnsAsync(_fakeSuccessDetailedResult);
 
             _mockCfCliService.Setup(m => m.
                 TargetSpace(FakeApp.ParentSpace.SpaceName))
@@ -1568,7 +1568,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         {
             _mockCfCliService.Setup(m => m.
                 TargetOrg(FakeApp.ParentSpace.ParentOrg.OrgName))
-                    .Returns(_fakeFailureDetailedResult);
+                    .ReturnsAsync(_fakeFailureDetailedResult);
 
             var result = await _sut.GetRecentLogs(FakeApp);
 
@@ -1584,7 +1584,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         {
             _mockCfCliService.Setup(m => m.
                 TargetOrg(FakeApp.ParentSpace.ParentOrg.OrgName))
-                    .Returns(_fakeSuccessDetailedResult);
+                    .ReturnsAsync(_fakeSuccessDetailedResult);
 
             _mockCfCliService.Setup(m => m.
                 TargetSpace(FakeApp.ParentSpace.SpaceName))

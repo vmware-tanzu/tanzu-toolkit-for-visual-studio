@@ -653,7 +653,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
              *      - "SpaceFields" (info about the currently-targeted space)
              */
 
-            var targetOrgResult = _cfCliService.TargetOrg(app.ParentSpace.ParentOrg.OrgName);
+            var targetOrgResult = await _cfCliService.TargetOrg(app.ParentSpace.ParentOrg.OrgName);
             if (!targetOrgResult.Succeeded)
             {
                 return new DetailedResult<string>(
