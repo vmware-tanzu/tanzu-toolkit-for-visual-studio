@@ -536,11 +536,11 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var fakeUsername = "uname";
             var fakePw = new SecureString();
             var fakeDecodedPw = "";
-            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService._authenticateCmd} {fakeUsername} {fakeDecodedPw}";
+            string expectedArgs = $"{CfCliService._authenticateCmd} {fakeUsername} {fakeDecodedPw}";
 
             _mockCmdProcessService.Setup(mock => mock.
-              InvokeWindowlessCommandAsync(expectedCmdStr, null, null, null))
-                .ReturnsAsync(new CmdResult(_fakeStdOut, _fakeStdErr, 0));
+              RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
+                .Returns(new CmdResult(_fakeStdOut, _fakeStdErr, 0));
 
             DetailedResult result = await _sut.AuthenticateAsync(fakeUsername, fakePw);
 
@@ -558,11 +558,11 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var fakeUsername = "uname";
             var fakePw = new SecureString();
             var fakeDecodedPw = "";
-            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService._authenticateCmd} {fakeUsername} {fakeDecodedPw}";
+            string expectedArgs= $"{CfCliService._authenticateCmd} {fakeUsername} {fakeDecodedPw}";
 
             _mockCmdProcessService.Setup(mock => mock.
-              InvokeWindowlessCommandAsync(expectedCmdStr, null, null, null))
-                .ReturnsAsync(new CmdResult(_fakeStdOut, _fakeStdErr, 1));
+              RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
+                .Returns(new CmdResult(_fakeStdOut, _fakeStdErr, 1));
 
             DetailedResult result = await _sut.AuthenticateAsync(fakeUsername, fakePw);
 

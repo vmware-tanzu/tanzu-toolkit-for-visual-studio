@@ -170,7 +170,7 @@ namespace Tanzu.Toolkit.Services.CfCli
             string passwordStr = new System.Net.NetworkCredential(string.Empty, password).Password;
 
             string args = $"{_authenticateCmd} {username} {passwordStr}";
-            DetailedResult result = await InvokeCfCliAsync(args);
+            DetailedResult result = await RunCfCommandAsync(args);
 
             /* Erase pw from memory */
             passwordStr = null;
