@@ -673,11 +673,11 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("GetSpacesAsync")]
         public async Task GetSpacesAsync_ReturnsSuccessfulResult_WhenCmdSucceeds()
         {
-            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService._getSpacesCmd} -v";
+            string expectedArgs = $"{CfCliService._getSpacesCmd} -v";
 
             _mockCmdProcessService.Setup(mock => mock.
-              InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
-                .ReturnsAsync(_fakeSpacesCmdResult);
+              RunCommand(_fakeProjectPath, expectedArgs, null, null, null))
+                .Returns(_fakeSpacesCmdResult);
 
             DetailedResult<List<Space>> result = await _sut.GetSpacesAsync();
 
@@ -694,11 +694,11 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("GetSpacesAsync")]
         public async Task GetSpacesAsync_ReturnsFailedResult_WhenCmdResultReportsFailure()
         {
-            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService._getSpacesCmd} -v";
+            string expectedArgs = $"{CfCliService._getSpacesCmd} -v";
 
             _mockCmdProcessService.Setup(mock => mock.
-              InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
-                .ReturnsAsync(_fakeFailureCmdResult);
+              RunCommand(_fakeProjectPath, expectedArgs, null, null, null))
+                .Returns(_fakeFailureCmdResult);
 
             DetailedResult<List<Space>> result = await _sut.GetSpacesAsync();
 
@@ -712,13 +712,13 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("GetSpacesAsync")]
         public async Task GetSpacesAsync_ReturnsFailedResult_WhenJsonParsingFails()
         {
-            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService._getSpacesCmd} -v";
+            string expectedArgs = $"{CfCliService._getSpacesCmd} -v";
             var fakeInvalidJsonOutput = $"REQUEST {CfCliService._getSpacesRequestPath} asdf RESPONSE asdf";
             var fakeFailureCmdResult = new CmdResult(fakeInvalidJsonOutput, string.Empty, 0);
 
             _mockCmdProcessService.Setup(mock => mock.
-              InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
-                .ReturnsAsync(fakeFailureCmdResult);
+              RunCommand(_fakeProjectPath, expectedArgs, null, null, null))
+                .Returns(fakeFailureCmdResult);
 
             DetailedResult<List<Space>> result = await _sut.GetSpacesAsync();
 
@@ -732,11 +732,11 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("GetSpacesAsync")]
         public async Task GetSpacesAsync_ReturnsFailedResult_WhenResponseContainsNoSpacesFound()
         {
-            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService._getSpacesCmd} -v";
+            string expectedArgs = $"{CfCliService._getSpacesCmd} -v";
 
             _mockCmdProcessService.Setup(mock => mock.
-              InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
-                .ReturnsAsync(_fakeNoSpacesCmdResult);
+              RunCommand(_fakeProjectPath, expectedArgs, null, null, null))
+                .Returns(_fakeNoSpacesCmdResult);
 
             var result = await _sut.GetSpacesAsync();
 
@@ -750,12 +750,12 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("GetSpacesAsync")]
         public async Task GetSpacesAsync_ReturnsFailedResult_For401UnauthorizedResponse()
         {
-            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService._getSpacesCmd} -v";
+            string expectedArgs = $"{CfCliService._getSpacesCmd} -v";
             var fakeFailureCmdResult = new CmdResult(_fakeSpaces401Output, string.Empty, 0);
 
             _mockCmdProcessService.Setup(mock => mock.
-              InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
-                .ReturnsAsync(fakeFailureCmdResult);
+              RunCommand(_fakeProjectPath, expectedArgs, null, null, null))
+                .Returns(fakeFailureCmdResult);
 
             DetailedResult<List<Space>> result = await _sut.GetSpacesAsync();
 
