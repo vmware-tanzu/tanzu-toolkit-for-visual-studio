@@ -486,15 +486,6 @@ namespace Tanzu.Toolkit.Services.CfCli
             return new DetailedResult<string>(content, succeeded, explanation, cmdDetails);
         }
 
-        /// <summary>
-        /// Initiate a new Cloud Foundry CLI command with the given arguments.
-        /// Invoke the command prompt and wait for the process to exit before returning.
-        /// Return true if no StdError was captured over the course of the process, false otherwise.
-        /// </summary>
-        /// <param name="arguments">Parameters to include along with the `cf` command (e.g. "push", "apps").</param>
-        /// <param name="stdOutCallback"></param>
-        /// <param name="stdErrCallback"></param>
-        /// <param name="workingDir"></param>
         public async Task<DetailedResult> InvokeCfCliAsync(string arguments, StdOutDelegate stdOutCallback = null, StdErrDelegate stdErrCallback = null, string workingDir = null)
         {
             string pathToCfExe = _fileLocatorService.FullPathToCfExe;
@@ -530,10 +521,14 @@ namespace Tanzu.Toolkit.Services.CfCli
         }
 
         /// <summary>
-        /// Invoke the CF CLI command prompt process and return StdOut result string immediately; do not wait for process to exit.
+        /// Invoke a CF CLI command using the <see cref="CmdProcessService"/>.
+        /// This method is synchronous, meaning it can be used within a lock statement.
         /// </summary>
-        /// <param name="arguments">Parameters to include along with the `cf` command (e.g. "push", "apps").</param>
+        /// <param name="arguments"></param>
+        /// <param name="stdOutCallback"></param>
+        /// <param name="stdErrCallback"></param>
         /// <param name="workingDir"></param>
+        /// <returns>A <see cref="DetailedResult"/> containing the results of the CF command.</returns>
         public DetailedResult ExecuteCfCliCommand(string arguments, string workingDir = null)
         {
             string pathToCfExe = _fileLocatorService.FullPathToCfExe;
@@ -568,6 +563,15 @@ namespace Tanzu.Toolkit.Services.CfCli
             return new DetailedResult(false, reason, cmdDetails: result);
         }
 
+        /// <summary>
+        /// Initiate a CF CLI command process by invoking the <see cref="CmdProcessService"/>.
+        /// This method is asynchronous, meaning it cannot be used within a lock statement.
+        /// </summary>
+        /// <param name="arguments"></param>
+        /// <param name="stdOutCallback"></param>
+        /// <param name="stdErrCallback"></param>
+        /// <param name="workingDir"></param>
+        /// <returns>An awaitable <see cref="Task"/> which will return a <see cref="DetailedResult"/> containing the results of the CF command.</returns>
         internal async Task<DetailedResult> RunCfCommandAsync(string arguments, StdOutDelegate stdOutCallback = null, StdErrDelegate stdErrCallback = null, string workingDir = null)
         {
             string pathToCfExe = _fileLocatorService.FullPathToCfExe;
