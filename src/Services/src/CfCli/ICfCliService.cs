@@ -19,7 +19,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         DetailedResult ExecuteCfCliCommand(string arguments, string workingDir = null);
         Task<DetailedResult<List<Org>>> GetOrgsAsync();
         Task<DetailedResult<List<Space>>> GetSpacesAsync();
-        DetailedResult TargetOrg(string orgName);
+        Task<DetailedResult> TargetOrg(string orgName);
         DetailedResult TargetSpace(string spaceName);
         Task<DetailedResult<List<App>>> GetAppsAsync();
         Task<DetailedResult> StopAppByNameAsync(string appName);

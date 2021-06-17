@@ -180,10 +180,10 @@ namespace Tanzu.Toolkit.Services.CfCli
             return result;
         }
 
-        public DetailedResult TargetOrg(string orgName)
+        public async Task<DetailedResult> TargetOrg(string orgName)
         {
             string args = $"{_targetOrgCmd} {orgName}";
-            var result = ExecuteCfCliCommand(args);
+            var result = await RunCfCommandAsync(args);
 
             if (!result.Succeeded)
             {
