@@ -1370,13 +1370,13 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
         [TestMethod]
         [TestCategory("DeployApp")]
-        public async Task DeployAppAsync_ReturnsFalseResult_WhenCfTargetCommandFails()
+        public async Task DeployAppAsync_ReturnsFalseResult_WhenCfTargetOrgCommandFails()
         {
-            const string fakeFailureExplanation = "cf target failed";
+            const string fakeFailureExplanation = "junk";
             var fakeCfCmdResponse = new DetailedResult(false, fakeFailureExplanation);
 
             _mockCfCliService.Setup(mock =>
-                mock.InvokeCfCliAsync(It.IsAny<string>(), It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), It.IsAny<string>()))
+                mock.TargetOrg(FakeOrg.OrgName))
                     .ReturnsAsync(fakeCfCmdResponse);
 
             _mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
@@ -1385,29 +1385,48 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains(fakeFailureExplanation));
+        }
+        
+        [TestMethod]
+        [TestCategory("DeployApp")]
+        public async Task DeployAppAsync_ReturnsFalseResult_WhenCfTargetSpaceCommandFails()
+        {
+            const string fakeFailureExplanation = "junk";
+            var fakeCfCmdResponse = new DetailedResult(false, fakeFailureExplanation);
 
-            var cfTargetArgs = $"target -o {FakeOrg.OrgName} -s {FakeSpace.SpaceName}";
-            _mockCfCliService.Verify(mock =>
-                mock.InvokeCfCliAsync(cfTargetArgs, null, null, null),
-                    Times.Once);
+            _mockCfCliService.Setup(mock =>
+                mock.TargetOrg(FakeOrg.OrgName))
+                    .ReturnsAsync(_fakeSuccessDetailedResult);
+            
+            _mockCfCliService.Setup(mock =>
+                mock.TargetSpace(FakeSpace.SpaceName))
+                    .ReturnsAsync(fakeCfCmdResponse);
+
+            _mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
+
+            DetailedResult result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, _defaultFullFWFlag, stdOutCallback: null, stdErrCallback: null);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsTrue(result.Explanation.Contains(fakeFailureExplanation));
         }
 
         [TestMethod]
         [TestCategory("DeployApp")]
         public async Task DeployAppAsync_ReturnsFalseResult_WhenCfPushCommandFails()
         {
-            const string fakeFailureExplanation = "cf push failed";
-            var cfTargetArgs = $"target -o {FakeOrg.OrgName} -s {FakeSpace.SpaceName}";
-
-            var fakeCfTargetResponse = new DetailedResult(true);
+            const string fakeFailureExplanation = "junk";
             var fakeCfPushResponse = new DetailedResult(false, fakeFailureExplanation);
 
             _mockCfCliService.Setup(mock =>
-                mock.InvokeCfCliAsync(cfTargetArgs, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), It.IsAny<string>()))
-                    .ReturnsAsync(fakeCfTargetResponse);
+                mock.TargetOrg(FakeOrg.OrgName))
+                    .ReturnsAsync(_fakeSuccessDetailedResult);
 
             _mockCfCliService.Setup(mock =>
-                mock.PushAppAsync(FakeApp.AppName, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), It.IsAny<string>(), null, null))
+                mock.TargetSpace(FakeSpace.SpaceName))
+                    .ReturnsAsync(_fakeSuccessDetailedResult);
+
+            _mockCfCliService.Setup(mock =>
+                mock.PushAppAsync(FakeApp.AppName, null, null, _fakeProjectPath, null, null))
                     .ReturnsAsync(fakeCfPushResponse);
 
             _mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
@@ -1416,67 +1435,49 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains(fakeFailureExplanation));
-
-            _mockCfCliService.Verify(mock =>
-                mock.InvokeCfCliAsync(cfTargetArgs, null, null, null),
-                    Times.Once);
-
-            _mockCfCliService.Verify(mock =>
-                mock.PushAppAsync(FakeApp.AppName, null, null, _fakeProjectPath, null, null),
-                    Times.Once);
         }
 
         [TestMethod]
         [TestCategory("DeployApp")]
         public async Task DeployAppAsync_ReturnsTrueResult_WhenCfTargetAndPushCommandsSucceed()
         {
-            var cfTargetArgs = $"target -o {FakeOrg.OrgName} -s {FakeSpace.SpaceName}";
-
-            var fakeCfTargetResponse = new DetailedResult(true);
-            var fakeCfPushResponse = new DetailedResult(true);
+            _mockCfCliService.Setup(mock =>
+                mock.TargetOrg(FakeOrg.OrgName))
+                    .ReturnsAsync(_fakeSuccessDetailedResult);
 
             _mockCfCliService.Setup(mock =>
-                mock.InvokeCfCliAsync(cfTargetArgs, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), It.IsAny<string>()))
-                    .ReturnsAsync(fakeCfTargetResponse);
+                mock.TargetSpace(FakeSpace.SpaceName))
+                    .ReturnsAsync(_fakeSuccessDetailedResult);
 
             _mockCfCliService.Setup(mock =>
-                mock.PushAppAsync(FakeApp.AppName, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), It.IsAny<string>(), null, null))
-                    .ReturnsAsync(fakeCfPushResponse);
+                mock.PushAppAsync(FakeApp.AppName, null, null, _fakeProjectPath, null, null))
+                    .ReturnsAsync(_fakeSuccessDetailedResult);
 
             _mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
             DetailedResult result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, _defaultFullFWFlag, stdOutCallback: null, stdErrCallback: null);
 
             Assert.IsTrue(result.Succeeded);
-
-            _mockCfCliService.Verify(mock =>
-                mock.InvokeCfCliAsync(cfTargetArgs, null, null, null),
-                    Times.Once);
-
-            _mockCfCliService.Verify(mock =>
-                mock.PushAppAsync(FakeApp.AppName, null, null, _fakeProjectPath, null, null),
-                    Times.Once);
         }
 
         [TestMethod]
         [TestCategory("DeployApp")]
         public async Task DeployAppAsync_SpecifiesHWCBuildpack_AndWindowsStack_WhenFullFWDeploymentIsTrue()
         {
-            var cfTargetArgs = $"target -o {FakeOrg.OrgName} -s {FakeSpace.SpaceName}";
-
             string expectedBuildpackValue = "hwc_buildpack";
             string expectedStackValue = "windows";
 
-            var fakeCfTargetResponse = new DetailedResult(true);
-            var fakeCfPushResponse = new DetailedResult(true);
+            _mockCfCliService.Setup(mock =>
+                mock.TargetOrg(FakeOrg.OrgName))
+                    .ReturnsAsync(_fakeSuccessDetailedResult);
 
             _mockCfCliService.Setup(mock =>
-                mock.InvokeCfCliAsync(cfTargetArgs, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), It.IsAny<string>()))
-                    .ReturnsAsync(fakeCfTargetResponse);
+                mock.TargetSpace(FakeSpace.SpaceName))
+                    .ReturnsAsync(_fakeSuccessDetailedResult);
 
             _mockCfCliService.Setup(mock =>
-                mock.PushAppAsync(FakeApp.AppName, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), It.IsAny<string>(), expectedBuildpackValue, expectedStackValue))
-                    .ReturnsAsync(fakeCfPushResponse);
+                mock.PushAppAsync(FakeApp.AppName, null, null, _fakeProjectPath, expectedBuildpackValue, expectedStackValue))
+                    .ReturnsAsync(_fakeSuccessDetailedResult);
 
             _mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
@@ -1484,14 +1485,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             DetailedResult result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, fullFWIndicator, stdOutCallback: null, stdErrCallback: null);
 
             Assert.IsTrue(result.Succeeded);
-
-            _mockCfCliService.Verify(mock =>
-                mock.InvokeCfCliAsync(cfTargetArgs, null, null, null),
-                    Times.Once);
-
-            _mockCfCliService.Verify(mock =>
-                mock.PushAppAsync(FakeApp.AppName, null, null, _fakeProjectPath, expectedBuildpackValue, expectedStackValue),
-                    Times.Once);
         }
 
         [TestMethod]

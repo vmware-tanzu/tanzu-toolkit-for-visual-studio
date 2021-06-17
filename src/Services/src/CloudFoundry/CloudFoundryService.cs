@@ -618,11 +618,24 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 return new DetailedResult(false, EmptyOutputDirMessage);
             }
 
-            DetailedResult cfTargetResult = await _cfCliService.InvokeCfCliAsync(arguments: $"target -o {targetOrg.OrgName} -s {targetSpace.SpaceName}", stdOutCallback, stdErrCallback);
-            if (!cfTargetResult.Succeeded)
+            var targetOrgResult = await _cfCliService.TargetOrg(targetOrg.OrgName);
+            if (!targetOrgResult.Succeeded)
             {
-                _logger.Error($"Unable to target org '{targetOrg.OrgName}' or space '{targetSpace.SpaceName}'.\n{cfTargetResult.Explanation}");
-                return new DetailedResult(false, $"Unable to target org '{targetOrg.OrgName}' or space '{targetSpace.SpaceName}'.\n{cfTargetResult.Explanation}");
+                return new DetailedResult<string>(
+                content: null,
+                succeeded: false,
+                targetOrgResult.Explanation,
+                targetOrgResult.CmdDetails);
+            }
+
+            var targetSpaceResult = await _cfCliService.TargetSpace(targetSpace.SpaceName);
+            if (!targetSpaceResult.Succeeded)
+            {
+                return new DetailedResult<string>(
+                content: null,
+                succeeded: false,
+                targetSpaceResult.Explanation,
+                targetSpaceResult.CmdDetails);
             }
 
             string buildpack = null;
