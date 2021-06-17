@@ -193,10 +193,10 @@ namespace Tanzu.Toolkit.Services.CfCli
             return result;
         }
 
-        public DetailedResult TargetSpace(string spaceName)
+        public async Task<DetailedResult> TargetSpace(string spaceName)
         {
             string args = $"{_targetSpaceCmd} {spaceName}";
-            var result = ExecuteCfCliCommand(args);
+            var result = await RunCfCommandAsync(args);
 
             if (!result.Succeeded)
             {

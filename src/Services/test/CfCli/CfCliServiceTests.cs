@@ -908,17 +908,17 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
 
         [TestMethod]
         [TestCategory("TargetSpace")]
-        public void TargetSpace_ReturnsTrueResult_WhenCmdExitCodeIsZero()
+        public async Task TargetSpace_ReturnsTrueResult_WhenCmdExitCodeIsZero()
         {
             var fakeSpaceName = "fake-space";
-            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService._targetSpaceCmd} {fakeSpaceName}";
+            string expectedArgs = $"{CfCliService._targetSpaceCmd} {fakeSpaceName}";
             CmdResult fakeSuccessResult = new CmdResult(_fakeStdOut, _fakeStdErr, 0);
 
             _mockCmdProcessService.Setup(mock => mock.
-              ExecuteWindowlessCommand(expectedCmdStr, null))
+              RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
                 .Returns(fakeSuccessResult);
 
-            DetailedResult result = _sut.TargetSpace(fakeSpaceName);
+            var result = await _sut.TargetSpace(fakeSpaceName);
 
             Assert.IsTrue(result.Succeeded);
             Assert.IsTrue(result.CmdDetails.ExitCode == 0);
@@ -929,17 +929,17 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
 
         [TestMethod]
         [TestCategory("TargetSpace")]
-        public void TargetSpace_ReturnsFalseResult_WhenCmdExitCodeIsNotZero()
+        public async Task TargetSpace_ReturnsFalseResult_WhenCmdExitCodeIsNotZero()
         {
             var fakeSpaceName = "fake-space";
-            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService._targetSpaceCmd} {fakeSpaceName}";
+            string expectedArgs = $"{CfCliService._targetSpaceCmd} {fakeSpaceName}";
             CmdResult fakeFailureResult = new CmdResult(_fakeStdOut, _fakeStdErr, 1);
 
             _mockCmdProcessService.Setup(mock => mock.
-              ExecuteWindowlessCommand(expectedCmdStr, null))
+              RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
                 .Returns(fakeFailureResult);
 
-            DetailedResult result = _sut.TargetSpace(fakeSpaceName);
+            var result = await _sut.TargetSpace(fakeSpaceName);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.CmdDetails.ExitCode == 1);
