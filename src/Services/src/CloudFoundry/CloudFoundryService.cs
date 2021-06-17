@@ -663,7 +663,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 targetOrgResult.CmdDetails);
             }
 
-            var targetSpaceResult = _cfCliService.TargetSpace(app.ParentSpace.SpaceName);
+            var targetSpaceResult = await _cfCliService.TargetSpace(app.ParentSpace.SpaceName);
             if (!targetSpaceResult.Succeeded)
             {
                 return new DetailedResult<string>(
