@@ -866,17 +866,17 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
 
         [TestMethod]
         [TestCategory("TargetOrg")]
-        public void TargetOrg_ReturnsTrue_WhenCmdExitCodeIsZero()
+        public async Task TargetOrg_ReturnsTrue_WhenCmdExitCodeIsZero()
         {
             var fakeOrgName = "fake-org";
-            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService._targetOrgCmd} {fakeOrgName}";
+            string expectedArgs = $"{CfCliService._targetOrgCmd} {fakeOrgName}";
             CmdResult fakeSuccessResult = new CmdResult(_fakeStdOut, _fakeStdErr, 0);
 
             _mockCmdProcessService.Setup(mock => mock.
-              ExecuteWindowlessCommand(expectedCmdStr, null))
+              RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
                 .Returns(fakeSuccessResult);
 
-            DetailedResult result = _sut.TargetOrg(fakeOrgName);
+            var result = await _sut.TargetOrg(fakeOrgName);
 
             Assert.IsTrue(result.Succeeded);
             Assert.IsTrue(result.CmdDetails.ExitCode == 0);
@@ -887,17 +887,17 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
 
         [TestMethod]
         [TestCategory("TargetOrg")]
-        public void TargetOrg_ReturnsFalse_WhenCmdExitCodeIsNotZero()
+        public async Task TargetOrg_ReturnsFalse_WhenCmdExitCodeIsNotZero()
         {
             var fakeOrgName = "fake-org";
-            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService._targetOrgCmd} {fakeOrgName}";
+            string expectedArgs = $"{CfCliService._targetOrgCmd} {fakeOrgName}";
             CmdResult fakeFailureResult = new CmdResult(_fakeStdOut, _fakeStdErr, 1);
 
             _mockCmdProcessService.Setup(mock => mock.
-              ExecuteWindowlessCommand(expectedCmdStr, null))
+              RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
                 .Returns(fakeFailureResult);
 
-            DetailedResult result = _sut.TargetOrg(fakeOrgName);
+            var result = await _sut.TargetOrg(fakeOrgName);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.CmdDetails.ExitCode == 1);
