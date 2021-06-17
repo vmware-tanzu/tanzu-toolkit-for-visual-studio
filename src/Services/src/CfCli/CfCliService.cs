@@ -486,40 +486,6 @@ namespace Tanzu.Toolkit.Services.CfCli
             return new DetailedResult<string>(content, succeeded, explanation, cmdDetails);
         }
 
-        public async Task<DetailedResult> InvokeCfCliAsync(string arguments, StdOutDelegate stdOutCallback = null, StdErrDelegate stdErrCallback = null, string workingDir = null)
-        {
-            string pathToCfExe = _fileLocatorService.FullPathToCfExe;
-            if (string.IsNullOrEmpty(pathToCfExe))
-            {
-                return new DetailedResult(false, $"Unable to locate cf.exe.");
-            }
-
-            string commandStr = '"' + pathToCfExe + '"' + ' ' + arguments;
-
-            ICmdProcessService cmdProcessService = Services.GetRequiredService<ICmdProcessService>();
-            CmdResult result = await cmdProcessService.InvokeWindowlessCommandAsync(commandStr, workingDir, stdOutCallback, stdErrCallback);
-
-            if (result.ExitCode == 0)
-            {
-                return new DetailedResult(succeeded: true, cmdDetails: result);
-            }
-
-            string reason = result.StdErr;
-            if (string.IsNullOrEmpty(result.StdErr))
-            {
-                if (result.StdOut.Contains("FAILED"))
-                {
-                    reason = result.StdOut;
-                }
-                else
-                {
-                    reason = $"Unable to execute `cf {arguments}`.";
-                }
-            }
-
-            return new DetailedResult(false, reason, cmdDetails: result);
-        }
-
         /// <summary>
         /// Invoke a CF CLI command using the <see cref="CmdProcessService"/>.
         /// This method is synchronous, meaning it can be used within a lock statement.
