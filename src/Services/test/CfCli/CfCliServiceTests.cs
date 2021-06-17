@@ -769,12 +769,12 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("GetAppsAsync")]
         public async Task GetAppsAsync_ReturnsSuccessfulResult_WhenCmdSucceeds()
         {
-            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService._getAppsCmd} -v";
+            string expectedArgs = $"{CfCliService._getAppsCmd} -v";
             int numAppsInFakeResponse = 53;
 
             _mockCmdProcessService.Setup(mock => mock.
-              InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
-                .ReturnsAsync(_fakeAppsCmdResult);
+              RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
+                .Returns(_fakeAppsCmdResult);
 
             var result = await _sut.GetAppsAsync();
 
@@ -792,12 +792,12 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("GetAppsAsync")]
         public async Task GetAppsAsync_ReturnsFailedResult_WhenCmdResultReportsFailure()
         {
-            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService._getAppsCmd} -v";
+            string expectedArgs = $"{CfCliService._getAppsCmd} -v";
             var fakeFailureCmdResult = new CmdResult(string.Empty, string.Empty, 1);
 
             _mockCmdProcessService.Setup(mock => mock.
-              InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
-                .ReturnsAsync(fakeFailureCmdResult);
+              RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
+                .Returns(fakeFailureCmdResult);
 
             var result = await _sut.GetAppsAsync();
 
@@ -811,13 +811,13 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("GetAppsAsync")]
         public async Task GetAppsAsync_ReturnsFailedResult_WhenJsonParsingFails()
         {
-            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService._getAppsCmd} -v";
+            string expectedArgs = $"{CfCliService._getAppsCmd} -v";
             var fakeInvalidJsonOutput = $"REQUEST {CfCliService._getAppsRequestPath} asdf RESPONSE asdf";
             var fakeFailureCmdResult = new CmdResult(fakeInvalidJsonOutput, string.Empty, 0);
 
             _mockCmdProcessService.Setup(mock => mock.
-              InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
-                .ReturnsAsync(fakeFailureCmdResult);
+              RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
+                .Returns(fakeFailureCmdResult);
 
             var result = await _sut.GetAppsAsync();
 
@@ -831,11 +831,11 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("GetAppsAsync")]
         public async Task GetAppsAsync_ReturnsFailedResult_WhenResponseContainsNoAppsFound()
         {
-            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService._getAppsCmd} -v";
+            string expectedArgs = $"{CfCliService._getAppsCmd} -v";
 
             _mockCmdProcessService.Setup(mock => mock.
-                InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
-                    .ReturnsAsync(_fakeNoAppsCmdResult);
+                RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
+                    .Returns(_fakeNoAppsCmdResult);
 
             var result = await _sut.GetAppsAsync();
 
@@ -849,12 +849,12 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("GetAppsAsync")]
         public async Task GetAppsAsync_ReturnsFailedResult_For401UnauthorizedResponse()
         {
-            string expectedArgs = $"\"{_fakePathToCfExe}\" {CfCliService._getAppsCmd} -v";
+            string expectedArgs = $"{CfCliService._getAppsCmd} -v";
             var fakeFailureCmdResult = new CmdResult(_fakeApps401Output, string.Empty, 0);
 
             _mockCmdProcessService.Setup(mock => mock.
-              InvokeWindowlessCommandAsync(expectedArgs, null, null, null))
-                .ReturnsAsync(fakeFailureCmdResult);
+              RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
+                .Returns(fakeFailureCmdResult);
 
             DetailedResult<List<App>> result = await _sut.GetAppsAsync();
 

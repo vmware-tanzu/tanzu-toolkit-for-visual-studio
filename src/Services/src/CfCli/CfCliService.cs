@@ -348,7 +348,7 @@ namespace Tanzu.Toolkit.Services.CfCli
             try
             {
                 string args = $"{_getAppsCmd} -v"; // -v prints api request details to stdout
-                cmdResult = await InvokeCfCliAsync(args);
+                cmdResult = await RunCfCommandAsync(args);
 
                 if (!cmdResult.Succeeded)
                 {
