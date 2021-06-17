@@ -1,6 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Threading.Tasks;
-using Tanzu.Toolkit.Services.OutputHandler;
 using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.Services.CmdProcess
@@ -11,10 +9,6 @@ namespace Tanzu.Toolkit.Services.CmdProcess
         private StdErrDelegate _stdErrCallback;
         private string _stdOutAggregator = "";
         private string _stdErrAggregator = "";
-
-        public CmdProcessService()
-        {
-        }
 
         public CmdResult RunCommand(string executableFilePath, string arguments, string workingDir, StdOutDelegate stdOutDelegate, StdErrDelegate stdErrDelegate)
         {
@@ -45,34 +39,6 @@ namespace Tanzu.Toolkit.Services.CmdProcess
             process.BeginErrorReadLine();
 
             // Begin blocking call
-            process.WaitForExit();
-
-            return new CmdResult(_stdOutAggregator, _stdErrAggregator, process.ExitCode);
-        }
-
-        public CmdResult ExecuteWindowlessCommand(string arguments, string workingDir)
-        {
-            // Create Process
-            Process process = new Process();
-            process.StartInfo.FileName = "cmd.exe";
-            process.StartInfo.Arguments = "/c " + arguments;
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.RedirectStandardOutput = true;
-            process.StartInfo.RedirectStandardError = true;
-            process.StartInfo.CreateNoWindow = true;
-            process.StartInfo.WorkingDirectory = workingDir;
-
-            // Set output and error handlers
-            _stdOutAggregator = "";
-            _stdErrAggregator = "";
-            process.OutputDataReceived += new DataReceivedEventHandler(OutputRecorder);
-            process.ErrorDataReceived += new DataReceivedEventHandler(ErrorRecorder);
-
-            // Start process and handlers
-            process.Start();
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
-
             process.WaitForExit();
 
             return new CmdResult(_stdOutAggregator, _stdErrAggregator, process.ExitCode);

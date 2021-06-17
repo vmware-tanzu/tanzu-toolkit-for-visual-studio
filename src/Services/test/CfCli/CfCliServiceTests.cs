@@ -177,10 +177,8 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("ExecuteCfCliCommand")]
         public void ExecuteCfCliCommand_ReturnsTrueResult_WhenProcessExitCodeIsZero()
         {
-            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {_fakeArguments}";
-
             _mockCmdProcessService.Setup(mock => mock.
-              ExecuteWindowlessCommand(expectedCmdStr, null))
+              RunCommand(_fakePathToCfExe, _fakeArguments, null, null, null))
                 .Returns(_fakeSuccessResult);
 
             DetailedResult result = _sut.ExecuteCfCliCommand(_fakeArguments);
@@ -193,10 +191,8 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("ExecuteCfCliCommand")]
         public void ExecuteCfCliCommand_ReturnsFalseResult_WhenProcessExitCodeIsNotZero()
         {
-            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {_fakeArguments}";
-
             _mockCmdProcessService.Setup(mock => mock.
-              ExecuteWindowlessCommand(expectedCmdStr, null))
+              RunCommand(_fakePathToCfExe, _fakeArguments, null, null, null))
                 .Returns(_fakeFailureResult);
 
             DetailedResult result = _sut.ExecuteCfCliCommand(_fakeArguments);
@@ -211,12 +207,10 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("ExecuteCfCliCommand")]
         public void ExecuteCfCliCommand_ReturnsStdOut_WhenProcessFailsWithoutStdErr_AndStdOutContainsFAILEDSubstring()
         {
-            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {_fakeArguments}";
-
             var fakeFailedResult = new CmdResult("FAILED this is a mock response", string.Empty, 1);
 
             _mockCmdProcessService.Setup(mock => mock.
-              ExecuteWindowlessCommand(expectedCmdStr, null))
+              RunCommand(_fakePathToCfExe, _fakeArguments, null, null, null))
                 .Returns(fakeFailedResult);
 
             DetailedResult result = _sut.ExecuteCfCliCommand(_fakeArguments);
@@ -231,11 +225,9 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("ExecuteCfCliCommand")]
         public void ExecuteCfCliCommand_ReturnsGenericExplanation_WhenProcessFailsWithoutStdErr()
         {
-            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {_fakeArguments}";
-
             var fakeFailedResult = new CmdResult("junk output", string.Empty, 1);
             _mockCmdProcessService.Setup(mock => mock.
-              ExecuteWindowlessCommand(expectedCmdStr, null))
+              RunCommand(_fakePathToCfExe, _fakeArguments, null, null, null))
                 .Returns(fakeFailedResult);
 
             DetailedResult result = _sut.ExecuteCfCliCommand(_fakeArguments);
@@ -264,10 +256,8 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("GetOAuthToken")]
         public void GetOAuthToken_ReturnsNull_WhenProcessExitsWithNonZeroCode()
         {
-            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService._getOAuthTokenCmd}";
-
             _mockCmdProcessService.Setup(mock => mock.
-              ExecuteWindowlessCommand(expectedCmdStr, null))
+              RunCommand(_fakePathToCfExe, CfCliService._getOAuthTokenCmd, null, null, null))
                 .Returns(new CmdResult(_fakeStdOut, _fakeStdErr, exitCode: 1));
 
             var token = _sut.GetOAuthToken();
@@ -279,10 +269,8 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("GetOAuthToken")]
         public void GetOAuthToken_TrimsPrefix_WhenResultStartsWithBearer()
         {
-            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService._getOAuthTokenCmd}";
-
             _mockCmdProcessService.Setup(mock => mock.
-              ExecuteWindowlessCommand(expectedCmdStr, null))
+              RunCommand(_fakePathToCfExe, CfCliService._getOAuthTokenCmd, null, null, null))
                 .Returns(new CmdResult(_fakeRealisticTokenOutput, _fakeStdErr, exitCode: 0));
 
             var token = _sut.GetOAuthToken();
@@ -293,10 +281,8 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("GetOAuthToken")]
         public void GetOAuthToken_RemovesNewlinesFromTokenResult()
         {
-            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService._getOAuthTokenCmd}";
-
             _mockCmdProcessService.Setup(mock => mock.
-              ExecuteWindowlessCommand(expectedCmdStr, null))
+              RunCommand(_fakePathToCfExe, CfCliService._getOAuthTokenCmd, null, null, null))
                 .Returns(new CmdResult(_fakeRealisticTokenOutput, _fakeStdErr, exitCode: 0));
 
             var token = _sut.GetOAuthToken();
@@ -310,12 +296,16 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         {
             var fakeTokenResult = new CmdResult(_fakeAccessToken, "", 0);
 
-            _mockCmdProcessService.Setup(m => m.ExecuteWindowlessCommand(It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null)).Returns(fakeTokenResult);
+            _mockCmdProcessService.Setup(m => m.
+              RunCommand(_fakePathToCfExe, It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null, null, null))
+                .Returns(fakeTokenResult);
 
             var firstResult = _sut.GetOAuthToken();
             Assert.AreEqual(_fakeAccessToken, firstResult);
             Assert.AreEqual(1, _mockCmdProcessService.Invocations.Count);
-            _mockCmdProcessService.Verify(m => m.ExecuteWindowlessCommand(It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null), Times.Once);
+            _mockCmdProcessService.Verify(m => m.
+              RunCommand(_fakePathToCfExe, It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null, null, null),
+                Times.Once);
 
             _mockCmdProcessService.Invocations.Clear();
             _mockCmdProcessService.Reset();
@@ -332,7 +322,9 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         {
             var fakeTokenResult = new CmdResult("my.fake.jwt", "", 0);
 
-            _mockCmdProcessService.Setup(m => m.ExecuteWindowlessCommand(It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null)).Returns(fakeTokenResult);
+            _mockCmdProcessService.Setup(m => m.
+              RunCommand(_fakePathToCfExe, It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null, null, null))
+                .Returns(fakeTokenResult);
 
             Exception thrownException = null;
             string result = "this should become null";
@@ -356,12 +348,16 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         {
             var fakeTokenResult = new CmdResult(_fakeAccessToken, "", 0);
 
-            _mockCmdProcessService.Setup(m => m.ExecuteWindowlessCommand(It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null)).Returns(fakeTokenResult);
+            _mockCmdProcessService.Setup(m => m.
+              RunCommand(_fakePathToCfExe, It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null, null, null))
+                .Returns(fakeTokenResult);
 
             var firstResult = _sut.GetOAuthToken();
             Assert.AreEqual(_fakeAccessToken, firstResult);
             Assert.AreEqual(1, _mockCmdProcessService.Invocations.Count);
-            _mockCmdProcessService.Verify(m => m.ExecuteWindowlessCommand(It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null), Times.Once);
+            _mockCmdProcessService.Verify(m => m.
+              RunCommand(_fakePathToCfExe, It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null, null, null), 
+                Times.Once);
 
             _mockCmdProcessService.Invocations.Clear();
             _mockCmdProcessService.Reset();
@@ -380,7 +376,9 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var thirdResult = _sut.GetOAuthToken();
             Assert.AreEqual(_fakeAccessToken, secondResult);
             Assert.AreEqual(1, _mockCmdProcessService.Invocations.Count);
-            _mockCmdProcessService.Verify(m => m.ExecuteWindowlessCommand(It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null), Times.Once);
+            _mockCmdProcessService.Verify(m => m.
+              RunCommand(_fakePathToCfExe, It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null, null, null), 
+                Times.Once);
         }
 
         [TestMethod]
@@ -389,10 +387,10 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         {
             var fakeApiAddress = "my.api.addr";
             bool skipSsl = true;
-            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService._targetApiCmd} {fakeApiAddress} --skip-ssl-validation";
+            string expectedArgs = $"{CfCliService._targetApiCmd} {fakeApiAddress} --skip-ssl-validation";
 
             _mockCmdProcessService.Setup(mock => mock.
-              ExecuteWindowlessCommand(expectedCmdStr, null))
+              RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
                 .Returns(new CmdResult(_fakeStdOut, _fakeStdErr, 0));
 
             DetailedResult result = _sut.TargetApi(fakeApiAddress, skipSsl);
@@ -410,10 +408,10 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         {
             var fakeApiAddress = "my.api.addr";
             bool skipSsl = true;
-            string expectedCmdStr = $"\"{_fakePathToCfExe}\" {CfCliService._targetApiCmd} {fakeApiAddress} --skip-ssl-validation";
+            string expectedArgs = $"{CfCliService._targetApiCmd} {fakeApiAddress} --skip-ssl-validation";
 
             _mockCmdProcessService.Setup(mock => mock.
-              ExecuteWindowlessCommand(expectedCmdStr, null))
+              RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
                 .Returns(new CmdResult(_fakeStdOut, _fakeStdErr, 1));
 
             DetailedResult result = _sut.TargetApi(fakeApiAddress, skipSsl);

@@ -503,10 +503,8 @@ namespace Tanzu.Toolkit.Services.CfCli
                 return new DetailedResult(false, _cfExePathErrorMsg);
             }
 
-            string commandStr = '"' + pathToCfExe + '"' + ' ' + arguments;
-
             ICmdProcessService cmdProcessService = Services.GetRequiredService<ICmdProcessService>();
-            CmdResult result = cmdProcessService.ExecuteWindowlessCommand(commandStr, workingDir);
+            CmdResult result = cmdProcessService.RunCommand(pathToCfExe, arguments, workingDir, null, null);
 
             if (result.ExitCode == 0)
             {
