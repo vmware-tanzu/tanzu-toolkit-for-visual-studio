@@ -16,46 +16,6 @@ namespace Tanzu.Toolkit.Services.CmdProcess
         {
         }
 
-        /// <summary>
-        /// Begins a new command with the given arguments. Returns true if the command process exits with a 0 exit code, otherwise returns false.
-        /// </summary>
-        /// <param name="arguments"></param>
-        /// <param name="workingDir"></param>
-        /// <returns></returns>
-        public async Task<CmdResult> InvokeWindowlessCommandAsync(string arguments, string workingDir, StdOutDelegate stdOutDelegate, StdErrDelegate stdErrDelegate)
-        {
-            // Create Process
-            Process process = new Process();
-            process.StartInfo.FileName = "cmd.exe";
-            process.StartInfo.Arguments = "/c " + arguments;
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.RedirectStandardOutput = true;
-            process.StartInfo.RedirectStandardError = true;
-            process.StartInfo.CreateNoWindow = true;
-            if (workingDir != null)
-            {
-                process.StartInfo.WorkingDirectory = workingDir;
-            }
-
-            // Set output and error handlers
-            _stdOutCallback = stdOutDelegate;
-            _stdErrCallback = stdErrDelegate;
-            _stdOutAggregator = "";
-            _stdErrAggregator = "";
-            process.OutputDataReceived += new DataReceivedEventHandler(OutputRecorder);
-            process.ErrorDataReceived += new DataReceivedEventHandler(ErrorRecorder);
-
-            // Start process and handlers
-            process.Start();
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
-
-            // Begin blocking call
-            await Task.Run(() => process.WaitForExit());
-
-            return new CmdResult(_stdOutAggregator, _stdErrAggregator, process.ExitCode);
-        }
-
         public CmdResult RunCommand(string executableFilePath, string arguments, string workingDir, StdOutDelegate stdOutDelegate, StdErrDelegate stdErrDelegate)
         {
             // Create Process
