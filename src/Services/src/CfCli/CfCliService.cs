@@ -48,7 +48,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         private readonly IFileLocatorService _fileLocatorService;
         private readonly ILogger _logger;
 
-        private object _tokenLock = new object();
+        private object _cfEnvironmentLock = new object();
         private volatile string _cachedAccessToken = null;
         private DateTime _accessTokenExpiration = new DateTime(0);
 
@@ -97,7 +97,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         {
             if (_cachedAccessToken == null || _accessTokenExpiration == null || DateTime.Compare(DateTime.Now, _accessTokenExpiration) >= 0)
             {
-                lock (_tokenLock)
+                lock (_cfEnvironmentLock)
                 {
                     // double-check just in case the last thread to access this block changed these values
                     // (prevents scenario where many threads wait for lock once token expires, then *all* try to refresh token)
@@ -140,7 +140,7 @@ namespace Tanzu.Toolkit.Services.CfCli
 
         public void ClearCachedAccessToken()
         {
-            lock (_tokenLock)
+            lock (_cfEnvironmentLock)
             {
                 _cachedAccessToken = null;
             }
@@ -148,10 +148,15 @@ namespace Tanzu.Toolkit.Services.CfCli
 
         public DetailedResult TargetApi(string apiAddress, bool skipSsl)
         {
-            string args = $"{_targetApiCmd} {apiAddress}{(skipSsl ? " --skip-ssl-validation" : string.Empty)}";
-            var result = ExecuteCfCliCommand(args);
+            DetailedResult result;
 
-            if (!result.Succeeded)
+            lock (_cfEnvironmentLock)
+            {
+                string args = $"{_targetApiCmd} {apiAddress}{(skipSsl ? " --skip-ssl-validation" : string.Empty)}";
+                result = ExecuteCfCliCommand(args);
+            }
+
+            if (result == null || !result.Succeeded)
             {
                 _logger.Error($"TargetApi({apiAddress}, {skipSsl}) failed: {result}");
             }
