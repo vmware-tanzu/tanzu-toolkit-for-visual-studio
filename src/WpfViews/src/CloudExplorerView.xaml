@@ -5,13 +5,20 @@
                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
                 xmlns:ViewModels="clr-namespace:Tanzu.Toolkit.ViewModels;assembly=Tanzu.Toolkit.ViewModels"
                 xmlns:converters="clr-namespace:Tanzu.Toolkit.WpfViews.Converters" xmlns:wpfviews="clr-namespace:Tanzu.Toolkit.VisualStudio.WpfViews"
-             mc:Ignorable="d"
+                mc:Ignorable="d"
                 Background="AntiqueWhite"
                 Name="CloudExplorerViewElement"
                 d:DesignHeight="300" d:DesignWidth="300">
 
+  
     <UserControl.Resources>
 
+        <SolidColorBrush x:Key="MyBrush1" Color="#234154"/>
+        <SolidColorBrush x:Key="MyBrush2" Color="{Binding ElementName=CloudExplorerViewElement, Path=DefaultBg}"/>
+        <SolidColorBrush x:Key="MyBrush3" Color="{Binding ElementName=CloudExplorerViewElement, Path=Color}"/>
+
+        <Color x:Key="MyColor1">#23a451</Color>
+        
         <converters:VisibilityConverter x:Key="Visibility" />
         <converters:VisibilityConverter x:Key="InverseVisibility" Reversed="True"/>
 
@@ -19,7 +26,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border CornerRadius="6" Background="LightSeaGreen" Margin="2,2,2,2">
+                        <Border CornerRadius="6" Background="{Binding ElementName=CloudExplorerViewElement, Path=MyCoolBrush}" Margin="2,2,2,2">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                     </ControlTemplate>

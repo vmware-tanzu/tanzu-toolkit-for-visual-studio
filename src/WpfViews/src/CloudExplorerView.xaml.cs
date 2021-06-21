@@ -1,5 +1,8 @@
-﻿using System.Windows.Controls;
+﻿using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using Tanzu.Toolkit.Services.ThemeService;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.WpfViews.Commands;
 
@@ -18,6 +21,11 @@ namespace Tanzu.Toolkit.WpfViews
         public ICommand RefreshSpaceCommand { get; }
         public ICommand RefreshAllCommand { get; }
         public ICommand RemoveCloudConnectionCommand { get; }
+        //public IThemeService Background { get; }
+
+        public static Color Color { get; } = (Color)ColorConverter.ConvertFromString("Red");
+
+        public SolidColorBrush DefaultBg { get; }
 
         public CloudExplorerView()
         {
@@ -35,8 +43,20 @@ namespace Tanzu.Toolkit.WpfViews
             RefreshAllCommand = new DelegatingCommand(viewModel.RefreshAllItems, viewModel.CanInitiateFullRefresh);
             RemoveCloudConnectionCommand = new DelegatingCommand(viewModel.RemoveCloudConnection, viewModel.CanRemoveCloudConnecion);
 
+            DefaultBg = new SolidColorBrush(Color);
+
+            Resources.Add("MyBrushKey", DefaultBg);
+            Resources.Add("MyCustomColor", Color);
+
             DataContext = viewModel;
             InitializeComponent();
         }
+
+        public Brush MyCoolBrush
+        {
+            get { return new SolidColorBrush(Color); }
+        }
+
+        //public SolidColorBrush MyProperty = defaultBg;
     }
 }
