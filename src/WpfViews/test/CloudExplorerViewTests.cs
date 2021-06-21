@@ -15,7 +15,7 @@ namespace Tanzu.Toolkit.WpfViews.Tests
             var fakeCfInstances = new Dictionary<string, CloudFoundryInstance>();
             mockCloudFoundryService.SetupGet(mock => mock.CloudFoundryInstances).Returns(fakeCfInstances);
             var vm = new CloudExplorerViewModel(services);
-            var view = new CloudExplorerView(vm);
+            var view = new CloudExplorerView(vm, mockThemeService.Object);
 
             // Verify DataContext initalized
             Assert.AreSame(vm, view.DataContext);

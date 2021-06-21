@@ -4,14 +4,14 @@
                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
                 xmlns:ViewModels="clr-namespace:Tanzu.Toolkit.ViewModels;assembly=Tanzu.Toolkit.ViewModels"
-                xmlns:converters="clr-namespace:Tanzu.Toolkit.WpfViews.Converters" xmlns:wpfviews="clr-namespace:Tanzu.Toolkit.VisualStudio.WpfViews"
-             mc:Ignorable="d"
-                Background="AntiqueWhite"
+                xmlns:converters="clr-namespace:Tanzu.Toolkit.WpfViews.Converters" 
+                xmlns:wpfviews="clr-namespace:Tanzu.Toolkit.VisualStudio.WpfViews"
+                mc:Ignorable="d"
                 Name="CloudExplorerViewElement"
                 d:DesignHeight="300" d:DesignWidth="300">
 
+  
     <UserControl.Resources>
-
         <converters:VisibilityConverter x:Key="Visibility" />
         <converters:VisibilityConverter x:Key="InverseVisibility" Reversed="True"/>
 
@@ -19,7 +19,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border CornerRadius="6" Background="LightSeaGreen" Margin="2,2,2,2">
+                        <Border CornerRadius="6" Margin="2,2,2,2">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                     </ControlTemplate>
@@ -85,15 +85,15 @@
             </Grid>
         </Button>
 
-        <Rectangle Grid.Row="1" Grid.RowSpan="1" Grid.ColumnSpan="3" Fill="White"/>
+        <Rectangle Grid.Row="1" Grid.RowSpan="1" Grid.ColumnSpan="3" />
 
         <TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" 
                  Margin="5"  IsReadOnly="True" 
                  TextWrapping="Wrap" BorderBrush="Transparent" 
                  ScrollViewer.VerticalScrollBarVisibility="Auto"
                  HorizontalAlignment="Center" VerticalAlignment="Center"
-                 Foreground="Gray" MinLines="3" MaxLines="3" 
-                 Background="Transparent" Text="Not Yet Connected" 
+                 MinLines="3" MaxLines="3" 
+                 Text="Not Yet Connected" 
                  Visibility="{Binding Path=HasCloudTargets, Converter={StaticResource InverseVisibility}}"/>
 
         <TreeView ItemsSource="{Binding CloudFoundryList}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Visibility="{Binding Path=HasCloudTargets, Converter={StaticResource Visibility}}">
