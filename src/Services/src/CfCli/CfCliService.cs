@@ -185,12 +185,22 @@ namespace Tanzu.Toolkit.Services.CfCli
             return result;
         }
 
-        public async Task<DetailedResult> TargetOrg(string orgName)
+        /// <summary>
+        /// Invokes a `cf target -o` command using the CF CLI.
+        /// <para>This method is not thread-safe; if two threads invoke it simultaneously, the 
+        /// first one to change the targeted org may have its efforts undone when the second 
+        /// one changes the targeted org. </para>
+        /// <para>To avoid race conditions around the "targeted org" value, make sure to invoke 
+        /// this method only after acquiring the <see cref="_cfEnvironmentLock"/>.</para>
+        /// </summary>
+        /// <param name="orgName"></param>
+        /// <returns></returns>
+        public DetailedResult TargetOrg(string orgName)
         {
             string args = $"{_targetOrgCmd} {orgName}";
-            var result = await RunCfCommandAsync(args);
+            DetailedResult result = ExecuteCfCliCommand(args);
 
-            if (!result.Succeeded)
+            if (result == null || !result.Succeeded)
             {
                 _logger.Error($"TargetOrg({orgName}) failed: {result}");
             }
@@ -198,12 +208,22 @@ namespace Tanzu.Toolkit.Services.CfCli
             return result;
         }
 
-        public async Task<DetailedResult> TargetSpace(string spaceName)
+        /// <summary>
+        /// Invokes a `cf target -s` command using the CF CLI.
+        /// <para>This method is not thread-safe; if two threads invoke it simultaneously, the 
+        /// first one to change the targeted space may have its efforts undone when the second 
+        /// one changes the targeted space. </para>
+        /// <para>To avoid race conditions around the "targeted space" value, make sure to invoke 
+        /// this method only after acquiring the <see cref="_cfEnvironmentLock"/>.</para>
+        /// </summary>
+        /// <param name="spaceName"></param>
+        /// <returns></returns>
+        public DetailedResult TargetSpace(string spaceName)
         {
             string args = $"{_targetSpaceCmd} {spaceName}";
-            var result = await RunCfCommandAsync(args);
+            DetailedResult result = ExecuteCfCliCommand(args);
 
-            if (!result.Succeeded)
+            if (result == null || !result.Succeeded)
             {
                 _logger.Error($"TargetSpace({spaceName}) failed: {result}");
             }
@@ -472,13 +492,32 @@ namespace Tanzu.Toolkit.Services.CfCli
             return pushResult;
         }
 
-        public async Task<DetailedResult<string>> GetRecentAppLogs(string appName)
+        public async Task<DetailedResult<string>> GetRecentAppLogs(string appName, string orgName, string spaceName)
         {
             var args = $"logs {appName} --recent";
-            var recentLogsResult = await RunCfCommandAsync(args);
+
+            Task<DetailedResult> logsTask;
+
+            lock (_cfEnvironmentLock)
+            {
+                var targetOrgResult = TargetOrg(orgName);
+                if (!targetOrgResult.Succeeded)
+                {
+                    return new DetailedResult<string>(null, targetOrgResult.Succeeded, targetOrgResult.Explanation, targetOrgResult.CmdDetails);
+                }
+                
+                var targetSpaceResult = TargetSpace(spaceName);
+                if (!targetSpaceResult.Succeeded)
+                {
+                    return new DetailedResult<string>(null, targetSpaceResult.Succeeded, targetSpaceResult.Explanation, targetSpaceResult.CmdDetails);
+                }
+
+                logsTask = Task.Run(async () => await RunCfCommandAsync(args));
+            }
+
+            var recentLogsResult = await logsTask;
 
             var content = recentLogsResult.CmdDetails.StdOut;
-
             var cmdDetails = recentLogsResult.CmdDetails;
             var explanation = recentLogsResult.Explanation;
             bool succeeded = recentLogsResult.Succeeded;

@@ -760,7 +760,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
 
         [TestMethod]
         [TestCategory("TargetOrg")]
-        public async Task TargetOrg_ReturnsTrue_WhenCmdExitCodeIsZero()
+        public void TargetOrg_ReturnsTrue_WhenCmdExitCodeIsZero()
         {
             var fakeOrgName = "fake-org";
             string expectedArgs = $"{CfCliService._targetOrgCmd} {fakeOrgName}";
@@ -770,7 +770,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
               RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
                 .Returns(fakeSuccessResult);
 
-            var result = await _sut.TargetOrg(fakeOrgName);
+            var result = _sut.TargetOrg(fakeOrgName);
 
             Assert.IsTrue(result.Succeeded);
             Assert.IsTrue(result.CmdDetails.ExitCode == 0);
@@ -781,7 +781,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
 
         [TestMethod]
         [TestCategory("TargetOrg")]
-        public async Task TargetOrg_ReturnsFalse_WhenCmdExitCodeIsNotZero()
+        public void TargetOrg_ReturnsFalse_WhenCmdExitCodeIsNotZero()
         {
             var fakeOrgName = "fake-org";
             string expectedArgs = $"{CfCliService._targetOrgCmd} {fakeOrgName}";
@@ -791,7 +791,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
               RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
                 .Returns(fakeFailureResult);
 
-            var result = await _sut.TargetOrg(fakeOrgName);
+            var result = _sut.TargetOrg(fakeOrgName);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.CmdDetails.ExitCode == 1);
@@ -802,7 +802,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
 
         [TestMethod]
         [TestCategory("TargetSpace")]
-        public async Task TargetSpace_ReturnsTrueResult_WhenCmdExitCodeIsZero()
+        public void TargetSpace_ReturnsTrueResult_WhenCmdExitCodeIsZero()
         {
             var fakeSpaceName = "fake-space";
             string expectedArgs = $"{CfCliService._targetSpaceCmd} {fakeSpaceName}";
@@ -812,7 +812,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
               RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
                 .Returns(fakeSuccessResult);
 
-            var result = await _sut.TargetSpace(fakeSpaceName);
+            var result = _sut.TargetSpace(fakeSpaceName);
 
             Assert.IsTrue(result.Succeeded);
             Assert.IsTrue(result.CmdDetails.ExitCode == 0);
@@ -823,7 +823,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
 
         [TestMethod]
         [TestCategory("TargetSpace")]
-        public async Task TargetSpace_ReturnsFalseResult_WhenCmdExitCodeIsNotZero()
+        public void TargetSpace_ReturnsFalseResult_WhenCmdExitCodeIsNotZero()
         {
             var fakeSpaceName = "fake-space";
             string expectedArgs = $"{CfCliService._targetSpaceCmd} {fakeSpaceName}";
@@ -833,7 +833,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
               RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
                 .Returns(fakeFailureResult);
 
-            var result = await _sut.TargetSpace(fakeSpaceName);
+            var result = _sut.TargetSpace(fakeSpaceName);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.CmdDetails.ExitCode == 1);
@@ -1178,17 +1178,27 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         public async Task GetRecentAppLogs_ReturnsSuccessResult_WhenLogsCmdSucceeds()
         {
             var fakeAppName = "junk";
-            var expectedArgs = $"logs {fakeAppName} --recent";
+            var expectedLogsCmdArgs = $"logs {fakeAppName} --recent";
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} {FakeOrg.OrgName}";
+            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} {FakeSpace.SpaceName}";
 
             string fakeCmdOutput = "These are fake app logs\nYabadabbadoo";
 
             CmdResult mockCmdResult = new CmdResult(fakeCmdOutput, string.Empty, 0);
 
             _mockCmdProcessService.Setup(m => m.
-                RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
+              RunCommand(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, null, null))
+                .Returns(_fakeSuccessCmdResult);
+            
+            _mockCmdProcessService.Setup(m => m.
+              RunCommand(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, null, null))
+                .Returns(_fakeSuccessCmdResult);
+
+            _mockCmdProcessService.Setup(m => m.
+                RunCommand(_fakePathToCfExe, expectedLogsCmdArgs, null, null, null))
                     .Returns(mockCmdResult);
 
-            var result = await _sut.GetRecentAppLogs(fakeAppName);
+            var result = await _sut.GetRecentAppLogs(fakeAppName, FakeOrg.OrgName, FakeSpace.SpaceName);
 
             Assert.AreEqual(result.Content, fakeCmdOutput);
             Assert.IsTrue(result.Succeeded);
@@ -1202,6 +1212,8 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         {
             var fakeAppName = "junk";
             var expectedArgs = $"logs {fakeAppName} --recent";
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} {FakeOrg.OrgName}";
+            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} {FakeSpace.SpaceName}";
 
             string fakeCmdOutput = "These are fake app logs\nYabadabbadoo";
 
@@ -1209,15 +1221,68 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             CmdResult mockCmdResult = new CmdResult(fakeCmdOutput, errorMsg, 1);
 
             _mockCmdProcessService.Setup(m => m.
+              RunCommand(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, null, null))
+                .Returns(_fakeSuccessCmdResult);
+
+            _mockCmdProcessService.Setup(m => m.
+              RunCommand(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, null, null))
+                .Returns(_fakeSuccessCmdResult);
+
+            _mockCmdProcessService.Setup(m => m.
                 RunCommand(_fakePathToCfExe, expectedArgs, null, null, null))
                     .Returns(mockCmdResult);
 
-            var result = await _sut.GetRecentAppLogs(fakeAppName);
+            var result = await _sut.GetRecentAppLogs(fakeAppName, FakeOrg.OrgName, FakeSpace.SpaceName);
 
             Assert.IsFalse(result.Succeeded);
             Assert.AreEqual(result.Content, fakeCmdOutput);
             Assert.AreEqual(mockCmdResult.StdErr, result.Explanation);
             Assert.AreEqual(mockCmdResult, result.CmdDetails);
+        }
+
+        [TestMethod]
+        [TestCategory("GetRecentAppLogs")]
+        public async Task GetRecentAppLogs_ReturnsFailureResult_WhenTargetOrgFails()
+        {
+            var fakeAppName = "junk";
+            var expectedArgs = $"logs {fakeAppName} --recent";
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} {FakeOrg.OrgName}";
+
+            _mockCmdProcessService.Setup(m => m.
+              RunCommand(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, null, null))
+                .Returns(_fakeFailureCmdResult);
+
+            var result = await _sut.GetRecentAppLogs(fakeAppName, FakeOrg.OrgName, FakeSpace.SpaceName);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNull(result.Content);
+            Assert.AreEqual(_fakeFailureCmdResult.StdErr, result.Explanation);
+            Assert.AreEqual(_fakeFailureCmdResult, result.CmdDetails);
+        }
+
+        [TestMethod]
+        [TestCategory("GetRecentAppLogs")]
+        public async Task GetRecentAppLogs_ReturnsFailureResult_WhenTargetSpaceFails()
+        {
+            var fakeAppName = "junk";
+            var expectedArgs = $"logs {fakeAppName} --recent";
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} {FakeOrg.OrgName}";
+            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} {FakeSpace.SpaceName}";
+
+            _mockCmdProcessService.Setup(m => m.
+              RunCommand(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, null, null))
+                .Returns(_fakeSuccessCmdResult);
+
+            _mockCmdProcessService.Setup(m => m.
+              RunCommand(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, null, null))
+                .Returns(_fakeFailureCmdResult);
+
+            var result = await _sut.GetRecentAppLogs(fakeAppName, FakeOrg.OrgName, FakeSpace.SpaceName);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNull(result.Content);
+            Assert.AreEqual(_fakeFailureCmdResult.StdErr, result.Explanation);
+            Assert.AreEqual(_fakeFailureCmdResult, result.CmdDetails);
         }
     }
 }
