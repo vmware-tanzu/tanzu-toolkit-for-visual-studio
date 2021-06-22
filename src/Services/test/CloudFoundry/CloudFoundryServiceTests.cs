@@ -1377,7 +1377,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             _mockCfCliService.Setup(mock =>
                 mock.TargetOrg(FakeOrg.OrgName))
-                    .ReturnsAsync(fakeCfCmdResponse);
+                    .Returns(fakeCfCmdResponse);
 
             _mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
@@ -1396,11 +1396,11 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             _mockCfCliService.Setup(mock =>
                 mock.TargetOrg(FakeOrg.OrgName))
-                    .ReturnsAsync(_fakeSuccessDetailedResult);
+                    .Returns(_fakeSuccessDetailedResult);
             
             _mockCfCliService.Setup(mock =>
                 mock.TargetSpace(FakeSpace.SpaceName))
-                    .ReturnsAsync(fakeCfCmdResponse);
+                    .Returns(fakeCfCmdResponse);
 
             _mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
@@ -1419,11 +1419,11 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             _mockCfCliService.Setup(mock =>
                 mock.TargetOrg(FakeOrg.OrgName))
-                    .ReturnsAsync(_fakeSuccessDetailedResult);
+                    .Returns(_fakeSuccessDetailedResult);
 
             _mockCfCliService.Setup(mock =>
                 mock.TargetSpace(FakeSpace.SpaceName))
-                    .ReturnsAsync(_fakeSuccessDetailedResult);
+                    .Returns(_fakeSuccessDetailedResult);
 
             _mockCfCliService.Setup(mock =>
                 mock.PushAppAsync(FakeApp.AppName, null, null, _fakeProjectPath, null, null))
@@ -1441,13 +1441,13 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("DeployApp")]
         public async Task DeployAppAsync_ReturnsTrueResult_WhenCfTargetAndPushCommandsSucceed()
         {
-            _mockCfCliService.Setup(mock =>
-                mock.TargetOrg(FakeOrg.OrgName))
-                    .ReturnsAsync(_fakeSuccessDetailedResult);
+            _mockCfCliService.Setup(mock => mock.
+                TargetOrg(FakeOrg.OrgName))
+                  .Returns(_fakeSuccessDetailedResult);
 
-            _mockCfCliService.Setup(mock =>
-                mock.TargetSpace(FakeSpace.SpaceName))
-                    .ReturnsAsync(_fakeSuccessDetailedResult);
+            _mockCfCliService.Setup(mock => mock.
+                TargetSpace(FakeSpace.SpaceName))
+                  .Returns(_fakeSuccessDetailedResult);
 
             _mockCfCliService.Setup(mock =>
                 mock.PushAppAsync(FakeApp.AppName, null, null, _fakeProjectPath, null, null))
@@ -1467,13 +1467,13 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             string expectedBuildpackValue = "hwc_buildpack";
             string expectedStackValue = "windows";
 
-            _mockCfCliService.Setup(mock =>
-                mock.TargetOrg(FakeOrg.OrgName))
-                    .ReturnsAsync(_fakeSuccessDetailedResult);
+            _mockCfCliService.Setup(mock => mock.
+                TargetOrg(FakeOrg.OrgName))
+                  .Returns(_fakeSuccessDetailedResult);
 
-            _mockCfCliService.Setup(mock =>
-                mock.TargetSpace(FakeSpace.SpaceName))
-                    .ReturnsAsync(_fakeSuccessDetailedResult);
+            _mockCfCliService.Setup(mock => mock.
+                TargetSpace(FakeSpace.SpaceName))
+                  .Returns(_fakeSuccessDetailedResult);
 
             _mockCfCliService.Setup(mock =>
                 mock.PushAppAsync(FakeApp.AppName, null, null, _fakeProjectPath, expectedBuildpackValue, expectedStackValue))
@@ -1504,19 +1504,11 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("GetRecentLogs")]
         public async Task GetRecentLogs_ReturnsSuccessResult_WhenWrappedMethodSucceeds()
         {
-            _mockCfCliService.Setup(m => m.
-                TargetOrg(FakeApp.ParentSpace.ParentOrg.OrgName))
-                    .ReturnsAsync(_fakeSuccessDetailedResult);
-
-            _mockCfCliService.Setup(m => m.
-                TargetSpace(FakeApp.ParentSpace.SpaceName))
-                    .ReturnsAsync(_fakeSuccessDetailedResult);
-
             var logsStub = "These are fake app logs!\n[12:16:04] App took a nap.";
             var fakeLogsResult = new DetailedResult<string>(logsStub, true, null, _fakeSuccessCmdResult);
 
             _mockCfCliService.Setup(m => m
-                .GetRecentAppLogs(FakeApp.AppName))
+                .GetRecentAppLogs(FakeApp.AppName, FakeOrg.OrgName, FakeSpace.SpaceName))
                     .ReturnsAsync(fakeLogsResult);
 
             var result = await _sut.GetRecentLogs(FakeApp);
@@ -1531,20 +1523,12 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("GetRecentLogs")]
         public async Task GetRecentLogs_ReturnsFailedResult_WhenWrappedMethodFails()
         {
-            _mockCfCliService.Setup(m => m.
-                TargetOrg(FakeApp.ParentSpace.ParentOrg.OrgName))
-                    .ReturnsAsync(_fakeSuccessDetailedResult);
-
-            _mockCfCliService.Setup(m => m.
-                TargetSpace(FakeApp.ParentSpace.SpaceName))
-                    .ReturnsAsync(_fakeSuccessDetailedResult);
-
             string fakeLogs = null;
             var fakeErrorMsg = "something went wrong";
             var fakeLogsResult = new DetailedResult<string>(fakeLogs, false, fakeErrorMsg, _fakeFailureCmdResult);
 
             _mockCfCliService.Setup(m => m
-                .GetRecentAppLogs(FakeApp.AppName))
+                .GetRecentAppLogs(FakeApp.AppName, FakeOrg.OrgName, FakeSpace.SpaceName))
                     .ReturnsAsync(fakeLogsResult);
 
             var result = await _sut.GetRecentLogs(FakeApp);
@@ -1553,42 +1537,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.AreEqual(result.Succeeded, fakeLogsResult.Succeeded);
             Assert.AreEqual(result.Explanation, fakeLogsResult.Explanation);
             Assert.AreEqual(result.CmdDetails, fakeLogsResult.CmdDetails);
-        }
-
-        [TestMethod]
-        [TestCategory("GetRecentLogs")]
-        public async Task GetRecentLogs_ReturnsFailedResult_WhenTargetOrgFails()
-        {
-            _mockCfCliService.Setup(m => m.
-                TargetOrg(FakeApp.ParentSpace.ParentOrg.OrgName))
-                    .ReturnsAsync(_fakeFailureDetailedResult);
-
-            var result = await _sut.GetRecentLogs(FakeApp);
-
-            Assert.IsNull(result.Content);
-            Assert.IsFalse(result.Succeeded);
-            Assert.AreEqual(result.Explanation, _fakeFailureDetailedResult.Explanation);
-            Assert.AreEqual(result.CmdDetails, _fakeFailureDetailedResult.CmdDetails);
-        }
-
-        [TestMethod]
-        [TestCategory("GetRecentLogs")]
-        public async Task GetRecentLogs_ReturnsFailedResult_WhenTargetSpaceFails()
-        {
-            _mockCfCliService.Setup(m => m.
-                TargetOrg(FakeApp.ParentSpace.ParentOrg.OrgName))
-                    .ReturnsAsync(_fakeSuccessDetailedResult);
-
-            _mockCfCliService.Setup(m => m.
-                TargetSpace(FakeApp.ParentSpace.SpaceName))
-                    .ReturnsAsync(_fakeFailureDetailedResult);
-
-            var result = await _sut.GetRecentLogs(FakeApp);
-
-            Assert.IsNull(result.Content);
-            Assert.IsFalse(result.Succeeded);
-            Assert.AreEqual(result.Explanation, _fakeFailureDetailedResult.Explanation);
-            Assert.AreEqual(result.CmdDetails, _fakeFailureDetailedResult.CmdDetails);
         }
     }
 }

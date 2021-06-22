@@ -618,7 +618,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 return new DetailedResult(false, EmptyOutputDirMessage);
             }
 
-            var targetOrgResult = await _cfCliService.TargetOrg(targetOrg.OrgName);
+            var targetOrgResult = _cfCliService.TargetOrg(targetOrg.OrgName);
             if (!targetOrgResult.Succeeded)
             {
                 return new DetailedResult<string>(
@@ -628,7 +628,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 targetOrgResult.CmdDetails);
             }
 
-            var targetSpaceResult = await _cfCliService.TargetSpace(targetSpace.SpaceName);
+            var targetSpaceResult = _cfCliService.TargetSpace(targetSpace.SpaceName);
             if (!targetSpaceResult.Succeeded)
             {
                 return new DetailedResult<string>(
@@ -647,6 +647,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
 
             DetailedResult cfPushResult = await _cfCliService.PushAppAsync(appName, stdOutCallback, stdErrCallback, appProjPath, buildpack, stack);
+
             if (!cfPushResult.Succeeded)
             {
                 _logger.Error($"Successfully targeted org '{targetOrg.OrgName}' and space '{targetSpace.SpaceName}' but app deployment failed at the `cf push` stage.\n{cfPushResult.Explanation}");
@@ -658,35 +659,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
         public async Task<DetailedResult<string>> GetRecentLogs(CloudFoundryApp app)
         {
-            /* CAUTION: these operations should happen atomically;
-             * if different threads all try to target orgs/spaces at the same time there's a risk of
-             * getting unexpected results due to a race conditions for these values in .cf/config.json:
-             *      - "Target" (api address)
-             *      - "OrganizationFields" (info about the currently-targeted org)
-             *      - "SpaceFields" (info about the currently-targeted space)
-             */
-
-            var targetOrgResult = await _cfCliService.TargetOrg(app.ParentSpace.ParentOrg.OrgName);
-            if (!targetOrgResult.Succeeded)
-            {
-                return new DetailedResult<string>(
-                content: null,
-                succeeded: false,
-                targetOrgResult.Explanation,
-                targetOrgResult.CmdDetails);
-            }
-
-            var targetSpaceResult = await _cfCliService.TargetSpace(app.ParentSpace.SpaceName);
-            if (!targetSpaceResult.Succeeded)
-            {
-                return new DetailedResult<string>(
-                content: null,
-                succeeded: false,
-                targetSpaceResult.Explanation,
-                targetSpaceResult.CmdDetails);
-            }
-
-            return await _cfCliService.GetRecentAppLogs(app.AppName);
+            return await _cfCliService.GetRecentAppLogs(app.AppName, app.ParentSpace.ParentOrg.OrgName, app.ParentSpace.SpaceName);
         }
 
         private void FormatExceptionMessage(Exception ex, List<string> message)
