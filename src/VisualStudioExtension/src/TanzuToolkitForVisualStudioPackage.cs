@@ -25,6 +25,9 @@ using Tanzu.Toolkit.VisualStudio.WpfViews.Services;
 using Tanzu.Toolkit.WpfViews;
 using Tanzu.Toolkit.WpfViews.Services;
 using Task = System.Threading.Tasks.Task;
+using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.PlatformUI;
+using Microsoft;
 
 namespace Tanzu.Toolkit.VisualStudio
 {
@@ -59,6 +62,8 @@ namespace Tanzu.Toolkit.VisualStudio
 
         private IServiceProvider _serviceProvider;
 
+        private uint Color;
+
         public TanzuToolkitForVisualStudioPackage()
         {
         }
@@ -80,6 +85,12 @@ namespace Tanzu.Toolkit.VisualStudio
             await PushToCloudFoundryCommand.InitializeAsync(this, _serviceProvider);
             await OutputWindowCommand.InitializeAsync(this);
             await OpenLogsCommand.InitializeAsync(this, _serviceProvider);
+
+            IVsUIShell6 vsUIShellService = await GetServiceAsync(typeof(SVsUIShell)) as IVsUIShell6;
+            Assumes.Present(vsUIShellService);
+            var brushKey = EnvironmentColors.ToolWindowBackgroundBrushKey;
+            Color = vsUIShellService.GetThemedColor(brushKey.Category, brushKey.Name, (uint)brushKey.KeyType);
+
         }
 
         protected override object GetService(Type serviceType)
@@ -132,7 +143,7 @@ namespace Tanzu.Toolkit.VisualStudio
 
             services.AddSingleton<IUiDispatcherService, UiDispatcherService>();
 
-            services.AddSingleton<IThemeService, ThemeService>();
+            services.AddSingleton<IThemeService>(new ThemeService(Color));
 
             services.AddTransient<ICmdProcessService, CmdProcessService>();
 

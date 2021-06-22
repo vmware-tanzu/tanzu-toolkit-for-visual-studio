@@ -21,16 +21,16 @@ namespace Tanzu.Toolkit.WpfViews
         public ICommand RefreshSpaceCommand { get; }
         public ICommand RefreshAllCommand { get; }
         public ICommand RemoveCloudConnectionCommand { get; }
-        //public IThemeService Background { get; }
+        public Color Color { get; private set; }
 
-        private static Color Color { get; } = (Color)ColorConverter.ConvertFromString("Blue");
+
 
         public CloudExplorerView()
         {
             InitializeComponent();
         }
 
-        public CloudExplorerView(ICloudExplorerViewModel viewModel)
+        public CloudExplorerView(ICloudExplorerViewModel viewModel, IThemeService brush)
         {
             OpenLoginFormCommand = new DelegatingCommand(viewModel.OpenLoginView, viewModel.CanOpenLoginView);
             StopCfAppCommand = new AsyncDelegatingCommand(viewModel.StopCfApp, viewModel.CanStopCfApp);
@@ -41,9 +41,16 @@ namespace Tanzu.Toolkit.WpfViews
             RefreshAllCommand = new DelegatingCommand(viewModel.RefreshAllItems, viewModel.CanInitiateFullRefresh);
             RemoveCloudConnectionCommand = new DelegatingCommand(viewModel.RemoveCloudConnection, viewModel.CanRemoveCloudConnecion);
 
+            //var practiceColor = brush.practiceBrush;
+            //Color = (Color)ColorConverter.ConvertFromString();
+            var colorUint = brush.MyColor;
+
+            // TODO convert from uint to WPF Color (saystem.windows.media.color?)
             DataContext = viewModel;
             InitializeComponent();
         }
+
+        
 
         public Brush MyCoolBrush
         {

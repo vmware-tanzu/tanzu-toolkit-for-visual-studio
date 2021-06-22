@@ -6,6 +6,9 @@ namespace Tanzu.Toolkit.Services.ThemeService
 {
     public interface IThemeService
     {
-        //public backgroundBrush { get; private set; }
+        string bgbrushString { get; }
+        string txtBrushString { get; }
+        uint practiceBrush { get; }
+        uint MyColor { get; }
     }
 }
