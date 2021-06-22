@@ -4,6 +4,5 @@ namespace Tanzu.Toolkit.WpfViews
 {
     public interface ICloudExplorerView
     {
-        SolidColorBrush DefaultBg { get; }
     }
 }

@@ -12,13 +12,6 @@
 
   
     <UserControl.Resources>
-
-        <SolidColorBrush x:Key="MyBrush1" Color="#234154"/>
-        <SolidColorBrush x:Key="MyBrush2" Color="{Binding ElementName=CloudExplorerViewElement, Path=DefaultBg}"/>
-        <SolidColorBrush x:Key="MyBrush3" Color="{Binding ElementName=CloudExplorerViewElement, Path=Color}"/>
-
-        <Color x:Key="MyColor1">#23a451</Color>
-        
         <converters:VisibilityConverter x:Key="Visibility" />
         <converters:VisibilityConverter x:Key="InverseVisibility" Reversed="True"/>
 

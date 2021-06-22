@@ -23,9 +23,7 @@ namespace Tanzu.Toolkit.WpfViews
         public ICommand RemoveCloudConnectionCommand { get; }
         //public IThemeService Background { get; }
 
-        public static Color Color { get; } = (Color)ColorConverter.ConvertFromString("Red");
-
-        public SolidColorBrush DefaultBg { get; }
+        private static Color Color { get; } = (Color)ColorConverter.ConvertFromString("Blue");
 
         public CloudExplorerView()
         {
@@ -43,11 +41,6 @@ namespace Tanzu.Toolkit.WpfViews
             RefreshAllCommand = new DelegatingCommand(viewModel.RefreshAllItems, viewModel.CanInitiateFullRefresh);
             RemoveCloudConnectionCommand = new DelegatingCommand(viewModel.RemoveCloudConnection, viewModel.CanRemoveCloudConnecion);
 
-            DefaultBg = new SolidColorBrush(Color);
-
-            Resources.Add("MyBrushKey", DefaultBg);
-            Resources.Add("MyCustomColor", Color);
-
             DataContext = viewModel;
             InitializeComponent();
         }
@@ -57,6 +50,5 @@ namespace Tanzu.Toolkit.WpfViews
             get { return new SolidColorBrush(Color); }
         }
 
-        //public SolidColorBrush MyProperty = defaultBg;
     }
 }
