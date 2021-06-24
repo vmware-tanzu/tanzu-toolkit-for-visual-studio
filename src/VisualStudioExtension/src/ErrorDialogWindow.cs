@@ -5,7 +5,7 @@ using Tanzu.Toolkit.Services.ErrorDialog;
 
 namespace Tanzu.Toolkit.VisualStudio
 {
-    public class ErrorDialogWindowService : TanzuToolkitForVisualStudioPackage, IErrorDialog
+    public class ErrorDialogWindowService : IErrorDialog
     {
         //private static IServiceProvider _serviceProvider;
         private readonly AsyncPackage _asyncServiceProvider;
