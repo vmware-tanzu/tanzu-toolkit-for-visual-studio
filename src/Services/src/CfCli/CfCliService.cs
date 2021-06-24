@@ -49,6 +49,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         private readonly ILogger _logger;
 
         private object _cfEnvironmentLock = new object();
+
         private volatile string _cachedAccessToken = null;
         private DateTime _accessTokenExpiration = new DateTime(0);
 
@@ -473,7 +474,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         /// <param name="stdOutCallback"></param>
         /// <param name="stdErrCallback"></param>
         /// <param name="appDir"></param>
-        public async Task<DetailedResult> PushAppAsync(string appName, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string appDir, string buildpack = null, string stack = null)
+        public async Task<DetailedResult> PushAppAsync(string appName, string orgName, string spaceName, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string appDir, string buildpack = null, string stack = null)
         {
             string args = $"push \"{appName}\"";
 
@@ -487,9 +488,29 @@ namespace Tanzu.Toolkit.Services.CfCli
                 args += $" -s {stack}";
             }
 
-            var pushResult = await RunCfCommandAsync(args, stdOutCallback, stdErrCallback, appDir);
+            Task<DetailedResult> deployTask;
+            lock (_cfEnvironmentLock)
+            {
+                var targetOrgResult = TargetOrg(orgName);
+                if (!targetOrgResult.Succeeded)
+                {
+                    string msg = $"Unable to deploy app '{appName}'; failed to target org '{orgName}'.\n{targetOrgResult.Explanation}";
+                    _logger.Error(msg);
+                    return new DetailedResult(false, explanation: msg, targetOrgResult.CmdDetails);
+                }
 
-            return pushResult;
+                var targetSpaceResult = TargetSpace(spaceName);
+                if (!targetSpaceResult.Succeeded)
+                {
+                    string msg = $"Unable to deploy app '{appName}'; failed to target space '{spaceName}'.\n{targetSpaceResult.Explanation}";
+                    _logger.Error(msg);
+                    return new DetailedResult(false, explanation: msg, targetSpaceResult.CmdDetails);
+                }
+
+                deployTask = Task.Run(async () => await RunCfCommandAsync(args, stdOutCallback, stdErrCallback, appDir));
+            }
+
+            return await deployTask;
         }
 
         public async Task<DetailedResult<string>> GetRecentAppLogs(string appName, string orgName, string spaceName)
