@@ -618,26 +618,6 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 return new DetailedResult(false, EmptyOutputDirMessage);
             }
 
-            var targetOrgResult = _cfCliService.TargetOrg(targetOrg.OrgName);
-            if (!targetOrgResult.Succeeded)
-            {
-                return new DetailedResult<string>(
-                content: null,
-                succeeded: false,
-                targetOrgResult.Explanation,
-                targetOrgResult.CmdDetails);
-            }
-
-            var targetSpaceResult = _cfCliService.TargetSpace(targetSpace.SpaceName);
-            if (!targetSpaceResult.Succeeded)
-            {
-                return new DetailedResult<string>(
-                content: null,
-                succeeded: false,
-                targetSpaceResult.Explanation,
-                targetSpaceResult.CmdDetails);
-            }
-
             string buildpack = null;
             string stack = null;
             if (fullFrameworkDeployment)
@@ -646,7 +626,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 stack = "windows";
             }
 
-            DetailedResult cfPushResult = await _cfCliService.PushAppAsync(appName, stdOutCallback, stdErrCallback, appProjPath, buildpack, stack);
+            DetailedResult cfPushResult = await _cfCliService.PushAppAsync(appName, targetOrg.OrgName, targetSpace.SpaceName, stdOutCallback, stdErrCallback, appProjPath, buildpack, stack);
 
             if (!cfPushResult.Succeeded)
             {
