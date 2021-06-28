@@ -9,6 +9,7 @@
 - [Demo Video](#demo-video)
 - [Usage](#usage)
 - [Version Support](#version-support)
+- [Notes](#notes)
 
 
 
@@ -47,4 +48,7 @@ The `TanzuToolkitForVS` project provides a VSIX extension that allows Visual Stu
 - V3 of the Cloud Controller API isn't officially supported by this extension yet, although some features may still work for TAS instances running CC API V3. 
 - We are currently working on supporting V3 of the Cloud Controller API and later versions of V2.
 
-As of April 2021 we are still working on an MVP & are not yet advertising this tool publicly.
+As of June 2021 we are still working on an MVP & are not yet advertising this tool publicly.
+
+## Notes
+- This extension uses the CF CLI to perform certain operations on Tanzu Application Service. All CF CLI binaries & config files can be found in the installation directory for this Visual Studio Extension (by default, this extension is installed in `c:\users\<user>\appdata\local\microsoft\visualstudio\<vs-instance>\extensions\vmware\tanzu toolkit for visual studio\<vsix-version>`)
