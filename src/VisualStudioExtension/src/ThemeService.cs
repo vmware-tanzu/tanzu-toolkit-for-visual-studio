@@ -10,30 +10,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using Tanzu.Toolkit.Services.ThemeService;
+using Tanzu.Toolkit.WpfViews.ThemeService;
 
 namespace Tanzu.Toolkit.VisualStudio
 {
     public class ThemeService : IThemeService
     {
-        //static public ThemeResourceKey backgroundBrush { get; private set; } = EnvironmentColors.ToolWindowBackgroundBrushKey;
-        //static public ThemeResourceKey textBrush { get; private set; } = EnvironmentColors.ToolWindowTextBrushKey;
-
-        //Guid bgGuid = Guid.Parse("624ed9c3-bdfd-41fa-96c3-7c824ea32e3d");
-        //string bgName = "ToolWindowBackground";
-        //uint bgType = (uint)backgroundBrush.KeyType;
-
-        //public string bgbrushString { get; } = backgroundBrush.Name;
-        //public string txtBrushString { get; } = textBrush.Name;
-
-
-
-        //public uint MyColor { get; }
-
-        //public ThemeService(uint bgColor)
-        //{
-        //    MyColor = bgColor;
-        //}
         public void SetTheme(FrameworkElement element)
         {
             if (element is Control control)

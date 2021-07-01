@@ -89,7 +89,7 @@
 
         <TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" 
                  Margin="5"  IsReadOnly="True" 
-                 TextWrapping="Wrap" BorderBrush="Transparent" 
+                 TextWrapping="Wrap"  
                  ScrollViewer.VerticalScrollBarVisibility="Auto"
                  HorizontalAlignment="Center" VerticalAlignment="Center"
                  MinLines="3" MaxLines="3" 
@@ -139,7 +139,7 @@
                                           ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                         <Image Source="Resources/CfOrg.png" Stretch="Uniform" Height="16px" Width="16px" Margin="0,2,4,0"/>
-                        <TextBlock Text="{Binding DisplayText}" />
+                        <TextBlock Text="{Binding DisplayText}" Foreground="{Binding ElementName=CloudExplorerViewElement, Path=Foreground}"/>
                         <wpfviews:LoadingSpinnerSmall Grid.Row="0" Grid.Column="2" IsLoading="{Binding IsRefreshing}"/>
                     </StackPanel>
                 </HierarchicalDataTemplate>
@@ -236,7 +236,7 @@
                 <!-- PLACEHOLDER TREE VIEW ITEMS -->
                 <DataTemplate DataType="{x:Type ViewModels:PlaceholderViewModel}">
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                        <TextBlock Text="{Binding DisplayText}" FontStyle="Italic" VerticalAlignment="Bottom"/>
+                        <TextBlock Text="{Binding DisplayText}" FontStyle="Italic" VerticalAlignment="Bottom" Foreground="{Binding ElementName=CloudExplorerViewElement, Path=Foreground}"/>
                     </StackPanel>
                 </DataTemplate>
 

@@ -17,7 +17,6 @@ using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.FileLocator;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.Threading;
-using Tanzu.Toolkit.Services.ThemeService;
 using Tanzu.Toolkit.Services.ViewLocator;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.VisualStudio.Commands;
@@ -28,6 +27,7 @@ using Task = System.Threading.Tasks.Task;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft;
+using Tanzu.Toolkit.WpfViews.ThemeService;
 
 namespace Tanzu.Toolkit.VisualStudio
 {
@@ -61,12 +61,8 @@ namespace Tanzu.Toolkit.VisualStudio
         public const string PackageGuidString = "9419e55b-9e82-4d87-8ee5-70871b01b7cc";
 
         private IServiceProvider _serviceProvider;
-        private uint Color;
-
-        public TanzuToolkitForVisualStudioPackage()
-        {
-        }
-
+   
+       
         /// <summary>
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
         /// where you can put all the initialization code that rely on services provided by VisualStudio.
@@ -84,13 +80,6 @@ namespace Tanzu.Toolkit.VisualStudio
             await PushToCloudFoundryCommand.InitializeAsync(this, _serviceProvider);
             await OutputWindowCommand.InitializeAsync(this);
             await OpenLogsCommand.InitializeAsync(this, _serviceProvider);
-
-         
-                //IVsUIShell5 vsUIShellService = await GetServiceAsync(typeof(SVsUIShell)) as IVsUIShell5;
-                //Assumes.Present(vsUIShellService);
-                //var brushKey = EnvironmentColors.ToolWindowBackgroundBrushKey;
-                //uint keyTypeAsUint = (uint)brushKey.KeyType;
-                //Color = vsUIShellService.GetThemedColor(brushKey.Category, brushKey.Name, keyTypeAsUint);
 
         }
 
