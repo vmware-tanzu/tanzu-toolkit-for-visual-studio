@@ -92,6 +92,7 @@
     <Compile Include="DeploymentDialogView.xaml.cs">
       <DependentUpon>DeploymentDialogView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ThemeService\IThemeService.cs" />
     <Page Include="CloudExplorerView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
