@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.WpfViews.Services;
+using Tanzu.Toolkit.WpfViews.ThemeService;
 
 namespace Tanzu.Toolkit.WpfViews
 {
@@ -20,9 +21,10 @@ namespace Tanzu.Toolkit.WpfViews
             InitializeComponent();
         }
 
-        public OutputView(IOutputViewModel viewModel, IServiceProvider services)
+        public OutputView(IOutputViewModel viewModel, IServiceProvider services, IThemeService themeService)
         {
             _services = services;
+            themeService.SetTheme(this);
             DataContext = viewModel;
             ViewModel = viewModel as IViewModel;
             InitializeComponent();

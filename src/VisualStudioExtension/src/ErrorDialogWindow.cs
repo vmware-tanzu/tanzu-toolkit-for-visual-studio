@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using Tanzu.Toolkit.Services.ErrorDialog;
+using Tanzu.Toolkit.WpfViews.ThemeService;
 
 namespace Tanzu.Toolkit.VisualStudio
 {

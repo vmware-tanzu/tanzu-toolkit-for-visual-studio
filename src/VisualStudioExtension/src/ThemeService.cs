@@ -1,13 +1,8 @@
 ﻿using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Tanzu.Toolkit.WpfViews.ThemeService;
@@ -22,6 +17,7 @@ namespace Tanzu.Toolkit.VisualStudio
             {
                 control.SetResourceReference(Control.BackgroundProperty, ThemedDialogColors.WindowPanelBrushKey);
                 control.SetResourceReference(Control.ForegroundProperty, ThemedDialogColors.WindowPanelTextBrushKey);
+                control.SetResourceReference(Control.BorderBrushProperty, ThemedDialogColors.WindowBorderBrushKey);
             }
             ThemedDialogStyleLoader.SetUseDefaultThemedDialogStyles(element, true);
             ImageThemingUtilities.SetThemeScrollBars(element, true);

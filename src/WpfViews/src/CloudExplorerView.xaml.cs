@@ -25,8 +25,6 @@ namespace Tanzu.Toolkit.WpfViews
         public ICommand RemoveCloudConnectionCommand { get; }
         
 
-        public Color Color { get; } = (Color)ColorConverter.ConvertFromString("Blue");
-
         public CloudExplorerView()
         {
             InitializeComponent();
@@ -50,13 +48,6 @@ namespace Tanzu.Toolkit.WpfViews
 
         }
 
-        
-
-
-        public Brush MyCoolBrush
-        {
-            get { return new SolidColorBrush(Color); }
-        }
 
     }
 }
