@@ -11,7 +11,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <ScrollViewer x:Name="OutputScrollViewer" Background="White" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer x:Name="OutputScrollViewer" VerticalScrollBarVisibility="Auto">
             <TextBox
                 Text="{Binding OutputContent}"
                 FontFamily="Courier New"

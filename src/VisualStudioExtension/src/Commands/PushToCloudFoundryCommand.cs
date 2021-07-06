@@ -10,6 +10,7 @@ using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Tanzu.Toolkit.Services.Dialog;
+using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.WpfViews;
 using Task = System.Threading.Tasks.Task;
@@ -37,7 +38,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         private readonly AsyncPackage _package;
 
         private readonly IServiceProvider _services;
-        private readonly IDialogService _dialogService;
+        private readonly IErrorDialog _dialogService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PushToCloudFoundryCommand"/> class.
@@ -52,7 +53,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
 
             _services = services;
 
-            _dialogService = services.GetRequiredService<IDialogService>();
+            _dialogService = services.GetRequiredService<IErrorDialog>();
 
             var menuCommandID = new CommandID(CommandSet, CommandId);
             var menuItem = new MenuCommand(Execute, menuCommandID);
@@ -97,7 +98,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         /// <summary>
         /// This function is the callback used to execute the command when the menu item is clicked.
         /// See the constructor to see how the menu item is associated with this function using
-        /// OleMenuCommandService service and MenuCommand class.
+        /// OleMenuCommandService service and MenuCommand class. 
         /// </summary>
         /// <param name="sender">Event sender.</param>
         /// <param name="e">Event args.</param>
@@ -127,7 +128,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                     else
                     {
                         var viewModel = new DeploymentDialogViewModel(_services, projectDirectory, tfm);
-                        var view = new DeploymentDialogView(viewModel);
+                        var view = new DeploymentDialogView(viewModel, new ThemeService());
 
                         var deployWindow = new DeploymentWindow
                         {
