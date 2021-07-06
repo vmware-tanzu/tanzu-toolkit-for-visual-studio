@@ -2,6 +2,7 @@
 using System.Windows.Input;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.WpfViews.Commands;
+using Tanzu.Toolkit.WpfViews.ThemeService;
 
 namespace Tanzu.Toolkit.WpfViews
 {
@@ -19,12 +20,12 @@ namespace Tanzu.Toolkit.WpfViews
             InitializeComponent();
         }
 
-        public DeploymentDialogView(IDeploymentDialogViewModel viewModel)
+        public DeploymentDialogView(IDeploymentDialogViewModel viewModel, IThemeService themeService)
         {
             _viewModel = viewModel;
             UploadAppCommand = new DelegatingCommand(viewModel.DeployApp, viewModel.CanDeployApp);
             OpenLoginDialogCommand = new DelegatingCommand(viewModel.OpenLoginView, viewModel.CanOpenLoginView);
-
+            themeService.SetTheme(this);
             DataContext = viewModel;
             InitializeComponent();
         }

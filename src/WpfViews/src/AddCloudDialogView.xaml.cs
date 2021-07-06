@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Input;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.WpfViews.Commands;
+using Tanzu.Toolkit.WpfViews.ThemeService;
 
 namespace Tanzu.Toolkit.WpfViews
 {
@@ -16,10 +17,11 @@ namespace Tanzu.Toolkit.WpfViews
             InitializeComponent();
         }
 
-        public AddCloudDialogView(IAddCloudDialogViewModel viewModel)
+        public AddCloudDialogView(IAddCloudDialogViewModel viewModel, IThemeService themeService)
         {
             AddCloudCommand = new AsyncDelegatingCommand(viewModel.AddCloudFoundryInstance, viewModel.CanAddCloudFoundryInstance);
             viewModel.GetPassword = GetPassword;
+            themeService.SetTheme(this);
             DataContext = viewModel;
             InitializeComponent();
         }

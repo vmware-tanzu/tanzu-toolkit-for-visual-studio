@@ -27,8 +27,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         internal const string AuthServerLookupFailureMessage = "Unable to locate authentication server";
         internal const string InvalidTargetUriMessage = "Invalid target URI";
 
-        private static IUaaClient _uaaClient;
-        private static HttpClient _httpClient;
+        private readonly IUaaClient _uaaClient;
+        private readonly HttpClient _httpClient;
 
         public CfApiClient(IUaaClient uaaClient, HttpClient httpClient)
         {

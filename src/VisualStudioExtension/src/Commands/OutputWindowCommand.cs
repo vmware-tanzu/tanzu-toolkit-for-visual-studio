@@ -66,7 +66,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         }
 
         /// <summary>
-        /// Initializes the singleton instance of the command.
+        /// Initializes the command.
         /// </summary>
         /// <param name="package">Owner package, not null.</param>
         public static async Task InitializeAsync(AsyncPackage package)

@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
+using Tanzu.Toolkit.Services.ErrorDialog;
 
 namespace Tanzu.Toolkit.ViewModels
 {
@@ -12,6 +14,7 @@ namespace Tanzu.Toolkit.ViewModels
         internal static readonly string _emptySpacesPlaceholderMsg = "No spaces";
         internal static readonly string _loadingMsg = "Loading spaces...";
         internal static readonly string _getSpacesFailureMsg = "Unable to load spaces.";
+        private readonly IErrorDialog _dialogService;
 
         private volatile bool _isRefreshing = false;
         private readonly object _threadLock = new object();
@@ -45,6 +48,8 @@ namespace Tanzu.Toolkit.ViewModels
         public OrgViewModel(CloudFoundryOrganization org, IServiceProvider services, bool expanded = false)
             : base(null, services, expanded: expanded)
         {
+            _dialogService = services.GetRequiredService<IErrorDialog>();
+
             Org = org;
             DisplayText = Org.OrgName;
 
@@ -77,7 +82,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
-                DialogService.DisplayErrorDialog(_getSpacesFailureMsg, spacesResponse.Explanation);
+                _dialogService.DisplayErrorDialog(_getSpacesFailureMsg, spacesResponse.Explanation);
             }
 
             return newSpacesList;
@@ -118,7 +123,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 IsLoading = false;
 
-                DialogService.DisplayErrorDialog(_getSpacesFailureMsg, spacesResponse.Explanation);
+                _dialogService.DisplayErrorDialog(_getSpacesFailureMsg, spacesResponse.Explanation);
 
                 IsExpanded = false;
             }
