@@ -29,9 +29,9 @@ namespace Tanzu.Toolkit.Services.CmdProcess
             // Set environment variables
             if (envVars != null)
             {
-                foreach (string key in envVars.Keys)
+                foreach (var envVar in envVars)
                 {
-                    process.StartInfo.EnvironmentVariables[key] = envVars[key];
+                    process.StartInfo.EnvironmentVariables[envVar.Key] = envVar.Value;
                 }
             }
 
