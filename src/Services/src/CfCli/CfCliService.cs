@@ -572,7 +572,7 @@ namespace Tanzu.Toolkit.Services.CfCli
             };
 
             ICmdProcessService cmdProcessService = Services.GetRequiredService<ICmdProcessService>();
-            CmdResult result = cmdProcessService.RunCommand(pathToCfExe, arguments, workingDir, null, null, envVars);
+            CmdResult result = cmdProcessService.RunCommand(pathToCfExe, arguments, workingDir, envVars);
 
             if (result.ExitCode == 0)
             {
@@ -617,7 +617,7 @@ namespace Tanzu.Toolkit.Services.CfCli
             };
 
             ICmdProcessService cmdProcessService = Services.GetRequiredService<ICmdProcessService>();
-            CmdResult result = await Task.Run(() => cmdProcessService.RunCommand(pathToCfExe, arguments, workingDir, stdOutCallback, stdErrCallback, envVars));
+            CmdResult result = await Task.Run(() => cmdProcessService.RunCommand(pathToCfExe, arguments, workingDir, envVars, stdOutCallback, stdErrCallback));
 
             if (result.ExitCode == 0)
             {
