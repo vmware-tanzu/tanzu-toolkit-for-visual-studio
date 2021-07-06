@@ -567,7 +567,8 @@ namespace Tanzu.Toolkit.Services.CfCli
                 return new DetailedResult(false, _cfExePathErrorMsg);
             }
 
-            var envVars = new Dictionary<string, string> {
+            var envVars = new Dictionary<string, string>
+            {
                 { "CF_HOME", ConfigFilePath }
             };
 
@@ -612,7 +613,8 @@ namespace Tanzu.Toolkit.Services.CfCli
                 return new DetailedResult(false, $"Unable to locate cf.exe.");
             }
 
-            var envVars = new Dictionary<string, string> {
+            var envVars = new Dictionary<string, string>
+            {
                 { "CF_HOME", ConfigFilePath }
             };
 
