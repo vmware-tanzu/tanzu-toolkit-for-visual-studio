@@ -189,7 +189,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
                 else
                 {
-                    var msg = $"Something went wrong while trying to request orgs from {apiAddress}: {originalException.Message}";
+                    var msg = $"{originalException.Message}. See logs for more details.";
                     _logger.Error(msg);
 
                     return new DetailedResult<List<CloudFoundryOrganization>>()
@@ -268,7 +268,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
                 else
                 {
-                    var msg = $"Something went wrong while trying to request spaces from {apiAddress}: {originalException.Message}";
+                    var msg = $"{originalException.Message}. See logs for more details.";
                     _logger.Error(msg);
 
                     return new DetailedResult<List<CloudFoundrySpace>>()
@@ -347,7 +347,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
                 else
                 {
-                    var msg = $"Something went wrong while trying to request apps from {apiAddress}: {originalException.Message}";
+                    var msg = $"{originalException.Message}. See logs for more details.";
                     _logger.Error(msg);
 
                     return new DetailedResult<List<CloudFoundryApp>>()
@@ -425,7 +425,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
                 else
                 {
-                    var msg = $"Something went wrong while trying to stop app '{app.AppName}': {originalException.Message}.";
+                    var msg = $"{originalException.Message}. See logs for more details.";
 
                     _logger.Error(msg);
 
@@ -501,7 +501,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
                 else
                 {
-                    var msg = $"Something went wrong while trying to start app '{app.AppName}': {originalException.Message}.";
+                    var msg = $"{originalException.Message}. See logs for more details.";
 
                     _logger.Error(msg);
 
@@ -593,7 +593,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
                 else
                 {
-                    var msg = $"Something went wrong while trying to delete app '{app.AppName}': {originalException.Message}.";
+                    var msg = $"{originalException.Message}. See logs for more details.";
 
                     _logger.Error(msg);
 
