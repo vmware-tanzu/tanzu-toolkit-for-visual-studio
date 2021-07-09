@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Security;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Serilog;
+using System;
+using System.Collections.Generic;
+using System.Security;
+using System.Threading.Tasks;
 using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CfCli.Models.Apps;
 using Tanzu.Toolkit.Services.CfCli.Models.Orgs;
@@ -361,6 +361,30 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             Assert.IsNull(thrownException);
             Assert.IsNull(result);
             _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+        }
+        
+        [TestMethod]
+        [TestCategory("GetOAuthToken")]
+        public void GetOAuthToken_ThrowsInvalidRefreshTokenException_WhenStdErrReportsInvalidToken()
+        {
+            var fakeTokenResult = new CmdResult("", CfCliService._invalidRefreshTokenError, 1);
+
+            _mockCmdProcessService.Setup(m => m.
+              RunCommand(_fakePathToCfExe, It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null, _defaultEnvVars, null, null))
+                .Returns(fakeTokenResult);
+
+            Exception thrownException = null;
+            try
+            {
+                _sut.GetOAuthToken();
+            }
+            catch (Exception ex)
+            {
+                thrownException = ex;
+            }
+
+            Assert.IsNotNull(thrownException);
+            Assert.AreEqual(typeof(InvalidRefreshTokenException), thrownException.GetType());
         }
 
         [TestMethod]
