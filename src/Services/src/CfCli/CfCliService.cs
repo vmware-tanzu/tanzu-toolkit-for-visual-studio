@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Serilog;
+using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -6,8 +8,6 @@ using System.Security;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Serilog;
 using Tanzu.Toolkit.Services.CfCli.Models;
 using Tanzu.Toolkit.Services.CfCli.Models.Apps;
 using Tanzu.Toolkit.Services.CfCli.Models.Orgs;
@@ -43,6 +43,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         internal const string _getOrgsRequestPath = "GET /v2/organizations";
         internal const string _getSpacesRequestPath = "GET /v2/spaces";
         internal const string _getAppsRequestPath = "GET /v2/spaces"; // not a typo; app info returned from /v2/spaces/:guid/apps
+        internal const string _invalidRefreshTokenError = "The token expired, was revoked, or the token ID is incorrect. Please log back in to re-authenticate.";
 
         private readonly IFileLocatorService _fileLocatorService;
         private readonly ILogger _logger;
@@ -98,6 +99,23 @@ namespace Tanzu.Toolkit.Services.CfCli
             }
         }
 
+        /// <summary>
+        /// Retrieves an access token to be used for authentication with Cloud Foundry UAA.
+        /// <para>
+        /// A cached value of the access token will be returned as long as the expiration time of the token has not yet been reached.
+        /// If there is no cached value for the access token or the expiration time of the cached token has been reached, this method 
+        /// will invoke the CF CLI oauth-token command (<see cref="_getOAuthTokenCmd"/>) to acquire a new access token. Invoking 
+        /// <see cref="_getOAuthTokenCmd"/> will attempt to renew the access token using the refresh token stored by the CF CLI.
+        /// </para>
+        /// <para>
+        /// The cached value for the access token can be cleared using <see cref="ClearCachedAccessToken"/>; this will force a fresh 
+        /// access token to be obtained using the refresh token via the CF CLI oauth-token command.
+        /// </para>
+        /// <exception cref="InvalidRefreshTokenException">Throws <see cref="InvalidRefreshTokenException"/> if a fresh access token
+        /// is unobtainable to due an invalid refresh token (this would occur once the refresh token reaches the end of its 
+        /// prescribed lifetime).</exception>
+        /// </summary>
+        /// <returns><see cref="string"/> accessToken on success.<para>null on failure.</para></returns>
         public string GetOAuthToken()
         {
             if (_cachedAccessToken == null || _accessTokenExpiration == null || DateTime.Compare(DateTime.Now, _accessTokenExpiration) >= 0)
@@ -117,6 +135,11 @@ namespace Tanzu.Toolkit.Services.CfCli
                                 return null;
                             }
 
+                            if (result.CmdDetails.StdErr != null && result.CmdDetails.StdErr.Contains(_invalidRefreshTokenError))
+                            {
+                                throw new InvalidRefreshTokenException();
+                            }
+
                             if (result.CmdDetails.ExitCode != 0)
                             {
                                 _logger.Error($"GetOAuthToken failed: {result}");
@@ -134,7 +157,12 @@ namespace Tanzu.Toolkit.Services.CfCli
                         }
                         catch (Exception ex)
                         {
-                            _logger.Error($"Something went wrong while attempting to renew access token {ex.ToString()}");
+                            if (ex.GetType() == typeof(InvalidRefreshTokenException))
+                            {
+                                throw ex;
+                            }
+
+                            _logger.Error($"Something went wrong while attempting to renew access token {ex}");
                         }
                     }
                 }
@@ -737,6 +765,13 @@ namespace Tanzu.Toolkit.Services.CfCli
             }
 
             return tokenStr;
+        }
+    }
+
+    public class InvalidRefreshTokenException : Exception
+    {
+        public InvalidRefreshTokenException()
+        {
         }
     }
 }
