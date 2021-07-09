@@ -13,7 +13,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         Dictionary<string, CloudFoundryInstance> CloudFoundryInstances { get; }
         string LoginFailureMessage { get; }
 
-        void AddCloudFoundryInstance(string name, string apiAddress, string accessToken);
+        void AddCloudFoundryInstance(string name, string apiAddress);
         Task<ConnectResult> ConnectToCFAsync(string target, string username, SecureString password, string httpProxy, bool skipSsl);
         Task<DetailedResult<List<CloudFoundryOrganization>>> GetOrgsForCfInstanceAsync(CloudFoundryInstance cf, bool skipSsl = true, int retryAmount = 1);
         Task<DetailedResult<List<CloudFoundrySpace>>> GetSpacesForOrgAsync(CloudFoundryOrganization org, bool skipSsl = true, int retryAmount = 1);

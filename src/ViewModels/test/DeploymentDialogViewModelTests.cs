@@ -15,7 +15,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         private const string _fakeProjPath = "this\\is\\a\\fake\\path\\to\\a\\project\\directory";
         private const string FakeTargetFrameworkMoniker = "junk";
 
-        private static readonly CloudFoundryInstance _fakeCfInstance = new CloudFoundryInstance("", "", "");
+        private static readonly CloudFoundryInstance _fakeCfInstance = new CloudFoundryInstance("", "");
         private static readonly CloudFoundryOrganization _fakeOrg = new CloudFoundryOrganization("", "", _fakeCfInstance);
         private readonly CloudFoundrySpace _fakeSpace = new CloudFoundrySpace("", "", _fakeOrg);
         private DeploymentDialogViewModel _sut;

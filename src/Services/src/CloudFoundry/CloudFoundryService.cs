@@ -49,14 +49,14 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             _logger = logSvc.Logger;
         }
 
-        public void AddCloudFoundryInstance(string name, string apiAddress, string accessToken)
+        public void AddCloudFoundryInstance(string name, string apiAddress)
         {
             if (CloudFoundryInstances.ContainsKey(name))
             {
                 throw new Exception($"The name {name} already exists.");
             }
 
-            CloudFoundryInstances.Add(name, new CloudFoundryInstance(name, apiAddress, accessToken));
+            CloudFoundryInstances.Add(name, new CloudFoundryInstance(name, apiAddress));
         }
 
         public void RemoveCloudFoundryInstance(string name)
@@ -126,21 +126,14 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 await MatchCliVersionToApiVersion();
 
-                string accessToken = _cfCliService.GetOAuthToken();
-
-                if (!string.IsNullOrEmpty(accessToken))
-                {
-                    return new ConnectResult(true, null, accessToken);
-                }
-
-                throw new Exception(LoginFailureMessage);
+                return new ConnectResult(true, null);
             }
             catch (Exception e)
             {
                 var errorMessages = new List<string>();
                 FormatExceptionMessage(e, errorMessages);
                 var errorMessage = string.Join(Environment.NewLine, errorMessages.ToArray());
-                return new ConnectResult(false, errorMessage, null);
+                return new ConnectResult(false, errorMessage);
             }
         }
 
