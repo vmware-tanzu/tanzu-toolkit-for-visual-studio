@@ -635,6 +635,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         /// access token on <see cref="CfCliService"/> and attempt to delete the app again using 
         /// a fresh access token.
         /// </para> 
+        /// <para>
+        /// An <see cref="InvalidRefreshTokenException"/> caught while trying to attain an access
+        /// token will cause this method to return a <see cref="DetailedResult"/> with a 
+        /// FailureType of <see cref="FailureType.InvalidRefreshToken"/>.
+        /// </para>
         /// </summary>
         /// <param name="app"></param>
         /// <param name="skipSsl"></param>
@@ -643,11 +648,28 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         /// <returns></returns>
         public async Task<DetailedResult> DeleteAppAsync(CloudFoundryApp app, bool skipSsl = true, bool removeRoutes = true, int retryAmount = 1)
         {
-            bool appWasDeleted;
-
             string apiAddress = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
+            
+            string accessToken;
+            try
+            {
+                accessToken = _cfCliService.GetOAuthToken();
+            }
+            catch (InvalidRefreshTokenException)
+            {
+                app.ParentSpace.ParentOrg.ParentCf.IsAuthenticated = false;
 
-            var accessToken = _cfCliService.GetOAuthToken();
+                var msg = $"Unable to delete app '{app.AppName}' because the connection to '{app.ParentSpace.ParentOrg.ParentCf.InstanceName}' has expired. Please log back in to re-authenticate.";
+                _logger.Information(msg);
+
+                return new DetailedResult
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                    FailureType = FailureType.InvalidRefreshToken,
+                };
+            }
+
             if (accessToken == null)
             {
                 _logger.Error("CloudFoundryService attempted to delete app '{appName}' but was unable to look up an access token.", app.AppName);
@@ -659,6 +681,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 };
             }
 
+            bool appWasDeleted;
             try
             {
                 appWasDeleted = await _cfApiClient.DeleteAppWithGuid(apiAddress, accessToken, app.AppId);

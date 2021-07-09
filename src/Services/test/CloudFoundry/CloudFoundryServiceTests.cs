@@ -1498,6 +1498,37 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
+        [TestCategory("DeleteApp")]
+        public async Task DeleteAppAsync_ReturnsFailedResult_WhenTokenRetrievalThrowsInvalidRefreshTokenException()
+        {
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Throws(new InvalidRefreshTokenException());
+
+            DetailedResult result = await _sut.DeleteAppAsync(FakeApp, retryAmount: 0);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsNull(result.CmdDetails);
+            Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
+        }
+
+        [TestMethod]
+        [TestCategory("DeleteApp")]
+        public async Task DeleteAppAsync_MarksParentCfAsNotAuthenticated_WhenTokenRetrievalThrowsInvalidRefreshTokenException()
+        {
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Throws(new InvalidRefreshTokenException());
+
+            Assert.IsTrue(FakeApp.ParentSpace.ParentOrg.ParentCf.IsAuthenticated);
+
+            await _sut.DeleteAppAsync(FakeApp, retryAmount: 0);
+
+            Assert.IsFalse(FakeApp.ParentSpace.ParentOrg.ParentCf.IsAuthenticated);
+        }
+
+        [TestMethod]
         [TestCategory("DeployApp")]
         public async Task DeployAppAsync_ReturnsFalseResult_WhenCfPushCommandFails()
         {
