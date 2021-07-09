@@ -1190,6 +1190,37 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
+        
+        [TestMethod]
+        [TestCategory("StopApp")]
+        public async Task StopAppAsync_ReturnsFailedResult_WhenTokenRetrievalThrowsInvalidRefreshTokenException()
+        {
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Throws(new InvalidRefreshTokenException());
+
+            DetailedResult result = await _sut.StopAppAsync(FakeApp, retryAmount: 0);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsNull(result.CmdDetails);
+            Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
+        }
+
+        [TestMethod]
+        [TestCategory("StopApp")]
+        public async Task StopAppAsync_MarksParentCfAsNotAuthenticated_WhenTokenRetrievalThrowsInvalidRefreshTokenException()
+        {
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Throws(new InvalidRefreshTokenException());
+
+            Assert.IsTrue(FakeApp.ParentSpace.ParentOrg.ParentCf.IsAuthenticated);
+
+            await _sut.StopAppAsync(FakeApp, retryAmount: 0);
+
+            Assert.IsFalse(FakeApp.ParentSpace.ParentOrg.ParentCf.IsAuthenticated);
+        }
 
         [TestMethod]
         [TestCategory("StartApp")]

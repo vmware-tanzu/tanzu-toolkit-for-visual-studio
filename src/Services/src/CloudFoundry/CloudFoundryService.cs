@@ -447,16 +447,38 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         /// access token on <see cref="CfCliService"/> and attempt to stop the app again using 
         /// a fresh access token.
         /// </para>
+        /// <para>
+        /// An <see cref="InvalidRefreshTokenException"/> caught while trying to attain an access
+        /// token will cause this method to return a <see cref="DetailedResult"/> with a 
+        /// FailureType of <see cref="FailureType.InvalidRefreshToken"/>.
+        /// </para>
         /// </summary>
         /// <param name="app"></param>
         /// <param name="skipSsl"></param>
         public async Task<DetailedResult> StopAppAsync(CloudFoundryApp app, bool skipSsl = true, int retryAmount = 1)
         {
-            bool appWasStopped;
-
             string apiAddress = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
 
-            var accessToken = _cfCliService.GetOAuthToken();
+            string accessToken;
+            try
+            {
+                accessToken = _cfCliService.GetOAuthToken();
+            }
+            catch (InvalidRefreshTokenException)
+            {
+                app.ParentSpace.ParentOrg.ParentCf.IsAuthenticated = false;
+
+                var msg = $"Unable to stop app '{app.AppName}' because the connection to '{app.ParentSpace.ParentOrg.ParentCf.InstanceName}' has expired. Please log back in to re-authenticate.";
+                _logger.Information(msg);
+
+                return new DetailedResult
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                    FailureType = FailureType.InvalidRefreshToken,
+                };
+            }
+
             if (accessToken == null)
             {
                 _logger.Error("CloudFoundryService attempted to stop app '{appName}' but was unable to look up an access token.", app.AppName);
@@ -468,6 +490,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 };
             }
 
+            bool appWasStopped;
             try
             {
                 appWasStopped = await _cfApiClient.StopAppWithGuid(apiAddress, accessToken, app.AppId);
