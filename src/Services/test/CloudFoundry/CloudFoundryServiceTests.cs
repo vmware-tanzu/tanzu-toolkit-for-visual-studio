@@ -754,6 +754,39 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
+        [TestCategory("GetSpaces")]
+        public async Task GetSpacesForOrgAsync_ReturnsFailedResult_WhenTokenRetrievalThrowsInvalidRefreshTokenException()
+        {
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Throws(new InvalidRefreshTokenException());
+
+            DetailedResult<List<CloudFoundrySpace>> result = await _sut.GetSpacesForOrgAsync(FakeOrg);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.AreEqual(null, result.CmdDetails);
+            Assert.AreEqual(null, result.Content);
+            Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
+        }
+
+        [TestMethod]
+        [TestCategory("GetSpaces")]
+        public async Task GetSpacesForOrgAsync_MarksParentCfAsNotAuthenticated_WhenTokenRetrievalThrowsInvalidRefreshTokenException()
+        {
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Throws(new InvalidRefreshTokenException());
+
+            Assert.IsTrue(FakeSpace.ParentOrg.ParentCf.IsAuthenticated);
+
+            await _sut.GetSpacesForOrgAsync(FakeOrg);
+
+            Assert.IsFalse(FakeSpace.ParentOrg.ParentCf.IsAuthenticated);
+        }
+
+        [TestMethod]
         [TestCategory("GetApps")]
         public async Task GetAppsForSpaceAsync_ReturnsFailedResult_WhenTokenCannotBeFound()
         {

@@ -245,17 +245,39 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         /// access token on <see cref="CfCliService"/> and attempt to retrieve the spaces again using a 
         /// fresh access token.
         /// </para>
+        /// <para>
+        /// An <see cref="InvalidRefreshTokenException"/> caught while trying to attain an access
+        /// token will cause this method to return a <see cref="DetailedResult"/> with a 
+        /// FailureType of <see cref="FailureType.InvalidRefreshToken"/>.
+        /// </para>
         /// </summary>
         /// <param name="org"></param>
         /// <param name="skipSsl"></param>
         public async Task<DetailedResult<List<CloudFoundrySpace>>> GetSpacesForOrgAsync(CloudFoundryOrganization org, bool skipSsl = true, int retryAmount = 1)
         {
-            List<Space> spacesFromApi;
-            var spacesToReturn = new List<CloudFoundrySpace>();
-
             string apiAddress = org.ParentCf.ApiAddress;
 
-            var accessToken = _cfCliService.GetOAuthToken();
+            string accessToken;
+            try
+            {
+                accessToken = _cfCliService.GetOAuthToken();
+            }
+            catch (InvalidRefreshTokenException)
+            {
+                org.ParentCf.IsAuthenticated = false;
+
+                var msg = $"Unable to retrieve spaces for '{org.OrgName}' because the connection to '{org.ParentCf.InstanceName}' has expired. Please log back in to re-authenticate.";
+                _logger.Information(msg);
+
+                return new DetailedResult<List<CloudFoundrySpace>>
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                    Content = null,
+                    FailureType = FailureType.InvalidRefreshToken,
+                };
+            }
+
             if (accessToken == null)
             {
                 _logger.Error("CloudFoundryService attempted to get spaces for '{orgName}' but was unable to look up an access token.", org.OrgName);
@@ -267,6 +289,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 };
             }
 
+            List<Space> spacesFromApi;
             try
             {
                 spacesFromApi = await _cfApiClient.ListSpacesForOrg(apiAddress, accessToken, org.OrgId);
@@ -292,6 +315,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
             }
 
+            var spacesToReturn = new List<CloudFoundrySpace>();
             foreach (Space space in spacesFromApi)
             {
                 if (space.Name == null)
