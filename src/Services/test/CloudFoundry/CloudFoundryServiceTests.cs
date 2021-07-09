@@ -59,6 +59,8 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             _services = serviceCollection.BuildServiceProvider();
 
             _sut = new CloudFoundryService(_services);
+
+            FakeCfInstance.IsAuthenticated = true;
         }
 
         [TestCleanup]
