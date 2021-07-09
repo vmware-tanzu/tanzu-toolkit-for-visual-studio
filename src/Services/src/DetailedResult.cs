@@ -14,11 +14,13 @@ namespace Tanzu.Toolkit.Services
             Succeeded = succeeded;
             Explanation = explanation;
             CmdDetails = cmdDetails;
+            FailureType = FailureType.None;
         }
 
         public bool Succeeded { get; set; }
         public string Explanation { get; set; }
         public CmdResult CmdDetails { get; }
+        public FailureType FailureType { get; set; }
 
         public override string ToString()
         {
@@ -38,5 +40,11 @@ namespace Tanzu.Toolkit.Services
         }
 
         public T Content { get; internal set; }
+    }
+
+    public enum FailureType
+    {
+        None = 0,
+        InvalidRefreshToken = 1,
     }
 }
