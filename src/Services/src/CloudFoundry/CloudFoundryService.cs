@@ -541,16 +541,38 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         /// access token on <see cref="CfCliService"/> and attempt to start the app again using 
         /// a fresh access token.
         /// </para>
+        /// <para>
+        /// An <see cref="InvalidRefreshTokenException"/> caught while trying to attain an access
+        /// token will cause this method to return a <see cref="DetailedResult"/> with a 
+        /// FailureType of <see cref="FailureType.InvalidRefreshToken"/>.
+        /// </para>
         /// </summary>
         /// <param name="app"></param>
         /// <param name="skipSsl"></param>
         public async Task<DetailedResult> StartAppAsync(CloudFoundryApp app, bool skipSsl = true, int retryAmount = 1)
         {
-            bool appWasStarted;
-
             string apiAddress = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
 
-            var accessToken = _cfCliService.GetOAuthToken();
+            string accessToken;
+            try
+            {
+                accessToken = _cfCliService.GetOAuthToken();
+            }
+            catch (InvalidRefreshTokenException)
+            {
+                app.ParentSpace.ParentOrg.ParentCf.IsAuthenticated = false;
+
+                var msg = $"Unable to start app '{app.AppName}' because the connection to '{app.ParentSpace.ParentOrg.ParentCf.InstanceName}' has expired. Please log back in to re-authenticate.";
+                _logger.Information(msg);
+
+                return new DetailedResult
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                    FailureType = FailureType.InvalidRefreshToken,
+                };
+            }
+
             if (accessToken == null)
             {
                 _logger.Error("CloudFoundryService attempted to start app '{appName}' but was unable to look up an access token.", app.AppName);
@@ -562,6 +584,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 };
             }
 
+            bool appWasStarted;
             try
             {
                 appWasStarted = await _cfApiClient.StartAppWithGuid(apiAddress, accessToken, app.AppId);
