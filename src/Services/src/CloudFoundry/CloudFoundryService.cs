@@ -346,17 +346,39 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         /// access token on <see cref="CfCliService"/> and attempt to retrieve the apps again using a 
         /// fresh access token.
         /// </para>
+        /// <para>
+        /// An <see cref="InvalidRefreshTokenException"/> caught while trying to attain an access
+        /// token will cause this method to return a <see cref="DetailedResult"/> with a 
+        /// FailureType of <see cref="FailureType.InvalidRefreshToken"/>.
+        /// </para>
         /// </summary>
         /// <param name="space"></param>
         /// <param name="skipSsl"></param>
         public async Task<DetailedResult<List<CloudFoundryApp>>> GetAppsForSpaceAsync(CloudFoundrySpace space, bool skipSsl = true, int retryAmount = 1)
         {
-            List<App> appsFromApi;
-            var appsToReturn = new List<CloudFoundryApp>();
-
             string apiAddress = space.ParentOrg.ParentCf.ApiAddress;
 
-            var accessToken = _cfCliService.GetOAuthToken();
+            string accessToken;
+            try
+            {
+                accessToken = _cfCliService.GetOAuthToken();
+            }
+            catch (InvalidRefreshTokenException)
+            {
+                space.ParentOrg.ParentCf.IsAuthenticated = false;
+
+                var msg = $"Unable to retrieve apps for '{space.SpaceName}' because the connection to '{space.ParentOrg.ParentCf.InstanceName}' has expired. Please log back in to re-authenticate.";
+                _logger.Information(msg);
+
+                return new DetailedResult<List<CloudFoundryApp>>
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                    Content = null,
+                    FailureType = FailureType.InvalidRefreshToken,
+                };
+            }
+
             if (accessToken == null)
             {
                 _logger.Error("CloudFoundryService attempted to get apps for '{spaceName}' but was unable to look up an access token.", space.SpaceName);
@@ -368,6 +390,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 };
             }
 
+            List<App> appsFromApi;
             try
             {
                 appsFromApi = await _cfApiClient.ListAppsForSpace(apiAddress, accessToken, space.SpaceId);
@@ -393,6 +416,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
             }
 
+            var appsToReturn = new List<CloudFoundryApp>();
             foreach (App app in appsFromApi)
             {
                 if (app.Name == null)

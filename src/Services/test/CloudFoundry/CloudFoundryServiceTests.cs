@@ -976,6 +976,39 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
+        [TestCategory("GetApps")]
+        public async Task GetAppsForSpaceAsync_ReturnsFailedResult_WhenTokenRetrievalThrowsInvalidRefreshTokenException()
+        {
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Throws(new InvalidRefreshTokenException());
+
+            DetailedResult<List<CloudFoundryApp>> result = await _sut.GetAppsForSpaceAsync(FakeSpace);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.AreEqual(null, result.CmdDetails);
+            Assert.AreEqual(null, result.Content);
+            Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
+        }
+
+        [TestMethod]
+        [TestCategory("GetApps")]
+        public async Task GetAppsForSpaceAsync_MarksParentCfAsNotAuthenticated_WhenTokenRetrievalThrowsInvalidRefreshTokenException()
+        {
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Throws(new InvalidRefreshTokenException());
+
+            Assert.IsTrue(FakeApp.ParentSpace.ParentOrg.ParentCf.IsAuthenticated);
+
+            await _sut.GetAppsForSpaceAsync(FakeSpace);
+
+            Assert.IsFalse(FakeApp.ParentSpace.ParentOrg.ParentCf.IsAuthenticated);
+        }
+
+        [TestMethod]
         [TestCategory("AddCloudFoundryInstance")]
         public void AddCloudFoundryInstance_ThrowsException_WhenNameAlreadyExists()
         {
