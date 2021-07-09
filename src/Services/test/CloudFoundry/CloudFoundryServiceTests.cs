@@ -536,6 +536,39 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 Assert.AreEqual(expectedResultContent[i].ParentCf, result.Content[i].ParentCf);
             }
         }
+        
+        [TestMethod]
+        [TestCategory("GetOrgs")]
+        public async Task GetOrgsForCfInstanceAsync_ReturnsFailedResult_WhenTokenRetrievalThrowsInvalidRefreshTokenException()
+        {
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Throws(new InvalidRefreshTokenException());
+
+            DetailedResult<List<CloudFoundryOrganization>> result = await _sut.GetOrgsForCfInstanceAsync(FakeCfInstance);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.AreEqual(null, result.CmdDetails);
+            Assert.AreEqual(null, result.Content);
+            Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
+        }
+
+        [TestMethod]
+        [TestCategory("GetOrgs")]
+        public async Task GetOrgsForCfInstanceAsync_MarksCfAsNotAuthenticated_WhenTokenRetrievalThrowsInvalidRefreshTokenException()
+        {
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Throws(new InvalidRefreshTokenException());
+
+            Assert.IsTrue(FakeOrg.ParentCf.IsAuthenticated);
+
+            await _sut.GetOrgsForCfInstanceAsync(FakeCfInstance);
+
+            Assert.IsFalse(FakeOrg.ParentCf.IsAuthenticated);
+        }
 
         [TestMethod]
         [TestCategory("GetSpaces")]

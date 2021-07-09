@@ -144,17 +144,39 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         /// access token on <see cref="CfCliService"/> and attempt to retrieve the orgs again using a 
         /// fresh access token.
         /// </para>
+        /// <para>
+        /// An <see cref="InvalidRefreshTokenException"/> caught while trying to attain an access
+        /// token will cause this method to return a <see cref="DetailedResult"/> with a 
+        /// FailureType of <see cref="FailureType.InvalidRefreshToken"/>.
+        /// </para>
         /// </summary>
         /// <param name="cf"></param>
         /// <param name="skipSsl"></param>
         public async Task<DetailedResult<List<CloudFoundryOrganization>>> GetOrgsForCfInstanceAsync(CloudFoundryInstance cf, bool skipSsl = true, int retryAmount = 1)
         {
-            List<Org> orgsFromApi;
-            var orgsToReturn = new List<CloudFoundryOrganization>();
-
             string apiAddress = cf.ApiAddress;
 
-            var accessToken = _cfCliService.GetOAuthToken();
+            string accessToken;
+            try
+            {
+                accessToken = _cfCliService.GetOAuthToken();
+            }
+            catch (InvalidRefreshTokenException)
+            {
+                cf.IsAuthenticated = false;
+
+                var msg = $"Unable to retrieve orgs for '{cf.InstanceName}' because the connection has expired. Please log back in to re-authenticate.";
+                _logger.Information(msg);
+
+                return new DetailedResult<List<CloudFoundryOrganization>>
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                    Content = null,
+                    FailureType = FailureType.InvalidRefreshToken,
+                };
+            }
+
             if (accessToken == null)
             {
                 _logger.Error("CloudFoundryService attempted to get orgs for {apiAddress} but was unable to look up an access token.", apiAddress);
@@ -166,6 +188,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 };
             }
 
+            List<Org> orgsFromApi;
             try
             {
                 orgsFromApi = await _cfApiClient.ListOrgs(apiAddress, accessToken);
@@ -191,6 +214,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
             }
 
+            var orgsToReturn = new List<CloudFoundryOrganization>();
             foreach (Org org in orgsFromApi)
             {
                 if (org.Name == null)
