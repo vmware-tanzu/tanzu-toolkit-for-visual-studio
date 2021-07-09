@@ -126,7 +126,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var emptyCfsDict = new Dictionary<string, CloudFoundryInstance>();
             var fakeCfsDict = new Dictionary<string, CloudFoundryInstance>
             {
-                { "fake cf", new CloudFoundryInstance("fake cf", null, null) },
+                { "fake cf", new CloudFoundryInstance("fake cf", null) },
             };
 
             MockCloudFoundryService.SetupSequence(mock => mock.CloudFoundryInstances)
@@ -345,7 +345,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
              * containing 1 (expanded) orgViewModel "ovm", which contains 1 (expanded) spaceViewModel "svm",
              * which contains 1 appViewModel "avm".
              */
-            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address", "fake-token");
+            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address");
             var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance);
             var fakeInitialSpace = new CloudFoundrySpace("fake space name", "fake space id", fakeInitialOrg);
             var fakeInitialApp = new CloudFoundryApp("fake app name", "fake app id", fakeInitialSpace, "state1");
@@ -371,7 +371,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
              * the initial app that existed prior to the refresh should have its state changed by 
              * the refresh.
              */
-            var fakeNewCfInstance = new CloudFoundryInstance("new cf", "http://new.api.address", "new-token");
+            var fakeNewCfInstance = new CloudFoundryInstance("new cf", "http://new.api.address");
             var fakeNewOrg = new CloudFoundryOrganization("new org", "new org id", fakeInitialCfInstance);
             var fakeNewSpace = new CloudFoundrySpace("new space", "new space id", fakeInitialOrg);
             var fakeUpdatedApp = new CloudFoundryApp(fakeInitialApp.AppName, fakeInitialApp.AppId, fakeInitialApp.ParentSpace, "new state");
@@ -490,7 +490,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
              * CloudExplorerViewModel starts off with 1 (expanded) cloudFoundryInstanceViewModel "cfivm",
              * containing 1 placeholder view model. No attempts should be made to refresh the placeholder.
              */
-            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address", "fake-token");
+            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address");
             var cfivm = new FakeCfInstanceViewModel(fakeInitialCfInstance, Services, expanded: true);
             cfivm.Children = new ObservableCollection<TreeViewItemViewModel>
             {
@@ -542,7 +542,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
              * CloudExplorerViewModel starts off with 1 (expanded) cloudFoundryInstanceViewModel "cfivm",
              * containing 1 (collapsed) orgViewModel "ovm" which should not itself be refreshed.
              */
-            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address", "fake-token");
+            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address");
             var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance);
             var cfivm = new FakeCfInstanceViewModel(fakeInitialCfInstance, Services, expanded: true);
             var ovm = new FakeOrgViewModel(fakeInitialOrg, Services, expanded: false);
@@ -594,7 +594,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
              * as its only child. cfivm should not be refreshed (defer to the loading
              * task in progress).
              */
-            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address", "fake-token");
+            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address");
             var cfivm = new FakeCfInstanceViewModel(fakeInitialCfInstance, Services, expanded: true)
             {
                 IsLoading = true,
@@ -639,7 +639,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
              * "cfivm" which has 1 expanded but *loading* org child "ovm". cfivm should be 
              * refreshed but the loading ovm should not be (defer to the loading task in progress).
              */
-            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address", "fake-token");
+            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address");
             var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance);
             var cfivm = new FakeCfInstanceViewModel(fakeInitialCfInstance, Services, expanded: true);
             var ovm = new FakeOrgViewModel(fakeInitialOrg, Services, expanded: true)
@@ -702,7 +702,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
              * space child "svm". cfivm & ovm should be refreshed but the loading svm should 
              * not be refreshed (defer to the loading task in progress).
              */
-            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address", "fake-token");
+            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address");
             var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance);
             var fakeInitialSpace = new CloudFoundrySpace("fake space name", "fake space id", fakeInitialOrg);
             var cfivm = new FakeCfInstanceViewModel(fakeInitialCfInstance, Services, expanded: true);

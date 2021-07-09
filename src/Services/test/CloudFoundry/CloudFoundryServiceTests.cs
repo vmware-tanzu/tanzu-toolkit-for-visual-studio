@@ -83,17 +83,18 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("ConnectToCfAsync")]
         public async Task ConnectToCFAsync_ReturnsConnectResult_WhenLoginSucceeds()
         {
-            _mockCfCliService.Setup(mock => mock.TargetApi(_fakeValidTarget, true))
-                .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
-            _mockCfCliService.Setup(mock => mock.GetOAuthToken()).Returns(_fakeValidAccessToken);
-            _mockCfCliService.Setup(mock => mock.AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
-                .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
+            _mockCfCliService.Setup(mock => mock.
+                TargetApi(_fakeValidTarget, true))
+                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+
+            _mockCfCliService.Setup(mock => mock.
+                AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
+                    .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
 
             ConnectResult result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _fakeHttpProxy, _skipSsl);
 
             Assert.IsTrue(result.IsLoggedIn);
             Assert.IsNull(result.ErrorMessage);
-            Assert.AreEqual(_fakeValidAccessToken, result.Token);
             _mockCfCliService.VerifyAll();
         }
 
@@ -108,7 +109,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             Assert.IsFalse(result.IsLoggedIn);
             Assert.IsTrue(result.ErrorMessage.Contains(_sut.LoginFailureMessage));
-            Assert.IsNull(result.Token);
             _mockCfCliService.VerifyAll();
         }
 
@@ -125,7 +125,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             Assert.IsFalse(result.IsLoggedIn);
             Assert.IsTrue(result.ErrorMessage.Contains(_sut.LoginFailureMessage));
-            Assert.IsNull(result.Token);
             _mockCfCliService.VerifyAll();
         }
 
@@ -143,7 +142,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             Assert.IsFalse(result.IsLoggedIn);
             Assert.IsTrue(result.ErrorMessage.Contains(_sut.LoginFailureMessage));
-            Assert.IsNull(result.Token);
             _mockCfCliService.VerifyAll();
         }
 
@@ -160,26 +158,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             Assert.IsFalse(result.IsLoggedIn);
             Assert.IsTrue(result.ErrorMessage.Contains(_sut.LoginFailureMessage));
-            Assert.IsNull(result.Token);
-            _mockCfCliService.VerifyAll();
-        }
-
-        [TestMethod]
-        [TestCategory("ConnectToCfAsync")]
-        public async Task ConnectToCFAsync_ReturnsConnectResult_WhenLoginFails_BecuaseOfInvalidOAuthToken()
-        {
-            string unacquiredToken = null;
-            _mockCfCliService.Setup(mock => mock.TargetApi(_fakeValidTarget, true))
-                .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
-            _mockCfCliService.Setup(mock => mock.AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
-                .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
-            _mockCfCliService.Setup(mock => mock.GetOAuthToken()).Returns(unacquiredToken);
-
-            ConnectResult result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _fakeHttpProxy, _skipSsl);
-
-            Assert.IsFalse(result.IsLoggedIn);
-            Assert.IsTrue(result.ErrorMessage.Contains(_sut.LoginFailureMessage));
-            Assert.IsNull(result.Token);
             _mockCfCliService.VerifyAll();
         }
 
@@ -192,15 +170,16 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             string outerMessage = "outer exception message";
             Exception multilayeredException = new Exception(outerMessage, new Exception(innerMessage, new Exception(baseMessage)));
 
-            _mockCfCliService.Setup(mock => mock.TargetApi(_fakeValidTarget, true))
-                .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
-            _mockCfCliService.Setup(mock => mock.AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
-                .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
-            _mockCfCliService.Setup(mock => mock.GetOAuthToken()).Throws(multilayeredException);
+            _mockCfCliService.Setup(mock => mock.
+                TargetApi(_fakeValidTarget, true))
+                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+
+            _mockCfCliService.Setup(mock => mock.
+                AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
+                    .Throws(multilayeredException);
 
             ConnectResult result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _fakeHttpProxy, _skipSsl);
 
-            Assert.IsNull(result.Token);
             Assert.IsTrue(result.ErrorMessage.Contains(baseMessage));
             Assert.IsTrue(result.ErrorMessage.Contains(innerMessage));
             Assert.IsTrue(result.ErrorMessage.Contains(outerMessage));
@@ -239,9 +218,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                     .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
 
             _mockCfCliService.Setup(mock => mock.
-                GetOAuthToken()).Returns(_fakeValidAccessToken);
-
-            _mockCfCliService.Setup(mock => mock.
                 AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
                     .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
 
@@ -269,9 +245,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             _mockCfCliService.Setup(mock => mock.
                 TargetApi(_fakeValidTarget, true))
                     .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
-
-            _mockCfCliService.Setup(mock => mock.
-                GetOAuthToken()).Returns(_fakeValidAccessToken);
 
             _mockCfCliService.Setup(mock => mock.
                 AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
@@ -309,9 +282,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                     .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
 
             _mockCfCliService.Setup(mock => mock.
-                GetOAuthToken()).Returns(_fakeValidAccessToken);
-
-            _mockCfCliService.Setup(mock => mock.
                 AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
                     .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
 
@@ -347,9 +317,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                     .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
 
             _mockCfCliService.Setup(mock => mock.
-                GetOAuthToken()).Returns(_fakeValidAccessToken);
-
-            _mockCfCliService.Setup(mock => mock.
                 AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
                     .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
 
@@ -383,9 +350,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             _mockCfCliService.Setup(mock => mock.
                 TargetApi(_fakeValidTarget, true))
                     .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
-
-            _mockCfCliService.Setup(mock => mock.
-                GetOAuthToken()).Returns(_fakeValidAccessToken);
 
             _mockCfCliService.Setup(mock => mock.
                 AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
@@ -948,12 +912,12 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         public void AddCloudFoundryInstance_ThrowsException_WhenNameAlreadyExists()
         {
             var duplicateName = "fake name";
-            _sut.AddCloudFoundryInstance(duplicateName, null, null);
+            _sut.AddCloudFoundryInstance(duplicateName, null);
             Exception expectedException = null;
 
             try
             {
-                _sut.AddCloudFoundryInstance(duplicateName, null, null);
+                _sut.AddCloudFoundryInstance(duplicateName, null);
             }
             catch (Exception e)
             {

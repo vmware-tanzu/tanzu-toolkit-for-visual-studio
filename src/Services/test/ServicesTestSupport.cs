@@ -67,7 +67,7 @@ namespace Tanzu.Toolkit.Services.Tests
         protected static readonly string _fakeValidAccessToken = "valid token";
         protected static readonly string _fakeProjectPath = "this\\is\\a\\fake\\path";
 
-        protected static readonly CloudFoundryInstance FakeCfInstance = new CloudFoundryInstance("fake cf", _fakeValidTarget, _fakeValidAccessToken);
+        protected static readonly CloudFoundryInstance FakeCfInstance = new CloudFoundryInstance("fake cf", _fakeValidTarget);
         protected static readonly CloudFoundryOrganization FakeOrg = new CloudFoundryOrganization("fake org", "fake org guid", FakeCfInstance);
         protected static readonly CloudFoundrySpace FakeSpace = new CloudFoundrySpace("fake space", "fake space guid", FakeOrg);
         protected static readonly CloudFoundryApp FakeApp = new CloudFoundryApp("fake app", "fake app guid", FakeSpace, null);
