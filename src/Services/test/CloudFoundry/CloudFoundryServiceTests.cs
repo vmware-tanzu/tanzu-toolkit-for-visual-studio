@@ -11,6 +11,7 @@ using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.CmdProcess;
 using Tanzu.Toolkit.Services.Dialog;
+using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.FileLocator;
 using Tanzu.Toolkit.Services.Logging;
 using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
@@ -26,7 +27,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
         private Mock<ICfApiClient> _mockCfApiClient;
         private Mock<ICfCliService> _mockCfCliService;
-        private Mock<IDialogService> _mockDialogService;
+        private Mock<IErrorDialog> _mockErrorDialogWindowService;
         private Mock<ICmdProcessService> _mockCmdProcessService;
         private Mock<IFileLocatorService> _mockFileLocatorService;
         private Mock<ILoggingService> _mockLoggingService;
@@ -40,7 +41,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             var serviceCollection = new ServiceCollection();
             _mockCfApiClient = new Mock<ICfApiClient>();
             _mockCfCliService = new Mock<ICfCliService>();
-            _mockDialogService = new Mock<IDialogService>();
+            _mockErrorDialogWindowService = new Mock<IErrorDialog>();
             _mockCmdProcessService = new Mock<ICmdProcessService>();
             _mockFileLocatorService = new Mock<IFileLocatorService>();
             _mockLoggingService = new Mock<ILoggingService>();
@@ -50,7 +51,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             serviceCollection.AddSingleton(_mockCfApiClient.Object);
             serviceCollection.AddSingleton(_mockCfCliService.Object);
-            serviceCollection.AddSingleton(_mockDialogService.Object);
+            serviceCollection.AddSingleton(_mockErrorDialogWindowService.Object);
             serviceCollection.AddSingleton(_mockCmdProcessService.Object);
             serviceCollection.AddSingleton(_mockFileLocatorService.Object);
             serviceCollection.AddSingleton(_mockLoggingService.Object);
@@ -256,7 +257,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             _mockFileLocatorService.VerifyAll();
             _mockCfCliService.VerifyAll();
-            _mockDialogService.Verify(m => m.
+            _mockErrorDialogWindowService.Verify(m => m.
                 DisplayErrorDialog(CloudFoundryService.CcApiVersionUndetectableErrTitle, CloudFoundryService.CcApiVersionUndetectableErrMsg),
                     Times.Once);
         }

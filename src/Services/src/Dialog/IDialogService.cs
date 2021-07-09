@@ -7,6 +7,5 @@ namespace Tanzu.Toolkit.Services.Dialog
         IDialogResult ShowDialog(string dialogViewModel, object parameter = null);
 
         void CloseDialog(object dialogWindow, bool result);
-        void DisplayErrorDialog(string errorTitle, string errorMsg);
     }
 }

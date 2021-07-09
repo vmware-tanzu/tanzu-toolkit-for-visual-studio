@@ -11,7 +11,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
 {
     public class UaaClient : IUaaClient
     {
-        private static HttpClient _httpClient;
+        private readonly HttpClient _httpClient;
         private static readonly bool _skipSsl = true;
         public Token Token { get; private set; }
 

@@ -13,6 +13,7 @@ using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.Dialog;
+using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.FileLocator;
 using Tanzu.Toolkit.Services.Logging;
 using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
@@ -25,11 +26,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         internal const string CcApiVersionUndetectableErrTitle = "Unable to detect Cloud Controller API version.";
         internal const string CcApiVersionUndetectableErrMsg = "Failed to detect which version of the Cloud Controller API is being run on the provided instance; some features of this extension may not work properly.";
 
-        private static ICfApiClient _cfApiClient;
-        private static ICfCliService _cfCliService;
-        private static IFileLocatorService _fileLocatorService;
-        private static IDialogService _dialogService;
-        private static ILogger _logger;
+        private readonly ICfApiClient _cfApiClient;
+        private readonly ICfCliService _cfCliService;
+        private readonly IFileLocatorService _fileLocatorService;
+        private readonly IErrorDialog _dialogService;
+        private readonly ILogger _logger;
 
         public string LoginFailureMessage { get; } = "Login failed.";
         public Dictionary<string, CloudFoundryInstance> CloudFoundryInstances { get; internal set; }
@@ -42,7 +43,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             _cfApiClient = services.GetRequiredService<ICfApiClient>();
             _cfCliService = services.GetRequiredService<ICfCliService>();
             _fileLocatorService = services.GetRequiredService<IFileLocatorService>();
-            _dialogService = services.GetRequiredService<IDialogService>();
+            _dialogService = services.GetRequiredService<IErrorDialog>();
 
             var logSvc = services.GetRequiredService<ILoggingService>();
             _logger = logSvc.Logger;
@@ -662,7 +663,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
         }
 
-        private static async Task MatchCliVersionToApiVersion()
+        private async Task MatchCliVersionToApiVersion()
         {
             Version apiVersion = await _cfCliService.GetApiVersion();
             if (apiVersion == null)

@@ -167,7 +167,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsFalse(_sut.IsLoading);
 
-            MockDialogService.Verify(mock => mock.
+            MockErrorDialogService.Verify(mock => mock.
               DisplayErrorDialog(OrgViewModel._getSpacesFailureMsg, fakeFailedResult.Explanation),
                 Times.Once);
         }
@@ -224,7 +224,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             CollectionAssert.AreEqual(EmptyListOfSpaces, result);
 
-            MockDialogService.Verify(mock => mock.
+            MockErrorDialogService.Verify(mock => mock.
               DisplayErrorDialog(OrgViewModel._getSpacesFailureMsg, fakeFailedResult.Explanation),
                 Times.Once);
         }

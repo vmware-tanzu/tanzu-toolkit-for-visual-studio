@@ -13,6 +13,7 @@ using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.CmdProcess;
 using Tanzu.Toolkit.Services.Dialog;
+using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.FileLocator;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.Threading;
@@ -23,6 +24,10 @@ using Tanzu.Toolkit.VisualStudio.WpfViews.Services;
 using Tanzu.Toolkit.WpfViews;
 using Tanzu.Toolkit.WpfViews.Services;
 using Task = System.Threading.Tasks.Task;
+using Microsoft.VisualStudio.PlatformUI;
+using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft;
+using Tanzu.Toolkit.WpfViews.ThemeService;
 
 namespace Tanzu.Toolkit.VisualStudio
 {
@@ -56,11 +61,8 @@ namespace Tanzu.Toolkit.VisualStudio
         public const string PackageGuidString = "9419e55b-9e82-4d87-8ee5-70871b01b7cc";
 
         private IServiceProvider _serviceProvider;
-
-        public TanzuToolkitForVisualStudioPackage()
-        {
-        }
-
+   
+       
         /// <summary>
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
         /// where you can put all the initialization code that rely on services provided by VisualStudio.
@@ -78,6 +80,7 @@ namespace Tanzu.Toolkit.VisualStudio
             await PushToCloudFoundryCommand.InitializeAsync(this, _serviceProvider);
             await OutputWindowCommand.InitializeAsync(this);
             await OpenLogsCommand.InitializeAsync(this, _serviceProvider);
+
         }
 
         protected override object GetService(Type serviceType)
@@ -125,7 +128,10 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<ILoggingService, LoggingService>();
             services.AddSingleton<IViewService, VsToolWindowService>();
             services.AddSingleton<IThreadingService, ThreadingService>();
+            services.AddSingleton<IErrorDialog>(new ErrorDialogWindowService(this));
             services.AddSingleton<IUiDispatcherService, UiDispatcherService>();
+
+            services.AddSingleton<IThemeService>(new ThemeService());
 
             services.AddTransient<ICmdProcessService, CmdProcessService>();
 
@@ -139,7 +145,6 @@ namespace Tanzu.Toolkit.VisualStudio
 
             services.AddTransient<IDeploymentDialogViewModel, DeploymentDialogViewModel>();
             services.AddTransient<IAddCloudDialogViewModel, AddCloudDialogViewModel>();
-            services.AddTransient<IErrorDialogViewModel, ErrorDialogViewModel>();
 
             /* Views */
             services.AddSingleton<IOutputView, OutputView>();
@@ -147,7 +152,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddTransient<ICloudExplorerView, CloudExplorerView>();
             services.AddTransient<IDeploymentDialogView, DeploymentDialogView>();
             services.AddTransient<IAddCloudDialogView, AddCloudDialogView>();
-            services.AddTransient<IErrorDialogView, ErrorDialogView>();
+            
         }
     }
 }

@@ -49,6 +49,8 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CloudExplorerViewTests.cs" />
+    <Compile Include="DeploymentDialogViewTests.cs" />
+    <Compile Include="OutputViewTests.cs" />
     <Compile Include="ViewTestSupport.cs" />
   </ItemGroup>
   <ItemGroup>
