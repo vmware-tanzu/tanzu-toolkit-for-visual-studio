@@ -23,6 +23,7 @@ namespace Tanzu.Toolkit.WpfViews
         public ICommand RefreshSpaceCommand { get; }
         public ICommand RefreshAllCommand { get; }
         public ICommand RemoveCloudConnectionCommand { get; }
+        public ICommand ReAuthenticateCommand { get; }
         
 
         public CloudExplorerView()
@@ -40,14 +41,12 @@ namespace Tanzu.Toolkit.WpfViews
             RefreshSpaceCommand = new DelegatingCommand(viewModel.RefreshSpace, viewModel.CanRefreshSpace);
             RefreshAllCommand = new DelegatingCommand(viewModel.RefreshAllItems, viewModel.CanInitiateFullRefresh);
             RemoveCloudConnectionCommand = new DelegatingCommand(viewModel.RemoveCloudConnection, viewModel.CanRemoveCloudConnecion);
+            ReAuthenticateCommand = new DelegatingCommand(viewModel.ReAuthenticate, viewModel.CanReAuthenticate);
 
             themeService.SetTheme(this);
 
             DataContext = viewModel;
             InitializeComponent();
-
         }
-
-
     }
 }
