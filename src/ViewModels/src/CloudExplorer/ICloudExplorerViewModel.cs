@@ -21,5 +21,7 @@ namespace Tanzu.Toolkit.ViewModels
         void RefreshAllItems(object arg);
         void RemoveCloudConnection(object arg);
         Task DisplayRecentAppLogs(object app);
+        bool CanReAuthenticate(object arg);
+        void ReAuthenticate(object cf);
     }
 }
