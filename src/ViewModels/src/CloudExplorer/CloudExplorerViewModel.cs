@@ -23,6 +23,7 @@ namespace Tanzu.Toolkit.ViewModels
         private volatile bool _isRefreshingAll = false;
         private volatile int _numRefreshThreads = 0;
         private object _refreshLock = new object();
+        private bool _authenticationRequired;
         private readonly IServiceProvider _services;
         private readonly IThreadingService _threadingService;
         private readonly IErrorDialog _dialogService;
@@ -87,6 +88,20 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
+        /// <summary>
+        /// A flag to indicate whether or not the view should prompt re-authentication.
+        /// </summary>
+        public bool AuthenticationRequired
+        {
+            get => _authenticationRequired;
+
+            internal set
+            {
+                _authenticationRequired = value;
+                RaisePropertyChangedEvent("AuthenticationRequired");
+            }
+        }
+
         public bool CanOpenLoginView(object arg)
         {
             return true;
@@ -140,6 +155,11 @@ namespace Tanzu.Toolkit.ViewModels
         public bool CanDisplayRecentAppLogs(object arg)
         {
             return true;
+        }
+
+        public bool CanReAuthenticate(object arg)
+        {
+            return CloudFoundryList.Count > 0 && CloudFoundryList[0] is CfInstanceViewModel;
         }
 
         public void OpenLoginView(object parent)
@@ -353,6 +373,12 @@ namespace Tanzu.Toolkit.ViewModels
                 CloudFoundryService.RemoveCloudFoundryInstance(cloudConnection.DisplayText);
                 SyncCloudFoundryList();
             }
+        }
+
+        public void ReAuthenticate(object arg)
+        {
+            RemoveCloudConnection(CloudFoundryList[0]);
+            OpenLoginView(null);
         }
 
         /// <summary>

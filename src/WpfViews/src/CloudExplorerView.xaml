@@ -85,6 +85,17 @@
             </Grid>
         </Button>
 
+        <Button 
+            Margin="4"
+            Grid.Row="0"
+            Grid.Column="2"
+            FontSize="12"
+            Foreground="Black"
+            Background="#FFFFE2"
+            Content="Disconnected; click here to re-authenticate."
+            Command="{Binding ElementName=CloudExplorerViewElement, Path=ReAuthenticateCommand}"
+            Visibility="{Binding AuthenticationRequired, Converter={StaticResource Visibility}}"/>
+
         <Rectangle Grid.Row="1" Grid.RowSpan="1" Grid.ColumnSpan="3" />
 
         <TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" 
@@ -243,5 +254,10 @@
             </TreeView.Resources>
         </TreeView>
 
+        <!--<StatusBar Grid.Row="2" Grid.ColumnSpan="3" Background="{Binding ElementName=CloudExplorerViewElement, Path=Background}">
+            <StatusBarItem Visibility="{Binding AuthenticationRequired, Converter={StaticResource Visibility}}">
+                
+            </StatusBarItem>
+        </StatusBar>-->
     </Grid>
 </UserControl>
