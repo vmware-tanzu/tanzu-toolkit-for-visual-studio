@@ -164,13 +164,12 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             var accessToken = _cfCliService.GetOAuthToken();
             if (accessToken == null)
             {
-                var msg = $"CloudFoundryService attempted to get orgs for '{apiAddress}' but was unable to look up an access token.";
-                _logger.Error(msg);
+                _logger.Error("CloudFoundryService attempted to get orgs for {apiAddress} but was unable to look up an access token.", apiAddress);
 
                 return new DetailedResult<List<CloudFoundryOrganization>>()
                 {
                     Succeeded = false,
-                    Explanation = msg,
+                    Explanation = $"CloudFoundryService attempted to get orgs for '{apiAddress}' but was unable to look up an access token.",
                 };
             }
 
@@ -182,20 +181,19 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 if (retryAmount > 0)
                 {
-                    _logger.Information($"GetOrgsForCfInstanceAsync caught an exception when trying to retrieve orgs: {originalException.Message}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).");
+                    _logger.Information("GetOrgsForCfInstanceAsync caught an exception when trying to retrieve orgs: {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).", originalException.Message, retryAmount);
                     _cfCliService.ClearCachedAccessToken();
                     retryAmount -= 1;
                     return await GetOrgsForCfInstanceAsync(cf, skipSsl, retryAmount);
                 }
                 else
                 {
-                    var msg = $"{originalException.Message}. See logs for more details.";
-                    _logger.Error(msg);
+                    _logger.Error("{Error}. See logs for more details: toolkit-diagnostics.log", originalException.Message);
 
                     return new DetailedResult<List<CloudFoundryOrganization>>()
                     {
                         Succeeded = false,
-                        Explanation = msg,
+                        Explanation = originalException.Message,
                     };
                 }
             }
@@ -243,13 +241,12 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             var accessToken = _cfCliService.GetOAuthToken();
             if (accessToken == null)
             {
-                var msg = $"CloudFoundryService attempted to get spaces for '{org.OrgName}' but was unable to look up an access token.";
-                _logger.Error(msg);
+                _logger.Error("CloudFoundryService attempted to get spaces for '{orgName}' but was unable to look up an access token.", org.OrgName);
 
                 return new DetailedResult<List<CloudFoundrySpace>>()
                 {
                     Succeeded = false,
-                    Explanation = msg,
+                    Explanation = $"CloudFoundryService attempted to get spaces for '{org.OrgName}' but was unable to look up an access token.",
                 };
             }
 
@@ -268,13 +265,12 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
                 else
                 {
-                    var msg = $"{originalException.Message}. See logs for more details.";
-                    _logger.Error(msg);
+                    _logger.Error("{Error}. See logs for more details: toolkit-diagnostics.log", originalException.Message);
 
                     return new DetailedResult<List<CloudFoundrySpace>>()
                     {
                         Succeeded = false,
-                        Explanation = msg,
+                        Explanation = originalException.Message,
                     };
                 }
             }
@@ -322,13 +318,12 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             var accessToken = _cfCliService.GetOAuthToken();
             if (accessToken == null)
             {
-                var msg = $"CloudFoundryService attempted to get apps for '{space.SpaceName}' but was unable to look up an access token.";
-                _logger.Error(msg);
+                _logger.Error("CloudFoundryService attempted to get apps for '{spaceName}' but was unable to look up an access token.", space.SpaceName);
 
                 return new DetailedResult<List<CloudFoundryApp>>()
                 {
                     Succeeded = false,
-                    Explanation = msg,
+                    Explanation = $"CloudFoundryService attempted to get apps for '{space.SpaceName}' but was unable to look up an access token.",
                 };
             }
 
@@ -340,20 +335,19 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 if (retryAmount > 0)
                 {
-                    _logger.Information($"GetAppsForSpaceAsync caught an exception when trying to retrieve apps: {originalException.Message}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).");
+                    _logger.Information("GetAppsForSpaceAsync caught an exception when trying to retrieve apps: {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).", originalException.Message, retryAmount);
                     _cfCliService.ClearCachedAccessToken();
                     retryAmount -= 1;
                     return await GetAppsForSpaceAsync(space, skipSsl, retryAmount);
                 }
                 else
                 {
-                    var msg = $"{originalException.Message}. See logs for more details.";
-                    _logger.Error(msg);
+                    _logger.Error("{Error}. See logs for more details: toolkit-diagnostics.log", originalException.Message);
 
                     return new DetailedResult<List<CloudFoundryApp>>()
                     {
                         Succeeded = false,
-                        Explanation = msg,
+                        Explanation = originalException.Message,
                     };
                 }
             }
@@ -400,13 +394,12 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             var accessToken = _cfCliService.GetOAuthToken();
             if (accessToken == null)
             {
-                var msg = $"CloudFoundryService attempted to stop app '{app.AppName}' but was unable to look up an access token.";
-                _logger.Error(msg);
+                _logger.Error("CloudFoundryService attempted to stop app '{appName}' but was unable to look up an access token.", app.AppName);
 
                 return new DetailedResult
                 {
                     Succeeded = false,
-                    Explanation = msg,
+                    Explanation = $"CloudFoundryService attempted to stop app '{app.AppName}' but was unable to look up an access token.",
                 };
             }
 
@@ -418,35 +411,31 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 if (retryAmount > 0)
                 {
-                    _logger.Information($"StopAppAsync caught an exception when trying to stop app '{app.AppName}': {originalException.Message}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).");
+                    _logger.Information("StopAppAsync caught an exception when trying to stop app '{appName}': {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).", app.AppName, originalException.Message, retryAmount);
                     _cfCliService.ClearCachedAccessToken();
                     retryAmount -= 1;
                     return await StopAppAsync(app, skipSsl, retryAmount);
                 }
                 else
                 {
-                    var msg = $"{originalException.Message}. See logs for more details.";
-
-                    _logger.Error(msg);
+                    _logger.Error("{Error}. See logs for more details: toolkit-diagnostics.log", originalException.Message);
 
                     return new DetailedResult
                     {
                         Succeeded = false,
-                        Explanation = msg,
+                        Explanation = originalException.Message,
                     };
                 }
             }
 
             if (!appWasStopped)
             {
-                var msg = $"Attempted to stop app '{app.AppName}' but it hasn't been stopped.";
-
-                _logger.Error(msg);
+                _logger.Error("Attempted to stop app '{appName}' but it hasn't been stopped.", app.AppName);
 
                 return new DetailedResult
                 {
                     Succeeded = false,
-                    Explanation = msg,
+                    Explanation = $"Attempted to stop app '{app.AppName}' but it hasn't been stopped.",
                 };
             }
 
@@ -476,13 +465,12 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             var accessToken = _cfCliService.GetOAuthToken();
             if (accessToken == null)
             {
-                var msg = $"CloudFoundryService attempted to start app '{app.AppName}' but was unable to look up an access token.";
-                _logger.Error(msg);
+                _logger.Error("CloudFoundryService attempted to start app '{appName}' but was unable to look up an access token.", app.AppName);
 
                 return new DetailedResult
                 {
                     Succeeded = false,
-                    Explanation = msg,
+                    Explanation = $"CloudFoundryService attempted to start app '{app.AppName}' but was unable to look up an access token.",
                 };
             }
 
@@ -494,35 +482,31 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 if (retryAmount > 0)
                 {
-                    _logger.Information($"StartAppAsync caught an exception when trying to start app '{app.AppName}': {originalException.Message}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).");
+                    _logger.Information("StartAppAsync caught an exception when trying to start app '{appName}': {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).", app.AppName, originalException.Message, retryAmount);
                     _cfCliService.ClearCachedAccessToken();
                     retryAmount -= 1;
                     return await StartAppAsync(app, skipSsl, retryAmount);
                 }
                 else
                 {
-                    var msg = $"{originalException.Message}. See logs for more details.";
-
-                    _logger.Error(msg);
+                    _logger.Error("{Error}. See logs for more details: toolkit-diagnostics.log", originalException.Message);
 
                     return new DetailedResult
                     {
                         Succeeded = false,
-                        Explanation = msg,
+                        Explanation = originalException.Message,
                     };
                 }
             }
 
             if (!appWasStarted)
             {
-                var msg = $"Attempted to start app '{app.AppName}' but it hasn't been started.";
-
-                _logger.Error(msg);
+                _logger.Error("Attempted to start app '{appName}' but it hasn't been started.", app.AppName);
 
                 return new DetailedResult
                 {
                     Succeeded = false,
-                    Explanation = msg,
+                    Explanation = $"Attempted to start app '{app.AppName}' but it hasn't been started.",
                 };
             }
 
@@ -555,13 +539,12 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             var accessToken = _cfCliService.GetOAuthToken();
             if (accessToken == null)
             {
-                var msg = $"CloudFoundryService attempted to delete app '{app.AppName}' but was unable to look up an access token.";
-                _logger.Error(msg);
+                _logger.Error("CloudFoundryService attempted to delete app '{appName}' but was unable to look up an access token.", app.AppName);
 
                 return new DetailedResult
                 {
                     Succeeded = false,
-                    Explanation = msg,
+                    Explanation = $"CloudFoundryService attempted to delete app '{app.AppName}' but was unable to look up an access token.",
                 };
             }
 
@@ -571,14 +554,12 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 if (!appWasDeleted)
                 {
-                    var msg = $"Attempted to delete app '{app.AppName}' but it hasn't been deleted.";
-
-                    _logger.Error(msg);
+                    _logger.Error("Attempted to delete app '{appName}' but it hasn't been deleted.", app.AppName);
 
                     return new DetailedResult
                     {
                         Succeeded = false,
-                        Explanation = msg,
+                        Explanation = $"Attempted to delete app '{app.AppName}' but it hasn't been deleted.",
                     };
                 }
             }
@@ -586,21 +567,19 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 if (retryAmount > 0)
                 {
-                    _logger.Information($"StartAppAsync caught an exception when trying to start app '{app.AppName}': {originalException.Message}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).");
+                    _logger.Information("StartAppAsync caught an exception when trying to start app '{appName}': {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).", app.AppName, originalException.Message, retryAmount);
                     _cfCliService.ClearCachedAccessToken();
                     retryAmount -= 1;
                     return await DeleteAppAsync(app, skipSsl, removeRoutes, retryAmount);
                 }
                 else
                 {
-                    var msg = $"{originalException.Message}. See logs for more details.";
-
-                    _logger.Error(msg);
+                    _logger.Error("{Error}. See logs for more details: toolkit-diagnostics.log", originalException.Message);
 
                     return new DetailedResult
                     {
                         Succeeded = false,
-                        Explanation = msg,
+                        Explanation = originalException.Message,
                     };
                 }
             }
@@ -631,7 +610,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
             if (!cfPushResult.Succeeded)
             {
-                _logger.Error($"Successfully targeted org '{targetOrg.OrgName}' and space '{targetSpace.SpaceName}' but app deployment failed at the `cf push` stage.\n{cfPushResult.Explanation}");
+                _logger.Error("Successfully targeted org '{targetOrgName}' and space '{targetSpaceName}' but app deployment failed at the `cf push` stage.\n{cfPushResult}", targetOrg.OrgName, targetSpace.SpaceName, cfPushResult.Explanation);
                 return new DetailedResult(false, cfPushResult.Explanation);
             }
 
@@ -721,7 +700,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                     default:
                         _fileLocatorService.CliVersion = 7;
-                        _logger.Information($"Detected an unexpected Cloud Controller API version: {apiVersion}. CLI version has been set to 7 by default.");
+                        _logger.Information("Detected an unexpected Cloud Controller API version: {apiVersion}. CLI version has been set to 7 by default.", apiVersion);
 
                         break;
                 }
