@@ -21,6 +21,7 @@ The `TanzuToolkitForVS` project provides a VSIX extension that allows Visual Stu
 - This product is still under development and, as such, may lack some features.
 - Our team uses [this board in ZenHub](https://app.zenhub.com/workspaces/net-dev-x---visual-studio-extensions-604161e65a9f390012665e4d/board?repos=327998348) to track progress.
 - All VSIX files for this extension are from the pre-release version and are not publicly supported.
+- The extension currently doesn't support SSL validation.
 
 ## Install
 - To install this extension, you will need Visual Studio version 16.0 or higher.
