@@ -16,7 +16,6 @@ namespace Tanzu.Toolkit.ViewModels
         internal static readonly string _stopAppErrorMsg = "Encountered an error while stopping app";
         internal static readonly string _startAppErrorMsg = "Encountered an error while starting app";
         internal static readonly string _deleteAppErrorMsg = "Encountered an error while deleting app";
-        
 
         private bool _hasCloudTargets;
         private ObservableCollection<CfInstanceViewModel> _cfs;
@@ -174,13 +173,20 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
+                var numInitialCfs = CloudFoundryList.Count;
+
                 DialogService.ShowDialog(typeof(AddCloudDialogViewModel).Name);
 
                 UpdateCloudFoundryInstances();
 
-                if (HasCloudTargets && !ThreadingService.IsPolling)
+                bool successfullyLoggedIn = CloudFoundryList.Count > numInitialCfs;
+
+                if (successfullyLoggedIn)
                 {
-                    ThreadingService.StartUiBackgroundPoller(RefreshAllItems, null, 10);
+                    if (HasCloudTargets && !ThreadingService.IsPolling)
+                    {
+                        ThreadingService.StartUiBackgroundPoller(RefreshAllItems, null, 10);
+                    }
                 }
             }
         }
