@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
 
@@ -201,6 +200,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("FetchChildren")]
         public async Task FetchChildren_ReturnsListOfSpaces_WithoutUpdatingChildren()
         {
             List<CloudFoundrySpace> fakeSpacesList = new List<CloudFoundrySpace>
@@ -261,7 +261,61 @@ namespace Tanzu.Toolkit.ViewModels.Tests
               DisplayErrorDialog(OrgViewModel._getSpacesFailureMsg, fakeFailedResult.Explanation),
                 Times.Once);
         }
-        
+
+        [TestMethod]
+        [TestCategory("FetchChildren")]
+        public async Task FetchChildren_CollapsesParentCfInstanceViewModel_WhenOrgsRequestFailsBecauseOfInvalidRefreshToken()
+        {
+            _sut = new OrgViewModel(FakeCfOrg, _fakeCfInstanceViewModel, _fakeCloudExplorerViewModel, Services, expanded: true);
+
+            var fakeFailedResult =
+                new DetailedResult<List<CloudFoundrySpace>>(succeeded: false, content: null, explanation: "junk", cmdDetails: FakeFailureCmdResult)
+                {
+                    FailureType = FailureType.InvalidRefreshToken,
+                };
+
+            MockCloudFoundryService.Setup(mock => mock.
+              GetSpacesForOrgAsync(_sut.Org, true, It.IsAny<int>()))
+                .ReturnsAsync(fakeFailedResult);
+
+            Assert.IsTrue(_sut.Parent.IsExpanded);
+
+            var result = await _sut.FetchChildren();
+
+            Assert.IsFalse(_sut.Parent.IsExpanded);
+
+            MockErrorDialogService.Verify(mock => mock.
+              DisplayErrorDialog(It.IsAny<string>(), It.IsAny<string>()),
+                Times.Never);
+        }
+
+        [TestMethod]
+        [TestCategory("FetchChildren")]
+        public async Task FetchChildren_SetsAuthenticationRequiredToTrue_WhenOrgsRequestFailsBecauseOfInvalidRefreshToken()
+        {
+            _sut = new OrgViewModel(FakeCfOrg, _fakeCfInstanceViewModel, _fakeCloudExplorerViewModel, Services, expanded: true);
+
+            var fakeFailedResult =
+                new DetailedResult<List<CloudFoundrySpace>>(succeeded: false, content: null, explanation: "junk", cmdDetails: FakeFailureCmdResult)
+                {
+                    FailureType = FailureType.InvalidRefreshToken,
+                };
+
+            MockCloudFoundryService.Setup(mock => mock.
+              GetSpacesForOrgAsync(_sut.Org, true, It.IsAny<int>()))
+                .ReturnsAsync(fakeFailedResult);
+
+            Assert.IsFalse(_sut.ParentCloudExplorer.AuthenticationRequired);
+
+            var result = await _sut.FetchChildren();
+
+            Assert.IsTrue(_sut.ParentCloudExplorer.AuthenticationRequired);
+
+            MockErrorDialogService.Verify(mock => mock.
+              DisplayErrorDialog(It.IsAny<string>(), It.IsAny<string>()),
+                Times.Never);
+        }
+
         [TestMethod]
         [TestCategory("RefreshChildren")]
         public async Task RefreshOrg_UpdatesChildrenOnOrgViewModel()
@@ -329,6 +383,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             // property changed events should only be raised for "IsRefreshing" (1 to set as true, 1 to set as false)
             Assert.AreEqual(2, _receivedEvents.Count);
             Assert.AreEqual("IsRefreshing", _receivedEvents[0]);
+            Assert.AreEqual("IsRefreshing", _receivedEvents[1]);
 
             MockCloudFoundryService.VerifyAll();
         }

@@ -121,6 +121,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("LoadChildren")]
         public async Task LoadChildren_AssignsNoOrgsPlaceholder_WhenThereAreNoOrgs()
         {
             var fakeNoOrgsResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: true, content: EmptyListOfOrgs);
@@ -143,6 +144,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("LoadChildren")]
         public async Task LoadChildren_SetsIsLoadingToFalse_WhenOrgsRequestSucceeds()
         {
             var fakeOrgsResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: true, content: EmptyListOfOrgs);
@@ -159,6 +161,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("LoadChildren")]
         public async Task LoadChildren_SetsIsLoadingToFalse_WhenOrgsRequestFails()
         {
             var fakeFailedResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: false, content: null);
@@ -175,6 +178,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("LoadChildren")]
         public async Task LoadChildren_DisplaysErrorDialog_WhenOrgsRequestFails()
         {
             var fakeFailedResult = new DetailedResult<List<CloudFoundryOrganization>>(
@@ -234,6 +238,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("FetchChildren")]
         public async Task FetchChildren_ReturnsListOfOrgs_WithoutUpdatingChildren()
         {
             var fakeOrgsList = new List<CloudFoundryOrganization>
@@ -269,6 +274,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("FetchChildren")]
         public async Task FetchChildren_DisplaysErrorDialog_WhenOrgsRequestFails()
         {
             var fakeFailedResult = new DetailedResult<List<CloudFoundryOrganization>>(
@@ -288,6 +294,60 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockErrorDialogService.Verify(mock => mock.
               DisplayErrorDialog(CfInstanceViewModel._getOrgsFailureMsg, fakeFailedResult.Explanation),
                 Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("FetchChildren")]
+        public async Task FetchChildren_CollapsesViewModel_WhenOrgsRequestFailsBecauseOfInvalidRefreshToken()
+        {
+            _sut = new CfInstanceViewModel(FakeCfInstance, _fakeCloudExplorerViewModel, Services, expanded: true);
+
+            var fakeFailedResult =
+                new DetailedResult<List<CloudFoundryOrganization>>(succeeded: false, content: null, explanation: "junk", cmdDetails: FakeFailureCmdResult)
+                {
+                    FailureType = FailureType.InvalidRefreshToken,
+                };
+
+            MockCloudFoundryService.Setup(mock => mock.
+              GetOrgsForCfInstanceAsync(_sut.CloudFoundryInstance, true, It.IsAny<int>()))
+                .ReturnsAsync(fakeFailedResult);
+
+            Assert.IsTrue(_sut.IsExpanded);
+
+            var result = await _sut.FetchChildren();
+
+            Assert.IsFalse(_sut.IsExpanded);
+
+            MockErrorDialogService.Verify(mock => mock.
+              DisplayErrorDialog(It.IsAny<string>(), It.IsAny<string>()),
+                Times.Never);
+        }
+        
+        [TestMethod]
+        [TestCategory("FetchChildren")]
+        public async Task FetchChildren_SetsAuthenticationRequiredToTrue_WhenOrgsRequestFailsBecauseOfInvalidRefreshToken()
+        {
+            _sut = new CfInstanceViewModel(FakeCfInstance, _fakeCloudExplorerViewModel, Services, expanded: true);
+
+            var fakeFailedResult =
+                new DetailedResult<List<CloudFoundryOrganization>>(succeeded: false, content: null, explanation: "junk", cmdDetails: FakeFailureCmdResult)
+                {
+                    FailureType = FailureType.InvalidRefreshToken,
+                };
+
+            MockCloudFoundryService.Setup(mock => mock.
+              GetOrgsForCfInstanceAsync(_sut.CloudFoundryInstance, true, It.IsAny<int>()))
+                .ReturnsAsync(fakeFailedResult);
+
+            Assert.IsFalse(_sut.ParentCloudExplorer.AuthenticationRequired);
+
+            var result = await _sut.FetchChildren();
+
+            Assert.IsTrue(_sut.ParentCloudExplorer.AuthenticationRequired);
+
+            MockErrorDialogService.Verify(mock => mock.
+              DisplayErrorDialog(It.IsAny<string>(), It.IsAny<string>()),
+                Times.Never);
         }
 
         [TestMethod]
