@@ -45,8 +45,8 @@ namespace Tanzu.Toolkit.ViewModels
 
         public CloudFoundryInstance CloudFoundryInstance { get; }
 
-        public CfInstanceViewModel(CloudFoundryInstance cloudFoundryInstance, IServiceProvider services, bool expanded = false)
-            : base(null, services, expanded: expanded)
+        public CfInstanceViewModel(CloudFoundryInstance cloudFoundryInstance, CloudExplorerViewModel parentCloudExplorer, IServiceProvider services, bool expanded = false)
+            : base(null, parentCloudExplorer, services, expanded: expanded)
         {
             _dialogService = services.GetRequiredService<IErrorDialog>();
             CloudFoundryInstance = cloudFoundryInstance;
@@ -75,7 +75,7 @@ namespace Tanzu.Toolkit.ViewModels
 
                 foreach (CloudFoundryOrganization org in orgs)
                 {
-                    var newOrg = new OrgViewModel(org, Services);
+                    var newOrg = new OrgViewModel(org, this, ParentCloudExplorer, Services);
                     newOrgsList.Add(newOrg);
                 }
             }
@@ -108,7 +108,7 @@ namespace Tanzu.Toolkit.ViewModels
                     var updatedOrgsList = new ObservableCollection<TreeViewItemViewModel>();
                     foreach (CloudFoundryOrganization org in orgsResponse.Content)
                     {
-                        var newOrg = new OrgViewModel(org, Services);
+                        var newOrg = new OrgViewModel(org, this, ParentCloudExplorer, Services);
                         updatedOrgsList.Add(newOrg);
                     }
 

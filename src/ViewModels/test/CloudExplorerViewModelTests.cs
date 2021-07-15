@@ -903,7 +903,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         private int _numRefreshes = 0;
 
         internal FakeCfInstanceViewModel(CloudFoundryInstance cloudFoundryInstance, IServiceProvider services, bool expanded = false)
-            : base(cloudFoundryInstance, services, expanded)
+            : base(cloudFoundryInstance, null, services, expanded)
         {
         }
 
@@ -921,7 +921,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         private int _numRefreshes = 0;
 
         internal FakeOrgViewModel(CloudFoundryOrganization org, IServiceProvider services, bool expanded = false)
-            : base(org, services, expanded)
+            : base(org, null, null, services, expanded)
         {
         }
 
@@ -939,7 +939,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         private int _numRefreshes = 0;
 
         internal FakeSpaceViewModel(CloudFoundrySpace space, IServiceProvider services, bool expanded = false)
-            : base(space, services, expanded)
+            : base(space, null, null, services, expanded)
         {
         }
 

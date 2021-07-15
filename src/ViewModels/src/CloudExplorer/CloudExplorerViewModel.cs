@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
@@ -399,7 +398,7 @@ namespace Tanzu.Toolkit.ViewModels
             var updatedCfInstanceViewModelList = new ObservableCollection<CfInstanceViewModel>();
             foreach (CloudFoundryInstance cf in loggedInCfs)
             {
-                updatedCfInstanceViewModelList.Add(new CfInstanceViewModel(cf, _services));
+                updatedCfInstanceViewModelList.Add(new CfInstanceViewModel(cf, this, _services));
             }
 
             RemoveNonexistentCfsFromCloudFoundryList(updatedCfInstanceViewModelList);
@@ -461,7 +460,7 @@ namespace Tanzu.Toolkit.ViewModels
             var updatedCfInstanceViewModelList = new ObservableCollection<CfInstanceViewModel>();
             foreach (CloudFoundryInstance cf in loggedInCfs)
             {
-                updatedCfInstanceViewModelList.Add(new CfInstanceViewModel(cf, _services));
+                updatedCfInstanceViewModelList.Add(new CfInstanceViewModel(cf, this, _services));
             }
 
             CloudFoundryList = updatedCfInstanceViewModelList;
