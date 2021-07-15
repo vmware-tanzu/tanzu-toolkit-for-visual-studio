@@ -79,6 +79,11 @@ namespace Tanzu.Toolkit.ViewModels
                     newOrgsList.Add(newOrg);
                 }
             }
+            else if (orgsResponse.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
+            {
+                IsExpanded = false;
+                ParentCloudExplorer.AuthenticationRequired = true;
+            }
             else
             {
                 _dialogService.DisplayErrorDialog(_getOrgsFailureMsg, orgsResponse.Explanation);

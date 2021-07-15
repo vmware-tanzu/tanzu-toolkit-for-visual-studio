@@ -80,6 +80,11 @@ namespace Tanzu.Toolkit.ViewModels
                     newSpacesList.Add(newSpace);
                 }
             }
+            else if (spacesResponse.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
+            {
+                Parent.IsExpanded = false;
+                ParentCloudExplorer.AuthenticationRequired = true;
+            }
             else
             {
                 _dialogService.DisplayErrorDialog(_getSpacesFailureMsg, spacesResponse.Explanation);
