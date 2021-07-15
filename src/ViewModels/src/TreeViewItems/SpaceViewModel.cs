@@ -44,8 +44,8 @@ namespace Tanzu.Toolkit.ViewModels
 
         public CloudFoundrySpace Space { get; }
 
-        public SpaceViewModel(CloudFoundrySpace space, IServiceProvider services, bool expanded = false)
-            : base(null, services, expanded: expanded)
+        public SpaceViewModel(CloudFoundrySpace space, OrgViewModel parentOrgViewModel, CloudExplorerViewModel parentCloudExplorer, IServiceProvider services, bool expanded = false)
+            : base(parentOrgViewModel, parentCloudExplorer, services, expanded: expanded)
         {
             _dialogService = services.GetRequiredService<IErrorDialog>();
             Space = space;

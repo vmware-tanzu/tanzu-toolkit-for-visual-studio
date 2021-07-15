@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
 
@@ -15,19 +14,16 @@ namespace Tanzu.Toolkit.ViewModels.Tests
     {
         private SpaceViewModel _sut;
         private List<string> _receivedEvents;
+        CloudExplorerViewModel _fakeCloudExplorerViewModel;
+        CfInstanceViewModel _fakeCfInstanceViewModel;
+        OrgViewModel _fakeOrgViewModel;
 
         [TestInitialize]
         public void TestInit()
         {
             RenewMockServices();
-
-            _sut = new SpaceViewModel(FakeCfSpace, Services);
-
-            _receivedEvents = new List<string>();
-            _sut.PropertyChanged += (sender, e) =>
-            {
-                _receivedEvents.Add(e.PropertyName);
-            };
+            
+            MockCloudFoundryService.SetupGet(mock => mock.CloudFoundryInstances).Returns(new Dictionary<string, CloudFoundryInstance>());
 
             MockUiDispatcherService.Setup(mock => mock.
                 RunOnUiThread(It.IsAny<Action>()))
@@ -36,6 +32,17 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                         // Run whatever method is passed to MockUiDispatcherService.RunOnUiThread; do not delegate to the UI Dispatcher
                         action();
                     });
+
+            _fakeCloudExplorerViewModel = new CloudExplorerViewModel(Services);
+            _fakeCfInstanceViewModel = new CfInstanceViewModel(FakeCfInstance, _fakeCloudExplorerViewModel, Services, expanded: true);
+            _fakeOrgViewModel = new OrgViewModel(FakeCfOrg, _fakeCfInstanceViewModel, _fakeCloudExplorerViewModel, Services);
+            _sut = new SpaceViewModel(FakeCfSpace, _fakeOrgViewModel, _fakeCloudExplorerViewModel, Services);
+
+            _receivedEvents = new List<string>();
+            _sut.PropertyChanged += (sender, e) =>
+            {
+                _receivedEvents.Add(e.PropertyName);
+            };
         }
 
         [TestCleanup]
@@ -45,21 +52,38 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("ctor")]
         public void Constructor_SetsDisplayTextToSpaceName()
         {
             Assert.AreEqual(FakeCfSpace.SpaceName, _sut.DisplayText);
         }
 
         [TestMethod]
+        [TestCategory("ctor")]
         public void Constructor_SetsLoadingPlaceholder()
         {
             Assert.AreEqual(SpaceViewModel.LoadingMsg, _sut.LoadingPlaceholder.DisplayText);
         }
 
         [TestMethod]
+        [TestCategory("ctor")]
         public void Constructor_SetsEmptyPlaceholder()
         {
             Assert.AreEqual(SpaceViewModel.EmptyAppsPlaceholderMsg, _sut.EmptyPlaceholder.DisplayText);
+        }
+
+        [TestMethod]
+        [TestCategory("ctor")]
+        public void Constructor_SetsParent()
+        {
+            Assert.AreEqual(_fakeOrgViewModel, _sut.Parent);
+        }
+
+        [TestMethod]
+        [TestCategory("ctor")]
+        public void Constructor_SetsParentCloudExplorer()
+        {
+            Assert.AreEqual(_fakeCloudExplorerViewModel, _sut.ParentCloudExplorer);
         }
 
         [TestMethod]
