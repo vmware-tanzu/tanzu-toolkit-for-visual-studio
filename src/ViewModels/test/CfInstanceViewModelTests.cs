@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
 
@@ -14,19 +14,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
     {
         private CfInstanceViewModel _sut;
         private List<string> _receivedEvents;
+        CloudExplorerViewModel _fakeCloudExplorerViewModel;
 
         [TestInitialize]
         public void TestInit()
         {
             RenewMockServices();
 
-            _sut = new CfInstanceViewModel(FakeCfInstance, Services);
-
-            _receivedEvents = new List<string>();
-            _sut.PropertyChanged += (sender, e) =>
-            {
-                _receivedEvents.Add(e.PropertyName);
-            };
+            MockCloudFoundryService.SetupGet(mock => mock.CloudFoundryInstances).Returns(new Dictionary<string, CloudFoundryInstance>());
 
             MockUiDispatcherService.Setup(mock => mock.
                 RunOnUiThread(It.IsAny<Action>()))
@@ -35,6 +30,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                         // Run whatever method is passed to MockUiDispatcherService.RunOnUiThread; do not delegate to the UI Dispatcher
                         action();
                     });
+
+            _fakeCloudExplorerViewModel = new CloudExplorerViewModel(Services);
+            _sut = new CfInstanceViewModel(FakeCfInstance, _fakeCloudExplorerViewModel, Services);
+
+            _receivedEvents = new List<string>();
+            _sut.PropertyChanged += (sender, e) =>
+            {
+                _receivedEvents.Add(e.PropertyName);
+            };
         }
 
         [TestCleanup]
@@ -44,31 +48,42 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("ctor")]
         public void Constructor_SetsDisplayTextToInstanceName()
         {
             Assert.AreEqual(FakeCfInstance.InstanceName, _sut.DisplayText);
         }
 
         [TestMethod]
+        [TestCategory("ctor")]
         public void Constructor_SetsLoadingPlaceholder()
         {
             Assert.AreEqual(CfInstanceViewModel._loadingMsg, _sut.LoadingPlaceholder.DisplayText);
         }
 
         [TestMethod]
+        [TestCategory("ctor")]
         public void Constructor_SetsEmptyPlaceholder()
         {
             Assert.AreEqual(CfInstanceViewModel._emptyOrgsPlaceholderMsg, _sut.EmptyPlaceholder.DisplayText);
         }
+        
+        [TestMethod]
+        [TestCategory("ctor")]
+        public void Constructor_SetsParentCloudExplorer()
+        {
+            Assert.AreEqual(_fakeCloudExplorerViewModel, _sut.ParentCloudExplorer);
+        }
 
         [TestMethod]
+        [TestCategory("LoadChildren")]
         public async Task LoadChildren_UpdatesAllOrgs()
         {
             var initialOrgsList = new System.Collections.ObjectModel.ObservableCollection<TreeViewItemViewModel>
             {
-                new OrgViewModel(new CloudFoundryOrganization("initial org 1", "initial org 1 guid", null), Services),
-                new OrgViewModel(new CloudFoundryOrganization("initial org 2", "initial org 2 guid", null), Services),
-                new OrgViewModel(new CloudFoundryOrganization("initial org 3", "initial org 3 guid", null), Services),
+                new OrgViewModel(new CloudFoundryOrganization("initial org 1", "initial org 1 guid", null), null, null, Services),
+                new OrgViewModel(new CloudFoundryOrganization("initial org 2", "initial org 2 guid", null), null, null, Services),
+                new OrgViewModel(new CloudFoundryOrganization("initial org 3", "initial org 3 guid", null), null, null, Services),
             };
 
             var newOrgsList = new List<CloudFoundryOrganization>
@@ -93,6 +108,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             await _sut.LoadChildren();
 
             Assert.AreEqual(newOrgsList.Count, _sut.Children.Count);
+
+            foreach (TreeViewItemViewModel child in _sut.Children)
+            {
+                Assert.AreEqual(_sut, child.Parent);
+            }
 
             Assert.AreEqual(1, _receivedEvents.Count);
             Assert.AreEqual("Children", _receivedEvents[0]);
@@ -177,9 +197,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("LoadChildren")]
         public async Task LoadChildren_CollapsesTreeViewItem_WhenOrgsRequestFails()
         {
-            var expandedViewModel = new CfInstanceViewModel(FakeCfInstance, Services)
+            var expandedViewModel = new CfInstanceViewModel(FakeCfInstance, null, Services)
             {
                 IsExpanded = true,
             };
@@ -234,6 +255,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var orgs = await _sut.FetchChildren();
 
             Assert.AreEqual(2, orgs.Count);
+            foreach (TreeViewItemViewModel child in orgs)
+            {
+                Assert.AreEqual(_sut, child.Parent);
+            }
 
             /* confirm presence of placeholder */
             Assert.AreEqual(1, _sut.Children.Count);
@@ -282,16 +307,16 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.Children = new ObservableCollection<TreeViewItemViewModel>
             {
                 // to be removed:
-                new OrgViewModel(new CloudFoundryOrganization(fakeOrgName1, fakeOrgGuid1, _sut.CloudFoundryInstance), Services), 
+                new OrgViewModel(new CloudFoundryOrganization(fakeOrgName1, fakeOrgGuid1, _sut.CloudFoundryInstance), null, null, Services), 
                 // to stay:
-                new OrgViewModel(new CloudFoundryOrganization(fakeOrgName2, fakeOrgGuid2, _sut.CloudFoundryInstance), Services, expanded: true), // should stay expanded after refresh 
-                new OrgViewModel(new CloudFoundryOrganization(fakeOrgName3, fakeOrgGuid3, _sut.CloudFoundryInstance), Services, expanded: false), // should stay collapsed after refresh 
+                new OrgViewModel(new CloudFoundryOrganization(fakeOrgName2, fakeOrgGuid2, _sut.CloudFoundryInstance), null, null, Services, expanded: true), // should stay expanded after refresh 
+                new OrgViewModel(new CloudFoundryOrganization(fakeOrgName3, fakeOrgGuid3, _sut.CloudFoundryInstance), null, null, Services, expanded: false), // should stay collapsed after refresh 
             };
 
             var fakeOrgsList = new List<CloudFoundryOrganization>
             {
                 // original:
-                new CloudFoundryOrganization(fakeOrgName2, fakeOrgGuid2, _sut.CloudFoundryInstance), 
+                new CloudFoundryOrganization(fakeOrgName2, fakeOrgGuid2, _sut.CloudFoundryInstance),
                 new CloudFoundryOrganization(fakeOrgName3, fakeOrgGuid3, _sut.CloudFoundryInstance),
                 // new:
                 new CloudFoundryOrganization(fakeOrgName4, fakeOrgGuid4, _sut.CloudFoundryInstance),
@@ -341,7 +366,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task RefreshChildren_AddsPlaceholder_WhenAllOrgsAreRemoved()
         {
             var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", parentCf: _sut.CloudFoundryInstance);
-            var ovm = new OrgViewModel(fakeInitialOrg, Services);
+            var ovm = new OrgViewModel(fakeInitialOrg, null, null, Services);
 
             var fakeEmptyOrgsResult = new DetailedResult<List<CloudFoundryOrganization>>(
                 succeeded: true,

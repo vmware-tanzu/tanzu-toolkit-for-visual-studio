@@ -15,19 +15,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
     {
         private OrgViewModel _sut;
         private List<string> _receivedEvents;
+        CloudExplorerViewModel _fakeCloudExplorerViewModel;
+        CfInstanceViewModel _fakeCfInstanceViewModel;
 
         [TestInitialize]
         public void TestInit()
         {
             RenewMockServices();
 
-            _sut = new OrgViewModel(FakeCfOrg, Services);
-
-            _receivedEvents = new List<string>();
-            _sut.PropertyChanged += (sender, e) =>
-            {
-                _receivedEvents.Add(e.PropertyName);
-            };
+            MockCloudFoundryService.SetupGet(mock => mock.CloudFoundryInstances).Returns(new Dictionary<string, CloudFoundryInstance>());
 
             MockUiDispatcherService.Setup(mock => mock.
                 RunOnUiThread(It.IsAny<Action>()))
@@ -36,6 +32,16 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                         // Run whatever method is passed to MockUiDispatcherService.RunOnUiThread; do not delegate to the UI Dispatcher
                         action();
                     });
+
+            _fakeCloudExplorerViewModel = new CloudExplorerViewModel(Services);
+            _fakeCfInstanceViewModel = new CfInstanceViewModel(FakeCfInstance, _fakeCloudExplorerViewModel, Services, expanded: true);
+            _sut = new OrgViewModel(FakeCfOrg, _fakeCfInstanceViewModel, _fakeCloudExplorerViewModel, Services);
+
+            _receivedEvents = new List<string>();
+            _sut.PropertyChanged += (sender, e) =>
+            {
+                _receivedEvents.Add(e.PropertyName);
+            };
         }
 
         [TestCleanup]
@@ -45,31 +51,49 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("ctor")]
         public void Constructor_SetsDisplayTextToOrgName()
         {
             Assert.AreEqual(FakeCfOrg.OrgName, _sut.DisplayText);
         }
 
         [TestMethod]
+        [TestCategory("ctor")]
         public void Constructor_SetsLoadingPlaceholder()
         {
             Assert.AreEqual(OrgViewModel._loadingMsg, _sut.LoadingPlaceholder.DisplayText);
         }
 
         [TestMethod]
+        [TestCategory("ctor")]
         public void Constructor_SetsEmptyPlaceholder()
         {
             Assert.AreEqual(OrgViewModel._emptySpacesPlaceholderMsg, _sut.EmptyPlaceholder.DisplayText);
         }
+        
+        [TestMethod]
+        [TestCategory("ctor")]
+        public void Constructor_SetsParent()
+        {
+            Assert.AreEqual(_fakeCfInstanceViewModel, _sut.Parent);
+        }
 
         [TestMethod]
+        [TestCategory("ctor")]
+        public void Constructor_SetsParentCloudExplorer()
+        {
+            Assert.AreEqual(_fakeCloudExplorerViewModel, _sut.ParentCloudExplorer);
+        }
+
+        [TestMethod]
+        [TestCategory("LoadChildren")]
         public async Task LoadChildren_UpdatesAllSpaces()
         {
             var initialSpacesList = new System.Collections.ObjectModel.ObservableCollection<TreeViewItemViewModel>
             {
-                new SpaceViewModel(new CloudFoundrySpace("initial space 1", "initial space 1 guid", null), Services),
-                new SpaceViewModel(new CloudFoundrySpace("initial space 2", "initial space 2 guid", null), Services),
-                new SpaceViewModel(new CloudFoundrySpace("initial space 3", "initial space 3 guid", null), Services),
+                new SpaceViewModel(new CloudFoundrySpace("initial space 1", "initial space 1 guid", null), null, null, Services),
+                new SpaceViewModel(new CloudFoundrySpace("initial space 2", "initial space 2 guid", null), null, null, Services),
+                new SpaceViewModel(new CloudFoundrySpace("initial space 3", "initial space 3 guid", null), null, null, Services),
             };
 
             var newSpacesList = new List<CloudFoundrySpace>
@@ -97,6 +121,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             await _sut.LoadChildren();
 
             Assert.AreEqual(newSpacesList.Count, _sut.Children.Count);
+            foreach (TreeViewItemViewModel child in _sut.Children)
+            {
+                Assert.AreEqual(_sut, child.Parent);
+            }
 
             Assert.AreEqual(1, _receivedEvents.Count);
             Assert.AreEqual("Children", _receivedEvents[0]);
@@ -198,6 +226,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var spaces = await _sut.FetchChildren();
 
             Assert.AreEqual(2, spaces.Count);
+            foreach (TreeViewItemViewModel child in spaces)
+            {
+                Assert.AreEqual(_sut, child.Parent);
+            }
 
             /* confirm presence of placeholder */
             Assert.AreEqual(1, _sut.Children.Count);
@@ -208,6 +240,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("FetchChildren")]
         public async Task FetchChildren_DisplaysErrorDialog_WhenSpacesRequestFails()
         {
             var fakeFailedResult = new DetailedResult<List<CloudFoundrySpace>>(
@@ -246,10 +279,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.Children = new ObservableCollection<TreeViewItemViewModel>
             {
                 // to be removed:
-                new SpaceViewModel(new CloudFoundrySpace(fakeSpaceName1, fakeSpaceGuid1, _sut.Org), Services), 
+                new SpaceViewModel(new CloudFoundrySpace(fakeSpaceName1, fakeSpaceGuid1, _sut.Org), null, null, Services), 
                 // to stay:
-                new SpaceViewModel(new CloudFoundrySpace(fakeSpaceName2, fakeSpaceGuid2, _sut.Org), Services, expanded: true), // should stay expanded after refresh 
-                new SpaceViewModel(new CloudFoundrySpace(fakeSpaceName3, fakeSpaceGuid3, _sut.Org), Services, expanded: false), // should stay collapsed after refresh 
+                new SpaceViewModel(new CloudFoundrySpace(fakeSpaceName2, fakeSpaceGuid2, _sut.Org), null, null, Services, expanded: true), // should stay expanded after refresh 
+                new SpaceViewModel(new CloudFoundrySpace(fakeSpaceName3, fakeSpaceGuid3, _sut.Org), null, null, Services, expanded: false), // should stay collapsed after refresh 
             };
 
             var fakeSpacesList = new List<CloudFoundrySpace>
@@ -305,7 +338,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task RefreshChildren_AddsPlaceholder_WhenAllSpacesAreRemoved()
         {
             var fakeInitialSpace = new CloudFoundrySpace("fake space name", "fake space id", _sut.Org);
-            var svm = new SpaceViewModel(fakeInitialSpace, Services);
+            var svm = new SpaceViewModel(fakeInitialSpace, null, null, Services);
 
             var fakeNoSpacesResult = new DetailedResult<List<CloudFoundrySpace>>(
                 succeeded: true,
