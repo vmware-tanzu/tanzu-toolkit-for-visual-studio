@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services.ErrorDialog;
@@ -75,6 +74,11 @@ namespace Tanzu.Toolkit.ViewModels
                     var newOrg = new AppViewModel(app, Services);
                     newAppsList.Add(newOrg);
                 }
+            }
+            else if (appsResult.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
+            {
+                Parent.Parent.IsExpanded = false;
+                ParentCloudExplorer.AuthenticationRequired = true;
             }
             else
             {

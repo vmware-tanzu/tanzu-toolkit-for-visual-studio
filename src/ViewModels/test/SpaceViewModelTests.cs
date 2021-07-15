@@ -130,6 +130,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("LoadChildren")]
         public async Task LoadChildren_AssignsNoAppsPlaceholder_WhenThereAreNoApps()
         {
             var fakeAppsResult = new DetailedResult<List<CloudFoundryApp>>(
@@ -156,6 +157,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("LoadChildren")]
         public async Task LoadChildren_SetsIsLoadingToFalse_WhenComplete()
         {
             var fakeAppsResult = new DetailedResult<List<CloudFoundryApp>>(
@@ -255,6 +257,60 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockErrorDialogService.Verify(mock => mock.
               DisplayErrorDialog(SpaceViewModel._getAppsFailureMsg, fakeFailedResult.Explanation),
                 Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("FetchChildren")]
+        public async Task FetchChildren_CollapsesParentCfInstanceViewModel_WhenSpacesRequestFailsBecauseOfInvalidRefreshToken()
+        {
+            _sut = new SpaceViewModel(FakeCfSpace, _fakeOrgViewModel, _fakeCloudExplorerViewModel, Services, expanded: true);
+
+            var fakeFailedResult =
+                new DetailedResult<List<CloudFoundryApp>>(succeeded: false, content: null, explanation: "junk", cmdDetails: FakeFailureCmdResult)
+                {
+                    FailureType = FailureType.InvalidRefreshToken,
+                };
+
+            MockCloudFoundryService.Setup(mock => mock.
+              GetAppsForSpaceAsync(_sut.Space, true, It.IsAny<int>()))
+                .ReturnsAsync(fakeFailedResult);
+
+            Assert.IsTrue(_sut.Parent.Parent.IsExpanded);
+
+            var result = await _sut.FetchChildren();
+
+            Assert.IsFalse(_sut.Parent.Parent.IsExpanded);
+
+            MockErrorDialogService.Verify(mock => mock.
+              DisplayErrorDialog(It.IsAny<string>(), It.IsAny<string>()),
+                Times.Never);
+        }
+
+        [TestMethod]
+        [TestCategory("FetchChildren")]
+        public async Task FetchChildren_SetsAuthenticationRequiredToTrue_WhenSpacesRequestFailsBecauseOfInvalidRefreshToken()
+        {
+            _sut = new SpaceViewModel(FakeCfSpace, _fakeOrgViewModel, _fakeCloudExplorerViewModel, Services, expanded: true);
+
+            var fakeFailedResult =
+                new DetailedResult<List<CloudFoundryApp>>(succeeded: false, content: null, explanation: "junk", cmdDetails: FakeFailureCmdResult)
+                {
+                    FailureType = FailureType.InvalidRefreshToken,
+                };
+
+            MockCloudFoundryService.Setup(mock => mock.
+              GetAppsForSpaceAsync(_sut.Space, true, It.IsAny<int>()))
+                .ReturnsAsync(fakeFailedResult);
+
+            Assert.IsFalse(_sut.ParentCloudExplorer.AuthenticationRequired);
+
+            var result = await _sut.FetchChildren();
+
+            Assert.IsTrue(_sut.ParentCloudExplorer.AuthenticationRequired);
+
+            MockErrorDialogService.Verify(mock => mock.
+              DisplayErrorDialog(It.IsAny<string>(), It.IsAny<string>()),
+                Times.Never);
         }
 
         [TestMethod]
