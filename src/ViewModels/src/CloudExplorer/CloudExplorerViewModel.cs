@@ -183,6 +183,8 @@ namespace Tanzu.Toolkit.ViewModels
 
                 if (successfullyLoggedIn)
                 {
+                    AuthenticationRequired = false;
+
                     if (HasCloudTargets && !ThreadingService.IsPolling)
                     {
                         ThreadingService.StartUiBackgroundPoller(RefreshAllItems, null, 10);
