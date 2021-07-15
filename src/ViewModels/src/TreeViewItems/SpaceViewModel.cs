@@ -130,9 +130,28 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 IsRefreshing = true;
 
-                await LoadChildren();
+                var freshApps = await FetchChildren();
+                ReplaceChildren(freshApps);
 
                 IsRefreshing = false;
+            }
+        }
+
+        private void ReplaceChildren(ObservableCollection<AppViewModel> freshApps)
+        {
+            UiDispatcherService.RunOnUiThread(() => Children.Clear());
+            foreach (TreeViewItemViewModel avm in freshApps)
+            {
+                UiDispatcherService.RunOnUiThread(() => Children.Add(avm));
+            }
+
+            if (Children.Count == 0)
+            {
+                UiDispatcherService.RunOnUiThread(() => Children.Add(EmptyPlaceholder));
+            }
+            else if (Children.Count > 1 && HasEmptyPlaceholder)
+            {
+                UiDispatcherService.RunOnUiThread(() => Children.Remove(EmptyPlaceholder));
             }
         }
     }
