@@ -431,7 +431,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNull(result.Content);
 
             Assert.IsTrue(_mockCfApiClient.Invocations.Count == 0);
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
         [TestMethod]
@@ -482,7 +482,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             _mockCfCliService.Verify(m => m.ClearCachedAccessToken(), Times.Once);
             _mockCfApiClient.Verify(m => m.ListOrgs(FakeCfInstance.ApiAddress, It.IsAny<string>()), Times.Exactly(2));
-            _mockLogger.Verify(m => m.Information(It.Is<string>(s => s.Contains(fakeExceptionMsg) && s.Contains("retry"))), Times.Once);
+            _mockLogger.Verify(m => m.Information(It.Is<string>(s => s.Contains("retry")), fakeExceptionMsg, It.IsAny<int>()), Times.Once);
         }
 
         [TestMethod]
@@ -508,7 +508,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNull(result.CmdDetails);
             Assert.IsNull(result.Content);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
         [TestMethod]
@@ -588,7 +588,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNull(result.Content);
 
             Assert.IsTrue(_mockCfApiClient.Invocations.Count == 0);
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
         [TestMethod]
@@ -665,7 +665,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNull(result.CmdDetails);
             Assert.IsNull(result.Content);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
         [TestMethod]
@@ -691,7 +691,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNull(result.CmdDetails);
             Assert.IsNull(result.Content);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
         [TestMethod]
@@ -771,7 +771,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNull(result.Content);
 
             Assert.IsTrue(_mockCfApiClient.Invocations.Count == 0);
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
         [TestMethod]
@@ -824,7 +824,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             _mockCfCliService.Verify(m => m.ClearCachedAccessToken(), Times.Once);
             _mockCfApiClient.Verify(m => m.ListAppsForSpace(FakeSpace.ParentOrg.ParentCf.ApiAddress, It.IsAny<string>(), FakeSpace.SpaceId), Times.Exactly(2));
-            _mockLogger.Verify(m => m.Information(It.Is<string>(s => s.Contains(fakeExceptionMsg) && s.Contains("retry"))), Times.Once);
+            _mockLogger.Verify(m => m.Information(It.Is<string>(s => s.Contains("retry")), fakeExceptionMsg, It.IsAny<int>()), Times.Once);
         }
 
         [TestMethod]
@@ -850,7 +850,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNull(result.CmdDetails);
             Assert.IsNull(result.Content);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
         [TestMethod]
@@ -876,7 +876,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNull(result.CmdDetails);
             Assert.IsNull(result.Content);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
         [TestMethod]
@@ -1043,7 +1043,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result.Explanation);
             Assert.IsNull(result.CmdDetails);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
         [TestMethod]
@@ -1051,6 +1051,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         public async Task StopAppAsync_ReturnsFailedResult_WhenStopAppWithGuidThrowsException()
         {
             var fakeExceptionMsg = "junk";
+            var appName = FakeApp.AppName;
 
             _mockCfCliService.Setup(m => m.
                 GetOAuthToken())
@@ -1067,7 +1068,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
             Assert.IsNull(result.CmdDetails);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
         [TestMethod]
@@ -1087,7 +1088,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             _mockCfApiClient.Setup(m => m.
                 StopAppWithGuid(FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
-                    .ReturnsAsync(true);
+                    .ReturnsAsync(true); 
 
             var result = await _sut.StopAppAsync(FakeApp);
 
@@ -1098,7 +1099,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             _mockCfCliService.Verify(m => m.ClearCachedAccessToken(), Times.Once);
             _mockCfApiClient.Verify(m => m.StopAppWithGuid(FakeSpace.ParentOrg.ParentCf.ApiAddress, It.IsAny<string>(), FakeApp.AppId), Times.Exactly(2));
-            _mockLogger.Verify(m => m.Information(It.Is<string>(s => s.Contains(fakeExceptionMsg) && s.Contains("retry"))), Times.Once);
+            _mockLogger.Verify(m => m.Information(It.Is<string>(s => s.Contains("retry")), It.IsAny<string>(), fakeExceptionMsg, It.IsAny<int>()), Times.Once);
         }
 
         [TestMethod]
@@ -1122,7 +1123,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
             Assert.IsNull(result.CmdDetails);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
         [TestMethod]
@@ -1165,7 +1166,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result.Explanation);
             Assert.IsNull(result.CmdDetails);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
         [TestMethod]
@@ -1189,7 +1190,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
             Assert.IsNull(result.CmdDetails);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
         [TestMethod]
@@ -1220,7 +1221,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             _mockCfCliService.Verify(m => m.ClearCachedAccessToken(), Times.Once);
             _mockCfApiClient.Verify(m => m.StartAppWithGuid(FakeSpace.ParentOrg.ParentCf.ApiAddress, It.IsAny<string>(), FakeApp.AppId), Times.Exactly(2));
-            _mockLogger.Verify(m => m.Information(It.Is<string>(s => s.Contains(fakeExceptionMsg) && s.Contains("retry"))), Times.Once);
+            _mockLogger.Verify(m => m.Information(It.Is<string>(s => s.Contains("retry")), It.IsAny<string>(), fakeExceptionMsg, It.IsAny<int>()), Times.Once);
         }
 
         [TestMethod]
@@ -1244,7 +1245,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
             Assert.IsNull(result.CmdDetails);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
         [TestMethod]
@@ -1287,7 +1288,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result.Explanation);
             Assert.IsNull(result.CmdDetails);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
         [TestMethod]
@@ -1311,7 +1312,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
             Assert.IsNull(result.CmdDetails);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
         [TestMethod]
@@ -1342,7 +1343,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             _mockCfCliService.Verify(m => m.ClearCachedAccessToken(), Times.Once);
             _mockCfApiClient.Verify(m => m.DeleteAppWithGuid(FakeSpace.ParentOrg.ParentCf.ApiAddress, It.IsAny<string>(), FakeApp.AppId), Times.Exactly(2));
-            _mockLogger.Verify(m => m.Information(It.Is<string>(s => s.Contains(fakeExceptionMsg) && s.Contains("retry"))), Times.Once);
+            _mockLogger.Verify(m => m.Information(It.Is<string>(s => s.Contains("retry")), It.IsAny<string>(), fakeExceptionMsg, It.IsAny<int>()), Times.Once);
         }
 
         [TestMethod]
@@ -1366,7 +1367,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
             Assert.IsNull(result.CmdDetails);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
         [TestMethod]
