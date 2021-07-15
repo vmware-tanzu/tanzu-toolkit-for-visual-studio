@@ -87,7 +87,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        public async Task LoadChildren_UpdatesAllSpaces()
+        [TestCategory("LoadChildren")]
+        public async Task LoadChildren_UpdatesAllApps()
         {
             var initialAppsList = new System.Collections.ObjectModel.ObservableCollection<TreeViewItemViewModel>
             {
@@ -175,6 +176,30 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("LoadChildren")]
+        public async Task LoadChildren_DisplaysErrorDialog_WhenAppsRequestFails()
+        {
+            var fakeFailedResult = new DetailedResult<List<CloudFoundryApp>>(
+                succeeded: false,
+                content: null,
+                explanation: "junk",
+                cmdDetails: FakeFailureCmdResult);
+
+            MockCloudFoundryService.Setup(mock => mock.
+              GetAppsForSpaceAsync(_sut.Space, true, It.IsAny<int>()))
+                .ReturnsAsync(fakeFailedResult);
+
+            await _sut.LoadChildren();
+
+            Assert.IsFalse(_sut.IsLoading);
+
+            MockErrorDialogService.Verify(mock => mock.
+              DisplayErrorDialog(SpaceViewModel._getAppsFailureMsg, fakeFailedResult.Explanation),
+                Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("FetchChildren")]
         public async Task FetchChildren_ReturnsListOfApps_WithoutUpdatingChildren()
         {
             var fakeAppsList = new List<CloudFoundryApp>
@@ -210,28 +235,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        public async Task LoadChildren_DisplaysErrorDialog_WhenAppsRequestFails()
-        {
-            var fakeFailedResult = new DetailedResult<List<CloudFoundryApp>>(
-                succeeded: false,
-                content: null,
-                explanation: "junk",
-                cmdDetails: FakeFailureCmdResult);
-
-            MockCloudFoundryService.Setup(mock => mock.
-              GetAppsForSpaceAsync(_sut.Space, true, It.IsAny<int>()))
-                .ReturnsAsync(fakeFailedResult);
-
-            await _sut.LoadChildren();
-
-            Assert.IsFalse(_sut.IsLoading);
-
-            MockErrorDialogService.Verify(mock => mock.
-              DisplayErrorDialog(SpaceViewModel._getAppsFailureMsg, fakeFailedResult.Explanation),
-                Times.Once);
-        }
-
-        [TestMethod]
+        [TestCategory("FetchChildren")]
         public async Task FetchChildren_DisplaysErrorDialog_WhenAppsRequestFails()
         {
             var fakeFailedResult = new DetailedResult<List<CloudFoundryApp>>(
@@ -319,11 +323,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.AreEqual(initialState2, refreshedChildApp1.App.State); // previous state shouldn't have changed
             Assert.AreNotEqual(initialState3, refreshedChildApp2.App.State); // previous state should have changed
 
-            // property changed event should be raised once for Children (update UI) & twice for IsRefreshing (set true when starting, false when done)
-            Assert.AreEqual(3, _receivedEvents.Count);
+            // property changed event should be raised twice for IsRefreshing (set true when starting, false when done)
+            Assert.AreEqual(2, _receivedEvents.Count);
             Assert.AreEqual("IsRefreshing", _receivedEvents[0]);
-            Assert.AreEqual("Children", _receivedEvents[1]);
-            Assert.AreEqual("IsRefreshing", _receivedEvents[2]);
+            Assert.AreEqual("IsRefreshing", _receivedEvents[1]);
 
             MockCloudFoundryService.VerifyAll();
         }
