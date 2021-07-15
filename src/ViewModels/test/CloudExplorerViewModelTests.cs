@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
 
@@ -114,6 +114,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("OpenLoginView")]
         public void OpenLoginView_CallsDialogService_ShowDialog()
         {
             _sut.OpenLoginView(null);
@@ -121,6 +122,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("OpenLoginView")]
         public void OpenLoginView_UpdatesCloudFoundryInstances_AfterDialogCloses()
         {
             var emptyCfsDict = new Dictionary<string, CloudFoundryInstance>();
@@ -139,6 +141,63 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsTrue(_sut.HasCloudTargets);
             Assert.AreEqual(1, _sut.CloudFoundryList.Count);
+        }
+
+        [TestMethod]
+        [TestCategory("OpenLoginView")]
+        public void OpenLoginView_SetsAuthenticationRequiredToFalse_WhenCFGetsAdded()
+        {
+            _sut.AuthenticationRequired = true;
+
+            MockDialogService.Setup(mock => mock.
+                ShowDialog(typeof(AddCloudDialogViewModel).Name, null))
+                    .Callback(() =>
+                    {
+                        // Simulate successful login by mocking CloudFoundryService to return 1 CF instance
+
+                        var fakeCfsDict = new Dictionary<string, CloudFoundryInstance>
+                        {
+                            { "fake cf", new CloudFoundryInstance("fake cf", null) },
+                        };
+
+                        MockCloudFoundryService.SetupGet(mock => mock.
+                          CloudFoundryInstances).Returns(fakeCfsDict);
+                    });
+
+            Assert.IsTrue(_sut.AuthenticationRequired);
+            Assert.AreEqual(0, _sut.CloudFoundryList.Count);
+
+            _sut.OpenLoginView(null);
+
+            Assert.AreEqual(1, _sut.CloudFoundryList.Count);
+            Assert.IsFalse(_sut.AuthenticationRequired);
+        }
+
+        [TestMethod]
+        [TestCategory("OpenLoginView")]
+        public void OpenLoginView_DoesNotChangeAuthenticationRequired_WhenNoCFIsAdded()
+        {
+            _sut.AuthenticationRequired = true;
+
+            MockDialogService.Setup(mock => mock.
+                ShowDialog(typeof(AddCloudDialogViewModel).Name, null))
+                    .Callback(() =>
+                    {
+                        // Simulate unsuccessful login by mocking CloudFoundryService to return 0 CF instances
+
+                        var emptyCfsDict = new Dictionary<string, CloudFoundryInstance>();
+
+                        MockCloudFoundryService.SetupGet(mock => mock.
+                          CloudFoundryInstances).Returns(emptyCfsDict);
+                    });
+
+            Assert.IsTrue(_sut.AuthenticationRequired);
+            Assert.AreEqual(0, _sut.CloudFoundryList.Count);
+
+            _sut.OpenLoginView(null);
+
+            Assert.AreEqual(0, _sut.CloudFoundryList.Count);
+            Assert.IsTrue(_sut.AuthenticationRequired); // this prop should not have changed
         }
 
         [TestMethod]
@@ -692,7 +751,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             // ensure RefreshChildren() was never called for ovm
             Assert.AreEqual(0, ovm.NumRefreshes);
         }
-        
+
         [TestMethod]
         public async Task InitiateFullRefresh_DoesNotAttemptToRefreshLoadingSpaces()
         {
@@ -739,7 +798,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                         },
                         explanation: null,
                         cmdDetails: FakeSuccessCmdResult));
-            
+
             MockCloudFoundryService.Setup(mock => mock.
                 GetSpacesForOrgAsync(fakeInitialOrg, true, It.IsAny<int>()))
                     .ReturnsAsync(new DetailedResult<List<CloudFoundrySpace>>(
@@ -757,7 +816,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.AreEqual(1, _sut.CloudFoundryList.Count);
             var cf = _sut.CloudFoundryList[0];
             Assert.IsTrue(cf.IsExpanded);
-            
+
             // pre-check: cfivm has 1 org view model & it's expanded
             Assert.AreEqual(1, cf.Children.Count);
             var org = cf.Children[0];
