@@ -914,6 +914,32 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         }
 
         [TestMethod]
+        [TestCategory("TargetSpace")]
+        public void TargetSpace_ThrowsInvalidRefreshTokenException_WhenStdErrReportsInvalidToken()
+        {
+            var fakeSpaceName = "fake-space";
+            string expectedArgs = $"{CfCliService._targetSpaceCmd} {fakeSpaceName}";
+            var tokenFailureResult = new CmdResult("junk", CfCliService._invalidRefreshTokenError, 1);
+
+            _mockCmdProcessService.Setup(mock => mock.
+              RunCommand(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null))
+                .Returns(tokenFailureResult);
+
+            Exception thrownException = null;
+            try
+            {
+                _sut.TargetSpace(fakeSpaceName);
+            }
+            catch (Exception ex)
+            {
+                thrownException = ex;
+            }
+
+            Assert.IsNotNull(thrownException);
+            Assert.AreEqual(typeof(InvalidRefreshTokenException), thrownException.GetType());
+        }
+
+        [TestMethod]
         [TestCategory("StopApp")]
         public async Task StopAppByNameAsync_ReturnsTrueResult_WhenCmdExitCodeIsZero()
         {
