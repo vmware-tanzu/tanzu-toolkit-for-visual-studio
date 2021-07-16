@@ -259,6 +259,9 @@ namespace Tanzu.Toolkit.Services.CfCli
         /// one changes the targeted space. </para>
         /// <para>To avoid race conditions around the "targeted space" value, make sure to invoke 
         /// this method only after acquiring the <see cref="_cfEnvironmentLock"/>.</para>
+        /// <exception cref="InvalidRefreshTokenException">Throws <see cref="InvalidRefreshTokenException"/> if a fresh access token
+        /// is unobtainable to due an invalid refresh token (this would occur once the refresh token reaches the end of its 
+        /// prescribed lifetime).</exception>
         /// </summary>
         /// <param name="spaceName"></param>
         /// <returns></returns>
@@ -267,7 +270,15 @@ namespace Tanzu.Toolkit.Services.CfCli
             string args = $"{_targetSpaceCmd} {spaceName}";
             DetailedResult result = ExecuteCfCliCommand(args);
 
-            if (result == null || !result.Succeeded)
+            if (result == null)
+            {
+                _logger.Error($"TargetSpace({spaceName}) failed: {result}");
+            }
+            else if (result.CmdDetails.StdErr != null && result.CmdDetails.StdErr.Contains(_invalidRefreshTokenError))
+            {
+                throw new InvalidRefreshTokenException();
+            }
+            else if (!result.Succeeded)
             {
                 _logger.Error($"TargetSpace({spaceName}) failed: {result}");
             }
