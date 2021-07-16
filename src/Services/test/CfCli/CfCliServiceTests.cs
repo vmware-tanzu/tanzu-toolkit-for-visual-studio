@@ -362,7 +362,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             Assert.IsNull(result);
             _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
         }
-        
+
         [TestMethod]
         [TestCategory("GetOAuthToken")]
         public void GetOAuthToken_ThrowsInvalidRefreshTokenException_WhenStdErrReportsInvalidToken()
@@ -843,6 +843,32 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             Assert.IsNotNull(result.Explanation);
             Assert.AreEqual(_fakeStdOut, result.CmdDetails.StdOut);
             Assert.AreEqual(_fakeStdErr, result.CmdDetails.StdErr);
+        }
+
+        [TestMethod]
+        [TestCategory("TargetOrg")]
+        public void TargetOrg_ThrowsInvalidRefreshTokenException_WhenStdErrReportsInvalidToken()
+        {
+            var fakeOrgName = "fake-org";
+            string expectedArgs = $"{CfCliService._targetOrgCmd} {fakeOrgName}";
+            var tokenFailureResult = new CmdResult("junk", CfCliService._invalidRefreshTokenError, 1);
+
+            _mockCmdProcessService.Setup(mock => mock.
+              RunCommand(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null))
+                .Returns(tokenFailureResult);
+
+            Exception thrownException = null;
+            try
+            {
+                _sut.TargetOrg(fakeOrgName);
+            }
+            catch (Exception ex)
+            {
+                thrownException = ex;
+            }
+
+            Assert.IsNotNull(thrownException);
+            Assert.AreEqual(typeof(InvalidRefreshTokenException), thrownException.GetType());
         }
 
         [TestMethod]
