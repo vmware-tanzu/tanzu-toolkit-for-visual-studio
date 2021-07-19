@@ -536,7 +536,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 Assert.AreEqual(expectedResultContent[i].ParentCf, result.Content[i].ParentCf);
             }
         }
-        
+
         [TestMethod]
         [TestCategory("GetOrgs")]
         public async Task GetOrgsForCfInstanceAsync_ReturnsFailedResult_WhenTokenRetrievalThrowsInvalidRefreshTokenException()
@@ -1190,7 +1190,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
-        
+
         [TestMethod]
         [TestCategory("StopApp")]
         public async Task StopAppAsync_ReturnsFailedResult_WhenTokenRetrievalThrowsInvalidRefreshTokenException()
@@ -1592,6 +1592,23 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains(CloudFoundryService.EmptyOutputDirMessage));
             _mockFileLocatorService.VerifyAll();
+        }
+
+        [TestMethod]
+        [TestCategory("DeployApp")]
+        public async Task DeployAppAsync_ReturnsFailedResult_WhenCfCliDeploymentThrowsInvalidRefreshTokenException()
+        {
+            _mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
+
+            _mockCfCliService.Setup(mock => mock.
+                PushAppAsync(FakeApp.AppName, FakeOrg.OrgName, FakeSpace.SpaceName, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), _fakeProjectPath, It.IsAny<string>(), It.IsAny<string>()))
+                    .Throws(new InvalidRefreshTokenException());
+
+            var result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, _defaultFullFWFlag, stdOutCallback: null, stdErrCallback: null);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
         }
 
         [TestMethod]
