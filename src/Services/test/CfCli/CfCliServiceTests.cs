@@ -1322,6 +1322,101 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         }
 
         [TestMethod]
+        [TestCategory("PushApp")]
+        public async Task PushAppAsync_ThrowsInvalidRefreshTokenException_WhenTargetOrgReportsInvalidRefreshToken()
+        {
+            var fakeAppName = "my fake app";
+            string expectedArgs = $"push \"{fakeAppName}\""; // ensure app name gets surrounded by quotes
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} {FakeOrg.OrgName}";
+            var invalidRefreshTokenCmdResult = new CmdResult("junk output", CfCliService._invalidRefreshTokenError, 1);
+
+            _mockCmdProcessService.Setup(m => m.
+              RunCommand(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
+                .Returns(invalidRefreshTokenCmdResult);
+
+            Exception thrownException = null;
+            try
+            {
+                await _sut.PushAppAsync(fakeAppName, FakeOrg.OrgName, FakeSpace.SpaceName, null, null, _fakeProjectPath);
+            }
+            catch (Exception ex)
+            {
+                thrownException = ex;
+            }
+
+            Assert.IsNotNull(thrownException);
+            Assert.AreEqual(typeof(InvalidRefreshTokenException), thrownException.GetType());
+        }
+
+        [TestMethod]
+        [TestCategory("PushApp")]
+        public async Task PushAppAsync_ThrowsInvalidRefreshTokenException_WhenTargetSpaceReportsInvalidRefreshToken()
+        {
+            var fakeAppName = "my fake app";
+            string expectedArgs = $"push \"{fakeAppName}\""; // ensure app name gets surrounded by quotes
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} {FakeOrg.OrgName}";
+            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} {FakeSpace.SpaceName}";
+            var invalidRefreshTokenCmdResult = new CmdResult("junk output", CfCliService._invalidRefreshTokenError, 1);
+            
+            _mockCmdProcessService.Setup(m => m.
+              RunCommand(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
+                .Returns(_fakeSuccessCmdResult);
+
+            _mockCmdProcessService.Setup(m => m.
+              RunCommand(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null))
+                .Returns(invalidRefreshTokenCmdResult);
+
+            Exception thrownException = null;
+            try
+            {
+                await _sut.PushAppAsync(fakeAppName, FakeOrg.OrgName, FakeSpace.SpaceName, null, null, _fakeProjectPath);
+            }
+            catch (Exception ex)
+            {
+                thrownException = ex;
+            }
+
+            Assert.IsNotNull(thrownException);
+            Assert.AreEqual(typeof(InvalidRefreshTokenException), thrownException.GetType());
+        }
+
+        [TestMethod]
+        [TestCategory("PushApp")]
+        public async Task PushAppAsync_ThrowsInvalidRefreshTokenException_WhenCfCmdFailsDueToInvalidRefreshToken()
+        {
+            var fakeAppName = "my fake app";
+            string expectedArgs = $"push \"{fakeAppName}\""; // ensure app name gets surrounded by quotes
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} {FakeOrg.OrgName}";
+            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} {FakeSpace.SpaceName}";
+            var invalidRefreshTokenCmdResult = new CmdResult("junk output", CfCliService._invalidRefreshTokenError, 1);
+
+            _mockCmdProcessService.Setup(m => m.
+              RunCommand(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
+                .Returns(_fakeSuccessCmdResult);
+
+            _mockCmdProcessService.Setup(m => m.
+              RunCommand(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null))
+                .Returns(_fakeSuccessCmdResult);
+
+            _mockCmdProcessService.Setup(m => m.
+                RunCommand(_fakePathToCfExe, expectedArgs, _fakeProjectPath, _defaultEnvVars, null, null))
+                    .Returns(invalidRefreshTokenCmdResult);
+
+            Exception thrownException = null;
+            try
+            {
+                await _sut.PushAppAsync(fakeAppName, FakeOrg.OrgName, FakeSpace.SpaceName, null, null, _fakeProjectPath);
+            }
+            catch (Exception ex)
+            {
+                thrownException = ex;
+            }
+
+            Assert.IsNotNull(thrownException);
+            Assert.AreEqual(typeof(InvalidRefreshTokenException), thrownException.GetType());
+        }
+
+        [TestMethod]
         [TestCategory("GetApiVersion")]
         public async Task GetApiVersion_ReturnsVersion_WhenApiCmdSucceeds()
         {
