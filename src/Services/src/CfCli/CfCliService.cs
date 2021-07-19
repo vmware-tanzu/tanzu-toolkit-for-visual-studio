@@ -557,7 +557,11 @@ namespace Tanzu.Toolkit.Services.CfCli
                 deployTask = Task.Run(async () => await RunCfCommandAsync(args, stdOutCallback, stdErrCallback, appDir));
             }
 
-            return await deployTask;
+            var deployResult = await deployTask;
+
+            ThrowIfResultIndicatesInvalidRefreshToken(deployResult);
+
+            return deployResult;
         }
 
         public async Task<DetailedResult<string>> GetRecentAppLogs(string appName, string orgName, string spaceName)
