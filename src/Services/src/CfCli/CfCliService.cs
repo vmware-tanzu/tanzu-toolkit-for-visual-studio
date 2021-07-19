@@ -135,10 +135,7 @@ namespace Tanzu.Toolkit.Services.CfCli
                                 return null;
                             }
 
-                            if (result.CmdDetails.StdErr != null && result.CmdDetails.StdErr.Contains(_invalidRefreshTokenError))
-                            {
-                                throw new InvalidRefreshTokenException();
-                            }
+                            ThrowIfResultIndicatesInvalidRefreshToken(result);
 
                             if (result.CmdDetails.ExitCode != 0)
                             {
@@ -236,13 +233,11 @@ namespace Tanzu.Toolkit.Services.CfCli
             string args = $"{_targetOrgCmd} {orgName}";
             DetailedResult result = ExecuteCfCliCommand(args);
 
+            ThrowIfResultIndicatesInvalidRefreshToken(result);
+
             if (result == null)
             {
                 _logger.Error($"TargetOrg({orgName}) failed: {result}");
-            }
-            else if (result.CmdDetails.StdErr != null && result.CmdDetails.StdErr.Contains(_invalidRefreshTokenError))
-            {
-                throw new InvalidRefreshTokenException();
             }
             else if (!result.Succeeded)
             {
@@ -270,13 +265,11 @@ namespace Tanzu.Toolkit.Services.CfCli
             string args = $"{_targetSpaceCmd} {spaceName}";
             DetailedResult result = ExecuteCfCliCommand(args);
 
+            ThrowIfResultIndicatesInvalidRefreshToken(result);
+
             if (result == null)
             {
                 _logger.Error($"TargetSpace({spaceName}) failed: {result}");
-            }
-            else if (result.CmdDetails.StdErr != null && result.CmdDetails.StdErr.Contains(_invalidRefreshTokenError))
-            {
-                throw new InvalidRefreshTokenException();
             }
             else if (!result.Succeeded)
             {
@@ -787,6 +780,14 @@ namespace Tanzu.Toolkit.Services.CfCli
             }
 
             return tokenStr;
+        }
+
+        private static void ThrowIfResultIndicatesInvalidRefreshToken(DetailedResult result)
+        {
+            if (result != null && result.CmdDetails != null && result.CmdDetails.StdErr != null && result.CmdDetails.StdErr.Contains(_invalidRefreshTokenError))
+            {
+                throw new InvalidRefreshTokenException();
+            }
         }
     }
 
