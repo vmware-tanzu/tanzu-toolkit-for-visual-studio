@@ -649,7 +649,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         public async Task<DetailedResult> DeleteAppAsync(CloudFoundryApp app, bool skipSsl = true, bool removeRoutes = true, int retryAmount = 1)
         {
             string apiAddress = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
-            
+
             string accessToken;
             try
             {
@@ -740,7 +740,23 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 stack = "windows";
             }
 
-            DetailedResult cfPushResult = await _cfCliService.PushAppAsync(appName, targetOrg.OrgName, targetSpace.SpaceName, stdOutCallback, stdErrCallback, appProjPath, buildpack, stack);
+            DetailedResult cfPushResult;
+            try
+            {
+                cfPushResult = await _cfCliService.PushAppAsync(appName, targetOrg.OrgName, targetSpace.SpaceName, stdOutCallback, stdErrCallback, appProjPath, buildpack, stack);
+            }
+            catch (InvalidRefreshTokenException)
+            {
+                var msg = $"Unable to deploy app '{appName}' to '{targetCf.InstanceName}' because the connection has expired. Please log back in to re-authenticate.";
+                _logger.Information(msg);
+
+                return new DetailedResult
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                    FailureType = FailureType.InvalidRefreshToken,
+                };
+            }
 
             if (!cfPushResult.Succeeded)
             {
