@@ -8,6 +8,7 @@ using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
+using Tanzu.Toolkit.WpfViews.Services;
 using Tanzu.Toolkit.WpfViews.ThemeService;
 
 namespace Tanzu.Toolkit.WpfViews.Tests
@@ -24,6 +25,7 @@ namespace Tanzu.Toolkit.WpfViews.Tests
         protected Mock<IUiDispatcherService> mockUiDispatcherService;
         protected Mock<IThreadingService> mockThreadingService;
         protected Mock<IThemeService> mockThemeService;
+        protected Mock<IViewService> mockViewService;
 
         protected ViewTestSupport()
         {
@@ -36,6 +38,7 @@ namespace Tanzu.Toolkit.WpfViews.Tests
             mockUiDispatcherService = new Mock<IUiDispatcherService>();
             mockThreadingService = new Mock<IThreadingService>();
             mockThemeService = new Mock<IThemeService>();
+            mockViewService = new Mock<IViewService>();
 
             services.AddSingleton(mockCloudFoundryService.Object);
             services.AddSingleton(mockErrorDialogService.Object);
@@ -45,6 +48,7 @@ namespace Tanzu.Toolkit.WpfViews.Tests
             services.AddSingleton(mockUiDispatcherService.Object);
             services.AddSingleton(mockThreadingService.Object);
             services.AddSingleton(mockThemeService.Object);
+            services.AddSingleton(mockViewService.Object);
             this.services = services.BuildServiceProvider();
         }
     }
