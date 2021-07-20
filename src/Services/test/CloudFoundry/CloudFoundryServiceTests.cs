@@ -59,8 +59,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             _services = serviceCollection.BuildServiceProvider();
 
             _sut = new CloudFoundryService(_services);
-
-            FakeCfInstance.IsAuthenticated = true;
         }
 
         [TestCleanup]
@@ -556,21 +554,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
-        [TestCategory("GetOrgs")]
-        public async Task GetOrgsForCfInstanceAsync_MarksCfAsNotAuthenticated_WhenTokenRetrievalThrowsInvalidRefreshTokenException()
-        {
-            _mockCfCliService.Setup(m => m.
-                GetOAuthToken())
-                    .Throws(new InvalidRefreshTokenException());
-
-            Assert.IsTrue(FakeOrg.ParentCf.IsAuthenticated);
-
-            await _sut.GetOrgsForCfInstanceAsync(FakeCfInstance);
-
-            Assert.IsFalse(FakeOrg.ParentCf.IsAuthenticated);
-        }
-
-        [TestMethod]
         [TestCategory("GetSpaces")]
         public async Task GetSpacesForOrgAsync_ReturnsFailedResult_WhenTokenCannotBeFound()
         {
@@ -769,21 +752,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.AreEqual(null, result.CmdDetails);
             Assert.AreEqual(null, result.Content);
             Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
-        }
-
-        [TestMethod]
-        [TestCategory("GetSpaces")]
-        public async Task GetSpacesForOrgAsync_MarksParentCfAsNotAuthenticated_WhenTokenRetrievalThrowsInvalidRefreshTokenException()
-        {
-            _mockCfCliService.Setup(m => m.
-                GetOAuthToken())
-                    .Throws(new InvalidRefreshTokenException());
-
-            Assert.IsTrue(FakeSpace.ParentOrg.ParentCf.IsAuthenticated);
-
-            await _sut.GetSpacesForOrgAsync(FakeOrg);
-
-            Assert.IsFalse(FakeSpace.ParentOrg.ParentCf.IsAuthenticated);
         }
 
         [TestMethod]
@@ -994,21 +962,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
-        [TestCategory("GetApps")]
-        public async Task GetAppsForSpaceAsync_MarksParentCfAsNotAuthenticated_WhenTokenRetrievalThrowsInvalidRefreshTokenException()
-        {
-            _mockCfCliService.Setup(m => m.
-                GetOAuthToken())
-                    .Throws(new InvalidRefreshTokenException());
-
-            Assert.IsTrue(FakeApp.ParentSpace.ParentOrg.ParentCf.IsAuthenticated);
-
-            await _sut.GetAppsForSpaceAsync(FakeSpace);
-
-            Assert.IsFalse(FakeApp.ParentSpace.ParentOrg.ParentCf.IsAuthenticated);
-        }
-
-        [TestMethod]
         [TestCategory("AddCloudFoundryInstance")]
         public void AddCloudFoundryInstance_ThrowsException_WhenNameAlreadyExists()
         {
@@ -1208,21 +1161,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
-        [TestCategory("StopApp")]
-        public async Task StopAppAsync_MarksParentCfAsNotAuthenticated_WhenTokenRetrievalThrowsInvalidRefreshTokenException()
-        {
-            _mockCfCliService.Setup(m => m.
-                GetOAuthToken())
-                    .Throws(new InvalidRefreshTokenException());
-
-            Assert.IsTrue(FakeApp.ParentSpace.ParentOrg.ParentCf.IsAuthenticated);
-
-            await _sut.StopAppAsync(FakeApp, retryAmount: 0);
-
-            Assert.IsFalse(FakeApp.ParentSpace.ParentOrg.ParentCf.IsAuthenticated);
-        }
-
-        [TestMethod]
         [TestCategory("StartApp")]
         public async Task StartAppAsync_ReturnsSuccessfulResult_AndUpdatesAppState()
         {
@@ -1361,21 +1299,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
-        [TestCategory("StartApp")]
-        public async Task StartAppAsync_MarksParentCfAsNotAuthenticated_WhenTokenRetrievalThrowsInvalidRefreshTokenException()
-        {
-            _mockCfCliService.Setup(m => m.
-                GetOAuthToken())
-                    .Throws(new InvalidRefreshTokenException());
-
-            Assert.IsTrue(FakeApp.ParentSpace.ParentOrg.ParentCf.IsAuthenticated);
-
-            await _sut.StartAppAsync(FakeApp, retryAmount: 0);
-
-            Assert.IsFalse(FakeApp.ParentSpace.ParentOrg.ParentCf.IsAuthenticated);
-        }
-
-        [TestMethod]
         [TestCategory("DeleteApp")]
         public async Task DeleteAppAsync_ReturnsSuccessfulResult_AndUpdatesAppState()
         {
@@ -1511,21 +1434,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result.Explanation);
             Assert.IsNull(result.CmdDetails);
             Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
-        }
-
-        [TestMethod]
-        [TestCategory("DeleteApp")]
-        public async Task DeleteAppAsync_MarksParentCfAsNotAuthenticated_WhenTokenRetrievalThrowsInvalidRefreshTokenException()
-        {
-            _mockCfCliService.Setup(m => m.
-                GetOAuthToken())
-                    .Throws(new InvalidRefreshTokenException());
-
-            Assert.IsTrue(FakeApp.ParentSpace.ParentOrg.ParentCf.IsAuthenticated);
-
-            await _sut.DeleteAppAsync(FakeApp, retryAmount: 0);
-
-            Assert.IsFalse(FakeApp.ParentSpace.ParentOrg.ParentCf.IsAuthenticated);
         }
 
         [TestMethod]
