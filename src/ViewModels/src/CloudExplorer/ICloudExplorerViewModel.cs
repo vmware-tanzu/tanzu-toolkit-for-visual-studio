@@ -5,6 +5,8 @@ namespace Tanzu.Toolkit.ViewModels
     public interface ICloudExplorerViewModel : IViewModel
     {
         bool HasCloudTargets { get; set; }
+        bool AuthenticationRequired { get; set; }
+
         bool CanOpenLoginView(object arg);
         void OpenLoginView(object arg);
         bool CanStopCfApp(object arg);

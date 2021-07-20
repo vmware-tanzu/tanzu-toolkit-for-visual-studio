@@ -37,6 +37,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 mock.NavigateTo(nameof(OutputViewModel), null))
                     .Returns(new FakeOutputView());
 
+            // * return fake view/viewmodel for cloudExplorer window
+            MockViewLocatorService.Setup(mock =>
+                mock.NavigateTo(nameof(CloudExplorerViewModel), null))
+                    .Returns(new FakeCloudExplorerView());
+
             _sut = new DeploymentDialogViewModel(Services, _fakeProjPath, FakeTargetFrameworkMoniker);
 
             _receivedEvents = new List<string>();
@@ -208,6 +213,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("StartDeployment")]
         public async Task StartDeploymentTask_UpdatesDeploymentInProgress_WhenComplete()
         {
             var receivedEvents = new List<string>();
@@ -235,6 +241,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("StartDeployment")]
         public async Task StartDeploymentTask_PassesOutputViewModelAppendLineMethod_AsCallbacks()
         {
             _sut.AppName = _fakeAppName;
@@ -255,6 +262,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("StartDeployment")]
         public async Task StartDeploymentTask_LogsError_WhenDeployResultReportsFailure()
         {
             _sut.AppName = _fakeAppName;
@@ -292,6 +300,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("StartDeployment")]
         public async Task StartDeploymentTask_DisplaysErrorDialog_WhenDeployResultReportsFailure()
         {
             _sut.AppName = _fakeAppName;
@@ -315,6 +324,36 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 DisplayErrorDialog(expectedErrorTitle, expectedErrorMsg));
 
             await _sut.StartDeployment();
+        }
+
+        [TestMethod]
+        [TestCategory("StartDeployment")]
+        public async Task StartDeployment_SetsAuthRequiredToTrueOnCloudExplorer_WhenFailureTypeIsInvalidRefreshToken()
+        {
+            _sut.AppName = _fakeAppName;
+            _sut.SelectedCf = _fakeCfInstance;
+            _sut.SelectedOrg = _fakeOrg;
+            _sut.SelectedSpace = _fakeSpace;
+
+            StdOutDelegate expectedStdOutCallback = _sut.OutputViewModel.AppendLine;
+            StdErrDelegate expectedStdErrCallback = _sut.OutputViewModel.AppendLine;
+
+            var invalidRefreshTokenFailure = new DetailedResult(false, "junk error", FakeFailureCmdResult)
+            {
+                FailureType = FailureType.InvalidRefreshToken
+            };
+
+            MockCloudFoundryService.Setup(mock => mock.
+                DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, _defaultFullFWFlag,
+                             expectedStdOutCallback,
+                             expectedStdErrCallback))
+                    .ReturnsAsync(invalidRefreshTokenFailure);
+
+            Assert.IsFalse(_sut.CloudExplorerViewModel.AuthenticationRequired);
+
+            await _sut.StartDeployment();
+
+            Assert.IsTrue(_sut.CloudExplorerViewModel.AuthenticationRequired);
         }
 
         [TestMethod]
@@ -530,6 +569,25 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public FakeOutputView()
         {
             ViewModel = new OutputViewModel(Services);
+            ShowMethodWasCalled = false;
+        }
+
+        public void Show()
+        {
+            ShowMethodWasCalled = true;
+        }
+    }
+
+    public class FakeCloudExplorerView : ViewModelTestSupport, IView
+    {
+        public IViewModel ViewModel { get; }
+
+        public bool ShowMethodWasCalled { get; private set; }
+
+        public FakeCloudExplorerView()
+        {
+            MockCloudFoundryService.SetupGet(mock => mock.CloudFoundryInstances).Returns(new Dictionary<string, CloudFoundryInstance>());
+            ViewModel = new CloudExplorerViewModel(Services);
             ShowMethodWasCalled = false;
         }
 

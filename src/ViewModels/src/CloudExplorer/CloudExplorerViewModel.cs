@@ -93,7 +93,7 @@ namespace Tanzu.Toolkit.ViewModels
         {
             get => _authenticationRequired;
 
-            internal set
+            set
             {
                 _authenticationRequired = value;
 

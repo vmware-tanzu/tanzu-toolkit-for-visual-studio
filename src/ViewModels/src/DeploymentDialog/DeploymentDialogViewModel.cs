@@ -21,7 +21,6 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string DeploymentErrorMsg = "Unable to deploy app:";
         internal const string GetOrgsFailureMsg = "Unable to fetch orgs.";
         internal const string GetSpacesFailureMsg = "Unable to fetch spaces.";
-        
 
         private readonly string _projDir;
         private string _status;
@@ -29,6 +28,7 @@ namespace Tanzu.Toolkit.ViewModels
         private readonly bool _fullFrameworkDeployment = false;
         private readonly IErrorDialog _dialogService;
         internal IOutputViewModel OutputViewModel;
+        internal ICloudExplorerViewModel CloudExplorerViewModel;
 
         private List<CloudFoundryInstance> _cfInstances;
         private List<CloudFoundryOrganization> _cfOrgs;
@@ -41,8 +41,12 @@ namespace Tanzu.Toolkit.ViewModels
             : base(services)
         {
             _dialogService = services.GetRequiredService<IErrorDialog>();
+
             IView outputView = ViewLocatorService.NavigateTo(nameof(ViewModels.OutputViewModel)) as IView;
             OutputViewModel = outputView?.ViewModel as IOutputViewModel;
+
+            IView cloudExplorerView = ViewLocatorService.NavigateTo(nameof(ViewModels.CloudExplorerViewModel)) as IView;
+            CloudExplorerViewModel = cloudExplorerView?.ViewModel as ICloudExplorerViewModel;
 
             DeploymentStatus = InitialStatus;
             DeploymentInProgress = false;
@@ -297,6 +301,11 @@ namespace Tanzu.Toolkit.ViewModels
 
             if (!deploymentResult.Succeeded)
             {
+                if (deploymentResult.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
+                {
+                    CloudExplorerViewModel.AuthenticationRequired = true;
+                }
+
                 var errorTitle = $"{DeploymentErrorMsg} {AppName}.";
                 var errorMsg = deploymentResult.Explanation;
 
@@ -307,6 +316,7 @@ namespace Tanzu.Toolkit.ViewModels
                     SelectedSpace.ParentOrg.OrgName,
                     SelectedSpace.SpaceName,
                     deploymentResult.ToString());
+
                 _dialogService.DisplayErrorDialog(errorTitle, errorMsg);
             }
 
