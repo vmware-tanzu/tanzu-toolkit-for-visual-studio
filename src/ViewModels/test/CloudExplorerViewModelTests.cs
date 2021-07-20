@@ -896,6 +896,25 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsTrue(fakeView.ShowMethodWasCalled);
         }
+
+        [TestMethod]
+        [TestCategory("AuthenticationRequired")]
+        public void SettingAuthenticationRequiredToTrue_CollapsesAllCfInstanceViewModels() 
+        {
+            _sut.CloudFoundryList.Add(new CfInstanceViewModel(FakeCfInstance, _sut, Services, expanded: true));
+            _sut.CloudFoundryList.Add(new CfInstanceViewModel(FakeCfInstance, _sut, Services, expanded: true));
+            _sut.CloudFoundryList.Add(new CfInstanceViewModel(FakeCfInstance, _sut, Services, expanded: true));
+
+            Assert.IsFalse(_sut.AuthenticationRequired);
+            
+            _sut.AuthenticationRequired = true;
+
+            Assert.IsTrue(_sut.AuthenticationRequired);
+            foreach (CfInstanceViewModel cfivm in _sut.CloudFoundryList)
+            {
+                Assert.IsFalse(cfivm.IsExpanded);
+            }
+        }
     }
 
     internal class FakeCfInstanceViewModel : CfInstanceViewModel

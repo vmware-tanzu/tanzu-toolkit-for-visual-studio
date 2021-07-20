@@ -96,6 +96,12 @@ namespace Tanzu.Toolkit.ViewModels
             internal set
             {
                 _authenticationRequired = value;
+
+                foreach (CfInstanceViewModel cfivm in CloudFoundryList)
+                {
+                    cfivm.IsExpanded = false;
+                }
+
                 RaisePropertyChangedEvent("AuthenticationRequired");
             }
         }
