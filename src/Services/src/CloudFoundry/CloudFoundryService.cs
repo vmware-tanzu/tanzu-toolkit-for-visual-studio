@@ -163,8 +163,6 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
             catch (InvalidRefreshTokenException)
             {
-                cf.IsAuthenticated = false;
-
                 var msg = $"Unable to retrieve orgs for '{cf.InstanceName}' because the connection has expired. Please log back in to re-authenticate.";
                 _logger.Information(msg);
 
@@ -264,8 +262,6 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
             catch (InvalidRefreshTokenException)
             {
-                org.ParentCf.IsAuthenticated = false;
-
                 var msg = $"Unable to retrieve spaces for '{org.OrgName}' because the connection to '{org.ParentCf.InstanceName}' has expired. Please log back in to re-authenticate.";
                 _logger.Information(msg);
 
@@ -365,8 +361,6 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
             catch (InvalidRefreshTokenException)
             {
-                space.ParentOrg.ParentCf.IsAuthenticated = false;
-
                 var msg = $"Unable to retrieve apps for '{space.SpaceName}' because the connection to '{space.ParentOrg.ParentCf.InstanceName}' has expired. Please log back in to re-authenticate.";
                 _logger.Information(msg);
 
@@ -466,8 +460,6 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
             catch (InvalidRefreshTokenException)
             {
-                app.ParentSpace.ParentOrg.ParentCf.IsAuthenticated = false;
-
                 var msg = $"Unable to stop app '{app.AppName}' because the connection to '{app.ParentSpace.ParentOrg.ParentCf.InstanceName}' has expired. Please log back in to re-authenticate.";
                 _logger.Information(msg);
 
@@ -560,8 +552,6 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
             catch (InvalidRefreshTokenException)
             {
-                app.ParentSpace.ParentOrg.ParentCf.IsAuthenticated = false;
-
                 var msg = $"Unable to start app '{app.AppName}' because the connection to '{app.ParentSpace.ParentOrg.ParentCf.InstanceName}' has expired. Please log back in to re-authenticate.";
                 _logger.Information(msg);
 
@@ -657,8 +647,6 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
             catch (InvalidRefreshTokenException)
             {
-                app.ParentSpace.ParentOrg.ParentCf.IsAuthenticated = false;
-
                 var msg = $"Unable to delete app '{app.AppName}' because the connection to '{app.ParentSpace.ParentOrg.ParentCf.InstanceName}' has expired. Please log back in to re-authenticate.";
                 _logger.Information(msg);
 
