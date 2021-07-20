@@ -589,6 +589,8 @@ namespace Tanzu.Toolkit.Services.CfCli
 
             var recentLogsResult = await logsTask;
 
+            ThrowIfResultIndicatesInvalidRefreshToken(recentLogsResult);
+
             var content = recentLogsResult.CmdDetails.StdOut;
             var cmdDetails = recentLogsResult.CmdDetails;
             var explanation = recentLogsResult.Explanation;
