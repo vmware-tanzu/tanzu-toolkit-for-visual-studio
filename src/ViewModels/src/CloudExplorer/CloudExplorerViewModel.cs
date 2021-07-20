@@ -244,6 +244,11 @@ namespace Tanzu.Toolkit.ViewModels
                 var recentLogsResult = await CloudFoundryService.GetRecentLogs(cfApp);
                 if (!recentLogsResult.Succeeded)
                 {
+                    if (recentLogsResult.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
+                    {
+                        AuthenticationRequired = true;
+                    }
+
                     Logger.Error($"Unable to retrieve recent logs for {cfApp.AppName}. {recentLogsResult.Explanation}. {recentLogsResult.CmdDetails}");
                     _dialogService.DisplayErrorDialog($"Unable to retrieve recent logs for {cfApp.AppName}.", recentLogsResult.Explanation);
                 }

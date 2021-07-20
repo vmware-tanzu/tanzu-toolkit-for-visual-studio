@@ -769,7 +769,27 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
         public async Task<DetailedResult<string>> GetRecentLogs(CloudFoundryApp app)
         {
-            return await _cfCliService.GetRecentAppLogs(app.AppName, app.ParentSpace.ParentOrg.OrgName, app.ParentSpace.SpaceName);
+            DetailedResult<string> logsResult;
+
+            try
+            {
+                logsResult = await _cfCliService.GetRecentAppLogs(app.AppName, app.ParentSpace.ParentOrg.OrgName, app.ParentSpace.SpaceName);
+            }
+            catch (InvalidRefreshTokenException)
+            {
+                var msg = $"Unable to retrieve app logs from '{app.AppName}' because the connection has expired. Please log back in to re-authenticate.";
+                _logger.Information(msg);
+
+                return new DetailedResult<string>
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                    Content = null,
+                    FailureType = FailureType.InvalidRefreshToken,
+                };
+            }
+
+            return logsResult;
         }
 
         private void FormatExceptionMessage(Exception ex, List<string> message)

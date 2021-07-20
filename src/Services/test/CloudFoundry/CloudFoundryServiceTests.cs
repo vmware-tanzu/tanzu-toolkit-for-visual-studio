@@ -1649,5 +1649,23 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.AreEqual(result.Explanation, fakeLogsResult.Explanation);
             Assert.AreEqual(result.CmdDetails, fakeLogsResult.CmdDetails);
         }
+
+        [TestMethod]
+        [TestCategory("GetRecentLogs")]
+        public async Task GetRecentLogs_ReturnsFailedResult_WhenCfCliCommandThrowsInvalidRefreshTokenException()
+        {
+            _mockCfCliService.Setup(m => m
+                .GetRecentAppLogs(FakeApp.AppName, FakeOrg.OrgName, FakeSpace.SpaceName))
+                    .Throws(new InvalidRefreshTokenException());
+
+            var result = await _sut.GetRecentLogs(FakeApp);
+
+            Assert.IsNull(result.Content);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsTrue(result.Explanation.Contains("Unable to retrieve app logs"));
+            Assert.IsTrue(result.Explanation.Contains(FakeApp.AppName));
+            Assert.IsTrue(result.Explanation.Contains("Please log back in to re-authenticate"));
+            Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
+        }
     }
 }
