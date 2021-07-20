@@ -844,6 +844,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("DisplayRecentAppLogs")]
         public async Task DisplayRecentAppLogs_LogsError_WhenArgumentTypeIsNotApp()
         {
             await _sut.DisplayRecentAppLogs(new object());
@@ -851,6 +852,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("DisplayRecentAppLogs")]
         public async Task DisplayRecentAppLogs_DisplaysErrorDialog_WhenLogsCmdFails()
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", null, "junk");
@@ -876,6 +878,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("DisplayRecentAppLogs")]
         public async Task DisplayRecentAppLogs_CallsViewShowMethod_WhenLogsCmdSucceeds()
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", null, "junk");
@@ -898,15 +901,44 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("DisplayRecentAppLogs")]
+        public async Task DisplayRecentAppLogs_SetsAuthenticationRequiredToTrue_WhenLogsCmdFailsDueToInvalidRefreshToken()
+        {
+            var fakeApp = new CloudFoundryApp("junk", "junk", null, "junk");
+            var invalidRefreshTokenResult = new DetailedResult<string>(content: null, succeeded: false, explanation: ":(", cmdDetails: FakeFailureCmdResult)
+            {
+                FailureType = FailureType.InvalidRefreshToken
+            };
+
+            MockViewLocatorService.Setup(m => m.
+                NavigateTo(nameof(OutputViewModel), null))
+                    .Callback(() => Assert.Fail("Output view does not need to be retrieved."));
+
+            MockCloudFoundryService.Setup(m => m.
+                GetRecentLogs(fakeApp))
+                    .ReturnsAsync(invalidRefreshTokenResult);
+
+            Assert.IsFalse(_sut.AuthenticationRequired);
+
+            await _sut.DisplayRecentAppLogs(fakeApp);
+
+            Assert.IsTrue(_sut.AuthenticationRequired);
+
+            MockErrorDialogService.Verify(m => m.
+                DisplayErrorDialog(It.Is<string>(s => s.Contains(fakeApp.AppName)), It.Is<string>(s => s.Contains(invalidRefreshTokenResult.Explanation))),
+                    Times.Once);
+        }
+
+        [TestMethod]
         [TestCategory("AuthenticationRequired")]
-        public void SettingAuthenticationRequiredToTrue_CollapsesAllCfInstanceViewModels() 
+        public void SettingAuthenticationRequiredToTrue_CollapsesAllCfInstanceViewModels()
         {
             _sut.CloudFoundryList.Add(new CfInstanceViewModel(FakeCfInstance, _sut, Services, expanded: true));
             _sut.CloudFoundryList.Add(new CfInstanceViewModel(FakeCfInstance, _sut, Services, expanded: true));
             _sut.CloudFoundryList.Add(new CfInstanceViewModel(FakeCfInstance, _sut, Services, expanded: true));
 
             Assert.IsFalse(_sut.AuthenticationRequired);
-            
+
             _sut.AuthenticationRequired = true;
 
             Assert.IsTrue(_sut.AuthenticationRequired);
