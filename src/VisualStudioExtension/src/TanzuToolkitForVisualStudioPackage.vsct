@@ -88,7 +88,7 @@
         <Parent guid="guidTanzuToolkitPackageCmdSet" id="ViewMenuGroup" />
         <Icon guid="guidImages2" id="bmpPic1" />
         <Strings>
-          <ButtonText>Tanzu Output Window</ButtonText>
+          <ButtonText>Tanzu Application Service Output Window</ButtonText>
         </Strings>
       </Button>
       
