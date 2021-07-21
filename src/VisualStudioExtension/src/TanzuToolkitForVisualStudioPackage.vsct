@@ -72,7 +72,7 @@
 				<Parent guid="guidTanzuToolkitPackageCmdSet" id="ViewMenuGroup" />
 				<Icon guid="guidImages" id="bmpPic1" />
 				<Strings>
-					<ButtonText>Tanzu Cloud Explorer</ButtonText>
+					<ButtonText>Tanzu Application Service Explorer</ButtonText>
 				</Strings>
 			</Button>
       
