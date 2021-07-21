@@ -104,8 +104,8 @@ namespace Tanzu.Toolkit.Services.CfCli
         /// <para>
         /// A cached value of the access token will be returned as long as the expiration time of the token has not yet been reached.
         /// If there is no cached value for the access token or the expiration time of the cached token has been reached, this method 
-        /// will invoke the CF CLI oauth-token command (<see cref="_getOAuthTokenCmd"/>) to acquire a new access token. Invoking 
-        /// <see cref="_getOAuthTokenCmd"/> will attempt to renew the access token using the refresh token stored by the CF CLI.
+        /// will invoke the CF CLI oauth-token command to acquire a new access token. Invoking the CF CLI oauth-token command will 
+        /// attempt to renew the access token using the refresh token stored by the CF CLI.
         /// </para>
         /// <para>
         /// The cached value for the access token can be cleared using <see cref="ClearCachedAccessToken"/>; this will force a fresh 
