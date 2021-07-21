@@ -384,7 +384,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             }
 
             Assert.IsNotNull(thrownException);
-            Assert.AreEqual(typeof(InvalidRefreshTokenException), thrownException.GetType());
+            Assert.IsTrue(thrownException is InvalidRefreshTokenException);
         }
 
         [TestMethod]
@@ -868,7 +868,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             }
 
             Assert.IsNotNull(thrownException);
-            Assert.AreEqual(typeof(InvalidRefreshTokenException), thrownException.GetType());
+            Assert.IsTrue(thrownException is InvalidRefreshTokenException);
         }
 
         [TestMethod]
@@ -936,7 +936,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             }
 
             Assert.IsNotNull(thrownException);
-            Assert.AreEqual(typeof(InvalidRefreshTokenException), thrownException.GetType());
+            Assert.IsTrue(thrownException is InvalidRefreshTokenException);
         }
 
         [TestMethod]
@@ -1345,7 +1345,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             }
 
             Assert.IsNotNull(thrownException);
-            Assert.AreEqual(typeof(InvalidRefreshTokenException), thrownException.GetType());
+            Assert.IsTrue(thrownException is InvalidRefreshTokenException);
         }
 
         [TestMethod]
@@ -1377,7 +1377,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             }
 
             Assert.IsNotNull(thrownException);
-            Assert.AreEqual(typeof(InvalidRefreshTokenException), thrownException.GetType());
+            Assert.IsTrue(thrownException is InvalidRefreshTokenException);
         }
 
         [TestMethod]
@@ -1413,7 +1413,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             }
 
             Assert.IsNotNull(thrownException);
-            Assert.AreEqual(typeof(InvalidRefreshTokenException), thrownException.GetType());
+            Assert.IsTrue(thrownException is InvalidRefreshTokenException);
         }
 
         [TestMethod]
@@ -1612,7 +1612,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             }
 
             Assert.IsNotNull(thrownException);
-            Assert.AreEqual(typeof(InvalidRefreshTokenException), thrownException.GetType());
+            Assert.IsTrue(thrownException is InvalidRefreshTokenException);
         }
 
         [TestMethod]
@@ -1644,7 +1644,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             }
 
             Assert.IsNotNull(thrownException);
-            Assert.AreEqual(typeof(InvalidRefreshTokenException), thrownException.GetType());
+            Assert.IsTrue(thrownException is InvalidRefreshTokenException);
         }
 
         [TestMethod]
@@ -1680,7 +1680,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             }
 
             Assert.IsNotNull(thrownException);
-            Assert.AreEqual(typeof(InvalidRefreshTokenException), thrownException.GetType());
+            Assert.IsTrue(thrownException is InvalidRefreshTokenException);
         }
 
     }

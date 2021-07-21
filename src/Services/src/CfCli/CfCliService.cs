@@ -154,7 +154,7 @@ namespace Tanzu.Toolkit.Services.CfCli
                         }
                         catch (Exception ex)
                         {
-                            if (ex.GetType() == typeof(InvalidRefreshTokenException))
+                            if (ex is InvalidRefreshTokenException)
                             {
                                 throw ex;
                             }
