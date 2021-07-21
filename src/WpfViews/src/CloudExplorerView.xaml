@@ -9,7 +9,6 @@
                 mc:Ignorable="d"
                 Name="CloudExplorerViewElement"
                 d:DesignHeight="300" d:DesignWidth="300">
-
   
     <UserControl.Resources>
         <converters:VisibilityConverter x:Key="Visibility" />
@@ -25,6 +24,13 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+        </Style>
+        
+        <Style x:Key="RowItemStyle" TargetType="{x:Type Button}">
+            <Setter Property="Background" Value="{Binding ElementName=CloudExplorerViewElement, Path=Background}"/>
+            <Setter Property="Foreground" Value="{Binding ElementName=CloudExplorerViewElement, Path=Foreground}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
         </Style>
     </UserControl.Resources>
     <Grid>
@@ -98,12 +104,11 @@
 
         <Rectangle Grid.Row="1" Grid.RowSpan="1" Grid.ColumnSpan="3" />
 
-        <TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" 
-                 Margin="5"  IsReadOnly="True" 
+        <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" 
+                 Margin="5"
                  TextWrapping="Wrap"  
                  ScrollViewer.VerticalScrollBarVisibility="Auto"
                  HorizontalAlignment="Center" VerticalAlignment="Center"
-                 MinLines="3" MaxLines="3" 
                  Text="Not Yet Connected" 
                  Visibility="{Binding Path=HasCloudTargets, Converter={StaticResource InverseVisibility}}"/>
 
@@ -128,9 +133,9 @@
                                           ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                         <Image Source="Resources/CloudFoundry.png" Stretch="Uniform" Height="16px" Width="16px" Margin="0,2,4,0"/>
-                        <Button Content="{Binding DisplayText}" VerticalAlignment="Center" HorizontalAlignment="Center" 
-                                Background="Transparent" BorderThickness="0" Grid.Row="0" Grid.Column="1" 
-                                Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
+                        <Button Content="{Binding DisplayText}"
+                                Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
+                                Style="{StaticResource RowItemStyle}">
                             <Button.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem Header="Delete Connection" 
@@ -150,7 +155,14 @@
                                           ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                         <Image Source="Resources/CfOrg.png" Stretch="Uniform" Height="16px" Width="16px" Margin="0,2,4,0"/>
-                        <TextBlock Text="{Binding DisplayText}" Foreground="{Binding ElementName=CloudExplorerViewElement, Path=Foreground}"/>
+                        <Button Content="{Binding DisplayText}" 
+                                Style="{StaticResource RowItemStyle}"
+                                Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
+                            <Button.ContextMenu>
+                                <ContextMenu>
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                        </Button>
                         <wpfviews:LoadingSpinnerSmall Grid.Row="0" Grid.Column="2" IsLoading="{Binding IsRefreshing}"/>
                     </StackPanel>
                 </HierarchicalDataTemplate>
@@ -160,8 +172,8 @@
                                           ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                         <Image Source="Resources/CfSpace.png" Stretch="Uniform" Height="16px" Width="16px" Margin="0,2,4,0"/>
-                        <Button Content="{Binding DisplayText}" VerticalAlignment="Center" HorizontalAlignment="Center" 
-                                Background="Transparent" BorderThickness="0" Grid.Row="0" Grid.Column="1" 
+                        <Button Content="{Binding DisplayText}" 
+                                Style="{StaticResource RowItemStyle}"
                                 Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
                             <Button.ContextMenu>
                                 <ContextMenu>
@@ -197,8 +209,10 @@
                                Grid.Row="0" Grid.Column="0" 
                                Visibility="{Binding Path=IsStopped, Converter={StaticResource Visibility}}"/>
 
-                        <Button Content="{Binding DisplayText}" VerticalAlignment="Center" HorizontalAlignment="Center" 
-                                Background="Transparent" BorderThickness="0" Grid.Row="0" Grid.Column="1" 
+                        <Button Content="{Binding DisplayText}"
+                                VerticalAlignment="Center"
+                                Grid.Row="0" Grid.Column="1" 
+                                Style="{StaticResource RowItemStyle}"
                                 Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
                             <Button.ContextMenu>
                                 <ContextMenu>
@@ -253,11 +267,5 @@
 
             </TreeView.Resources>
         </TreeView>
-
-        <!--<StatusBar Grid.Row="2" Grid.ColumnSpan="3" Background="{Binding ElementName=CloudExplorerViewElement, Path=Background}">
-            <StatusBarItem Visibility="{Binding AuthenticationRequired, Converter={StaticResource Visibility}}">
-                
-            </StatusBarItem>
-        </StatusBar>-->
     </Grid>
 </UserControl>
