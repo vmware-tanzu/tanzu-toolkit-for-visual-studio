@@ -360,7 +360,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
 
             Assert.IsNull(thrownException);
             Assert.IsNull(result);
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<Exception>()), Times.Once);
         }
 
         [TestMethod]
