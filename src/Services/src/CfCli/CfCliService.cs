@@ -159,7 +159,7 @@ namespace Tanzu.Toolkit.Services.CfCli
                                 throw ex;
                             }
 
-                            _logger.Error($"Something went wrong while attempting to renew access token {ex}");
+                            _logger.Error("Something went wrong while attempting to renew access token {TokenException}", ex);
                         }
                     }
                 }
@@ -235,13 +235,9 @@ namespace Tanzu.Toolkit.Services.CfCli
 
             ThrowIfResultIndicatesInvalidRefreshToken(result);
 
-            if (result == null)
+            if (result == null || !result.Succeeded)
             {
-                _logger.Error($"TargetOrg({orgName}) failed: {result}");
-            }
-            else if (!result.Succeeded)
-            {
-                _logger.Error($"TargetOrg({orgName}) failed: {result}");
+                _logger.Error("TargetOrg({OrgName}) failed: {TargetOrgResult}", orgName, result);
             }
 
             return result;
@@ -267,13 +263,9 @@ namespace Tanzu.Toolkit.Services.CfCli
 
             ThrowIfResultIndicatesInvalidRefreshToken(result);
 
-            if (result == null)
+            if (result == null || !result.Succeeded)
             {
-                _logger.Error($"TargetSpace({spaceName}) failed: {result}");
-            }
-            else if (!result.Succeeded)
-            {
-                _logger.Error($"TargetSpace({spaceName}) failed: {result}");
+                _logger.Error("TargetSpace({SpaceName}) failed: {TargetSpaceResult}", spaceName, result);
             }
 
             return result;
