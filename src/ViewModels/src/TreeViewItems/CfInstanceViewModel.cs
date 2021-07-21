@@ -45,8 +45,8 @@ namespace Tanzu.Toolkit.ViewModels
 
         public CloudFoundryInstance CloudFoundryInstance { get; }
 
-        public CfInstanceViewModel(CloudFoundryInstance cloudFoundryInstance, CloudExplorerViewModel parentCloudExplorer, IServiceProvider services, bool expanded = false)
-            : base(null, parentCloudExplorer, services, expanded: expanded)
+        public CfInstanceViewModel(CloudFoundryInstance cloudFoundryInstance, TasExplorerViewModel parentTasExplorer, IServiceProvider services, bool expanded = false)
+            : base(null, parentTasExplorer, services, expanded: expanded)
         {
             _dialogService = services.GetRequiredService<IErrorDialog>();
             CloudFoundryInstance = cloudFoundryInstance;
@@ -75,14 +75,14 @@ namespace Tanzu.Toolkit.ViewModels
 
                 foreach (CloudFoundryOrganization org in orgs)
                 {
-                    var newOrg = new OrgViewModel(org, this, ParentCloudExplorer, Services);
+                    var newOrg = new OrgViewModel(org, this, ParentTasExplorer, Services);
                     newOrgsList.Add(newOrg);
                 }
             }
             else if (orgsResponse.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
             {
                 IsExpanded = false;
-                ParentCloudExplorer.AuthenticationRequired = true;
+                ParentTasExplorer.AuthenticationRequired = true;
             }
             else
             {
@@ -113,7 +113,7 @@ namespace Tanzu.Toolkit.ViewModels
                     var updatedOrgsList = new ObservableCollection<TreeViewItemViewModel>();
                     foreach (CloudFoundryOrganization org in orgsResponse.Content)
                     {
-                        var newOrg = new OrgViewModel(org, this, ParentCloudExplorer, Services);
+                        var newOrg = new OrgViewModel(org, this, ParentTasExplorer, Services);
                         updatedOrgsList.Add(newOrg);
                     }
 

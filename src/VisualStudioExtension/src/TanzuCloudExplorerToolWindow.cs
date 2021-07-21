@@ -17,13 +17,13 @@ namespace Tanzu.Toolkit.VisualStudio
     /// </para>
     /// </remarks>
     [Guid("051b6546-acb2-4f74-85b3-60de9fefab24")]
-    public class TanzuCloudExplorerToolWindow : ToolWindowPane
+    public class TanzuTasExplorerToolWindow : ToolWindowPane
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TanzuCloudExplorerToolWindow"/> class.
+        /// Initializes a new instance of the <see cref="TanzuTasExplorerToolWindow"/> class.
         /// </summary>
         /// <param name="view"></param>
-        public TanzuCloudExplorerToolWindow(ICloudExplorerView view) : base(null)
+        public TanzuTasExplorerToolWindow(ITasExplorerView view) : base(null)
         {
             Caption = "Tanzu Application Service Explorer";
 

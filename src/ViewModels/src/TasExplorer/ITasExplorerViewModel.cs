@@ -2,7 +2,7 @@
 
 namespace Tanzu.Toolkit.ViewModels
 {
-    public interface ICloudExplorerViewModel : IViewModel
+    public interface ITasExplorerViewModel : IViewModel
     {
         bool HasCloudTargets { get; set; }
         bool AuthenticationRequired { get; set; }

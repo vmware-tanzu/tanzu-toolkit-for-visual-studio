@@ -2,7 +2,7 @@
 
 namespace Tanzu.Toolkit.WpfViews
 {
-    public interface ICloudExplorerView
+    public interface ITasExplorerView
     {
     }
 }

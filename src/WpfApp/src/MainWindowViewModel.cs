@@ -73,14 +73,14 @@ namespace Tanzu.Toolkit.WpfApp
             }
         }
 
-        public bool CanOpenCloudExplorer(object arg)
+        public bool CanOpenTasExplorer(object arg)
         {
             return true;
         }
 
-        public void OpenCloudExplorer(object arg)
+        public void OpenTasExplorer(object arg)
         {
-            ActiveView = ViewLocatorService.NavigateTo(typeof(CloudExplorerViewModel).Name);
+            ActiveView = ViewLocatorService.NavigateTo(typeof(TasExplorerViewModel).Name);
         }
 
         public bool CanInvokeCommandPrompt(object arg)

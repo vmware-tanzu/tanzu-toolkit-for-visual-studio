@@ -1,9 +1,5 @@
-﻿using Microsoft.VisualStudio.Shell.Interop;
-using System;
-using System.Windows;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.WpfViews.Commands;
 using Tanzu.Toolkit.WpfViews.Services;
@@ -12,9 +8,9 @@ using Tanzu.Toolkit.WpfViews.ThemeService;
 namespace Tanzu.Toolkit.WpfViews
 {
     /// <summary>
-    /// Interaction logic for CloudExplorerView.xaml.
+    /// Interaction logic for TasExplorerView.xaml.
     /// </summary>
-    public partial class CloudExplorerView : UserControl, ICloudExplorerView, IView
+    public partial class TasExplorerView : UserControl, ITasExplorerView, IView
     {
         private IViewService ViewService;
 
@@ -29,12 +25,12 @@ namespace Tanzu.Toolkit.WpfViews
         public ICommand ReAuthenticateCommand { get; }
         public IViewModel ViewModel { get; private set; }
 
-        public CloudExplorerView()
+        public TasExplorerView()
         {
             InitializeComponent();
         }
 
-        public CloudExplorerView(ICloudExplorerViewModel viewModel, IThemeService themeService, IViewService viewService)
+        public TasExplorerView(ITasExplorerViewModel viewModel, IThemeService themeService, IViewService viewService)
         {
             ViewModel = viewModel;
             ViewService = viewService;

@@ -6,9 +6,9 @@ namespace Tanzu.Toolkit.WpfApp
     {
         bool CanInvokeCfCli(object arg);
         bool CanInvokeCommandPrompt(object arg);
-        bool CanOpenCloudExplorer(object arg);
+        bool CanOpenTasExplorer(object arg);
         void InvokeCfCli(object arg);
         void InvokeCommandPrompt(object arg);
-        void OpenCloudExplorer(object arg);
+        void OpenTasExplorer(object arg);
     }
 }

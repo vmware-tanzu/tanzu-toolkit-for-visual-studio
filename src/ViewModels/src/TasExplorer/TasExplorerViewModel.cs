@@ -10,7 +10,7 @@ using Tanzu.Toolkit.Services.Threading;
 
 namespace Tanzu.Toolkit.ViewModels
 {
-    public class CloudExplorerViewModel : AbstractViewModel, ICloudExplorerViewModel
+    public class TasExplorerViewModel : AbstractViewModel, ITasExplorerViewModel
     {
         internal static readonly string _stopAppErrorMsg = "Encountered an error while stopping app";
         internal static readonly string _startAppErrorMsg = "Encountered an error while starting app";
@@ -26,7 +26,7 @@ namespace Tanzu.Toolkit.ViewModels
         private readonly IThreadingService _threadingService;
         private readonly IErrorDialog _dialogService;
 
-        public CloudExplorerViewModel(IServiceProvider services)
+        public TasExplorerViewModel(IServiceProvider services)
             : base(services)
         {
             _dialogService = services.GetRequiredService<IErrorDialog>();
@@ -60,7 +60,7 @@ namespace Tanzu.Toolkit.ViewModels
         }
 
         /// <summary>
-        /// A thread-safe indicator of whether or not this <see cref="CloudExplorerViewModel"/> 
+        /// A thread-safe indicator of whether or not this <see cref="TasExplorerViewModel"/> 
         /// is in the process of updating all <see cref="CfInstanceViewModel"/>s, 
         /// <see cref="OrgViewModel"/>s, <see cref="SpaceViewModel"/>s & <see cref="AppViewModel"/>s.
         /// </summary>
@@ -172,7 +172,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 var errorTitle = "Unable to add more TAS connections.";
                 var errorMsg = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
-                errorMsg += System.Environment.NewLine + "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Cloud Explorer & re-connecting to a new one.";
+                errorMsg += System.Environment.NewLine + "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Application Service Explorer & re-connecting to a new one.";
 
                 _dialogService.DisplayErrorDialog(errorTitle, errorMsg);
             }
@@ -264,7 +264,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
-                Logger.Error($"CloudExplorerViewModel.GetRecentAppLogs received expected argument 'app' to be of type '{typeof(CloudFoundryApp)}', but instead received type '{app.GetType()}'.");
+                Logger.Error($"TasExplorerViewModel.GetRecentAppLogs received expected argument 'app' to be of type '{typeof(CloudFoundryApp)}', but instead received type '{app.GetType()}'.");
             }
         }
 

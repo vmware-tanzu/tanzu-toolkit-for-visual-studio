@@ -45,8 +45,8 @@ namespace Tanzu.Toolkit.ViewModels
 
         public CloudFoundryOrganization Org { get; }
 
-        public OrgViewModel(CloudFoundryOrganization org, CfInstanceViewModel parentCfInstanceViewModel, CloudExplorerViewModel parentCloudExplorer, IServiceProvider services, bool expanded = false)
-            : base(parentCfInstanceViewModel, parentCloudExplorer, services, expanded: expanded)
+        public OrgViewModel(CloudFoundryOrganization org, CfInstanceViewModel parentCfInstanceViewModel, TasExplorerViewModel parentTasExplorer, IServiceProvider services, bool expanded = false)
+            : base(parentCfInstanceViewModel, parentTasExplorer, services, expanded: expanded)
         {
             _dialogService = services.GetRequiredService<IErrorDialog>();
 
@@ -76,14 +76,14 @@ namespace Tanzu.Toolkit.ViewModels
 
                 foreach (CloudFoundrySpace space in spaces)
                 {
-                    var newSpace = new SpaceViewModel(space, this, ParentCloudExplorer, Services);
+                    var newSpace = new SpaceViewModel(space, this, ParentTasExplorer, Services);
                     newSpacesList.Add(newSpace);
                 }
             }
             else if (spacesResponse.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
             {
                 Parent.IsExpanded = false;
-                ParentCloudExplorer.AuthenticationRequired = true;
+                ParentTasExplorer.AuthenticationRequired = true;
             }
             else
             {
@@ -114,7 +114,7 @@ namespace Tanzu.Toolkit.ViewModels
                     var updatedSpacesList = new ObservableCollection<TreeViewItemViewModel>();
                     foreach (CloudFoundrySpace space in spacesResponse.Content)
                     {
-                        var newSpace = new SpaceViewModel(space, this, ParentCloudExplorer, Services);
+                        var newSpace = new SpaceViewModel(space, this, ParentTasExplorer, Services);
                         updatedSpacesList.Add(newSpace);
                     }
 

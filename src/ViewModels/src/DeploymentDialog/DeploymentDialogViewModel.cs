@@ -28,7 +28,7 @@ namespace Tanzu.Toolkit.ViewModels
         private readonly bool _fullFrameworkDeployment = false;
         private readonly IErrorDialog _dialogService;
         internal IOutputViewModel OutputViewModel;
-        internal ICloudExplorerViewModel CloudExplorerViewModel;
+        internal ITasExplorerViewModel TasExplorerViewModel;
 
         private List<CloudFoundryInstance> _cfInstances;
         private List<CloudFoundryOrganization> _cfOrgs;
@@ -45,8 +45,8 @@ namespace Tanzu.Toolkit.ViewModels
             IView outputView = ViewLocatorService.NavigateTo(nameof(ViewModels.OutputViewModel)) as IView;
             OutputViewModel = outputView?.ViewModel as IOutputViewModel;
 
-            IView cloudExplorerView = ViewLocatorService.NavigateTo(nameof(ViewModels.CloudExplorerViewModel)) as IView;
-            CloudExplorerViewModel = cloudExplorerView?.ViewModel as ICloudExplorerViewModel;
+            IView tasExplorerView = ViewLocatorService.NavigateTo(nameof(ViewModels.TasExplorerViewModel)) as IView;
+            TasExplorerViewModel = tasExplorerView?.ViewModel as ITasExplorerViewModel;
 
             DeploymentStatus = InitialStatus;
             DeploymentInProgress = false;
@@ -227,7 +227,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 var errorTitle = "Unable to add more TAS connections.";
                 var errorMsg = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
-                errorMsg += System.Environment.NewLine + "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Cloud Explorer & re-connecting to a new one.";
+                errorMsg += System.Environment.NewLine + "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Application Service Explorer & re-connecting to a new one.";
 
                 _dialogService.DisplayErrorDialog(errorTitle, errorMsg);
             }
@@ -303,7 +303,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 if (deploymentResult.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
                 {
-                    CloudExplorerViewModel.AuthenticationRequired = true;
+                    TasExplorerViewModel.AuthenticationRequired = true;
                 }
 
                 var errorTitle = $"{DeploymentErrorMsg} {AppName}.";

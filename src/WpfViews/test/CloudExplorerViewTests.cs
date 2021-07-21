@@ -8,9 +8,9 @@ using Tanzu.Toolkit.WpfViews.Commands;
 namespace Tanzu.Toolkit.WpfViews.Tests
 {
     [TestClass]
-    public class CloudExplorerViewTests : ViewTestSupport
+    public class TasExplorerViewTests : ViewTestSupport
     {
-        private CloudExplorerViewModel vm;
+        private TasExplorerViewModel vm;
 
         [TestInitialize]
         public void TestInit()
@@ -18,13 +18,13 @@ namespace Tanzu.Toolkit.WpfViews.Tests
             var fakeCfInstances = new Dictionary<string, CloudFoundryInstance>();
             mockCloudFoundryService.SetupGet(mock => mock.CloudFoundryInstances).Returns(fakeCfInstances);
             
-            vm = new CloudExplorerViewModel(services);
+            vm = new TasExplorerViewModel(services);
         }
 
         [TestMethod]
         public void Constructor_Initializes()
         {
-            var view = new CloudExplorerView(vm, mockThemeService.Object, mockViewService.Object);
+            var view = new TasExplorerView(vm, mockThemeService.Object, mockViewService.Object);
 
             // Verify DataContext initalized
             Assert.AreSame(vm, view.DataContext);
@@ -41,7 +41,7 @@ namespace Tanzu.Toolkit.WpfViews.Tests
         [TestMethod]
         public void Constructor_SetsWindowTheme_UsingThemeService()
         {
-            var view = new CloudExplorerView(vm, mockThemeService.Object, mockViewService.Object);
+            var view = new TasExplorerView(vm, mockThemeService.Object, mockViewService.Object);
             mockThemeService.Verify(mock => mock.SetTheme(view), Times.Once);
         }
     }

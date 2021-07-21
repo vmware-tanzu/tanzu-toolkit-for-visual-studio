@@ -51,7 +51,7 @@ namespace Tanzu.Toolkit.VisualStudio
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [Guid(PackageGuidString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
-    [ProvideToolWindow(typeof(TanzuCloudExplorerToolWindow))]
+    [ProvideToolWindow(typeof(TanzuTasExplorerToolWindow))]
     [ProvideToolWindow(typeof(OutputToolWindow))]
     public sealed class TanzuToolkitForVisualStudioPackage : AsyncPackage
     {
@@ -76,7 +76,7 @@ namespace Tanzu.Toolkit.VisualStudio
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
-            await TanzuCloudExplorerCommand.InitializeAsync(this);
+            await TanzuTasExplorerCommand.InitializeAsync(this);
             await PushToCloudFoundryCommand.InitializeAsync(this, _serviceProvider);
             await OutputWindowCommand.InitializeAsync(this);
             await OpenLogsCommand.InitializeAsync(this, _serviceProvider);
@@ -136,12 +136,12 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddTransient<ICmdProcessService, CmdProcessService>();
 
             /* Tool Windows */
-            services.AddTransient<TanzuCloudExplorerToolWindow>();
+            services.AddTransient<TanzuTasExplorerToolWindow>();
             services.AddTransient<OutputToolWindow>();
 
             /* View Models */
             services.AddSingleton<IOutputViewModel, OutputViewModel>();
-            services.AddSingleton<ICloudExplorerViewModel, CloudExplorerViewModel>();
+            services.AddSingleton<ITasExplorerViewModel, TasExplorerViewModel>();
 
             services.AddTransient<IDeploymentDialogViewModel, DeploymentDialogViewModel>();
             services.AddTransient<IAddCloudDialogViewModel, AddCloudDialogViewModel>();
@@ -149,7 +149,7 @@ namespace Tanzu.Toolkit.VisualStudio
             /* Views */
             services.AddSingleton<IOutputView, OutputView>();
 
-            services.AddTransient<ICloudExplorerView, CloudExplorerView>();
+            services.AddTransient<ITasExplorerView, TasExplorerView>();
             services.AddTransient<IDeploymentDialogView, DeploymentDialogView>();
             services.AddTransient<IAddCloudDialogView, AddCloudDialogView>();
             
