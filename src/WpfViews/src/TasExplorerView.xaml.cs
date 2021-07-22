@@ -1,5 +1,7 @@
-﻿using System.Windows.Controls;
+﻿using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.WpfViews.Commands;
 using Tanzu.Toolkit.WpfViews.Services;
@@ -24,6 +26,12 @@ namespace Tanzu.Toolkit.WpfViews
         public ICommand RemoveCloudConnectionCommand { get; }
         public ICommand ReAuthenticateCommand { get; }
         public IViewModel ViewModel { get; private set; }
+
+        public Brush ListItemMouseOverBrush { get { return (Brush)GetValue(ListItemMouseOverBrushProperty); } set { SetValue(ListItemMouseOverBrushProperty, value); } }
+        public Brush WizardFooterBrush { get { return (Brush)GetValue(WizardFooterBrushProperty); } set { SetValue(WizardFooterBrushProperty, value); } }
+
+        public static readonly DependencyProperty ListItemMouseOverBrushProperty = DependencyProperty.Register("ListItemMouseOverBrush", typeof(Brush), typeof(TasExplorerView), new PropertyMetadata(default(Brush)));
+        public static readonly DependencyProperty WizardFooterBrushProperty = DependencyProperty.Register("WizardFooterBrush", typeof(Brush), typeof(TasExplorerView), new PropertyMetadata(default(Brush)));
 
         public TasExplorerView()
         {

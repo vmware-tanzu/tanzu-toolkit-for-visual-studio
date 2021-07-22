@@ -13,24 +13,46 @@
     <UserControl.Resources>
         <converters:VisibilityConverter x:Key="Visibility" />
         <converters:VisibilityConverter x:Key="InverseVisibility" Reversed="True"/>
-
+        
         <Style x:Key="RoundedButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border CornerRadius="6" Margin="2,2,2,2">
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="2" Margin="2,2,2,2">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+            <Setter Property="Width" Value="32px"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{Binding ElementName=TasExplorerViewElement, Path=ListItemMouseOverBrush}"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
-        
+
         <Style x:Key="RowItemStyle" TargetType="{x:Type Button}">
             <Setter Property="Background" Value="{Binding ElementName=TasExplorerViewElement, Path=Background}"/>
             <Setter Property="Foreground" Value="{Binding ElementName=TasExplorerViewElement, Path=Foreground}"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="1">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{Binding ElementName=TasExplorerViewElement, Path=Foreground}"/>
+                    <Setter Property="Foreground" Value="{Binding ElementName=TasExplorerViewElement, Path=Background}"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
     </UserControl.Resources>
     <Grid>
@@ -45,51 +67,51 @@
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <Button Grid.Row="0" Grid.Column="0" 
-                Style="{DynamicResource RoundedButtonStyle}"
-                Command ="{ Binding ElementName=TasExplorerViewElement, Path=OpenLoginFormCommand }" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}">
-            <Image Source="Resources/AddCloud.png" Stretch="Uniform" Width="16px" Height="16px"
-                   ToolTip="Target New Tanzu Application Service"/>
-        </Button>
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.ColumnSpan="3" Background="{Binding ElementName=TasExplorerViewElement, Path=WizardFooterBrush}">
+            <Button Style="{DynamicResource RoundedButtonStyle}"
+                    Command ="{ Binding ElementName=TasExplorerViewElement, Path=OpenLoginFormCommand }" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}">
+                <Image Source="Resources/AddCloud.png" Stretch="Uniform" Width="16px" Height="16px"
+                       ToolTip="Target New Tanzu Application Service"/>
+            </Button>
 
-        <Button Grid.Row="0" Grid.Column="1" 
-                Style="{DynamicResource RoundedButtonStyle}"
-                Command ="{ Binding ElementName=TasExplorerViewElement, Path=RefreshAllCommand }">
-            <Grid>
-                <Image Source="Resources/Refresh.png" 
-                       Grid.Row="0"
-                       Grid.Column="0"
-                       Stretch="Uniform" 
-                       Width="16px" 
-                       Height="16px"
-                       ToolTip="Refresh All Cloud Connections" 
-                       RenderTransformOrigin="0.5 0.5"
-                       Visibility="{Binding IsRefreshingAll, Converter={StaticResource Visibility}}">
-                    <Image.RenderTransform>
-                        <RotateTransform x:Name="Rotation" Angle="0"/>
-                    </Image.RenderTransform>
-                    <Image.Triggers>
-                        <EventTrigger RoutedEvent="Loaded">
-                            <BeginStoryboard>
-                                <Storyboard RepeatBehavior="Forever">
-                                    <DoubleAnimation Storyboard.TargetName="Rotation" Storyboard.TargetProperty="Angle" From="0" To="360"/>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </EventTrigger>
-                    </Image.Triggers>
-                </Image>
-                <Image Source="Resources/Refresh.png" 
-                       Grid.Row="0"
-                       Grid.Column="0"
-                       Stretch="Uniform" 
-                       Width="16px" 
-                       Height="16px"
-                       ToolTip="Refresh All Cloud Connections" 
-                       RenderTransformOrigin="0.5 0.5"
-                       Visibility="{Binding IsRefreshingAll, Converter={StaticResource InverseVisibility}}">
-                </Image>
-            </Grid>
-        </Button>
+            <Button Style="{DynamicResource RoundedButtonStyle}"
+                    Command ="{ Binding ElementName=TasExplorerViewElement, Path=RefreshAllCommand }">
+                <Grid>
+                    <Image Source="Resources/Refresh.png" 
+                           Grid.Row="0"
+                           Grid.Column="0"
+                           Stretch="Uniform" 
+                           Width="16px" 
+                           Height="16px"
+                           ToolTip="Refresh All Cloud Connections" 
+                           RenderTransformOrigin="0.5 0.5"
+                           Visibility="{Binding IsRefreshingAll, Converter={StaticResource Visibility}}">
+                        <Image.RenderTransform>
+                            <RotateTransform x:Name="Rotation" Angle="0"/>
+                        </Image.RenderTransform>
+                        <Image.Triggers>
+                            <EventTrigger RoutedEvent="Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <DoubleAnimation Storyboard.TargetName="Rotation" Storyboard.TargetProperty="Angle" From="0" To="360"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Image.Triggers>
+                    </Image>
+                    <Image Source="Resources/Refresh.png" 
+                           Grid.Row="0"
+                           Grid.Column="0"
+                           Stretch="Uniform" 
+                           Width="16px" 
+                           Height="16px"
+                           ToolTip="Refresh All Cloud Connections" 
+                           RenderTransformOrigin="0.5 0.5"
+                           Visibility="{Binding IsRefreshingAll, Converter={StaticResource InverseVisibility}}">
+                    </Image>
+                </Grid>
+            </Button>
+        </StackPanel>
 
         <Button 
             Margin="4"
