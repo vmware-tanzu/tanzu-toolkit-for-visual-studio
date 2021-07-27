@@ -14,7 +14,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
     {
         private CfInstanceViewModel _sut;
         private List<string> _receivedEvents;
-        CloudExplorerViewModel _fakeCloudExplorerViewModel;
+        TasExplorerViewModel _fakeTasExplorerViewModel;
 
         [TestInitialize]
         public void TestInit()
@@ -31,8 +31,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                         action();
                     });
 
-            _fakeCloudExplorerViewModel = new CloudExplorerViewModel(Services);
-            _sut = new CfInstanceViewModel(FakeCfInstance, _fakeCloudExplorerViewModel, Services);
+            _fakeTasExplorerViewModel = new TasExplorerViewModel(Services);
+            _sut = new CfInstanceViewModel(FakeCfInstance, _fakeTasExplorerViewModel, Services);
 
             _receivedEvents = new List<string>();
             _sut.PropertyChanged += (sender, e) =>
@@ -70,9 +70,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         
         [TestMethod]
         [TestCategory("ctor")]
-        public void Constructor_SetsParentCloudExplorer()
+        public void Constructor_SetsParentTasExplorer()
         {
-            Assert.AreEqual(_fakeCloudExplorerViewModel, _sut.ParentCloudExplorer);
+            Assert.AreEqual(_fakeTasExplorerViewModel, _sut.ParentTasExplorer);
         }
 
         [TestMethod]
@@ -300,7 +300,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("FetchChildren")]
         public async Task FetchChildren_CollapsesViewModel_WhenOrgsRequestFailsBecauseOfInvalidRefreshToken()
         {
-            _sut = new CfInstanceViewModel(FakeCfInstance, _fakeCloudExplorerViewModel, Services, expanded: true);
+            _sut = new CfInstanceViewModel(FakeCfInstance, _fakeTasExplorerViewModel, Services, expanded: true);
 
             var fakeFailedResult =
                 new DetailedResult<List<CloudFoundryOrganization>>(succeeded: false, content: null, explanation: "junk", cmdDetails: FakeFailureCmdResult)
@@ -327,7 +327,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("FetchChildren")]
         public async Task FetchChildren_SetsAuthenticationRequiredToTrue_WhenOrgsRequestFailsBecauseOfInvalidRefreshToken()
         {
-            _sut = new CfInstanceViewModel(FakeCfInstance, _fakeCloudExplorerViewModel, Services, expanded: true);
+            _sut = new CfInstanceViewModel(FakeCfInstance, _fakeTasExplorerViewModel, Services, expanded: true);
 
             var fakeFailedResult =
                 new DetailedResult<List<CloudFoundryOrganization>>(succeeded: false, content: null, explanation: "junk", cmdDetails: FakeFailureCmdResult)
@@ -339,11 +339,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
               GetOrgsForCfInstanceAsync(_sut.CloudFoundryInstance, true, It.IsAny<int>()))
                 .ReturnsAsync(fakeFailedResult);
 
-            Assert.IsFalse(_sut.ParentCloudExplorer.AuthenticationRequired);
+            Assert.IsFalse(_sut.ParentTasExplorer.AuthenticationRequired);
 
             var result = await _sut.FetchChildren();
 
-            Assert.IsTrue(_sut.ParentCloudExplorer.AuthenticationRequired);
+            Assert.IsTrue(_sut.ParentTasExplorer.AuthenticationRequired);
 
             MockErrorDialogService.Verify(mock => mock.
               DisplayErrorDialog(It.IsAny<string>(), It.IsAny<string>()),

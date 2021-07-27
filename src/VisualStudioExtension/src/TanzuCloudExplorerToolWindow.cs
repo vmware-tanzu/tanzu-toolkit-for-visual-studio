@@ -17,15 +17,15 @@ namespace Tanzu.Toolkit.VisualStudio
     /// </para>
     /// </remarks>
     [Guid("051b6546-acb2-4f74-85b3-60de9fefab24")]
-    public class TanzuCloudExplorerToolWindow : ToolWindowPane
+    public class TanzuTasExplorerToolWindow : ToolWindowPane
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TanzuCloudExplorerToolWindow"/> class.
+        /// Initializes a new instance of the <see cref="TanzuTasExplorerToolWindow"/> class.
         /// </summary>
         /// <param name="view"></param>
-        public TanzuCloudExplorerToolWindow(ICloudExplorerView view) : base(null)
+        public TanzuTasExplorerToolWindow(ITasExplorerView view) : base(null)
         {
-            Caption = "Tanzu Cloud Explorer";
+            Caption = "Tanzu Application Service Explorer";
 
             // This is the user control hosted by the tool window; Note that, even if this class implements IDisposable,
             // we are not calling Dispose on this object. This is because ToolWindowPane calls Dispose on

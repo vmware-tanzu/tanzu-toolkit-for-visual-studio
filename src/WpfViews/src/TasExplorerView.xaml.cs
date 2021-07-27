@@ -1,6 +1,4 @@
-﻿using Microsoft.VisualStudio.Shell.Interop;
-using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -12,9 +10,9 @@ using Tanzu.Toolkit.WpfViews.ThemeService;
 namespace Tanzu.Toolkit.WpfViews
 {
     /// <summary>
-    /// Interaction logic for CloudExplorerView.xaml.
+    /// Interaction logic for TasExplorerView.xaml.
     /// </summary>
-    public partial class CloudExplorerView : UserControl, ICloudExplorerView, IView
+    public partial class TasExplorerView : UserControl, ITasExplorerView, IView
     {
         private IViewService ViewService;
 
@@ -29,12 +27,18 @@ namespace Tanzu.Toolkit.WpfViews
         public ICommand ReAuthenticateCommand { get; }
         public IViewModel ViewModel { get; private set; }
 
-        public CloudExplorerView()
+        public Brush ListItemMouseOverBrush { get { return (Brush)GetValue(ListItemMouseOverBrushProperty); } set { SetValue(ListItemMouseOverBrushProperty, value); } }
+        public Brush WizardFooterBrush { get { return (Brush)GetValue(WizardFooterBrushProperty); } set { SetValue(WizardFooterBrushProperty, value); } }
+
+        public static readonly DependencyProperty ListItemMouseOverBrushProperty = DependencyProperty.Register("ListItemMouseOverBrush", typeof(Brush), typeof(TasExplorerView), new PropertyMetadata(default(Brush)));
+        public static readonly DependencyProperty WizardFooterBrushProperty = DependencyProperty.Register("WizardFooterBrush", typeof(Brush), typeof(TasExplorerView), new PropertyMetadata(default(Brush)));
+
+        public TasExplorerView()
         {
             InitializeComponent();
         }
 
-        public CloudExplorerView(ICloudExplorerViewModel viewModel, IThemeService themeService, IViewService viewService)
+        public TasExplorerView(ITasExplorerViewModel viewModel, IThemeService themeService, IViewService viewService)
         {
             ViewModel = viewModel;
             ViewService = viewService;

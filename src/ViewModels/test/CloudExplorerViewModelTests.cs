@@ -10,9 +10,9 @@ using Tanzu.Toolkit.Services;
 namespace Tanzu.Toolkit.ViewModels.Tests
 {
     [TestClass]
-    public class CloudExplorerViewModelTests : ViewModelTestSupport
+    public class TasExplorerViewModelTests : ViewModelTestSupport
     {
-        private CloudExplorerViewModel _sut;
+        private TasExplorerViewModel _sut;
         private List<string> _receivedEvents;
 
         [TestInitialize]
@@ -41,7 +41,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     });
 
 
-            _sut = new CloudExplorerViewModel(Services);
+            _sut = new TasExplorerViewModel(Services);
             _receivedEvents = new List<string>();
         }
 
@@ -232,7 +232,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             await _sut.StopCfApp(fakeApp);
 
-            var expectedErrorTitle = $"{CloudExplorerViewModel._stopAppErrorMsg} {fakeApp.AppName}.";
+            var expectedErrorTitle = $"{TasExplorerViewModel._stopAppErrorMsg} {fakeApp.AppName}.";
             var expectedErrorMsg = FakeFailureDetailedResult.Explanation;
 
             MockErrorDialogService.Verify(mock => mock.
@@ -253,7 +253,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             var logPropVal1 = "{AppName}";
             var logPropVal2 = "{StopResult}";
-            var expectedLogMsg = $"{CloudExplorerViewModel._stopAppErrorMsg} {logPropVal1}. {logPropVal2}";
+            var expectedLogMsg = $"{TasExplorerViewModel._stopAppErrorMsg} {logPropVal1}. {logPropVal2}";
 
             MockLogger.Verify(m => m.
                 Error(expectedLogMsg, fakeApp.AppName, FakeFailureDetailedResult.ToString()),
@@ -292,7 +292,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             await _sut.StartCfApp(fakeApp);
 
-            var expectedErrorTitle = $"{CloudExplorerViewModel._startAppErrorMsg} {fakeApp.AppName}.";
+            var expectedErrorTitle = $"{TasExplorerViewModel._startAppErrorMsg} {fakeApp.AppName}.";
             var expectedErrorMsg = FakeFailureDetailedResult.Explanation;
 
             MockErrorDialogService.Verify(mock => mock.
@@ -313,7 +313,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             var logPropVal1 = "{AppName}";
             var logPropVal2 = "{StartResult}";
-            var expectedLogMsg = $"{CloudExplorerViewModel._startAppErrorMsg} {logPropVal1}. {logPropVal2}";
+            var expectedLogMsg = $"{TasExplorerViewModel._startAppErrorMsg} {logPropVal1}. {logPropVal2}";
 
             MockLogger.Verify(m => m.
                 Error(expectedLogMsg, fakeApp.AppName, FakeFailureDetailedResult.ToString()),
@@ -352,7 +352,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             await _sut.DeleteCfApp(fakeApp);
 
-            var expectedErrorTitle = $"{CloudExplorerViewModel._deleteAppErrorMsg} {fakeApp.AppName}.";
+            var expectedErrorTitle = $"{TasExplorerViewModel._deleteAppErrorMsg} {fakeApp.AppName}.";
             var expectedErrorMsg = FakeFailureDetailedResult.Explanation;
 
             MockErrorDialogService.Verify(mock => mock.
@@ -373,7 +373,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             var logPropVal1 = "{AppName}";
             var logPropVal2 = "{DeleteResult}";
-            var expectedLogMsg = $"{CloudExplorerViewModel._deleteAppErrorMsg} {logPropVal1}. {logPropVal2}";
+            var expectedLogMsg = $"{TasExplorerViewModel._deleteAppErrorMsg} {logPropVal1}. {logPropVal2}";
 
             MockLogger.Verify(m => m.
                 Error(expectedLogMsg, fakeApp.AppName, FakeFailureDetailedResult.ToString()),
@@ -400,7 +400,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task InitiateFullRefresh_RefreshesEachExpandedTreeViewItemViewModel()
         {
             /** INTENTION:
-             * CloudExplorerViewModel starts off with 1 (expanded) cloudFoundryInstanceViewModel "cfivm",
+             * TasExplorerViewModel starts off with 1 (expanded) cloudFoundryInstanceViewModel "cfivm",
              * containing 1 (expanded) orgViewModel "ovm", which contains 1 (expanded) spaceViewModel "svm",
              * which contains 1 appViewModel "avm".
              */
@@ -425,7 +425,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.CloudFoundryList = new ObservableCollection<CfInstanceViewModel> { cfivm };
 
             /** INTENTION:
-             * Mocks should simulate CloudExplorerViewModel.InitiateFullRefresh adding 1 cf, 1 org, 
+             * Mocks should simulate TasExplorerViewModel.InitiateFullRefresh adding 1 cf, 1 org, 
              * 1 space & 1 app to each of the respective TreeViewItemViewModels above. In addition,
              * the initial app that existed prior to the refresh should have its state changed by 
              * the refresh.
@@ -546,7 +546,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task InitiateFullRefresh_DoesNotAttemptToRefreshPlaceholderItems()
         {
             /** INTENTION:
-             * CloudExplorerViewModel starts off with 1 (expanded) cloudFoundryInstanceViewModel "cfivm",
+             * TasExplorerViewModel starts off with 1 (expanded) cloudFoundryInstanceViewModel "cfivm",
              * containing 1 placeholder view model. No attempts should be made to refresh the placeholder.
              */
             var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address");
@@ -575,7 +575,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             _sut.CloudFoundryList = new ObservableCollection<CfInstanceViewModel> { cfivm };
 
-            // pre-check: cloud explorer has 1 cf view model & it's expanded
+            // pre-check: tas explorer has 1 cf view model & it's expanded
             Assert.AreEqual(1, _sut.CloudFoundryList.Count);
             Assert.IsTrue(_sut.CloudFoundryList[0].IsExpanded);
 
@@ -598,7 +598,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task InitiateFullRefresh_DoesNotAttemptToRefreshCollapsedItems()
         {
             /** INTENTION:
-             * CloudExplorerViewModel starts off with 1 (expanded) cloudFoundryInstanceViewModel "cfivm",
+             * TasExplorerViewModel starts off with 1 (expanded) cloudFoundryInstanceViewModel "cfivm",
              * containing 1 (collapsed) orgViewModel "ovm" which should not itself be refreshed.
              */
             var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address");
@@ -626,7 +626,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             _sut.CloudFoundryList = new ObservableCollection<CfInstanceViewModel> { cfivm };
 
-            // pre-check: cloud explorer has 1 cf view model & it's expanded
+            // pre-check: tas explorer has 1 cf view model & it's expanded
             Assert.AreEqual(1, _sut.CloudFoundryList.Count);
             Assert.IsTrue(_sut.CloudFoundryList[0].IsExpanded);
 
@@ -648,7 +648,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task InitiateFullRefresh_DoesNotAttemptToRefreshLoadingCFs()
         {
             /** INTENTION:
-             * CloudExplorerViewModel starts off with 1 expanded but *loading* 
+             * TasExplorerViewModel starts off with 1 expanded but *loading* 
              * cloudFoundryInstanceViewModel "cfivm" which has a loading placeholder
              * as its only child. cfivm should not be refreshed (defer to the loading
              * task in progress).
@@ -673,7 +673,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             _sut.CloudFoundryList = new ObservableCollection<CfInstanceViewModel> { cfivm };
 
-            // pre-check: cloud explorer has 1 cf view model & it's loading
+            // pre-check: tas explorer has 1 cf view model & it's loading
             Assert.AreEqual(1, _sut.CloudFoundryList.Count);
             Assert.IsTrue(_sut.CloudFoundryList[0].IsExpanded);
             Assert.IsTrue(_sut.CloudFoundryList[0].IsLoading);
@@ -694,7 +694,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task InitiateFullRefresh_DoesNotAttemptToRefreshLoadingOrgs()
         {
             /** INTENTION:
-             * CloudExplorerViewModel starts off with 1 expanded cloudFoundryInstanceViewModel 
+             * TasExplorerViewModel starts off with 1 expanded cloudFoundryInstanceViewModel 
              * "cfivm" which has 1 expanded but *loading* org child "ovm". cfivm should be 
              * refreshed but the loading ovm should not be (defer to the loading task in progress).
              */
@@ -731,7 +731,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             _sut.CloudFoundryList = new ObservableCollection<CfInstanceViewModel> { cfivm };
 
-            // pre-check: cloud explorer has 1 cf view model & it's expanded
+            // pre-check: tas explorer has 1 cf view model & it's expanded
             Assert.AreEqual(1, _sut.CloudFoundryList.Count);
             Assert.IsTrue(_sut.CloudFoundryList[0].IsExpanded);
 
@@ -756,7 +756,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task InitiateFullRefresh_DoesNotAttemptToRefreshLoadingSpaces()
         {
             /** INTENTION:
-             * CloudExplorerViewModel starts off with 1 expanded cloudFoundryInstanceViewModel 
+             * TasExplorerViewModel starts off with 1 expanded cloudFoundryInstanceViewModel 
              * "cfivm" which has 1 expanded org child "ovm". ovm has 1 expanded but *loading*
              * space child "svm". cfivm & ovm should be refreshed but the loading svm should 
              * not be refreshed (defer to the loading task in progress).
@@ -812,7 +812,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             _sut.CloudFoundryList = new ObservableCollection<CfInstanceViewModel> { cfivm };
 
-            // pre-check: cloud explorer has 1 cf view model & it's expanded
+            // pre-check: tas explorer has 1 cf view model & it's expanded
             Assert.AreEqual(1, _sut.CloudFoundryList.Count);
             var cf = _sut.CloudFoundryList[0];
             Assert.IsTrue(cf.IsExpanded);

@@ -68,11 +68,11 @@
               <CommandFlag>DefaultInvisible</CommandFlag>
               <CommandFlag>DynamicVisibility</CommandFlag>
           If you do not want an image next to your command, remove the Icon node /> -->
-			<Button guid="guidTanzuToolkitPackageCmdSet" id="CloudExplorerCommandId" priority="0x0100" type="Button">
+			<Button guid="guidTanzuToolkitPackageCmdSet" id="TasExplorerCommandId" priority="0x0100" type="Button">
 				<Parent guid="guidTanzuToolkitPackageCmdSet" id="ViewMenuGroup" />
 				<Icon guid="guidImages" id="bmpPic1" />
 				<Strings>
-					<ButtonText>Tanzu Cloud Explorer</ButtonText>
+					<ButtonText>Tanzu Application Service Explorer</ButtonText>
 				</Strings>
 			</Button>
       
@@ -88,7 +88,7 @@
         <Parent guid="guidTanzuToolkitPackageCmdSet" id="ViewMenuGroup" />
         <Icon guid="guidImages2" id="bmpPic1" />
         <Strings>
-          <ButtonText>Tanzu Output Window</ButtonText>
+          <ButtonText>Tanzu Application Service Output Window</ButtonText>
         </Strings>
       </Button>
       
@@ -122,7 +122,7 @@
 		<!-- This is the guid used to group the menu commands together -->
 		<GuidSymbol name="guidTanzuToolkitPackageCmdSet" value="{f91c88fb-6e17-42a6-878d-f4d16ead7625}">
       
-			<IDSymbol name="CloudExplorerCommandId" value="256" />
+			<IDSymbol name="TasExplorerCommandId" value="256" />
 			<IDSymbol name="PushToCloudFoundryCommandId" value="257" />
       <IDSymbol name="OutputWindowCommandId" value="258" />
       <IDSymbol name="OpenLogsCommandId" value="259"/>

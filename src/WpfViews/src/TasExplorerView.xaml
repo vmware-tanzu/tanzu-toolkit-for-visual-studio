@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Tanzu.Toolkit.WpfViews.CloudExplorerView"
+﻿<UserControl x:Class="Tanzu.Toolkit.WpfViews.TasExplorerView"
                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -7,24 +7,52 @@
                 xmlns:converters="clr-namespace:Tanzu.Toolkit.WpfViews.Converters" 
                 xmlns:wpfviews="clr-namespace:Tanzu.Toolkit.VisualStudio.WpfViews"
                 mc:Ignorable="d"
-                Name="CloudExplorerViewElement"
+                Name="TasExplorerViewElement"
                 d:DesignHeight="300" d:DesignWidth="300">
-
   
     <UserControl.Resources>
         <converters:VisibilityConverter x:Key="Visibility" />
         <converters:VisibilityConverter x:Key="InverseVisibility" Reversed="True"/>
-
+        
         <Style x:Key="RoundedButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border CornerRadius="6" Margin="2,2,2,2">
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="2" Margin="2,2,2,2">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+            <Setter Property="Width" Value="32px"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{Binding ElementName=TasExplorerViewElement, Path=ListItemMouseOverBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="RowItemStyle" TargetType="{x:Type Button}">
+            <Setter Property="Background" Value="{Binding ElementName=TasExplorerViewElement, Path=Background}"/>
+            <Setter Property="Foreground" Value="{Binding ElementName=TasExplorerViewElement, Path=Foreground}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="1">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{Binding ElementName=TasExplorerViewElement, Path=Foreground}"/>
+                    <Setter Property="Foreground" Value="{Binding ElementName=TasExplorerViewElement, Path=Background}"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
     </UserControl.Resources>
     <Grid>
@@ -39,51 +67,51 @@
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <Button Grid.Row="0" Grid.Column="0" 
-                Style="{DynamicResource RoundedButtonStyle}"
-                Command ="{ Binding ElementName=CloudExplorerViewElement, Path=OpenLoginFormCommand }" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}">
-            <Image Source="Resources/AddCloud.png" Stretch="Uniform" Width="16px" Height="16px"
-                   ToolTip="Target New Tanzu Application Service"/>
-        </Button>
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.ColumnSpan="3" Background="{Binding ElementName=TasExplorerViewElement, Path=WizardFooterBrush}">
+            <Button Style="{DynamicResource RoundedButtonStyle}"
+                    Command ="{ Binding ElementName=TasExplorerViewElement, Path=OpenLoginFormCommand }" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}">
+                <Image Source="Resources/AddCloud.png" Stretch="Uniform" Width="16px" Height="16px"
+                       ToolTip="Target New Tanzu Application Service"/>
+            </Button>
 
-        <Button Grid.Row="0" Grid.Column="1" 
-                Style="{DynamicResource RoundedButtonStyle}"
-                Command ="{ Binding ElementName=CloudExplorerViewElement, Path=RefreshAllCommand }">
-            <Grid>
-                <Image Source="Resources/Refresh.png" 
-                       Grid.Row="0"
-                       Grid.Column="0"
-                       Stretch="Uniform" 
-                       Width="16px" 
-                       Height="16px"
-                       ToolTip="Refresh All Cloud Connections" 
-                       RenderTransformOrigin="0.5 0.5"
-                       Visibility="{Binding IsRefreshingAll, Converter={StaticResource Visibility}}">
-                    <Image.RenderTransform>
-                        <RotateTransform x:Name="Rotation" Angle="0"/>
-                    </Image.RenderTransform>
-                    <Image.Triggers>
-                        <EventTrigger RoutedEvent="Loaded">
-                            <BeginStoryboard>
-                                <Storyboard RepeatBehavior="Forever">
-                                    <DoubleAnimation Storyboard.TargetName="Rotation" Storyboard.TargetProperty="Angle" From="0" To="360"/>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </EventTrigger>
-                    </Image.Triggers>
-                </Image>
-                <Image Source="Resources/Refresh.png" 
-                       Grid.Row="0"
-                       Grid.Column="0"
-                       Stretch="Uniform" 
-                       Width="16px" 
-                       Height="16px"
-                       ToolTip="Refresh All Cloud Connections" 
-                       RenderTransformOrigin="0.5 0.5"
-                       Visibility="{Binding IsRefreshingAll, Converter={StaticResource InverseVisibility}}">
-                </Image>
-            </Grid>
-        </Button>
+            <Button Style="{DynamicResource RoundedButtonStyle}"
+                    Command ="{ Binding ElementName=TasExplorerViewElement, Path=RefreshAllCommand }">
+                <Grid>
+                    <Image Source="Resources/Refresh.png" 
+                           Grid.Row="0"
+                           Grid.Column="0"
+                           Stretch="Uniform" 
+                           Width="16px" 
+                           Height="16px"
+                           ToolTip="Refresh All Cloud Connections" 
+                           RenderTransformOrigin="0.5 0.5"
+                           Visibility="{Binding IsRefreshingAll, Converter={StaticResource Visibility}}">
+                        <Image.RenderTransform>
+                            <RotateTransform x:Name="Rotation" Angle="0"/>
+                        </Image.RenderTransform>
+                        <Image.Triggers>
+                            <EventTrigger RoutedEvent="Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <DoubleAnimation Storyboard.TargetName="Rotation" Storyboard.TargetProperty="Angle" From="0" To="360"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Image.Triggers>
+                    </Image>
+                    <Image Source="Resources/Refresh.png" 
+                           Grid.Row="0"
+                           Grid.Column="0"
+                           Stretch="Uniform" 
+                           Width="16px" 
+                           Height="16px"
+                           ToolTip="Refresh All Cloud Connections" 
+                           RenderTransformOrigin="0.5 0.5"
+                           Visibility="{Binding IsRefreshingAll, Converter={StaticResource InverseVisibility}}">
+                    </Image>
+                </Grid>
+            </Button>
+        </StackPanel>
 
         <Button 
             Margin="4"
@@ -93,17 +121,16 @@
             Foreground="Black"
             Background="#FFFFE2"
             Content="Disconnected; click here to re-authenticate."
-            Command="{Binding ElementName=CloudExplorerViewElement, Path=ReAuthenticateCommand}"
+            Command="{Binding ElementName=TasExplorerViewElement, Path=ReAuthenticateCommand}"
             Visibility="{Binding AuthenticationRequired, Converter={StaticResource Visibility}}"/>
 
         <Rectangle Grid.Row="1" Grid.RowSpan="1" Grid.ColumnSpan="3" />
 
-        <TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" 
-                 Margin="5"  IsReadOnly="True" 
+        <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" 
+                 Margin="5"
                  TextWrapping="Wrap"  
                  ScrollViewer.VerticalScrollBarVisibility="Auto"
                  HorizontalAlignment="Center" VerticalAlignment="Center"
-                 MinLines="3" MaxLines="3" 
                  Text="Not Yet Connected" 
                  Visibility="{Binding Path=HasCloudTargets, Converter={StaticResource InverseVisibility}}"/>
 
@@ -128,9 +155,9 @@
                                           ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                         <Image Source="Resources/CloudFoundry.png" Stretch="Uniform" Height="16px" Width="16px" Margin="0,2,4,0"/>
-                        <Button Content="{Binding DisplayText}" VerticalAlignment="Center" HorizontalAlignment="Center" 
-                                Background="Transparent" BorderThickness="0" Grid.Row="0" Grid.Column="1" 
-                                Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
+                        <Button Content="{Binding DisplayText}"
+                                Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
+                                Style="{StaticResource RowItemStyle}">
                             <Button.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem Header="Delete Connection" 
@@ -150,7 +177,14 @@
                                           ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                         <Image Source="Resources/CfOrg.png" Stretch="Uniform" Height="16px" Width="16px" Margin="0,2,4,0"/>
-                        <TextBlock Text="{Binding DisplayText}" Foreground="{Binding ElementName=CloudExplorerViewElement, Path=Foreground}"/>
+                        <Button Content="{Binding DisplayText}" 
+                                Style="{StaticResource RowItemStyle}"
+                                Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
+                            <Button.ContextMenu>
+                                <ContextMenu>
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                        </Button>
                         <wpfviews:LoadingSpinnerSmall Grid.Row="0" Grid.Column="2" IsLoading="{Binding IsRefreshing}"/>
                     </StackPanel>
                 </HierarchicalDataTemplate>
@@ -160,8 +194,8 @@
                                           ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                         <Image Source="Resources/CfSpace.png" Stretch="Uniform" Height="16px" Width="16px" Margin="0,2,4,0"/>
-                        <Button Content="{Binding DisplayText}" VerticalAlignment="Center" HorizontalAlignment="Center" 
-                                Background="Transparent" BorderThickness="0" Grid.Row="0" Grid.Column="1" 
+                        <Button Content="{Binding DisplayText}" 
+                                Style="{StaticResource RowItemStyle}"
                                 Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
                             <Button.ContextMenu>
                                 <ContextMenu>
@@ -197,8 +231,10 @@
                                Grid.Row="0" Grid.Column="0" 
                                Visibility="{Binding Path=IsStopped, Converter={StaticResource Visibility}}"/>
 
-                        <Button Content="{Binding DisplayText}" VerticalAlignment="Center" HorizontalAlignment="Center" 
-                                Background="Transparent" BorderThickness="0" Grid.Row="0" Grid.Column="1" 
+                        <Button Content="{Binding DisplayText}"
+                                VerticalAlignment="Center"
+                                Grid.Row="0" Grid.Column="1" 
+                                Style="{StaticResource RowItemStyle}"
                                 Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
                             <Button.ContextMenu>
                                 <ContextMenu>
@@ -247,17 +283,11 @@
                 <!-- PLACEHOLDER TREE VIEW ITEMS -->
                 <DataTemplate DataType="{x:Type ViewModels:PlaceholderViewModel}">
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                        <TextBlock Text="{Binding DisplayText}" FontStyle="Italic" VerticalAlignment="Bottom" Foreground="{Binding ElementName=CloudExplorerViewElement, Path=Foreground}"/>
+                        <TextBlock Text="{Binding DisplayText}" FontStyle="Italic" VerticalAlignment="Bottom" Foreground="{Binding ElementName=TasExplorerViewElement, Path=Foreground}"/>
                     </StackPanel>
                 </DataTemplate>
 
             </TreeView.Resources>
         </TreeView>
-
-        <!--<StatusBar Grid.Row="2" Grid.ColumnSpan="3" Background="{Binding ElementName=CloudExplorerViewElement, Path=Background}">
-            <StatusBarItem Visibility="{Binding AuthenticationRequired, Converter={StaticResource Visibility}}">
-                
-            </StatusBarItem>
-        </StatusBar>-->
     </Grid>
 </UserControl>
