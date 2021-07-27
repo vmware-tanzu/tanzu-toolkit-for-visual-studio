@@ -16,14 +16,14 @@ namespace Tanzu.Toolkit.WpfApp
 
         public MainWindowView(IMainWindowViewModel viewModel)
         {
-            OpenCloudExplorerCommand = new DelegatingCommand(viewModel.OpenCloudExplorer, viewModel.CanOpenCloudExplorer);
+            OpenTasExplorerCommand = new DelegatingCommand(viewModel.OpenTasExplorer, viewModel.CanOpenTasExplorer);
             InvokeCommandPromptCommand = new DelegatingCommand(viewModel.InvokeCommandPrompt, viewModel.CanInvokeCommandPrompt);
             InvokeCfCliCommand = new DelegatingCommand(viewModel.InvokeCfCli, viewModel.CanInvokeCfCli);
             DataContext = viewModel;
             InitializeComponent();
         }
 
-        public ICommand OpenCloudExplorerCommand { get; }
+        public ICommand OpenTasExplorerCommand { get; }
         public ICommand InvokeCommandPromptCommand { get; }
         public ICommand InvokeCfCliCommand { get; }
     }

@@ -43,8 +43,8 @@ namespace Tanzu.Toolkit.ViewModels
 
         public CloudFoundrySpace Space { get; }
 
-        public SpaceViewModel(CloudFoundrySpace space, OrgViewModel parentOrgViewModel, CloudExplorerViewModel parentCloudExplorer, IServiceProvider services, bool expanded = false)
-            : base(parentOrgViewModel, parentCloudExplorer, services, expanded: expanded)
+        public SpaceViewModel(CloudFoundrySpace space, OrgViewModel parentOrgViewModel, TasExplorerViewModel parentTasExplorer, IServiceProvider services, bool expanded = false)
+            : base(parentOrgViewModel, parentTasExplorer, services, expanded: expanded)
         {
             _dialogService = services.GetRequiredService<IErrorDialog>();
             Space = space;
@@ -78,7 +78,7 @@ namespace Tanzu.Toolkit.ViewModels
             else if (appsResult.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
             {
                 Parent.Parent.IsExpanded = false;
-                ParentCloudExplorer.AuthenticationRequired = true;
+                ParentTasExplorer.AuthenticationRequired = true;
             }
             else
             {

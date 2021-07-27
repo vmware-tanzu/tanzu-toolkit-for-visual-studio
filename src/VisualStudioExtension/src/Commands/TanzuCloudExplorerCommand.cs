@@ -12,7 +12,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
     /// <summary>
     /// Command handler.
     /// </summary>
-    internal sealed class TanzuCloudExplorerCommand
+    internal sealed class TanzuTasExplorerCommand
     {
         /// <summary>
         /// Command ID.
@@ -30,12 +30,12 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         private readonly AsyncPackage _package;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TanzuCloudExplorerCommand"/> class.
+        /// Initializes a new instance of the <see cref="TanzuTasExplorerCommand"/> class.
         /// Adds our command handlers for menu (commands must exist in the command table file).
         /// </summary>
         /// <param name="package">Owner package, not null.</param>
         /// <param name="commandService">Command service to add command to, not null.</param>
-        private TanzuCloudExplorerCommand(AsyncPackage package, OleMenuCommandService commandService)
+        private TanzuTasExplorerCommand(AsyncPackage package, OleMenuCommandService commandService)
         {
             this._package = package ?? throw new ArgumentNullException(nameof(package));
             commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
@@ -48,7 +48,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         /// <summary>
         /// Gets the instance of the command.
         /// </summary>
-        public static TanzuCloudExplorerCommand Instance
+        public static TanzuTasExplorerCommand Instance
         {
             get;
             private set;
@@ -76,7 +76,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
 
             OleMenuCommandService commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
-            Instance = new TanzuCloudExplorerCommand(package, commandService);
+            Instance = new TanzuTasExplorerCommand(package, commandService);
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             // Get the instance number 0 of this tool window. This window is single instance so this instance
             // is actually the only one.
             // The last flag is set to true so that if the tool window does not exists it will be created.
-            ToolWindowPane window = _package.FindToolWindow(typeof(TanzuCloudExplorerToolWindow), 0, true);
+            ToolWindowPane window = _package.FindToolWindow(typeof(TanzuTasExplorerToolWindow), 0, true);
             if (window == null || window.Frame == null)
             {
                 throw new NotSupportedException("Cannot create tool window");

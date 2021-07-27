@@ -14,7 +14,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
     {
         private SpaceViewModel _sut;
         private List<string> _receivedEvents;
-        CloudExplorerViewModel _fakeCloudExplorerViewModel;
+        TasExplorerViewModel _fakeTasExplorerViewModel;
         CfInstanceViewModel _fakeCfInstanceViewModel;
         OrgViewModel _fakeOrgViewModel;
 
@@ -33,10 +33,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                         action();
                     });
 
-            _fakeCloudExplorerViewModel = new CloudExplorerViewModel(Services);
-            _fakeCfInstanceViewModel = new CfInstanceViewModel(FakeCfInstance, _fakeCloudExplorerViewModel, Services, expanded: true);
-            _fakeOrgViewModel = new OrgViewModel(FakeCfOrg, _fakeCfInstanceViewModel, _fakeCloudExplorerViewModel, Services);
-            _sut = new SpaceViewModel(FakeCfSpace, _fakeOrgViewModel, _fakeCloudExplorerViewModel, Services);
+            _fakeTasExplorerViewModel = new TasExplorerViewModel(Services);
+            _fakeCfInstanceViewModel = new CfInstanceViewModel(FakeCfInstance, _fakeTasExplorerViewModel, Services, expanded: true);
+            _fakeOrgViewModel = new OrgViewModel(FakeCfOrg, _fakeCfInstanceViewModel, _fakeTasExplorerViewModel, Services);
+            _sut = new SpaceViewModel(FakeCfSpace, _fakeOrgViewModel, _fakeTasExplorerViewModel, Services);
 
             _receivedEvents = new List<string>();
             _sut.PropertyChanged += (sender, e) =>
@@ -81,9 +81,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("ctor")]
-        public void Constructor_SetsParentCloudExplorer()
+        public void Constructor_SetsParentTasExplorer()
         {
-            Assert.AreEqual(_fakeCloudExplorerViewModel, _sut.ParentCloudExplorer);
+            Assert.AreEqual(_fakeTasExplorerViewModel, _sut.ParentTasExplorer);
         }
 
         [TestMethod]
@@ -263,7 +263,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("FetchChildren")]
         public async Task FetchChildren_CollapsesParentCfInstanceViewModel_WhenSpacesRequestFailsBecauseOfInvalidRefreshToken()
         {
-            _sut = new SpaceViewModel(FakeCfSpace, _fakeOrgViewModel, _fakeCloudExplorerViewModel, Services, expanded: true);
+            _sut = new SpaceViewModel(FakeCfSpace, _fakeOrgViewModel, _fakeTasExplorerViewModel, Services, expanded: true);
 
             var fakeFailedResult =
                 new DetailedResult<List<CloudFoundryApp>>(succeeded: false, content: null, explanation: "junk", cmdDetails: FakeFailureCmdResult)
@@ -290,7 +290,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("FetchChildren")]
         public async Task FetchChildren_SetsAuthenticationRequiredToTrue_WhenSpacesRequestFailsBecauseOfInvalidRefreshToken()
         {
-            _sut = new SpaceViewModel(FakeCfSpace, _fakeOrgViewModel, _fakeCloudExplorerViewModel, Services, expanded: true);
+            _sut = new SpaceViewModel(FakeCfSpace, _fakeOrgViewModel, _fakeTasExplorerViewModel, Services, expanded: true);
 
             var fakeFailedResult =
                 new DetailedResult<List<CloudFoundryApp>>(succeeded: false, content: null, explanation: "junk", cmdDetails: FakeFailureCmdResult)
@@ -302,11 +302,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
               GetAppsForSpaceAsync(_sut.Space, true, It.IsAny<int>()))
                 .ReturnsAsync(fakeFailedResult);
 
-            Assert.IsFalse(_sut.ParentCloudExplorer.AuthenticationRequired);
+            Assert.IsFalse(_sut.ParentTasExplorer.AuthenticationRequired);
 
             var result = await _sut.FetchChildren();
 
-            Assert.IsTrue(_sut.ParentCloudExplorer.AuthenticationRequired);
+            Assert.IsTrue(_sut.ParentTasExplorer.AuthenticationRequired);
 
             MockErrorDialogService.Verify(mock => mock.
               DisplayErrorDialog(It.IsAny<string>(), It.IsAny<string>()),

@@ -37,10 +37,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 mock.NavigateTo(nameof(OutputViewModel), null))
                     .Returns(new FakeOutputView());
 
-            // * return fake view/viewmodel for cloudExplorer window
+            // * return fake view/viewmodel for tasExplorer window
             MockViewLocatorService.Setup(mock =>
-                mock.NavigateTo(nameof(CloudExplorerViewModel), null))
-                    .Returns(new FakeCloudExplorerView());
+                mock.NavigateTo(nameof(TasExplorerViewModel), null))
+                    .Returns(new FakeTasExplorerView());
 
             _sut = new DeploymentDialogViewModel(Services, _fakeProjPath, FakeTargetFrameworkMoniker);
 
@@ -328,7 +328,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("StartDeployment")]
-        public async Task StartDeployment_SetsAuthRequiredToTrueOnCloudExplorer_WhenFailureTypeIsInvalidRefreshToken()
+        public async Task StartDeployment_SetsAuthRequiredToTrueOnTasExplorer_WhenFailureTypeIsInvalidRefreshToken()
         {
             _sut.AppName = _fakeAppName;
             _sut.SelectedCf = _fakeCfInstance;
@@ -349,11 +349,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                              expectedStdErrCallback))
                     .ReturnsAsync(invalidRefreshTokenFailure);
 
-            Assert.IsFalse(_sut.CloudExplorerViewModel.AuthenticationRequired);
+            Assert.IsFalse(_sut.TasExplorerViewModel.AuthenticationRequired);
 
             await _sut.StartDeployment();
 
-            Assert.IsTrue(_sut.CloudExplorerViewModel.AuthenticationRequired);
+            Assert.IsTrue(_sut.TasExplorerViewModel.AuthenticationRequired);
         }
 
         [TestMethod]
@@ -578,16 +578,16 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
     }
 
-    public class FakeCloudExplorerView : ViewModelTestSupport, IView
+    public class FakeTasExplorerView : ViewModelTestSupport, IView
     {
         public IViewModel ViewModel { get; }
 
         public bool ShowMethodWasCalled { get; private set; }
 
-        public FakeCloudExplorerView()
+        public FakeTasExplorerView()
         {
             MockCloudFoundryService.SetupGet(mock => mock.CloudFoundryInstances).Returns(new Dictionary<string, CloudFoundryInstance>());
-            ViewModel = new CloudExplorerViewModel(Services);
+            ViewModel = new TasExplorerViewModel(Services);
             ShowMethodWasCalled = false;
         }
 
