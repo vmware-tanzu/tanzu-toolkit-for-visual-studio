@@ -9,11 +9,11 @@
                 mc:Ignorable="d"
                 Name="TasExplorerViewElement"
                 d:DesignHeight="300" d:DesignWidth="300">
-  
+
     <UserControl.Resources>
         <converters:VisibilityConverter x:Key="Visibility" />
         <converters:VisibilityConverter x:Key="InverseVisibility" Reversed="True"/>
-        
+
         <Style x:Key="RoundedButtonStyle" TargetType="{x:Type Button}">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Template">
@@ -57,8 +57,8 @@
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="32"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="27"></RowDefinition>
+            <RowDefinition/>
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
@@ -113,28 +113,34 @@
             </Button>
         </StackPanel>
 
-        <Button 
-            Margin="4"
-            Grid.Row="0"
-            Grid.Column="2"
-            FontSize="12"
-            Foreground="Black"
-            Background="#FFFFE2"
-            Content="Disconnected; click here to re-authenticate."
-            Command="{Binding ElementName=TasExplorerViewElement, Path=ReAuthenticateCommand}"
-            Visibility="{Binding AuthenticationRequired, Converter={StaticResource Visibility}}"/>
+        <StackPanel Grid.Row="1" Grid.ColumnSpan="3">
+            <Button 
+             Margin="0,0,0,244"
+             FontSize="12"
+             Foreground="Black"
+             Background="#FFFFE2"
+             Command="{Binding ElementName=TasExplorerViewElement, Path=ReAuthenticateCommand}"
+             Visibility="{Binding AuthenticationRequired, Converter={StaticResource Visibility}}" Grid.ColumnSpan="3">
+                <DockPanel HorizontalAlignment="Stretch" Width="285" Height="23">
+                    <Label Content="Disconnected: Click here to re-authenticate" DockPanel.Dock="Right" 
+                       VerticalAlignment="Top" Width="275" Foreground="Black" FontSize="11" Height="24" Margin="0,-2,0,0"/>
+                    <Image Stretch="Uniform" DockPanel.Dock="Left" VerticalAlignment="Center" 
+                       Source="Resources/StatusWarning.png" Height="25" Width="11" Margin="0,0,0,4"/>
+                </DockPanel>
+            </Button>
+        </StackPanel>
 
         <Rectangle Grid.Row="1" Grid.RowSpan="1" Grid.ColumnSpan="3" />
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" 
-                 Margin="5"
+        <TextBlock Grid.Row="1" Grid.Column="2" 
+                 Margin="36,129,100,128"
                  TextWrapping="Wrap"  
                  ScrollViewer.VerticalScrollBarVisibility="Auto"
                  HorizontalAlignment="Center" VerticalAlignment="Center"
                  Text="Not Yet Connected" 
-                 Visibility="{Binding Path=HasCloudTargets, Converter={StaticResource InverseVisibility}}"/>
+                 Visibility="{Binding Path=HasCloudTargets, Converter={StaticResource InverseVisibility}}" Height="16" Width="100"/>
 
-        <TreeView ItemsSource="{Binding CloudFoundryList}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Visibility="{Binding Path=HasCloudTargets, Converter={StaticResource Visibility}}">
+        <TreeView ItemsSource="{Binding CloudFoundryList}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Visibility="{Binding Path=HasCloudTargets, Converter={StaticResource Visibility}}" Margin="0,20,0,3">
             <TreeView.ItemContainerStyle>
                 <!-- This Style binds a TreeViewItem to a TreeViewItemViewModel. -->
                 <Style TargetType="{x:Type TreeViewItem}">
