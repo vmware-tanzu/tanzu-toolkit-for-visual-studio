@@ -15,23 +15,25 @@
 
 ## Introduction
 
-The `TanzuToolkitForVS` project provides a VSIX extension that allows Visual Studio users to interact with Tanzu Application Service (Cloud Foundry) from their IDE.
+The `TanzuToolkit` solution provides a VSIX extension that allows Visual Studio users to interact with Tanzu Application Service from within their IDE.
 
 ## Disclaimer
 - This product is still under development and, as such, may lack some features.
 - Our team uses [this board in ZenHub](https://app.zenhub.com/workspaces/net-dev-x---visual-studio-extensions-604161e65a9f390012665e4d/board?repos=327998348) to track progress.
 - All VSIX files for this extension are from the pre-release version and are not publicly supported.
-- The extension currently doesn't support SSL validation.
+- The extension currently doesn't support SSL validation when connecting to Tanzu Application Service.
 
 ## Install
 - To install this extension, you will need Visual Studio version 16.0 or higher.
-- You can find a pre-release under the `v0.0.1` tag in the "Releases" section of this repository.
+- You can find a pre-release under the `v0.0.2` tag in the ["Releases" section of this repository](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/releases).
 - Download the `Tanzu.Toolkit.VisualStudio.vsix` file & double-click to prompt an installation into your Visual Studio instance.
 - To uninstall this extension from Visual Studio, visit the Visual Studio Extension Manager found under the `Extensions` menu.
 
-## Demo Video + Screenshots
+## Demo Video
 
 [[Demo video]![demo](https://user-images.githubusercontent.com/52456455/114413841-56d54700-9b7c-11eb-9baa-504a50bccb02.PNG)](https://user-images.githubusercontent.com/52456455/114176128-c2af7980-9908-11eb-831b-f2ac34bc3e61.mp4)
+
+## Screenshots
 
 ![demopic1](https://user-images.githubusercontent.com/52456455/114448940-2ef8da00-9ba2-11eb-885f-25815c8858ec.PNG)
 ![demopic2](https://user-images.githubusercontent.com/52456455/114448950-30c29d80-9ba2-11eb-964e-d1e3c2fe1423.PNG)
