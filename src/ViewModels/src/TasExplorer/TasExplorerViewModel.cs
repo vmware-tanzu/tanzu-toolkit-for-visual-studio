@@ -163,7 +163,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool CanReAuthenticate(object arg)
         {
-            return CloudFoundryList.Count > 0 && CloudFoundryList[0] is CfInstanceViewModel;
+            return AuthenticationRequired;
         }
 
         public void OpenLoginView(object parent)
@@ -395,7 +395,10 @@ namespace Tanzu.Toolkit.ViewModels
 
         public void ReAuthenticate(object arg)
         {
-            RemoveCloudConnection(CloudFoundryList[0]);
+            if (CloudFoundryList.Count > 0)
+            {
+                RemoveCloudConnection(CloudFoundryList[0]);
+            }
             OpenLoginView(null);
         }
 
