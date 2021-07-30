@@ -163,7 +163,6 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool CanReAuthenticate(object arg)
         {
-            //return CloudFoundryList.Count > 0 && CloudFoundryList[0] is CfInstanceViewModel;
             return AuthenticationRequired;
         }
 
