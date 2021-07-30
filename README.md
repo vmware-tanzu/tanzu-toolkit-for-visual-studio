@@ -47,11 +47,16 @@ The `TanzuToolkit` solution provides a VSIX extension that allows Visual Studio 
   - The newly deployed app will show up in the Tanzu Cloud Explorer window after pressing the refresh button.
 
 ## Version Support
-- Our extension currently supports v.2 of the Cloud Controller API, specifically between 2.128.0 - 2.149.0
-- V3 of the Cloud Controller API isn't officially supported by this extension yet, although some features may still work for TAS instances running CC API V3. 
-- We are currently working on supporting V3 of the Cloud Controller API and later versions of V2.
+- Our extension currently supports both v.2 (≥ 2.128.0) and v.3 (≥ 3.63.0) of the Cloud Controller API. 
+- To maximize the range of supported CC API versions, 2 copies of the CF CLI are bundled with this extension: CF CLI v6 & CF CLI v7:
+  - If Tanzu Application Service is running CC API version 2 ... 
+    - ... above 2.150.0, this extension uses CF CLI v7.
+    - ... between 2.128.0 - 2.150.0, this VS extension uses CF CLI v6.
+  - If Tanzu Application Service is running CC API version 3 ... 
+    - ... above 3.85.0, this extension uses CF CLI v7.
+    - ... between 3.63.0 - 3.85.0, this VS extension uses CF CLI v6.
 
-As of June 2021 we are still working on an MVP & are not yet advertising this tool publicly.
+As of July 2021 we are still working on an MVP & are not yet advertising this tool publicly.
 
 ## Notes
 - This extension uses the CF CLI to perform certain operations on Tanzu Application Service. All CF CLI binaries & config files can be found in the installation directory for this Visual Studio Extension (by default, this extension is installed in `c:\users\<user>\appdata\local\microsoft\visualstudio\<vs-instance>\extensions\vmware\tanzu toolkit for visual studio\<vsix-version>`)
