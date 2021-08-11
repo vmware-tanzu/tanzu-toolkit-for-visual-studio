@@ -38,9 +38,9 @@ The `TanzuToolkit` solution provides a VSIX extension that allows Visual Studio 
 
 ## Screenshots
 
-![demopic1](https://user-images.githubusercontent.com/52456455/114448940-2ef8da00-9ba2-11eb-885f-25815c8858ec.PNG)
-![demopic2](https://user-images.githubusercontent.com/52456455/114448950-30c29d80-9ba2-11eb-964e-d1e3c2fe1423.PNG)
-![demopic3](https://user-images.githubusercontent.com/52456455/114448957-328c6100-9ba2-11eb-938c-8a97119e27bc.PNG)
+![newscreenshot1](https://user-images.githubusercontent.com/52456455/129063507-9aa54439-4ddd-4872-9d28-7034b06a5198.PNG)
+![newscreenshot2](https://user-images.githubusercontent.com/52456455/129063550-0a12fab6-e4bd-489a-a256-8de70af50052.PNG)
+![newscreenshot3](https://user-images.githubusercontent.com/52456455/129063566-0061109d-e4ed-40e7-b1da-25f7e53de1f8.PNG)
 
 
 ## Usage
