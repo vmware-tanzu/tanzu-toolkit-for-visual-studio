@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Tanzu.Toolkit.ViewModels
 {
-    public interface IAddCloudDialogViewModel : IViewModel
+    public interface ILoginViewModel : IViewModel
     {
         string InstanceName { get; set; }
         string Target { get; set; }

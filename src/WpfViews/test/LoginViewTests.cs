@@ -6,14 +6,14 @@ using Moq;
 namespace Tanzu.Toolkit.WpfViews.Tests
 {
     [TestClass]
-    public class AddCloudDialogViewTests : ViewTestSupport
+    public class LoginViewTests : ViewTestSupport
     {
-        private AddCloudDialogViewModel vm;
+        private LoginViewModel vm;
 
         [TestInitialize]
         public void TestInit()
         {
-            vm = new AddCloudDialogViewModel(services);
+            vm = new LoginViewModel(services);
         }
 
         [TestMethod]
@@ -21,7 +21,7 @@ namespace Tanzu.Toolkit.WpfViews.Tests
         {
             vm.InstanceName = "My CF";
             vm.Target = "http://test/";
-            var view = new AddCloudDialogView(vm, mockThemeService.Object);
+            var view = new LoginView(vm, mockThemeService.Object);
 
             // Verify DataContext initalized
             Assert.AreSame(vm, view.DataContext);
@@ -42,7 +42,7 @@ namespace Tanzu.Toolkit.WpfViews.Tests
         [TestMethod]
         public void Constructor_SetsWindowTheme_UsingThemeService()
         {
-            var view = new AddCloudDialogView(vm, mockThemeService.Object);
+            var view = new LoginView(vm, mockThemeService.Object);
             mockThemeService.Verify(mock => mock.SetTheme(view), Times.Once);
         }
     }

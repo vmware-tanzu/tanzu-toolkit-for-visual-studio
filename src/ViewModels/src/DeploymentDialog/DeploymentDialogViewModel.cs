@@ -233,7 +233,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
-                DialogService.ShowDialog(typeof(AddCloudDialogViewModel).Name);
+                DialogService.ShowDialog(typeof(LoginViewModel).Name);
                 UpdateCfInstanceOptions();
             }
         }
