@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Tanzu.Toolkit.ViewModels
 {
-    public class AddCloudDialogViewModel : AbstractViewModel, IAddCloudDialogViewModel
+    public class LoginViewModel : AbstractViewModel, ILoginViewModel
     {
         public const string TargetEmptyMessage = "Invalid URI: The URI is empty.";
         public const string TargetInvalidFormatMessage = "Invalid URI: The format of the URI could not be determined.";
@@ -16,7 +16,7 @@ namespace Tanzu.Toolkit.ViewModels
         private string _errorMessage;
         private string _instanceName;
 
-        public AddCloudDialogViewModel(IServiceProvider services)
+        public LoginViewModel(IServiceProvider services)
             : base(services)
         {
             SkipSsl = true;

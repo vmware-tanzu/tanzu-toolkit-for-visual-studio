@@ -10,14 +10,14 @@ namespace Tanzu.Toolkit.WpfViews
     /// <summary>
     /// Interaction logic for LoginView.xaml.
     /// </summary>
-    public partial class LoginView : Window, IAddCloudDialogView
+    public partial class LoginView : Window, ILoginView
     {
         public LoginView()
         {
             InitializeComponent();
         }
 
-        public LoginView(IAddCloudDialogViewModel viewModel, IThemeService themeService)
+        public LoginView(ILoginViewModel viewModel, IThemeService themeService)
         {
             AddCloudCommand = new AsyncDelegatingCommand(viewModel.AddCloudFoundryInstance, viewModel.CanAddCloudFoundryInstance);
             viewModel.GetPassword = GetPassword;

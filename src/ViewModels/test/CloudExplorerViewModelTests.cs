@@ -118,7 +118,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public void OpenLoginView_CallsDialogService_ShowDialog()
         {
             _sut.OpenLoginView(null);
-            MockDialogService.Verify(ds => ds.ShowDialog(typeof(AddCloudDialogViewModel).Name, null), Times.Once);
+            MockDialogService.Verify(ds => ds.ShowDialog(typeof(LoginViewModel).Name, null), Times.Once);
         }
 
         [TestMethod]
@@ -150,7 +150,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.AuthenticationRequired = true;
 
             MockDialogService.Setup(mock => mock.
-                ShowDialog(typeof(AddCloudDialogViewModel).Name, null))
+                ShowDialog(typeof(LoginViewModel).Name, null))
                     .Callback(() =>
                     {
                         // Simulate successful login by mocking CloudFoundryService to return 1 CF instance
@@ -180,7 +180,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.AuthenticationRequired = true;
 
             MockDialogService.Setup(mock => mock.
-                ShowDialog(typeof(AddCloudDialogViewModel).Name, null))
+                ShowDialog(typeof(LoginViewModel).Name, null))
                     .Callback(() =>
                     {
                         // Simulate unsuccessful login by mocking CloudFoundryService to return 0 CF instances

@@ -6,7 +6,7 @@
         xmlns:converters="clr-namespace:Tanzu.Toolkit.WpfViews.Converters"
         mc:Ignorable="d"
         d:DesignHeight="300" d:DesignWidth="400"
-        Name ="AddCloudDialogViewElement"
+        Name ="LoginViewElement"
         WindowStartupLocation="CenterScreen"
         Title="Login" Icon="Resources/AddCloud.png" Height="400" Width="400">
     
@@ -41,26 +41,26 @@
         <Label Content="Instance Name" Grid.Row="2" Grid.Column="0"></Label>
         <TextBox Name="tbInstanceName" Grid.Row="3" Grid.Column="1" 
                  HorizontalAlignment="Stretch" Width="auto" Text="{ Binding Path=InstanceName }" 
-                 Background="{ Binding ElementName=AddCloudDialogViewElement, Path=Background}"></TextBox>
+                 Background="{ Binding ElementName=LoginViewElement, Path=Background}"></TextBox>
         
         <Label Content="Target Api Address" Grid.Row="4" Grid.Column="0"></Label>
         <TextBox Name="tbUrl" Grid.Row="5" Grid.Column="1" 
                  HorizontalAlignment="Stretch" Width="auto" Text="{ Binding Path=Target }" 
-                 Background="{ Binding ElementName=AddCloudDialogViewElement, Path=Background}"></TextBox>
+                 Background="{ Binding ElementName=LoginViewElement, Path=Background}"></TextBox>
 
         <Label Content="Username" Grid.Row="6" Grid.Column="0"></Label>
         <TextBox Name="tbUsername" Grid.Row="7" Grid.Column="1" 
                  HorizontalAlignment="Stretch" Width="auto" Text="{ Binding Path=Username }" 
-                 Background="{ Binding ElementName=AddCloudDialogViewElement, Path=Background}"></TextBox>
+                 Background="{ Binding ElementName=LoginViewElement, Path=Background}"></TextBox>
 
         <Label Content="Password" Grid.Row="8" Grid.Column="0" ></Label>
         <PasswordBox Name="pbPassword" Grid.Row="9" Grid.Column="1" 
                      HorizontalAlignment="Stretch" Width="auto" 
-                     Background="{ Binding ElementName=AddCloudDialogViewElement, Path=Background}" 
-                     Foreground="{ Binding ElementName=AddCloudDialogViewElement, Path=Foreground}" 
-                     BorderBrush="{ Binding ElementName=AddCloudDialogViewElement, Path=BorderBrush}"></PasswordBox>
+                     Background="{ Binding ElementName=LoginViewElement, Path=Background}" 
+                     Foreground="{ Binding ElementName=LoginViewElement, Path=Foreground}" 
+                     BorderBrush="{ Binding ElementName=LoginViewElement, Path=BorderBrush}"></PasswordBox>
 
-        <Button Content="Add Cloud Target" Grid.Row="13" Grid.Column="0" Command="{ Binding ElementName=AddCloudDialogViewElement, Path=AddCloudCommand }" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+        <Button Content="Add Cloud Target" Grid.Row="13" Grid.Column="0" Command="{ Binding ElementName=LoginViewElement, Path=AddCloudCommand }" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
                 Name="loginButton"/>
 
 

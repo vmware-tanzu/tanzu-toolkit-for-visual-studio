@@ -144,14 +144,14 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<ITasExplorerViewModel, TasExplorerViewModel>();
 
             services.AddTransient<IDeploymentDialogViewModel, DeploymentDialogViewModel>();
-            services.AddTransient<IAddCloudDialogViewModel, AddCloudDialogViewModel>();
+            services.AddTransient<ILoginViewModel, LoginViewModel>();
 
             /* Views */
             services.AddSingleton<IOutputView, OutputView>();
 
             services.AddTransient<ITasExplorerView, TasExplorerView>();
             services.AddTransient<IDeploymentDialogView, DeploymentDialogView>();
-            services.AddTransient<IAddCloudDialogView, LoginView>();
+            services.AddTransient<ILoginView, LoginView>();
             
         }
     }

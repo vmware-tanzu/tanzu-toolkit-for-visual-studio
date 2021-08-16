@@ -6,14 +6,14 @@ using Moq;
 namespace Tanzu.Toolkit.WpfViews.Tests
 {
     [TestClass]
-    public class AddCloudDialogViewTests : ViewTestSupport
+    public class LoginViewTests : ViewTestSupport
     {
-        private AddCloudDialogViewModel vm;
+        private LoginViewModel vm;
 
         [TestInitialize]
         public void TestInit()
         {
-            vm = new AddCloudDialogViewModel(services);
+            vm = new LoginViewModel(services);
         }
 
         [TestMethod]

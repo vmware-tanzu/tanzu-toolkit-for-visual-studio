@@ -77,7 +77,7 @@
   <ItemGroup>
     <Compile Include="Commands\AsyncDelegatingCommand.cs" />
     <Compile Include="ICloudExplorerView.cs" />
-    <Compile Include="IAddCloudDialogView.cs" />
+    <Compile Include="ILoginView.cs" />
     <Compile Include="IDeploymentDialogView.cs" />
     <Compile Include="IOutputView.cs" />
     <Compile Include="LoadingSpinnerSmall.cs" />

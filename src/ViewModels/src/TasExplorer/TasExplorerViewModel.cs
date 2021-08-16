@@ -180,7 +180,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 var numInitialCfs = CloudFoundryList.Count;
 
-                DialogService.ShowDialog(typeof(AddCloudDialogViewModel).Name);
+                DialogService.ShowDialog(typeof(LoginViewModel).Name);
 
                 UpdateCloudFoundryInstances();
 
