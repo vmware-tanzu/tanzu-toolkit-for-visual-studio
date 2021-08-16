@@ -8,7 +8,6 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 {
     public interface ICloudFoundryService
     {
-        CloudFoundryInstance ActiveCloud { get; set; }
         Dictionary<string, CloudFoundryInstance> CloudFoundryInstances { get; }
 
         void AddCloudFoundryInstance(string name, string apiAddress);
