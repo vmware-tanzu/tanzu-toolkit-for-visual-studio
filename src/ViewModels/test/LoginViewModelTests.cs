@@ -8,7 +8,7 @@ using Tanzu.Toolkit.Services.CloudFoundry;
 namespace Tanzu.Toolkit.ViewModels.Tests
 {
     [TestClass]
-    public class AddCloudDialogViewModelTests : ViewModelTestSupport
+    public class LoginViewModelTests : ViewModelTestSupport
     {
         private const string FakeInstanceName = "My Fake CF";
         private const string FakeTarget = "http://my.fake.target";
@@ -18,14 +18,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         private const string FakeToken = "junk";
         private static readonly SecureString FakeSecurePw = new SecureString();
 
-        private static AddCloudDialogViewModel _sut;
+        private static LoginViewModel _sut;
 
         [TestInitialize]
         public void TestInit()
         {
             RenewMockServices();
 
-            _sut = new AddCloudDialogViewModel(Services)
+            _sut = new LoginViewModel(Services)
             {
                 InstanceName = FakeInstanceName,
                 Target = FakeTarget,
@@ -54,7 +54,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsTrue(errorMessagePropertyChangedCalled);
             Assert.IsTrue(_sut.HasErrors);
-            Assert.AreEqual(AddCloudDialogViewModel.TargetEmptyMessage, _sut.ErrorMessage);
+            Assert.AreEqual(LoginViewModel.TargetEmptyMessage, _sut.ErrorMessage);
 
             MockDialogService.Verify(ds => ds.CloseDialog(It.IsAny<object>(), true), Times.Never);
             MockDialogService.Verify(ds => ds.ShowDialog(It.IsAny<string>(), null), Times.Never);
@@ -79,7 +79,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsTrue(errorMessagePropertyChangedCalled);
             Assert.IsTrue(_sut.HasErrors);
-            Assert.AreEqual(AddCloudDialogViewModel.TargetInvalidFormatMessage, _sut.ErrorMessage);
+            Assert.AreEqual(LoginViewModel.TargetInvalidFormatMessage, _sut.ErrorMessage);
 
             MockDialogService.Verify(ds => ds.CloseDialog(It.IsAny<object>(), true), Times.Never);
             MockDialogService.Verify(ds => ds.ShowDialog(It.IsAny<string>(), null), Times.Never);

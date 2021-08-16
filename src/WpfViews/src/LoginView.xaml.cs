@@ -8,16 +8,16 @@ using Tanzu.Toolkit.WpfViews.ThemeService;
 namespace Tanzu.Toolkit.WpfViews
 {
     /// <summary>
-    /// Interaction logic for AddCloudDialogView.xaml.
+    /// Interaction logic for LoginView.xaml.
     /// </summary>
-    public partial class AddCloudDialogView : Window, IAddCloudDialogView
+    public partial class LoginView : Window, ILoginView
     {
-        public AddCloudDialogView()
+        public LoginView()
         {
             InitializeComponent();
         }
 
-        public AddCloudDialogView(IAddCloudDialogViewModel viewModel, IThemeService themeService)
+        public LoginView(ILoginViewModel viewModel, IThemeService themeService)
         {
             AddCloudCommand = new AsyncDelegatingCommand(viewModel.AddCloudFoundryInstance, viewModel.CanAddCloudFoundryInstance);
             viewModel.GetPassword = GetPassword;
