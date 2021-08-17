@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
@@ -22,7 +23,6 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string GetOrgsFailureMsg = "Unable to fetch orgs.";
         internal const string GetSpacesFailureMsg = "Unable to fetch spaces.";
 
-        private readonly string _projDir;
         private string _status;
         private string _appName;
         private readonly bool _fullFrameworkDeployment = false;
@@ -36,6 +36,8 @@ namespace Tanzu.Toolkit.ViewModels
         private CloudFoundryInstance _selectedCf;
         private CloudFoundryOrganization _selectedOrg;
         private CloudFoundrySpace _selectedSpace;
+        private string manifestPathLabel;
+        private string manifestPath;
 
         public DeploymentDialogViewModel(IServiceProvider services, string directoryOfProjectToDeploy, string targetFrameworkMoniker)
             : base(services)
@@ -51,7 +53,7 @@ namespace Tanzu.Toolkit.ViewModels
             DeploymentStatus = InitialStatus;
             DeploymentInProgress = false;
             SelectedCf = null;
-            _projDir = directoryOfProjectToDeploy;
+            ProjectDirPath = directoryOfProjectToDeploy;
 
             if (targetFrameworkMoniker.StartsWith(".NETFramework"))
             {
@@ -61,6 +63,8 @@ namespace Tanzu.Toolkit.ViewModels
             UpdateCfInstanceOptions();
             CfOrgOptions = new List<CloudFoundryOrganization>();
             CfSpaceOptions = new List<CloudFoundrySpace>();
+
+            SetManifestIfDefaultExists();
         }
 
         public string AppName
@@ -82,6 +86,44 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 _status = value;
                 RaisePropertyChangedEvent("DeploymentStatus");
+            }
+        }
+
+        public string ProjectDirPath { get; private set; }
+
+        public string ManifestPath
+        {
+            get => manifestPath;
+
+            set
+            {
+                if (value == null)
+                {
+                    manifestPath = value;
+                    ManifestPathLabel = "<none selected>";
+                }
+                else if (File.Exists(value))
+                {
+                    manifestPath = value;
+
+                    ManifestPathLabel = value;
+                    SetAppNameFromManifest(value);
+                }
+                else
+                {
+                    _dialogService.DisplayErrorDialog("Unable to set manifest path", $"'{value}' does not appear to be a valid path to a manifest.");
+                }
+            }
+        }
+
+        public string ManifestPathLabel
+        {
+            get => manifestPathLabel;
+
+            private set
+            {
+                manifestPathLabel = value;
+                RaisePropertyChangedEvent("ManifestPathLabel");
             }
         }
 
@@ -287,14 +329,16 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
+
         internal async Task StartDeployment()
         {
+            // TODO: pass in manifest path here
             var deploymentResult = await CloudFoundryService.DeployAppAsync(
                 SelectedSpace.ParentOrg.ParentCf,
                 SelectedSpace.ParentOrg,
                 SelectedSpace,
                 AppName,
-                _projDir,
+                ProjectDirPath,
                 _fullFrameworkDeployment,
                 stdOutCallback: OutputViewModel.AppendLine,
                 stdErrCallback: OutputViewModel.AppendLine);
@@ -321,6 +365,33 @@ namespace Tanzu.Toolkit.ViewModels
             }
 
             DeploymentInProgress = false;
+        }
+
+        private void SetManifestIfDefaultExists()
+        {
+            var expectedManifestLocation = Path.Combine(ProjectDirPath, "manifest.yml");
+
+            if (File.Exists(expectedManifestLocation))
+            {
+                ManifestPath = expectedManifestLocation;
+            }
+            else
+            {
+                ManifestPath = null;
+            }
+        }
+
+        private void SetAppNameFromManifest(string pathToManifest)
+        {
+            string[] manifestContents = File.ReadAllLines(pathToManifest);
+
+            foreach (string line in manifestContents)
+            {
+                if (line.StartsWith("- name"))
+                {
+                    AppName = line.Substring(line.IndexOf(":") + 1).Trim();
+                }
+            }
         }
     }
 }
