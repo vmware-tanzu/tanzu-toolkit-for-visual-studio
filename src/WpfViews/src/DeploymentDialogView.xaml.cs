@@ -1,4 +1,6 @@
-﻿using System.Windows.Controls;
+﻿using System.IO;
+using System.Windows.Controls;
+using System.Windows.Forms;
 using System.Windows.Input;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.WpfViews.Commands;
@@ -9,7 +11,7 @@ namespace Tanzu.Toolkit.WpfViews
     /// <summary>
     /// Interaction logic for DeploymentDialogView.xaml.
     /// </summary>
-    public partial class DeploymentDialogView : UserControl, IDeploymentDialogView
+    public partial class DeploymentDialogView : System.Windows.Controls.UserControl, IDeploymentDialogView
     {
         private IDeploymentDialogViewModel _viewModel;
         public ICommand UploadAppCommand { get; }
@@ -43,6 +45,22 @@ namespace Tanzu.Toolkit.WpfViews
         private void DeploymentStatus_TextChanged(object sender, TextChangedEventArgs e)
         {
             deploymentStatusText.ScrollToEnd();
+        }
+
+        private void SelectManifest(object sender, System.Windows.RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                InitialDirectory = _viewModel.ProjectDirPath,
+                Filter = "yml files (*.yml)|*.yml",
+                FilterIndex = 2,
+                RestoreDirectory = true
+            };
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                _viewModel.ManifestPath = openFileDialog.FileName;
+            }
         }
     }
 }
