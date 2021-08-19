@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
@@ -16,12 +15,12 @@ namespace Tanzu.Toolkit.ViewModels
         internal static readonly string _startAppErrorMsg = "Encountered an error while starting app";
         internal static readonly string _deleteAppErrorMsg = "Encountered an error while deleting app";
 
-        private bool _hasCloudTargets;
-        private ObservableCollection<CfInstanceViewModel> _cfs;
+        private CfInstanceViewModel _tas;
         private volatile bool _isRefreshingAll = false;
         private volatile int _numRefreshThreads = 0;
         private object _refreshLock = new object();
         private bool _authenticationRequired;
+        private ObservableCollection<TreeViewItemViewModel> treeRoot;
         private readonly IServiceProvider _services;
         private readonly IThreadingService _threadingService;
         private readonly IErrorDialog _dialogService;
@@ -33,29 +32,51 @@ namespace Tanzu.Toolkit.ViewModels
             _services = services;
             _threadingService = services.GetRequiredService<IThreadingService>();
 
-            _cfs = new ObservableCollection<CfInstanceViewModel>();
-            HasCloudTargets = CloudFoundryService.ConnectedCf.Keys.Count > 0;
-        }
-
-        public ObservableCollection<CfInstanceViewModel> CloudFoundryList
-        {
-            get => _cfs;
-
-            set
+            if (CloudFoundryService.ConnectedCf != null)
             {
-                _cfs = value;
-                RaisePropertyChangedEvent("CloudFoundryList");
+                TasConnection = new CfInstanceViewModel(CloudFoundryService.ConnectedCf, this, Services);
+            }
+            else
+            {
+                TasConnection = null;
             }
         }
 
-        public bool HasCloudTargets
+        public CfInstanceViewModel TasConnection
         {
-            get => _hasCloudTargets;
+            get => _tas;
 
             set
             {
-                _hasCloudTargets = value;
-                RaisePropertyChangedEvent("HasCloudTargets");
+                _tas = value;
+
+                if (value == null)
+                {
+                    TreeRoot = new ObservableCollection<TreeViewItemViewModel>
+                    {
+                        new LoginPromptViewModel(Services),
+                    };
+                }
+                else if (value is CfInstanceViewModel)
+                {
+                    TreeRoot = new ObservableCollection<TreeViewItemViewModel>
+                    {
+                        value
+                    };
+                }
+
+                RaisePropertyChangedEvent("TasConnection");
+            }
+        }
+
+        public ObservableCollection<TreeViewItemViewModel> TreeRoot
+        {
+            get => treeRoot;
+
+            set
+            {
+                treeRoot = value;
+                RaisePropertyChangedEvent("TreeRoot");
             }
         }
 
@@ -97,9 +118,16 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 _authenticationRequired = value;
 
-                foreach (CfInstanceViewModel cfivm in CloudFoundryList)
+                if (value == true)
                 {
-                    cfivm.IsExpanded = false;
+                    if (TasConnection != null)
+                    {
+                        TasConnection.IsExpanded = false;
+                    }
+                    else
+                    {
+                        Logger.Error("Set AuthenticationRequired => true but there is no TasConnection to collapse");
+                    }
                 }
 
                 RaisePropertyChangedEvent("AuthenticationRequired");
@@ -108,7 +136,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool CanOpenLoginView(object arg)
         {
-            return true;
+            return CloudFoundryService.ConnectedCf == null;
         }
 
         public bool CanStopCfApp(object arg)
@@ -168,7 +196,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public void OpenLoginView(object parent)
         {
-            if (CloudFoundryService.ConnectedCf.Count > 0)
+            if (CloudFoundryService.ConnectedCf != null)
             {
                 var errorTitle = "Unable to add more TAS connections.";
                 var errorMsg = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
@@ -178,19 +206,16 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
-                var numInitialCfs = CloudFoundryList.Count;
-
                 DialogService.ShowDialog(typeof(LoginViewModel).Name);
 
-                UpdateCloudFoundryInstances();
-
-                bool successfullyLoggedIn = CloudFoundryList.Count > numInitialCfs;
+                bool successfullyLoggedIn = CloudFoundryService.ConnectedCf != null;
 
                 if (successfullyLoggedIn)
                 {
+                    TasConnection = new CfInstanceViewModel(CloudFoundryService.ConnectedCf, this, Services);
                     AuthenticationRequired = false;
 
-                    if (HasCloudTargets && !ThreadingService.IsPolling)
+                    if (TasConnection != null && !ThreadingService.IsPolling)
                     {
                         ThreadingService.StartUiBackgroundPoller(RefreshAllItems, null, 10);
                     }
@@ -290,82 +315,75 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 IsRefreshingAll = true;
 
-                // before refreshing each cf instance, check the Model's record of Cloud
-                // connections & make sure `CloudFoundryList` matches those values
-                SyncCloudFoundryList();
-
                 object threadLock = new object();
 
-                foreach (CfInstanceViewModel cfivm in CloudFoundryList)
+                if (TasConnection != null && TasConnection.IsExpanded && !TasConnection.IsLoading)
                 {
-                    if (cfivm.IsExpanded && !cfivm.IsLoading)
+                    var refreshCfTask = new Task(async () =>
                     {
-                        var refreshCfTask = new Task(async () =>
+                        await TasConnection.RefreshChildren();
+
+                        foreach (TreeViewItemViewModel cfChild in TasConnection.Children)
                         {
-                            await cfivm.RefreshChildren();
-
-                            foreach (TreeViewItemViewModel cfChild in cfivm.Children)
+                            if (cfChild is OrgViewModel ovm && cfChild.IsExpanded && !cfChild.IsLoading)
                             {
-                                if (cfChild is OrgViewModel ovm && cfChild.IsExpanded && !cfChild.IsLoading)
+                                var refreshOrgTask = new Task(async () =>
                                 {
-                                    var refreshOrgTask = new Task(async () =>
+                                    await ovm.RefreshChildren();
+
+                                    foreach (TreeViewItemViewModel orgChild in ovm.Children)
                                     {
-                                        await ovm.RefreshChildren();
-
-                                        foreach (TreeViewItemViewModel orgChild in ovm.Children)
+                                        if (orgChild is SpaceViewModel svm && orgChild.IsExpanded && !orgChild.IsLoading)
                                         {
-                                            if (orgChild is SpaceViewModel svm && orgChild.IsExpanded && !orgChild.IsLoading)
+                                            var refreshSpaceTask = new Task(async () =>
                                             {
-                                                var refreshSpaceTask = new Task(async () =>
-                                                {
-                                                    await svm.RefreshChildren();
-
-                                                    lock (threadLock)
-                                                    {
-                                                        if (_numRefreshThreads < 1) throw new ArgumentOutOfRangeException();
-                                                        _numRefreshThreads -= 1;
-                                                    }
-                                                });
+                                                await svm.RefreshChildren();
 
                                                 lock (threadLock)
                                                 {
-                                                    _numRefreshThreads += 1;
+                                                    if (_numRefreshThreads < 1) throw new ArgumentOutOfRangeException();
+                                                    _numRefreshThreads -= 1;
                                                 }
+                                            });
 
-                                                _threadingService.StartTask(() => Task.Run(() => refreshSpaceTask.Start())); // wrapped in extra task runner for ease of unit testing
+                                            lock (threadLock)
+                                            {
+                                                _numRefreshThreads += 1;
                                             }
-                                        }
 
-                                        lock (threadLock)
-                                        {
-                                            if (_numRefreshThreads < 1) throw new ArgumentOutOfRangeException();
-                                            _numRefreshThreads -= 1;
+                                            _threadingService.StartTask(() => Task.Run(() => refreshSpaceTask.Start())); // wrapped in extra task runner for ease of unit testing
                                         }
-                                    });
+                                    }
 
                                     lock (threadLock)
                                     {
-                                        _numRefreshThreads += 1;
+                                        if (_numRefreshThreads < 1) throw new ArgumentOutOfRangeException();
+                                        _numRefreshThreads -= 1;
                                     }
+                                });
 
-                                    _threadingService.StartTask(() => Task.Run(() => refreshOrgTask.Start())); // wrapped in extra task runner for ease of unit testing
+                                lock (threadLock)
+                                {
+                                    _numRefreshThreads += 1;
                                 }
-                            }
 
-                            lock (threadLock)
-                            {
-                                if (_numRefreshThreads < 1) throw new ArgumentOutOfRangeException();
-                                _numRefreshThreads -= 1;
+                                _threadingService.StartTask(() => Task.Run(() => refreshOrgTask.Start())); // wrapped in extra task runner for ease of unit testing
                             }
-                        });
+                        }
 
                         lock (threadLock)
                         {
-                            _numRefreshThreads += 1;
+                            if (_numRefreshThreads < 1) throw new ArgumentOutOfRangeException();
+                            _numRefreshThreads -= 1;
                         }
+                    });
 
-                        _threadingService.StartTask(() => Task.Run(() => refreshCfTask.Start())); // wrapped in extra task runner for ease of unit testing
+                    lock (threadLock)
+                    {
+                        _numRefreshThreads += 1;
                     }
+
+                    _threadingService.StartTask(() => Task.Run(() => refreshCfTask.Start())); // wrapped in extra task runner for ease of unit testing
                 }
 
                 int threadsStillRunning = 1;
@@ -384,102 +402,19 @@ namespace Tanzu.Toolkit.ViewModels
             });
         }
 
-        public void RemoveCloudConnection(object arg)
+        public void DeleteConnection(object arg)
         {
-            if (arg is CfInstanceViewModel cloudConnection)
+            if (arg is CfInstanceViewModel)
             {
-                CloudFoundryService.RemoveCloudFoundryInstance(cloudConnection.DisplayText);
-                SyncCloudFoundryList();
+                TasConnection = null;
+                CloudFoundryService.ConnectedCf = null;
             }
         }
 
         public void ReAuthenticate(object arg)
         {
-            if (CloudFoundryList.Count > 0)
-            {
-                RemoveCloudConnection(CloudFoundryList[0]);
-            }
+            DeleteConnection(TasConnection);
             OpenLoginView(null);
-        }
-
-        /// <summary>
-        /// Update CloudFoundryList with values from the Model's record of Cloud instances
-        /// Do not re-assign CloudFoundryList (avoid raising property changed event).
-        /// </summary>
-        private void SyncCloudFoundryList()
-        {
-            var loggedInCfs = new ObservableCollection<CloudFoundryInstance>(CloudFoundryService.ConnectedCf.Values);
-            var updatedCfInstanceViewModelList = new ObservableCollection<CfInstanceViewModel>();
-            foreach (CloudFoundryInstance cf in loggedInCfs)
-            {
-                updatedCfInstanceViewModelList.Add(new CfInstanceViewModel(cf, this, _services));
-            }
-
-            RemoveNonexistentCfsFromCloudFoundryList(updatedCfInstanceViewModelList);
-            AddNewCfsToCloudFoundryList(updatedCfInstanceViewModelList);
-
-            HasCloudTargets = CloudFoundryList.Count > 0;
-        }
-
-        private void AddNewCfsToCloudFoundryList(ObservableCollection<CfInstanceViewModel> updatedCfInstanceViewModelList)
-        {
-            foreach (CfInstanceViewModel newCFIVM in updatedCfInstanceViewModelList)
-            {
-                // if newCFIVM isn't in CloudFoundryList, add it
-                if (newCFIVM != null)
-                {
-                    bool cfWasAlreadyInCloudFoundryList = CloudFoundryList.Any(oldCf =>
-                    {
-                        return oldCf != null
-                            && oldCf.CloudFoundryInstance.ApiAddress == newCFIVM.CloudFoundryInstance.ApiAddress
-                            && oldCf.CloudFoundryInstance.InstanceName == newCFIVM.CloudFoundryInstance.InstanceName;
-                    });
-
-                    if (!cfWasAlreadyInCloudFoundryList)
-                    {
-                        UiDispatcherService.RunOnUiThread(() => CloudFoundryList.Add(newCFIVM));
-                    }
-                }
-            }
-        }
-
-        private void RemoveNonexistentCfsFromCloudFoundryList(ObservableCollection<CfInstanceViewModel> updatedCfInstanceViewModelList)
-        {
-            var cfsToRemove = new ObservableCollection<CfInstanceViewModel>();
-
-            foreach (CfInstanceViewModel oldCFIVM in CloudFoundryList)
-            {
-                // if oldCFIVM isn't in updatedCfInstanceViewModelList, remove it from CloudFoundryList
-                if (oldCFIVM != null)
-                {
-                    bool cfConnectionStillExists = updatedCfInstanceViewModelList.Any(cfivm => cfivm != null
-                        && cfivm.CloudFoundryInstance.ApiAddress == oldCFIVM.CloudFoundryInstance.ApiAddress);
-
-                    if (!cfConnectionStillExists)
-                    {
-                        cfsToRemove.Add(oldCFIVM);
-                    }
-                }
-            }
-
-            foreach (CfInstanceViewModel cfivm in cfsToRemove)
-            {
-                UiDispatcherService.RunOnUiThread(() => CloudFoundryList.Remove(cfivm));
-            }
-        }
-
-        private void UpdateCloudFoundryInstances()
-        {
-            var loggedInCfs = new ObservableCollection<CloudFoundryInstance>(CloudFoundryService.ConnectedCf.Values);
-            var updatedCfInstanceViewModelList = new ObservableCollection<CfInstanceViewModel>();
-            foreach (CloudFoundryInstance cf in loggedInCfs)
-            {
-                updatedCfInstanceViewModelList.Add(new CfInstanceViewModel(cf, this, _services));
-            }
-
-            CloudFoundryList = updatedCfInstanceViewModelList;
-
-            HasCloudTargets = CloudFoundryList.Count > 0;
         }
     }
 }

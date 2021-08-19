@@ -20,7 +20,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             RenewMockServices();
 
-            MockCloudFoundryService.SetupGet(mock => mock.ConnectedCf).Returns(new Dictionary<string, CloudFoundryInstance>());
+            MockCloudFoundryService.SetupGet(mock => mock.ConnectedCf).Returns(FakeCfInstance);
 
             // set up mockUiDispatcherService to run whatever method is passed
             // to RunOnUiThread; do not delegate to the UI Dispatcher
@@ -52,9 +52,76 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        public void CanOpenLoginView_ReturnsExpected()
+        [TestCategory("Ctor")]
+        public void Ctor_SetsTasConnection_WhenCfServiceIsConnectedToTAS()
         {
+            Assert.IsNotNull(_sut.TasConnection);
+            Assert.AreEqual(FakeCfInstance, _sut.TasConnection.CloudFoundryInstance);
+        }
+
+        [TestMethod]
+        [TestCategory("Ctor")]
+        public void Ctor_SetsTasConnectionToNull_WhenCfServiceIsNotConnectedToTAS()
+        {
+            MockCloudFoundryService.SetupGet(mock => mock.ConnectedCf).Returns((CloudFoundryInstance)null);
+
+            _sut = new TasExplorerViewModel(Services);
+
+            Assert.IsNull(_sut.TasConnection);
+        }
+
+        [TestMethod]
+        [TestCategory("TasConnection")]
+        [TestCategory("TreeRoot")]
+        public void SettingTasConnection_PopulatesTreeRoot()
+        {
+            MockCloudFoundryService.SetupGet(mock => mock.ConnectedCf).Returns((CloudFoundryInstance)null);
+
+            _sut = new TasExplorerViewModel(Services);
+
+            Assert.IsNull(_sut.TasConnection);
+            Assert.AreEqual(1, _sut.TreeRoot.Count);
+            Assert.IsTrue(_sut.TreeRoot[0] is LoginPromptViewModel);
+
+            _sut.TasConnection = new CfInstanceViewModel(FakeCfInstance, _sut, Services);
+
+            Assert.IsNotNull(_sut.TasConnection);
+            Assert.AreEqual(1, _sut.TreeRoot.Count);
+            Assert.AreEqual(_sut.TreeRoot[0], _sut.TasConnection);
+        }
+        
+        [TestMethod]
+        [TestCategory("TasConnection")]
+        [TestCategory("TreeRoot")]
+        public void SettingTasConnectionToNull_ClearsTreeRoot()
+        {
+            Assert.IsNotNull(_sut.TasConnection);
+            Assert.AreEqual(1, _sut.TreeRoot.Count);
+            Assert.AreEqual(_sut.TreeRoot[0], _sut.TasConnection);
+
+            _sut.TasConnection = null;
+
+            Assert.IsNull(_sut.TasConnection);
+            Assert.AreEqual(1, _sut.TreeRoot.Count);
+            Assert.IsTrue(_sut.TreeRoot[0] is LoginPromptViewModel);
+        }
+
+        [TestMethod]
+        public void CanOpenLoginView_ReturnsTrue_WhenConnectedCfIsNull()
+        {
+            MockCloudFoundryService.SetupGet(mock => mock.ConnectedCf).Returns((CloudFoundryInstance)null);
+
+            Assert.IsNull(MockCloudFoundryService.Object.ConnectedCf);
             Assert.IsTrue(_sut.CanOpenLoginView(null));
+        }
+
+        [TestMethod]
+        public void CanOpenLoginView_ReturnsFalse_WhenConnectedCfIsNotNull()
+        {
+            MockCloudFoundryService.SetupGet(mock => mock.ConnectedCf).Returns(FakeCfInstance);
+
+            Assert.IsNotNull(MockCloudFoundryService.Object.ConnectedCf);
+            Assert.IsFalse(_sut.CanOpenLoginView(null));
         }
 
         [TestMethod]
@@ -117,59 +184,42 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("OpenLoginView")]
         public void OpenLoginView_CallsDialogService_ShowDialog()
         {
+            MockCloudFoundryService.SetupGet(mock => mock.ConnectedCf).Returns((CloudFoundryInstance)null);
+
+            Assert.IsTrue(_sut.CanOpenLoginView(null));
+
             _sut.OpenLoginView(null);
             MockDialogService.Verify(ds => ds.ShowDialog(typeof(LoginViewModel).Name, null), Times.Once);
         }
 
         [TestMethod]
         [TestCategory("OpenLoginView")]
-        public void OpenLoginView_UpdatesCloudFoundryInstances_AfterDialogCloses()
-        {
-            var emptyCfsDict = new Dictionary<string, CloudFoundryInstance>();
-            var fakeCfsDict = new Dictionary<string, CloudFoundryInstance>
-            {
-                { "fake cf", new CloudFoundryInstance("fake cf", null) },
-            };
-
-            MockCloudFoundryService.SetupSequence(mock => mock.ConnectedCf)
-                .Returns(emptyCfsDict) // return empty on first request to avoid error due to temporary "single-cf" requirement.
-                .Returns(fakeCfsDict); // return fake cf on second request as mock result of having logged in.
-
-            Assert.AreEqual(0, _sut.CloudFoundryList.Count);
-
-            _sut.OpenLoginView(null);
-
-            Assert.IsTrue(_sut.HasCloudTargets);
-            Assert.AreEqual(1, _sut.CloudFoundryList.Count);
-        }
-
-        [TestMethod]
-        [TestCategory("OpenLoginView")]
         public void OpenLoginView_SetsAuthenticationRequiredToFalse_WhenCFGetsAdded()
         {
-            _sut.AuthenticationRequired = true;
+            MockCloudFoundryService.SetupGet(mock => mock.ConnectedCf).Returns((CloudFoundryInstance)null);
+
+            _sut = new TasExplorerViewModel(Services)
+            {
+                AuthenticationRequired = true
+            };
 
             MockDialogService.Setup(mock => mock.
                 ShowDialog(typeof(LoginViewModel).Name, null))
                     .Callback(() =>
                     {
-                        // Simulate successful login by mocking CloudFoundryService to return 1 CF instance
-
-                        var fakeCfsDict = new Dictionary<string, CloudFoundryInstance>
-                        {
-                            { "fake cf", new CloudFoundryInstance("fake cf", null) },
-                        };
+                        // Simulate successful login by mocking CloudFoundryService to return non-null CF instance
 
                         MockCloudFoundryService.SetupGet(mock => mock.
-                          ConnectedCf).Returns(fakeCfsDict);
+                          ConnectedCf).Returns(FakeCfInstance);
                     });
 
             Assert.IsTrue(_sut.AuthenticationRequired);
-            Assert.AreEqual(0, _sut.CloudFoundryList.Count);
+            Assert.IsNull(_sut.TasConnection);
 
+            Assert.IsTrue(_sut.CanOpenLoginView(null));
             _sut.OpenLoginView(null);
 
-            Assert.AreEqual(1, _sut.CloudFoundryList.Count);
+            Assert.IsNotNull(_sut.TasConnection);
             Assert.IsFalse(_sut.AuthenticationRequired);
         }
 
@@ -177,26 +227,30 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("OpenLoginView")]
         public void OpenLoginView_DoesNotChangeAuthenticationRequired_WhenNoCFIsAdded()
         {
-            _sut.AuthenticationRequired = true;
+            MockCloudFoundryService.SetupGet(mock => mock.ConnectedCf).Returns((CloudFoundryInstance)null);
+
+            _sut = new TasExplorerViewModel(Services)
+            {
+                AuthenticationRequired = true
+            };
 
             MockDialogService.Setup(mock => mock.
                 ShowDialog(typeof(LoginViewModel).Name, null))
                     .Callback(() =>
                     {
-                        // Simulate unsuccessful login by mocking CloudFoundryService to return 0 CF instances
-
-                        var emptyCfsDict = new Dictionary<string, CloudFoundryInstance>();
+                        // Simulate unsuccessful login by mocking CloudFoundryService to return null
 
                         MockCloudFoundryService.SetupGet(mock => mock.
-                          ConnectedCf).Returns(emptyCfsDict);
+                          ConnectedCf).Returns((CloudFoundryInstance)null);
                     });
 
             Assert.IsTrue(_sut.AuthenticationRequired);
-            Assert.AreEqual(0, _sut.CloudFoundryList.Count);
+            Assert.IsNull(_sut.TasConnection);
 
+            Assert.IsTrue(_sut.CanOpenLoginView(null));
             _sut.OpenLoginView(null);
 
-            Assert.AreEqual(0, _sut.CloudFoundryList.Count);
+            Assert.IsNull(_sut.TasConnection);
             Assert.IsTrue(_sut.AuthenticationRequired); // this prop should not have changed
         }
 
@@ -404,8 +458,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
              * containing 1 (expanded) orgViewModel "ovm", which contains 1 (expanded) spaceViewModel "svm",
              * which contains 1 appViewModel "avm".
              */
-            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address");
-            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance);
+            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", FakeCfInstance);
             var fakeInitialSpace = new CloudFoundrySpace("fake space name", "fake space id", fakeInitialOrg);
             var fakeInitialApp = new CloudFoundryApp("fake app name", "fake app id", fakeInitialSpace, "state1");
 
@@ -414,7 +467,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
              * on these fakes increments `NumRefreshes` by 1). These view models are constructed with expanded = true
              * to make them eligible for refreshing.
              */
-            var cfivm = new FakeCfInstanceViewModel(fakeInitialCfInstance, Services, expanded: true);
+            var cfivm = new FakeCfInstanceViewModel(FakeCfInstance, Services, expanded: true);
             var ovm = new FakeOrgViewModel(fakeInitialOrg, Services, expanded: true);
             var svm = new FakeSpaceViewModel(fakeInitialSpace, Services, expanded: true);
             var avm = new AppViewModel(fakeInitialApp, Services);
@@ -422,32 +475,22 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             cfivm.Children = new ObservableCollection<TreeViewItemViewModel> { ovm };
             ovm.Children = new ObservableCollection<TreeViewItemViewModel> { svm };
             svm.Children = new ObservableCollection<TreeViewItemViewModel> { avm };
-            _sut.CloudFoundryList = new ObservableCollection<CfInstanceViewModel> { cfivm };
+            _sut.TasConnection = cfivm;
 
             /** INTENTION:
-             * Mocks should simulate TasExplorerViewModel.InitiateFullRefresh adding 1 cf, 1 org, 
+             * Mocks should simulate TasExplorerViewModel.InitiateFullRefresh adding 1 org, 
              * 1 space & 1 app to each of the respective TreeViewItemViewModels above. In addition,
              * the initial app that existed prior to the refresh should have its state changed by 
              * the refresh.
              */
-            var fakeNewCfInstance = new CloudFoundryInstance("new cf", "http://new.api.address");
-            var fakeNewOrg = new CloudFoundryOrganization("new org", "new org id", fakeInitialCfInstance);
+            var fakeNewOrg = new CloudFoundryOrganization("new org", "new org id", FakeCfInstance);
             var fakeNewSpace = new CloudFoundrySpace("new space", "new space id", fakeInitialOrg);
             var fakeUpdatedApp = new CloudFoundryApp(fakeInitialApp.AppName, fakeInitialApp.AppId, fakeInitialApp.ParentSpace, "new state");
             var fakeNewApp = new CloudFoundryApp("new app", "new app id", fakeInitialSpace, "junk state");
 
-            // simulate addition of new CF
-            MockCloudFoundryService.SetupGet(mock => mock.
-                ConnectedCf)
-                    .Returns(new Dictionary<string, CloudFoundryInstance>
-                    {
-                        { "fake cf name", fakeInitialCfInstance },
-                        { "new cf name", fakeNewCfInstance },
-                    });
-
             // simulate addition of new Org
             MockCloudFoundryService.Setup(mock => mock.
-                GetOrgsForCfInstanceAsync(fakeInitialCfInstance, true, 1))
+                GetOrgsForCfInstanceAsync(FakeCfInstance, true, 1))
                     .ReturnsAsync(new DetailedResult<List<CloudFoundryOrganization>>(
                         succeeded: true,
                         content: new List<CloudFoundryOrganization>
@@ -494,18 +537,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.AreEqual(1, ovm.NumRefreshes);
             Assert.AreEqual(1, svm.NumRefreshes); // in the real implemenation of spaceViewModel.RefreshChildren, all apps should be refreshed
 
-            // ensure refresh added second cfivm
-            Assert.AreEqual(2, _sut.CloudFoundryList.Count);
-            CfInstanceViewModel firstCfVm = _sut.CloudFoundryList[0];
-            CfInstanceViewModel secondCfVm = _sut.CloudFoundryList[1];
-            Assert.AreEqual(cfivm, firstCfVm);
-            Assert.AreEqual(fakeInitialCfInstance, firstCfVm.CloudFoundryInstance);
-            Assert.AreEqual(fakeNewCfInstance, secondCfVm.CloudFoundryInstance);
+            // ensure refresh didn't change cfivm
+            Assert.IsNotNull(_sut.TasConnection);
+            Assert.AreEqual(cfivm, _sut.TasConnection);
 
             // ensure cf refresh added second org vm
-            Assert.AreEqual(2, firstCfVm.Children.Count);
-            OrgViewModel firstOrgVm = (OrgViewModel)firstCfVm.Children[0];
-            OrgViewModel secondOrgVm = (OrgViewModel)firstCfVm.Children[1];
+            OrgViewModel firstOrgVm = (OrgViewModel)cfivm.Children[0];
+            OrgViewModel secondOrgVm = (OrgViewModel)cfivm.Children[1];
             Assert.AreEqual(ovm, firstOrgVm);
             Assert.AreEqual(fakeInitialOrg, firstOrgVm.Org);
             Assert.AreEqual(fakeNewOrg, secondOrgVm.Org);
@@ -529,10 +567,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             // ensure space refresh makes request for fresh apps
             MockCloudFoundryService.Verify(mock => mock.GetAppsForSpaceAsync(fakeInitialSpace, true, It.IsAny<int>()), Times.Once);
 
-            // No need to get children for CFs that were just added by refresh.
-            MockCloudFoundryService.Verify(mock => mock.
-                GetOrgsForCfInstanceAsync(fakeNewCfInstance, true, It.IsAny<int>()), Times.Never);
-
             // No need to get children for orgs that were just added by refresh.
             MockCloudFoundryService.Verify(mock => mock.
                 GetSpacesForOrgAsync(fakeNewOrg, true, It.IsAny<int>()), Times.Never);
@@ -549,22 +583,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
              * TasExplorerViewModel starts off with 1 (expanded) cloudFoundryInstanceViewModel "cfivm",
              * containing 1 placeholder view model. No attempts should be made to refresh the placeholder.
              */
-            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address");
-            var cfivm = new FakeCfInstanceViewModel(fakeInitialCfInstance, Services, expanded: true);
+            var cfivm = new FakeCfInstanceViewModel(FakeCfInstance, Services, expanded: true);
             cfivm.Children = new ObservableCollection<TreeViewItemViewModel>
             {
                 new FakePlaceholderViewModel(cfivm, Services),
             };
 
-            MockCloudFoundryService.SetupGet(mock => mock.
-                ConnectedCf)
-                    .Returns(new Dictionary<string, CloudFoundryInstance>
-                    {
-                        { "fake cf name", fakeInitialCfInstance },
-                    });
-
             MockCloudFoundryService.Setup(mock => mock.
-                GetOrgsForCfInstanceAsync(fakeInitialCfInstance, true, 1))
+                GetOrgsForCfInstanceAsync(FakeCfInstance, true, 1))
                     .ReturnsAsync(new DetailedResult<List<CloudFoundryOrganization>>(
                         succeeded: true,
                         content: new List<CloudFoundryOrganization>
@@ -573,15 +599,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                         explanation: null,
                         cmdDetails: FakeSuccessCmdResult));
 
-            _sut.CloudFoundryList = new ObservableCollection<CfInstanceViewModel> { cfivm };
+            _sut.TasConnection = cfivm;
 
-            // pre-check: tas explorer has 1 cf view model & it's expanded
-            Assert.AreEqual(1, _sut.CloudFoundryList.Count);
-            Assert.IsTrue(_sut.CloudFoundryList[0].IsExpanded);
+            // pre-check: tas explorer has a cf view model & it's expanded
+            Assert.IsNotNull(_sut.TasConnection);
+            Assert.IsTrue(_sut.TasConnection.IsExpanded);
 
             // pre-check: cf view model has 1 child & it's a placeholder 
-            Assert.AreEqual(1, _sut.CloudFoundryList[0].Children.Count);
-            Assert.AreEqual(typeof(FakePlaceholderViewModel), _sut.CloudFoundryList[0].Children[0].GetType());
+            Assert.AreEqual(1, _sut.TasConnection.Children.Count);
+            Assert.AreEqual(typeof(FakePlaceholderViewModel), _sut.TasConnection.Children[0].GetType());
 
             await _sut.InitiateFullRefresh();
 
@@ -601,20 +627,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
              * TasExplorerViewModel starts off with 1 (expanded) cloudFoundryInstanceViewModel "cfivm",
              * containing 1 (collapsed) orgViewModel "ovm" which should not itself be refreshed.
              */
-            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address");
-            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance);
-            var cfivm = new FakeCfInstanceViewModel(fakeInitialCfInstance, Services, expanded: true);
+            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", FakeCfInstance);
+            var cfivm = new FakeCfInstanceViewModel(FakeCfInstance, Services, expanded: true);
             var ovm = new FakeOrgViewModel(fakeInitialOrg, Services, expanded: false);
 
-            MockCloudFoundryService.SetupGet(mock => mock.
-                ConnectedCf)
-                    .Returns(new Dictionary<string, CloudFoundryInstance>
-                    {
-                        { "fake cf name", fakeInitialCfInstance },
-                    });
-
             MockCloudFoundryService.Setup(mock => mock.
-                GetOrgsForCfInstanceAsync(fakeInitialCfInstance, true, 1))
+                GetOrgsForCfInstanceAsync(FakeCfInstance, true, 1))
                     .ReturnsAsync(new DetailedResult<List<CloudFoundryOrganization>>(
                         succeeded: true,
                         content: new List<CloudFoundryOrganization>
@@ -624,15 +642,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                         explanation: null,
                         cmdDetails: FakeSuccessCmdResult));
 
-            _sut.CloudFoundryList = new ObservableCollection<CfInstanceViewModel> { cfivm };
+            _sut.TasConnection = cfivm;
 
-            // pre-check: tas explorer has 1 cf view model & it's expanded
-            Assert.AreEqual(1, _sut.CloudFoundryList.Count);
-            Assert.IsTrue(_sut.CloudFoundryList[0].IsExpanded);
+            // pre-check: tas explorer has a cf view model & it's expanded
+            Assert.IsNotNull(_sut.TasConnection);
+            Assert.IsTrue(_sut.TasConnection.IsExpanded);
 
             // pre-check: cf view model has 1 org child & it's collapsed
-            Assert.AreEqual(1, _sut.CloudFoundryList[0].Children.Count);
-            Assert.IsFalse(_sut.CloudFoundryList[0].Children[0].IsExpanded);
+            Assert.AreEqual(1, _sut.TasConnection.Children.Count);
+            Assert.IsFalse(_sut.TasConnection.Children[0].IsExpanded);
 
             await _sut.InitiateFullRefresh();
 
@@ -653,8 +671,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
              * as its only child. cfivm should not be refreshed (defer to the loading
              * task in progress).
              */
-            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address");
-            var cfivm = new FakeCfInstanceViewModel(fakeInitialCfInstance, Services, expanded: true)
+            var cfivm = new FakeCfInstanceViewModel(FakeCfInstance, Services, expanded: true)
             {
                 IsLoading = true,
             };
@@ -664,22 +681,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 cfivm.LoadingPlaceholder,
             };
 
-            MockCloudFoundryService.SetupGet(mock => mock.
-                ConnectedCf)
-                    .Returns(new Dictionary<string, CloudFoundryInstance>
-                    {
-                        { fakeInitialCfInstance.InstanceName, fakeInitialCfInstance },
-                    });
+            _sut.TasConnection = cfivm;
 
-            _sut.CloudFoundryList = new ObservableCollection<CfInstanceViewModel> { cfivm };
-
-            // pre-check: tas explorer has 1 cf view model & it's loading
-            Assert.AreEqual(1, _sut.CloudFoundryList.Count);
-            Assert.IsTrue(_sut.CloudFoundryList[0].IsExpanded);
-            Assert.IsTrue(_sut.CloudFoundryList[0].IsLoading);
-            Assert.AreEqual(1, _sut.CloudFoundryList[0].Children.Count);
-            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.CloudFoundryList[0].Children[0].GetType());
-            Assert.AreEqual(CfInstanceViewModel._loadingMsg, _sut.CloudFoundryList[0].Children[0].DisplayText);
+            // pre-check: tas explorer has a cf view model & it's loading
+            Assert.IsNotNull(_sut.TasConnection);
+            Assert.IsTrue(_sut.TasConnection.IsExpanded);
+            Assert.IsTrue(_sut.TasConnection.IsLoading);
+            Assert.AreEqual(1, _sut.TasConnection.Children.Count);
+            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.TasConnection.Children[0].GetType());
+            Assert.AreEqual(CfInstanceViewModel._loadingMsg, _sut.TasConnection.Children[0].DisplayText);
 
             await _sut.InitiateFullRefresh();
 
@@ -698,9 +708,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
              * "cfivm" which has 1 expanded but *loading* org child "ovm". cfivm should be 
              * refreshed but the loading ovm should not be (defer to the loading task in progress).
              */
-            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address");
-            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance);
-            var cfivm = new FakeCfInstanceViewModel(fakeInitialCfInstance, Services, expanded: true);
+            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", FakeCfInstance);
+            var cfivm = new FakeCfInstanceViewModel(FakeCfInstance, Services, expanded: true);
             var ovm = new FakeOrgViewModel(fakeInitialOrg, Services, expanded: true)
             {
                 IsLoading = true
@@ -711,15 +720,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 ovm,
             };
 
-            MockCloudFoundryService.SetupGet(mock => mock.
-                ConnectedCf)
-                    .Returns(new Dictionary<string, CloudFoundryInstance>
-                    {
-                        { fakeInitialCfInstance.InstanceName, fakeInitialCfInstance },
-                    });
-
             MockCloudFoundryService.Setup(mock => mock.
-                GetOrgsForCfInstanceAsync(fakeInitialCfInstance, true, 1))
+                GetOrgsForCfInstanceAsync(FakeCfInstance, true, 1))
                     .ReturnsAsync(new DetailedResult<List<CloudFoundryOrganization>>(
                         succeeded: true,
                         content: new List<CloudFoundryOrganization>
@@ -729,15 +731,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                         explanation: null,
                         cmdDetails: FakeSuccessCmdResult));
 
-            _sut.CloudFoundryList = new ObservableCollection<CfInstanceViewModel> { cfivm };
+            _sut.TasConnection = cfivm;
 
-            // pre-check: tas explorer has 1 cf view model & it's expanded
-            Assert.AreEqual(1, _sut.CloudFoundryList.Count);
-            Assert.IsTrue(_sut.CloudFoundryList[0].IsExpanded);
+            // pre-check: tas explorer has a cf view model & it's expanded
+            Assert.IsNotNull(_sut.TasConnection);
+            Assert.IsTrue(_sut.TasConnection.IsExpanded);
 
             // pre-check: cfivm has 1 child & it's loading
-            Assert.AreEqual(1, _sut.CloudFoundryList[0].Children.Count);
-            var orgChild = _sut.CloudFoundryList[0].Children[0];
+            Assert.AreEqual(1, _sut.TasConnection.Children.Count);
+            var orgChild = _sut.TasConnection.Children[0];
             Assert.IsTrue(orgChild.IsLoading);
 
             await _sut.InitiateFullRefresh();
@@ -761,10 +763,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
              * space child "svm". cfivm & ovm should be refreshed but the loading svm should 
              * not be refreshed (defer to the loading task in progress).
              */
-            var fakeInitialCfInstance = new CloudFoundryInstance("fake cf name", "http://fake.api.address");
-            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", fakeInitialCfInstance);
+            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", FakeCfInstance);
             var fakeInitialSpace = new CloudFoundrySpace("fake space name", "fake space id", fakeInitialOrg);
-            var cfivm = new FakeCfInstanceViewModel(fakeInitialCfInstance, Services, expanded: true);
+            var cfivm = new FakeCfInstanceViewModel(FakeCfInstance, Services, expanded: true);
             var ovm = new FakeOrgViewModel(fakeInitialOrg, Services, expanded: true);
             var svm = new FakeSpaceViewModel(fakeInitialSpace, Services, expanded: true)
             {
@@ -781,15 +782,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 svm,
             };
 
-            MockCloudFoundryService.SetupGet(mock => mock.
-                ConnectedCf)
-                    .Returns(new Dictionary<string, CloudFoundryInstance>
-                    {
-                        { fakeInitialCfInstance.InstanceName, fakeInitialCfInstance },
-                    });
-
             MockCloudFoundryService.Setup(mock => mock.
-                GetOrgsForCfInstanceAsync(fakeInitialCfInstance, true, 1))
+                GetOrgsForCfInstanceAsync(FakeCfInstance, true, 1))
                     .ReturnsAsync(new DetailedResult<List<CloudFoundryOrganization>>(
                         succeeded: true,
                         content: new List<CloudFoundryOrganization>
@@ -810,11 +804,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                         explanation: null,
                         cmdDetails: FakeSuccessCmdResult));
 
-            _sut.CloudFoundryList = new ObservableCollection<CfInstanceViewModel> { cfivm };
+            _sut.TasConnection = cfivm;
 
-            // pre-check: tas explorer has 1 cf view model & it's expanded
-            Assert.AreEqual(1, _sut.CloudFoundryList.Count);
-            var cf = _sut.CloudFoundryList[0];
+            // pre-check: tas explorer has a cf view model & it's expanded
+            Assert.IsNotNull(_sut.TasConnection);
+            var cf = _sut.TasConnection;
             Assert.IsTrue(cf.IsExpanded);
 
             // pre-check: cfivm has 1 org view model & it's expanded
@@ -931,21 +925,37 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("AuthenticationRequired")]
-        public void SettingAuthenticationRequiredToTrue_CollapsesAllCfInstanceViewModels()
+        public void SettingAuthenticationRequiredToTrue_CollapsesCfInstanceViewModel()
         {
-            _sut.CloudFoundryList.Add(new CfInstanceViewModel(FakeCfInstance, _sut, Services, expanded: true));
-            _sut.CloudFoundryList.Add(new CfInstanceViewModel(FakeCfInstance, _sut, Services, expanded: true));
-            _sut.CloudFoundryList.Add(new CfInstanceViewModel(FakeCfInstance, _sut, Services, expanded: true));
+            _sut.TasConnection = new FakeCfInstanceViewModel(FakeCfInstance, Services, expanded: true);
 
             Assert.IsFalse(_sut.AuthenticationRequired);
+            Assert.IsTrue(_sut.TasConnection.IsExpanded);
 
             _sut.AuthenticationRequired = true;
 
             Assert.IsTrue(_sut.AuthenticationRequired);
-            foreach (CfInstanceViewModel cfivm in _sut.CloudFoundryList)
+            Assert.IsFalse(_sut.TasConnection.IsExpanded);
+        }
+
+        [TestMethod]
+        [TestCategory("AuthenticationRequired")]
+        public void SettingAuthenticationRequiredToFalse_DoesNotExpandCfInstanceViewModel()
+        {
+            _sut = new TasExplorerViewModel(Services)
             {
-                Assert.IsFalse(cfivm.IsExpanded);
-            }
+                AuthenticationRequired = true,
+            };
+
+            _sut.TasConnection = new FakeCfInstanceViewModel(FakeCfInstance, Services, expanded: false);
+
+            Assert.IsTrue(_sut.AuthenticationRequired);
+            Assert.IsFalse(_sut.TasConnection.IsExpanded);
+
+            _sut.AuthenticationRequired = false;
+
+            Assert.IsFalse(_sut.AuthenticationRequired);
+            Assert.IsFalse(_sut.TasConnection.IsExpanded);
         }
     }
 
