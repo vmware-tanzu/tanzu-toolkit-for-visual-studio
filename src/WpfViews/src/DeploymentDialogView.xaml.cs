@@ -1,4 +1,4 @@
-﻿using System.IO;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
@@ -11,7 +11,7 @@ namespace Tanzu.Toolkit.WpfViews
     /// <summary>
     /// Interaction logic for DeploymentDialogView.xaml.
     /// </summary>
-    public partial class DeploymentDialogView : System.Windows.Controls.UserControl, IDeploymentDialogView
+    public partial class DeploymentDialogView : Window, IDeploymentDialogView
     {
         private IDeploymentDialogViewModel _viewModel;
         public ICommand UploadAppCommand { get; }
@@ -57,7 +57,7 @@ namespace Tanzu.Toolkit.WpfViews
                 RestoreDirectory = true
             };
 
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 _viewModel.ManifestPath = openFileDialog.FileName;
             }
