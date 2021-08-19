@@ -329,10 +329,8 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-
         internal async Task StartDeployment()
         {
-            // TODO: pass in manifest path here
             var deploymentResult = await CloudFoundryService.DeployAppAsync(
                 SelectedSpace.ParentOrg.ParentCf,
                 SelectedSpace.ParentOrg,
@@ -341,7 +339,8 @@ namespace Tanzu.Toolkit.ViewModels
                 ProjectDirPath,
                 _fullFrameworkDeployment,
                 stdOutCallback: OutputViewModel.AppendLine,
-                stdErrCallback: OutputViewModel.AppendLine);
+                stdErrCallback: OutputViewModel.AppendLine, 
+                manifestPath: ManifestPath);
 
             if (!deploymentResult.Succeeded)
             {
@@ -363,7 +362,7 @@ namespace Tanzu.Toolkit.ViewModels
 
                 _dialogService.DisplayErrorDialog(errorTitle, errorMsg);
             }
-
+             
             DeploymentInProgress = false;
         }
 

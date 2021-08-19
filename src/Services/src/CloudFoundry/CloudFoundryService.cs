@@ -713,7 +713,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             };
         }
 
-        public async Task<DetailedResult> DeployAppAsync(CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, string appName, string appProjPath, bool fullFrameworkDeployment, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback)
+        public async Task<DetailedResult> DeployAppAsync(CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, string appName, string appProjPath, bool fullFrameworkDeployment, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string manifestPath = null)
         {
             if (!_fileLocatorService.DirContainsFiles(appProjPath))
             {
@@ -731,7 +731,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             DetailedResult cfPushResult;
             try
             {
-                cfPushResult = await _cfCliService.PushAppAsync(appName, targetOrg.OrgName, targetSpace.SpaceName, stdOutCallback, stdErrCallback, appProjPath, buildpack, stack);
+                cfPushResult = await _cfCliService.PushAppAsync(appName, targetOrg.OrgName, targetSpace.SpaceName, stdOutCallback, stdErrCallback, appProjPath, buildpack, stack, manifestPath);
             }
             catch (InvalidRefreshTokenException)
             {

@@ -513,7 +513,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         /// <param name="stdOutCallback"></param>
         /// <param name="stdErrCallback"></param>
         /// <param name="appDir"></param>
-        public async Task<DetailedResult> PushAppAsync(string appName, string orgName, string spaceName, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string appDir, string buildpack = null, string stack = null)
+        public async Task<DetailedResult> PushAppAsync(string appName, string orgName, string spaceName, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string appDir, string buildpack = null, string stack = null, string manifestPath = null)
         {
             string args = $"push \"{appName}\"";
 
@@ -525,6 +525,11 @@ namespace Tanzu.Toolkit.Services.CfCli
             if (stack != null)
             {
                 args += $" -s {stack}";
+            }
+
+            if (manifestPath != null)
+            {
+                args = $"push -f \"{manifestPath}\"";
             }
 
             Task<DetailedResult> deployTask;
