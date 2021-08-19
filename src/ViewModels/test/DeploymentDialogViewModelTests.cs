@@ -204,7 +204,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath,
                     expectedFullFWFlag,
                     It.IsAny<StdOutDelegate>(),
-                    It.IsAny<StdErrDelegate>()))
+                    It.IsAny<StdErrDelegate>(), null))
                 .ReturnsAsync(FakeSuccessDetailedResult);
 
             await _sut.StartDeployment();
@@ -225,7 +225,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockCloudFoundryService.Setup(mock =>
                 mock.DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, _defaultFullFWFlag,
                                     It.IsAny<StdOutDelegate>(),
-                                    It.IsAny<StdErrDelegate>()))
+                                    It.IsAny<StdErrDelegate>(), null))
                     .ReturnsAsync(FakeSuccessDetailedResult);
 
             _sut.AppName = _fakeAppName;
@@ -255,7 +255,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockCloudFoundryService.Setup(mock => mock.
               DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, _defaultFullFWFlag,
                              expectedStdOutCallback,
-                             expectedStdErrCallback))
+                             expectedStdErrCallback, null))
                 .ReturnsAsync(FakeSuccessDetailedResult);
 
             await _sut.StartDeployment();
@@ -276,7 +276,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockCloudFoundryService.Setup(mock => mock.
                 DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, _defaultFullFWFlag,
                              expectedStdOutCallback,
-                             expectedStdErrCallback))
+                             expectedStdErrCallback, null))
                     .ReturnsAsync(FakeFailureDetailedResult);
 
             var expectedErrorTitle = $"{DeploymentDialogViewModel.DeploymentErrorMsg} {_fakeAppName}.";
@@ -314,7 +314,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockCloudFoundryService.Setup(mock => mock.
                 DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, _defaultFullFWFlag,
                              expectedStdOutCallback,
-                             expectedStdErrCallback))
+                             expectedStdErrCallback, null))
                     .ReturnsAsync(FakeFailureDetailedResult);
 
             var expectedErrorTitle = $"{DeploymentDialogViewModel.DeploymentErrorMsg} {_fakeAppName}.";
@@ -346,7 +346,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockCloudFoundryService.Setup(mock => mock.
                 DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, _defaultFullFWFlag,
                              expectedStdOutCallback,
-                             expectedStdErrCallback))
+                             expectedStdErrCallback, null))
                     .ReturnsAsync(invalidRefreshTokenFailure);
 
             Assert.IsFalse(_sut.TasExplorerViewModel.AuthenticationRequired);
