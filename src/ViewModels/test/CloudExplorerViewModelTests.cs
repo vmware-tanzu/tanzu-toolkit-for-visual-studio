@@ -20,7 +20,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             RenewMockServices();
 
-            MockCloudFoundryService.SetupGet(mock => mock.CloudFoundryInstances).Returns(new Dictionary<string, CloudFoundryInstance>());
+            MockCloudFoundryService.SetupGet(mock => mock.ConnectedCf).Returns(new Dictionary<string, CloudFoundryInstance>());
 
             // set up mockUiDispatcherService to run whatever method is passed
             // to RunOnUiThread; do not delegate to the UI Dispatcher
@@ -131,7 +131,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 { "fake cf", new CloudFoundryInstance("fake cf", null) },
             };
 
-            MockCloudFoundryService.SetupSequence(mock => mock.CloudFoundryInstances)
+            MockCloudFoundryService.SetupSequence(mock => mock.ConnectedCf)
                 .Returns(emptyCfsDict) // return empty on first request to avoid error due to temporary "single-cf" requirement.
                 .Returns(fakeCfsDict); // return fake cf on second request as mock result of having logged in.
 
@@ -161,7 +161,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                         };
 
                         MockCloudFoundryService.SetupGet(mock => mock.
-                          CloudFoundryInstances).Returns(fakeCfsDict);
+                          ConnectedCf).Returns(fakeCfsDict);
                     });
 
             Assert.IsTrue(_sut.AuthenticationRequired);
@@ -188,7 +188,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                         var emptyCfsDict = new Dictionary<string, CloudFoundryInstance>();
 
                         MockCloudFoundryService.SetupGet(mock => mock.
-                          CloudFoundryInstances).Returns(emptyCfsDict);
+                          ConnectedCf).Returns(emptyCfsDict);
                     });
 
             Assert.IsTrue(_sut.AuthenticationRequired);
@@ -438,7 +438,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             // simulate addition of new CF
             MockCloudFoundryService.SetupGet(mock => mock.
-                CloudFoundryInstances)
+                ConnectedCf)
                     .Returns(new Dictionary<string, CloudFoundryInstance>
                     {
                         { "fake cf name", fakeInitialCfInstance },
@@ -557,7 +557,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             };
 
             MockCloudFoundryService.SetupGet(mock => mock.
-                CloudFoundryInstances)
+                ConnectedCf)
                     .Returns(new Dictionary<string, CloudFoundryInstance>
                     {
                         { "fake cf name", fakeInitialCfInstance },
@@ -607,7 +607,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var ovm = new FakeOrgViewModel(fakeInitialOrg, Services, expanded: false);
 
             MockCloudFoundryService.SetupGet(mock => mock.
-                CloudFoundryInstances)
+                ConnectedCf)
                     .Returns(new Dictionary<string, CloudFoundryInstance>
                     {
                         { "fake cf name", fakeInitialCfInstance },
@@ -665,7 +665,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             };
 
             MockCloudFoundryService.SetupGet(mock => mock.
-                CloudFoundryInstances)
+                ConnectedCf)
                     .Returns(new Dictionary<string, CloudFoundryInstance>
                     {
                         { fakeInitialCfInstance.InstanceName, fakeInitialCfInstance },
@@ -712,7 +712,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             };
 
             MockCloudFoundryService.SetupGet(mock => mock.
-                CloudFoundryInstances)
+                ConnectedCf)
                     .Returns(new Dictionary<string, CloudFoundryInstance>
                     {
                         { fakeInitialCfInstance.InstanceName, fakeInitialCfInstance },
@@ -782,7 +782,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             };
 
             MockCloudFoundryService.SetupGet(mock => mock.
-                CloudFoundryInstances)
+                ConnectedCf)
                     .Returns(new Dictionary<string, CloudFoundryInstance>
                     {
                         { fakeInitialCfInstance.InstanceName, fakeInitialCfInstance },

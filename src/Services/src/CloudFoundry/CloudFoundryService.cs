@@ -30,11 +30,13 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         private readonly IErrorDialog _dialogService;
         private readonly ILogger _logger;
 
-        public Dictionary<string, CloudFoundryInstance> CloudFoundryInstances { get; internal set; }
+        public string LoginFailureMessage { get; } = "Login failed.";
+        public Dictionary<string, CloudFoundryInstance> ConnectedCf { get; internal set; }
+        public CloudFoundryInstance ActiveCloud { get; set; }
 
         public CloudFoundryService(IServiceProvider services)
         {
-            CloudFoundryInstances = new Dictionary<string, CloudFoundryInstance>();
+            ConnectedCf = new Dictionary<string, CloudFoundryInstance>();
 
             _cfApiClient = services.GetRequiredService<ICfApiClient>();
             _cfCliService = services.GetRequiredService<ICfCliService>();
@@ -47,19 +49,19 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
         public void AddCloudFoundryInstance(string name, string apiAddress)
         {
-            if (CloudFoundryInstances.ContainsKey(name))
+            if (ConnectedCf.ContainsKey(name))
             {
                 throw new Exception($"The name {name} already exists.");
             }
 
-            CloudFoundryInstances.Add(name, new CloudFoundryInstance(name, apiAddress));
+            ConnectedCf.Add(name, new CloudFoundryInstance(name, apiAddress));
         }
 
         public void RemoveCloudFoundryInstance(string name)
         {
-            if (CloudFoundryInstances.ContainsKey(name))
+            if (ConnectedCf.ContainsKey(name))
             {
-                CloudFoundryInstances.Remove(name);
+                ConnectedCf.Remove(name);
             }
         }
 

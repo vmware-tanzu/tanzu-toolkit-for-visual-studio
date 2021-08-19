@@ -34,7 +34,7 @@ namespace Tanzu.Toolkit.ViewModels
             _threadingService = services.GetRequiredService<IThreadingService>();
 
             _cfs = new ObservableCollection<CfInstanceViewModel>();
-            HasCloudTargets = CloudFoundryService.CloudFoundryInstances.Keys.Count > 0;
+            HasCloudTargets = CloudFoundryService.ConnectedCf.Keys.Count > 0;
         }
 
         public ObservableCollection<CfInstanceViewModel> CloudFoundryList
@@ -168,7 +168,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public void OpenLoginView(object parent)
         {
-            if (CloudFoundryService.CloudFoundryInstances.Count > 0)
+            if (CloudFoundryService.ConnectedCf.Count > 0)
             {
                 var errorTitle = "Unable to add more TAS connections.";
                 var errorMsg = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
@@ -408,7 +408,7 @@ namespace Tanzu.Toolkit.ViewModels
         /// </summary>
         private void SyncCloudFoundryList()
         {
-            var loggedInCfs = new ObservableCollection<CloudFoundryInstance>(CloudFoundryService.CloudFoundryInstances.Values);
+            var loggedInCfs = new ObservableCollection<CloudFoundryInstance>(CloudFoundryService.ConnectedCf.Values);
             var updatedCfInstanceViewModelList = new ObservableCollection<CfInstanceViewModel>();
             foreach (CloudFoundryInstance cf in loggedInCfs)
             {
@@ -470,7 +470,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         private void UpdateCloudFoundryInstances()
         {
-            var loggedInCfs = new ObservableCollection<CloudFoundryInstance>(CloudFoundryService.CloudFoundryInstances.Values);
+            var loggedInCfs = new ObservableCollection<CloudFoundryInstance>(CloudFoundryService.ConnectedCf.Values);
             var updatedCfInstanceViewModelList = new ObservableCollection<CfInstanceViewModel>();
             foreach (CloudFoundryInstance cf in loggedInCfs)
             {
