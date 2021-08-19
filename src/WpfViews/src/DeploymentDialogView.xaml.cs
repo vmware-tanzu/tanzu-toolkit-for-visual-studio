@@ -52,7 +52,7 @@ namespace Tanzu.Toolkit.WpfViews
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
                 InitialDirectory = _viewModel.ProjectDirPath,
-                Filter = "yml files (*.yml)|*.yml",
+                Filter = "YAML files (*.yaml, *.yml)|*.yaml;*.yml",
                 FilterIndex = 2,
                 RestoreDirectory = true
             };
