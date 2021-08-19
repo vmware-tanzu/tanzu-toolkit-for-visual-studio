@@ -29,8 +29,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             // * return empty dictionary of CloudFoundryInstances
             MockCloudFoundryService.SetupGet(mock =>
-                mock.ConnectedCf)
-                    .Returns(new Dictionary<string, CloudFoundryInstance>());
+                mock.ConnectedCf).Returns(FakeCfInstance);
 
             // * return fake view/viewmodel for output window
             MockViewLocatorService.Setup(mock =>
@@ -62,10 +61,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         public void DeploymentDialogViewModel_GetsListOfCfsFromCfService_WhenConstructed()
         {
-            var vm = new DeploymentDialogViewModel(Services, _fakeProjPath, FakeTargetFrameworkMoniker);
-
-            Assert.IsNotNull(vm.CfInstanceOptions);
-            Assert.AreEqual(0, vm.CfInstanceOptions.Count);
+            Assert.IsNotNull(_sut.CfInstanceOptions);
+            Assert.AreEqual(1, _sut.CfInstanceOptions.Count);
 
             MockCloudFoundryService.VerifyGet(mock => mock.ConnectedCf);
         }
@@ -586,7 +583,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         public FakeTasExplorerView()
         {
-            MockCloudFoundryService.SetupGet(mock => mock.ConnectedCf).Returns(new Dictionary<string, CloudFoundryInstance>());
+            MockCloudFoundryService.SetupGet(mock => mock.ConnectedCf).Returns(FakeCfInstance);
             ViewModel = new TasExplorerViewModel(Services);
             ShowMethodWasCalled = false;
         }

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.ViewModels;
@@ -15,8 +14,8 @@ namespace Tanzu.Toolkit.WpfViews.Tests
         [TestInitialize]
         public void TestInit()
         {
-            var fakeCfInstances = new Dictionary<string, CloudFoundryInstance>();
-            mockCloudFoundryService.SetupGet(mock => mock.ConnectedCf).Returns(fakeCfInstances);
+            var fakeCfInstance = new CloudFoundryInstance("fake cf", "http://fake.api.address");
+            mockCloudFoundryService.SetupGet(mock => mock.ConnectedCf).Returns(fakeCfInstance);
             
             vm = new TasExplorerViewModel(services);
         }

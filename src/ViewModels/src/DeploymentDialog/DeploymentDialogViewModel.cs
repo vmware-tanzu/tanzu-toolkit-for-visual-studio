@@ -60,11 +60,16 @@ namespace Tanzu.Toolkit.ViewModels
                 _fullFrameworkDeployment = true;
             }
 
-            UpdateCfInstanceOptions();
+            CfInstanceOptions = new List<CloudFoundryInstance>();
             CfOrgOptions = new List<CloudFoundryOrganization>();
             CfSpaceOptions = new List<CloudFoundrySpace>();
 
             SetManifestIfDefaultExists();
+
+            if (CloudFoundryService.ConnectedCf != null)
+            {
+                CfInstanceOptions.Add(CloudFoundryService.ConnectedCf);
+            }
         }
 
         public string AppName
@@ -260,12 +265,12 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool CanOpenLoginView(object arg)
         {
-            return true;
+            return CloudFoundryService.ConnectedCf == null;
         }
 
         public void OpenLoginView(object arg)
         {
-            if (CloudFoundryService.ConnectedCf.Count > 0)
+            if (CloudFoundryService.ConnectedCf != null)
             {
                 var errorTitle = "Unable to add more TAS connections.";
                 var errorMsg = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
@@ -276,13 +281,7 @@ namespace Tanzu.Toolkit.ViewModels
             else
             {
                 DialogService.ShowDialog(typeof(LoginViewModel).Name);
-                UpdateCfInstanceOptions();
             }
-        }
-
-        public void UpdateCfInstanceOptions()
-        {
-            CfInstanceOptions = new List<CloudFoundryInstance>(CloudFoundryService.ConnectedCf.Values);
         }
 
         public async Task UpdateCfOrgOptions()
