@@ -132,17 +132,7 @@
 
         <Rectangle Grid.Row="1" Grid.RowSpan="1" Grid.ColumnSpan="3" />
 
-        <TextBlock Grid.Row="1" 
-                   Grid.Column="0" 
-                   Grid.ColumnSpan="3"
-                   HorizontalAlignment="Center" 
-                   VerticalAlignment="Center"
-                   Text="Not Yet Connected" 
-                   Visibility="{Binding Path=HasCloudTargets, Converter={StaticResource InverseVisibility}}" 
-                   Height="16" 
-                   Width="100"/>
-
-        <TreeView ItemsSource="{Binding CloudFoundryList}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Visibility="{Binding Path=HasCloudTargets, Converter={StaticResource Visibility}}" Margin="0,20,0,3">
+        <TreeView ItemsSource="{Binding TreeRoot}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,20,0,3">
             <TreeView.ItemContainerStyle>
                 <!-- This Style binds a TreeViewItem to a TreeViewItemViewModel. -->
                 <Style TargetType="{x:Type TreeViewItem}">
@@ -169,7 +159,7 @@
                             <Button.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem Header="Delete Connection" 
-                                              Command="{Binding PlacementTarget.Tag.RemoveCloudConnectionCommand, 
+                                              Command="{Binding PlacementTarget.Tag.DeleteConnectionCommand, 
                                                                 RelativeSource={RelativeSource Mode=FindAncestor, 
                                                                 AncestorType=ContextMenu}}"
                                               CommandParameter="{Binding Path=.}"/>
@@ -291,7 +281,24 @@
                 <!-- PLACEHOLDER TREE VIEW ITEMS -->
                 <DataTemplate DataType="{x:Type ViewModels:PlaceholderViewModel}">
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                        <TextBlock Text="{Binding DisplayText}" FontStyle="Italic" VerticalAlignment="Bottom" Foreground="{Binding ElementName=TasExplorerViewElement, Path=Foreground}"/>
+                        <TextBlock 
+                            Text="{Binding DisplayText}" 
+                            FontStyle="Italic" 
+                            VerticalAlignment="Bottom" 
+                            Foreground="{Binding ElementName=TasExplorerViewElement, Path=Foreground}"/>
+                    </StackPanel>
+                </DataTemplate>
+
+                <!-- LOGIN PROMPT TREE VIEW ITEMS -->
+                <DataTemplate DataType="{x:Type ViewModels:LoginPromptViewModel}">
+                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                        <Button Command="{Binding ElementName=TasExplorerViewElement, Path=OpenLoginFormCommand}">
+                            <TextBlock 
+                                Text="{Binding DisplayText}" 
+                                FontStyle="Italic" 
+                                VerticalAlignment="Bottom" 
+                                Foreground="{Binding ElementName=TasExplorerViewElement, Path=Foreground}"/>
+                        </Button>
                     </StackPanel>
                 </DataTemplate>
 

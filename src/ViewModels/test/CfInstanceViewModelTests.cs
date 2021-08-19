@@ -21,7 +21,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             RenewMockServices();
 
-            MockCloudFoundryService.SetupGet(mock => mock.ConnectedCf).Returns(new Dictionary<string, CloudFoundryInstance>());
+            var fakeCfInstance = new CloudFoundryInstance("fake cf", "http://fake.api.address");
+            MockCloudFoundryService.SetupGet(mock => mock.ConnectedCf).Returns(fakeCfInstance);
 
             MockUiDispatcherService.Setup(mock => mock.
                 RunOnUiThread(It.IsAny<Action>()))

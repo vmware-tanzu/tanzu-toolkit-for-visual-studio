@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Security;
 using System.Threading.Tasks;
+using Tanzu.Toolkit.Models;
 
 namespace Tanzu.Toolkit.ViewModels
 {
@@ -125,15 +126,7 @@ namespace Tanzu.Toolkit.ViewModels
 
             if (result.IsLoggedIn)
             {
-                try
-                {
-                    CloudFoundryService.AddCloudFoundryInstance(InstanceName, Target);
-                }
-                catch (Exception e)
-                {
-                    ErrorMessage = e.Message;
-                    HasErrors = true;
-                }
+                CloudFoundryService.ConnectedCf = new CloudFoundryInstance(InstanceName, Target);
             }
 
             if (!HasErrors)
