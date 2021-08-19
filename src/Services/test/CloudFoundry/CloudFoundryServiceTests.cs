@@ -989,17 +989,17 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         {
             var sut = new CloudFoundryService(_services)
             {
-                CloudFoundryInstances = new Dictionary<string, CloudFoundryInstance>
+                ConnectedCf = new Dictionary<string, CloudFoundryInstance>
                 {
                     { FakeCfInstance.InstanceName, FakeCfInstance },
                 },
             };
 
-            Assert.AreEqual(1, sut.CloudFoundryInstances.Count);
+            Assert.AreEqual(1, sut.ConnectedCf.Count);
 
             sut.RemoveCloudFoundryInstance(FakeCfInstance.InstanceName);
 
-            Assert.AreEqual(0, sut.CloudFoundryInstances.Count);
+            Assert.AreEqual(0, sut.ConnectedCf.Count);
         }
 
         [TestMethod]
@@ -1008,17 +1008,17 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         {
             var sut = new CloudFoundryService(_services)
             {
-                CloudFoundryInstances = new Dictionary<string, CloudFoundryInstance>
+                ConnectedCf = new Dictionary<string, CloudFoundryInstance>
                 {
                     { FakeCfInstance.InstanceName, FakeCfInstance },
                 },
             };
 
-            Assert.AreEqual(1, sut.CloudFoundryInstances.Count);
+            Assert.AreEqual(1, sut.ConnectedCf.Count);
 
             sut.RemoveCloudFoundryInstance("nonexistent item");
 
-            Assert.AreEqual(1, sut.CloudFoundryInstances.Count);
+            Assert.AreEqual(1, sut.ConnectedCf.Count);
         }
 
         [TestMethod]

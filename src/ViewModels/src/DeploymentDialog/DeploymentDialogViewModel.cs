@@ -265,7 +265,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public void OpenLoginView(object arg)
         {
-            if (CloudFoundryService.CloudFoundryInstances.Count > 0)
+            if (CloudFoundryService.ConnectedCf.Count > 0)
             {
                 var errorTitle = "Unable to add more TAS connections.";
                 var errorMsg = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
@@ -282,7 +282,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public void UpdateCfInstanceOptions()
         {
-            CfInstanceOptions = new List<CloudFoundryInstance>(CloudFoundryService.CloudFoundryInstances.Values);
+            CfInstanceOptions = new List<CloudFoundryInstance>(CloudFoundryService.ConnectedCf.Values);
         }
 
         public async Task UpdateCfOrgOptions()

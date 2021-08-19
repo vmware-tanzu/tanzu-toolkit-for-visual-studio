@@ -18,7 +18,7 @@ namespace Tanzu.Toolkit.WpfViews.Tests
         public void TestInit()
         {
             var fakeCfInstances = new Dictionary<string, CloudFoundryInstance>();
-            mockCloudFoundryService.SetupGet(mock => mock.CloudFoundryInstances).Returns(fakeCfInstances);
+            mockCloudFoundryService.SetupGet(mock => mock.ConnectedCf).Returns(fakeCfInstances);
 
             vm = new DeploymentDialogViewModel(services, _fakeDirPath, _fakeTFM);
         }

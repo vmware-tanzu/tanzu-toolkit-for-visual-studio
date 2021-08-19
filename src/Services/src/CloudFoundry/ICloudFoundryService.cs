@@ -8,7 +8,9 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 {
     public interface ICloudFoundryService
     {
-        Dictionary<string, CloudFoundryInstance> CloudFoundryInstances { get; }
+        CloudFoundryInstance ActiveCloud { get; set; }
+        Dictionary<string, CloudFoundryInstance> ConnectedCf { get; }
+        string LoginFailureMessage { get; }
 
         void AddCloudFoundryInstance(string name, string apiAddress);
         Task<ConnectResult> ConnectToCFAsync(string target, string username, SecureString password, string httpProxy, bool skipSsl);
