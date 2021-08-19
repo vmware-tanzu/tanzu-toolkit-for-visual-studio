@@ -1,15 +1,13 @@
-﻿using System;
-using System.ComponentModel.Design;
-using System.IO;
-using System.Threading.Tasks;
-using EnvDTE;
+﻿using EnvDTE;
 using EnvDTE80;
 using Microsoft;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using Tanzu.Toolkit.Services.Dialog;
+using System;
+using System.ComponentModel.Design;
+using System.IO;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.WpfViews;
@@ -130,12 +128,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                         var viewModel = new DeploymentDialogViewModel(_services, projectDirectory, tfm);
                         var view = new DeploymentDialogView(viewModel, new ThemeService());
 
-                        var deployWindow = new DeploymentWindow
-                        {
-                            Content = view,
-                        };
-
-                        deployWindow.ShowModal();
+                        view.ShowDialog();
 
                         // * Actions to take after modal closes:
                         if (viewModel.DeploymentInProgress) // don't open tool window if modal was closed via "X" button
@@ -166,17 +159,6 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
 
             IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
             Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
-        }
-    }
-
-    internal class DeploymentWindow : DialogWindow
-    {
-        internal DeploymentWindow()
-        {
-            Height = 316;
-            Width = 512;
-            HasMaximizeButton = true;
-            HasMinimizeButton = true;
         }
     }
 }
