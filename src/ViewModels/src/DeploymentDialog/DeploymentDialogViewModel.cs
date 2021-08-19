@@ -339,7 +339,7 @@ namespace Tanzu.Toolkit.ViewModels
                 ProjectDirPath,
                 _fullFrameworkDeployment,
                 stdOutCallback: OutputViewModel.AppendLine,
-                stdErrCallback: OutputViewModel.AppendLine, 
+                stdErrCallback: OutputViewModel.AppendLine,
                 manifestPath: ManifestPath);
 
             if (!deploymentResult.Succeeded)
@@ -362,17 +362,22 @@ namespace Tanzu.Toolkit.ViewModels
 
                 _dialogService.DisplayErrorDialog(errorTitle, errorMsg);
             }
-             
+
             DeploymentInProgress = false;
         }
 
         private void SetManifestIfDefaultExists()
         {
-            var expectedManifestLocation = Path.Combine(ProjectDirPath, "manifest.yml");
+            var expectedManifestLocation1 = Path.Combine(ProjectDirPath, "manifest.yaml");
+            var expectedManifestLocation2 = Path.Combine(ProjectDirPath, "manifest.yml");
 
-            if (File.Exists(expectedManifestLocation))
+            if (File.Exists(expectedManifestLocation1))
             {
-                ManifestPath = expectedManifestLocation;
+                ManifestPath = expectedManifestLocation1;
+            }
+            else if (File.Exists(expectedManifestLocation2))
+            {
+                ManifestPath = expectedManifestLocation2;
             }
             else
             {
