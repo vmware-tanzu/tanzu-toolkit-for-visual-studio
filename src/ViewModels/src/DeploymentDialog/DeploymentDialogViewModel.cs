@@ -36,8 +36,8 @@ namespace Tanzu.Toolkit.ViewModels
         private CloudFoundryInstance _selectedCf;
         private CloudFoundryOrganization _selectedOrg;
         private CloudFoundrySpace _selectedSpace;
-        private string manifestPathLabel;
-        private string manifestPath;
+        private string _manifestPathLabel;
+        private string _manifestPath;
 
         public DeploymentDialogViewModel(IServiceProvider services, string directoryOfProjectToDeploy, string targetFrameworkMoniker)
             : base(services)
@@ -93,18 +93,18 @@ namespace Tanzu.Toolkit.ViewModels
 
         public string ManifestPath
         {
-            get => manifestPath;
+            get => _manifestPath;
 
             set
             {
                 if (value == null)
                 {
-                    manifestPath = value;
+                    _manifestPath = value;
                     ManifestPathLabel = "<none selected>";
                 }
                 else if (File.Exists(value))
                 {
-                    manifestPath = value;
+                    _manifestPath = value;
 
                     ManifestPathLabel = value;
                     SetAppNameFromManifest(value);
@@ -118,11 +118,11 @@ namespace Tanzu.Toolkit.ViewModels
 
         public string ManifestPathLabel
         {
-            get => manifestPathLabel;
+            get => _manifestPathLabel;
 
             private set
             {
-                manifestPathLabel = value;
+                _manifestPathLabel = value;
                 RaisePropertyChangedEvent("ManifestPathLabel");
             }
         }
