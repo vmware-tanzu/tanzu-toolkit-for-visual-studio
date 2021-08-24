@@ -1,18 +1,15 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Serilog;
 using Tanzu.Toolkit.CloudFoundryApiClient;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.OrgsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.SpacesResponse;
 using Tanzu.Toolkit.Models;
-using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CfCli;
-using Tanzu.Toolkit.Services.CloudFoundry;
-using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.FileLocator;
 using Tanzu.Toolkit.Services.Logging;
@@ -25,6 +22,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         internal const string EmptyOutputDirMessage = "Unable to locate app files; project output directory is empty. (Has your project already been compiled?)";
         internal const string CcApiVersionUndetectableErrTitle = "Unable to detect Cloud Controller API version.";
         internal const string CcApiVersionUndetectableErrMsg = "Failed to detect which version of the Cloud Controller API is being run on the provided instance; some features of this extension may not work properly.";
+        internal const string LoginFailureMessage = "Login failed.";
 
         private readonly ICfApiClient _cfApiClient;
         private readonly ICfCliService _cfCliService;
@@ -32,9 +30,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         private readonly IErrorDialog _dialogService;
         private readonly ILogger _logger;
 
-        public string LoginFailureMessage { get; } = "Login failed.";
         public Dictionary<string, CloudFoundryInstance> CloudFoundryInstances { get; internal set; }
-        public CloudFoundryInstance ActiveCloud { get; set; }
 
         public CloudFoundryService(IServiceProvider services)
         {

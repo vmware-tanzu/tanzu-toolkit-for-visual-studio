@@ -2,16 +2,13 @@
 using System.Security;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
-using Tanzu.Toolkit.Services.CloudFoundry;
 using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.Services.CloudFoundry
 {
     public interface ICloudFoundryService
     {
-        CloudFoundryInstance ActiveCloud { get; set; }
         Dictionary<string, CloudFoundryInstance> CloudFoundryInstances { get; }
-        string LoginFailureMessage { get; }
 
         void AddCloudFoundryInstance(string name, string apiAddress);
         Task<ConnectResult> ConnectToCFAsync(string target, string username, SecureString password, string httpProxy, bool skipSsl);

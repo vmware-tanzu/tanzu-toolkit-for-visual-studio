@@ -108,7 +108,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             ConnectResult result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _fakeHttpProxy, _skipSsl);
 
             Assert.IsFalse(result.IsLoggedIn);
-            Assert.IsTrue(result.ErrorMessage.Contains(_sut.LoginFailureMessage));
+            Assert.IsTrue(result.ErrorMessage.Contains(CloudFoundryService.LoginFailureMessage));
             _mockCfCliService.VerifyAll();
         }
 
@@ -124,7 +124,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             ConnectResult result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _fakeHttpProxy, _skipSsl);
 
             Assert.IsFalse(result.IsLoggedIn);
-            Assert.IsTrue(result.ErrorMessage.Contains(_sut.LoginFailureMessage));
+            Assert.IsTrue(result.ErrorMessage.Contains(CloudFoundryService.LoginFailureMessage));
             _mockCfCliService.VerifyAll();
         }
 
@@ -141,7 +141,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             ConnectResult result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _fakeHttpProxy, _skipSsl);
 
             Assert.IsFalse(result.IsLoggedIn);
-            Assert.IsTrue(result.ErrorMessage.Contains(_sut.LoginFailureMessage));
+            Assert.IsTrue(result.ErrorMessage.Contains(CloudFoundryService.LoginFailureMessage));
             _mockCfCliService.VerifyAll();
         }
 
@@ -157,7 +157,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             ConnectResult result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _fakeHttpProxy, _skipSsl);
 
             Assert.IsFalse(result.IsLoggedIn);
-            Assert.IsTrue(result.ErrorMessage.Contains(_sut.LoginFailureMessage));
+            Assert.IsTrue(result.ErrorMessage.Contains(CloudFoundryService.LoginFailureMessage));
             _mockCfCliService.VerifyAll();
         }
 
