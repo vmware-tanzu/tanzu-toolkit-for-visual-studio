@@ -22,7 +22,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             RenewMockServices();
 
-            MockCloudFoundryService.SetupGet(mock => mock.CloudFoundryInstances).Returns(new Dictionary<string, CloudFoundryInstance>());
+            MockCloudFoundryService.SetupGet(mock => mock.ConnectedCf).Returns(FakeCfInstance);
 
             MockUiDispatcherService.Setup(mock => mock.
                 RunOnUiThread(It.IsAny<Action>()))
@@ -69,7 +69,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             Assert.AreEqual(OrgViewModel._emptySpacesPlaceholderMsg, _sut.EmptyPlaceholder.DisplayText);
         }
-        
+
         [TestMethod]
         [TestCategory("ctor")]
         public void Constructor_SetsParent()

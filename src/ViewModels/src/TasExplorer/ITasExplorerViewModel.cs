@@ -4,7 +4,6 @@ namespace Tanzu.Toolkit.ViewModels
 {
     public interface ITasExplorerViewModel : IViewModel
     {
-        bool HasCloudTargets { get; set; }
         bool AuthenticationRequired { get; set; }
 
         bool CanOpenLoginView(object arg);
@@ -21,7 +20,7 @@ namespace Tanzu.Toolkit.ViewModels
         Task DeleteCfApp(object arg);
         void RefreshSpace(object arg);
         void RefreshAllItems(object arg);
-        void RemoveCloudConnection(object arg);
+        void DeleteConnection(object arg);
         Task DisplayRecentAppLogs(object app);
         bool CanReAuthenticate(object arg);
         void ReAuthenticate(object cf);

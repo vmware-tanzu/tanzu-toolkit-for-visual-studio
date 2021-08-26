@@ -962,66 +962,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
-        [TestCategory("AddCloudFoundryInstance")]
-        public void AddCloudFoundryInstance_ThrowsException_WhenNameAlreadyExists()
-        {
-            var duplicateName = "fake name";
-            _sut.AddCloudFoundryInstance(duplicateName, null);
-            Exception expectedException = null;
-
-            try
-            {
-                _sut.AddCloudFoundryInstance(duplicateName, null);
-            }
-            catch (Exception e)
-            {
-                expectedException = e;
-            }
-
-            Assert.IsNotNull(expectedException);
-            Assert.IsTrue(expectedException.Message.Contains(duplicateName));
-            Assert.IsTrue(expectedException.Message.Contains("already exists"));
-        }
-
-        [TestMethod]
-        [TestCategory("RemoveCloudFoundryInstance")]
-        public void RemoveCloudFoundryInstance_RemovesItemFromDictionary()
-        {
-            var sut = new CloudFoundryService(_services)
-            {
-                CloudFoundryInstances = new Dictionary<string, CloudFoundryInstance>
-                {
-                    { FakeCfInstance.InstanceName, FakeCfInstance },
-                },
-            };
-
-            Assert.AreEqual(1, sut.CloudFoundryInstances.Count);
-
-            sut.RemoveCloudFoundryInstance(FakeCfInstance.InstanceName);
-
-            Assert.AreEqual(0, sut.CloudFoundryInstances.Count);
-        }
-
-        [TestMethod]
-        [TestCategory("RemoveCloudFoundryInstance")]
-        public void RemoveCloudFoundryInstance_DoesNothing_WhenItemNotInDictionary()
-        {
-            var sut = new CloudFoundryService(_services)
-            {
-                CloudFoundryInstances = new Dictionary<string, CloudFoundryInstance>
-                {
-                    { FakeCfInstance.InstanceName, FakeCfInstance },
-                },
-            };
-
-            Assert.AreEqual(1, sut.CloudFoundryInstances.Count);
-
-            sut.RemoveCloudFoundryInstance("nonexistent item");
-
-            Assert.AreEqual(1, sut.CloudFoundryInstances.Count);
-        }
-
-        [TestMethod]
         [TestCategory("StopApp")]
         public async Task StopAppAsync_ReturnsSuccessfulResult_AndUpdatesAppState()
         {
