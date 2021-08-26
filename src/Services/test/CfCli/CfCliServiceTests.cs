@@ -1508,8 +1508,8 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("GetRecentAppLogs")]
         public async Task GetRecentAppLogs_ReturnsSuccessResult_WhenLogsCmdSucceeds()
         {
-            var fakeAppName = "junk";
-            var expectedLogsCmdArgs = $"logs {fakeAppName} --recent";
+            var fakeAppName = "fake app name";
+            var expectedLogsCmdArgs = $"logs \"{fakeAppName}\" --recent"; // expect app name to be surrounded by double quotes
             var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} {FakeOrg.OrgName}";
             var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} {FakeSpace.SpaceName}";
 
@@ -1541,8 +1541,8 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("GetRecentAppLogs")]
         public async Task GetRecentAppLogs_ReturnsFailureResult_WhenLogsCmdExitCodeIsNotZero()
         {
-            var fakeAppName = "junk";
-            var expectedArgs = $"logs {fakeAppName} --recent";
+            var fakeAppName = "fake app name";
+            var expectedArgs = $"logs \"{fakeAppName}\" --recent"; // expect app name to be surrounded by double quotes
             var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} {FakeOrg.OrgName}";
             var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} {FakeSpace.SpaceName}";
 
