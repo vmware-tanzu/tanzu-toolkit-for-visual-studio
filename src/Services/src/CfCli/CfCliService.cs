@@ -258,7 +258,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         /// <returns></returns>
         public DetailedResult TargetSpace(string spaceName)
         {
-            string args = $"{_targetSpaceCmd} {spaceName}";
+            string args = $"{_targetSpaceCmd} \"{spaceName}\"";
             DetailedResult result = ExecuteCfCliCommand(args);
 
             ThrowIfResultIndicatesInvalidRefreshToken(result);
