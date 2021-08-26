@@ -31,7 +31,6 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         private readonly ILogger _logger;
 
         public CloudFoundryInstance ConnectedCf { get; set; }
-        public CloudFoundryInstance ActiveCloud { get; set; }
 
         public CloudFoundryService(IServiceProvider services)
         {
