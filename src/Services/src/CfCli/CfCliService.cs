@@ -230,7 +230,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         /// <returns></returns>
         public DetailedResult TargetOrg(string orgName)
         {
-            string args = $"{_targetOrgCmd} {orgName}";
+            string args = $"{_targetOrgCmd} \"{orgName}\"";
             DetailedResult result = ExecuteCfCliCommand(args);
 
             ThrowIfResultIndicatesInvalidRefreshToken(result);
