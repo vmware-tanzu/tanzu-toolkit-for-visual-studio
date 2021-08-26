@@ -301,6 +301,14 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
+        public void RefreshOrg(object arg)
+        {
+            if (arg is OrgViewModel orgViewModel)
+            {
+                Task.Run(() => orgViewModel.RefreshChildren());
+            }
+        }
+
         public void RefreshAllItems(object arg)
         {
             if (!IsRefreshingAll)

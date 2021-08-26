@@ -434,6 +434,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     Times.Once);
         }
 
+
         [TestMethod]
         public void RefreshAllItems_StartsFullRefreshTask()
         {

@@ -180,6 +180,11 @@
                                 Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
                             <Button.ContextMenu>
                                 <ContextMenu>
+                                    <MenuItem Header="Refresh Org" 
+                                              Command="{Binding PlacementTarget.Tag.RefreshOrgCommand, 
+                                                                RelativeSource={RelativeSource Mode=FindAncestor, 
+                                                                AncestorType=ContextMenu}}"
+                                              CommandParameter="{Binding Path=.}"/>
                                 </ContextMenu>
                             </Button.ContextMenu>
                         </Button>

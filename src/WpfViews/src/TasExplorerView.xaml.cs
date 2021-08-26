@@ -22,6 +22,7 @@ namespace Tanzu.Toolkit.WpfViews
         public ICommand DeleteCfAppCommand { get; }
         public ICommand DisplayRecentAppLogsCommand { get; }
         public ICommand RefreshSpaceCommand { get; }
+        public ICommand RefreshOrgCommand { get; }
         public ICommand RefreshAllCommand { get; }
         public ICommand DeleteConnectionCommand { get; }
         public ICommand ReAuthenticateCommand { get; }
@@ -49,6 +50,7 @@ namespace Tanzu.Toolkit.WpfViews
             DeleteCfAppCommand = new AsyncDelegatingCommand(viewModel.DeleteCfApp, viewModel.CanDeleteCfApp);
             DisplayRecentAppLogsCommand = new AsyncDelegatingCommand(viewModel.DisplayRecentAppLogs, viewModel.CanDisplayRecentAppLogs);
             RefreshSpaceCommand = new DelegatingCommand(viewModel.RefreshSpace, viewModel.CanRefreshSpace);
+            RefreshOrgCommand = new DelegatingCommand(viewModel.RefreshOrg, viewModel.CanRefreshOrg);
             RefreshAllCommand = new DelegatingCommand(viewModel.RefreshAllItems, viewModel.CanInitiateFullRefresh);
             DeleteConnectionCommand = new DelegatingCommand(viewModel.DeleteConnection, viewModel.CanRemoveCloudConnecion);
             ReAuthenticateCommand = new DelegatingCommand(viewModel.ReAuthenticate, viewModel.CanReAuthenticate);

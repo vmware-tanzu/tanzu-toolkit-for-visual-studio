@@ -12,6 +12,7 @@ namespace Tanzu.Toolkit.ViewModels
         bool CanStartCfApp(object arg);
         bool CanDeleteCfApp(object arg);
         bool CanRefreshSpace(object arg);
+        bool CanRefreshOrg(object arg);
         bool CanInitiateFullRefresh(object arg);
         bool CanRemoveCloudConnecion(object arg);
         bool CanDisplayRecentAppLogs(object arg);
@@ -19,6 +20,7 @@ namespace Tanzu.Toolkit.ViewModels
         Task StartCfApp(object arg);
         Task DeleteCfApp(object arg);
         void RefreshSpace(object arg);
+        void RefreshOrg(object arg);
         void RefreshAllItems(object arg);
         void DeleteConnection(object arg);
         Task DisplayRecentAppLogs(object app);
