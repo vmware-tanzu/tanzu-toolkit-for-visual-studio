@@ -563,7 +563,7 @@ namespace Tanzu.Toolkit.Services.CfCli
 
         public async Task<DetailedResult<string>> GetRecentAppLogs(string appName, string orgName, string spaceName)
         {
-            var args = $"logs {appName} --recent";
+            var args = $"logs \"{appName}\" --recent";
 
             Task<DetailedResult> logsTask;
 
