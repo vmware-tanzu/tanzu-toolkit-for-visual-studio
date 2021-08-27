@@ -54,7 +54,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="24"></RowDefinition>
             </Grid.RowDefinitions>
-            
+
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="32"/>
@@ -86,22 +86,15 @@
             <TextBlock VerticalAlignment="Center" Text="Deployment Target:" />
         </StackPanel>
 
-        <ComboBox Grid.Row="2" Grid.Column="1" Margin="8,4,8,4" 
-                  ItemsSource="{Binding CfInstanceOptions}" 
-                  SelectedItem="{Binding SelectedCf}"
-                  DropDownClosed="CfInstanceOptions_ComboBox_DropDownClosed">
-            <ComboBox.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Text="{Binding InstanceName}"/>
-                </DataTemplate>
-            </ComboBox.ItemTemplate>
-        </ComboBox>
-
-        <Button Grid.Row="2" Grid.Column="2" Margin="0,4,0,4"
-                Style="{DynamicResource RoundedButtonStyle}" 
-                Command ="{ Binding ElementName=DeploymentDialogViewElement, Path=OpenLoginDialogCommand }" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}">
-            <Image Source="Resources/AddCloud.png" Stretch="Uniform" Height="16px" Width="16px" 
-                   ToolTip="Target New Tanzu Application Service"/>
+        <Button Grid.Row="2" Grid.Column="1" ToolTip="Login to Tanzu Application Service"
+                Command ="{ Binding ElementName=DeploymentDialogViewElement, Path=OpenLoginDialogCommand }" 
+                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" Margin="8,4,8,4">
+            <DockPanel HorizontalAlignment="Left" Width="265" Height="23">
+                <Label Content="Disconnected: Click here to login" DockPanel.Dock="Right" 
+                       VerticalAlignment="Top" Width="235" FontSize="11" Height="24" Margin="0,-2,0,0"/>
+                <Image Source="Resources/AddCloud.png" Stretch="Uniform" Height="16px" Width="21" 
+                    Margin="0,2,0,5"/>
+            </DockPanel>
         </Button>
 
         <StackPanel VerticalAlignment="Center" Grid.Row="3" Margin="8,0,8,0">
