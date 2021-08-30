@@ -194,6 +194,30 @@
     <Resource Include="Resources\StatusWarning.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\tanzu_nc_dark.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Refresh_16x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\02_tanzu_newconnection_blue_dark_16x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\02_tanzu_refresh_dark_16x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\ApplicationRunning_16x.png" />
+    <Resource Include="Resources\ApplicationStopped_16x.png" />
+    <Resource Include="Resources\cf_org_16x.png" />
+    <Resource Include="Resources\delete_app.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\cf_space_16x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\tasicon.png" />
+  </ItemGroup>
+  <ItemGroup>
     <Resource Include="Resources\OpenFolder.png" />
   </ItemGroup>
   <ItemGroup>
