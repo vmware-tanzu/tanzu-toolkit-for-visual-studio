@@ -995,6 +995,27 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsFalse(_sut.AuthenticationRequired);
             Assert.IsFalse(_sut.TasConnection.IsExpanded);
         }
+
+        [TestMethod]
+        [TestCategory("DeleteConnection")]
+        public void DeleteConnection_SetsTasConnectionToNull_WhenArgIsCfInstanceViewModel()
+        {
+            Assert.IsNotNull(_sut.TasConnection);
+            _sut.DeleteConnection(_sut.TasConnection.CloudFoundryInstance);
+            Assert.IsNull(_sut.TasConnection);
+        }
+
+        [TestMethod]
+        [TestCategory("DeleteConnection")]
+        public void DeleteConnection_DoesNotChangeTasConnection_WhenArgIsNotCfInstanceViewModel()
+        {
+            Assert.IsNotNull(_sut.TasConnection);
+
+            var initialConnection = _sut.TasConnection;
+            _sut.DeleteConnection("bad arg");
+
+            Assert.AreEqual(initialConnection, _sut.TasConnection);
+        }
     }
 
     internal class FakeCfInstanceViewModel : CfInstanceViewModel
