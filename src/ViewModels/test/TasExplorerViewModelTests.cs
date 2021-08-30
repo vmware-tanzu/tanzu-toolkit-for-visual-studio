@@ -433,8 +433,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 Error(expectedLogMsg, fakeApp.AppName, FakeFailureDetailedResult.ToString()),
                     Times.Once);
         }
-
-
+        
         [TestMethod]
         public void RefreshAllItems_StartsFullRefreshTask()
         {
