@@ -1001,7 +1001,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public void DeleteConnection_SetsTasConnectionToNull_WhenArgIsCfInstanceViewModel()
         {
             Assert.IsNotNull(_sut.TasConnection);
-            _sut.DeleteConnection(_sut.TasConnection.CloudFoundryInstance);
+            Assert.IsTrue(_sut.TasConnection is CfInstanceViewModel);
+
+            _sut.DeleteConnection(_sut.TasConnection);
+            
             Assert.IsNull(_sut.TasConnection);
         }
 

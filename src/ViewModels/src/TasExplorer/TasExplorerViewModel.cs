@@ -410,6 +410,14 @@ namespace Tanzu.Toolkit.ViewModels
             });
         }
 
+        public void SetConnetion(CloudFoundryInstance cf)
+        {
+            if (TasConnection == null)
+            {
+                TasConnection = new CfInstanceViewModel(cf, this, Services);
+            }
+        }
+
         public void DeleteConnection(object arg)
         {
             if (arg is CfInstanceViewModel)
