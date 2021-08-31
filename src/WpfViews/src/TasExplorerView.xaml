@@ -77,7 +77,7 @@
             <Button Style="{DynamicResource RoundedButtonStyle}"
                     Command ="{ Binding ElementName=TasExplorerViewElement, Path=RefreshAllCommand }">
                 <Grid>
-                    <Image Source="Resources/Refresh_16.png" 
+                    <Image Source="Resources/Refresh_16x.png" 
                            Grid.Row="0"
                            Grid.Column="0"
                            Stretch="Uniform" 
