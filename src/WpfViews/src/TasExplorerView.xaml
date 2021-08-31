@@ -71,7 +71,7 @@
             <Button Style="{DynamicResource RoundedButtonStyle}"
                     Command ="{ Binding ElementName=TasExplorerViewElement, Path=OpenLoginFormCommand }" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}">
                 <Image Source="Resources/tanzu_nc_dark.png" Stretch="Uniform" Width="16px" Height="16px"
-                       ToolTip="Target New Tanzu Application Service"/>
+                       ToolTip="Log in to Tanzu Application Service"/>
             </Button>
 
             <Button Style="{DynamicResource RoundedButtonStyle}"
@@ -105,7 +105,7 @@
                            Stretch="Uniform" 
                            Width="16px" 
                            Height="16px"
-                           ToolTip="Refresh All Cloud Connections" 
+                           ToolTip="Refresh all"
                            RenderTransformOrigin="0.5 0.5"
                            Visibility="{Binding IsRefreshingAll, Converter={StaticResource InverseVisibility}}">
                     </Image>
