@@ -19,8 +19,8 @@ namespace Tanzu.Toolkit.ViewModels
         Task StopCfApp(object arg);
         Task StartCfApp(object arg);
         Task DeleteCfApp(object arg);
-        void RefreshSpace(object arg);
-        void RefreshOrg(object arg);
+        Task RefreshSpace(object arg);
+        Task RefreshOrg(object arg);
         void RefreshAllItems(object arg);
         void DeleteConnection(object arg);
         Task DisplayRecentAppLogs(object app);
