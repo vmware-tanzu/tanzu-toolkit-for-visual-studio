@@ -57,7 +57,7 @@
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="27"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
             <RowDefinition/>
         </Grid.RowDefinitions>
 
