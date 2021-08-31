@@ -89,7 +89,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.AreEqual(1, _sut.TreeRoot.Count);
             Assert.AreEqual(_sut.TreeRoot[0], _sut.TasConnection);
         }
-        
+
         [TestMethod]
         [TestCategory("TasConnection")]
         [TestCategory("TreeRoot")]
@@ -433,7 +433,45 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 Error(expectedLogMsg, fakeApp.AppName, FakeFailureDetailedResult.ToString()),
                     Times.Once);
         }
+
+        [TestMethod]
+        [TestCategory("RefreshOrg")]
+        public async Task RefreshOrg_CallsRefreshChildren_WhenArgIsOrgViewModel()
+        {
+            var ovm = new FakeOrgViewModel(FakeCfOrg, Services);
+            var spacesCollection = new DetailedResult<List<CloudFoundrySpace>>();
+
+            MockCloudFoundryService.Setup(mock => mock.
+                GetSpacesForOrgAsync(FakeCfOrg, true, It.IsAny<int>()))
+                    .ReturnsAsync(spacesCollection);
+
+            Assert.IsTrue(ovm is OrgViewModel);
+            Assert.AreEqual(0, ovm.NumRefreshes);
+
+            await _sut.RefreshOrg(ovm);
+
+            Assert.AreEqual(1, ovm.NumRefreshes);
+        }
         
+        [TestMethod]
+        [TestCategory("RefreshSpace")]
+        public async Task RefreshSpace_CallsRefreshChildren_WhenArgIsSpaceViewModel()
+        {
+            var svm = new FakeSpaceViewModel(FakeCfSpace, Services);
+            var appCollection = new DetailedResult<List<CloudFoundryApp>>();
+
+            MockCloudFoundryService.Setup(mock => mock.
+                GetAppsForSpaceAsync(FakeCfSpace, true, It.IsAny<int>()))
+                    .ReturnsAsync(appCollection);
+
+            Assert.IsTrue(svm is SpaceViewModel);
+            Assert.AreEqual(0, svm.NumRefreshes);
+
+            await _sut.RefreshSpace(svm);
+
+            Assert.AreEqual(1, svm.NumRefreshes);
+        }
+
         [TestMethod]
         public void RefreshAllItems_StartsFullRefreshTask()
         {

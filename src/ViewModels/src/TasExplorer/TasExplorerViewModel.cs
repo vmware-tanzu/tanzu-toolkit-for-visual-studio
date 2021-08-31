@@ -293,19 +293,19 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public void RefreshSpace(object arg)
+        public async Task RefreshSpace(object arg)
         {
             if (arg is SpaceViewModel spaceViewModel)
             {
-                Task.Run(() => spaceViewModel.RefreshChildren());
+                await spaceViewModel.RefreshChildren();
             }
         }
 
-        public void RefreshOrg(object arg)
+        public async Task RefreshOrg(object arg)
         {
             if (arg is OrgViewModel orgViewModel)
             {
-                Task.Run(() => orgViewModel.RefreshChildren());
+                await orgViewModel.RefreshChildren();
             }
         }
 
