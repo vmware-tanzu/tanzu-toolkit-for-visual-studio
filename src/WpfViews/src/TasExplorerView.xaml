@@ -152,7 +152,7 @@
                 <HierarchicalDataTemplate DataType="{x:Type ViewModels:CfInstanceViewModel}" 
                                           ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                        <Image Source="Resources/tasicon.png" Stretch="Uniform" Height="16px" Width="16px" Margin="0,2,4,0"/>
+                        <Image Source="Resources/tas_16px.png" Stretch="Uniform" Height="16px" Width="16px" Margin="0,2,4,0"/>
                         <Button Content="{Binding DisplayText}"
                                 Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
                                 Style="{StaticResource RowItemStyle}">
