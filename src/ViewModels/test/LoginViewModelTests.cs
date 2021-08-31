@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using System.Security;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
+using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services.CloudFoundry;
 
 namespace Tanzu.Toolkit.ViewModels.Tests
@@ -15,7 +15,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         private const string FakeUsername = "correct-username";
         private const string FakeHttpProxy = "junk";
         private const bool SkipSsl = true;
-        private const string FakeToken = "junk";
         private static readonly SecureString FakeSecurePw = new SecureString();
 
         private static LoginViewModel _sut;
@@ -100,6 +99,25 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.AreEqual(expectedErrorMessage, _sut.ErrorMessage);
             MockCloudFoundryService.Verify(mock => mock.ConnectToCFAsync(FakeTarget, FakeUsername, FakeSecurePw, FakeHttpProxy, SkipSsl), Times.Once);
             MockDialogService.Verify(ds => ds.CloseDialog(It.IsAny<object>(), true), Times.Never);
+        }
+
+        [TestMethod]
+        public async Task AddCloudFoundryInstance_SetsConnectionOnTasExplorer_WhenLoginRequestSucceeds()
+        {
+            MockCloudFoundryService.Setup(mock => mock.
+              ConnectToCFAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SecureString>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .ReturnsAsync(new ConnectResult(true, null));
+
+            MockTasExplorerViewModel.Setup(m => m.SetConnetion(It.IsAny<CloudFoundryInstance>())).Verifiable();
+
+            await _sut.AddCloudFoundryInstance(null);
+
+            Assert.IsFalse(_sut.HasErrors);
+            MockCloudFoundryService.Verify(mock => mock.ConnectToCFAsync(FakeTarget, FakeUsername, FakeSecurePw, FakeHttpProxy, SkipSsl), Times.Once);
+            MockDialogService.Verify(mock => mock.CloseDialog(It.IsAny<object>(), It.IsAny<bool>()), Times.Once);
+            MockDialogService.Verify(ds => ds.CloseDialog(It.IsAny<object>(), true), Times.Once);
+
+            MockTasExplorerViewModel.Verify(m => m.SetConnetion(It.Is<CloudFoundryInstance>(cf => cf.ApiAddress == FakeTarget)), Times.Once);
         }
 
         [TestMethod]
