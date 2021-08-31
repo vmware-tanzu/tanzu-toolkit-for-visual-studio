@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Security;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
@@ -16,11 +17,14 @@ namespace Tanzu.Toolkit.ViewModels
         private bool _hasErrors;
         private string _errorMessage;
         private string _instanceName;
+        private ITasExplorerViewModel _tasExplorer;
 
         public LoginViewModel(IServiceProvider services)
             : base(services)
         {
             SkipSsl = true;
+
+            _tasExplorer = services.GetRequiredService<ITasExplorerViewModel>();
         }
 
         public string InstanceName
@@ -126,7 +130,7 @@ namespace Tanzu.Toolkit.ViewModels
 
             if (result.IsLoggedIn)
             {
-                CloudFoundryService.ConnectedCf = new CloudFoundryInstance(InstanceName, Target);
+                _tasExplorer.SetConnetion(new CloudFoundryInstance(InstanceName, Target));
             }
 
             if (!HasErrors)

@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Tanzu.Toolkit.Models;
 
 namespace Tanzu.Toolkit.ViewModels
 {
@@ -26,5 +27,6 @@ namespace Tanzu.Toolkit.ViewModels
         Task DisplayRecentAppLogs(object app);
         bool CanReAuthenticate(object arg);
         void ReAuthenticate(object cf);
+        void SetConnetion(CloudFoundryInstance cf);
     }
 }
