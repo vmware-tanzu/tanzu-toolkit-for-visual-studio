@@ -230,7 +230,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         /// <returns></returns>
         public DetailedResult TargetOrg(string orgName)
         {
-            string args = $"{_targetOrgCmd} {orgName}";
+            string args = $"{_targetOrgCmd} \"{orgName}\"";
             DetailedResult result = ExecuteCfCliCommand(args);
 
             ThrowIfResultIndicatesInvalidRefreshToken(result);
@@ -258,7 +258,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         /// <returns></returns>
         public DetailedResult TargetSpace(string spaceName)
         {
-            string args = $"{_targetSpaceCmd} {spaceName}";
+            string args = $"{_targetSpaceCmd} \"{spaceName}\"";
             DetailedResult result = ExecuteCfCliCommand(args);
 
             ThrowIfResultIndicatesInvalidRefreshToken(result);
@@ -563,7 +563,7 @@ namespace Tanzu.Toolkit.Services.CfCli
 
         public async Task<DetailedResult<string>> GetRecentAppLogs(string appName, string orgName, string spaceName)
         {
-            var args = $"logs {appName} --recent";
+            var args = $"logs \"{appName}\" --recent";
 
             Task<DetailedResult> logsTask;
 

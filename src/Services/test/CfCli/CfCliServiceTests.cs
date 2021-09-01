@@ -807,8 +807,8 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("TargetOrg")]
         public void TargetOrg_ReturnsTrue_WhenCmdExitCodeIsZero()
         {
-            var fakeOrgName = "fake-org";
-            string expectedArgs = $"{CfCliService._targetOrgCmd} {fakeOrgName}";
+            var fakeOrgName = "fake org";
+            string expectedArgs = $"{CfCliService._targetOrgCmd} \"{fakeOrgName}\""; // expect org name to be surrounded by double quotes
             CmdResult fakeSuccessResult = new CmdResult(_fakeStdOut, _fakeStdErr, 0);
 
             _mockCmdProcessService.Setup(mock => mock.
@@ -828,8 +828,8 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("TargetOrg")]
         public void TargetOrg_ReturnsFalse_WhenCmdExitCodeIsNotZero()
         {
-            var fakeOrgName = "fake-org";
-            string expectedArgs = $"{CfCliService._targetOrgCmd} {fakeOrgName}";
+            var fakeOrgName = "fake org";
+            string expectedArgs = $"{CfCliService._targetOrgCmd} \"{fakeOrgName}\""; // expect org name to be surrounded by double quotes
             CmdResult fakeFailureResult = new CmdResult(_fakeStdOut, _fakeStdErr, 1);
 
             _mockCmdProcessService.Setup(mock => mock.
@@ -849,8 +849,8 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("TargetOrg")]
         public void TargetOrg_ThrowsInvalidRefreshTokenException_WhenStdErrReportsInvalidToken()
         {
-            var fakeOrgName = "fake-org";
-            string expectedArgs = $"{CfCliService._targetOrgCmd} {fakeOrgName}";
+            var fakeOrgName = "fake org";
+            string expectedArgs = $"{CfCliService._targetOrgCmd} \"{fakeOrgName}\""; // expect org name to be surrounded by double quotes
             var tokenFailureResult = new CmdResult("junk", CfCliService._invalidRefreshTokenError, 1);
 
             _mockCmdProcessService.Setup(mock => mock.
@@ -876,7 +876,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         public void TargetSpace_ReturnsTrueResult_WhenCmdExitCodeIsZero()
         {
             var fakeSpaceName = "fake-space";
-            string expectedArgs = $"{CfCliService._targetSpaceCmd} {fakeSpaceName}";
+            string expectedArgs = $"{CfCliService._targetSpaceCmd} \"{fakeSpaceName}\""; // ensure space name gets surrounded by quotes 
             CmdResult fakeSuccessResult = new CmdResult(_fakeStdOut, _fakeStdErr, 0);
 
             _mockCmdProcessService.Setup(mock => mock.
@@ -897,7 +897,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         public void TargetSpace_ReturnsFalseResult_WhenCmdExitCodeIsNotZero()
         {
             var fakeSpaceName = "fake-space";
-            string expectedArgs = $"{CfCliService._targetSpaceCmd} {fakeSpaceName}";
+            string expectedArgs = $"{CfCliService._targetSpaceCmd} \"{fakeSpaceName}\""; // ensure space name gets surrounded by quotes
             CmdResult fakeFailureResult = new CmdResult(_fakeStdOut, _fakeStdErr, 1);
 
             _mockCmdProcessService.Setup(mock => mock.
@@ -918,7 +918,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         public void TargetSpace_ThrowsInvalidRefreshTokenException_WhenStdErrReportsInvalidToken()
         {
             var fakeSpaceName = "fake-space";
-            string expectedArgs = $"{CfCliService._targetSpaceCmd} {fakeSpaceName}";
+            string expectedArgs = $"{CfCliService._targetSpaceCmd} \"{fakeSpaceName}\""; // ensure space name gets surrounded by quotes
             var tokenFailureResult = new CmdResult("junk", CfCliService._invalidRefreshTokenError, 1);
 
             _mockCmdProcessService.Setup(mock => mock.
@@ -1088,8 +1088,8 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         {
             var fakeAppName = "my fake app";
             string expectedArgs = $"push \"{fakeAppName}\""; // ensure app name gets surrounded by quotes
-            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} {FakeOrg.OrgName}";
-            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} {FakeSpace.SpaceName}";
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
+            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
 
             _mockCmdProcessService.Setup(m => m.
               RunCommand(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
@@ -1117,8 +1117,8 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var fakeAppName = "my fake app";
             var fakeStackValue = "my-cool-stack-name";
             string expectedArgs = $"push \"{fakeAppName}\" -s {fakeStackValue}"; // ensure app name gets surrounded by quotes
-            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} {FakeOrg.OrgName}";
-            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} {FakeSpace.SpaceName}";
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
+            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
 
             _mockCmdProcessService.Setup(m => m.
                RunCommand(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
@@ -1146,8 +1146,8 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var fakeAppName = "my fake app";
             var fakeBuildpackValue = "my-cool-buildpack";
             string expectedArgs = $"push \"{fakeAppName}\" -b {fakeBuildpackValue}"; // ensure app name gets surrounded by quotes
-            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} {FakeOrg.OrgName}";
-            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} {FakeSpace.SpaceName}";
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
+            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
 
             _mockCmdProcessService.Setup(m => m.
               RunCommand(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
@@ -1176,8 +1176,8 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var fakeStackValue = "my-cool-stack";
             var fakeBuildpackValue = "my-cool-buildpack";
             string expectedArgs = $"push \"{fakeAppName}\" -b {fakeBuildpackValue} -s {fakeStackValue}"; // ensure app name gets surrounded by quotes
-            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} {FakeOrg.OrgName}";
-            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} {FakeSpace.SpaceName}";
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
+            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
 
             _mockCmdProcessService.Setup(m => m.
               RunCommand(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
@@ -1220,8 +1220,8 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         {
             var fakeAppName = "my fake app";
             string expectedArgs = $"push \"{fakeAppName}\""; // ensure app name gets surrounded by quotes
-            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} {FakeOrg.OrgName}";
-            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} {FakeSpace.SpaceName}";
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
+            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
 
             _mockCmdProcessService.Setup(m => m.
               RunCommand(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
@@ -1243,8 +1243,8 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         {
             var fakeAppName = "my fake app";
             string expectedArgs = $"push \"{fakeAppName}\""; // ensure app name gets surrounded by quotes
-            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} {FakeOrg.OrgName}";
-            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} {FakeSpace.SpaceName}";
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
+            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
 
             _mockCmdProcessService.Setup(m => m.
               RunCommand(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
@@ -1270,8 +1270,8 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         {
             var fakeAppName = "my fake app";
             string expectedArgs = $"push \"{fakeAppName}\""; // ensure app name gets surrounded by quotes
-            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} {FakeOrg.OrgName}";
-            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} {FakeSpace.SpaceName}";
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
+            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
 
             _mockCmdProcessService.Setup(m => m.
               RunCommand(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
@@ -1298,8 +1298,8 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         {
             var fakeAppName = "my fake app";
             string expectedArgs = $"push \"{fakeAppName}\""; // ensure app name gets surrounded by quotes
-            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} {FakeOrg.OrgName}";
-            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} {FakeSpace.SpaceName}";
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
+            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
             CmdResult mockFailedResult = new CmdResult("Something went wrong but there's no StdErr!", "", 1);
 
             _mockCmdProcessService.Setup(m => m.
@@ -1327,7 +1327,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         {
             var fakeAppName = "my fake app";
             string expectedArgs = $"push \"{fakeAppName}\""; // ensure app name gets surrounded by quotes
-            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} {FakeOrg.OrgName}";
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
             var invalidRefreshTokenCmdResult = new CmdResult("junk output", CfCliService._invalidRefreshTokenError, 1);
 
             _mockCmdProcessService.Setup(m => m.
@@ -1354,8 +1354,8 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         {
             var fakeAppName = "my fake app";
             string expectedArgs = $"push \"{fakeAppName}\""; // ensure app name gets surrounded by quotes
-            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} {FakeOrg.OrgName}";
-            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} {FakeSpace.SpaceName}";
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
+            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
             var invalidRefreshTokenCmdResult = new CmdResult("junk output", CfCliService._invalidRefreshTokenError, 1);
             
             _mockCmdProcessService.Setup(m => m.
@@ -1386,8 +1386,8 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         {
             var fakeAppName = "my fake app";
             string expectedArgs = $"push \"{fakeAppName}\""; // ensure app name gets surrounded by quotes
-            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} {FakeOrg.OrgName}";
-            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} {FakeSpace.SpaceName}";
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
+            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
             var invalidRefreshTokenCmdResult = new CmdResult("junk output", CfCliService._invalidRefreshTokenError, 1);
 
             _mockCmdProcessService.Setup(m => m.
@@ -1423,8 +1423,8 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var fakeAppName = "my fake app";
             var fakeManifestPath = "this\\is\\a\\fake\\path\\to\\manifest.yml";
             string expectedArgs = $"push -f \"{fakeManifestPath}\""; // ensure manifest path gets surrounded by quotes
-            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} {FakeOrg.OrgName}";
-            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} {FakeSpace.SpaceName}";
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
+            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
 
             _mockCmdProcessService.Setup(m => m.
               RunCommand(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
@@ -1508,10 +1508,10 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("GetRecentAppLogs")]
         public async Task GetRecentAppLogs_ReturnsSuccessResult_WhenLogsCmdSucceeds()
         {
-            var fakeAppName = "junk";
-            var expectedLogsCmdArgs = $"logs {fakeAppName} --recent";
-            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} {FakeOrg.OrgName}";
-            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} {FakeSpace.SpaceName}";
+            var fakeAppName = "fake app name";
+            var expectedLogsCmdArgs = $"logs \"{fakeAppName}\" --recent"; // expect app name to be surrounded by double quotes
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
+            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
 
             string fakeCmdOutput = "These are fake app logs\nYabadabbadoo";
 
@@ -1541,10 +1541,10 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("GetRecentAppLogs")]
         public async Task GetRecentAppLogs_ReturnsFailureResult_WhenLogsCmdExitCodeIsNotZero()
         {
-            var fakeAppName = "junk";
-            var expectedArgs = $"logs {fakeAppName} --recent";
-            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} {FakeOrg.OrgName}";
-            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} {FakeSpace.SpaceName}";
+            var fakeAppName = "fake app name";
+            var expectedArgs = $"logs \"{fakeAppName}\" --recent"; // expect app name to be surrounded by double quotes
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
+            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
 
             string fakeCmdOutput = "These are fake app logs\nYabadabbadoo";
 
@@ -1577,7 +1577,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         {
             var fakeAppName = "junk";
             var expectedArgs = $"logs {fakeAppName} --recent";
-            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} {FakeOrg.OrgName}";
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
 
             _mockCmdProcessService.Setup(m => m.
               RunCommand(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
@@ -1597,8 +1597,8 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         {
             var fakeAppName = "junk";
             var expectedArgs = $"logs {fakeAppName} --recent";
-            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} {FakeOrg.OrgName}";
-            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} {FakeSpace.SpaceName}";
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
+            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
 
             _mockCmdProcessService.Setup(m => m.
               RunCommand(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
@@ -1623,7 +1623,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         {
             var fakeAppName = "my fake app";
             var expectedArgs = $"logs {fakeAppName} --recent";
-            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} {FakeOrg.OrgName}";
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
             var invalidRefreshTokenCmdResult = new CmdResult("junk output", CfCliService._invalidRefreshTokenError, 1);
 
             _mockCmdProcessService.Setup(m => m.
@@ -1650,8 +1650,8 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         {
             var fakeAppName = "my fake app";
             var expectedArgs = $"logs {fakeAppName} --recent";
-            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} {FakeOrg.OrgName}";
-            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} {FakeSpace.SpaceName}";
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
+            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
             var invalidRefreshTokenCmdResult = new CmdResult("junk output", CfCliService._invalidRefreshTokenError, 1);
 
             _mockCmdProcessService.Setup(m => m.
@@ -1682,8 +1682,8 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         {
             var fakeAppName = "my fake app";
             var expectedArgs = $"logs {fakeAppName} --recent";
-            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} {FakeOrg.OrgName}";
-            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} {FakeSpace.SpaceName}";
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
+            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
             var invalidRefreshTokenCmdResult = new CmdResult("junk output", CfCliService._invalidRefreshTokenError, 1);
 
             _mockCmdProcessService.Setup(m => m.
