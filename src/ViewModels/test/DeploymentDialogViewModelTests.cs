@@ -27,10 +27,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             RenewMockServices();
 
-            // * return empty dictionary of CloudFoundryInstances
-            MockCloudFoundryService.SetupGet(mock =>
-                mock.ConnectedCf).Returns(FakeCfInstance);
-
             // * return fake view/viewmodel for output window
             MockViewLocatorService.Setup(mock =>
                 mock.NavigateTo(nameof(OutputViewModel), null))
@@ -59,15 +55,38 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        public void DeploymentDialogViewModel_GetsListOfCfsFromCfService_WhenConstructed()
+        [TestCategory("ctor")]
+        public void Constructor_SetsCfInstanceOptions_ToTasExplorerViewModelTasConnection_WhenNotNull()
         {
-            Assert.IsNotNull(_sut.CfInstanceOptions);
+            Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
             Assert.AreEqual(1, _sut.CfInstanceOptions.Count);
-
-            MockCloudFoundryService.VerifyGet(mock => mock.ConnectedCf);
+            Assert.AreEqual(_sut.TasExplorerViewModel.TasConnection.CloudFoundryInstance, _sut.CfInstanceOptions[0]);
         }
 
         [TestMethod]
+        [TestCategory("ctor")]
+        public void Constructor_SetsCfInstanceOptions_ToEmptyList_WhenTasExplorerViewModelTasConnectionNull()
+        {
+            var fakeTasExplorerView = new FakeTasExplorerView()
+            {
+                ViewModel = new TasExplorerViewModel(Services)
+                {
+                    TasConnection = null,
+                },
+            };
+
+            MockViewLocatorService.Setup(mock =>
+                mock.NavigateTo(nameof(TasExplorerViewModel), null))
+                    .Returns(fakeTasExplorerView);
+
+            _sut = new DeploymentDialogViewModel(Services, _fakeProjPath, FakeTargetFrameworkMoniker);
+
+            Assert.IsNull(_sut.TasExplorerViewModel.TasConnection);
+            Assert.AreEqual(0, _sut.CfInstanceOptions.Count);
+        }
+
+        [TestMethod]
+        [TestCategory("ctor")]
         public void DeploymentDialogViewModel_SetsCfOrgOptionsToEmptyList_WhenConstructed()
         {
             var vm = new DeploymentDialogViewModel(Services, _fakeProjPath, FakeTargetFrameworkMoniker);
@@ -77,6 +96,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("ctor")]
         public void DeploymentDialogViewModel_SetsCfSpaceOptionsToEmptyList_WhenConstructed()
         {
             var vm = new DeploymentDialogViewModel(Services, _fakeProjPath, FakeTargetFrameworkMoniker);
@@ -555,6 +575,54 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockDialogService.VerifyAll();
             Assert.AreEqual(initialSpaceOptions, _sut.CfSpaceOptions);
         }
+
+        [TestMethod]
+        [TestCategory("CanOpenLoginView")]
+        public void CanOpenLoginView_ReturnsTrue()
+        {
+            Assert.IsTrue(_sut.CanOpenLoginView(null));
+        }
+
+        [TestMethod]
+        [TestCategory("OpenLoginView")]
+        public void OpenLoginView_ShowsLoginDialog_WhenTasExplorerConnectionIsNull()
+        {
+            var fakeTasExplorerView = new FakeTasExplorerView()
+            {
+                ViewModel = new TasExplorerViewModel(Services)
+                {
+                    TasConnection = null,
+                },
+            };
+
+            MockViewLocatorService.Setup(mock =>
+                mock.NavigateTo(nameof(TasExplorerViewModel), null))
+                    .Returns(fakeTasExplorerView);
+
+            _sut = new DeploymentDialogViewModel(Services, _fakeProjPath, FakeTargetFrameworkMoniker);
+
+            Assert.IsNull(_sut.TasExplorerViewModel.TasConnection);
+
+            _sut.OpenLoginView(null);
+
+            MockDialogService.Verify(m => m.
+                ShowDialog(It.Is<string>(s => s.Contains("LoginViewModel")), null), 
+                    Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("OpenLoginView")]
+        public void OpenLoginView_DisplaysErrorDialog_WhenTasExplorerConnectionIsNotNull()
+        {
+            Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
+
+            _sut.OpenLoginView(null);
+
+            MockErrorDialogService.Verify(m => m.
+                DisplayErrorDialog(DeploymentDialogViewModel.SingleLoginErrorTitle,
+                                   It.Is<string>(s => s.Contains(DeploymentDialogViewModel.SingleLoginErrorMessage1) && s.Contains(DeploymentDialogViewModel.SingleLoginErrorMessage2))),
+                    Times.Once);
+        }
     }
 
     public class FakeOutputView : ViewModelTestSupport, IView
@@ -577,14 +645,16 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
     public class FakeTasExplorerView : ViewModelTestSupport, IView
     {
-        public IViewModel ViewModel { get; }
+        public IViewModel ViewModel { get; internal set; }
 
         public bool ShowMethodWasCalled { get; private set; }
 
         public FakeTasExplorerView()
         {
-            MockCloudFoundryService.SetupGet(mock => mock.ConnectedCf).Returns(FakeCfInstance);
-            ViewModel = new TasExplorerViewModel(Services);
+            ViewModel = new TasExplorerViewModel(Services)
+            {
+                TasConnection = new FakeCfInstanceViewModel(FakeCfInstance, Services),
+            };
             ShowMethodWasCalled = false;
         }
 
