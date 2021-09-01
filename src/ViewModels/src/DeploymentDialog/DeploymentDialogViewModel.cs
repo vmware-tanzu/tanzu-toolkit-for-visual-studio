@@ -22,6 +22,9 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string DeploymentErrorMsg = "Unable to deploy app:";
         internal const string GetOrgsFailureMsg = "Unable to fetch orgs.";
         internal const string GetSpacesFailureMsg = "Unable to fetch spaces.";
+        internal const string SingleLoginErrorTitle = "Unable to add more TAS connections.";
+        internal const string SingleLoginErrorMessage1 = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
+        internal const string SingleLoginErrorMessage2 = "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Application Service Explorer & re-connecting to a new one.";
 
         private string _status;
         private string _appName;
@@ -66,9 +69,9 @@ namespace Tanzu.Toolkit.ViewModels
 
             SetManifestIfDefaultExists();
 
-            if (CloudFoundryService.ConnectedCf != null)
+            if (TasExplorerViewModel.TasConnection != null)
             {
-                CfInstanceOptions.Add(CloudFoundryService.ConnectedCf);
+                CfInstanceOptions.Add(TasExplorerViewModel.TasConnection.CloudFoundryInstance);
             }
         }
 
@@ -265,18 +268,16 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool CanOpenLoginView(object arg)
         {
-            return CloudFoundryService.ConnectedCf == null;
+            return true;
         }
 
         public void OpenLoginView(object arg)
         {
-            if (CloudFoundryService.ConnectedCf != null)
+            if (TasExplorerViewModel.TasConnection != null)
             {
-                var errorTitle = "Unable to add more TAS connections.";
-                var errorMsg = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
-                errorMsg += System.Environment.NewLine + "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Application Service Explorer & re-connecting to a new one.";
+                var errorMsg = SingleLoginErrorMessage1 + Environment.NewLine + SingleLoginErrorMessage2;
 
-                _dialogService.DisplayErrorDialog(errorTitle, errorMsg);
+                _dialogService.DisplayErrorDialog(SingleLoginErrorTitle, errorMsg);
             }
             else
             {
