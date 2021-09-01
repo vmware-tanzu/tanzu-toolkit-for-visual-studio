@@ -46,7 +46,7 @@ namespace Tanzu.Toolkit.ViewModels
         {
             get => _tas;
 
-            set
+            internal set
             {
                 _tas = value;
 

@@ -6,6 +6,7 @@ namespace Tanzu.Toolkit.ViewModels
     public interface ITasExplorerViewModel : IViewModel
     {
         bool AuthenticationRequired { get; set; }
+        CfInstanceViewModel TasConnection { get; }
 
         bool CanOpenLoginView(object arg);
         void OpenLoginView(object arg);
