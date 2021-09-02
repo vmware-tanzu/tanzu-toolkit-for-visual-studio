@@ -46,12 +46,10 @@ namespace Tanzu.Toolkit.ViewModels
             : base(services)
         {
             _dialogService = services.GetRequiredService<IErrorDialog>();
+            TasExplorerViewModel = services.GetRequiredService<ITasExplorerViewModel>();
 
             IView outputView = ViewLocatorService.NavigateTo(nameof(ViewModels.OutputViewModel)) as IView;
             OutputViewModel = outputView?.ViewModel as IOutputViewModel;
-
-            IView tasExplorerView = ViewLocatorService.NavigateTo(nameof(ViewModels.TasExplorerViewModel)) as IView;
-            TasExplorerViewModel = tasExplorerView?.ViewModel as ITasExplorerViewModel;
 
             DeploymentStatus = InitialStatus;
             DeploymentInProgress = false;
@@ -273,16 +271,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public void OpenLoginView(object arg)
         {
-            if (TasExplorerViewModel.TasConnection != null)
-            {
-                var errorMsg = SingleLoginErrorMessage1 + Environment.NewLine + SingleLoginErrorMessage2;
-
-                _dialogService.DisplayErrorDialog(SingleLoginErrorTitle, errorMsg);
-            }
-            else
-            {
-                DialogService.ShowDialog(typeof(LoginViewModel).Name);
-            }
+            TasExplorerViewModel.OpenLoginView(arg);
         }
 
         public async Task UpdateCfOrgOptions()
