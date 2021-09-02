@@ -14,9 +14,6 @@ namespace Tanzu.Toolkit.WpfViews.Tests
         [TestInitialize]
         public void TestInit()
         {
-            var fakeCfInstance = new CloudFoundryInstance("fake cf", "http://fake.api.address");
-            mockCloudFoundryService.SetupGet(mock => mock.ConnectedCf).Returns(fakeCfInstance);
-            
             vm = new TasExplorerViewModel(services);
         }
 
