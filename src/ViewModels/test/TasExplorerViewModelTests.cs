@@ -14,13 +14,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
     {
         private TasExplorerViewModel _sut;
         private List<string> _receivedEvents;
+        private CfInstanceViewModel _fakeTasConnection;
 
         [TestInitialize]
         public void TestInit()
         {
             RenewMockServices();
-
-            MockCloudFoundryService.SetupGet(mock => mock.ConnectedCf).Returns(FakeCfInstance);
 
             // set up mockUiDispatcherService to run whatever method is passed
             // to RunOnUiThread; do not delegate to the UI Dispatcher
@@ -43,30 +42,19 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             _sut = new TasExplorerViewModel(Services);
             _receivedEvents = new List<string>();
+
+            _fakeTasConnection = new FakeCfInstanceViewModel(FakeCfInstance, Services);
         }
 
         [TestCleanup]
         public void TestCleanup()
         {
-            MockCloudFoundryService.VerifyAll();
         }
 
         [TestMethod]
         [TestCategory("Ctor")]
-        public void Ctor_SetsTasConnection_WhenCfServiceIsConnectedToTAS()
+        public void Ctor_SetsTasConnectionToNull()
         {
-            Assert.IsNotNull(_sut.TasConnection);
-            Assert.AreEqual(FakeCfInstance, _sut.TasConnection.CloudFoundryInstance);
-        }
-
-        [TestMethod]
-        [TestCategory("Ctor")]
-        public void Ctor_SetsTasConnectionToNull_WhenCfServiceIsNotConnectedToTAS()
-        {
-            MockCloudFoundryService.SetupGet(mock => mock.ConnectedCf).Returns((CloudFoundryInstance)null);
-
-            _sut = new TasExplorerViewModel(Services);
-
             Assert.IsNull(_sut.TasConnection);
         }
 
@@ -75,8 +63,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("TreeRoot")]
         public void SettingTasConnection_PopulatesTreeRoot()
         {
-            MockCloudFoundryService.SetupGet(mock => mock.ConnectedCf).Returns((CloudFoundryInstance)null);
-
             _sut = new TasExplorerViewModel(Services);
 
             Assert.IsNull(_sut.TasConnection);
@@ -95,6 +81,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("TreeRoot")]
         public void SettingTasConnectionToNull_ClearsTreeRoot()
         {
+            _sut.TasConnection = _fakeTasConnection;
+
             Assert.IsNotNull(_sut.TasConnection);
             Assert.AreEqual(1, _sut.TreeRoot.Count);
             Assert.AreEqual(_sut.TreeRoot[0], _sut.TasConnection);
@@ -107,21 +95,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        public void CanOpenLoginView_ReturnsTrue_WhenConnectedCfIsNull()
+        public void CanOpenLoginView_ReturnsTrue()
         {
-            MockCloudFoundryService.SetupGet(mock => mock.ConnectedCf).Returns((CloudFoundryInstance)null);
-
-            Assert.IsNull(MockCloudFoundryService.Object.ConnectedCf);
             Assert.IsTrue(_sut.CanOpenLoginView(null));
-        }
-
-        [TestMethod]
-        public void CanOpenLoginView_ReturnsFalse_WhenConnectedCfIsNotNull()
-        {
-            MockCloudFoundryService.SetupGet(mock => mock.ConnectedCf).Returns(FakeCfInstance);
-
-            Assert.IsNotNull(MockCloudFoundryService.Object.ConnectedCf);
-            Assert.IsFalse(_sut.CanOpenLoginView(null));
         }
 
         [TestMethod]
@@ -182,22 +158,35 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("OpenLoginView")]
-        public void OpenLoginView_CallsDialogService_ShowDialog()
+        public void OpenLoginView_DisplaysLoginDialog_WhenTasConnectionIsNull()
         {
-            MockCloudFoundryService.SetupGet(mock => mock.ConnectedCf).Returns((CloudFoundryInstance)null);
-
-            Assert.IsTrue(_sut.CanOpenLoginView(null));
+            Assert.IsNull(_sut.TasConnection);
 
             _sut.OpenLoginView(null);
+            
             MockDialogService.Verify(ds => ds.ShowDialog(typeof(LoginViewModel).Name, null), Times.Once);
+        }
+        
+        [TestMethod]
+        [TestCategory("OpenLoginView")]
+        public void OpenLoginView_DisplaysErrorDialog_WhenTasConnectionIsNotNull()
+        {
+            _sut.TasConnection = _fakeTasConnection;
+
+            Assert.IsNotNull(_sut.TasConnection);
+
+            _sut.OpenLoginView(null);
+            
+            MockErrorDialogService.Verify(m => m.
+                DisplayErrorDialog(TasExplorerViewModel.SingleLoginErrorTitle,
+                                   It.Is<string>(s => s.Contains(TasExplorerViewModel.SingleLoginErrorMessage1) && s.Contains(TasExplorerViewModel.SingleLoginErrorMessage2))), 
+                    Times.Once);
         }
 
         [TestMethod]
         [TestCategory("OpenLoginView")]
-        public void OpenLoginView_SetsAuthenticationRequiredToFalse_WhenCFGetsAdded()
+        public void OpenLoginView_SetsAuthenticationRequiredToFalse_WhenTasConnectionGetsSet()
         {
-            MockCloudFoundryService.SetupGet(mock => mock.ConnectedCf).Returns((CloudFoundryInstance)null);
-
             _sut = new TasExplorerViewModel(Services)
             {
                 AuthenticationRequired = true
@@ -207,10 +196,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 ShowDialog(typeof(LoginViewModel).Name, null))
                     .Callback(() =>
                     {
-                        // Simulate successful login by mocking CloudFoundryService to return non-null CF instance
+                        // Simulate successful login by setting TasConnection as if LoginViewModel had done so
 
-                        MockCloudFoundryService.SetupGet(mock => mock.
-                          ConnectedCf).Returns(FakeCfInstance);
+                        _sut.TasConnection = _fakeTasConnection;
                     });
 
             Assert.IsTrue(_sut.AuthenticationRequired);
@@ -225,10 +213,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("OpenLoginView")]
-        public void OpenLoginView_DoesNotChangeAuthenticationRequired_WhenNoCFIsAdded()
+        public void OpenLoginView_DoesNotChangeAuthenticationRequired_WhenTasConnectionDoesNotGetSet()
         {
-            MockCloudFoundryService.SetupGet(mock => mock.ConnectedCf).Returns((CloudFoundryInstance)null);
-
             _sut = new TasExplorerViewModel(Services)
             {
                 AuthenticationRequired = true
@@ -238,10 +224,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 ShowDialog(typeof(LoginViewModel).Name, null))
                     .Callback(() =>
                     {
-                        // Simulate unsuccessful login by mocking CloudFoundryService to return null
-
-                        MockCloudFoundryService.SetupGet(mock => mock.
-                          ConnectedCf).Returns((CloudFoundryInstance)null);
+                        // Simulate unsuccessful login by NOT setting TasConnection as LoginView would've done on a successful login
                     });
 
             Assert.IsTrue(_sut.AuthenticationRequired);
@@ -1000,6 +983,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("DeleteConnection")]
         public void DeleteConnection_SetsTasConnectionToNull_WhenArgIsCfInstanceViewModel()
         {
+            _sut.TasConnection = _fakeTasConnection;
+
             Assert.IsNotNull(_sut.TasConnection);
             Assert.IsTrue(_sut.TasConnection is CfInstanceViewModel);
 
@@ -1012,6 +997,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("DeleteConnection")]
         public void DeleteConnection_DoesNotChangeTasConnection_WhenArgIsNotCfInstanceViewModel()
         {
+            _sut.TasConnection = _fakeTasConnection;
+
             Assert.IsNotNull(_sut.TasConnection);
 
             var initialConnection = _sut.TasConnection;

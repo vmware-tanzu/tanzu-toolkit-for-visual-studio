@@ -11,9 +11,12 @@ namespace Tanzu.Toolkit.ViewModels
 {
     public class TasExplorerViewModel : AbstractViewModel, ITasExplorerViewModel
     {
-        internal static readonly string _stopAppErrorMsg = "Encountered an error while stopping app";
-        internal static readonly string _startAppErrorMsg = "Encountered an error while starting app";
-        internal static readonly string _deleteAppErrorMsg = "Encountered an error while deleting app";
+        internal const string _stopAppErrorMsg = "Encountered an error while stopping app";
+        internal const string _startAppErrorMsg = "Encountered an error while starting app";
+        internal const string _deleteAppErrorMsg = "Encountered an error while deleting app";
+        internal const string SingleLoginErrorTitle = "Unable to add more TAS connections.";
+        internal const string SingleLoginErrorMessage1 = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
+        internal const string SingleLoginErrorMessage2 = "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Application Service Explorer & re-connecting to a new one.";
 
         private CfInstanceViewModel _tas;
         private volatile bool _isRefreshingAll = false;
@@ -32,14 +35,7 @@ namespace Tanzu.Toolkit.ViewModels
             _services = services;
             _threadingService = services.GetRequiredService<IThreadingService>();
 
-            if (CloudFoundryService.ConnectedCf != null)
-            {
-                TasConnection = new CfInstanceViewModel(CloudFoundryService.ConnectedCf, this, Services);
-            }
-            else
-            {
-                TasConnection = null;
-            }
+            TasConnection = null;
         }
 
         public CfInstanceViewModel TasConnection
@@ -136,7 +132,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool CanOpenLoginView(object arg)
         {
-            return CloudFoundryService.ConnectedCf == null;
+            return true;
         }
 
         public bool CanStopCfApp(object arg)
@@ -196,26 +192,23 @@ namespace Tanzu.Toolkit.ViewModels
 
         public void OpenLoginView(object parent)
         {
-            if (CloudFoundryService.ConnectedCf != null)
+            if (TasConnection != null)
             {
-                var errorTitle = "Unable to add more TAS connections.";
-                var errorMsg = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
-                errorMsg += System.Environment.NewLine + "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Application Service Explorer & re-connecting to a new one.";
+                var errorMsg = SingleLoginErrorMessage1 + Environment.NewLine + SingleLoginErrorMessage2;
 
-                _dialogService.DisplayErrorDialog(errorTitle, errorMsg);
+                _dialogService.DisplayErrorDialog(SingleLoginErrorTitle, errorMsg);
             }
             else
             {
                 DialogService.ShowDialog(typeof(LoginViewModel).Name);
 
-                bool successfullyLoggedIn = CloudFoundryService.ConnectedCf != null;
+                bool successfullyLoggedIn = TasConnection != null;
 
                 if (successfullyLoggedIn)
                 {
-                    TasConnection = new CfInstanceViewModel(CloudFoundryService.ConnectedCf, this, Services);
                     AuthenticationRequired = false;
 
-                    if (TasConnection != null && !ThreadingService.IsPolling)
+                    if (!ThreadingService.IsPolling)
                     {
                         ThreadingService.StartUiBackgroundPoller(RefreshAllItems, null, 10);
                     }
@@ -423,7 +416,6 @@ namespace Tanzu.Toolkit.ViewModels
             if (arg is CfInstanceViewModel)
             {
                 TasConnection = null;
-                CloudFoundryService.ConnectedCf = null;
             }
         }
 
