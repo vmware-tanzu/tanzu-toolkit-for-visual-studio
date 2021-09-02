@@ -272,6 +272,14 @@ namespace Tanzu.Toolkit.ViewModels
         public void OpenLoginView(object arg)
         {
             TasExplorerViewModel.OpenLoginView(arg);
+
+            if (TasExplorerViewModel.TasConnection != null)
+            {
+                CfInstanceOptions = new List<CloudFoundryInstance>
+                {
+                    TasExplorerViewModel.TasConnection.CloudFoundryInstance,
+                };
+            }
         }
 
         public async Task UpdateCfOrgOptions()

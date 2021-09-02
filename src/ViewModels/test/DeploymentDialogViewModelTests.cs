@@ -581,6 +581,49 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             MockTasExplorerViewModel.Verify(m => m.OpenLoginView(fakeArg), Times.Once);
         }
+
+        [TestMethod]
+        [TestCategory("OpenLoginView")]
+        public void OpenLoginView_SetsCfInstanceOptions_WhenTasConnectionGetsSet()
+        {
+            object fakeArg = new object();
+
+            MockTasExplorerViewModel.Setup(m => m.
+                OpenLoginView(fakeArg))
+                    .Callback(() =>
+                    {
+                        MockTasExplorerViewModel.SetupGet(m => m.TasConnection)
+                            .Returns(new CfInstanceViewModel(FakeCfInstance, null, Services));
+                    });
+
+            Assert.AreEqual(0, _sut.CfInstanceOptions.Count);
+
+            _sut.OpenLoginView(fakeArg);
+
+            Assert.AreEqual(1, _sut.CfInstanceOptions.Count);
+            Assert.AreEqual(FakeCfInstance, _sut.CfInstanceOptions[0]);
+        }
+
+        [TestMethod]
+        [TestCategory("OpenLoginView")]
+        public void OpenLoginView_DoesNotChangeCfInstanceOptions_WhenTasConnectionDoesNotGetSet()
+        {
+            object fakeArg = new object();
+
+            MockTasExplorerViewModel.Setup(m => m.
+                OpenLoginView(fakeArg))
+                    .Callback(() =>
+                    {
+                        MockTasExplorerViewModel.SetupGet(m => m.TasConnection)
+                            .Returns((CfInstanceViewModel)null);
+                    });
+
+            Assert.AreEqual(0, _sut.CfInstanceOptions.Count);
+
+            _sut.OpenLoginView(fakeArg);
+
+            Assert.AreEqual(0, _sut.CfInstanceOptions.Count);
+        }
     }
 
     public class FakeOutputView : ViewModelTestSupport, IView
