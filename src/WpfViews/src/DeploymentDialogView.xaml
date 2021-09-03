@@ -92,7 +92,7 @@
             <DockPanel HorizontalAlignment="Left" Width="265" Height="23">
                 <Label Content="Disconnected: Click here to login" DockPanel.Dock="Right" 
                        VerticalAlignment="Top" Width="235" FontSize="11" Height="24" Margin="0,-2,0,0"/>
-                <Image Source="Resources/AddCloud.png" Stretch="Uniform" Height="16px" Width="21" 
+                <Image Source="Resources/tanzu_nc_dark.png" Stretch="Uniform" Height="16px" Width="21" 
                     Margin="0,2,0,5"/>
             </DockPanel>
         </Button>
