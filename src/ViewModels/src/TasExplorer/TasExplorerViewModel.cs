@@ -403,7 +403,7 @@ namespace Tanzu.Toolkit.ViewModels
             });
         }
 
-        public void SetConnetion(CloudFoundryInstance cf)
+        public void SetConnection(CloudFoundryInstance cf)
         {
             if (TasConnection == null)
             {
