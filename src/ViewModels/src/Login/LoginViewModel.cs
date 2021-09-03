@@ -130,7 +130,7 @@ namespace Tanzu.Toolkit.ViewModels
 
             if (result.IsLoggedIn)
             {
-                _tasExplorer.SetConnetion(new CloudFoundryInstance(InstanceName, Target));
+                _tasExplorer.SetConnection(new CloudFoundryInstance(InstanceName, Target));
             }
 
             if (!HasErrors)

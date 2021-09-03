@@ -28,6 +28,6 @@ namespace Tanzu.Toolkit.ViewModels
         Task DisplayRecentAppLogs(object app);
         bool CanReAuthenticate(object arg);
         void ReAuthenticate(object cf);
-        void SetConnetion(CloudFoundryInstance cf);
+        void SetConnection(CloudFoundryInstance cf);
     }
 }

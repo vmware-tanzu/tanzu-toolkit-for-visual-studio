@@ -108,7 +108,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
               ConnectToCFAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SecureString>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .ReturnsAsync(new ConnectResult(true, null));
 
-            MockTasExplorerViewModel.Setup(m => m.SetConnetion(It.IsAny<CloudFoundryInstance>())).Verifiable();
+            MockTasExplorerViewModel.Setup(m => m.SetConnection(It.IsAny<CloudFoundryInstance>())).Verifiable();
 
             await _sut.AddCloudFoundryInstance(null);
 
@@ -117,7 +117,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockDialogService.Verify(mock => mock.CloseDialog(It.IsAny<object>(), It.IsAny<bool>()), Times.Once);
             MockDialogService.Verify(ds => ds.CloseDialog(It.IsAny<object>(), true), Times.Once);
 
-            MockTasExplorerViewModel.Verify(m => m.SetConnetion(It.Is<CloudFoundryInstance>(cf => cf.ApiAddress == FakeTarget)), Times.Once);
+            MockTasExplorerViewModel.Verify(m => m.SetConnection(It.Is<CloudFoundryInstance>(cf => cf.ApiAddress == FakeTarget)), Times.Once);
         }
 
         [TestMethod]
