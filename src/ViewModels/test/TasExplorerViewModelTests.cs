@@ -163,10 +163,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsNull(_sut.TasConnection);
 
             _sut.OpenLoginView(null);
-            
+
             MockDialogService.Verify(ds => ds.ShowDialog(typeof(LoginViewModel).Name, null), Times.Once);
         }
-        
+
         [TestMethod]
         [TestCategory("OpenLoginView")]
         public void OpenLoginView_DisplaysErrorDialog_WhenTasConnectionIsNotNull()
@@ -176,10 +176,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsNotNull(_sut.TasConnection);
 
             _sut.OpenLoginView(null);
-            
+
             MockErrorDialogService.Verify(m => m.
                 DisplayErrorDialog(TasExplorerViewModel.SingleLoginErrorTitle,
-                                   It.Is<string>(s => s.Contains(TasExplorerViewModel.SingleLoginErrorMessage1) && s.Contains(TasExplorerViewModel.SingleLoginErrorMessage2))), 
+                                   It.Is<string>(s => s.Contains(TasExplorerViewModel.SingleLoginErrorMessage1) && s.Contains(TasExplorerViewModel.SingleLoginErrorMessage2))),
                     Times.Once);
         }
 
@@ -435,7 +435,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.AreEqual(1, ovm.NumRefreshes);
         }
-        
+
         [TestMethod]
         [TestCategory("RefreshSpace")]
         public async Task RefreshSpace_CallsRefreshChildren_WhenArgIsSpaceViewModel()
@@ -989,7 +989,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsTrue(_sut.TasConnection is CfInstanceViewModel);
 
             _sut.DeleteConnection(_sut.TasConnection);
-            
+
             Assert.IsNull(_sut.TasConnection);
         }
 
@@ -1005,6 +1005,34 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.DeleteConnection("bad arg");
 
             Assert.AreEqual(initialConnection, _sut.TasConnection);
+        }
+
+        [TestMethod]
+        [TestCategory("SetConnection")]
+        public void SetConnection_UpdatesTasConnection_WithNewCfInfo_WhenTasConnectionIsNull()
+        {
+            Assert.IsNull(_sut.TasConnection);
+
+            _sut.SetConnection(FakeCfInstance);
+
+            Assert.IsNotNull(_sut.TasConnection);
+            Assert.AreEqual(FakeCfInstance, _sut.TasConnection.CloudFoundryInstance);
+        }
+
+        [TestMethod]
+        [TestCategory("SetConnection")]
+        public void SetConnection_DoesNotChangeTasConnection_WhenTasConnectionIsNotNull()
+        {
+            _sut.TasConnection = new CfInstanceViewModel(FakeCfInstance, _sut, Services);
+
+            Assert.IsNotNull(_sut.TasConnection);
+
+            var initialCf = _sut.TasConnection.CloudFoundryInstance;
+
+            _sut.SetConnection(FakeCfInstance);
+
+            Assert.IsNotNull(_sut.TasConnection);
+            Assert.AreEqual(initialCf, _sut.TasConnection.CloudFoundryInstance);
         }
     }
 
