@@ -223,6 +223,14 @@ namespace Tanzu.Toolkit.ViewModels
 
         public string TargetName { get; internal set; }
 
+        public bool IsLoggedIn
+        {
+            get
+            {
+                return TasExplorerViewModel.TasConnection != null;
+            }
+        }
+
         public bool CanDeployApp(object arg)
         {
             return true;
