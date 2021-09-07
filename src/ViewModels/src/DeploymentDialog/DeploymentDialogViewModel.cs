@@ -69,6 +69,7 @@ namespace Tanzu.Toolkit.ViewModels
 
             if (TasExplorerViewModel.TasConnection != null)
             {
+                TargetName = TasExplorerViewModel.TasConnection.DisplayText;
                 CfInstanceOptions.Add(TasExplorerViewModel.TasConnection.CloudFoundryInstance);
             }
         }
@@ -219,6 +220,8 @@ namespace Tanzu.Toolkit.ViewModels
         }
 
         public bool DeploymentInProgress { get; internal set; }
+
+        public string TargetName { get; internal set; }
 
         public bool CanDeployApp(object arg)
         {
