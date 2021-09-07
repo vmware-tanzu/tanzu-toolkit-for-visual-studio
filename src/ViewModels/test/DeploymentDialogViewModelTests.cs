@@ -94,6 +94,37 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("ctor")]
+        [DataRow("fake cf name")]
+        [DataRow("junk name")]
+        [DataRow("asdf")]
+        public void Constructor_SetsTargetNameToTasConnectionDisplayText_WhenTasConnectionIsNotNull(string connectionName)
+        {
+            var fakeCf = new CloudFoundryInstance(connectionName, FakeCfApiAddress);
+            var fakeTasConnection = new FakeCfInstanceViewModel(fakeCf, Services);
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(fakeTasConnection);
+
+            _sut = new DeploymentDialogViewModel(Services, _fakeProjPath, FakeTargetFrameworkMoniker);
+
+            // sanity check
+            Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
+            Assert.AreEqual(connectionName, fakeTasConnection.DisplayText);
+
+            Assert.IsNotNull(_sut.TargetName);
+            Assert.AreEqual(fakeTasConnection.DisplayText, _sut.TargetName);
+        }
+        
+        [TestMethod]
+        [TestCategory("ctor")]
+        public void Constructor_SetsTargetNameToNull_WhenTasConnectionIsNull()
+        {
+            // sanity check
+            Assert.IsNull(_sut.TasExplorerViewModel.TasConnection);
+
+            Assert.IsNull(_sut.TargetName);
+        }
+
+        [TestMethod]
         public void DeployApp_UpdatesDeploymentStatus_WhenAppNameEmpty()
         {
             var receivedEvents = new List<string>();
