@@ -655,6 +655,26 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.AreEqual(0, _sut.CfInstanceOptions.Count);
         }
+
+        [TestMethod]
+        [TestCategory("IsLoggedIn")]
+        public void IsLoggedIn_ReturnsTrue_WhenTasConnectionIsNotNull()
+        {
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(new FakeCfInstanceViewModel(FakeCfInstance, Services));
+
+            _sut = new DeploymentDialogViewModel(Services, _fakeProjPath, FakeTargetFrameworkMoniker);
+
+            Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
+            Assert.IsTrue(_sut.IsLoggedIn);
+        }
+
+        [TestMethod]
+        [TestCategory("IsLoggedIn")]
+        public void IsLoggedIn_ReturnsFalse_WhenTasConnectionIsNull()
+        {
+            Assert.IsNull(_sut.TasExplorerViewModel.TasConnection);
+            Assert.IsFalse(_sut.IsLoggedIn);
+        }
     }
 
     public class FakeOutputView : ViewModelTestSupport, IView
