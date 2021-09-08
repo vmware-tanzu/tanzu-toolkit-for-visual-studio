@@ -41,6 +41,8 @@ namespace Tanzu.Toolkit.ViewModels
         private CloudFoundrySpace _selectedSpace;
         private string _manifestPathLabel;
         private string _manifestPath;
+        private string _targetName;
+        private bool _isLoggedIn;
 
         public DeploymentDialogViewModel(IServiceProvider services, string directoryOfProjectToDeploy, string targetFrameworkMoniker)
             : base(services)
@@ -70,6 +72,8 @@ namespace Tanzu.Toolkit.ViewModels
             if (TasExplorerViewModel.TasConnection != null)
             {
                 TargetName = TasExplorerViewModel.TasConnection.DisplayText;
+                IsLoggedIn = true;
+
                 CfInstanceOptions.Add(TasExplorerViewModel.TasConnection.CloudFoundryInstance);
             }
         }
@@ -221,13 +225,25 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool DeploymentInProgress { get; internal set; }
 
-        public string TargetName { get; internal set; }
+        public string TargetName
+        {
+            get => _targetName;
+
+            internal set
+            {
+                _targetName = value;
+                RaisePropertyChangedEvent("TargetName");
+            }
+        }
 
         public bool IsLoggedIn
         {
-            get
+            get => _isLoggedIn;
+
+            internal set
             {
-                return TasExplorerViewModel.TasConnection != null;
+                _isLoggedIn = value;
+                RaisePropertyChangedEvent("IsLoggedIn");
             }
         }
 
@@ -290,6 +306,10 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     TasExplorerViewModel.TasConnection.CloudFoundryInstance,
                 };
+
+                TargetName = TasExplorerViewModel.TasConnection.DisplayText;
+                IsLoggedIn = true;
+
             }
         }
 
