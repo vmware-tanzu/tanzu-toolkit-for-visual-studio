@@ -54,6 +54,7 @@
         </StackPanel>
 
         <Button Grid.Row="0" Grid.Column="1" ToolTip="Login to Tanzu Application Service"
+                Visibility="{Binding IsLoggedIn, Converter={StaticResource InverseVisibility}}"
                 Command ="{ Binding ElementName=DeploymentDialogViewElement, Path=OpenLoginDialogCommand }" 
                 CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" Margin="8,4,8,4">
             <DockPanel HorizontalAlignment="Left" Width="265" Height="23">
@@ -63,7 +64,13 @@
                     Margin="0,2,0,5"/>
             </DockPanel>
         </Button>
-        
+
+        <Label Content="{Binding TargetName}"
+               VerticalContentAlignment="Center"
+               Grid.Row="0" Grid.Column="1"
+               Margin="4,0,0,0"
+               Visibility="{Binding IsLoggedIn, Converter={StaticResource Visibility}}"/>
+
         <!--ROW 1-->
         <TextBlock Grid.Row="1" Text="App Manifest:" VerticalAlignment="Center" Margin="8,0,8,0"/>
 

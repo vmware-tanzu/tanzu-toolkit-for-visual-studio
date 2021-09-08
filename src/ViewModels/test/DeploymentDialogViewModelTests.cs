@@ -47,6 +47,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockCloudFoundryService.VerifyAll();
             MockViewLocatorService.VerifyAll();
             MockDialogService.VerifyAll();
+            MockTasExplorerViewModel.VerifyAll();
         }
 
         [TestMethod]
@@ -113,7 +114,18 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsNotNull(_sut.TargetName);
             Assert.AreEqual(fakeTasConnection.DisplayText, _sut.TargetName);
         }
-        
+
+        [TestMethod]
+        [TestCategory("ctor")]
+        public void Constructor_SetsIsLoggedInToTrue_WhenTasConnectionIsNotNull()
+        {
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(new FakeCfInstanceViewModel(FakeCfInstance, Services));
+
+            _sut = new DeploymentDialogViewModel(Services, _fakeProjPath, FakeTargetFrameworkMoniker);
+
+            Assert.IsTrue(_sut.IsLoggedIn);
+        }
+
         [TestMethod]
         [TestCategory("ctor")]
         public void Constructor_SetsTargetNameToNull_WhenTasConnectionIsNull()
@@ -657,6 +669,53 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("OpenLoginView")]
+        public void OpenLoginView_SetsIsLoggedInPropertyToTrue_WhenTasConnectionGetsSet()
+        {
+            // pre-check
+            Assert.IsNull(_sut.TasExplorerViewModel.TasConnection);
+            Assert.IsFalse(_sut.IsLoggedIn);
+
+            //arrange
+            MockTasExplorerViewModel.Setup(m => m.
+                OpenLoginView(null))
+                    .Callback(() =>
+                    {
+                        MockTasExplorerViewModel.SetupGet(m => m.TasConnection)
+                            .Returns(new CfInstanceViewModel(FakeCfInstance, null, Services));
+                    });
+        
+            //act
+            _sut.OpenLoginView(null);
+
+            //assert
+            Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
+            Assert.IsTrue(_sut.IsLoggedIn);
+        }
+        
+        [TestMethod]
+        [TestCategory("OpenLoginView")]
+        public void OpenLoginView_SetsTargetName_WhenTasConnectionIsNotNull()
+        {
+            var initialTargetName = _sut.TargetName;
+            Assert.IsNull(_sut.TasExplorerViewModel.TasConnection);
+            
+            MockTasExplorerViewModel.Setup(m => m.
+                OpenLoginView(null))
+                    .Callback(() =>
+                    {
+                        MockTasExplorerViewModel.SetupGet(m => m.TasConnection)
+                            .Returns(new CfInstanceViewModel(FakeCfInstance, null, Services));
+                    });
+
+            _sut.OpenLoginView(null);
+
+            Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
+            Assert.AreNotEqual(initialTargetName, _sut.TargetName);
+            Assert.AreEqual(_sut.TasExplorerViewModel.TasConnection.DisplayText, _sut.TargetName);
+        }
+
+        [TestMethod]
         [TestCategory("IsLoggedIn")]
         public void IsLoggedIn_ReturnsTrue_WhenTasConnectionIsNotNull()
         {
@@ -674,6 +733,31 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             Assert.IsNull(_sut.TasExplorerViewModel.TasConnection);
             Assert.IsFalse(_sut.IsLoggedIn);
+        }
+
+        [TestMethod]
+        [TestCategory("IsLoggedIn")]
+        public void IsLoggedIn_SetterRaisesPropChangedEvent()
+        {
+            Assert.AreEqual(0, _receivedEvents.Count);
+            Assert.IsFalse(_sut.IsLoggedIn);
+
+            _sut.IsLoggedIn = true;
+
+            Assert.AreEqual(1, _receivedEvents.Count);
+            Assert.IsTrue(_receivedEvents.Contains("IsLoggedIn"));
+        }
+
+        [TestMethod]
+        [TestCategory("TargetName")]
+        public void TargetName_SetterRaisesPropChangedEvent()
+        {
+            Assert.AreEqual(0, _receivedEvents.Count);
+
+            _sut.TargetName = "new name";
+
+            Assert.AreEqual(1, _receivedEvents.Count);
+            Assert.IsTrue(_receivedEvents.Contains("TargetName"));
         }
     }
 
