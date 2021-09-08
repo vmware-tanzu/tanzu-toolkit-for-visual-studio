@@ -48,9 +48,26 @@
             <ColumnDefinition Width="30"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Text="App Manifest:" VerticalAlignment="Center" Margin="8,0,8,0"/>
+        <!--ROW 0-->
+        <StackPanel VerticalAlignment="Center" Grid.Row="0" Margin="8,8,8,8">
+            <TextBlock VerticalAlignment="Center" Text="Deployment Target:" />
+        </StackPanel>
 
-        <Grid Grid.Row="0" Grid.Column="1" Margin="8,0,8,0" VerticalAlignment="Center">
+        <Button Grid.Row="0" Grid.Column="1" ToolTip="Login to Tanzu Application Service"
+                Command ="{ Binding ElementName=DeploymentDialogViewElement, Path=OpenLoginDialogCommand }" 
+                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" Margin="8,4,8,4">
+            <DockPanel HorizontalAlignment="Left" Width="265" Height="23">
+                <Label Content="Disconnected: Click here to login" DockPanel.Dock="Right" 
+                       VerticalAlignment="Top" Width="235" FontSize="11" Height="24" Margin="0,-2,0,0"/>
+                <Image Source="Resources/tanzu_nc_dark.png" Stretch="Uniform" Height="16px" Width="21" 
+                    Margin="0,2,0,5"/>
+            </DockPanel>
+        </Button>
+        
+        <!--ROW 1-->
+        <TextBlock Grid.Row="1" Text="App Manifest:" VerticalAlignment="Center" Margin="8,0,8,0"/>
+
+        <Grid Grid.Row="1" Grid.Column="1" Margin="8,0,8,0" VerticalAlignment="Center">
             <Grid.RowDefinitions>
                 <RowDefinition Height="24"></RowDefinition>
             </Grid.RowDefinitions>
@@ -78,25 +95,12 @@
             </Button>
         </Grid>
 
-        <TextBlock Grid.Row="1" Text="App Name:" VerticalAlignment="Center" Margin="8,0,8,0"/>
+        <!--ROW 2-->
+        <TextBlock Grid.Row="2" Text="App Name:" VerticalAlignment="Center" Margin="8,0,8,0"/>
 
-        <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="1" Margin="8,4,8,4" Height="24" Text="{Binding AppName}" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
+        <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="1" Margin="8,4,8,4" Height="24" Text="{Binding AppName}" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
 
-        <StackPanel VerticalAlignment="Center" Grid.Row="2" Margin="8,8,8,8">
-            <TextBlock VerticalAlignment="Center" Text="Deployment Target:" />
-        </StackPanel>
-
-        <Button Grid.Row="2" Grid.Column="1" ToolTip="Login to Tanzu Application Service"
-                Command ="{ Binding ElementName=DeploymentDialogViewElement, Path=OpenLoginDialogCommand }" 
-                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" Margin="8,4,8,4">
-            <DockPanel HorizontalAlignment="Left" Width="265" Height="23">
-                <Label Content="Disconnected: Click here to login" DockPanel.Dock="Right" 
-                       VerticalAlignment="Top" Width="235" FontSize="11" Height="24" Margin="0,-2,0,0"/>
-                <Image Source="Resources/tanzu_nc_dark.png" Stretch="Uniform" Height="16px" Width="21" 
-                    Margin="0,2,0,5"/>
-            </DockPanel>
-        </Button>
-
+        <!--ROW 3-->
         <StackPanel VerticalAlignment="Center" Grid.Row="3" Margin="8,0,8,0">
             <TextBlock VerticalAlignment="Center" Text="Target Organization:"/>
         </StackPanel>
@@ -111,7 +115,8 @@
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
-
+        
+        <!--ROW 4-->
         <StackPanel VerticalAlignment="Center" Grid.Row="4" Margin="8,0,8,0">
             <TextBlock VerticalAlignment="Center" Text="Target Space:"/>
         </StackPanel>
@@ -124,6 +129,7 @@
             </ComboBox.ItemTemplate>
         </ComboBox>
 
+        <!--ROW 5-->
         <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Margin="8,4,8,4">
             <Button Content="Deploy" Width="100" HorizontalAlignment="Right" 
                 Command="{ Binding ElementName=DeploymentDialogViewElement, Path=UploadAppCommand }" 
@@ -131,6 +137,7 @@
              />
         </StackPanel>
 
+        <!--ROW 6-->
         <StackPanel Grid.Row="6" Grid.ColumnSpan="2" Margin="8,0,8,0">
             <ScrollViewer Name="scrollViewer" VerticalScrollBarVisibility="Auto" CanContentScroll="True">
                 <TextBox Name="deploymentStatusText" 
