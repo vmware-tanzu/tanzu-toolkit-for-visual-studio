@@ -36,7 +36,6 @@ namespace Tanzu.Toolkit.ViewModels
         private List<CloudFoundryInstance> _cfInstances;
         private List<CloudFoundryOrganization> _cfOrgs;
         private List<CloudFoundrySpace> _cfSpaces;
-        private CloudFoundryInstance _selectedCf;
         private CloudFoundryOrganization _selectedOrg;
         private CloudFoundrySpace _selectedSpace;
         private string _manifestPathLabel;
@@ -55,7 +54,6 @@ namespace Tanzu.Toolkit.ViewModels
 
             DeploymentStatus = InitialStatus;
             DeploymentInProgress = false;
-            SelectedCf = null;
             ProjectDirPath = directoryOfProjectToDeploy;
 
             if (targetFrameworkMoniker.StartsWith(".NETFramework"))
@@ -74,7 +72,7 @@ namespace Tanzu.Toolkit.ViewModels
                 TargetName = TasExplorerViewModel.TasConnection.DisplayText;
                 IsLoggedIn = true;
 
-                CfInstanceOptions.Add(TasExplorerViewModel.TasConnection.CloudFoundryInstance);
+                ThreadingService.StartTask(UpdateCfOrgOptions);
             }
         }
 
@@ -135,25 +133,6 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 _manifestPathLabel = value;
                 RaisePropertyChangedEvent("ManifestPathLabel");
-            }
-        }
-
-        public CloudFoundryInstance SelectedCf
-        {
-            get => _selectedCf;
-
-            set
-            {
-                if (value != _selectedCf)
-                {
-                    _selectedCf = value;
-
-                    // clear orgs & spaces
-                    CfOrgOptions = new List<CloudFoundryOrganization>();
-                    CfSpaceOptions = new List<CloudFoundrySpace>();
-
-                    RaisePropertyChangedEvent("SelectedCf");
-                }
             }
         }
 
@@ -263,7 +242,7 @@ namespace Tanzu.Toolkit.ViewModels
                     throw new Exception(AppNameEmptyMsg);
                 }
 
-                if (SelectedCf == null)
+                if (TasExplorerViewModel.TasConnection == null)
                 {
                     throw new Exception(TargetEmptyMsg);
                 }
@@ -310,18 +289,20 @@ namespace Tanzu.Toolkit.ViewModels
                 TargetName = TasExplorerViewModel.TasConnection.DisplayText;
                 IsLoggedIn = true;
 
+                ThreadingService.StartTask(UpdateCfOrgOptions);
             }
         }
 
         public async Task UpdateCfOrgOptions()
         {
-            if (SelectedCf == null)
+            if (TasExplorerViewModel.TasConnection == null)
             {
+
                 CfOrgOptions = new List<CloudFoundryOrganization>();
             }
             else
             {
-                var orgsResponse = await CloudFoundryService.GetOrgsForCfInstanceAsync(SelectedCf);
+                var orgsResponse = await CloudFoundryService.GetOrgsForCfInstanceAsync(TasExplorerViewModel.TasConnection.CloudFoundryInstance);
 
                 if (orgsResponse.Succeeded)
                 {
@@ -337,7 +318,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public async Task UpdateCfSpaceOptions()
         {
-            if (SelectedOrg == null || SelectedCf == null)
+            if (SelectedOrg == null || TasExplorerViewModel.TasConnection == null)
             {
                 CfSpaceOptions = new List<CloudFoundrySpace>();
             }
