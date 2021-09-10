@@ -5,10 +5,28 @@ pool:
   vmImage: 'windows-2019'
 
 variables:
-  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
-  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  - name: major
+    value: 0
+  - name: minor
+    value: 0
+  - name: patch
+    value: 3
+  - name: DOTNET_SKIP_FIRST_TIME_EXPERIENCE
+    value: true
+  - name: DOTNET_CLI_TELEMETRY_OPTOUT
+    value: 1
+
+name: $(major).$(minor).$(patch)-build$(Rev:.r) # Set the value of $(Build.BuildNumber)
 
 steps:
+  # Run PowerShell script to sync vsix version with build number
+- task: PowerShell@2
+  displayName: Update version in the vsix manifest
+  inputs:
+    filePath: 'build\update-version.ps1'
+    arguments: '$(Build.BuildNumber)'
+    pwsh: true
+
 # NuGet tool installer
 # Acquires a specific version of NuGet from the internet or the tools cache and adds it to the PATH. Use this task to change the version of NuGet used in the NuGet tasks.
 - task: NuGetToolInstaller@1
@@ -52,7 +70,12 @@ steps:
     codeCoverageTool: cobertura
     summaryFileLocation: $(build.artifactstagingdirectory)/TestResults/cobertura.xml
 
+- task: CmdLine@2
+  displayName: Rename vsix file to include version number
+  inputs:
+    script: cd "$(Build.SourcesDirectory)\src\VisualStudioExtension\src\bin\$(buildConfiguration)\" && ren *.vsix *.$(Build.BuildNumber).vsix
+
 - task: PublishBuildArtifacts@1
   inputs:
-    PathtoPublish: 'src/VisualStudioExtension/src/bin/$(buildConfiguration)/Tanzu.Toolkit.VisualStudio.vsix'
-    ArtifactName: 'Tanzu.Toolkit.VisualStudio.vsix'
+    PathtoPublish: 'src/VisualStudioExtension/src/bin/$(buildConfiguration)/Tanzu.Toolkit.VisualStudio.$(Build.BuildNumber).vsix'
+    ArtifactName: Tanzu.Toolkit.VisualStudio.$(Build.BuildNumber).vsix
