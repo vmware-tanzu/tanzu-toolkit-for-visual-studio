@@ -1,0 +1,10 @@
+schedules:
+- cron: "0 9 * * 1"
+  displayName: Weekly CF environment renewal
+  always: true
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- bash: curl -v https://environments.toolsmiths.cf-app.com/custom_gcp_environments/239/renew
