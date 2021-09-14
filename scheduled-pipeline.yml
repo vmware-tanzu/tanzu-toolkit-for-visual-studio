@@ -5,8 +5,8 @@ schedules:
   displayName: CF environment renewal
   always: true
   branches:
-    exclude:
-      - '*'
+    include:
+      - 'renew-cf-env' # purposefully nonexistent branch name
 
 pool:
   vmImage: ubuntu-latest
