@@ -2,6 +2,9 @@ schedules:
 - cron: "0 9 * * 1"
   displayName: Weekly CF environment renewal
   always: true
+  branches:
+    include:
+    - main
 
 pool:
   vmImage: ubuntu-latest
