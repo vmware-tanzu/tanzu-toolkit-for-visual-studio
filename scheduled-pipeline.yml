@@ -1,6 +1,6 @@
 schedules:
-- cron: "0 9 * * 1"
-  displayName: Weekly CF environment renewal
+- cron: "0 9 * * 1,3,5" # every Monday, Wednesday, and Friday at 9:00 AM
+  displayName: CF environment renewal
   always: true
   branches:
     include:
