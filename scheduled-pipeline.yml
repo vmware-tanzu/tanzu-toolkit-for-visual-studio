@@ -8,8 +8,7 @@ schedules:
   always: true
   branches:
     include:
-      - 'renew-cf-env' # purposefully nonexistent branch name
-
+      - 'main'
 pool:
   vmImage: ubuntu-latest
 
