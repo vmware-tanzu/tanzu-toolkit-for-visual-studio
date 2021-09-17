@@ -34,11 +34,11 @@ namespace Tanzu.Toolkit.ViewModels
         public ICloudFoundryService CloudFoundryService { get; }
 
         public IViewLocatorService ViewLocatorService { get; }
-        
+
         public IThreadingService ThreadingService { get; }
 
         public IUiDispatcherService UiDispatcherService { get; }
-        
+
         public IDialogService DialogService { get; }
 
         public ILogger Logger { get; }
@@ -64,6 +64,10 @@ namespace Tanzu.Toolkit.ViewModels
             if (handler != null)
             {
                 handler(this, new PropertyChangedEventArgs(propertyName));
+            }
+            else
+            {
+                Logger.Debug($"Detected null PropertyChanged handler; is there a subscriber for the event '{propertyName}'?");
             }
         }
     }

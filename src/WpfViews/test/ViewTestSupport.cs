@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Serilog;
 using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.Dialog;
@@ -24,6 +25,7 @@ namespace Tanzu.Toolkit.WpfViews.Tests
         protected Mock<IDialogService> mockDialogService;
         protected Mock<IViewLocatorService> mockViewLocatorService;
         protected Mock<ILoggingService> mockLoggingService;
+        protected Mock<ILogger> mockLogger;
         protected Mock<IUiDispatcherService> mockUiDispatcherService;
         protected Mock<IThreadingService> mockThreadingService;
         protected Mock<IThemeService> mockThemeService;
@@ -45,6 +47,9 @@ namespace Tanzu.Toolkit.WpfViews.Tests
             mockThemeService = new Mock<IThemeService>();
             mockViewService = new Mock<IViewService>();
             mockTasExplorerViewModel = new Mock<ITasExplorerViewModel>();
+
+            mockLogger = new Mock<ILogger>();
+            mockLoggingService.SetupGet(m => m.Logger).Returns(mockLogger.Object);
 
             services.AddSingleton(mockCloudFoundryService.Object);
             services.AddSingleton(mockErrorDialogService.Object);
