@@ -67,7 +67,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
-                Logger.Debug($"Detected null PropertyChanged handler; is there a subscriber for the event '{propertyName}'?");
+                Logger.Debug("Detected null PropertyChanged handler; is there a subscriber for the event '{EventPropertyName}'?", propertyName);
             }
         }
     }
