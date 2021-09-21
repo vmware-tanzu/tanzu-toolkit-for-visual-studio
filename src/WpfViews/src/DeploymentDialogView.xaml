@@ -39,6 +39,7 @@
             <RowDefinition Height="32"></RowDefinition>
             <RowDefinition Height="32"></RowDefinition>
             <RowDefinition Height="32"></RowDefinition>
+            <RowDefinition Height="32"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
 
@@ -109,10 +110,20 @@
 
         <!--ROW 3-->
         <StackPanel VerticalAlignment="Center" Grid.Row="3" Margin="8,0,8,0">
-            <TextBlock VerticalAlignment="Center" Text="Target Organization:"/>
+            <TextBlock VerticalAlignment="Center" Text="Stack:"/>
         </StackPanel>
 
         <ComboBox Grid.Row="3" Grid.Column="1" Margin="8,4,8,4" 
+                  ItemsSource="{Binding StackOptions}" 
+                  SelectedItem="{Binding SelectedStack}">
+        </ComboBox>
+
+        <!--ROW 4-->
+        <StackPanel VerticalAlignment="Center" Grid.Row="4" Margin="8,0,8,0">
+            <TextBlock VerticalAlignment="Center" Text="Target Organization:"/>
+        </StackPanel>
+
+        <ComboBox Grid.Row="4" Grid.Column="1" Margin="8,4,8,4" 
                   ItemsSource="{Binding CfOrgOptions}" 
                   SelectedItem="{Binding SelectedOrg}"
                   DropDownClosed="CfOrgOptions_ComboBox_DropDownClosed">
@@ -122,13 +133,13 @@
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
-        
-        <!--ROW 4-->
-        <StackPanel VerticalAlignment="Center" Grid.Row="4" Margin="8,0,8,0">
+
+        <!--ROW 5-->
+        <StackPanel VerticalAlignment="Center" Grid.Row="5" Margin="8,0,8,0">
             <TextBlock VerticalAlignment="Center" Text="Target Space:"/>
         </StackPanel>
 
-        <ComboBox Grid.Row="4" Grid.Column="1" Margin="8,4,8,4" ItemsSource="{Binding CfSpaceOptions}" SelectedItem="{Binding SelectedSpace}">
+        <ComboBox Grid.Row="5" Grid.Column="1" Margin="8,4,8,4" ItemsSource="{Binding CfSpaceOptions}" SelectedItem="{Binding SelectedSpace}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding SpaceName}"/>
@@ -136,16 +147,16 @@
             </ComboBox.ItemTemplate>
         </ComboBox>
 
-        <!--ROW 5-->
-        <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Margin="8,4,8,4">
+        <!--ROW 6-->
+        <StackPanel Grid.Row="6" Grid.ColumnSpan="2" Margin="8,4,8,4">
             <Button Content="Deploy" Width="100" HorizontalAlignment="Right" 
                 Command="{ Binding ElementName=DeploymentDialogViewElement, Path=UploadAppCommand }" 
                 CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
              />
         </StackPanel>
 
-        <!--ROW 6-->
-        <StackPanel Grid.Row="6" Grid.ColumnSpan="2" Margin="8,0,8,0">
+        <!--ROW 7-->
+        <StackPanel Grid.Row="7" Grid.ColumnSpan="2" Margin="8,0,8,0">
             <ScrollViewer Name="scrollViewer" VerticalScrollBarVisibility="Auto" CanContentScroll="True">
                 <TextBox Name="deploymentStatusText" 
                     Text="{Binding  Path=DeploymentStatus}"

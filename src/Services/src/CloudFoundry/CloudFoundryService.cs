@@ -687,7 +687,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             };
         }
 
-        public async Task<DetailedResult> DeployAppAsync(CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, string appName, string appProjPath, bool fullFrameworkDeployment, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string manifestPath = null)
+        public async Task<DetailedResult> DeployAppAsync(CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, string appName, string appProjPath, bool fullFrameworkDeployment, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string stack, string manifestPath = null)
         {
             if (!_fileLocatorService.DirContainsFiles(appProjPath))
             {
@@ -695,7 +695,6 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
 
             string buildpack = null;
-            string stack = null;
             if (fullFrameworkDeployment)
             {
                 buildpack = "hwc_buildpack";
