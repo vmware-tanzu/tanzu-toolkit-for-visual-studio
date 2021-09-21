@@ -25,6 +25,7 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string SingleLoginErrorTitle = "Unable to add more TAS connections.";
         internal const string SingleLoginErrorMessage1 = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
         internal const string SingleLoginErrorMessage2 = "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Application Service Explorer & re-connecting to a new one.";
+        private List<string> stackOptions = new List<string> { "windows", "linux" };
 
         private string _status;
         private string _appName;
@@ -42,6 +43,7 @@ namespace Tanzu.Toolkit.ViewModels
         private string _manifestPath;
         private string _targetName;
         private bool _isLoggedIn;
+        private string selectedStack;
 
         public DeploymentDialogViewModel(IServiceProvider services, string directoryOfProjectToDeploy, string targetFrameworkMoniker)
             : base(services)
@@ -136,6 +138,17 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
+        public string SelectedStack
+        {
+            get => selectedStack; 
+            
+            set 
+            {
+               selectedStack = value;
+                RaisePropertyChangedEvent("SelectedStack");
+            }
+        }
+
         public CloudFoundryOrganization SelectedOrg
         {
             get => _selectedOrg;
@@ -200,6 +213,11 @@ namespace Tanzu.Toolkit.ViewModels
                 _cfSpaces = value;
                 RaisePropertyChangedEvent("CfSpaceOptions");
             }
+        }
+
+        public List<string> StackOptions
+        {
+            get => stackOptions;
         }
 
         public bool DeploymentInProgress { get; internal set; }
@@ -349,7 +367,7 @@ namespace Tanzu.Toolkit.ViewModels
                 _fullFrameworkDeployment,
                 stdOutCallback: OutputViewModel.AppendLine,
                 stdErrCallback: OutputViewModel.AppendLine,
-                manifestPath: ManifestPath);
+                stack: null, manifestPath: ManifestPath);
 
             if (!deploymentResult.Succeeded)
             {
