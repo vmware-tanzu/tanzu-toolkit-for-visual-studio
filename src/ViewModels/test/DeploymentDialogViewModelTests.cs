@@ -278,6 +278,34 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("StartDeployment")]
+        [DataRow("windows")]
+        [DataRow("linux")]
+        [DataRow("junk name")]
+        public async Task StartDeploymentTask_PassesSelectedStack_ForDeployment(string stack)
+        {
+            var receivedEvents = new List<string>();
+            _sut.PropertyChanged += (sender, e) =>
+            {
+                receivedEvents.Add(e.PropertyName);
+            };
+
+            MockCloudFoundryService.Setup(mock =>
+                mock.DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, _defaultFullFWFlag,
+                                    It.IsAny<StdOutDelegate>(),
+                                    It.IsAny<StdErrDelegate>(), stack, null))
+                    .ReturnsAsync(FakeSuccessDetailedResult);
+
+            _sut.AppName = _fakeAppName;
+            _sut.SelectedOrg = _fakeOrg;
+            _sut.SelectedSpace = _fakeSpace;
+            _sut.SelectedStack = stack;
+            Assert.IsNotNull(_sut.SelectedStack);
+
+            await _sut.StartDeployment();
+        }
+
+        [TestMethod]
+        [TestCategory("StartDeployment")]
         public async Task StartDeploymentTask_PassesOutputViewModelAppendLineMethod_AsCallbacks()
         {
             _sut.AppName = _fakeAppName;
