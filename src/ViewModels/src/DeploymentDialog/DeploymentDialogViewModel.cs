@@ -27,6 +27,7 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string SingleLoginErrorMessage2 = "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Application Service Explorer & re-connecting to a new one.";
         internal const string FullFrameworkTFM = ".NETFramework";
         internal const string ManifestNotFoundTitle = "Unable to set manifest path";
+        internal const string DirectoryNotFoundTitle = "Unable to set push directory path";
 
         private string _status;
         private string _appName;
@@ -42,10 +43,14 @@ namespace Tanzu.Toolkit.ViewModels
         private CloudFoundrySpace _selectedSpace;
         private string _manifestPathLabel;
         private string _manifestPath;
+        private string _directoryPathLabel;
+        private string _directoryPath;
         private string _targetName;
         private bool _isLoggedIn;
         private string _selectedStack;
         private List<string> _stackOptions = new List<string> { "windows", "linux" };
+        private bool _sourceDeployment;
+        private string _deploymentButtonLabel;
 
         public DeploymentDialogViewModel(IServiceProvider services, string directoryOfProjectToDeploy, string targetFrameworkMoniker)
             : base(services)
@@ -78,6 +83,20 @@ namespace Tanzu.Toolkit.ViewModels
                 IsLoggedIn = true;
 
                 ThreadingService.StartTask(UpdateCfOrgOptions);
+            }
+
+            DirectoryPath = ProjectDirPath;
+        }
+
+        public bool SourceDeployment
+        {
+            get => _sourceDeployment;
+
+            internal set
+            {
+                DeploymentButtonLabel = value ? "Push app (from source)" : "Push app (from binaries)";
+                _sourceDeployment = value;
+                RaisePropertyChangedEvent("SourceDeployment");
             }
         }
 
@@ -141,6 +160,50 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 _manifestPathLabel = value;
                 RaisePropertyChangedEvent("ManifestPathLabel");
+            }
+        }
+
+        public string DirectoryPath
+        {
+            get => _directoryPath;
+
+            set
+            {
+                if (Directory.Exists(value))
+                {
+                    _directoryPath = value;
+                    DirectoryPathLabel = value;
+
+                    SourceDeployment = value == ProjectDirPath;
+                }
+                else
+                {
+                    _dialogService.DisplayErrorDialog(DirectoryNotFoundTitle, $"'{value}' does not appear to be a valid path to a directory.");
+                    _directoryPath = null;
+                    DirectoryPathLabel = "<none specified>";
+                }
+            }
+        }
+
+        public string DirectoryPathLabel
+        {
+            get => _directoryPathLabel;
+
+            internal set
+            {
+                _directoryPathLabel = value;
+                RaisePropertyChangedEvent("DirectoryPathLabel");
+            }
+        }
+
+        public string DeploymentButtonLabel
+        {
+            get => _deploymentButtonLabel;
+
+            set
+            {
+                _deploymentButtonLabel = value;
+                RaisePropertyChangedEvent("DeploymentButtonLabel");
             }
         }
 

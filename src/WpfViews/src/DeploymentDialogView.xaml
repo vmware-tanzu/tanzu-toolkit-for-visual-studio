@@ -11,7 +11,7 @@
         Width="500"
         Height="320"
         MinWidth="500"
-        MinHeight="320"
+        MinHeight="350"
         d:DesignHeight="500" d:DesignWidth="800">
 
     <Window.Resources>
@@ -33,6 +33,7 @@
 
     <Grid Width="414" VerticalAlignment="Top" Margin="8,8,8,8">
         <Grid.RowDefinitions>
+            <RowDefinition Height="32"></RowDefinition>
             <RowDefinition Height="32"></RowDefinition>
             <RowDefinition Height="32"></RowDefinition>
             <RowDefinition Height="32"></RowDefinition>
@@ -148,15 +149,46 @@
         </ComboBox>
 
         <!--ROW 6-->
-        <StackPanel Grid.Row="6" Grid.ColumnSpan="2" Margin="8,4,8,4">
-            <Button Content="Deploy" Width="100" HorizontalAlignment="Right" 
+        <TextBlock Grid.Row="6" Text="Directory to Push:" VerticalAlignment="Center" Margin="8,0,8,0" ToolTip="Path to app directory or to a zip file of the contents of the app directory"/>
+
+        <Grid Grid.Row="6" Grid.Column="1" Margin="8,0,8,0" VerticalAlignment="Center">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="24"></RowDefinition>
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="32"/>
+            </Grid.ColumnDefinitions>
+
+            <Label 
+                VerticalAlignment="Center"
+                Grid.Row="0"
+                Grid.Column="0"
+                Content="{Binding DirectoryPathLabel}" 
+                ToolTip="{Binding DirectoryPathLabel}"/>
+
+            <Button 
+                MaxWidth="32" MinWidth="32" Padding="0,0,0,0"
+                Grid.Row="0"
+                Grid.Column="1"
+                Click="SelectPublishDirectory">
+                <Image 
+                    Width="16"
+                    Source="Resources/OpenFolder.png" />
+            </Button>
+        </Grid>
+
+        <!--ROW 7-->
+        <StackPanel Grid.Row="7" Grid.ColumnSpan="2" Margin="8,4,8,4">
+            <Button Content="{ Binding DeploymentButtonLabel }" Width="160" HorizontalAlignment="Right" 
                 Command="{ Binding ElementName=DeploymentDialogViewElement, Path=UploadAppCommand }" 
                 CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
              />
         </StackPanel>
 
-        <!--ROW 7-->
-        <StackPanel Grid.Row="7" Grid.ColumnSpan="2" Margin="8,0,8,0">
+        <!--ROW 8-->
+        <StackPanel Grid.Row="8" Grid.ColumnSpan="2" Margin="8,0,8,0">
             <ScrollViewer Name="scrollViewer" VerticalScrollBarVisibility="Auto" CanContentScroll="True">
                 <TextBox Name="deploymentStatusText" 
                     Text="{Binding  Path=DeploymentStatus}"
