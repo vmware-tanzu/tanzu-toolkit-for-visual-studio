@@ -282,7 +282,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("StartDeployment")]
         [DataRow("windows")]
         [DataRow("linux")]
-        [DataRow("junk name")]
         public async Task StartDeploymentTask_PassesSelectedStack_ForDeployment(string stack)
         {
             var receivedEvents = new List<string>();
@@ -869,6 +868,86 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.ManifestPath = pathToInvalidManifest;
 
             Assert.AreEqual(initialAppName, _sut.AppName);
+        }
+
+        [TestMethod]
+        [TestCategory("ManifestPath")]
+        [TestCategory("SelectedStack")]
+        public void ManifestPathSetter_SetsSelectedStack_WhenManifestExistsAndContainsStack()
+        {
+            var pathToFakeManifest = "TestFakes/fake-manifest.yml";
+            var expectedFakeStackNameFromManifest = "windows";
+
+            Assert.IsTrue(File.ReadAllText(pathToFakeManifest).Contains("stack:"));
+            Assert.IsTrue(File.ReadAllText(pathToFakeManifest).Contains(expectedFakeStackNameFromManifest));
+
+            Assert.AreNotEqual(expectedFakeStackNameFromManifest, _sut.SelectedStack);
+
+            _sut.ManifestPath = pathToFakeManifest;
+
+            Assert.AreEqual(expectedFakeStackNameFromManifest, _sut.SelectedStack);
+        }
+
+        [TestMethod]
+        [TestCategory("ManifestPath")]
+        [TestCategory("SelectedStack")]
+        public void ManifestPathSetter_DoesNotChangeStack_WhenManifestDoesNotExist()
+        {
+            var pathToNonexistentManifest = "bogus//path";
+            var initialStack = _sut.SelectedStack;
+
+            _sut.ManifestPath = pathToNonexistentManifest;
+
+            Assert.AreEqual(initialStack, _sut.SelectedStack);
+        }
+
+        [TestMethod]
+        [TestCategory("ManifestPath")]
+        [TestCategory("SelectedStack")]
+        public void ManifestPathSetter_DoesNotChangeStack_WhenManifestExistsAndContainsInvalidStack()
+        {
+            var pathToInvalidManifest = "TestFakes/fake-invalid-manifest.yml";
+            var expectedInvalidFakeStackNameFromManifest = "my-cool-stack";
+            var initialStack = _sut.SelectedStack;
+
+            var fakeManifestContents = File.ReadAllText(pathToInvalidManifest);
+
+            Assert.IsTrue(fakeManifestContents.Contains("stack:"));
+            Assert.IsTrue(fakeManifestContents.Contains(expectedInvalidFakeStackNameFromManifest));
+
+            _sut.ManifestPath = pathToInvalidManifest;
+
+            Assert.AreEqual(initialStack, _sut.SelectedStack);
+        }
+
+        [TestMethod]
+        [TestCategory("SelectedStack")]
+        public void SelectedStackSetter_SetsValue_WhenValueExistsInStackOptions()
+        {
+            var stackVal = "windows";
+
+            Assert.IsTrue(_sut.StackOptions.Contains(stackVal));
+
+            _sut.SelectedStack = stackVal;
+
+            Assert.AreEqual(stackVal, _sut.SelectedStack);
+            Assert.AreEqual(1, _receivedEvents.Count);
+            Assert.AreEqual("SelectedStack", _receivedEvents[0]);
+        }
+
+        [TestMethod]
+        [TestCategory("SelectedStack")]
+        public void SelectedStackSetter_DoesNotSetValue_WhenValueDoesNotExistInStackOptions()
+        {
+            var bogusStackVal = "junk";
+            var initialSelectedStack = _sut.SelectedStack;
+
+            Assert.IsFalse(_sut.StackOptions.Contains(bogusStackVal));
+
+            _sut.SelectedStack = bogusStackVal;
+
+            Assert.AreEqual(initialSelectedStack, _sut.SelectedStack);
+            Assert.AreEqual(0, _receivedEvents.Count);
         }
     }
 
