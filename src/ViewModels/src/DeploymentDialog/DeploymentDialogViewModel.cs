@@ -26,6 +26,7 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string SingleLoginErrorMessage1 = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
         internal const string SingleLoginErrorMessage2 = "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Application Service Explorer & re-connecting to a new one.";
         internal const string FullFrameworkTFM = ".NETFramework";
+        internal const string ManifestNotFoundTitle = "Unable to set manifest path";
 
         private string _status;
         private string _appName;
@@ -124,7 +125,7 @@ namespace Tanzu.Toolkit.ViewModels
                 }
                 else
                 {
-                    _dialogService.DisplayErrorDialog("Unable to set manifest path", $"'{value}' does not appear to be a valid path to a manifest.");
+                    _dialogService.DisplayErrorDialog(ManifestNotFoundTitle, $"'{value}' does not appear to be a valid path to a manifest.");
                 }
             }
         }
