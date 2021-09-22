@@ -120,8 +120,11 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     _manifestPath = value;
 
-                    ManifestPathLabel = value;
-                    SetAppNameFromManifest(value);
+                    ManifestPathLabel = _manifestPath;
+
+                    string[] manifestLines = File.ReadAllLines(_manifestPath);
+                    SetAppNameFromManifest(manifestLines);
+                    SetStackFromManifest(manifestLines);
                 }
                 else
                 {
@@ -143,12 +146,15 @@ namespace Tanzu.Toolkit.ViewModels
 
         public string SelectedStack
         {
-            get => _selectedStack; 
-            
-            set 
+            get => _selectedStack;
+
+            set
             {
-               _selectedStack = value;
-                RaisePropertyChangedEvent("SelectedStack");
+                if (_stackOptions.Contains(value))
+                {
+                    _selectedStack = value;
+                    RaisePropertyChangedEvent("SelectedStack");
+                }
             }
         }
 
@@ -415,15 +421,29 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        private void SetAppNameFromManifest(string pathToManifest)
+        private void SetAppNameFromManifest(string[] manifestContents)
         {
-            string[] manifestContents = File.ReadAllLines(pathToManifest);
-
             foreach (string line in manifestContents)
             {
                 if (line.StartsWith("- name"))
                 {
                     AppName = line.Substring(line.IndexOf(":") + 1).Trim();
+                }
+            }
+        }
+
+        private void SetStackFromManifest(string[] manifestContents)
+        {
+            foreach (string line in manifestContents)
+            {
+                if (line.Contains("stack: "))
+                {
+                    var detectedStack = line.Substring(line.IndexOf(":") + 1).Trim();
+
+                    if (_stackOptions.Contains(detectedStack))
+                    {
+                        SelectedStack = detectedStack;
+                    }
                 }
             }
         }
