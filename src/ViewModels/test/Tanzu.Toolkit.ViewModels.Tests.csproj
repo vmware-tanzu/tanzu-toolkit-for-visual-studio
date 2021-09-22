@@ -28,4 +28,13 @@
     <ProjectReference Include="..\src\Tanzu.Toolkit.ViewModels.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="TestFakes\fake-invalid-manifest.yml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestFakes\fake-manifest.yml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
