@@ -128,6 +128,20 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("ctor")]
+        [TestCategory("DirectoryPath")]
+        public void Constructor_SetsDefaultDirectoryPath_EqualToProjectDirPath()
+        {
+            var realPathToTestFakes = "TestFakes";
+            Assert.IsTrue(Directory.Exists(realPathToTestFakes));
+
+            _sut = new DeploymentDialogViewModel(Services, realPathToTestFakes, FakeTargetFrameworkMoniker);
+
+            Assert.AreEqual(_sut.ProjectDirPath, _sut.DirectoryPath);
+            Assert.AreEqual(_sut.ProjectDirPath, _sut.DirectoryPathLabel);
+        }
+
+        [TestMethod]
         public void DeployApp_UpdatesDeploymentStatus_WhenAppNameEmpty()
         {
             var receivedEvents = new List<string>();
@@ -948,6 +962,66 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.AreEqual(initialSelectedStack, _sut.SelectedStack);
             Assert.AreEqual(0, _receivedEvents.Count);
+        }
+
+        [TestMethod]
+        [TestCategory("DirectoryPath")]
+        public void DirectoryPathSetter_SetsDirectoryPathLabel_WhenDirectoryExistsAtGivenPath()
+        {
+            var realPathToTestFakes = "TestFakes";
+            Assert.IsTrue(Directory.Exists(realPathToTestFakes));
+
+            var initialDirectoryPathLabel = _sut.DirectoryPathLabel;
+
+            _sut.DirectoryPath = realPathToTestFakes;
+
+            Assert.AreNotEqual(initialDirectoryPathLabel, _sut.DirectoryPathLabel);
+            Assert.AreEqual(realPathToTestFakes, _sut.DirectoryPathLabel);
+            Assert.AreEqual(realPathToTestFakes, _sut.DirectoryPath);
+        }
+
+        [TestMethod]
+        [TestCategory("DirectoryPath")]
+        public void DirectoryPathSetter_DisplaysError_AndSetsDirectoryPathLabelToNoneSpecified_WhenNoDirectoryExistsAtGivenPath()
+        {
+            var fakePath = "asdf//junk";
+            Assert.IsFalse(Directory.Exists(fakePath));
+
+            _sut.DirectoryPathLabel = "fake initial value";
+
+            Assert.AreNotEqual("<none specified>", _sut.DirectoryPathLabel);
+
+            _sut.DirectoryPath = fakePath;
+
+            Assert.AreEqual("<none specified>", _sut.DirectoryPathLabel);
+
+            MockErrorDialogService.Verify(
+                m => m.DisplayErrorDialog(DeploymentDialogViewModel.DirectoryNotFoundTitle, It.Is<string>(s => s.Contains(fakePath) && s.Contains("does not appear to be a valid path"))),
+                Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("SourceDeployment")]
+        [TestCategory("DeploymentButtonLabel")]
+        public void SourceDeployment_SetsDeploymentButtonLabelToPushSource_WhenSetToTrue()
+        {
+            _sut.DeploymentButtonLabel = "fake initial value";
+
+            _sut.SourceDeployment = true;
+
+            Assert.AreEqual("Push app (from source)", _sut.DeploymentButtonLabel);
+        }
+
+        [TestMethod]
+        [TestCategory("SourceDeployment")]
+        [TestCategory("DeploymentButtonLabel")]
+        public void SourceDeployment_SetsDeploymentButtonLabelToPushBinaries_WhenSetToFalse()
+        {
+            _sut.DeploymentButtonLabel = "fake initial value";
+
+            _sut.SourceDeployment = false;
+
+            Assert.AreEqual("Push app (from binaries)", _sut.DeploymentButtonLabel);
         }
     }
 

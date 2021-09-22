@@ -47,7 +47,7 @@ namespace Tanzu.Toolkit.WpfViews
             deploymentStatusText.ScrollToEnd();
         }
 
-        private void SelectManifest(object sender, System.Windows.RoutedEventArgs e)
+        private void SelectManifest(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
@@ -60,6 +60,19 @@ namespace Tanzu.Toolkit.WpfViews
             if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 _viewModel.ManifestPath = openFileDialog.FileName;
+            }
+        }
+
+        private void SelectPublishDirectory(object sender, RoutedEventArgs e)
+        {
+            FolderBrowserDialog openFolderDialog = new FolderBrowserDialog
+            {
+                SelectedPath = _viewModel.ProjectDirPath,
+            };
+
+            if (openFolderDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                _viewModel.DirectoryPath = openFolderDialog.SelectedPath;
             }
         }
     }
