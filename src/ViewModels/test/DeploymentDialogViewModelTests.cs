@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -48,6 +49,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockViewLocatorService.VerifyAll();
             MockDialogService.VerifyAll();
             MockTasExplorerViewModel.VerifyAll();
+            MockErrorDialogService.VerifyAll();
         }
 
 
@@ -820,6 +822,53 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.AreEqual(1, _sut.StackOptions.Count);
             Assert.IsTrue(_sut.StackOptions.Contains("windows"));
+        }
+
+        [TestMethod]
+        [TestCategory("ManifestPath")]
+        public void ManifestPathSetter_SetsAppName_WhenManifestExistsAndContainsAppName()
+        {
+            var manifestPath = "TestFakes/fake-manifest.yml";
+            var expectedFakeAppNameFromManifest = "my-cool-app";
+
+            Assert.IsTrue(File.ReadAllText(manifestPath).Contains("- name"));
+            Assert.IsTrue(File.ReadAllText(manifestPath).Contains(expectedFakeAppNameFromManifest));
+
+            Assert.AreNotEqual(expectedFakeAppNameFromManifest, _sut.AppName);
+
+            _sut.ManifestPath = manifestPath;
+
+            Assert.AreEqual(expectedFakeAppNameFromManifest, _sut.AppName);
+        }
+        
+        [TestMethod]
+        [TestCategory("ManifestPath")]
+        public void ManifestPathSetter_DisplaysError_AndDoesNotChangeAppName_WhenManifestDoesNotExist()
+        {
+            var pathToNonexistentManifest = "bogus//path";
+            var initialAppName = _sut.AppName;
+
+            MockErrorDialogService.Setup(m => m.
+                DisplayErrorDialog(DeploymentDialogViewModel.ManifestNotFoundTitle, It.Is<string>(s => s.Contains(pathToNonexistentManifest) && s.Contains("does not appear to be a valid path to a manifest"))))
+                    .Verifiable();
+
+            _sut.ManifestPath = pathToNonexistentManifest;
+
+            Assert.AreEqual(initialAppName, _sut.AppName);
+        }
+
+        [TestMethod]
+        [TestCategory("ManifestPath")]
+        public void ManifestPathSetter_DoesNotChangeAppName_WhenManifestExistsButDoesNotContainAppName()
+        {
+            var pathToInvalidManifest = "TestFakes/fake-invalid-manifest.yml";
+
+            Assert.IsFalse(File.ReadAllText(pathToInvalidManifest).Contains("- name"));
+            var initialAppName = _sut.AppName;
+
+            _sut.ManifestPath = pathToInvalidManifest;
+
+            Assert.AreEqual(initialAppName, _sut.AppName);
         }
     }
 
