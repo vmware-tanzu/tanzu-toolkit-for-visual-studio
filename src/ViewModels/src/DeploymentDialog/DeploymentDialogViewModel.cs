@@ -25,11 +25,11 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string SingleLoginErrorTitle = "Unable to add more TAS connections.";
         internal const string SingleLoginErrorMessage1 = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
         internal const string SingleLoginErrorMessage2 = "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Application Service Explorer & re-connecting to a new one.";
-        private List<string> stackOptions = new List<string> { "windows", "linux" };
+        internal const string FullFrameworkTFM = ".NETFramework";
 
         private string _status;
         private string _appName;
-        private readonly bool _fullFrameworkDeployment = false;
+        internal readonly bool _fullFrameworkDeployment = false;
         private readonly IErrorDialog _dialogService;
         internal IOutputViewModel OutputViewModel;
         internal ITasExplorerViewModel TasExplorerViewModel;
@@ -43,7 +43,8 @@ namespace Tanzu.Toolkit.ViewModels
         private string _manifestPath;
         private string _targetName;
         private bool _isLoggedIn;
-        private string selectedStack;
+        private string _selectedStack;
+        private List<string> _stackOptions = new List<string> { "windows", "linux" };
 
         public DeploymentDialogViewModel(IServiceProvider services, string directoryOfProjectToDeploy, string targetFrameworkMoniker)
             : base(services)
@@ -58,9 +59,10 @@ namespace Tanzu.Toolkit.ViewModels
             DeploymentInProgress = false;
             ProjectDirPath = directoryOfProjectToDeploy;
 
-            if (targetFrameworkMoniker.StartsWith(".NETFramework"))
+            if (targetFrameworkMoniker.StartsWith(FullFrameworkTFM))
             {
                 _fullFrameworkDeployment = true;
+                _stackOptions = new List<string> { "windows" };
             }
 
             CfInstanceOptions = new List<CloudFoundryInstance>();
@@ -140,11 +142,11 @@ namespace Tanzu.Toolkit.ViewModels
 
         public string SelectedStack
         {
-            get => selectedStack; 
+            get => _selectedStack; 
             
             set 
             {
-               selectedStack = value;
+               _selectedStack = value;
                 RaisePropertyChangedEvent("SelectedStack");
             }
         }
@@ -217,7 +219,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public List<string> StackOptions
         {
-            get => stackOptions;
+            get => _stackOptions;
         }
 
         public bool DeploymentInProgress { get; internal set; }

@@ -800,6 +800,27 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.AreEqual(1, _receivedEvents.Count);
             Assert.IsTrue(_receivedEvents.Contains("TargetName"));
         }
+
+        [TestMethod]
+        [TestCategory("StackOptions")]
+        public void StackOptions_Returns_LinuxAndWindows()
+        {
+            Assert.AreEqual(2, _sut.StackOptions.Count);
+            Assert.IsTrue(_sut.StackOptions.Contains("windows"));
+            Assert.IsTrue(_sut.StackOptions.Contains("linux"));
+        }
+
+        [TestMethod]
+        [TestCategory("StackOptions")]
+        public void StackOptions_Returns_Windows_WhenTargetFrameworkIsNETFramework()
+        {
+            _sut = new DeploymentDialogViewModel(Services, _fakeProjPath, targetFrameworkMoniker: DeploymentDialogViewModel.FullFrameworkTFM);
+
+            Assert.IsTrue(_sut._fullFrameworkDeployment);
+
+            Assert.AreEqual(1, _sut.StackOptions.Count);
+            Assert.IsTrue(_sut.StackOptions.Contains("windows"));
+        }
     }
 
     public class FakeOutputView : ViewModelTestSupport, IView
