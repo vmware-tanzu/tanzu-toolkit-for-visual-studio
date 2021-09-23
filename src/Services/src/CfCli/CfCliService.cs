@@ -527,6 +527,11 @@ namespace Tanzu.Toolkit.Services.CfCli
                 args += $" -s {stack}";
             }
 
+            if (startCommand != null)
+            {
+                args += $" -c \"{startCommand}\"";
+            }
+
             if (manifestPath != null)
             {
                 args += $" -f \"{manifestPath}\"";
