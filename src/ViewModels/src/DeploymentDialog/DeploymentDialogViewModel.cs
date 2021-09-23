@@ -41,6 +41,7 @@ namespace Tanzu.Toolkit.ViewModels
         private List<CloudFoundrySpace> _cfSpaces;
         private CloudFoundryOrganization _selectedOrg;
         private CloudFoundrySpace _selectedSpace;
+        private string _projectName;
         private string _manifestPathLabel;
         private string _manifestPath;
         private string _directoryPathLabel;
@@ -86,6 +87,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
 
             SelectedDeploymentDirectoryPath = PathToProjectRootDir;
+            _projectName = projectName;
         }
 
         public bool SourceDeployment
@@ -441,7 +443,8 @@ namespace Tanzu.Toolkit.ViewModels
                 stdErrCallback: OutputViewModel.AppendLine,
                 stack: SelectedStack,
                 sourceDeployment: SourceDeployment,
-                projectName: null, manifestPath: ManifestPath);
+                projectName: _projectName, 
+                manifestPath: ManifestPath);
 
             if (!deploymentResult.Succeeded)
             {
