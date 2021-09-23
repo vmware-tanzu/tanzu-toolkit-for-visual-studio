@@ -21,7 +21,7 @@ namespace Tanzu.Toolkit.WpfViews.Tests
             mockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(new CfInstanceViewModel(fakeCfInstance, null, services));
             mockViewLocatorService.Setup(m => m.NavigateTo(It.Is<string>(s => s.Contains("TasExplorer")), null)).Returns(new FakeTasExplorerView());
 
-            vm = new DeploymentDialogViewModel(services, _fakeDirPath, _fakeTFM);
+            vm = new DeploymentDialogViewModel(services, null, _fakeDirPath, _fakeTFM);
         }
 
         [TestMethod]

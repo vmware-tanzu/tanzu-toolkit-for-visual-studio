@@ -36,7 +36,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsTrue(Directory.Exists(_realPathToFakeDeploymentDir));
 
-            _sut = new DeploymentDialogViewModel(Services, _realPathToFakeDeploymentDir, FakeTargetFrameworkMoniker);
+            _sut = new DeploymentDialogViewModel(Services, null, _realPathToFakeDeploymentDir, FakeTargetFrameworkMoniker);
 
             _receivedEvents = new List<string>();
             _sut.PropertyChanged += (sender, e) =>
@@ -60,7 +60,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ctor")]
         public void DeploymentDialogViewModel_SetsCfOrgOptionsToEmptyList_WhenConstructed()
         {
-            var vm = new DeploymentDialogViewModel(Services, _fakeProjPath, FakeTargetFrameworkMoniker);
+            var vm = new DeploymentDialogViewModel(Services, null, _fakeProjPath, FakeTargetFrameworkMoniker);
 
             Assert.IsNotNull(vm.CfOrgOptions);
             Assert.AreEqual(0, vm.CfOrgOptions.Count);
@@ -70,7 +70,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ctor")]
         public void DeploymentDialogViewModel_SetsCfSpaceOptionsToEmptyList_WhenConstructed()
         {
-            var vm = new DeploymentDialogViewModel(Services, _fakeProjPath, FakeTargetFrameworkMoniker);
+            var vm = new DeploymentDialogViewModel(Services, null, _fakeProjPath, FakeTargetFrameworkMoniker);
 
             Assert.IsNotNull(vm.CfSpaceOptions);
             Assert.AreEqual(0, vm.CfSpaceOptions.Count);
@@ -87,7 +87,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var fakeTasConnection = new FakeCfInstanceViewModel(fakeCf, Services);
             MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(fakeTasConnection);
 
-            _sut = new DeploymentDialogViewModel(Services, _fakeProjPath, FakeTargetFrameworkMoniker);
+            _sut = new DeploymentDialogViewModel(Services, null, _fakeProjPath, FakeTargetFrameworkMoniker);
 
             // sanity check
             Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
@@ -103,7 +103,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(new FakeCfInstanceViewModel(FakeCfInstance, Services));
 
-            _sut = new DeploymentDialogViewModel(Services, _fakeProjPath, FakeTargetFrameworkMoniker);
+            _sut = new DeploymentDialogViewModel(Services, null, _fakeProjPath, FakeTargetFrameworkMoniker);
 
             Assert.IsTrue(_sut.IsLoggedIn);
         }
@@ -124,7 +124,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(new FakeCfInstanceViewModel(FakeCfInstance, Services));
 
-            _sut = new DeploymentDialogViewModel(Services, _fakeProjPath, FakeTargetFrameworkMoniker);
+            _sut = new DeploymentDialogViewModel(Services, null, _fakeProjPath, FakeTargetFrameworkMoniker);
 
             Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
             MockThreadingService.Verify(m => m.StartTask(_sut.UpdateCfOrgOptions), Times.Once);
@@ -135,7 +135,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("SelectedDeploymentDirectoryPath")]
         public void Constructor_SetsDefaultDirectoryPath_EqualToProjectDirPath()
         {
-            _sut = new DeploymentDialogViewModel(Services, _realPathToFakeDeploymentDir, FakeTargetFrameworkMoniker);
+            _sut = new DeploymentDialogViewModel(Services, null, _realPathToFakeDeploymentDir, FakeTargetFrameworkMoniker);
 
             Assert.AreEqual(_sut.PathToProjectRootDir, _sut.SelectedDeploymentDirectoryPath);
             Assert.AreEqual(_sut.PathToProjectRootDir, _sut.DirectoryPathLabel);
@@ -250,7 +250,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task StartDeploymentTask_IndicatesFullFWDeployment_WhenTFMStartsWith_NETFramework()
         {
             string targetFrameworkMoniker = ".NETFramework";
-            _sut = new DeploymentDialogViewModel(Services, _realPathToFakeDeploymentDir, targetFrameworkMoniker)
+            _sut = new DeploymentDialogViewModel(Services, null, _realPathToFakeDeploymentDir, targetFrameworkMoniker)
             {
                 AppName = _fakeAppName,
                 SelectedOrg = _fakeOrg,
@@ -269,7 +269,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                It.IsAny<StdOutDelegate>(),
                                It.IsAny<StdErrDelegate>(),
                                null,
-                               true, null))
+                               true, null, null))
                 .ReturnsAsync(FakeSuccessDetailedResult);
 
             await _sut.StartDeployment();
@@ -291,7 +291,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                     It.IsAny<StdOutDelegate>(),
                                     It.IsAny<StdErrDelegate>(),
                                     null,
-                                    true, null))
+                                    true, null, null))
                     .ReturnsAsync(FakeSuccessDetailedResult);
 
             _sut.AppName = _fakeAppName;
@@ -321,7 +321,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                     It.IsAny<StdOutDelegate>(),
                                     It.IsAny<StdErrDelegate>(),
                                     stack,
-                                    true, null))
+                                    true, null, null))
                     .ReturnsAsync(FakeSuccessDetailedResult);
 
             _sut.AppName = _fakeAppName;
@@ -349,7 +349,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                     It.IsAny<StdOutDelegate>(),
                                     It.IsAny<StdErrDelegate>(),
                                     _fakeStack,
-                                    true, null))
+                                    true, null, null))
                     .ReturnsAsync(FakeSuccessDetailedResult);
 
             _sut.AppName = _fakeAppName;
@@ -379,8 +379,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                     It.IsAny<StdOutDelegate>(),
                                     It.IsAny<StdErrDelegate>(),
                                     _fakeStack,
-                                    isSourceDeployment, 
-                                    null))
+                                    isSourceDeployment,
+                                    null, null))
                     .ReturnsAsync(FakeSuccessDetailedResult);
 
             _sut.AppName = _fakeAppName;
@@ -418,7 +418,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                              expectedStdOutCallback,
                              expectedStdErrCallback,
                              null,
-                             true, null))
+                             true, null, null))
                 .ReturnsAsync(FakeSuccessDetailedResult);
 
             await _sut.StartDeployment();
@@ -445,7 +445,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                expectedStdOutCallback,
                                expectedStdErrCallback,
                                null,
-                               true, null))
+                               true, null, null))
                     .ReturnsAsync(FakeFailureDetailedResult);
 
             var expectedErrorTitle = $"{DeploymentDialogViewModel.DeploymentErrorMsg} {_fakeAppName}.";
@@ -489,7 +489,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                expectedStdOutCallback,
                                expectedStdErrCallback,
                                null,
-                               true, null))
+                               true, null, null))
                     .ReturnsAsync(FakeFailureDetailedResult);
 
             var expectedErrorTitle = $"{DeploymentDialogViewModel.DeploymentErrorMsg} {_fakeAppName}.";
@@ -527,7 +527,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                expectedStdOutCallback,
                                expectedStdErrCallback,
                                null,
-                               true, null))
+                               true, null, null))
                     .ReturnsAsync(invalidRefreshTokenFailure);
 
             MockTasExplorerViewModel.SetupSet(m => m.AuthenticationRequired = true).Verifiable();
@@ -883,7 +883,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(new FakeCfInstanceViewModel(FakeCfInstance, Services));
 
-            _sut = new DeploymentDialogViewModel(Services, _fakeProjPath, FakeTargetFrameworkMoniker);
+            _sut = new DeploymentDialogViewModel(Services, null, _fakeProjPath, FakeTargetFrameworkMoniker);
 
             Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
             Assert.IsTrue(_sut.IsLoggedIn);
@@ -935,7 +935,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("StackOptions")]
         public void StackOptions_Returns_Windows_WhenTargetFrameworkIsNETFramework()
         {
-            _sut = new DeploymentDialogViewModel(Services, _fakeProjPath, targetFrameworkMoniker: DeploymentDialogViewModel.FullFrameworkTFM);
+            _sut = new DeploymentDialogViewModel(Services, null, _fakeProjPath, targetFrameworkMoniker: DeploymentDialogViewModel.FullFrameworkTFM);
 
             Assert.IsTrue(_sut._fullFrameworkDeployment);
 

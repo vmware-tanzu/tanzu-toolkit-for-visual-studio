@@ -52,7 +52,7 @@ namespace Tanzu.Toolkit.ViewModels
         private bool _sourceDeployment;
         private string _deploymentButtonLabel;
 
-        public DeploymentDialogViewModel(IServiceProvider services, string directoryOfProjectToDeploy, string targetFrameworkMoniker)
+        public DeploymentDialogViewModel(IServiceProvider services, string projectName, string directoryOfProjectToDeploy, string targetFrameworkMoniker)
             : base(services)
         {
             _dialogService = services.GetRequiredService<IErrorDialog>();
@@ -440,8 +440,8 @@ namespace Tanzu.Toolkit.ViewModels
                 stdOutCallback: OutputViewModel.AppendLine,
                 stdErrCallback: OutputViewModel.AppendLine,
                 stack: SelectedStack,
-                sourceDeployment: SourceDeployment, 
-                manifestPath: ManifestPath);
+                sourceDeployment: SourceDeployment,
+                projectName: null, manifestPath: ManifestPath);
 
             if (!deploymentResult.Succeeded)
             {

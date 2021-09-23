@@ -1389,7 +1389,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             _mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
-            DetailedResult result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, _defaultFullFWFlag, stdOutCallback: null, stdErrCallback: null, stack: null, sourceDeployment: true, manifestPath: null);
+            DetailedResult result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, _defaultFullFWFlag, stdOutCallback: null, stdErrCallback: null, stack: null, sourceDeployment: true, projectName: null, manifestPath: null);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains(fakeFailureExplanation));
@@ -1408,7 +1408,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             _mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
-            DetailedResult result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, _defaultFullFWFlag, stdOutCallback: null, stdErrCallback: null, stack: stack, sourceDeployment: true, manifestPath: null);
+            DetailedResult result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, _defaultFullFWFlag, stdOutCallback: null, stdErrCallback: null, stack: stack, sourceDeployment: true, projectName: null, manifestPath: null);
 
             Assert.IsTrue(result.Succeeded);
         }
@@ -1427,7 +1427,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             _mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
             bool fullFWIndicator = true;
-            DetailedResult result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, fullFWIndicator, stdOutCallback: null, stdErrCallback: null, stack: null, sourceDeployment: true, manifestPath: null);
+            DetailedResult result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, fullFWIndicator, stdOutCallback: null, stdErrCallback: null, stack: null, sourceDeployment: true, projectName: null, manifestPath: null);
 
             Assert.IsTrue(result.Succeeded);
         }
@@ -1438,7 +1438,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         {
             _mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(false);
 
-            var result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, _defaultFullFWFlag, stdOutCallback: null, stdErrCallback: null, stack: null, sourceDeployment: true, manifestPath: null);
+            var result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, _defaultFullFWFlag, stdOutCallback: null, stdErrCallback: null, stack: null, sourceDeployment: true, projectName: null, manifestPath: null);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains(CloudFoundryService.EmptyOutputDirMessage));
@@ -1455,7 +1455,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 PushAppAsync(FakeApp.AppName, FakeOrg.OrgName, FakeSpace.SpaceName, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), _fakeProjectPath, It.IsAny<string>(), It.IsAny<string>(), null, null))
                     .Throws(new InvalidRefreshTokenException());
 
-            var result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, _defaultFullFWFlag, stdOutCallback: null, stdErrCallback: null, stack: null, sourceDeployment: true, manifestPath: null);
+            var result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, _defaultFullFWFlag, stdOutCallback: null, stdErrCallback: null, stack: null, sourceDeployment: true, projectName: null, manifestPath: null);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
