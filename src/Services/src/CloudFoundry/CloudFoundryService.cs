@@ -695,6 +695,8 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
 
             string buildpack = null;
+            string startCommand = null;
+
             if (fullFrameworkDeployment)
             {
                 buildpack = "hwc_buildpack";
@@ -704,7 +706,13 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             DetailedResult cfPushResult;
             try
             {
-                cfPushResult = await _cfCliService.PushAppAsync(appName, targetOrg.OrgName, targetSpace.SpaceName, stdOutCallback, stdErrCallback, pathToDeploymentDirectory, buildpack, stack, null, manifestPath);
+                if (!sourceDeployment)
+                {
+                    buildpack = "binary_buildpack";
+                    startCommand = $"cmd /c .\\{projectName} --urls=http://*:%PORT%";
+                }
+
+                cfPushResult = await _cfCliService.PushAppAsync(appName, targetOrg.OrgName, targetSpace.SpaceName, stdOutCallback, stdErrCallback, pathToDeploymentDirectory, buildpack, stack, startCommand, manifestPath);
             }
             catch (InvalidRefreshTokenException)
             {
