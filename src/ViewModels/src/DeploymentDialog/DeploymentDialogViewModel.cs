@@ -438,7 +438,7 @@ namespace Tanzu.Toolkit.ViewModels
                 SelectedSpace.ParentOrg,
                 SelectedSpace,
                 AppName,
-                PathToProjectRootDir,
+                DirectoryPath,
                 _fullFrameworkDeployment,
                 stdOutCallback: OutputViewModel.AppendLine,
                 stdErrCallback: OutputViewModel.AppendLine,
