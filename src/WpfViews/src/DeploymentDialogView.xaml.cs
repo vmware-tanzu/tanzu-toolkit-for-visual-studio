@@ -53,7 +53,7 @@ namespace Tanzu.Toolkit.WpfViews
         {
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
-                InitialDirectory = _viewModel.ProjectDirPath,
+                InitialDirectory = _viewModel.PathToProjectRootDir,
                 Filter = "YAML files (*.yaml, *.yml)|*.yaml;*.yml",
                 FilterIndex = 2,
                 RestoreDirectory = true
@@ -69,7 +69,7 @@ namespace Tanzu.Toolkit.WpfViews
         {
             FolderBrowserDialog openFolderDialog = new FolderBrowserDialog
             {
-                SelectedPath = _viewModel.ProjectDirPath,
+                SelectedPath = _viewModel.PathToProjectRootDir,
             };
 
             if (openFolderDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)

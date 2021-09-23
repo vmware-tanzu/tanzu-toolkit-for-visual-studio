@@ -4,7 +4,7 @@ namespace Tanzu.Toolkit.ViewModels
 {
     public interface IDeploymentDialogViewModel
     {
-        string ProjectDirPath { get; }
+        string PathToProjectRootDir { get; }
         string ManifestPath { get; set; }
         string DirectoryPath { get; set; }
 
