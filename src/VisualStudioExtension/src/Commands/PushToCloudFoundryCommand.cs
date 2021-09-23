@@ -125,7 +125,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                     }
                     else
                     {
-                        var viewModel = new DeploymentDialogViewModel(_services, projectDirectory, tfm);
+                        var viewModel = new DeploymentDialogViewModel(_services, proj.Name, projectDirectory, tfm);
                         var view = new DeploymentDialogView(viewModel, new ThemeService());
 
                         view.ShowDialog();
