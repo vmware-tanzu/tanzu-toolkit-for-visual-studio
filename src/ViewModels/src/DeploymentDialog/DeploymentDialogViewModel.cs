@@ -439,7 +439,8 @@ namespace Tanzu.Toolkit.ViewModels
                 _fullFrameworkDeployment,
                 stdOutCallback: OutputViewModel.AppendLine,
                 stdErrCallback: OutputViewModel.AppendLine,
-                stack: SelectedStack, 
+                stack: SelectedStack,
+                sourceDeployment: SourceDeployment, 
                 manifestPath: ManifestPath);
 
             if (!deploymentResult.Succeeded)
