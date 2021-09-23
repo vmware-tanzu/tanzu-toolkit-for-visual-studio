@@ -35,15 +35,11 @@ namespace Tanzu.Toolkit.WpfViews.Tests
 
             // Verify commands point to view model
             var openLoginCommand = view.OpenLoginDialogCommand as DelegatingCommand;
-            var pushFromSourceCommand = view.PushFromSourceCommand as DelegatingCommand;
-            var pushFromBinariesCommand = view.PushFromBinariesCommand as DelegatingCommand;
-
+            var uploadAppCommand = view.UploadAppCommand as DelegatingCommand;
             Assert.IsNotNull(openLoginCommand);
-            Assert.IsNotNull(pushFromSourceCommand);
-            Assert.IsNotNull(pushFromBinariesCommand);
+            Assert.IsNotNull(uploadAppCommand);
             Assert.AreEqual(vm, openLoginCommand.Action.Target);
-            Assert.AreEqual(vm, pushFromSourceCommand.Action.Target);
-            Assert.AreEqual(vm, pushFromBinariesCommand.Action.Target);
+            Assert.AreEqual(vm, uploadAppCommand.Action.Target);
         }
 
         [TestMethod]

@@ -10,8 +10,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         bool CanDeployApp(object arg);
         bool CanOpenLoginView(object arg);
-        void DeployAppFromBinaries(object dialogWindow);
-        void DeployAppFromSource(object dialogWindow);
+        void DeployApp(object arg);
         void OpenLoginView(object arg);
         Task UpdateCfOrgOptions();
         Task UpdateCfSpaceOptions();
