@@ -132,12 +132,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("ctor")]
-        [TestCategory("DirectoryPath")]
+        [TestCategory("SelectedDeploymentDirectoryPath")]
         public void Constructor_SetsDefaultDirectoryPath_EqualToProjectDirPath()
         {
             _sut = new DeploymentDialogViewModel(Services, _realPathToFakeDeploymentDir, FakeTargetFrameworkMoniker);
 
-            Assert.AreEqual(_sut.PathToProjectRootDir, _sut.DirectoryPath);
+            Assert.AreEqual(_sut.PathToProjectRootDir, _sut.SelectedDeploymentDirectoryPath);
             Assert.AreEqual(_sut.PathToProjectRootDir, _sut.DirectoryPathLabel);
         }
 
@@ -436,7 +436,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.SelectedOrg = _fakeOrg;
             _sut.SelectedSpace = _fakeSpace;
             _sut.SelectedStack = _fakeStack;
-            _sut.DirectoryPath = realPathToFakeDeploymentDir;
+            _sut.SelectedDeploymentDirectoryPath = realPathToFakeDeploymentDir;
 
             Assert.IsNotNull(_sut.SelectedStack);
 
@@ -1117,25 +1117,25 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("DirectoryPath")]
+        [TestCategory("SelectedDeploymentDirectoryPath")]
         public void DirectoryPathSetter_SetsDirectoryPathLabel_WhenDirectoryExistsAtGivenPath()
         {
-            _sut.DirectoryPath = "junk//path";
+            _sut.SelectedDeploymentDirectoryPath = "junk//path";
             var initialDirectoryPathLabel = _sut.DirectoryPathLabel;
 
-            Assert.IsNull(_sut.DirectoryPath);
+            Assert.IsNull(_sut.SelectedDeploymentDirectoryPath);
             Assert.AreEqual("<none specified>", _sut.DirectoryPathLabel);
 
-            _sut.DirectoryPath = _realPathToFakeDeploymentDir;
+            _sut.SelectedDeploymentDirectoryPath = _realPathToFakeDeploymentDir;
 
-            Assert.IsNotNull(_sut.DirectoryPath);
+            Assert.IsNotNull(_sut.SelectedDeploymentDirectoryPath);
             Assert.AreNotEqual(initialDirectoryPathLabel, _sut.DirectoryPathLabel);
             Assert.AreEqual(_realPathToFakeDeploymentDir, _sut.DirectoryPathLabel);
-            Assert.AreEqual(_realPathToFakeDeploymentDir, _sut.DirectoryPath);
+            Assert.AreEqual(_realPathToFakeDeploymentDir, _sut.SelectedDeploymentDirectoryPath);
         }
 
         [TestMethod]
-        [TestCategory("DirectoryPath")]
+        [TestCategory("SelectedDeploymentDirectoryPath")]
         public void DirectoryPathSetter_DisplaysError_AndSetsDirectoryPathLabelToNoneSpecified_WhenNoDirectoryExistsAtGivenPath()
         {
             var fakePath = "asdf//junk";
@@ -1145,7 +1145,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.AreNotEqual("<none specified>", _sut.DirectoryPathLabel);
 
-            _sut.DirectoryPath = fakePath;
+            _sut.SelectedDeploymentDirectoryPath = fakePath;
 
             Assert.AreEqual("<none specified>", _sut.DirectoryPathLabel);
 

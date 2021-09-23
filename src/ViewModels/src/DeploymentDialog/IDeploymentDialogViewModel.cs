@@ -6,7 +6,7 @@ namespace Tanzu.Toolkit.ViewModels
     {
         string PathToProjectRootDir { get; }
         string ManifestPath { get; set; }
-        string DirectoryPath { get; set; }
+        string SelectedDeploymentDirectoryPath { get; set; }
 
         bool CanDeployApp(object arg);
         bool CanOpenLoginView(object arg);
