@@ -137,8 +137,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             _sut = new DeploymentDialogViewModel(Services, realPathToTestFakes, FakeTargetFrameworkMoniker);
 
-            Assert.AreEqual(_sut.ProjectDirPath, _sut.DirectoryPath);
-            Assert.AreEqual(_sut.ProjectDirPath, _sut.DirectoryPathLabel);
+            Assert.AreEqual(_sut.PathToProjectRootDir, _sut.DirectoryPath);
+            Assert.AreEqual(_sut.PathToProjectRootDir, _sut.DirectoryPathLabel);
         }
 
         [TestMethod]

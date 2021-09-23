@@ -63,7 +63,7 @@ namespace Tanzu.Toolkit.ViewModels
 
             DeploymentStatus = InitialStatus;
             DeploymentInProgress = false;
-            ProjectDirPath = directoryOfProjectToDeploy;
+            PathToProjectRootDir = directoryOfProjectToDeploy;
 
             if (targetFrameworkMoniker.StartsWith(FullFrameworkTFM))
             {
@@ -85,7 +85,7 @@ namespace Tanzu.Toolkit.ViewModels
                 ThreadingService.StartTask(UpdateCfOrgOptions);
             }
 
-            DirectoryPath = ProjectDirPath;
+            DirectoryPath = PathToProjectRootDir;
         }
 
         public bool SourceDeployment
@@ -122,7 +122,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public string ProjectDirPath { get; private set; }
+        public string PathToProjectRootDir { get; private set; }
 
         public string ManifestPath
         {
@@ -174,7 +174,7 @@ namespace Tanzu.Toolkit.ViewModels
                     _directoryPath = value;
                     DirectoryPathLabel = value;
 
-                    SourceDeployment = value == ProjectDirPath;
+                    SourceDeployment = value == PathToProjectRootDir;
                 }
                 else
                 {
@@ -438,11 +438,12 @@ namespace Tanzu.Toolkit.ViewModels
                 SelectedSpace.ParentOrg,
                 SelectedSpace,
                 AppName,
-                ProjectDirPath,
+                PathToProjectRootDir,
                 _fullFrameworkDeployment,
                 stdOutCallback: OutputViewModel.AppendLine,
                 stdErrCallback: OutputViewModel.AppendLine,
-                stack: SelectedStack, manifestPath: ManifestPath);
+                stack: SelectedStack, 
+                manifestPath: ManifestPath);
 
             if (!deploymentResult.Succeeded)
             {
@@ -470,8 +471,8 @@ namespace Tanzu.Toolkit.ViewModels
 
         private void SetManifestIfDefaultExists()
         {
-            var expectedManifestLocation1 = Path.Combine(ProjectDirPath, "manifest.yaml");
-            var expectedManifestLocation2 = Path.Combine(ProjectDirPath, "manifest.yml");
+            var expectedManifestLocation1 = Path.Combine(PathToProjectRootDir, "manifest.yaml");
+            var expectedManifestLocation2 = Path.Combine(PathToProjectRootDir, "manifest.yml");
 
             if (File.Exists(expectedManifestLocation1))
             {
