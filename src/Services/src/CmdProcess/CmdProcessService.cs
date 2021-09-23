@@ -11,7 +11,7 @@ namespace Tanzu.Toolkit.Services.CmdProcess
         private string _stdOutAggregator = "";
         private string _stdErrAggregator = "";
 
-        public CmdResult RunCommand(string executableFilePath, string arguments, string workingDir, Dictionary<string, string> envVars = null, StdOutDelegate stdOutDelegate = null, StdErrDelegate stdErrDelegate = null)
+        public CmdResult RunExecutable(string executableFilePath, string arguments, string workingDir, Dictionary<string, string> envVars = null, StdOutDelegate stdOutDelegate = null, StdErrDelegate stdErrDelegate = null)
         {
             // Create Process
             Process process = new Process();
