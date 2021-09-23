@@ -1199,15 +1199,45 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
 
         [TestMethod]
         [TestCategory("PushApp")]
+        public async Task PushAppAsync_AddsCFlag_WhenGivenAStartCommandParam()
+        {
+            var fakeAppName = "my fake app";
+            var fakeStartCommand = "just DO it!";
+            string expectedArgs = $"push \"{fakeAppName}\" -c \"{fakeStartCommand}\""; // ensure app name gets surrounded by quotes
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
+            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
+
+            _mockCmdProcessService.Setup(m => m.
+              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
+                .Returns(_fakeSuccessCmdResult);
+
+            _mockCmdProcessService.Setup(m => m.
+              RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null))
+                .Returns(_fakeSuccessCmdResult);
+
+            _mockCmdProcessService.Setup(m => m.
+                RunExecutable(_fakePathToCfExe, expectedArgs, _fakeProjectPath, _defaultEnvVars, null, null))
+                    .Returns(_fakeSuccessCmdResult);
+
+            var result = await _sut.PushAppAsync(fakeAppName, FakeOrg.OrgName, FakeSpace.SpaceName, null, null, _fakeProjectPath, buildpack: null, manifestPath: null, startCommand: fakeStartCommand);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.AreEqual(_fakeSuccessCmdResult, result.CmdDetails);
+        }
+
+        [TestMethod]
+        [TestCategory("PushApp")]
         public async Task PushAppAsync_AddsMultipleFlags_WhenGivenMultipleOptionalParams()
         {
             var fakeAppName = "my fake app";
             var fakeStackValue = "my-cool-stack";
+            var fakeStartCommand = "run the thing!";
             var fakeManifestPath = "this\\is\\a\\fake\\path\\to\\manifest.yml";
             var fakeBuildpackValue = "my-cool-buildpack";
 
             // ensure app name, start command & manifest path get surrounded by quotes
-            string expectedArgs = $"push \"{fakeAppName}\" -b {fakeBuildpackValue} -s {fakeStackValue} -f \"{fakeManifestPath}\"";
+            string expectedArgs = $"push \"{fakeAppName}\" -b {fakeBuildpackValue} -s {fakeStackValue} -c \"{fakeStartCommand}\" -f \"{fakeManifestPath}\"";
             var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
             var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
 
@@ -1231,7 +1261,8 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
                                                  _fakeProjectPath,
                                                  buildpack: fakeBuildpackValue,
                                                  stack: fakeStackValue,
-                                                 startCommand: null, manifestPath: fakeManifestPath);
+                                                 startCommand: fakeStartCommand,
+                                                 manifestPath: fakeManifestPath);
 
             Assert.IsTrue(result.Succeeded);
             Assert.IsNull(result.Explanation);
