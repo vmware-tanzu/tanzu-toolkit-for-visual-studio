@@ -14,7 +14,8 @@ namespace Tanzu.Toolkit.WpfViews
     public partial class DeploymentDialogView : Window, IDeploymentDialogView
     {
         private IDeploymentDialogViewModel _viewModel;
-        public ICommand UploadAppCommand { get; }
+        public ICommand PushFromSourceCommand { get; }
+        public ICommand PushFromBinariesCommand { get; }
         public ICommand OpenLoginDialogCommand { get; }
 
         public DeploymentDialogView()
@@ -25,7 +26,8 @@ namespace Tanzu.Toolkit.WpfViews
         public DeploymentDialogView(IDeploymentDialogViewModel viewModel, IThemeService themeService)
         {
             _viewModel = viewModel;
-            UploadAppCommand = new DelegatingCommand(viewModel.DeployApp, viewModel.CanDeployApp);
+            PushFromSourceCommand = new DelegatingCommand(viewModel.DeployAppFromSource, viewModel.CanDeployApp);
+            PushFromBinariesCommand = new DelegatingCommand(viewModel.DeployAppFromBinaries, viewModel.CanDeployApp);
             OpenLoginDialogCommand = new DelegatingCommand(viewModel.OpenLoginView, viewModel.CanOpenLoginView);
             themeService.SetTheme(this);
             DataContext = viewModel;

@@ -321,36 +321,39 @@ namespace Tanzu.Toolkit.ViewModels
             return true;
         }
 
-        public void DeployApp(object dialogWindow)
+        public void DeployAppFromSource(object dialogWindow)
         {
             try
             {
                 DeploymentStatus = InitialStatus;
 
-                if (string.IsNullOrEmpty(AppName))
-                {
-                    throw new Exception(AppNameEmptyMsg);
-                }
-
-                if (TasExplorerViewModel.TasConnection == null)
-                {
-                    throw new Exception(TargetEmptyMsg);
-                }
-
-                if (SelectedOrg == null)
-                {
-                    throw new Exception(OrgEmptyMsg);
-                }
-
-                if (SelectedSpace == null)
-                {
-                    throw new Exception(SpaceEmptyMsg);
-                }
+                ValidateDeploymentConfiguration();
 
                 DeploymentStatus = "Waiting for app to deploy....";
 
                 DeploymentInProgress = true;
-                Task.Run(StartDeployment);
+                ThreadingService.StartTask(StartDeployment);
+
+                DialogService.CloseDialog(dialogWindow, true);
+            }
+            catch (Exception e)
+            {
+                DeploymentStatus += $"\nAn error occurred: \n{e.Message}";
+            }
+        }
+
+        public void DeployAppFromBinaries(object dialogWindow)
+        {
+            try
+            {
+                DeploymentStatus = InitialStatus;
+
+                ValidateDeploymentConfiguration();
+
+                DeploymentStatus = "Waiting for app to deploy....";
+
+                DeploymentInProgress = true;
+                ThreadingService.StartTask(StartDeployment);
 
                 DialogService.CloseDialog(dialogWindow, true);
             }
@@ -508,6 +511,29 @@ namespace Tanzu.Toolkit.ViewModels
                         SelectedStack = detectedStack;
                     }
                 }
+            }
+        }
+
+        private void ValidateDeploymentConfiguration()
+        {
+            if (string.IsNullOrEmpty(AppName))
+            {
+                throw new Exception(AppNameEmptyMsg);
+            }
+
+            if (TasExplorerViewModel.TasConnection == null)
+            {
+                throw new Exception(TargetEmptyMsg);
+            }
+
+            if (SelectedOrg == null)
+            {
+                throw new Exception(OrgEmptyMsg);
+            }
+
+            if (SelectedSpace == null)
+            {
+                throw new Exception(SpaceEmptyMsg);
             }
         }
     }
