@@ -182,7 +182,7 @@
         <!--ROW 7-->
         <StackPanel Grid.Row="7" Grid.ColumnSpan="2" Margin="8,4,8,4">
             <Button Content="{ Binding DeploymentButtonLabel }" Width="160" HorizontalAlignment="Right" 
-                Command="{ Binding ElementName=DeploymentDialogViewElement, Path=UploadAppCommand }" 
+                Command="{ Binding ElementName=DeploymentDialogViewElement, Path=PushFromSourceCommand }" 
                 CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
              />
         </StackPanel>
