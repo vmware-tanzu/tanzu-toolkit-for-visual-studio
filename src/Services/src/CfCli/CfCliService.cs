@@ -513,7 +513,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         /// <param name="stdOutCallback"></param>
         /// <param name="stdErrCallback"></param>
         /// <param name="appDir"></param>
-        public async Task<DetailedResult> PushAppAsync(string appName, string orgName, string spaceName, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string appDir, string buildpack = null, string stack = null, string manifestPath = null)
+        public async Task<DetailedResult> PushAppAsync(string appName, string orgName, string spaceName, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string appDir, string buildpack = null, string stack = null, string startCommand = null, string manifestPath = null)
         {
             string args = $"push \"{appName}\"";
 
@@ -529,7 +529,7 @@ namespace Tanzu.Toolkit.Services.CfCli
 
             if (manifestPath != null)
             {
-                args = $"push -f \"{manifestPath}\"";
+                args += $" -f \"{manifestPath}\"";
             }
 
             Task<DetailedResult> deployTask;
@@ -619,7 +619,7 @@ namespace Tanzu.Toolkit.Services.CfCli
             };
 
             ICmdProcessService cmdProcessService = Services.GetRequiredService<ICmdProcessService>();
-            CmdResult result = cmdProcessService.RunCommand(pathToCfExe, arguments, workingDir, envVars);
+            CmdResult result = cmdProcessService.RunExecutable(pathToCfExe, arguments, workingDir, envVars);
 
             if (result.ExitCode == 0)
             {
@@ -665,7 +665,7 @@ namespace Tanzu.Toolkit.Services.CfCli
             };
 
             ICmdProcessService cmdProcessService = Services.GetRequiredService<ICmdProcessService>();
-            CmdResult result = await Task.Run(() => cmdProcessService.RunCommand(pathToCfExe, arguments, workingDir, envVars, stdOutCallback, stdErrCallback));
+            CmdResult result = await Task.Run(() => cmdProcessService.RunExecutable(pathToCfExe, arguments, workingDir, envVars, stdOutCallback, stdErrCallback));
 
             if (result.ExitCode == 0)
             {
