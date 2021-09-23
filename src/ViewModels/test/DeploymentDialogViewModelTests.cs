@@ -13,9 +13,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
     public class DeploymentDialogViewModelTests : ViewModelTestSupport
     {
         private const string _fakeAppName = "fake app name";
+        private const string _fakeStack = "windows";
         private const string _fakeProjPath = "this\\is\\a\\fake\\path\\to\\a\\project\\directory";
+        private const string _realPathToFakeDeploymentDir = "TestFakes";
         private const string FakeTargetFrameworkMoniker = "junk";
-
         private static readonly CloudFoundryInstance _fakeCfInstance = new CloudFoundryInstance("", "");
         private static readonly CloudFoundryOrganization _fakeOrg = new CloudFoundryOrganization("", "", _fakeCfInstance);
         private readonly CloudFoundrySpace _fakeSpace = new CloudFoundrySpace("", "", _fakeOrg);
@@ -33,7 +34,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 mock.NavigateTo(nameof(OutputViewModel), null))
                     .Returns(new FakeOutputView());
 
-            _sut = new DeploymentDialogViewModel(Services, _fakeProjPath, FakeTargetFrameworkMoniker);
+            Assert.IsTrue(Directory.Exists(_realPathToFakeDeploymentDir));
+
+            _sut = new DeploymentDialogViewModel(Services, _realPathToFakeDeploymentDir, FakeTargetFrameworkMoniker);
 
             _receivedEvents = new List<string>();
             _sut.PropertyChanged += (sender, e) =>
@@ -132,10 +135,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("DirectoryPath")]
         public void Constructor_SetsDefaultDirectoryPath_EqualToProjectDirPath()
         {
-            var realPathToTestFakes = "TestFakes";
-            Assert.IsTrue(Directory.Exists(realPathToTestFakes));
-
-            _sut = new DeploymentDialogViewModel(Services, realPathToTestFakes, FakeTargetFrameworkMoniker);
+            _sut = new DeploymentDialogViewModel(Services, _realPathToFakeDeploymentDir, FakeTargetFrameworkMoniker);
 
             Assert.AreEqual(_sut.PathToProjectRootDir, _sut.DirectoryPath);
             Assert.AreEqual(_sut.PathToProjectRootDir, _sut.DirectoryPathLabel);
@@ -326,10 +326,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        public async Task DeploymentDialogViewModel_IndicatesFullFWDeployment_WhenTFMStartsWith_NETFramework()
+        [TestCategory("StartDeployment")]
+        public async Task StartDeploymentTask_IndicatesFullFWDeployment_WhenTFMStartsWith_NETFramework()
         {
             string targetFrameworkMoniker = ".NETFramework";
-            _sut = new DeploymentDialogViewModel(Services, _fakeProjPath, targetFrameworkMoniker)
+            _sut = new DeploymentDialogViewModel(Services, _realPathToFakeDeploymentDir, targetFrameworkMoniker)
             {
                 AppName = _fakeAppName,
                 SelectedOrg = _fakeOrg,
@@ -339,10 +340,16 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             bool expectedFullFWFlag = true;
 
             MockCloudFoundryService.Setup(m => m.
-                DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath,
-                    expectedFullFWFlag,
-                    It.IsAny<StdOutDelegate>(),
-                    It.IsAny<StdErrDelegate>(), null, null))
+                DeployAppAsync(_fakeCfInstance,
+                               _fakeOrg,
+                               _fakeSpace,
+                               _fakeAppName,
+                               _realPathToFakeDeploymentDir,
+                               expectedFullFWFlag,
+                               It.IsAny<StdOutDelegate>(),
+                               It.IsAny<StdErrDelegate>(),
+                               null,
+                               null))
                 .ReturnsAsync(FakeSuccessDetailedResult);
 
             await _sut.StartDeployment();
@@ -354,16 +361,17 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("StartDeployment")]
         public async Task StartDeploymentTask_UpdatesDeploymentInProgress_WhenComplete()
         {
-            var receivedEvents = new List<string>();
-            _sut.PropertyChanged += (sender, e) =>
-            {
-                receivedEvents.Add(e.PropertyName);
-            };
-
             MockCloudFoundryService.Setup(mock =>
-                mock.DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, _defaultFullFWFlag,
+                mock.DeployAppAsync(_fakeCfInstance,
+                                    _fakeOrg,
+                                    _fakeSpace,
+                                    _fakeAppName,
+                                    _realPathToFakeDeploymentDir,
+                                    _defaultFullFWFlag,
                                     It.IsAny<StdOutDelegate>(),
-                                    It.IsAny<StdErrDelegate>(), null, null))
+                                    It.IsAny<StdErrDelegate>(),
+                                    null,
+                                    null))
                     .ReturnsAsync(FakeSuccessDetailedResult);
 
             _sut.AppName = _fakeAppName;
@@ -383,22 +391,53 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [DataRow("linux")]
         public async Task StartDeploymentTask_PassesSelectedStack_ForDeployment(string stack)
         {
-            var receivedEvents = new List<string>();
-            _sut.PropertyChanged += (sender, e) =>
-            {
-                receivedEvents.Add(e.PropertyName);
-            };
-
             MockCloudFoundryService.Setup(mock =>
-                mock.DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, _defaultFullFWFlag,
+                mock.DeployAppAsync(_fakeCfInstance,
+                                    _fakeOrg,
+                                    _fakeSpace,
+                                    _fakeAppName,
+                                    _realPathToFakeDeploymentDir,
+                                    _defaultFullFWFlag,
                                     It.IsAny<StdOutDelegate>(),
-                                    It.IsAny<StdErrDelegate>(), stack, null))
+                                    It.IsAny<StdErrDelegate>(),
+                                    stack,
+                                    null))
                     .ReturnsAsync(FakeSuccessDetailedResult);
 
             _sut.AppName = _fakeAppName;
             _sut.SelectedOrg = _fakeOrg;
             _sut.SelectedSpace = _fakeSpace;
             _sut.SelectedStack = stack;
+            Assert.IsNotNull(_sut.SelectedStack);
+
+            await _sut.StartDeployment();
+        }
+        
+        [TestMethod]
+        [TestCategory("StartDeployment")]
+        public async Task StartDeploymentTask_PassesDirectoryPath_ForDeployment()
+        {
+            var realPathToFakeDeploymentDir = _realPathToFakeDeploymentDir;
+
+            MockCloudFoundryService.Setup(mock =>
+                mock.DeployAppAsync(_fakeCfInstance,
+                                    _fakeOrg,
+                                    _fakeSpace,
+                                    _fakeAppName,
+                                    realPathToFakeDeploymentDir,
+                                    _defaultFullFWFlag,
+                                    It.IsAny<StdOutDelegate>(),
+                                    It.IsAny<StdErrDelegate>(),
+                                    _fakeStack,
+                                    null))
+                    .ReturnsAsync(FakeSuccessDetailedResult);
+
+            _sut.AppName = _fakeAppName;
+            _sut.SelectedOrg = _fakeOrg;
+            _sut.SelectedSpace = _fakeSpace;
+            _sut.SelectedStack = _fakeStack;
+            _sut.DirectoryPath = realPathToFakeDeploymentDir;
+
             Assert.IsNotNull(_sut.SelectedStack);
 
             await _sut.StartDeployment();
@@ -416,9 +455,16 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             StdErrDelegate expectedStdErrCallback = _sut.OutputViewModel.AppendLine;
 
             MockCloudFoundryService.Setup(mock => mock.
-              DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, _defaultFullFWFlag,
+              DeployAppAsync(_fakeCfInstance,
+                             _fakeOrg,
+                             _fakeSpace,
+                             _fakeAppName,
+                             _realPathToFakeDeploymentDir,
+                             _defaultFullFWFlag,
                              expectedStdOutCallback,
-                             expectedStdErrCallback, null, null))
+                             expectedStdErrCallback,
+                             null,
+                             null))
                 .ReturnsAsync(FakeSuccessDetailedResult);
 
             await _sut.StartDeployment();
@@ -436,9 +482,16 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             StdErrDelegate expectedStdErrCallback = _sut.OutputViewModel.AppendLine;
 
             MockCloudFoundryService.Setup(mock => mock.
-                DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, _defaultFullFWFlag,
-                             expectedStdOutCallback,
-                             expectedStdErrCallback, null, null))
+                DeployAppAsync(_fakeCfInstance,
+                               _fakeOrg,
+                               _fakeSpace,
+                               _fakeAppName,
+                               _realPathToFakeDeploymentDir,
+                               _defaultFullFWFlag,
+                               expectedStdOutCallback,
+                               expectedStdErrCallback,
+                               null,
+                               null))
                     .ReturnsAsync(FakeFailureDetailedResult);
 
             var expectedErrorTitle = $"{DeploymentDialogViewModel.DeploymentErrorMsg} {_fakeAppName}.";
@@ -473,9 +526,16 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             StdErrDelegate expectedStdErrCallback = _sut.OutputViewModel.AppendLine;
 
             MockCloudFoundryService.Setup(mock => mock.
-                DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, _defaultFullFWFlag,
-                             expectedStdOutCallback,
-                             expectedStdErrCallback, null, null))
+                DeployAppAsync(_fakeCfInstance,
+                               _fakeOrg,
+                               _fakeSpace,
+                               _fakeAppName,
+                               _realPathToFakeDeploymentDir,
+                               _defaultFullFWFlag,
+                               expectedStdOutCallback,
+                               expectedStdErrCallback,
+                               null,
+                               null))
                     .ReturnsAsync(FakeFailureDetailedResult);
 
             var expectedErrorTitle = $"{DeploymentDialogViewModel.DeploymentErrorMsg} {_fakeAppName}.";
@@ -504,9 +564,16 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             };
 
             MockCloudFoundryService.Setup(mock => mock.
-                DeployAppAsync(_fakeCfInstance, _fakeOrg, _fakeSpace, _fakeAppName, _fakeProjPath, _defaultFullFWFlag,
-                             expectedStdOutCallback,
-                             expectedStdErrCallback, null, null))
+                DeployAppAsync(_fakeCfInstance,
+                               _fakeOrg,
+                               _fakeSpace,
+                               _fakeAppName,
+                               _realPathToFakeDeploymentDir,
+                               _defaultFullFWFlag,
+                               expectedStdOutCallback,
+                               expectedStdErrCallback,
+                               null,
+                               null))
                     .ReturnsAsync(invalidRefreshTokenFailure);
 
             MockTasExplorerViewModel.SetupSet(m => m.AuthenticationRequired = true).Verifiable();
@@ -1053,16 +1120,18 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("DirectoryPath")]
         public void DirectoryPathSetter_SetsDirectoryPathLabel_WhenDirectoryExistsAtGivenPath()
         {
-            var realPathToTestFakes = "TestFakes";
-            Assert.IsTrue(Directory.Exists(realPathToTestFakes));
-
+            _sut.DirectoryPath = "junk//path";
             var initialDirectoryPathLabel = _sut.DirectoryPathLabel;
 
-            _sut.DirectoryPath = realPathToTestFakes;
+            Assert.IsNull(_sut.DirectoryPath);
+            Assert.AreEqual("<none specified>", _sut.DirectoryPathLabel);
 
+            _sut.DirectoryPath = _realPathToFakeDeploymentDir;
+
+            Assert.IsNotNull(_sut.DirectoryPath);
             Assert.AreNotEqual(initialDirectoryPathLabel, _sut.DirectoryPathLabel);
-            Assert.AreEqual(realPathToTestFakes, _sut.DirectoryPathLabel);
-            Assert.AreEqual(realPathToTestFakes, _sut.DirectoryPath);
+            Assert.AreEqual(_realPathToFakeDeploymentDir, _sut.DirectoryPathLabel);
+            Assert.AreEqual(_realPathToFakeDeploymentDir, _sut.DirectoryPath);
         }
 
         [TestMethod]
