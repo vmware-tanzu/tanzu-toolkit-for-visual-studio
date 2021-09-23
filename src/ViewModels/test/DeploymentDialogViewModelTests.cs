@@ -13,6 +13,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
     public class DeploymentDialogViewModelTests : ViewModelTestSupport
     {
         private const string _fakeAppName = "fake app name";
+        private const string _fakeProjName = "fake project name";
         private const string _fakeStack = "windows";
         private const string _fakeProjPath = "this\\is\\a\\fake\\path\\to\\a\\project\\directory";
         private const string _realPathToFakeDeploymentDir = "TestFakes";
@@ -36,7 +37,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsTrue(Directory.Exists(_realPathToFakeDeploymentDir));
 
-            _sut = new DeploymentDialogViewModel(Services, null, _realPathToFakeDeploymentDir, FakeTargetFrameworkMoniker);
+            _sut = new DeploymentDialogViewModel(Services, _fakeProjName, _realPathToFakeDeploymentDir, FakeTargetFrameworkMoniker);
 
             _receivedEvents = new List<string>();
             _sut.PropertyChanged += (sender, e) =>
@@ -269,7 +270,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                It.IsAny<StdOutDelegate>(),
                                It.IsAny<StdErrDelegate>(),
                                null,
-                               true, null, null))
+                               true, 
+                               It.IsAny<string>(), 
+                               null))
                 .ReturnsAsync(FakeSuccessDetailedResult);
 
             await _sut.StartDeployment();
@@ -291,7 +294,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                     It.IsAny<StdOutDelegate>(),
                                     It.IsAny<StdErrDelegate>(),
                                     null,
-                                    true, null, null))
+                                    true,
+                                    _fakeProjName, 
+                                    null))
                     .ReturnsAsync(FakeSuccessDetailedResult);
 
             _sut.AppName = _fakeAppName;
@@ -321,7 +326,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                     It.IsAny<StdOutDelegate>(),
                                     It.IsAny<StdErrDelegate>(),
                                     stack,
-                                    true, null, null))
+                                    true,
+                                    _fakeProjName, 
+                                    null))
                     .ReturnsAsync(FakeSuccessDetailedResult);
 
             _sut.AppName = _fakeAppName;
@@ -349,7 +356,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                     It.IsAny<StdOutDelegate>(),
                                     It.IsAny<StdErrDelegate>(),
                                     _fakeStack,
-                                    true, null, null))
+                                    true,
+                                    _fakeProjName, 
+                                    null))
                     .ReturnsAsync(FakeSuccessDetailedResult);
 
             _sut.AppName = _fakeAppName;
@@ -380,7 +389,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                     It.IsAny<StdErrDelegate>(),
                                     _fakeStack,
                                     isSourceDeployment,
-                                    null, null))
+                                    _fakeProjName, 
+                                    null))
                     .ReturnsAsync(FakeSuccessDetailedResult);
 
             _sut.AppName = _fakeAppName;
@@ -391,6 +401,37 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.SourceDeployment = isSourceDeployment;
 
             Assert.AreEqual(isSourceDeployment, _sut.SourceDeployment);
+
+            await _sut.StartDeployment();
+
+            MockCloudFoundryService.VerifyAll();
+        }
+        
+        [TestMethod]
+        [TestCategory("StartDeployment")]
+        public async Task StartDeployment_PassesProjectName_ForDeployment()
+        {
+            var expectedProjectName = _fakeProjName;
+
+            MockCloudFoundryService.Setup(mock =>
+                mock.DeployAppAsync(_fakeCfInstance,
+                                    _fakeOrg,
+                                    _fakeSpace,
+                                    _fakeAppName,
+                                    It.IsAny<string>(),
+                                    _defaultFullFWFlag,
+                                    It.IsAny<StdOutDelegate>(),
+                                    It.IsAny<StdErrDelegate>(),
+                                    _fakeStack,
+                                    It.IsAny<bool>(),
+                                    expectedProjectName, 
+                                    null))
+                    .ReturnsAsync(FakeSuccessDetailedResult);
+
+            _sut.AppName = _fakeAppName;
+            _sut.SelectedOrg = _fakeOrg;
+            _sut.SelectedSpace = _fakeSpace;
+            _sut.SelectedStack = _fakeStack;
 
             await _sut.StartDeployment();
 
@@ -418,7 +459,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                              expectedStdOutCallback,
                              expectedStdErrCallback,
                              null,
-                             true, null, null))
+                             true, 
+                             _fakeProjName, 
+                             null))
                 .ReturnsAsync(FakeSuccessDetailedResult);
 
             await _sut.StartDeployment();
@@ -445,7 +488,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                expectedStdOutCallback,
                                expectedStdErrCallback,
                                null,
-                               true, null, null))
+                               true, 
+                               _fakeProjName, 
+                               null))
                     .ReturnsAsync(FakeFailureDetailedResult);
 
             var expectedErrorTitle = $"{DeploymentDialogViewModel.DeploymentErrorMsg} {_fakeAppName}.";
@@ -489,7 +534,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                expectedStdOutCallback,
                                expectedStdErrCallback,
                                null,
-                               true, null, null))
+                               true, 
+                               _fakeProjName, 
+                               null))
                     .ReturnsAsync(FakeFailureDetailedResult);
 
             var expectedErrorTitle = $"{DeploymentDialogViewModel.DeploymentErrorMsg} {_fakeAppName}.";
@@ -527,7 +574,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                expectedStdOutCallback,
                                expectedStdErrCallback,
                                null,
-                               true, null, null))
+                               true,
+                               _fakeProjName, 
+                               null))
                     .ReturnsAsync(invalidRefreshTokenFailure);
 
             MockTasExplorerViewModel.SetupSet(m => m.AuthenticationRequired = true).Verifiable();
