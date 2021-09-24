@@ -50,7 +50,7 @@ namespace Tanzu.Toolkit.ViewModels
         private bool _isLoggedIn;
         private string _selectedStack;
         private List<string> _stackOptions = new List<string> { "windows", "linux" };
-        private bool _sourceDeployment;
+        private bool _binaryDeployment;
         private string _deploymentButtonLabel;
 
         public DeploymentDialogViewModel(IServiceProvider services, string projectName, string directoryOfProjectToDeploy, string targetFrameworkMoniker)
@@ -90,15 +90,15 @@ namespace Tanzu.Toolkit.ViewModels
             _projectName = projectName;
         }
 
-        public bool SourceDeployment
+        public bool BinaryDeployment
         {
-            get => _sourceDeployment;
+            get => _binaryDeployment;
 
             internal set
             {
-                DeploymentButtonLabel = value ? "Push app (from source)" : "Push app (from binaries)";
-                _sourceDeployment = value;
-                RaisePropertyChangedEvent("SourceDeployment");
+                DeploymentButtonLabel = value ? "Push app (from binaries)" : "Push app (from source)";
+                _binaryDeployment = value;
+                RaisePropertyChangedEvent("BinaryDeployment");
             }
         }
 
@@ -176,7 +176,7 @@ namespace Tanzu.Toolkit.ViewModels
                     _directoryPath = value;
                     DirectoryPathLabel = value;
 
-                    SourceDeployment = value == PathToProjectRootDir;
+                    BinaryDeployment = value != PathToProjectRootDir;
                 }
                 else
                 {
@@ -442,7 +442,7 @@ namespace Tanzu.Toolkit.ViewModels
                 stdOutCallback: OutputViewModel.AppendLine,
                 stdErrCallback: OutputViewModel.AppendLine,
                 stack: SelectedStack,
-                sourceDeployment: SourceDeployment,
+                binaryDeployment: BinaryDeployment,
                 projectName: _projectName, 
                 manifestPath: ManifestPath);
 
