@@ -270,7 +270,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                It.IsAny<StdOutDelegate>(),
                                It.IsAny<StdErrDelegate>(),
                                null,
-                               true, 
+                               false, 
                                It.IsAny<string>(), 
                                null))
                 .ReturnsAsync(FakeSuccessDetailedResult);
@@ -294,7 +294,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                     It.IsAny<StdOutDelegate>(),
                                     It.IsAny<StdErrDelegate>(),
                                     null,
-                                    true,
+                                    false,
                                     _fakeProjName, 
                                     null))
                     .ReturnsAsync(FakeSuccessDetailedResult);
@@ -326,7 +326,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                     It.IsAny<StdOutDelegate>(),
                                     It.IsAny<StdErrDelegate>(),
                                     stack,
-                                    true,
+                                    false,
                                     _fakeProjName, 
                                     null))
                     .ReturnsAsync(FakeSuccessDetailedResult);
@@ -356,7 +356,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                     It.IsAny<StdOutDelegate>(),
                                     It.IsAny<StdErrDelegate>(),
                                     _fakeStack,
-                                    true,
+                                    false,
                                     _fakeProjName, 
                                     null))
                     .ReturnsAsync(FakeSuccessDetailedResult);
@@ -376,7 +376,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("StartDeployment")]
         [DataRow(true)]
         [DataRow(false)]
-        public async Task StartDeployment_PassesSourceDeploymentBool_ForDeployment(bool isSourceDeployment)
+        public async Task StartDeployment_PassesBinaryDeploymentBool_ForDeployment(bool isBinaryDeployment)
         {
             MockCloudFoundryService.Setup(mock =>
                 mock.DeployAppAsync(_fakeCfInstance,
@@ -388,7 +388,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                     It.IsAny<StdOutDelegate>(),
                                     It.IsAny<StdErrDelegate>(),
                                     _fakeStack,
-                                    isSourceDeployment,
+                                    isBinaryDeployment,
                                     _fakeProjName, 
                                     null))
                     .ReturnsAsync(FakeSuccessDetailedResult);
@@ -398,9 +398,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.SelectedSpace = _fakeSpace;
             _sut.SelectedStack = _fakeStack;
             _sut.SelectedDeploymentDirectoryPath = _realPathToFakeDeploymentDir;
-            _sut.SourceDeployment = isSourceDeployment;
+            _sut.BinaryDeployment = isBinaryDeployment;
 
-            Assert.AreEqual(isSourceDeployment, _sut.SourceDeployment);
+            Assert.AreEqual(isBinaryDeployment, _sut.BinaryDeployment);
 
             await _sut.StartDeployment();
 
@@ -459,7 +459,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                              expectedStdOutCallback,
                              expectedStdErrCallback,
                              null,
-                             true, 
+                             false, 
                              _fakeProjName, 
                              null))
                 .ReturnsAsync(FakeSuccessDetailedResult);
@@ -488,7 +488,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                expectedStdOutCallback,
                                expectedStdErrCallback,
                                null,
-                               true, 
+                               false, 
                                _fakeProjName, 
                                null))
                     .ReturnsAsync(FakeFailureDetailedResult);
@@ -534,7 +534,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                expectedStdOutCallback,
                                expectedStdErrCallback,
                                null,
-                               true, 
+                               false, 
                                _fakeProjName, 
                                null))
                     .ReturnsAsync(FakeFailureDetailedResult);
@@ -574,7 +574,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                expectedStdOutCallback,
                                expectedStdErrCallback,
                                null,
-                               true,
+                               false,
                                _fakeProjName, 
                                null))
                     .ReturnsAsync(invalidRefreshTokenFailure);
@@ -1158,25 +1158,25 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("SourceDeployment")]
+        [TestCategory("BinaryDeployment")]
         [TestCategory("DeploymentButtonLabel")]
-        public void SourceDeployment_SetsDeploymentButtonLabelToPushSource_WhenSetToTrue()
+        public void BinaryDeployment_SetsDeploymentButtonLabelToPushSource_WhenSetToFalse()
         {
             _sut.DeploymentButtonLabel = "fake initial value";
 
-            _sut.SourceDeployment = true;
+            _sut.BinaryDeployment = false;
 
             Assert.AreEqual("Push app (from source)", _sut.DeploymentButtonLabel);
         }
 
         [TestMethod]
-        [TestCategory("SourceDeployment")]
+        [TestCategory("BinaryDeployment")]
         [TestCategory("DeploymentButtonLabel")]
-        public void SourceDeployment_SetsDeploymentButtonLabelToPushBinaries_WhenSetToFalse()
+        public void BinaryDeployment_SetsDeploymentButtonLabelToPushBinaries_WhenSetToTrue()
         {
             _sut.DeploymentButtonLabel = "fake initial value";
 
-            _sut.SourceDeployment = false;
+            _sut.BinaryDeployment = true;
 
             Assert.AreEqual("Push app (from binaries)", _sut.DeploymentButtonLabel);
         }

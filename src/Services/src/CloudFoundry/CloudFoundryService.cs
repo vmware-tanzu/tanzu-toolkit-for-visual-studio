@@ -687,7 +687,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             };
         }
 
-        public async Task<DetailedResult> DeployAppAsync(CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, string appName, string pathToDeploymentDirectory, bool fullFrameworkDeployment, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string stack, bool sourceDeployment, string projectName, string manifestPath = null)
+        public async Task<DetailedResult> DeployAppAsync(CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, string appName, string pathToDeploymentDirectory, bool fullFrameworkDeployment, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string stack, bool binaryDeployment, string projectName, string manifestPath = null)
         {
             if (!_fileLocatorService.DirContainsFiles(pathToDeploymentDirectory))
             {
@@ -706,7 +706,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             DetailedResult cfPushResult;
             try
             {
-                if (!sourceDeployment)
+                if (binaryDeployment)
                 {
                     buildpack = "binary_buildpack";
                     startCommand = $"cmd /c .\\{projectName} --urls=http://*:%PORT%";
