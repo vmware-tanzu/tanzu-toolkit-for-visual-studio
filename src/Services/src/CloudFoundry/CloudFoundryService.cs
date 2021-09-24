@@ -710,6 +710,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     buildpack = "binary_buildpack";
                     startCommand = $"cmd /c .\\{projectName} --urls=http://*:%PORT%";
+
+                    if (fullFrameworkDeployment)
+                    {
+                        startCommand = $"cmd /c .\\{projectName} --server.urls=http://*:%PORT%";
+                    }
                 }
 
                 cfPushResult = await _cfCliService.PushAppAsync(appName, targetOrg.OrgName, targetSpace.SpaceName, stdOutCallback, stdErrCallback, pathToDeploymentDirectory, buildpack, stack, startCommand, manifestPath);
