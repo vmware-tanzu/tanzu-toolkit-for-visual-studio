@@ -715,6 +715,12 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                     {
                         startCommand = $"cmd /c .\\{projectName} --server.urls=http://*:%PORT%";
                     }
+
+                    if (stack == "linux") 
+                    {
+                        buildpack = "dotnet_core_buildpack";
+                        startCommand = null;
+                    }
                 }
 
                 cfPushResult = await _cfCliService.PushAppAsync(appName, targetOrg.OrgName, targetSpace.SpaceName, stdOutCallback, stdErrCallback, pathToDeploymentDirectory, buildpack, stack, startCommand, manifestPath);
