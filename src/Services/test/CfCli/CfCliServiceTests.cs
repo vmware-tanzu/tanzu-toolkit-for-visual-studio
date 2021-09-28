@@ -1087,7 +1087,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         public async Task PushAppAsync_ReturnsSuccessResult_WhenCommandSucceeds()
         {
             var fakeAppName = "my fake app";
-            string expectedArgs = $"push \"{fakeAppName}\""; // ensure app name gets surrounded by quotes
+            string expectedArgs = $"push \"{fakeAppName}\" -p \"{_fakeProjectPath}\""; // ensure app name gets surrounded by quotes
             var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
             var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
 
@@ -1129,7 +1129,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
                 .Returns(_fakeSuccessCmdResult);
 
             _mockCmdProcessService.Setup(m => m.
-                RunExecutable(_fakePathToCfExe, expectedArgs, _fakeProjectPath, _defaultEnvVars, null, null))
+                RunExecutable(_fakePathToCfExe, It.Is<string>(s => s.Contains(expectedArgs)), _fakeProjectPath, _defaultEnvVars, null, null))
                     .Returns(_fakeSuccessCmdResult);
 
             var result = await _sut.PushAppAsync(fakeAppName, FakeOrg.OrgName, FakeSpace.SpaceName, null, null, _fakeProjectPath, stack: fakeStackValue, manifestPath: null, startCommand: null);
@@ -1158,7 +1158,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
                 .Returns(_fakeSuccessCmdResult);
 
             _mockCmdProcessService.Setup(m => m.
-                RunExecutable(_fakePathToCfExe, expectedArgs, _fakeProjectPath, _defaultEnvVars, null, null))
+                RunExecutable(_fakePathToCfExe, It.Is<string>(s => s.Contains(expectedArgs)), _fakeProjectPath, _defaultEnvVars, null, null))
                     .Returns(_fakeSuccessCmdResult);
 
             var result = await _sut.PushAppAsync(fakeAppName, FakeOrg.OrgName, FakeSpace.SpaceName, null, null, _fakeProjectPath, buildpack: fakeBuildpackValue, manifestPath: null, startCommand: null);
@@ -1166,6 +1166,33 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             Assert.IsTrue(result.Succeeded);
             Assert.IsNull(result.Explanation);
             Assert.AreEqual(_fakeSuccessCmdResult, result.CmdDetails);
+        }
+
+
+        [TestMethod]
+        [TestCategory("PushApp")]
+        public async Task PushAppAsync_AddsPFlag_WhenGivenAnAppDirParam()
+        {
+            var fakeAppName = "my fake app";
+            var fakeAppDirPath = "fake dir path";
+            string expectedArgs = $"push \"{fakeAppName}\" -p \"{fakeAppDirPath}\""; // ensure app name gets surrounded by quotes
+            
+            _mockCmdProcessService.Setup(m => m.
+              RunExecutable(_fakePathToCfExe, It.IsAny<string>(), null, _defaultEnvVars, null, null))
+                .Returns(_fakeSuccessCmdResult);
+
+            _mockCmdProcessService.Setup(m => m.
+              RunExecutable(_fakePathToCfExe, It.IsAny<string>(), null, _defaultEnvVars, null, null))
+                .Returns(_fakeSuccessCmdResult);
+
+            _mockCmdProcessService.Setup(m => m.
+                RunExecutable(_fakePathToCfExe, expectedArgs, fakeAppDirPath, _defaultEnvVars, null, null))
+                  .Returns(_fakeSuccessCmdResult);
+
+            await _sut.PushAppAsync(fakeAppName, FakeOrg.OrgName, FakeSpace.SpaceName, null, null, fakeAppDirPath, manifestPath: null, startCommand: null);
+
+            _mockCmdProcessService.Verify(m => m.
+                RunExecutable(_fakePathToCfExe, expectedArgs, fakeAppDirPath, _defaultEnvVars, null, null), Times.Once);
         }
 
         [TestMethod]
@@ -1187,7 +1214,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
                 .Returns(_fakeSuccessCmdResult);
 
             _mockCmdProcessService.Setup(m => m.
-                RunExecutable(_fakePathToCfExe, expectedArgs, _fakeProjectPath, _defaultEnvVars, null, null))
+                RunExecutable(_fakePathToCfExe, It.Is<string>(s => s.Contains(expectedArgs)), _fakeProjectPath, _defaultEnvVars, null, null))
                     .Returns(_fakeSuccessCmdResult);
 
             var result = await _sut.PushAppAsync(fakeAppName, FakeOrg.OrgName, FakeSpace.SpaceName, null, null, _fakeProjectPath, manifestPath: fakeManifestPath, startCommand: null);
@@ -1216,7 +1243,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
                 .Returns(_fakeSuccessCmdResult);
 
             _mockCmdProcessService.Setup(m => m.
-                RunExecutable(_fakePathToCfExe, expectedArgs, _fakeProjectPath, _defaultEnvVars, null, null))
+                RunExecutable(_fakePathToCfExe, It.Is<string>(s => s.Contains(expectedArgs)), _fakeProjectPath, _defaultEnvVars, null, null))
                     .Returns(_fakeSuccessCmdResult);
 
             var result = await _sut.PushAppAsync(fakeAppName, FakeOrg.OrgName, FakeSpace.SpaceName, null, null, _fakeProjectPath, buildpack: null, manifestPath: null, startCommand: fakeStartCommand);
@@ -1235,9 +1262,10 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var fakeStartCommand = "run the thing!";
             var fakeManifestPath = "this\\is\\a\\fake\\path\\to\\manifest.yml";
             var fakeBuildpackValue = "my-cool-buildpack";
+            var expectedAppDir = _fakeProjectPath;
 
             // ensure app name, start command & manifest path get surrounded by quotes
-            string expectedArgs = $"push \"{fakeAppName}\" -b {fakeBuildpackValue} -s {fakeStackValue} -c \"{fakeStartCommand}\" -f \"{fakeManifestPath}\"";
+            string expectedArgs = $"push \"{fakeAppName}\" -b {fakeBuildpackValue} -s {fakeStackValue} -c \"{fakeStartCommand}\" -f \"{fakeManifestPath}\" -p \"{expectedAppDir}\"";
             var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
             var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
 
@@ -1250,7 +1278,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
                 .Returns(_fakeSuccessCmdResult);
 
             _mockCmdProcessService.Setup(m => m.
-                RunExecutable(_fakePathToCfExe, expectedArgs, _fakeProjectPath, _defaultEnvVars, null, null))
+                RunExecutable(_fakePathToCfExe, expectedArgs, expectedAppDir, _defaultEnvVars, null, null))
                     .Returns(_fakeSuccessCmdResult);
 
             var result = await _sut.PushAppAsync(fakeAppName,
@@ -1258,7 +1286,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
                                                  FakeSpace.SpaceName,
                                                  null,
                                                  null,
-                                                 _fakeProjectPath,
+                                                 expectedAppDir,
                                                  buildpack: fakeBuildpackValue,
                                                  stack: fakeStackValue,
                                                  startCommand: fakeStartCommand,
@@ -1340,7 +1368,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         public async Task PushAppAsync_ReturnsFailureResult_WhenCfCmdFails()
         {
             var fakeAppName = "my fake app";
-            string expectedArgs = $"push \"{fakeAppName}\""; // ensure app name gets surrounded by quotes
+            string expectedArgs = $"push \"{fakeAppName}\" -p \"{_fakeProjectPath}\""; // ensure app name gets surrounded by quotes
             var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
             var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
 
@@ -1368,7 +1396,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         public async Task PushAppAsync_ReturnsGenericErrorMessage_WhenCfCmdFailsWithoutStdErr()
         {
             var fakeAppName = "my fake app";
-            string expectedArgs = $"push \"{fakeAppName}\""; // ensure app name gets surrounded by quotes
+            string expectedArgs = $"push \"{fakeAppName}\" -p \"{_fakeProjectPath}\""; // ensure app name gets surrounded by quotes
             var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
             var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
             CmdResult mockFailedResult = new CmdResult("Something went wrong but there's no StdErr!", "", 1);
@@ -1456,7 +1484,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         public async Task PushAppAsync_ThrowsInvalidRefreshTokenException_WhenCfCmdFailsDueToInvalidRefreshToken()
         {
             var fakeAppName = "my fake app";
-            string expectedArgs = $"push \"{fakeAppName}\""; // ensure app name gets surrounded by quotes
+            string expectedArgs = $"push \"{fakeAppName}\" -p \"{_fakeProjectPath}\""; // ensure app name gets surrounded by quotes
             var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
             var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
             var invalidRefreshTokenCmdResult = new CmdResult("junk output", CfCliService._invalidRefreshTokenError, 1);
