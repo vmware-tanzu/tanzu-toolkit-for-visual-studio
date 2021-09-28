@@ -1502,6 +1502,46 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
+        [TestCategory("DeployApp")]
+        public async Task DeployAppAsync_SpecifiesDotNetCoreBuildpack_WhenBinaryDeploymentIsTrue_AndStackIsLinux()
+        {
+            _mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
+
+            var expectedProjectName = "junk proj name";
+            var expectedBuildpack = "dotnet_core_buildpack";
+            string expectedStartCommand = null;
+
+            _mockCfCliService.Setup(mock =>
+                mock.PushAppAsync(FakeApp.AppName,
+                                  FakeApp.ParentSpace.ParentOrg.OrgName,
+                                  FakeApp.ParentSpace.SpaceName,
+                                  It.IsAny<StdOutDelegate>(),
+                                  It.IsAny<StdErrDelegate>(),
+                                  _fakeProjectPath,
+                                  expectedBuildpack,
+                                  It.IsAny<string>(),
+                                  expectedStartCommand,
+                                  null))
+                    .ReturnsAsync(_fakeSuccessDetailedResult);
+
+            await _sut.DeployAppAsync(FakeCfInstance,
+                                      FakeOrg,
+                                      FakeSpace,
+                                      FakeApp.AppName,
+                                      _fakeProjectPath,
+                                      _defaultFullFWFlag,
+                                      null,
+                                      null,
+                                      manifestPath: null,
+                                      binaryDeployment: true,
+                                      projectName: expectedProjectName,
+                                      stack: "linux");
+
+            _mockCfCliService.VerifyAll();
+        }
+
+
+        [TestMethod]
         [TestCategory("GetRecentLogs")]
         public async Task GetRecentLogs_ReturnsSuccessResult_WhenWrappedMethodSucceeds()
         {
