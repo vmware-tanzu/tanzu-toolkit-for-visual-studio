@@ -513,7 +513,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         /// <param name="stdOutCallback"></param>
         /// <param name="stdErrCallback"></param>
         /// <param name="appDir"></param>
-        public async Task<DetailedResult> PushAppAsync(string appName, string orgName, string spaceName, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string appDir, string buildpack = null, string stack = null, string startCommand = null, string manifestPath = null)
+        public async Task<DetailedResult> PushAppAsync(string appName, string orgName, string spaceName, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string appDirPath, string buildpack = null, string stack = null, string startCommand = null, string manifestPath = null)
         {
             string args = $"push \"{appName}\"";
 
@@ -537,6 +537,11 @@ namespace Tanzu.Toolkit.Services.CfCli
                 args += $" -f \"{manifestPath}\"";
             }
 
+            if (appDirPath != null)
+            {
+                args += $" -p \"{appDirPath}\"";
+            }
+
             Task<DetailedResult> deployTask;
             lock (_cfEnvironmentLock)
             {
@@ -556,7 +561,7 @@ namespace Tanzu.Toolkit.Services.CfCli
                     return new DetailedResult(false, explanation: msg, targetSpaceResult.CmdDetails);
                 }
 
-                deployTask = Task.Run(async () => await RunCfCommandAsync(args, stdOutCallback, stdErrCallback, appDir));
+                deployTask = Task.Run(async () => await RunCfCommandAsync(args, stdOutCallback, stdErrCallback, appDirPath));
             }
 
             var deployResult = await deployTask;
