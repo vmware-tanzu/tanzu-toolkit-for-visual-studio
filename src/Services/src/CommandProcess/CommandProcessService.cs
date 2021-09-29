@@ -2,16 +2,16 @@
 using System.Diagnostics;
 using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
-namespace Tanzu.Toolkit.Services.CmdProcess
+namespace Tanzu.Toolkit.Services.CommandProcess
 {
-    public class CmdProcessService : ICmdProcessService
+    public class CommandProcessService : ICommandProcessService
     {
         private StdOutDelegate _stdOutCallback;
         private StdErrDelegate _stdErrCallback;
         private string _stdOutAggregator = "";
         private string _stdErrAggregator = "";
 
-        public CmdResult RunExecutable(string executableFilePath, string arguments, string workingDir, Dictionary<string, string> envVars = null, StdOutDelegate stdOutDelegate = null, StdErrDelegate stdErrDelegate = null)
+        public CommandResult RunExecutable(string executableFilePath, string arguments, string workingDir, Dictionary<string, string> envVars = null, StdOutDelegate stdOutDelegate = null, StdErrDelegate stdErrDelegate = null)
         {
             // Create Process
             Process process = new Process();
@@ -51,7 +51,7 @@ namespace Tanzu.Toolkit.Services.CmdProcess
             // Begin blocking call
             process.WaitForExit();
 
-            return new CmdResult(_stdOutAggregator, _stdErrAggregator, process.ExitCode);
+            return new CommandResult(_stdOutAggregator, _stdErrAggregator, process.ExitCode);
         }
 
         private void OutputRecorder(object sendingProcess, DataReceivedEventArgs outLine)

@@ -12,7 +12,7 @@ using Tanzu.Toolkit.Services.CfCli.Models;
 using Tanzu.Toolkit.Services.CfCli.Models.Apps;
 using Tanzu.Toolkit.Services.CfCli.Models.Orgs;
 using Tanzu.Toolkit.Services.CfCli.Models.Spaces;
-using Tanzu.Toolkit.Services.CmdProcess;
+using Tanzu.Toolkit.Services.CommandProcess;
 using Tanzu.Toolkit.Services.FileLocator;
 using Tanzu.Toolkit.Services.Logging;
 using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
@@ -607,7 +607,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         }
 
         /// <summary>
-        /// Invoke a CF CLI command using the <see cref="CmdProcessService"/>.
+        /// Invoke a CF CLI command using the <see cref="CommandProcessService"/>.
         /// This method is synchronous, meaning it can be used within a lock statement.
         /// </summary>
         /// <param name="arguments"></param>
@@ -628,8 +628,8 @@ namespace Tanzu.Toolkit.Services.CfCli
                 { "CF_HOME", ConfigFilePath }
             };
 
-            ICmdProcessService cmdProcessService = Services.GetRequiredService<ICmdProcessService>();
-            CmdResult result = cmdProcessService.RunExecutable(pathToCfExe, arguments, workingDir, envVars);
+            ICommandProcessService cmdProcessService = Services.GetRequiredService<ICommandProcessService>();
+            CommandResult result = cmdProcessService.RunExecutable(pathToCfExe, arguments, workingDir, envVars);
 
             if (result.ExitCode == 0)
             {
@@ -653,7 +653,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         }
 
         /// <summary>
-        /// Initiate a CF CLI command process by invoking the <see cref="CmdProcessService"/>.
+        /// Initiate a CF CLI command process by invoking the <see cref="CommandProcessService"/>.
         /// This method is asynchronous, meaning it cannot be used within a lock statement.
         /// </summary>
         /// <param name="arguments"></param>
@@ -674,8 +674,8 @@ namespace Tanzu.Toolkit.Services.CfCli
                 { "CF_HOME", ConfigFilePath }
             };
 
-            ICmdProcessService cmdProcessService = Services.GetRequiredService<ICmdProcessService>();
-            CmdResult result = await Task.Run(() => cmdProcessService.RunExecutable(pathToCfExe, arguments, workingDir, envVars, stdOutCallback, stdErrCallback));
+            ICommandProcessService cmdProcessService = Services.GetRequiredService<ICommandProcessService>();
+            CommandResult result = await Task.Run(() => cmdProcessService.RunExecutable(pathToCfExe, arguments, workingDir, envVars, stdOutCallback, stdErrCallback));
 
             if (result.ExitCode == 0)
             {

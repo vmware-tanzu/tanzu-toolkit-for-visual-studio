@@ -1,13 +1,13 @@
-﻿namespace Tanzu.Toolkit.Services.CmdProcess
+﻿namespace Tanzu.Toolkit.Services.CommandProcess
 {
-    public class CmdResult
+    public class CommandResult
     {
         public string StdOut { get; }
         public string StdErr { get; }
 
         public int ExitCode { get; }
 
-        public CmdResult(string stdOut, string stdErr, int exitCode)
+        public CommandResult(string stdOut, string stdErr, int exitCode)
         {
             StdOut = stdOut;
             StdErr = stdErr;
