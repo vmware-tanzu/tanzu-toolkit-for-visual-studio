@@ -90,6 +90,27 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             totalResults: 125,
             totalPages: 3,
             resultsPerPage: 50));
+
+        internal static readonly string _fakeBuildpacksJsonResponsePage1 = JsonConvert.SerializeObject(new FakeBuildpacksResponse(
+            apiAddress: _fakeCfApiAddress,
+            pageNum: 1,
+            totalResults: 125,
+            totalPages: 3,
+            resultsPerPage: 50));
+
+        internal static readonly string _fakeBuildpacksJsonResponsePage2 = JsonConvert.SerializeObject(new FakeBuildpacksResponse(
+            apiAddress: _fakeCfApiAddress,
+            pageNum: 2,
+            totalResults: 125,
+            totalPages: 3,
+            resultsPerPage: 50));
+
+        internal static readonly string _fakeBuildpacksJsonResponsePage3 = JsonConvert.SerializeObject(new FakeBuildpacksResponse(
+            apiAddress: _fakeCfApiAddress,
+            pageNum: 3,
+            totalResults: 125,
+            totalPages: 3,
+            resultsPerPage: 50));
     }
 
     internal class FakeBasicInfoResponse : BasicInfoResponse
@@ -270,6 +291,63 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             }
 
             Apps = apps;
+        }
+    }
+
+    internal class FakeBuildpacksResponse : BuildpacksResponse
+    {
+        public FakeBuildpacksResponse(string apiAddress, int pageNum, int totalResults, int totalPages, int resultsPerPage)
+        {
+            bool isFirstPage = pageNum == 1;
+            bool isLastPage = pageNum == totalPages;
+
+            var firstHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListBuildpacksPath}?page=1&per_page={resultsPerPage}" };
+            var lastHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListBuildpacksPath}?page={totalPages}&per_page={resultsPerPage}" };
+            var nextHref = isLastPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListBuildpacksPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
+            var previousHref = isFirstPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListBuildpacksPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
+
+            Pagination = new Pagination
+            {
+                Total_results = totalResults,
+                Total_pages = totalPages,
+                First = firstHref,
+                Last = lastHref,
+                Next = nextHref,
+                Previous = previousHref,
+            };
+
+            Buildpack[] buildpacks;
+
+            var numPreviousResults = (pageNum - 1) * resultsPerPage;
+            
+            if (isLastPage)
+            {
+                int numResourcesInLastPage = totalResults % resultsPerPage;
+                buildpacks = new Buildpack[numResourcesInLastPage];
+
+                for (int i = 0; i < numResourcesInLastPage; i++)
+                {
+                    buildpacks[i] = new Buildpack
+                    {
+                        Name = $"fakeBuildpack{i / 3 + 1 + numPreviousResults}",
+                        Stack = $"fakeStack{i % 3 + 1 + numPreviousResults}",
+                    };
+                }
+            }
+            else
+            {
+                buildpacks = new Buildpack[resultsPerPage];
+
+                for (int i = 0; i < resultsPerPage; i++)
+                {
+                    buildpacks[i] = new Buildpack
+                    {
+                        Name = $"fakeBuildpack{i / 3 + 1 + numPreviousResults}",
+                        Stack = $"fakeStack{i % 3 + 1 + numPreviousResults}",
+                    };
+                }
+            }
+            Buildpacks = buildpacks;
         }
     }
 }

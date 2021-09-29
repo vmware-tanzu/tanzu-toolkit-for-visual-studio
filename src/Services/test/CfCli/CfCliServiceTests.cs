@@ -1386,7 +1386,6 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             Assert.AreEqual(_fakeFailureCmdResult, result.CmdResult);
         }
 
-
         [TestMethod]
         [TestCategory("GetRecentAppLogs")]
         public async Task GetRecentAppLogs_ThrowsInvalidRefreshTokenException_WhenTargetOrgReportsInvalidRefreshToken()
@@ -1481,6 +1480,5 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             Assert.IsNotNull(thrownException);
             Assert.IsTrue(thrownException is InvalidRefreshTokenException);
         }
-
     }
 }
