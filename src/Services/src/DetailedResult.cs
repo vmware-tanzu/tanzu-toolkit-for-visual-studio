@@ -1,5 +1,5 @@
 ﻿using System.Text.Json;
-using Tanzu.Toolkit.Services.CmdProcess;
+using Tanzu.Toolkit.Services.CommandProcess;
 
 namespace Tanzu.Toolkit.Services
 {
@@ -9,7 +9,7 @@ namespace Tanzu.Toolkit.Services
         {
         }
 
-        public DetailedResult(bool succeeded, string explanation = null, CmdResult cmdDetails = null)
+        public DetailedResult(bool succeeded, string explanation = null, CommandResult cmdDetails = null)
         {
             Succeeded = succeeded;
             Explanation = explanation;
@@ -19,7 +19,7 @@ namespace Tanzu.Toolkit.Services
 
         public bool Succeeded { get; set; }
         public string Explanation { get; set; }
-        public CmdResult CmdDetails { get; }
+        public CommandResult CmdDetails { get; }
         public FailureType FailureType { get; set; }
 
         public override string ToString()
@@ -34,7 +34,7 @@ namespace Tanzu.Toolkit.Services
         {
         }
 
-        public DetailedResult(T content, bool succeeded, string explanation = null, CmdResult cmdDetails = null) : base(succeeded, explanation, cmdDetails)
+        public DetailedResult(T content, bool succeeded, string explanation = null, CommandResult cmdDetails = null) : base(succeeded, explanation, cmdDetails)
         {
             Content = content;
         }

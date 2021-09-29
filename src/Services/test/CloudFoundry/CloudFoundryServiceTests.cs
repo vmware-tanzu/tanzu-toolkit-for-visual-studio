@@ -9,7 +9,8 @@ using Tanzu.Toolkit.CloudFoundryApiClient;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CloudFoundry;
-using Tanzu.Toolkit.Services.CmdProcess;
+using Tanzu.Toolkit.Services.CommandProcess;
+using Tanzu.Toolkit.Services.CommandProcess;
 using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.FileLocator;
@@ -28,7 +29,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         private Mock<ICfApiClient> _mockCfApiClient;
         private Mock<ICfCliService> _mockCfCliService;
         private Mock<IErrorDialog> _mockErrorDialogWindowService;
-        private Mock<ICmdProcessService> _mockCmdProcessService;
+        private Mock<ICommandProcessService> _mockCommandProcessService;
         private Mock<IFileLocatorService> _mockFileLocatorService;
         private Mock<ILoggingService> _mockLoggingService;
         private Mock<ILogger> _mockLogger;
@@ -42,7 +43,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             _mockCfApiClient = new Mock<ICfApiClient>();
             _mockCfCliService = new Mock<ICfCliService>();
             _mockErrorDialogWindowService = new Mock<IErrorDialog>();
-            _mockCmdProcessService = new Mock<ICmdProcessService>();
+            _mockCommandProcessService = new Mock<ICommandProcessService>();
             _mockFileLocatorService = new Mock<IFileLocatorService>();
             _mockLoggingService = new Mock<ILoggingService>();
 
@@ -52,7 +53,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             serviceCollection.AddSingleton(_mockCfApiClient.Object);
             serviceCollection.AddSingleton(_mockCfCliService.Object);
             serviceCollection.AddSingleton(_mockErrorDialogWindowService.Object);
-            serviceCollection.AddSingleton(_mockCmdProcessService.Object);
+            serviceCollection.AddSingleton(_mockCommandProcessService.Object);
             serviceCollection.AddSingleton(_mockFileLocatorService.Object);
             serviceCollection.AddSingleton(_mockLoggingService.Object);
 
@@ -191,10 +192,10 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         public async Task ConnectToCfAsync_InvokesCfApiAndCfAuthCommands()
         {
             var cfApiArgs = $"api {_fakeValidTarget}{(_skipSsl ? " --skip-ssl-validation" : string.Empty)}";
-            var fakeCfApiResponse = new DetailedResult(true, null, new CmdResult(null, null, 0));
+            var fakeCfApiResponse = new DetailedResult(true, null, new CommandResult(null, null, 0));
             var fakePasswordStr = new System.Net.NetworkCredential(string.Empty, _fakeValidPassword).Password;
             var cfAuthArgs = $"auth {_fakeValidUsername} {fakePasswordStr}";
-            var fakeCfAuthResponse = new DetailedResult(true, null, new CmdResult(null, null, 0));
+            var fakeCfAuthResponse = new DetailedResult(true, null, new CommandResult(null, null, 0));
 
             _mockCfCliService.Setup(mock => mock.
               TargetApi(_fakeValidTarget, It.IsAny<bool>()))

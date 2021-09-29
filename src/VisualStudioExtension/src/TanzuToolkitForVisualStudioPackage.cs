@@ -9,7 +9,7 @@ using Tanzu.Toolkit.CloudFoundryApiClient;
 using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CloudFoundry;
-using Tanzu.Toolkit.Services.CmdProcess;
+using Tanzu.Toolkit.Services.CommandProcess;
 using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.FileLocator;
@@ -124,7 +124,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<IErrorDialog>(new ErrorDialogWindowService(this));
             services.AddSingleton<IUiDispatcherService, UiDispatcherService>();
             services.AddSingleton<IThemeService>(new ThemeService());
-            services.AddTransient<ICmdProcessService, CmdProcessService>();
+            services.AddTransient<ICommandProcessService, CommandProcessService>();
 
             /* Tool Windows */
             services.AddTransient<TanzuTasExplorerToolWindow>();
