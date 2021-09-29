@@ -540,5 +540,62 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Assert.AreEqual(1, _mockHttp.GetMatchCount(cfDeleteAppRequest));
             Assert.IsNotNull(expectedException);
         }
+
+        [TestMethod]
+        [TestCategory("ListBuildpacks")]
+        public async Task ListBuildpacks_ReturnsListOfBuildpacks_WhenResponseContainsMultiplePages()
+        {
+            string expectedPath = CfApiClient.ListBuildpacksPath;
+            string page2Identifier = "?page=2&per_page=50";
+            string page3Identifier = "?page=3&per_page=50";
+
+            MockedRequest buildpacksRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
+                    .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                    .Respond("application/json", _fakeBuildpacksJsonResponsePage1);
+
+            MockedRequest buildpacksPage2Request = _mockHttp.Expect(_fakeCfApiAddress + expectedPath + page2Identifier)
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond("application/json", _fakeBuildpacksJsonResponsePage2);
+
+            MockedRequest buildpacksPage3Request = _mockHttp.Expect(_fakeCfApiAddress + expectedPath + page3Identifier)
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond("application/json", _fakeBuildpacksJsonResponsePage3);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.ListBuildpacks(_fakeCfApiAddress, _fakeAccessToken);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(125, result.Count);
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(buildpacksRequest));
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(buildpacksPage2Request));
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(buildpacksPage3Request));
+        }
+
+        [TestMethod]
+        [TestCategory("ListBuildpacks")]
+        public async Task ListBuildpacks_ThrowsException_WhenStatusCodeIsNotASuccess()
+        {
+            string expectedPath = CfApiClient.ListBuildpacksPath;
+
+            MockedRequest buildpacksRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond(HttpStatusCode.Unauthorized);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            Exception expectedException = null;
+            try
+            {
+                var result = await _sut.ListBuildpacks(_fakeCfApiAddress, _fakeAccessToken);
+            }
+            catch (Exception ex)
+            {
+                expectedException = ex;
+            }
+
+            Assert.IsNotNull(expectedException);
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(buildpacksRequest));
+        }
     }
 }
