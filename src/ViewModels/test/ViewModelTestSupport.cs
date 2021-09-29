@@ -6,7 +6,7 @@ using Serilog;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CloudFoundry;
-using Tanzu.Toolkit.Services.CmdProcess;
+using Tanzu.Toolkit.Services.CommandProcess;
 using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.Logging;
@@ -45,8 +45,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         protected static readonly List<CloudFoundrySpace> EmptyListOfSpaces = new List<CloudFoundrySpace>();
         protected static readonly List<CloudFoundryApp> EmptyListOfApps = new List<CloudFoundryApp>();
 
-        protected static readonly CmdResult FakeSuccessCmdResult = new CmdResult("junk output", "junk error", 0);
-        protected static readonly CmdResult FakeFailureCmdResult = new CmdResult("junk output", "junk error", 1);
+        protected static readonly CommandResult FakeSuccessCmdResult = new CommandResult("junk output", "junk error", 0);
+        protected static readonly CommandResult FakeFailureCmdResult = new CommandResult("junk output", "junk error", 1);
 
         protected static readonly DetailedResult FakeSuccessDetailedResult = new DetailedResult(true, null, FakeSuccessCmdResult);
         protected static readonly DetailedResult FakeFailureDetailedResult = new DetailedResult(false, "junk error", FakeFailureCmdResult);

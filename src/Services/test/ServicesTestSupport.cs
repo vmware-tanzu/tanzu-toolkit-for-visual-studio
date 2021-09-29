@@ -11,7 +11,7 @@ using Tanzu.Toolkit.Services.CfCli.Models.Apps;
 using Tanzu.Toolkit.Services.CfCli.Models.Orgs;
 using Tanzu.Toolkit.Services.CfCli.Models.Spaces;
 using Tanzu.Toolkit.Services.CloudFoundry;
-using Tanzu.Toolkit.Services.CmdProcess;
+using Tanzu.Toolkit.Services.CommandProcess;
 using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.FileLocator;
 using Tanzu.Toolkit.Services.Logging;
@@ -72,8 +72,8 @@ namespace Tanzu.Toolkit.Services.Tests
         protected static readonly CloudFoundrySpace FakeSpace = new CloudFoundrySpace("fake space", "fake space guid", FakeOrg);
         protected static readonly CloudFoundryApp FakeApp = new CloudFoundryApp("fake app", "fake app guid", FakeSpace, null);
 
-        protected static readonly CmdResult _fakeSuccessCmdResult = new CmdResult("junk output", "junk error", 0);
-        protected static readonly CmdResult _fakeFailureCmdResult = new CmdResult("junk output", "junk error", 1);
+        protected static readonly CommandResult _fakeSuccessCmdResult = new CommandResult("junk output", "junk error", 0);
+        protected static readonly CommandResult _fakeFailureCmdResult = new CommandResult("junk output", "junk error", 1);
         protected static readonly DetailedResult _fakeSuccessDetailedResult = new DetailedResult(true, null, _fakeSuccessCmdResult);
         protected static readonly DetailedResult _fakeFailureDetailedResult = new DetailedResult(false, "junk", _fakeSuccessCmdResult);
 
