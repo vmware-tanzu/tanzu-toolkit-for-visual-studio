@@ -313,7 +313,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         [TestCategory("StartDeployment")]
         [DataRow("windows")]
-        [DataRow("linux")]
+        [DataRow("cflinuxfs3")]
         public async Task StartDeploymentTask_PassesSelectedStack_ForDeployment(string stack)
         {
             MockCloudFoundryService.Setup(mock =>
@@ -977,7 +977,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             Assert.AreEqual(2, _sut.StackOptions.Count);
             Assert.IsTrue(_sut.StackOptions.Contains("windows"));
-            Assert.IsTrue(_sut.StackOptions.Contains("linux"));
+            Assert.IsTrue(_sut.StackOptions.Contains("cflinuxfs3"));
         }
 
         [TestMethod]

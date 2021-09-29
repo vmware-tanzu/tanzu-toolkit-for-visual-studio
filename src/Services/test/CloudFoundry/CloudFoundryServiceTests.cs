@@ -1398,7 +1398,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestMethod]
         [TestCategory("DeployApp")]
         [DataRow("windows")]
-        [DataRow("linux")]
+        [DataRow("cflinuxfs3")]
         [DataRow("junk")]
         public async Task DeployAppAsync_ReturnsTrueResult_WhenCfTargetAndPushCommandsSucceed(string stack)
         {
@@ -1535,7 +1535,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                                       manifestPath: null,
                                       binaryDeployment: true,
                                       projectName: expectedProjectName,
-                                      stack: "linux");
+                                      stack: "cflinuxfs3");
 
             _mockCfCliService.VerifyAll();
         }

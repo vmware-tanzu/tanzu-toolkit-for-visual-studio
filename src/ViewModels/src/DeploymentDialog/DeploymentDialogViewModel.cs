@@ -49,7 +49,7 @@ namespace Tanzu.Toolkit.ViewModels
         private string _targetName;
         private bool _isLoggedIn;
         private string _selectedStack;
-        private List<string> _stackOptions = new List<string> { "windows", "linux" };
+        private List<string> _stackOptions = new List<string> { "windows", "cflinuxfs3" };
         private bool _binaryDeployment;
         private string _deploymentButtonLabel;
 
