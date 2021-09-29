@@ -716,7 +716,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                         startCommand = $"cmd /c .\\{projectName} --server.urls=http://*:%PORT%";
                     }
 
-                    if (stack == "linux") 
+                    if (stack == "cflinuxfs3") 
                     {
                         buildpack = "dotnet_core_buildpack";
                         startCommand = null;
