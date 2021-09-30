@@ -133,12 +133,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("ctor")]
-        [TestCategory("SelectedDeploymentDirectoryPath")]
+        [TestCategory("DeploymentDirectoryPath")]
         public void Constructor_SetsDefaultDirectoryPath_EqualToProjectDirPath()
         {
             _sut = new DeploymentDialogViewModel(Services, null, _realPathToFakeDeploymentDir, FakeTargetFrameworkMoniker);
 
-            Assert.AreEqual(_sut.PathToProjectRootDir, _sut.SelectedDeploymentDirectoryPath);
+            Assert.AreEqual(_sut.PathToProjectRootDir, _sut.DeploymentDirectoryPath);
             Assert.AreEqual(_sut.PathToProjectRootDir, _sut.DirectoryPathLabel);
         }
 
@@ -365,7 +365,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.SelectedOrg = _fakeOrg;
             _sut.SelectedSpace = _fakeSpace;
             _sut.SelectedStack = _fakeStack;
-            _sut.SelectedDeploymentDirectoryPath = realPathToFakeDeploymentDir;
+            _sut.DeploymentDirectoryPath = realPathToFakeDeploymentDir;
 
             Assert.IsNotNull(_sut.SelectedStack);
 
@@ -397,7 +397,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.SelectedOrg = _fakeOrg;
             _sut.SelectedSpace = _fakeSpace;
             _sut.SelectedStack = _fakeStack;
-            _sut.SelectedDeploymentDirectoryPath = _realPathToFakeDeploymentDir;
+            _sut.DeploymentDirectoryPath = _realPathToFakeDeploymentDir;
             _sut.BinaryDeployment = isBinaryDeployment;
 
             Assert.AreEqual(isBinaryDeployment, _sut.BinaryDeployment);
@@ -1120,25 +1120,25 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("SelectedDeploymentDirectoryPath")]
+        [TestCategory("DeploymentDirectoryPath")]
         public void DirectoryPathSetter_SetsDirectoryPathLabel_WhenDirectoryExistsAtGivenPath()
         {
-            _sut.SelectedDeploymentDirectoryPath = "junk//path";
+            _sut.DeploymentDirectoryPath = "junk//path";
             var initialDirectoryPathLabel = _sut.DirectoryPathLabel;
 
-            Assert.IsNull(_sut.SelectedDeploymentDirectoryPath);
+            Assert.IsNull(_sut.DeploymentDirectoryPath);
             Assert.AreEqual("<none specified>", _sut.DirectoryPathLabel);
 
-            _sut.SelectedDeploymentDirectoryPath = _realPathToFakeDeploymentDir;
+            _sut.DeploymentDirectoryPath = _realPathToFakeDeploymentDir;
 
-            Assert.IsNotNull(_sut.SelectedDeploymentDirectoryPath);
+            Assert.IsNotNull(_sut.DeploymentDirectoryPath);
             Assert.AreNotEqual(initialDirectoryPathLabel, _sut.DirectoryPathLabel);
             Assert.AreEqual(_realPathToFakeDeploymentDir, _sut.DirectoryPathLabel);
-            Assert.AreEqual(_realPathToFakeDeploymentDir, _sut.SelectedDeploymentDirectoryPath);
+            Assert.AreEqual(_realPathToFakeDeploymentDir, _sut.DeploymentDirectoryPath);
         }
 
         [TestMethod]
-        [TestCategory("SelectedDeploymentDirectoryPath")]
+        [TestCategory("DeploymentDirectoryPath")]
         public void DirectoryPathSetter_DisplaysError_AndSetsDirectoryPathLabelToNoneSpecified_WhenNoDirectoryExistsAtGivenPath()
         {
             var fakePath = "asdf//junk";
@@ -1148,7 +1148,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.AreNotEqual("<none specified>", _sut.DirectoryPathLabel);
 
-            _sut.SelectedDeploymentDirectoryPath = fakePath;
+            _sut.DeploymentDirectoryPath = fakePath;
 
             Assert.AreEqual("<none specified>", _sut.DirectoryPathLabel);
 

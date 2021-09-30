@@ -72,7 +72,7 @@ namespace Tanzu.Toolkit.WpfViews
 
             if (openFolderDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                _viewModel.SelectedDeploymentDirectoryPath = openFolderDialog.SelectedPath;
+                _viewModel.DeploymentDirectoryPath = openFolderDialog.SelectedPath;
             }
         }
     }
