@@ -86,7 +86,7 @@ namespace Tanzu.Toolkit.ViewModels
                 ThreadingService.StartTask(UpdateCfOrgOptions);
             }
 
-            SelectedDeploymentDirectoryPath = PathToProjectRootDir;
+            DeploymentDirectoryPath = PathToProjectRootDir;
             _projectName = projectName;
         }
 
@@ -165,7 +165,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public string SelectedDeploymentDirectoryPath
+        public string DeploymentDirectoryPath
         {
             get => _directoryPath;
 
@@ -437,7 +437,7 @@ namespace Tanzu.Toolkit.ViewModels
                 SelectedSpace.ParentOrg,
                 SelectedSpace,
                 AppName,
-                SelectedDeploymentDirectoryPath,
+                DeploymentDirectoryPath,
                 _fullFrameworkDeployment,
                 stdOutCallback: OutputViewModel.AppendLine,
                 stdErrCallback: OutputViewModel.AppendLine,
