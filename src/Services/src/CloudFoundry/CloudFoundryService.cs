@@ -61,7 +61,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             try
             {
                 DetailedResult targetResult = _cfCliService.TargetApi(targetApiAddress, skipSsl);
-                bool unableToExecuteTargetCmd = targetResult.CmdDetails == null;
+                bool unableToExecuteTargetCmd = targetResult.CmdResult == null;
 
                 if (unableToExecuteTargetCmd)
                 {
@@ -76,11 +76,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                         message: LoginFailureMessage,
                         innerException: new Exception(
                             message: $"Unable to target api at this address: {targetApiAddress}",
-                            innerException: new Exception(targetResult.CmdDetails.StdErr)));
+                            innerException: new Exception(targetResult.CmdResult.StdErr)));
                 }
 
                 DetailedResult authResult = await _cfCliService.AuthenticateAsync(username, password);
-                bool unableToExecuteAuthCmd = authResult.CmdDetails == null;
+                bool unableToExecuteAuthCmd = authResult.CmdResult == null;
 
                 if (unableToExecuteAuthCmd)
                 {
@@ -95,7 +95,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                        message: LoginFailureMessage,
                        innerException: new Exception(
                            message: $"Unable to authenticate user \"{username}\"",
-                           innerException: new Exception(authResult.CmdDetails.StdErr)));
+                           innerException: new Exception(authResult.CmdResult.StdErr)));
                 }
 
                 await MatchCliVersionToApiVersion();
