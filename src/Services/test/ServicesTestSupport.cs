@@ -1,20 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Security;
-using Microsoft.Extensions.DependencyInjection;
-using Moq;
-using Serilog;
-using Tanzu.Toolkit.CloudFoundryApiClient;
+﻿using System.Security;
 using Tanzu.Toolkit.Models;
-using Tanzu.Toolkit.Services.CfCli;
-using Tanzu.Toolkit.Services.CfCli.Models.Apps;
-using Tanzu.Toolkit.Services.CfCli.Models.Orgs;
-using Tanzu.Toolkit.Services.CfCli.Models.Spaces;
-using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.CommandProcess;
-using Tanzu.Toolkit.Services.Dialog;
-using Tanzu.Toolkit.Services.FileLocator;
-using Tanzu.Toolkit.Services.Logging;
 
 namespace Tanzu.Toolkit.Services.Tests
 {
@@ -76,78 +62,6 @@ namespace Tanzu.Toolkit.Services.Tests
         protected static readonly CommandResult _fakeFailureCmdResult = new CommandResult("junk output", "junk error", 1);
         protected static readonly DetailedResult _fakeSuccessDetailedResult = new DetailedResult(true, null, _fakeSuccessCmdResult);
         protected static readonly DetailedResult _fakeFailureDetailedResult = new DetailedResult(false, "junk", _fakeSuccessCmdResult);
-
-        protected static readonly List<Org> _mockOrgsResponse = new List<Org>
-        {
-            new Org
-            {
-                Entity = new Services.CfCli.Models.Orgs.Entity { Name = _org1Name, SpacesUrl = _org1SpacesUrl },
-                Metadata = new Services.CfCli.Models.Orgs.Metadata { Guid = _org1Guid },
-            },
-            new Org
-            {
-                Entity = new Services.CfCli.Models.Orgs.Entity { Name = _org2Name, SpacesUrl = _org2SpacesUrl },
-                Metadata = new Services.CfCli.Models.Orgs.Metadata { Guid = _org2Guid },
-            },
-            new Org
-            {
-                Entity = new Services.CfCli.Models.Orgs.Entity { Name = _org3Name, SpacesUrl = _org3SpacesUrl },
-                Metadata = new Services.CfCli.Models.Orgs.Metadata { Guid = _org3Guid },
-            },
-            new Org
-            {
-                Entity = new Services.CfCli.Models.Orgs.Entity { Name = _org4Name, SpacesUrl = _org4SpacesUrl },
-                Metadata = new Services.CfCli.Models.Orgs.Metadata { Guid = _org4Guid },
-            },
-        };
-
-        protected static readonly List<Space> _mockSpacesResponse = new List<Space>
-        {
-            new Space
-            {
-                Entity = new Services.CfCli.Models.Spaces.Entity { Name = _space1Name, AppsUrl = _space1AppsUrl },
-                Metadata = new Services.CfCli.Models.Spaces.Metadata { Guid = _space1Guid },
-            },
-            new Space
-            {
-                Entity = new Services.CfCli.Models.Spaces.Entity { Name = _space2Name, AppsUrl = _space2AppsUrl },
-                Metadata = new Services.CfCli.Models.Spaces.Metadata { Guid = _space2Guid },
-            },
-            new Space
-            {
-                Entity = new Services.CfCli.Models.Spaces.Entity { Name = _space3Name, AppsUrl = _space3AppsUrl },
-                Metadata = new Services.CfCli.Models.Spaces.Metadata { Guid = _space3Guid },
-            },
-            new Space
-            {
-                Entity = new Services.CfCli.Models.Spaces.Entity { Name = _space4Name, AppsUrl = _space4AppsUrl },
-                Metadata = new Services.CfCli.Models.Spaces.Metadata { Guid = _space4Guid },
-            },
-        };
-
-        protected static readonly List<App> _mockAppsResponse = new List<App>
-            {
-                new App
-                {
-                    Name = _app1Name,
-                    Guid = _app1Guid,
-                },
-                new App
-                {
-                    Name = _app2Name,
-                    Guid = _app2Guid,
-                },
-                new App
-                {
-                    Name = _app3Name,
-                    Guid = _app3Guid,
-                },
-                new App
-                {
-                    Name = _app4Name,
-                    Guid = _app4Guid,
-                },
-            };
 
         /** this fake JWT was created using these values:
          * HEADER:
