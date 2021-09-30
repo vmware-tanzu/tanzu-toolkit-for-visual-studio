@@ -83,7 +83,7 @@ namespace Tanzu.Toolkit.Services.CfCli
             try
             {
                 const string versionLabel = "api version:";
-                var content = result.CmdDetails.StdOut.ToLower();
+                var content = result.CmdResult.StdOut.ToLower();
 
                 var versionString = content.Substring(content.IndexOf(versionLabel))
                     .Replace("\n", string.Empty)
@@ -137,13 +137,13 @@ namespace Tanzu.Toolkit.Services.CfCli
 
                             ThrowIfResultIndicatesInvalidRefreshToken(result);
 
-                            if (result.CmdDetails.ExitCode != 0)
+                            if (result.CmdResult.ExitCode != 0)
                             {
                                 _logger.Error($"GetOAuthToken failed: {result}");
                                 return null;
                             }
 
-                            var accessToken = FormatToken(result.CmdDetails.StdOut);
+                            var accessToken = FormatToken(result.CmdResult.StdOut);
 
                             var handler = new JwtSecurityTokenHandler();
                             var jsonToken = handler.ReadToken(accessToken);
@@ -288,11 +288,11 @@ namespace Tanzu.Toolkit.Services.CfCli
                         content: null,
                         succeeded: false,
                         explanation: _requestErrorMsg,
-                        cmdDetails: cmdResult.CmdDetails);
+                        cmdDetails: cmdResult.CmdResult);
                 }
 
                 /* break early & skip json parsing if output contains 'No orgs found' */
-                string content = cmdResult.CmdDetails.StdOut;
+                string content = cmdResult.CmdResult.StdOut;
                 string contentEnding = content.Substring(content.Length - 20);
                 if (contentEnding.Contains("No orgs found"))
                 {
@@ -300,21 +300,21 @@ namespace Tanzu.Toolkit.Services.CfCli
                         content: new List<Org>(),
                         succeeded: true,
                         explanation: null,
-                        cmdDetails: cmdResult.CmdDetails);
+                        cmdDetails: cmdResult.CmdResult);
                 }
 
-                var orgResponsePages = GetJsonResponsePages<OrgsApiV2ResponsePage>(cmdResult.CmdDetails.StdOut, _getOrgsRequestPath);
+                var orgResponsePages = GetJsonResponsePages<OrgsApiV2ResponsePage>(cmdResult.CmdResult.StdOut, _getOrgsRequestPath);
 
                 /* check for unsuccessful json parsing */
                 if (orgResponsePages == null)
                 {
-                    _logger.Error($"GetOrgsAsync() failed during response parsing. Used this delimeter: '{_getOrgsRequestPath}' to parse through: {cmdResult.CmdDetails.StdOut}");
+                    _logger.Error($"GetOrgsAsync() failed during response parsing. Used this delimeter: '{_getOrgsRequestPath}' to parse through: {cmdResult.CmdResult.StdOut}");
 
                     return new DetailedResult<List<Org>>(
                         content: null,
                         succeeded: false,
                         explanation: _jsonParsingErrorMsg,
-                        cmdDetails: cmdResult.CmdDetails);
+                        cmdDetails: cmdResult.CmdResult);
                 }
 
                 var orgsList = new List<Org>();
@@ -326,13 +326,13 @@ namespace Tanzu.Toolkit.Services.CfCli
                     }
                 }
 
-                return new DetailedResult<List<Org>>(orgsList, true, null, cmdResult.CmdDetails);
+                return new DetailedResult<List<Org>>(orgsList, true, null, cmdResult.CmdResult);
             }
             catch (Exception e)
             {
                 _logger.Error($"GetOrgsAsync() failed due to an unpredicted exception: {e}.");
 
-                return new DetailedResult<List<Org>>(null, false, e.Message, cmdResult?.CmdDetails);
+                return new DetailedResult<List<Org>>(null, false, e.Message, cmdResult?.CmdResult);
             }
         }
 
@@ -353,11 +353,11 @@ namespace Tanzu.Toolkit.Services.CfCli
                         content: null,
                         succeeded: false,
                         explanation: _requestErrorMsg,
-                        cmdDetails: cmdResult.CmdDetails);
+                        cmdDetails: cmdResult.CmdResult);
                 }
 
                 /* break early & skip json parsing if output contains 'No spaces found' */
-                string content = cmdResult.CmdDetails.StdOut;
+                string content = cmdResult.CmdResult.StdOut;
                 string contentEnding = content.Substring(content.Length - 20);
                 if (contentEnding.Contains("No spaces found"))
                 {
@@ -365,7 +365,7 @@ namespace Tanzu.Toolkit.Services.CfCli
                         content: new List<Space>(),
                         succeeded: true,
                         explanation: null,
-                        cmdDetails: cmdResult.CmdDetails);
+                        cmdDetails: cmdResult.CmdResult);
                 }
 
                 var spaceResponsePages = GetJsonResponsePages<SpacesApiV2ResponsePage>(content, _getSpacesRequestPath);
@@ -373,13 +373,13 @@ namespace Tanzu.Toolkit.Services.CfCli
                 /* check for unsuccessful json parsing */
                 if (spaceResponsePages == null)
                 {
-                    _logger.Error($"GetSpacesAsync() failed during response parsing. Used this delimeter: '{_getSpacesRequestPath}' to parse through: {cmdResult.CmdDetails.StdOut}");
+                    _logger.Error($"GetSpacesAsync() failed during response parsing. Used this delimeter: '{_getSpacesRequestPath}' to parse through: {cmdResult.CmdResult.StdOut}");
 
                     return new DetailedResult<List<Space>>(
                         content: null,
                         succeeded: false,
                         explanation: _jsonParsingErrorMsg,
-                        cmdDetails: cmdResult.CmdDetails);
+                        cmdDetails: cmdResult.CmdResult);
                 }
 
                 var spacesList = new List<Space>();
@@ -391,13 +391,13 @@ namespace Tanzu.Toolkit.Services.CfCli
                     }
                 }
 
-                return new DetailedResult<List<Space>>(spacesList, true, null, cmdResult.CmdDetails);
+                return new DetailedResult<List<Space>>(spacesList, true, null, cmdResult.CmdResult);
             }
             catch (Exception e)
             {
                 _logger.Error($"GetSpacesAsync() failed due to an unpredicted exception: {e}.");
 
-                return new DetailedResult<List<Space>>(null, false, e.Message, cmdResult?.CmdDetails);
+                return new DetailedResult<List<Space>>(null, false, e.Message, cmdResult?.CmdResult);
             }
         }
 
@@ -418,11 +418,11 @@ namespace Tanzu.Toolkit.Services.CfCli
                         content: null,
                         succeeded: false,
                         explanation: _requestErrorMsg,
-                        cmdDetails: cmdResult.CmdDetails);
+                        cmdDetails: cmdResult.CmdResult);
                 }
 
                 /* break early & skip json parsing if output contains 'No apps found' */
-                string content = cmdResult.CmdDetails.StdOut;
+                string content = cmdResult.CmdResult.StdOut;
                 string contentEnding = content.Substring(content.Length - 20);
                 if (contentEnding.Contains("No apps found"))
                 {
@@ -430,7 +430,7 @@ namespace Tanzu.Toolkit.Services.CfCli
                         content: new List<App>(),
                         succeeded: true,
                         explanation: null,
-                        cmdDetails: cmdResult.CmdDetails);
+                        cmdDetails: cmdResult.CmdResult);
                 }
 
                 var appsResponses = GetJsonResponsePages<AppsApiV2Response>(content, _getAppsRequestPath);
@@ -439,13 +439,13 @@ namespace Tanzu.Toolkit.Services.CfCli
                 if (appsResponses == null ||
                     (appsResponses.Count > 0 && appsResponses[0].Guid == null && appsResponses[0].Name == null && appsResponses[0].Services == null && appsResponses[0].Apps == null))
                 {
-                    _logger.Error($"GetAppsAsync() failed during response parsing. Used this delimeter: '{_getAppsRequestPath}' to parse through: {cmdResult.CmdDetails.StdOut}");
+                    _logger.Error($"GetAppsAsync() failed during response parsing. Used this delimeter: '{_getAppsRequestPath}' to parse through: {cmdResult.CmdResult.StdOut}");
 
                     return new DetailedResult<List<App>>(
                         content: null,
                         succeeded: false,
                         explanation: _jsonParsingErrorMsg,
-                        cmdDetails: cmdResult.CmdDetails);
+                        cmdDetails: cmdResult.CmdResult);
                 }
 
                 var appsList = new List<App>();
@@ -457,13 +457,13 @@ namespace Tanzu.Toolkit.Services.CfCli
                     }
                 }
 
-                return new DetailedResult<List<App>>(appsList, true, null, cmdResult.CmdDetails);
+                return new DetailedResult<List<App>>(appsList, true, null, cmdResult.CmdResult);
             }
             catch (Exception e)
             {
                 _logger.Error($"GetAppsAsync() failed due to an unpredicted exception: {e}.");
 
-                return new DetailedResult<List<App>>(null, false, e.Message, cmdResult?.CmdDetails);
+                return new DetailedResult<List<App>>(null, false, e.Message, cmdResult?.CmdResult);
             }
         }
 
@@ -550,7 +550,7 @@ namespace Tanzu.Toolkit.Services.CfCli
                 {
                     string msg = $"Unable to deploy app '{appName}'; failed to target org '{orgName}'.\n{targetOrgResult.Explanation}";
                     _logger.Error(msg);
-                    return new DetailedResult(false, explanation: msg, targetOrgResult.CmdDetails);
+                    return new DetailedResult(false, explanation: msg, targetOrgResult.CmdResult);
                 }
 
                 var targetSpaceResult = TargetSpace(spaceName);
@@ -558,7 +558,7 @@ namespace Tanzu.Toolkit.Services.CfCli
                 {
                     string msg = $"Unable to deploy app '{appName}'; failed to target space '{spaceName}'.\n{targetSpaceResult.Explanation}";
                     _logger.Error(msg);
-                    return new DetailedResult(false, explanation: msg, targetSpaceResult.CmdDetails);
+                    return new DetailedResult(false, explanation: msg, targetSpaceResult.CmdResult);
                 }
 
                 deployTask = Task.Run(async () => await RunCfCommandAsync(args, stdOutCallback, stdErrCallback, appDirPath));
@@ -582,13 +582,13 @@ namespace Tanzu.Toolkit.Services.CfCli
                 var targetOrgResult = TargetOrg(orgName);
                 if (!targetOrgResult.Succeeded)
                 {
-                    return new DetailedResult<string>(null, targetOrgResult.Succeeded, targetOrgResult.Explanation, targetOrgResult.CmdDetails);
+                    return new DetailedResult<string>(null, targetOrgResult.Succeeded, targetOrgResult.Explanation, targetOrgResult.CmdResult);
                 }
 
                 var targetSpaceResult = TargetSpace(spaceName);
                 if (!targetSpaceResult.Succeeded)
                 {
-                    return new DetailedResult<string>(null, targetSpaceResult.Succeeded, targetSpaceResult.Explanation, targetSpaceResult.CmdDetails);
+                    return new DetailedResult<string>(null, targetSpaceResult.Succeeded, targetSpaceResult.Explanation, targetSpaceResult.CmdResult);
                 }
 
                 logsTask = Task.Run(async () => await RunCfCommandAsync(args));
@@ -598,8 +598,8 @@ namespace Tanzu.Toolkit.Services.CfCli
 
             ThrowIfResultIndicatesInvalidRefreshToken(recentLogsResult);
 
-            var content = recentLogsResult.CmdDetails.StdOut;
-            var cmdDetails = recentLogsResult.CmdDetails;
+            var content = recentLogsResult.CmdResult.StdOut;
+            var cmdDetails = recentLogsResult.CmdResult;
             var explanation = recentLogsResult.Explanation;
             bool succeeded = recentLogsResult.Succeeded;
 
@@ -633,7 +633,7 @@ namespace Tanzu.Toolkit.Services.CfCli
 
             if (result.ExitCode == 0)
             {
-                return new DetailedResult(succeeded: true, cmdDetails: result);
+                return new DetailedResult(succeeded: true, cmdResult: result);
             }
 
             string reason = result.StdErr;
@@ -649,7 +649,7 @@ namespace Tanzu.Toolkit.Services.CfCli
                 }
             }
 
-            return new DetailedResult(false, reason, cmdDetails: result);
+            return new DetailedResult(false, reason, cmdResult: result);
         }
 
         /// <summary>
@@ -679,7 +679,7 @@ namespace Tanzu.Toolkit.Services.CfCli
 
             if (result.ExitCode == 0)
             {
-                return new DetailedResult(succeeded: true, cmdDetails: result);
+                return new DetailedResult(succeeded: true, cmdResult: result);
             }
 
             string reason = result.StdErr;
@@ -695,7 +695,7 @@ namespace Tanzu.Toolkit.Services.CfCli
                 }
             }
 
-            return new DetailedResult(false, reason, cmdDetails: result);
+            return new DetailedResult(false, reason, cmdResult: result);
         }
 
         /// <summary>
@@ -797,7 +797,7 @@ namespace Tanzu.Toolkit.Services.CfCli
 
         private static void ThrowIfResultIndicatesInvalidRefreshToken(DetailedResult result)
         {
-            if (result != null && result.CmdDetails != null && result.CmdDetails.StdErr != null && result.CmdDetails.StdErr.Contains(_invalidRefreshTokenError))
+            if (result != null && result.CmdResult != null && result.CmdResult.StdErr != null && result.CmdResult.StdErr.Contains(_invalidRefreshTokenError))
             {
                 throw new InvalidRefreshTokenException();
             }

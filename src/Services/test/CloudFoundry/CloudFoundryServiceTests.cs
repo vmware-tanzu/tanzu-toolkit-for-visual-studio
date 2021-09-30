@@ -392,7 +392,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsNull(result.CmdDetails);
+            Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
             Assert.IsTrue(_mockCfApiClient.Invocations.Count == 0);
@@ -442,7 +442,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Succeeded);
             Assert.IsNull(result.Explanation);
-            Assert.AreEqual(null, result.CmdDetails);
+            Assert.AreEqual(null, result.CmdResult);
             Assert.AreEqual(expectedResultContent.Count, result.Content.Count);
 
             _mockCfCliService.Verify(m => m.ClearCachedAccessToken(), Times.Once);
@@ -470,7 +470,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
             Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
-            Assert.IsNull(result.CmdDetails);
+            Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
             _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
@@ -525,7 +525,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Succeeded);
             Assert.IsNull(result.Explanation);
-            Assert.AreEqual(null, result.CmdDetails);
+            Assert.AreEqual(null, result.CmdResult);
             Assert.AreEqual(expectedResultContent.Count, result.Content.Count);
 
             for (int i = 0; i < expectedResultContent.Count; i++)
@@ -549,7 +549,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.AreEqual(null, result.CmdDetails);
+            Assert.AreEqual(null, result.CmdResult);
             Assert.AreEqual(null, result.Content);
             Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
         }
@@ -567,7 +567,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsNull(result.CmdDetails);
+            Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
             Assert.IsTrue(_mockCfApiClient.Invocations.Count == 0);
@@ -617,7 +617,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Succeeded);
             Assert.IsNull(result.Explanation);
-            Assert.AreEqual(null, result.CmdDetails);
+            Assert.AreEqual(null, result.CmdResult);
             Assert.AreEqual(expectedResultContent.Count, result.Content.Count);
 
             _mockCfCliService.Verify(m => m.ClearCachedAccessToken(), Times.Once);
@@ -645,7 +645,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
             Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
-            Assert.IsNull(result.CmdDetails);
+            Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
             _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
@@ -671,7 +671,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
             Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
-            Assert.IsNull(result.CmdDetails);
+            Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
             _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
@@ -726,7 +726,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Succeeded);
             Assert.IsNull(result.Explanation);
-            Assert.AreEqual(null, result.CmdDetails);
+            Assert.AreEqual(null, result.CmdResult);
             Assert.AreEqual(expectedResultContent.Count, result.Content.Count);
 
             for (int i = 0; i < expectedResultContent.Count; i++)
@@ -750,7 +750,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.AreEqual(null, result.CmdDetails);
+            Assert.AreEqual(null, result.CmdResult);
             Assert.AreEqual(null, result.Content);
             Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
         }
@@ -768,7 +768,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsNull(result.CmdDetails);
+            Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
             Assert.IsTrue(_mockCfApiClient.Invocations.Count == 0);
@@ -820,7 +820,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Succeeded);
             Assert.IsNull(result.Explanation);
-            Assert.AreEqual(null, result.CmdDetails);
+            Assert.AreEqual(null, result.CmdResult);
             Assert.AreEqual(expectedResultContent.Count, result.Content.Count);
 
             _mockCfCliService.Verify(m => m.ClearCachedAccessToken(), Times.Once);
@@ -848,7 +848,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
             Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
-            Assert.IsNull(result.CmdDetails);
+            Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
             _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
@@ -874,7 +874,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
             Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
-            Assert.IsNull(result.CmdDetails);
+            Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
             _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
@@ -933,7 +933,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Succeeded);
             Assert.IsNull(result.Explanation);
-            Assert.AreEqual(null, result.CmdDetails);
+            Assert.AreEqual(null, result.CmdResult);
             Assert.AreEqual(expectedResultContent.Count, result.Content.Count);
 
             for (int i = 0; i < expectedResultContent.Count; i++)
@@ -957,7 +957,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.AreEqual(null, result.CmdDetails);
+            Assert.AreEqual(null, result.CmdResult);
             Assert.AreEqual(null, result.Content);
             Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
         }
@@ -981,7 +981,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.AreEqual("STOPPED", FakeApp.State);
             Assert.IsTrue(result.Succeeded);
             Assert.IsNull(result.Explanation);
-            Assert.IsNull(result.CmdDetails);
+            Assert.IsNull(result.CmdResult);
         }
 
         [TestMethod]
@@ -1000,7 +1000,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsNull(result.CmdDetails);
+            Assert.IsNull(result.CmdResult);
 
             _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
@@ -1025,7 +1025,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
             Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
-            Assert.IsNull(result.CmdDetails);
+            Assert.IsNull(result.CmdResult);
 
             _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
@@ -1054,7 +1054,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Succeeded);
             Assert.IsNull(result.Explanation);
-            Assert.IsNull(result.CmdDetails);
+            Assert.IsNull(result.CmdResult);
 
             _mockCfCliService.Verify(m => m.ClearCachedAccessToken(), Times.Once);
             _mockCfApiClient.Verify(m => m.StopAppWithGuid(FakeSpace.ParentOrg.ParentCf.ApiAddress, It.IsAny<string>(), FakeApp.AppId), Times.Exactly(2));
@@ -1080,7 +1080,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
             Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
-            Assert.IsNull(result.CmdDetails);
+            Assert.IsNull(result.CmdResult);
 
             _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
@@ -1097,7 +1097,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsNull(result.CmdDetails);
+            Assert.IsNull(result.CmdResult);
             Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
         }
 
@@ -1120,7 +1120,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.AreEqual("STARTED", FakeApp.State);
             Assert.IsTrue(result.Succeeded);
             Assert.IsNull(result.Explanation);
-            Assert.IsNull(result.CmdDetails);
+            Assert.IsNull(result.CmdResult);
         }
 
         [TestMethod]
@@ -1139,7 +1139,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsNull(result.CmdDetails);
+            Assert.IsNull(result.CmdResult);
 
             _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
@@ -1163,7 +1163,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
             Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
-            Assert.IsNull(result.CmdDetails);
+            Assert.IsNull(result.CmdResult);
 
             _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
@@ -1192,7 +1192,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Succeeded);
             Assert.IsNull(result.Explanation);
-            Assert.IsNull(result.CmdDetails);
+            Assert.IsNull(result.CmdResult);
 
             _mockCfCliService.Verify(m => m.ClearCachedAccessToken(), Times.Once);
             _mockCfApiClient.Verify(m => m.StartAppWithGuid(FakeSpace.ParentOrg.ParentCf.ApiAddress, It.IsAny<string>(), FakeApp.AppId), Times.Exactly(2));
@@ -1218,7 +1218,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
             Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
-            Assert.IsNull(result.CmdDetails);
+            Assert.IsNull(result.CmdResult);
 
             _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
@@ -1235,7 +1235,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsNull(result.CmdDetails);
+            Assert.IsNull(result.CmdResult);
             Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
         }
 
@@ -1258,7 +1258,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.AreEqual("DELETED", FakeApp.State);
             Assert.IsTrue(result.Succeeded);
             Assert.IsNull(result.Explanation);
-            Assert.IsNull(result.CmdDetails);
+            Assert.IsNull(result.CmdResult);
         }
 
         [TestMethod]
@@ -1277,7 +1277,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsNull(result.CmdDetails);
+            Assert.IsNull(result.CmdResult);
 
             _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
@@ -1301,7 +1301,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
             Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
-            Assert.IsNull(result.CmdDetails);
+            Assert.IsNull(result.CmdResult);
 
             _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
@@ -1330,7 +1330,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Succeeded);
             Assert.IsNull(result.Explanation);
-            Assert.IsNull(result.CmdDetails);
+            Assert.IsNull(result.CmdResult);
 
             _mockCfCliService.Verify(m => m.ClearCachedAccessToken(), Times.Once);
             _mockCfApiClient.Verify(m => m.DeleteAppWithGuid(FakeSpace.ParentOrg.ParentCf.ApiAddress, It.IsAny<string>(), FakeApp.AppId), Times.Exactly(2));
@@ -1356,7 +1356,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
             Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
-            Assert.IsNull(result.CmdDetails);
+            Assert.IsNull(result.CmdResult);
 
             _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
@@ -1373,7 +1373,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsNull(result.CmdDetails);
+            Assert.IsNull(result.CmdResult);
             Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
         }
 
@@ -1558,7 +1558,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.AreEqual(result.Content, logsStub);
             Assert.AreEqual(result.Succeeded, fakeLogsResult.Succeeded);
             Assert.AreEqual(result.Explanation, fakeLogsResult.Explanation);
-            Assert.AreEqual(result.CmdDetails, fakeLogsResult.CmdDetails);
+            Assert.AreEqual(result.CmdResult, fakeLogsResult.CmdResult);
         }
 
         [TestMethod]
@@ -1578,7 +1578,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNull(result.Content);
             Assert.AreEqual(result.Succeeded, fakeLogsResult.Succeeded);
             Assert.AreEqual(result.Explanation, fakeLogsResult.Explanation);
-            Assert.AreEqual(result.CmdDetails, fakeLogsResult.CmdDetails);
+            Assert.AreEqual(result.CmdResult, fakeLogsResult.CmdResult);
         }
 
         [TestMethod]

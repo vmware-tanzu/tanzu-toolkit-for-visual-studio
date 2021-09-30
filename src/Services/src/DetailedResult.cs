@@ -9,17 +9,17 @@ namespace Tanzu.Toolkit.Services
         {
         }
 
-        public DetailedResult(bool succeeded, string explanation = null, CommandResult cmdDetails = null)
+        public DetailedResult(bool succeeded, string explanation = null, CommandResult cmdResult = null)
         {
             Succeeded = succeeded;
             Explanation = explanation;
-            CmdDetails = cmdDetails;
+            CmdResult = cmdResult;
             FailureType = FailureType.None;
         }
 
         public bool Succeeded { get; set; }
         public string Explanation { get; set; }
-        public CommandResult CmdDetails { get; }
+        public CommandResult CmdResult { get; }
         public FailureType FailureType { get; set; }
 
         public override string ToString()
