@@ -320,7 +320,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool CanDeployApp(object arg)
         {
-            return true;
+            return !string.IsNullOrEmpty(AppName) && IsLoggedIn && SelectedOrg != null && SelectedSpace != null;
         }
 
         public void DeployApp(object dialogWindow)
