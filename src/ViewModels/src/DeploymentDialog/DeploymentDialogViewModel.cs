@@ -19,7 +19,7 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string OrgEmptyMsg = "Org not specified.";
         internal const string SpaceEmptyMsg = "Space not specified.";
         internal const string DeploymentSuccessMsg = "App was successfully deployed!\nYou can now close this window.";
-        internal const string DeploymentErrorMsg = "Unable to deploy app:";
+        internal const string DeploymentErrorMsg = "Encountered an issue while deploying app:";
         internal const string GetOrgsFailureMsg = "Unable to fetch orgs.";
         internal const string GetSpacesFailureMsg = "Unable to fetch spaces.";
         internal const string SingleLoginErrorTitle = "Unable to add more TAS connections.";
@@ -454,7 +454,7 @@ namespace Tanzu.Toolkit.ViewModels
                 }
 
                 var errorTitle = $"{DeploymentErrorMsg} {AppName}.";
-                var errorMsg = deploymentResult.Explanation;
+                var errorMsg = deploymentResult.Explanation.Replace("Instances starting...\n", "");
 
                 Logger.Error(
                     "DeploymentDialogViewModel initiated app deployment of {AppName} to target {TargetApi}.{TargetOrg}.{TargetSpace}; deployment result reported failure: {DplmtResult}.",
