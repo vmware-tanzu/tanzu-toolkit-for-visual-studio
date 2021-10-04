@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -584,6 +585,46 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             await _sut.StartDeployment();
 
             MockTasExplorerViewModel.VerifyAll();
+        }
+
+        [TestMethod]
+        [TestCategory("StartDeployment")]
+        public async Task StartDeployment_TrimsRedundantInfoFromErrorMessage()
+        {
+            _sut.AppName = _fakeAppName;
+            _sut.SelectedOrg = _fakeOrg;
+            _sut.SelectedSpace = _fakeSpace;
+
+            StdOutDelegate expectedStdOutCallback = _sut.OutputViewModel.AppendLine;
+            StdErrDelegate expectedStdErrCallback = _sut.OutputViewModel.AppendLine;
+
+            var specialRedundantErrorContent = "Instances starting...\n";
+            var significantErrorInfo = "some junk error";
+            var errorMsgWithRedundantInfo = string.Concat(Enumerable.Repeat(specialRedundantErrorContent, 8)) + significantErrorInfo;
+            var redundantErrorInfoResult = new DetailedResult(false, errorMsgWithRedundantInfo, FakeFailureCmdResult);
+
+            MockCloudFoundryService.Setup(mock => mock.
+                DeployAppAsync(_fakeCfInstance,
+                               _fakeOrg,
+                               _fakeSpace,
+                               _fakeAppName,
+                               _realPathToFakeDeploymentDir,
+                               _defaultFullFWFlag,
+                               expectedStdOutCallback,
+                               expectedStdErrCallback,
+                               null,
+                               false,
+                               _fakeProjName,
+                               null))
+                    .ReturnsAsync(redundantErrorInfoResult);
+
+            await _sut.StartDeployment();
+
+            MockErrorDialogService.Verify(m => m.
+              DisplayErrorDialog(
+                It.Is<string>(s => s.Contains(DeploymentDialogViewModel.DeploymentErrorMsg)),
+                It.Is<string>(s => s.Contains(significantErrorInfo) && !s.Contains(specialRedundantErrorContent))), 
+                Times.Once);
         }
 
         [TestMethod]
