@@ -144,6 +144,66 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("CanDeployApp")]
+        public void CanDeployApp_ReturnsTrue_WhenAllRequiredFieldsAreValid()
+        {
+            _sut.AppName = "FakeAppName";
+            _sut.SelectedOrg = FakeCfOrg;
+            _sut.SelectedSpace = FakeCfSpace;
+            _sut.IsLoggedIn = true;
+
+            Assert.IsTrue(_sut.CanDeployApp(null));
+        }
+        
+        [TestMethod]
+        [TestCategory("CanDeployApp")]
+        public void CanDeployApp_ReturnsFalse_WhenAppNameEmpty()
+        {
+            _sut.AppName = "";
+            _sut.SelectedOrg = FakeCfOrg;
+            _sut.SelectedSpace = FakeCfSpace;
+            _sut.IsLoggedIn = true;
+
+            Assert.IsFalse(_sut.CanDeployApp(null));
+        }
+
+        [TestMethod]
+        [TestCategory("CanDeployApp")]
+        public void CanDeployApp_ReturnsFalse_WhenSelectedOrgEmpty()
+        {
+            _sut.AppName = "junk";
+            _sut.SelectedOrg = null;
+            _sut.SelectedSpace = FakeCfSpace;
+            _sut.IsLoggedIn = true;
+
+            Assert.IsFalse(_sut.CanDeployApp(null));
+        }
+        
+        [TestMethod]
+        [TestCategory("CanDeployApp")]
+        public void CanDeployApp_ReturnsFalse_WhenSelectedSpaceEmpty()
+        {
+            _sut.AppName = "junk";
+            _sut.SelectedOrg = FakeCfOrg;
+            _sut.SelectedSpace = null;
+            _sut.IsLoggedIn = true;
+
+            Assert.IsFalse(_sut.CanDeployApp(null));
+        }
+        
+        [TestMethod]
+        [TestCategory("CanDeployApp")]
+        public void CanDeployApp_ReturnsFalse_WhenNotLoggedIn()
+        {
+            _sut.AppName = "junk";
+            _sut.SelectedOrg = FakeCfOrg;
+            _sut.SelectedSpace = FakeCfSpace;
+            _sut.IsLoggedIn = false;
+
+            Assert.IsFalse(_sut.CanDeployApp(null));
+        }
+        
+        [TestMethod]
         [TestCategory("DeployApp")]
         public void DeployApp_UpdatesDeploymentStatus_WhenAppNameEmpty()
         {
