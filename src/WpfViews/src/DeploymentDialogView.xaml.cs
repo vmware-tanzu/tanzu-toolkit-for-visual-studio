@@ -13,8 +13,8 @@ namespace Tanzu.Toolkit.WpfViews
     /// </summary>
     public partial class DeploymentDialogView : Window, IDeploymentDialogView
     {
-        private const int _collapsedHeight = 270;
-        private const int _expandedHeight = 360;
+        private const int _collapsedHeight = 314;
+        private const int _expandedHeight = 414;
 
         private IDeploymentDialogViewModel _viewModel;
         public ICommand UploadAppCommand { get; }
@@ -40,6 +40,8 @@ namespace Tanzu.Toolkit.WpfViews
             themeService.SetTheme(this);
             DataContext = viewModel;
             InitializeComponent();
+            
+            MouseDown += Window_MouseDown;
         }
 
         private void CfOrgOptions_ComboBox_DropDownClosed(object sender, System.EventArgs e)
@@ -90,5 +92,18 @@ namespace Tanzu.Toolkit.WpfViews
             }
         }
 
+        private void Close(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+
+        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                DragMove();
+            }
+
+        }
     }
 }
