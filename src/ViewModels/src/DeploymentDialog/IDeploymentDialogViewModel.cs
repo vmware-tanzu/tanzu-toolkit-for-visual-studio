@@ -7,11 +7,14 @@ namespace Tanzu.Toolkit.ViewModels
         string PathToProjectRootDir { get; }
         string ManifestPath { get; set; }
         string DeploymentDirectoryPath { get; set; }
+        bool Expanded { get; set; }
 
         bool CanDeployApp(object arg);
+        bool CanToggleAdvancedOptions(object arg);
         bool CanOpenLoginView(object arg);
         void DeployApp(object arg);
         void OpenLoginView(object arg);
+        void ToggleAdvancedOptions(object arg);
         Task UpdateCfOrgOptions();
         Task UpdateCfSpaceOptions();
     }

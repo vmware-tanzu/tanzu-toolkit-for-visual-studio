@@ -28,7 +28,6 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string ManifestNotFoundTitle = "Unable to set manifest path";
         internal const string DirectoryNotFoundTitle = "Unable to set push directory path";
 
-        private string _status;
         private string _appName;
         internal readonly bool _fullFrameworkDeployment = false;
         private readonly IErrorDialog _dialogService;
@@ -51,6 +50,8 @@ namespace Tanzu.Toolkit.ViewModels
         private List<string> _stackOptions = new List<string> { "windows", "cflinuxfs3" };
         private bool _binaryDeployment;
         private string _deploymentButtonLabel;
+        private bool _expanded;
+        private string _expansionButtonText;
 
         public DeploymentDialogViewModel(IServiceProvider services, string projectName, string directoryOfProjectToDeploy, string targetFrameworkMoniker)
             : base(services)
@@ -86,6 +87,8 @@ namespace Tanzu.Toolkit.ViewModels
 
             DeploymentDirectoryPath = PathToProjectRootDir;
             _projectName = projectName;
+
+            Expanded = false;
         }
 
         public bool BinaryDeployment
@@ -193,6 +196,38 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 _deploymentButtonLabel = value;
                 RaisePropertyChangedEvent("DeploymentButtonLabel");
+            }
+        }
+
+        public bool Expanded
+        {
+            get => _expanded;
+
+            set
+            {
+                _expanded = value;
+                
+                if (value == true)
+                {
+                    ExpansionButtonText = "Fewer Options";
+                }
+                else
+                {
+                    ExpansionButtonText = "More Options";
+                }
+
+                RaisePropertyChangedEvent("Expanded");
+            }
+        }
+
+        public string ExpansionButtonText
+        {
+            get => _expansionButtonText;
+
+            set
+            {
+                _expansionButtonText = value;
+                RaisePropertyChangedEvent("ExpansionButtonText");
             }
         }
 
@@ -327,6 +362,11 @@ namespace Tanzu.Toolkit.ViewModels
             return true;
         }
 
+        public bool CanToggleAdvancedOptions(object arg)
+        {
+            return true;
+        }
+
         public void OpenLoginView(object arg)
         {
             TasExplorerViewModel.OpenLoginView(arg);
@@ -388,6 +428,11 @@ namespace Tanzu.Toolkit.ViewModels
                     _dialogService.DisplayErrorDialog(GetSpacesFailureMsg, spacesResponse.Explanation);
                 }
             }
+        }
+
+        public void ToggleAdvancedOptions(object arg)
+        {
+            Expanded = !Expanded;
         }
 
         internal async Task StartDeployment()

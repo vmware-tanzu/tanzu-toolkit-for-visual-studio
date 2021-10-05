@@ -9,9 +9,8 @@
         Title="Deploy to Tanzu Application Service"
         Icon="Resources/tas_16px.png"
         Width="500"
-        Height="320"
-        MinWidth="500"
-        MinHeight="350"
+        Height="270"
+        ResizeMode="NoResize"
         d:DesignHeight="500" d:DesignWidth="800">
 
     <Window.Resources>
@@ -33,38 +32,52 @@
 
     <Grid Width="414" VerticalAlignment="Top" Margin="8,8,8,8">
         <Grid.RowDefinitions>
+            <!--ROW 0-->
+            <RowDefinition Height="36"></RowDefinition>
+            <!--ROW 1-->
             <RowDefinition Height="32"></RowDefinition>
+            <!--ROW 2-->
             <RowDefinition Height="32"></RowDefinition>
+            <!--ROW 3-->
             <RowDefinition Height="32"></RowDefinition>
+            <!--ROW 4-->
             <RowDefinition Height="32"></RowDefinition>
+            <!--ROW 5-->
+            <RowDefinition Height="12"></RowDefinition>
+            <!--ROW 6-->
             <RowDefinition Height="32"></RowDefinition>
+            <!--ROW 7-->
+            <RowDefinition Height="24"></RowDefinition>
+            <!--ROW 8-->
             <RowDefinition Height="32"></RowDefinition>
+            <!--ROW 9-->
             <RowDefinition Height="32"></RowDefinition>
-            <RowDefinition Height="32"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="128"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
-            <ColumnDefinition Width="30"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
         <!--ROW 0-->
-        <StackPanel VerticalAlignment="Center" Grid.Row="0" Margin="8,8,8,8">
+        <StackPanel VerticalAlignment="Center" Grid.Row="0">
             <TextBlock VerticalAlignment="Center" Text="Deployment Target:" />
         </StackPanel>
 
-        <Button Grid.Row="0" Grid.Column="1" ToolTip="Login to Tanzu Application Service"
+        <Button Grid.Row="0" 
+                Grid.Column="1" 
+                ToolTip="Login to Tanzu Application Service"
                 Visibility="{Binding IsLoggedIn, Converter={StaticResource InverseVisibility}}"
                 Command ="{ Binding ElementName=DeploymentDialogViewElement, Path=OpenLoginDialogCommand }" 
-                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" Margin="8,4,8,4">
-            <DockPanel HorizontalAlignment="Left" Width="265" Height="23">
-                <Label Content="Disconnected: Click here to login" DockPanel.Dock="Right" 
-                       VerticalAlignment="Top" Width="235" FontSize="11" Height="24" Margin="0,-2,0,0"/>
-                <Image Source="Resources/tanzu_nc_dark.png" Stretch="Uniform" Height="16px" Width="21" 
-                    Margin="0,2,0,5"/>
-            </DockPanel>
+                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" 
+                Margin="0,4">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="Resources/tanzu_nc_dark.png" 
+                           Width="16"/>
+                <Label Content="Disconnected: Click here to login" 
+                           FontSize="11" 
+                           Height="24"/>
+            </StackPanel>
         </Button>
 
         <Label Content="{Binding TargetName}"
@@ -74,9 +87,9 @@
                Visibility="{Binding IsLoggedIn, Converter={StaticResource Visibility}}"/>
 
         <!--ROW 1-->
-        <TextBlock Grid.Row="1" Text="App Manifest:" VerticalAlignment="Center" Margin="8,0,8,0"/>
+        <TextBlock Grid.Row="1" Text="App Manifest:" VerticalAlignment="Center"/>
 
-        <Grid Grid.Row="1" Grid.Column="1" Margin="8,0,8,0" VerticalAlignment="Center">
+        <Grid Grid.Row="1" Grid.Column="1" VerticalAlignment="Center">
             <Grid.RowDefinitions>
                 <RowDefinition Height="24"></RowDefinition>
             </Grid.RowDefinitions>
@@ -107,10 +120,10 @@
         </Grid>
 
         <!--ROW 2-->
-        <TextBlock Grid.Row="2" Text="App Name:" VerticalAlignment="Center" Margin="8,0,8,0"/>
+        <TextBlock Grid.Row="2" Text="App Name:" VerticalAlignment="Center"/>
 
         <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="1" 
-                 Margin="8,4,8,4" 
+                 Margin="0,4" 
                  Height="24" 
                  Text="{Binding AppName}" 
                  IsEnabled="{Binding IsLoggedIn}"
@@ -118,22 +131,11 @@
                  VerticalContentAlignment="Center"/>
 
         <!--ROW 3-->
-        <StackPanel VerticalAlignment="Center" Grid.Row="3" Margin="8,0,8,0">
-            <TextBlock VerticalAlignment="Center" Text="Stack:"/>
-        </StackPanel>
-
-        <ComboBox Grid.Row="3" Grid.Column="1" Margin="8,4,8,4" 
-                  ItemsSource="{Binding StackOptions}" 
-                  IsEnabled="{Binding IsLoggedIn}"
-                  SelectedItem="{Binding SelectedStack}">
-        </ComboBox>
-
-        <!--ROW 4-->
-        <StackPanel VerticalAlignment="Center" Grid.Row="4" Margin="8,0,8,0">
+        <StackPanel VerticalAlignment="Center" Grid.Row="3">
             <TextBlock VerticalAlignment="Center" Text="Target Organization:"/>
         </StackPanel>
 
-        <ComboBox Grid.Row="4" Grid.Column="1" Margin="8,4,8,4" 
+        <ComboBox Grid.Row="3" Grid.Column="1" Margin="0,4" 
                   ItemsSource="{Binding CfOrgOptions}" 
                   SelectedItem="{Binding SelectedOrg}"
                   IsEnabled="{Binding IsLoggedIn}"
@@ -145,12 +147,12 @@
             </ComboBox.ItemTemplate>
         </ComboBox>
 
-        <!--ROW 5-->
-        <StackPanel VerticalAlignment="Center" Grid.Row="5" Margin="8,0,8,0">
+        <!--ROW 4-->
+        <StackPanel VerticalAlignment="Center" Grid.Row="4">
             <TextBlock VerticalAlignment="Center" Text="Target Space:"/>
         </StackPanel>
 
-        <ComboBox Grid.Row="5" Grid.Column="1" Margin="8,4,8,4" 
+        <ComboBox Grid.Row="4" Grid.Column="1" Margin="0,4"
                   ItemsSource="{Binding CfSpaceOptions}" 
                   SelectedItem="{Binding SelectedSpace}"
                   IsEnabled="{Binding IsLoggedIn}">
@@ -161,10 +163,62 @@
             </ComboBox.ItemTemplate>
         </ComboBox>
 
-        <!--ROW 6-->
-        <TextBlock Grid.Row="6" Text="Directory to Push:" VerticalAlignment="Center" Margin="8,0,8,0" ToolTip="Path to app directory or to a zip file of the contents of the app directory"/>
+        <!--ROW 5-->
+        <!--Intentionally empty-->
 
-        <Grid Grid.Row="6" Grid.Column="1" Margin="8,0,8,0" VerticalAlignment="Center">
+        <!--ROW 6-->
+        <Button Command="{Binding ElementName=DeploymentDialogViewElement, Path=ToggleAdvancedOptionsCommand}"
+                Grid.Row="6"
+                Grid.Column="0"
+                Padding="0"
+                HorizontalAlignment="Left"
+                VerticalContentAlignment="Bottom"
+                BorderThickness="0"
+                Background="Transparent"
+                Foreground="{Binding ElementName=DeploymentDialogViewElement, Path=HyperlinkBrush}">
+            
+            <Grid Width="100">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                </Grid.ColumnDefinitions>
+                
+                <TextBlock Grid.Column="0" Text="{Binding ExpansionButtonText}"/>
+                <Image Grid.Column="1" 
+                       Source="Resources/CollapseUp.png" 
+                       Visibility="{Binding Expanded, Converter={StaticResource Visibility}}"
+                       Height="16" 
+                       Width="16"  
+                       VerticalAlignment="Bottom" 
+                       Margin="2"/>
+                <Image Grid.Column="1" 
+                       Source="Resources/ExpandDown.png" 
+                       Visibility="{Binding Expanded, Converter={StaticResource InverseVisibility}}"
+                       Height="16" 
+                       Width="16"  
+                       VerticalAlignment="Bottom" 
+                       Margin="2"/>
+            </Grid>
+        </Button>
+
+        <Button 
+            Grid.Row="6"
+            Grid.Column="1"
+            Content="{ Binding DeploymentButtonLabel }" 
+            Width="160" 
+            HorizontalAlignment="Right"
+            Margin="0,4"
+            Command="{ Binding ElementName=DeploymentDialogViewElement, Path=UploadAppCommand }" 
+            CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+            />
+
+        <!--ROW 7-->
+        <Separator Grid.Row="7" Grid.ColumnSpan="2"/>
+
+        <!--ROW 8-->
+        <TextBlock Grid.Row="8" Text="Directory to Push:" VerticalAlignment="Center" ToolTip="Path to app directory or to a zip file of the contents of the app directory"/>
+
+        <Grid Grid.Row="8" Grid.Column="1" VerticalAlignment="Center">
             <Grid.RowDefinitions>
                 <RowDefinition Height="24"></RowDefinition>
             </Grid.RowDefinitions>
@@ -183,7 +237,7 @@
                 ToolTip="{Binding DirectoryPathLabel}"/>
 
             <Button 
-                MaxWidth="32" MinWidth="32" Padding="0,0,0,0"
+                MaxWidth="32" MinWidth="32" Padding="0"
                 Grid.Row="0"
                 Grid.Column="1"
                 IsEnabled="{Binding IsLoggedIn}"
@@ -194,16 +248,16 @@
             </Button>
         </Grid>
 
-        <!--ROW 7-->
-        <StackPanel Grid.Row="7" Grid.ColumnSpan="2" Margin="8,4,8,4">
-            <Button 
-                Content="{ Binding DeploymentButtonLabel }" 
-                Width="160" 
-                HorizontalAlignment="Right" 
-                Command="{ Binding ElementName=DeploymentDialogViewElement, Path=UploadAppCommand }" 
-                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
-             />
+        <!-- ROW 9-->
+        <StackPanel VerticalAlignment="Center" Grid.Row="9" >
+            <TextBlock VerticalAlignment="Center" Text="Stack:"/>
         </StackPanel>
+
+        <ComboBox Grid.Row="9" Grid.Column="1" Margin="0,4" 
+                  ItemsSource="{Binding StackOptions}" 
+                  IsEnabled="{Binding IsLoggedIn}"
+                  SelectedItem="{Binding SelectedStack}">
+        </ComboBox>
 
     </Grid>
 </Window>
