@@ -1,7 +1,7 @@
 ﻿using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
+using System.Windows.Media;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.WpfViews.Commands;
 using Tanzu.Toolkit.WpfViews.ThemeService;
@@ -13,9 +13,17 @@ namespace Tanzu.Toolkit.WpfViews
     /// </summary>
     public partial class DeploymentDialogView : Window, IDeploymentDialogView
     {
+        private const int _collapsedHeight = 270;
+        private const int _expandedHeight = 360;
+
         private IDeploymentDialogViewModel _viewModel;
         public ICommand UploadAppCommand { get; }
         public ICommand OpenLoginDialogCommand { get; }
+        public ICommand ToggleAdvancedOptionsCommand { get; }
+
+        public Brush HyperlinkBrush { get { return (Brush)GetValue(HyperlinkBrushProperty); } set { SetValue(HyperlinkBrushProperty, value); } }
+
+        public static readonly DependencyProperty HyperlinkBrushProperty = DependencyProperty.Register("HyperlinkBrush", typeof(Brush), typeof(DeploymentDialogView), new PropertyMetadata(default(Brush)));
 
         public DeploymentDialogView()
         {
@@ -27,6 +35,8 @@ namespace Tanzu.Toolkit.WpfViews
             _viewModel = viewModel;
             UploadAppCommand = new DelegatingCommand(viewModel.DeployApp, viewModel.CanDeployApp);
             OpenLoginDialogCommand = new DelegatingCommand(viewModel.OpenLoginView, viewModel.CanOpenLoginView);
+            ToggleAdvancedOptionsCommand = new DelegatingCommand(ToggleAdvancedOptions, viewModel.CanToggleAdvancedOptions);
+
             themeService.SetTheme(this);
             DataContext = viewModel;
             InitializeComponent();
@@ -65,5 +75,20 @@ namespace Tanzu.Toolkit.WpfViews
                 _viewModel.DeploymentDirectoryPath = openFolderDialog.SelectedPath;
             }
         }
+
+        private void ToggleAdvancedOptions(object arg)
+        {
+            _viewModel.ToggleAdvancedOptions(arg);
+            
+            if (_viewModel.Expanded)
+            {
+                Height = _expandedHeight;
+            }
+            else
+            {
+                Height = _collapsedHeight;
+            }
+        }
+
     }
 }
