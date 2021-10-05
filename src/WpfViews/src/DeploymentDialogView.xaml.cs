@@ -37,11 +37,6 @@ namespace Tanzu.Toolkit.WpfViews
             _viewModel.UpdateCfSpaceOptions();
         }
 
-        private void DeploymentStatus_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            deploymentStatusText.ScrollToEnd();
-        }
-
         private void SelectManifest(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog

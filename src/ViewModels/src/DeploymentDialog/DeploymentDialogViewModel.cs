@@ -13,7 +13,6 @@ namespace Tanzu.Toolkit.ViewModels
 {
     public class DeploymentDialogViewModel : AbstractViewModel, IDeploymentDialogViewModel
     {
-        internal const string InitialStatus = "Deployment hasn't started yet.";
         internal const string AppNameEmptyMsg = "App name not specified.";
         internal const string TargetEmptyMsg = "Target not specified.";
         internal const string OrgEmptyMsg = "Org not specified.";
@@ -62,7 +61,6 @@ namespace Tanzu.Toolkit.ViewModels
             IView outputView = ViewLocatorService.NavigateTo(nameof(ViewModels.OutputViewModel)) as IView;
             OutputViewModel = outputView?.ViewModel as IOutputViewModel;
 
-            DeploymentStatus = InitialStatus;
             DeploymentInProgress = false;
             PathToProjectRootDir = directoryOfProjectToDeploy;
 
@@ -110,17 +108,6 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 _appName = value;
                 RaisePropertyChangedEvent("AppName");
-            }
-        }
-
-        public string DeploymentStatus
-        {
-            get => _status;
-
-            set
-            {
-                _status = value;
-                RaisePropertyChangedEvent("DeploymentStatus");
             }
         }
 
@@ -325,40 +312,13 @@ namespace Tanzu.Toolkit.ViewModels
 
         public void DeployApp(object dialogWindow)
         {
-            try
+            if (CanDeployApp(null))
             {
-                DeploymentStatus = InitialStatus;
-
-                if (string.IsNullOrEmpty(AppName))
-                {
-                    throw new Exception(AppNameEmptyMsg);
-                }
-
-                if (TasExplorerViewModel.TasConnection == null)
-                {
-                    throw new Exception(TargetEmptyMsg);
-                }
-
-                if (SelectedOrg == null)
-                {
-                    throw new Exception(OrgEmptyMsg);
-                }
-
-                if (SelectedSpace == null)
-                {
-                    throw new Exception(SpaceEmptyMsg);
-                }
-
-                DeploymentStatus = "Waiting for app to deploy....";
-
                 DeploymentInProgress = true;
-                Task.Run(StartDeployment);
+
+                ThreadingService.StartTask(StartDeployment);
 
                 DialogService.CloseDialog(dialogWindow, true);
-            }
-            catch (Exception e)
-            {
-                DeploymentStatus += $"\nAn error occurred: \n{e.Message}";
             }
         }
 
@@ -443,7 +403,7 @@ namespace Tanzu.Toolkit.ViewModels
                 stdErrCallback: OutputViewModel.AppendLine,
                 stack: SelectedStack,
                 binaryDeployment: BinaryDeployment,
-                projectName: _projectName, 
+                projectName: _projectName,
                 manifestPath: ManifestPath);
 
             if (!deploymentResult.Succeeded)
