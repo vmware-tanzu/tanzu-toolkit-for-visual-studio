@@ -90,6 +90,7 @@
                 VerticalAlignment="Center"
                 Grid.Row="0"
                 Grid.Column="0"
+                IsEnabled="{Binding IsLoggedIn}"
                 Content="{Binding ManifestPathLabel}" 
                 ToolTip="{Binding ManifestPathLabel}"/>
 
@@ -97,7 +98,8 @@
                 MaxWidth="32" MinWidth="32" Padding="0,0,0,0"
                 Grid.Row="0"
                 Grid.Column="1"
-                Click="SelectManifest">
+                Click="SelectManifest"
+                IsEnabled="{Binding IsLoggedIn}">
                 <Image 
                     Width="16"
                     Source="Resources/OpenFolder.png" />
@@ -107,7 +109,13 @@
         <!--ROW 2-->
         <TextBlock Grid.Row="2" Text="App Name:" VerticalAlignment="Center" Margin="8,0,8,0"/>
 
-        <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="1" Margin="8,4,8,4" Height="24" Text="{Binding AppName}" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
+        <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="1" 
+                 Margin="8,4,8,4" 
+                 Height="24" 
+                 Text="{Binding AppName}" 
+                 IsEnabled="{Binding IsLoggedIn}"
+                 VerticalAlignment="Center" 
+                 VerticalContentAlignment="Center"/>
 
         <!--ROW 3-->
         <StackPanel VerticalAlignment="Center" Grid.Row="3" Margin="8,0,8,0">
@@ -116,6 +124,7 @@
 
         <ComboBox Grid.Row="3" Grid.Column="1" Margin="8,4,8,4" 
                   ItemsSource="{Binding StackOptions}" 
+                  IsEnabled="{Binding IsLoggedIn}"
                   SelectedItem="{Binding SelectedStack}">
         </ComboBox>
 
@@ -127,6 +136,7 @@
         <ComboBox Grid.Row="4" Grid.Column="1" Margin="8,4,8,4" 
                   ItemsSource="{Binding CfOrgOptions}" 
                   SelectedItem="{Binding SelectedOrg}"
+                  IsEnabled="{Binding IsLoggedIn}"
                   DropDownClosed="CfOrgOptions_ComboBox_DropDownClosed">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
@@ -142,7 +152,8 @@
 
         <ComboBox Grid.Row="5" Grid.Column="1" Margin="8,4,8,4" 
                   ItemsSource="{Binding CfSpaceOptions}" 
-                  SelectedItem="{Binding SelectedSpace}">
+                  SelectedItem="{Binding SelectedSpace}"
+                  IsEnabled="{Binding IsLoggedIn}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding SpaceName}"/>
@@ -167,6 +178,7 @@
                 VerticalAlignment="Center"
                 Grid.Row="0"
                 Grid.Column="0"
+                IsEnabled="{Binding IsLoggedIn}"
                 Content="{Binding DirectoryPathLabel}" 
                 ToolTip="{Binding DirectoryPathLabel}"/>
 
@@ -174,6 +186,7 @@
                 MaxWidth="32" MinWidth="32" Padding="0,0,0,0"
                 Grid.Row="0"
                 Grid.Column="1"
+                IsEnabled="{Binding IsLoggedIn}"
                 Click="SelectPublishDirectory">
                 <Image 
                     Width="16"
@@ -183,7 +196,10 @@
 
         <!--ROW 7-->
         <StackPanel Grid.Row="7" Grid.ColumnSpan="2" Margin="8,4,8,4">
-            <Button Content="{ Binding DeploymentButtonLabel }" Width="160" HorizontalAlignment="Right" 
+            <Button 
+                Content="{ Binding DeploymentButtonLabel }" 
+                Width="160" 
+                HorizontalAlignment="Right" 
                 Command="{ Binding ElementName=DeploymentDialogViewElement, Path=UploadAppCommand }" 
                 CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
              />
