@@ -205,106 +205,45 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         
         [TestMethod]
         [TestCategory("DeployApp")]
-        public void DeployApp_UpdatesDeploymentStatus_WhenAppNameEmpty()
+        public void DeployApp_SetsDeploymentInProgress_AndInvokesStartDeployment_AndClosesDeploymentDialog_WhenCanDeployAppIsTrue()
         {
-            var receivedEvents = new List<string>();
-            _sut.PropertyChanged += (sender, e) =>
-            {
-                receivedEvents.Add(e.PropertyName);
-            };
-
-            _sut.AppName = string.Empty;
-            _sut.SelectedOrg = _fakeOrg;
-            _sut.SelectedSpace = _fakeSpace;
-
-            _sut.DeployApp(null);
-
-            Assert.IsTrue(receivedEvents.Contains("DeploymentStatus"));
-            Assert.IsTrue(_sut.DeploymentStatus.Contains("An error occurred:"));
-            Assert.IsTrue(_sut.DeploymentStatus.Contains(DeploymentDialogViewModel.AppNameEmptyMsg));
-        }
-
-        [TestMethod]
-        [TestCategory("DeployApp")]
-        public void DeployApp_UpdatesDeploymentStatus_WhenTargetCfEmpty()
-        {
-            var receivedEvents = new List<string>();
-            _sut.PropertyChanged += (sender, e) =>
-            {
-                receivedEvents.Add(e.PropertyName);
-            };
-
-            _sut.AppName = "fake app name";
-            _sut.SelectedOrg = _fakeOrg;
-            _sut.SelectedSpace = _fakeSpace;
-
-            _sut.DeployApp(null);
-
-            Assert.IsTrue(receivedEvents.Contains("DeploymentStatus"));
-            Assert.IsTrue(_sut.DeploymentStatus.Contains("An error occurred:"));
-            Assert.IsTrue(_sut.DeploymentStatus.Contains(DeploymentDialogViewModel.TargetEmptyMsg));
-        }
-
-        [TestMethod]
-        [TestCategory("DeployApp")]
-        public void DeployApp_UpdatesDeploymentStatus_WhenTargetOrgEmpty()
-        {
-            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(new FakeCfInstanceViewModel(FakeCfInstance, Services));
-
-            var receivedEvents = new List<string>();
-            _sut.PropertyChanged += (sender, e) =>
-            {
-                receivedEvents.Add(e.PropertyName);
-            };
-
-            _sut.AppName = "fake app name";
-            _sut.SelectedOrg = null;
-            _sut.SelectedSpace = _fakeSpace;
-
-            _sut.DeployApp(null);
-
-            Assert.IsTrue(receivedEvents.Contains("DeploymentStatus"));
-            Assert.IsTrue(_sut.DeploymentStatus.Contains("An error occurred:"));
-            Assert.IsTrue(_sut.DeploymentStatus.Contains(DeploymentDialogViewModel.OrgEmptyMsg));
-        }
-
-        [TestMethod]
-        [TestCategory("DeployApp")]
-        public void DeployApp_UpdatesDeploymentStatus_WhenTargetSpaceEmpty()
-        {
-            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(new FakeCfInstanceViewModel(FakeCfInstance, Services));
-
-            var receivedEvents = new List<string>();
-            _sut.PropertyChanged += (sender, e) =>
-            {
-                receivedEvents.Add(e.PropertyName);
-            };
-
-            _sut.AppName = "fake app name";
-            _sut.SelectedOrg = _fakeOrg;
-            _sut.SelectedSpace = null;
-
-            _sut.DeployApp(null);
-
-            Assert.IsTrue(receivedEvents.Contains("DeploymentStatus"));
-            Assert.IsTrue(_sut.DeploymentStatus.Contains("An error occurred:"));
-            Assert.IsTrue(_sut.DeploymentStatus.Contains(DeploymentDialogViewModel.SpaceEmptyMsg));
-        }
-
-        [TestMethod]
-        [TestCategory("DeployApp")]
-        public void DeployApp_ClosesDeploymentDialog()
-        {
-            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(new FakeCfInstanceViewModel(FakeCfInstance, Services));
-
             var dw = new object();
 
             _sut.AppName = _fakeAppName;
             _sut.SelectedOrg = _fakeOrg;
             _sut.SelectedSpace = _fakeSpace;
+            _sut.IsLoggedIn = true;
+
+            Assert.IsTrue(_sut.CanDeployApp(null));
+            Assert.IsFalse(_sut.DeploymentInProgress);
 
             _sut.DeployApp(dw);
+
+            Assert.IsTrue(_sut.DeploymentInProgress);
+
             MockDialogService.Verify(mock => mock.CloseDialog(dw, true), Times.Once);
+            MockThreadingService.Verify(mock => mock.StartTask(_sut.StartDeployment), Times.Once);
+        }
+
+        [TestMethod]
+        public void DeployApp_DoesNothing_WhenCanDeployAppIsFalse()
+        {
+            var dw = new object();
+
+            _sut.AppName = "";
+            _sut.SelectedOrg = null;
+            _sut.SelectedSpace = null;
+            _sut.IsLoggedIn = false;
+
+            Assert.IsFalse(_sut.CanDeployApp(null));
+            Assert.IsFalse(_sut.DeploymentInProgress);
+
+            _sut.DeployApp(dw);
+
+            Assert.IsFalse(_sut.DeploymentInProgress);
+
+            MockDialogService.Verify(mock => mock.CloseDialog(dw, true), Times.Never);
+            MockThreadingService.Verify(mock => mock.StartTask(_sut.StartDeployment), Times.Never);
         }
 
         [TestMethod]
@@ -356,7 +295,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                     It.IsAny<StdErrDelegate>(),
                                     null,
                                     false,
-                                    _fakeProjName, 
+                                    _fakeProjName,
                                     null))
                     .ReturnsAsync(FakeSuccessDetailedResult);
 

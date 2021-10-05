@@ -140,7 +140,9 @@
             <TextBlock VerticalAlignment="Center" Text="Target Space:"/>
         </StackPanel>
 
-        <ComboBox Grid.Row="5" Grid.Column="1" Margin="8,4,8,4" ItemsSource="{Binding CfSpaceOptions}" SelectedItem="{Binding SelectedSpace}">
+        <ComboBox Grid.Row="5" Grid.Column="1" Margin="8,4,8,4" 
+                  ItemsSource="{Binding CfSpaceOptions}" 
+                  SelectedItem="{Binding SelectedSpace}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding SpaceName}"/>
@@ -185,20 +187,6 @@
                 Command="{ Binding ElementName=DeploymentDialogViewElement, Path=UploadAppCommand }" 
                 CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
              />
-        </StackPanel>
-
-        <!--ROW 8-->
-        <StackPanel Grid.Row="8" Grid.ColumnSpan="2" Margin="8,0,8,0">
-            <ScrollViewer Name="scrollViewer" VerticalScrollBarVisibility="Auto" CanContentScroll="True">
-                <TextBox Name="deploymentStatusText" 
-                    Text="{Binding  Path=DeploymentStatus}"
-                    Padding="5"
-                    ScrollViewer.VerticalScrollBarVisibility="Auto"
-                    IsReadOnly="True" 
-                    TextWrapping="Wrap" 
-                    MaxLines="5"
-                    TextBoxBase.TextChanged="DeploymentStatus_TextChanged"/>
-            </ScrollViewer>
         </StackPanel>
 
     </Grid>
