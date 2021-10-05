@@ -32,11 +32,6 @@ namespace Tanzu.Toolkit.WpfViews
             InitializeComponent();
         }
 
-        private void CfInstanceOptions_ComboBox_DropDownClosed(object sender, System.EventArgs e)
-        {
-            _viewModel.UpdateCfOrgOptions();
-        }
-
         private void CfOrgOptions_ComboBox_DropDownClosed(object sender, System.EventArgs e)
         {
             _viewModel.UpdateCfSpaceOptions();
