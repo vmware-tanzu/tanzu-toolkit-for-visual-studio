@@ -4,6 +4,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:converters="clr-namespace:Tanzu.Toolkit.WpfViews.Converters"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Name="DeploymentDialogViewElement"
         Title="Deploy to Tanzu Application Service"
@@ -17,6 +18,11 @@
         d:DesignHeight="500" d:DesignWidth="800">
 
     <Window.Resources>
+        <sys:Double x:Key="collapsedWindowHeight">335</sys:Double>
+        <sys:Double x:Key="expandedWindowHeight">430</sys:Double>
+        <sys:Double x:Key="collapsedGridBodyHeight">210</sys:Double>
+        <sys:Double x:Key="expandedGridBodyHeight">320</sys:Double>
+
         <converters:VisibilityConverter x:Key="Visibility" />
         <converters:VisibilityConverter x:Key="InverseVisibility" Reversed="True"/>
 
@@ -39,7 +45,7 @@
             <TextBlock FontSize="24" Text="Push to Tanzu Application Service" Margin="4" Grid.Row="0" Grid.Column="1"/>
         </StackPanel>
 
-        <Grid x:Name="GridBody" Width="414" Height="210" VerticalAlignment="Top" Margin="8,8,8,0" DockPanel.Dock="Top">
+        <Grid x:Name="GridBody" Width="414" Height="{StaticResource collapsedGridBodyHeight}" VerticalAlignment="Top" Margin="8,8,8,0" DockPanel.Dock="Top">
             <Grid.RowDefinitions>
                 <!--ROW 0-->
                 <RowDefinition Height="42"></RowDefinition>

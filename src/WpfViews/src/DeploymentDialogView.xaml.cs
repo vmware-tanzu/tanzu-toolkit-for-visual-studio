@@ -13,9 +13,6 @@ namespace Tanzu.Toolkit.WpfViews
     /// </summary>
     public partial class DeploymentDialogView : Window, IDeploymentDialogView
     {
-        private const int _collapsedHeight = 335;
-        private const int _expandedHeight = 430;
-
         private IDeploymentDialogViewModel _viewModel;
         public ICommand UploadAppCommand { get; }
         public ICommand OpenLoginDialogCommand { get; }
@@ -84,13 +81,13 @@ namespace Tanzu.Toolkit.WpfViews
             
             if (_viewModel.Expanded)
             {
-                Height = _expandedHeight;
-                GridBody.Height = 320;
+                Height = (double)Resources["expandedWindowHeight"];
+                GridBody.Height = (double)Resources["expandedGridBodyHeight"]; ;
             }
             else
             {
-                Height = _collapsedHeight;
-                GridBody.Height = 210;
+                Height = (double)Resources["collapsedWindowHeight"];
+                GridBody.Height = (double)Resources["collapsedGridBodyHeight"]; ;
             }
         }
 
