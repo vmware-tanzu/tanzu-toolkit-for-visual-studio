@@ -88,7 +88,8 @@
                     Margin="0,4">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="Resources/tanzu_nc_dark.png" 
-                               Width="16"/>
+                           Width="16"
+                           RenderOptions.BitmapScalingMode="NearestNeighbor"/>
                     <Label Content="Disconnected: Click here to login" 
                                FontSize="11" 
                                Height="24"/>
