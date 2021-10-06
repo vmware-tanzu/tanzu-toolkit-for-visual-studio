@@ -209,7 +209,7 @@ namespace Tanzu.Toolkit.ViewModels
                 
                 if (value == true)
                 {
-                    ExpansionButtonText = "Fewer Options";
+                    ExpansionButtonText = "Hide Options";
                 }
                 else
                 {
