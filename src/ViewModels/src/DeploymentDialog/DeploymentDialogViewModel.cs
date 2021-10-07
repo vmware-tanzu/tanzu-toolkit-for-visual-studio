@@ -206,15 +206,8 @@ namespace Tanzu.Toolkit.ViewModels
             set
             {
                 _expanded = value;
-                
-                if (value == true)
-                {
-                    ExpansionButtonText = "Hide Options";
-                }
-                else
-                {
-                    ExpansionButtonText = "More Options";
-                }
+
+                ExpansionButtonText = _expanded ? "Hide Options" : "More Options";
 
                 RaisePropertyChangedEvent("Expanded");
             }
@@ -430,7 +423,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public void ToggleAdvancedOptions(object arg)
+        public void ToggleAdvancedOptions(object arg = null)
         {
             Expanded = !Expanded;
         }
