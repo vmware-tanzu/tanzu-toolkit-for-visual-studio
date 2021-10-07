@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:converters="clr-namespace:Tanzu.Toolkit.WpfViews.Converters"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:wpfviews="clr-namespace:Tanzu.Toolkit.VisualStudio.WpfViews"
         mc:Ignorable="d"
         Name="DeploymentDialogViewElement"
         Title="Deploy to Tanzu Application Service"
@@ -86,14 +87,7 @@
                     Command ="{ Binding ElementName=DeploymentDialogViewElement, Path=OpenLoginDialogCommand }" 
                     CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" 
                     Margin="0,4">
-                <StackPanel Orientation="Horizontal">
-                    <Image Source="Resources/tanzu_nc_dark.png" 
-                           Width="16"
-                           RenderOptions.BitmapScalingMode="NearestNeighbor"/>
-                    <Label Content="Disconnected: Click here to login" 
-                               FontSize="11" 
-                               Height="24"/>
-                </StackPanel>
+                <wpfviews:LoginPromptButton/>
             </Button>
 
             <Label Content="{Binding TargetName}"
