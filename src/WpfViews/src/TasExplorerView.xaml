@@ -298,11 +298,7 @@
                 <DataTemplate DataType="{x:Type ViewModels:LoginPromptViewModel}">
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                         <Button Command="{Binding ElementName=TasExplorerViewElement, Path=OpenLoginFormCommand}">
-                            <TextBlock 
-                                Text="{Binding DisplayText}" 
-                                FontStyle="Italic" 
-                                VerticalAlignment="Bottom" 
-                                Foreground="{Binding ElementName=TasExplorerViewElement, Path=Foreground}"/>
+                            <wpfviews:LoginPromptButton/>
                         </Button>
                     </StackPanel>
                 </DataTemplate>
