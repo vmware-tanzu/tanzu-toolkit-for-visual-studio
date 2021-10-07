@@ -1,0 +1,17 @@
+﻿<UserControl x:Class="Tanzu.Toolkit.VisualStudio.WpfViews.LoginPromptButton"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Tanzu.Toolkit.VisualStudio.WpfViews"
+             mc:Ignorable="d" >
+
+    <StackPanel Orientation="Horizontal">
+        <Image Source="Resources/tanzu_nc_dark.png" 
+                Width="16"
+                RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+        <Label Content="Disconnected: Click here to login" 
+                FontSize="11" 
+                Height="24"/>
+    </StackPanel>
+</UserControl>
