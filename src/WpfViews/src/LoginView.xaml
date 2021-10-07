@@ -8,67 +8,89 @@
         d:DesignHeight="300" d:DesignWidth="400"
         Name ="LoginViewElement"
         WindowStartupLocation="CenterScreen"
-        Title="Login" Icon="Resources/AddCloud.png" Height="400" Width="400">
-    
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        Title="Login" Icon="Resources/AddCloud.png" Height="400" Width="480">
+
     <Window.Resources>
         <converters:VisibilityConverter x:Key="Visibility" />
     </Window.Resources>
 
-    <Grid Margin="50,0,50,0">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="20"></RowDefinition>
-            <RowDefinition Height="40"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="auto"></RowDefinition>
-        </Grid.RowDefinitions>
+    <DockPanel LastChildFill="False">
+        <StackPanel Orientation="Horizontal" Margin="12,12,0,16" DockPanel.Dock="Top">
+            <Image Source="Resources/tasicon.png" Width="32" Margin="4" Grid.Row="0" Grid.Column="0"/>
+            <TextBlock FontSize="24" Text="Log In to Tanzu Application Service" Margin="4" Grid.Row="0" Grid.Column="1"/>
+        </StackPanel>
 
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"></ColumnDefinition>
-        </Grid.ColumnDefinitions>
+        <Grid Margin="50,0,50,0" DockPanel.Dock="Top">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
 
-        <Label Content="Instance Name" Grid.Row="2" Grid.Column="0"></Label>
-        <TextBox Name="tbInstanceName" Grid.Row="3" Grid.Column="1" 
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <Label Content="Connection Name" Grid.Row="2" Grid.Column="0"></Label>
+            <TextBox Name="tbInstanceName" Grid.Row="3" Grid.Column="1"
                  HorizontalAlignment="Stretch" Width="auto" Text="{ Binding Path=InstanceName }" 
                  Background="{ Binding ElementName=LoginViewElement, Path=Background}"></TextBox>
-        
-        <Label Content="Target Api Address" Grid.Row="4" Grid.Column="0"></Label>
-        <TextBox Name="tbUrl" Grid.Row="5" Grid.Column="1" 
+
+            <Label Content="TAS Api Address" Grid.Row="4" Grid.Column="0"></Label>
+            <TextBox Name="tbUrl" Grid.Row="5" Grid.Column="1"
                  HorizontalAlignment="Stretch" Width="auto" Text="{ Binding Path=Target }" 
                  Background="{ Binding ElementName=LoginViewElement, Path=Background}"></TextBox>
 
-        <Label Content="Username" Grid.Row="6" Grid.Column="0"></Label>
-        <TextBox Name="tbUsername" Grid.Row="7" Grid.Column="1" 
+            <Label Content="Username" Grid.Row="6" Grid.Column="0"></Label>
+            <TextBox Name="tbUsername" Grid.Row="7" Grid.Column="1"
                  HorizontalAlignment="Stretch" Width="auto" Text="{ Binding Path=Username }" 
                  Background="{ Binding ElementName=LoginViewElement, Path=Background}"></TextBox>
 
-        <Label Content="Password" Grid.Row="8" Grid.Column="0" ></Label>
-        <PasswordBox Name="pbPassword" Grid.Row="9" Grid.Column="1" 
+            <Label Content="Password" Grid.Row="8" Grid.Column="0" ></Label>
+            <PasswordBox Name="pbPassword" Grid.Row="9" Grid.Column="1"
                      HorizontalAlignment="Stretch" Width="auto" 
                      Background="{ Binding ElementName=LoginViewElement, Path=Background}" 
                      Foreground="{ Binding ElementName=LoginViewElement, Path=Foreground}" 
                      BorderBrush="{ Binding ElementName=LoginViewElement, Path=BorderBrush}"></PasswordBox>
 
-        <Button Content="Add Cloud Target" Grid.Row="13" Grid.Column="0" Command="{ Binding ElementName=LoginViewElement, Path=AddCloudCommand }" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
-                Name="loginButton"/>
-
-
-        <TextBox Grid.Row="14" Grid.Column="0" Margin="5"  IsReadOnly="True" 
+            <TextBox Grid.Row="10" Grid.Column="0" Margin="20"  IsReadOnly="True"
                  TextWrapping="Wrap" BorderBrush="Transparent" 
                  ScrollViewer.VerticalScrollBarVisibility="Auto"
                  Foreground="Crimson" MinLines="3" MaxLines="3" 
                  Background="Transparent" Text="{Binding  Path=ErrorMessage}" 
                  Visibility="{Binding Path=HasErrors, Converter={StaticResource Visibility}}"/>
-    </Grid>
+        </Grid>
+
+        <StackPanel
+            DockPanel.Dock="Bottom"
+            Orientation="Horizontal"
+            Margin="12"
+            Height="36"
+            HorizontalAlignment="Right">
+
+            <Button
+                Content="Log In"
+                Margin="4"
+                Padding="4,0"
+                HorizontalAlignment="Right"
+                Command="{ Binding ElementName=LoginViewElement, Path=AddCloudCommand }" 
+                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
+
+            <Button
+                Margin="4"
+                Padding="4,0"
+                Click="Close"
+                Content="Cancel"/>
+        </StackPanel>
+    </DockPanel>
 </Window>
