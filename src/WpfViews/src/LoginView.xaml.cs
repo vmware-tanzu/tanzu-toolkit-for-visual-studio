@@ -24,6 +24,8 @@ namespace Tanzu.Toolkit.WpfViews
             themeService.SetTheme(this);
             DataContext = viewModel;
             InitializeComponent();
+
+            MouseDown += Window_MouseDown;
         }
 
         public SecureString GetPassword()
@@ -32,5 +34,18 @@ namespace Tanzu.Toolkit.WpfViews
         }
 
         public ICommand AddCloudCommand { get; }
+
+        private void Close(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+
+        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                DragMove();
+            }
+        }
     }
 }
