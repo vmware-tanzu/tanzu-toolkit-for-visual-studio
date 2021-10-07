@@ -1220,6 +1220,34 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.AreEqual("Push app (from binaries)", _sut.DeploymentButtonLabel);
         }
+
+        [TestMethod]
+        [TestCategory("ToggleAdvancedOptions")]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
+        public void ToggleAdvancedOptions_InvertsValueOfExpandedProp(bool initialExpandedVal, bool expectedExpandedVal)
+        {
+            _sut.Expanded = initialExpandedVal;
+
+            _sut.ToggleAdvancedOptions();
+
+            Assert.AreEqual(expectedExpandedVal, _sut.Expanded);
+        }
+
+        [TestMethod]
+        [TestCategory("Expanded")]
+        [TestCategory("ExpansionButtonText")]
+        [DataRow(true, "Hide Options")]
+        [DataRow(false, "More Options")]
+        public void SettingExpandedProp_ChangesExpansionButtonText(bool expandedVal, string expectedButtonText)
+        {
+            _sut.Expanded = expandedVal;
+
+            Assert.AreEqual(_sut.ExpansionButtonText, expectedButtonText);
+            Assert.AreEqual(2, _receivedEvents.Count);
+            Assert.IsTrue(_receivedEvents.Contains("Expanded"));
+            Assert.IsTrue(_receivedEvents.Contains("ExpansionButtonText"));
+        }
     }
 
     public class FakeOutputView : ViewModelTestSupport, IView
