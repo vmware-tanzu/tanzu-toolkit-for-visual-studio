@@ -94,6 +94,9 @@
       <DependentUpon>DeploymentDialogView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ThemeService\IThemeService.cs" />
+    <Compile Include="LoginPromptButton.xaml.cs">
+      <DependentUpon>LoginPromptButton.xaml</DependentUpon>
+    </Compile>
     <Page Include="TasExplorerView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -121,6 +124,10 @@
     <Page Include="Styles\Styles.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="LoginPromptButton.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
