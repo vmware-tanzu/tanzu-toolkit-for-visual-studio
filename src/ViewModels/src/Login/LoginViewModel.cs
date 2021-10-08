@@ -96,21 +96,21 @@ namespace Tanzu.Toolkit.ViewModels
                 RaisePropertyChangedEvent("ErrorMessage");
             }
         }
-            
+
         public Func<SecureString> GetPassword { get; set; }
 
         public Func<bool> PasswordEmpty { get; set; }
 
         public bool CanLogIn(object arg = null)
         {
-            return !(string.IsNullOrWhiteSpace(ConnectionName) || string.IsNullOrWhiteSpace(Target) || string.IsNullOrWhiteSpace(Username) || PasswordEmpty());
+            return !(string.IsNullOrWhiteSpace(ConnectionName) || string.IsNullOrWhiteSpace(Target) || string.IsNullOrWhiteSpace(Username) || PasswordEmpty()) && VerifyApiAddress(Target);
         }
 
         public async Task LogIn(object arg)
         {
             HasErrors = false;
 
-            if (!VerifyTarget())
+            if (!VerifyApiAddress(Target))
             {
                 return;
             }
@@ -129,9 +129,9 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        private bool VerifyTarget()
+        public bool VerifyApiAddress(string apiAddress)
         {
-            if (string.IsNullOrEmpty(Target))
+            if (string.IsNullOrEmpty(apiAddress))
             {
                 ErrorMessage = TargetEmptyMessage;
                 return false;
@@ -139,7 +139,9 @@ namespace Tanzu.Toolkit.ViewModels
 
             try
             {
-                var uri = new Uri(Target);
+                var uri = new Uri(apiAddress);
+                ErrorMessage = null;
+                HasErrors = false;
             }
             catch
             {

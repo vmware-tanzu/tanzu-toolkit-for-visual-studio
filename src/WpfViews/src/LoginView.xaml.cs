@@ -12,6 +12,8 @@ namespace Tanzu.Toolkit.WpfViews
     /// </summary>
     public partial class LoginView : Window, ILoginView
     {
+        private ILoginViewModel _viewModel;
+
         public LoginView()
         {
             InitializeComponent();
@@ -24,6 +26,7 @@ namespace Tanzu.Toolkit.WpfViews
             viewModel.PasswordEmpty = PasswordBoxEmpty;
             themeService.SetTheme(this);
             DataContext = viewModel;
+            _viewModel = viewModel;
             InitializeComponent();
 
             MouseDown += Window_MouseDown;
@@ -52,6 +55,11 @@ namespace Tanzu.Toolkit.WpfViews
             {
                 DragMove();
             }
+        }
+
+        private void TbUrl_LostFocus(object sender, RoutedEventArgs e)
+        {
+            _viewModel.VerifyApiAddress(tbUrl.Text);
         }
     }
 }
