@@ -19,7 +19,7 @@ namespace Tanzu.Toolkit.WpfViews.Tests
         [TestMethod]
         public void Constructor_Initializes()
         {
-            vm.InstanceName = "My CF";
+            vm.ConnectionName = "My CF";
             vm.Target = "http://test/";
             var view = new LoginView(vm, mockThemeService.Object);
 
@@ -35,7 +35,7 @@ namespace Tanzu.Toolkit.WpfViews.Tests
             Assert.IsNotNull(vm.GetPassword);
 
             // Verify bindings
-            Assert.AreEqual(vm.InstanceName, view.tbInstanceName.Text);
+            Assert.AreEqual(vm.ConnectionName, view.tbConnectionName.Text);
             Assert.AreEqual(vm.Target, view.tbUrl.Text);
         }
 

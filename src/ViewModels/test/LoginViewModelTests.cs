@@ -10,7 +10,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
     [TestClass]
     public class LoginViewModelTests : ViewModelTestSupport
     {
-        private const string FakeInstanceName = "My Fake CF";
+        private const string FakeConnectionName = "My Fake CF";
         private const string FakeTarget = "http://my.fake.target";
         private const string FakeUsername = "correct-username";
         private const bool SkipSsl = true;
@@ -25,7 +25,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             _sut = new LoginViewModel(Services)
             {
-                InstanceName = FakeInstanceName,
+                ConnectionName = FakeConnectionName,
                 Target = FakeTarget,
                 Username = FakeUsername,
                 GetPassword = () => { return FakeSecurePw; },

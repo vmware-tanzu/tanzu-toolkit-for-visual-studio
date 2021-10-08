@@ -15,7 +15,7 @@ namespace Tanzu.Toolkit.ViewModels
         private bool _skipSsl;
         private bool _hasErrors;
         private string _errorMessage;
-        private string _instanceName;
+        private string _connectionName;
         private ITasExplorerViewModel _tasExplorer;
 
         public LoginViewModel(IServiceProvider services)
@@ -26,14 +26,14 @@ namespace Tanzu.Toolkit.ViewModels
             _tasExplorer = services.GetRequiredService<ITasExplorerViewModel>();
         }
 
-        public string InstanceName
+        public string ConnectionName
         {
-            get => _instanceName;
+            get => _connectionName;
 
             set
             {
-                _instanceName = value;
-                RaisePropertyChangedEvent("InstanceName");
+                _connectionName = value;
+                RaisePropertyChangedEvent("ConnectionName");
             }
         }
 
@@ -118,7 +118,7 @@ namespace Tanzu.Toolkit.ViewModels
 
             if (result.IsLoggedIn)
             {
-                _tasExplorer.SetConnection(new CloudFoundryInstance(InstanceName, Target));
+                _tasExplorer.SetConnection(new CloudFoundryInstance(ConnectionName, Target));
             }
 
             if (!HasErrors)
