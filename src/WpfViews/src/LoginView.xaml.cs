@@ -19,7 +19,7 @@ namespace Tanzu.Toolkit.WpfViews
 
         public LoginView(ILoginViewModel viewModel, IThemeService themeService)
         {
-            AddCloudCommand = new AsyncDelegatingCommand(viewModel.AddCloudFoundryInstance, viewModel.CanAddCloudFoundryInstance);
+            AddCloudCommand = new AsyncDelegatingCommand(viewModel.LogIn, viewModel.CanLogIn);
             viewModel.GetPassword = GetPassword;
             themeService.SetTheme(this);
             DataContext = viewModel;

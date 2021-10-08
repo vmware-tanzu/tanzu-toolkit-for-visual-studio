@@ -111,12 +111,12 @@ namespace Tanzu.Toolkit.ViewModels
 
         public Func<SecureString> GetPassword { get; set; }
 
-        public bool CanAddCloudFoundryInstance(object arg)
+        public bool CanLogIn(object arg = null)
         {
             return true;
         }
 
-        public async Task AddCloudFoundryInstance(object arg)
+        public async Task LogIn(object arg)
         {
             HasErrors = false;
 

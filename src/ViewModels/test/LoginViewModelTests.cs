@@ -36,7 +36,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        public async Task AddCloudFoundryInstance_SetsErrorMessage_WhenTargetUriNull()
+        public async Task LogIn_SetsErrorMessage_WhenTargetUriNull()
         {
             bool errorMessagePropertyChangedCalled = false;
             _sut.Target = null;
@@ -49,7 +49,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 }
             };
 
-            await _sut.AddCloudFoundryInstance(null);
+            await _sut.LogIn(null);
 
             Assert.IsTrue(errorMessagePropertyChangedCalled);
             Assert.IsTrue(_sut.HasErrors);
@@ -61,7 +61,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        public async Task AddCloudFoundryInstance_SetsErrorMessage_WhenTargetUriMalformed()
+        public async Task LogIn_SetsErrorMessage_WhenTargetUriMalformed()
         {
             bool errorMessagePropertyChangedCalled = false;
             _sut.Target = "some-poorly-formatted-uri";
@@ -74,7 +74,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 }
             };
 
-            await _sut.AddCloudFoundryInstance(null);
+            await _sut.LogIn(null);
 
             Assert.IsTrue(errorMessagePropertyChangedCalled);
             Assert.IsTrue(_sut.HasErrors);
@@ -86,14 +86,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        public async Task AddCloudFoundryInstance_SetsErrorMessage_WhenLoginRequestFails()
+        public async Task LogIn_SetsErrorMessage_WhenLoginRequestFails()
         {
             const string expectedErrorMessage = "my fake error message";
 
             MockCloudFoundryService.Setup(mock => mock.ConnectToCFAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SecureString>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .ReturnsAsync(new ConnectResult(false, expectedErrorMessage));
 
-            await _sut.AddCloudFoundryInstance(null);
+            await _sut.LogIn(null);
 
             Assert.IsTrue(_sut.HasErrors);
             Assert.AreEqual(expectedErrorMessage, _sut.ErrorMessage);
@@ -102,7 +102,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        public async Task AddCloudFoundryInstance_SetsConnectionOnTasExplorer_WhenLoginRequestSucceeds()
+        public async Task LogIn_SetsConnectionOnTasExplorer_WhenLoginRequestSucceeds()
         {
             MockCloudFoundryService.Setup(mock => mock.
               ConnectToCFAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SecureString>(), It.IsAny<string>(), It.IsAny<bool>()))
@@ -110,7 +110,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             MockTasExplorerViewModel.Setup(m => m.SetConnection(It.IsAny<CloudFoundryInstance>())).Verifiable();
 
-            await _sut.AddCloudFoundryInstance(null);
+            await _sut.LogIn(null);
 
             Assert.IsFalse(_sut.HasErrors);
             MockCloudFoundryService.Verify(mock => mock.ConnectToCFAsync(FakeTarget, FakeUsername, FakeSecurePw, FakeHttpProxy, SkipSsl), Times.Once);
@@ -121,12 +121,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        public async Task AddCloudFoundryInstance_ClosesDialog_WhenLoginRequestSucceeds()
+        public async Task LogIn_ClosesDialog_WhenLoginRequestSucceeds()
         {
             MockCloudFoundryService.Setup(mock => mock.ConnectToCFAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SecureString>(), It.IsAny<string>(), It.IsAny<bool>()))
                .ReturnsAsync(new ConnectResult(true, null));
 
-            await _sut.AddCloudFoundryInstance(null);
+            await _sut.LogIn(null);
 
             Assert.IsFalse(_sut.HasErrors);
             MockCloudFoundryService.Verify(mock => mock.ConnectToCFAsync(FakeTarget, FakeUsername, FakeSecurePw, FakeHttpProxy, SkipSsl), Times.Once);
