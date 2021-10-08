@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System.Net;
 using System.Security;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
@@ -14,7 +15,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         private const string FakeTarget = "http://my.fake.target";
         private const string FakeUsername = "correct-username";
         private const bool SkipSsl = true;
-        private static readonly SecureString FakeSecurePw = new SecureString();
+        private const string FakePwStr = "fakePw";
+        private static SecureString FakeSecurePw;
 
         private static LoginViewModel _sut;
 
@@ -23,17 +25,21 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             RenewMockServices();
 
+            FakeSecurePw = new NetworkCredential("", FakePwStr).SecurePassword;
+
             _sut = new LoginViewModel(Services)
             {
                 ConnectionName = FakeConnectionName,
                 Target = FakeTarget,
                 Username = FakeUsername,
                 GetPassword = () => { return FakeSecurePw; },
+                PasswordEmpty = () => { return false; },
                 SkipSsl = SkipSsl,
             };
         }
 
         [TestMethod]
+        [TestCategory("LogIn")]
         public async Task LogIn_SetsErrorMessage_WhenTargetUriNull()
         {
             bool errorMessagePropertyChangedCalled = false;
@@ -59,6 +65,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("LogIn")]
         public async Task LogIn_SetsErrorMessage_WhenTargetUriMalformed()
         {
             bool errorMessagePropertyChangedCalled = false;
@@ -84,6 +91,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("LogIn")]
         public async Task LogIn_SetsErrorMessage_WhenLoginRequestFails()
         {
             const string expectedErrorMessage = "my fake error message";
@@ -100,6 +108,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("LogIn")]
         public async Task LogIn_SetsConnectionOnTasExplorer_WhenLoginRequestSucceeds()
         {
             MockCloudFoundryService.Setup(mock => mock.
@@ -119,6 +128,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("LogIn")]
         public async Task LogIn_ClosesDialog_WhenLoginRequestSucceeds()
         {
             MockCloudFoundryService.Setup(mock => mock.ConnectToCFAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SecureString>(), It.IsAny<bool>()))
@@ -130,6 +140,87 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockCloudFoundryService.Verify(mock => mock.ConnectToCFAsync(FakeTarget, FakeUsername, FakeSecurePw, SkipSsl), Times.Once);
             MockDialogService.Verify(mock => mock.CloseDialog(It.IsAny<object>(), It.IsAny<bool>()), Times.Once);
             MockDialogService.Verify(ds => ds.CloseDialog(It.IsAny<object>(), true), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("CanLogIn")]
+        public void CanLogIn_ReturnsTrue_WhenAllFieldsFilled()
+        {
+            Assert.IsNotNull(_sut.ConnectionName);
+            Assert.IsNotNull(_sut.Target);
+            Assert.IsNotNull(_sut.Username);
+            Assert.IsFalse(_sut.PasswordEmpty());
+
+            Assert.IsTrue(_sut.CanLogIn());
+        }
+
+        [TestMethod]
+        [TestCategory("CanLogIn")]
+        [DataRow("")]
+        [DataRow(" ")]
+        [DataRow("  ")]
+        [DataRow(null)]
+        public void CanLogIn_ReturnsFalse_WhenConnectionNameEmpty(string invalidConnectionName)
+        {
+            _sut.ConnectionName = invalidConnectionName;
+
+            Assert.IsTrue(string.IsNullOrWhiteSpace(_sut.ConnectionName));
+            Assert.IsNotNull(_sut.Target);
+            Assert.IsNotNull(_sut.Username);
+            Assert.IsFalse(_sut.PasswordEmpty());
+
+            Assert.IsFalse(_sut.CanLogIn());
+        }
+
+        [TestMethod]
+        [TestCategory("CanLogIn")]
+        [DataRow("")]
+        [DataRow(" ")]
+        [DataRow("  ")]
+        [DataRow(null)]
+        public void CanLogIn_ReturnsFalse_WhenTargetEmpty(string invalidTargetApiAddress)
+        {
+            _sut.Target = invalidTargetApiAddress;
+
+            Assert.IsNotNull(_sut.ConnectionName);
+            Assert.IsTrue(string.IsNullOrWhiteSpace(_sut.Target));
+            Assert.IsNotNull(_sut.Username);
+            Assert.IsFalse(_sut.PasswordEmpty());
+
+            Assert.IsFalse(_sut.CanLogIn());
+        }
+
+        [TestMethod]
+        [TestCategory("CanLogIn")]
+        [DataRow("")]
+        [DataRow(" ")]
+        [DataRow("  ")]
+        [DataRow(null)]
+        public void CanLogIn_ReturnsFalse_WhenUsernameEmpty(string invalidUsername)
+        {
+            _sut.Username = invalidUsername;
+
+            Assert.IsNotNull(_sut.ConnectionName);
+            Assert.IsNotNull(_sut.Target);
+            Assert.IsTrue(string.IsNullOrWhiteSpace(_sut.Username));
+            Assert.IsFalse(_sut.PasswordEmpty());
+
+            Assert.IsFalse(_sut.CanLogIn());
+        }
+
+        [TestMethod]
+        [TestCategory("CanLogIn")]
+        public void CanLogIn_ReturnsFalse_WhenPasswordEmpty()
+        {
+            // mock out testimony from login view that password box is empty
+            _sut.PasswordEmpty = () => { return true; };
+
+            Assert.IsNotNull(_sut.ConnectionName);
+            Assert.IsNotNull(_sut.Target);
+            Assert.IsNotNull(_sut.Username);
+            Assert.IsTrue(_sut.PasswordEmpty());
+
+            Assert.IsFalse(_sut.CanLogIn());
         }
     }
 }

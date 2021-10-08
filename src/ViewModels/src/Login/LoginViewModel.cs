@@ -96,12 +96,14 @@ namespace Tanzu.Toolkit.ViewModels
                 RaisePropertyChangedEvent("ErrorMessage");
             }
         }
-
+            
         public Func<SecureString> GetPassword { get; set; }
+
+        public Func<bool> PasswordEmpty { get; set; }
 
         public bool CanLogIn(object arg = null)
         {
-            return true;
+            return !(string.IsNullOrWhiteSpace(ConnectionName) || string.IsNullOrWhiteSpace(Target) || string.IsNullOrWhiteSpace(Username) || PasswordEmpty());
         }
 
         public async Task LogIn(object arg)
