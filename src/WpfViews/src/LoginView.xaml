@@ -50,6 +50,7 @@
 
             <Label Content="TAS Api Address" Grid.Row="4" Grid.Column="0"></Label>
             <TextBox Name="tbUrl" Grid.Row="5" Grid.Column="1"
+                     LostFocus="TbUrl_LostFocus"
                  HorizontalAlignment="Stretch" Width="auto" Text="{ Binding Path=Target }" 
                  Background="{ Binding ElementName=LoginViewElement, Path=Background}"></TextBox>
 
