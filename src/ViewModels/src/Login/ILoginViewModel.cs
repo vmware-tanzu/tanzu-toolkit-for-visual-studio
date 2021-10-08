@@ -14,7 +14,7 @@ namespace Tanzu.Toolkit.ViewModels
         bool HasErrors { get; set; }
         string ErrorMessage { get; set; }
         Func<SecureString> GetPassword { get; set; }
-        Task AddCloudFoundryInstance(object arg);
-        bool CanAddCloudFoundryInstance(object arg);
+        Task LogIn(object arg);
+        bool CanLogIn(object arg);
     }
 }
