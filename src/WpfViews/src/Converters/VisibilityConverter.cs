@@ -9,6 +9,8 @@ namespace Tanzu.Toolkit.WpfViews.Converters
     {
         public bool Reversed { get; set; }
 
+        public bool ReserveSpace { get; set; }
+
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value as bool? != Reversed)
@@ -17,7 +19,7 @@ namespace Tanzu.Toolkit.WpfViews.Converters
             }
             else
             {
-                return Visibility.Hidden;
+                return ReserveSpace ? Visibility.Hidden : (object)Visibility.Collapsed;
             }
         }
 
