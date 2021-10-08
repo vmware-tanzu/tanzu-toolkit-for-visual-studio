@@ -21,6 +21,7 @@ namespace Tanzu.Toolkit.WpfViews
         {
             AddCloudCommand = new AsyncDelegatingCommand(viewModel.LogIn, viewModel.CanLogIn);
             viewModel.GetPassword = GetPassword;
+            viewModel.PasswordEmpty = PasswordBoxEmpty;
             themeService.SetTheme(this);
             DataContext = viewModel;
             InitializeComponent();
@@ -31,6 +32,11 @@ namespace Tanzu.Toolkit.WpfViews
         public SecureString GetPassword()
         {
             return pbPassword.SecurePassword;
+        }
+
+        public bool PasswordBoxEmpty()
+        {
+            return string.IsNullOrWhiteSpace(pbPassword.Password);
         }
 
         public ICommand AddCloudCommand { get; }
