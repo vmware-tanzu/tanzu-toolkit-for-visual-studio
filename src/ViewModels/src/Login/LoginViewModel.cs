@@ -12,7 +12,6 @@ namespace Tanzu.Toolkit.ViewModels
         public const string TargetInvalidFormatMessage = "Invalid URI: The format of the URI could not be determined.";
         private string _target;
         private string _username;
-        private string _httpProxy;
         private bool _skipSsl;
         private bool _hasErrors;
         private string _errorMessage;
@@ -57,17 +56,6 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 _username = value;
                 RaisePropertyChangedEvent("Username");
-            }
-        }
-
-        public string HttpProxy
-        {
-            get => _httpProxy;
-
-            set
-            {
-                _httpProxy = value;
-                RaisePropertyChangedEvent("HttpProxy");
             }
         }
 
@@ -125,7 +113,7 @@ namespace Tanzu.Toolkit.ViewModels
                 return;
             }
 
-            var result = await CloudFoundryService.ConnectToCFAsync(Target, Username, GetPassword(), HttpProxy, SkipSsl);
+            var result = await CloudFoundryService.ConnectToCFAsync(Target, Username, GetPassword(), SkipSsl);
             ErrorMessage = result.ErrorMessage;
 
             if (result.IsLoggedIn)

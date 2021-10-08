@@ -41,7 +41,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             _logger = logSvc.Logger;
         }
 
-        public async Task<ConnectResult> ConnectToCFAsync(string targetApiAddress, string username, SecureString password, string httpProxy, bool skipSsl)
+        public async Task<ConnectResult> ConnectToCFAsync(string targetApiAddress, string username, SecureString password, bool skipSsl)
         {
             if (string.IsNullOrEmpty(targetApiAddress))
             {

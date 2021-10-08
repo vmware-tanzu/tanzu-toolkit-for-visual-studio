@@ -9,7 +9,6 @@ namespace Tanzu.Toolkit.ViewModels
         string InstanceName { get; set; }
         string Target { get; set; }
         string Username { get; set; }
-        string HttpProxy { get; set; }
         bool SkipSsl { get; set; }
         bool HasErrors { get; set; }
         string ErrorMessage { get; set; }
