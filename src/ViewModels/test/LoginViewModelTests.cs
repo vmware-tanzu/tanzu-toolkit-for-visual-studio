@@ -150,6 +150,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsNotNull(_sut.Target);
             Assert.IsNotNull(_sut.Username);
             Assert.IsFalse(_sut.PasswordEmpty());
+            Assert.IsTrue(_sut.VerifyApiAddress(_sut.Target));
 
             Assert.IsTrue(_sut.CanLogIn());
         }
@@ -168,6 +169,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsNotNull(_sut.Target);
             Assert.IsNotNull(_sut.Username);
             Assert.IsFalse(_sut.PasswordEmpty());
+            Assert.IsTrue(_sut.VerifyApiAddress(_sut.Target));
 
             Assert.IsFalse(_sut.CanLogIn());
         }
@@ -184,6 +186,24 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsNotNull(_sut.ConnectionName);
             Assert.IsTrue(string.IsNullOrWhiteSpace(_sut.Target));
+            Assert.IsNotNull(_sut.Username);
+            Assert.IsFalse(_sut.PasswordEmpty());
+            Assert.IsFalse(_sut.VerifyApiAddress(_sut.Target));
+
+            Assert.IsFalse(_sut.CanLogIn());
+        }
+
+        [TestMethod]
+        [TestCategory("CanLogIn")]
+        [DataRow("asdf")]
+        [DataRow("^%$(**")]
+        [DataRow("a.bad.url")]
+        public void CanLogIn_ReturnsFalse_WhenTargetFailsVerification(string invalidTargetApiAddress)
+        {
+            _sut.Target = invalidTargetApiAddress;
+
+            Assert.IsNotNull(_sut.ConnectionName);
+            Assert.IsFalse(_sut.VerifyApiAddress(_sut.Target));
             Assert.IsNotNull(_sut.Username);
             Assert.IsFalse(_sut.PasswordEmpty());
 
@@ -204,6 +224,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsNotNull(_sut.Target);
             Assert.IsTrue(string.IsNullOrWhiteSpace(_sut.Username));
             Assert.IsFalse(_sut.PasswordEmpty());
+            Assert.IsTrue(_sut.VerifyApiAddress(_sut.Target));
 
             Assert.IsFalse(_sut.CanLogIn());
         }
@@ -219,6 +240,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsNotNull(_sut.Target);
             Assert.IsNotNull(_sut.Username);
             Assert.IsTrue(_sut.PasswordEmpty());
+            Assert.IsTrue(_sut.VerifyApiAddress(_sut.Target));
 
             Assert.IsFalse(_sut.CanLogIn());
         }
