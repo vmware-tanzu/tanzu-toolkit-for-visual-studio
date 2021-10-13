@@ -45,26 +45,29 @@
 
             <Label Content="Connection Name" Grid.Row="2" Grid.Column="0"></Label>
             <TextBox Name="tbConnectionName" Grid.Row="3" Grid.Column="1"
-                 HorizontalAlignment="Stretch" Width="auto" Text="{ Binding Path=ConnectionName }" 
-                 Background="{ Binding ElementName=LoginViewElement, Path=Background}"></TextBox>
+                     BorderBrush="{ Binding ElementName=LoginViewElement, Path=FieldBorderBrushProperty}"
+                     HorizontalAlignment="Stretch" Width="auto" Text="{ Binding Path=ConnectionName }" 
+                     Background="{ Binding ElementName=LoginViewElement, Path=Background}"></TextBox>
 
             <Label Content="TAS Api Address" Grid.Row="4" Grid.Column="0"></Label>
             <TextBox Name="tbUrl" Grid.Row="5" Grid.Column="1"
                      LostFocus="TbUrl_LostFocus"
-                 HorizontalAlignment="Stretch" Width="auto" Text="{ Binding Path=Target }" 
-                 Background="{ Binding ElementName=LoginViewElement, Path=Background}"></TextBox>
+                     BorderBrush="{ Binding ElementName=LoginViewElement, Path=FieldBorderBrushProperty}"
+                     HorizontalAlignment="Stretch" Width="auto" Text="{ Binding Path=Target }" 
+                     Background="{ Binding ElementName=LoginViewElement, Path=Background}"></TextBox>
 
             <Label Content="Username" Grid.Row="6" Grid.Column="0"></Label>
             <TextBox Name="tbUsername" Grid.Row="7" Grid.Column="1"
-                 HorizontalAlignment="Stretch" Width="auto" Text="{ Binding Path=Username }" 
-                 Background="{ Binding ElementName=LoginViewElement, Path=Background}"></TextBox>
+                     HorizontalAlignment="Stretch" Width="auto" Text="{ Binding Path=Username }" 
+                     BorderBrush="{ Binding ElementName=LoginViewElement, Path=FieldBorderBrushProperty}"
+                     Background="{ Binding ElementName=LoginViewElement, Path=Background}"></TextBox>
 
             <Label Content="Password" Grid.Row="8" Grid.Column="0" ></Label>
             <PasswordBox Name="pbPassword" Grid.Row="9" Grid.Column="1"
-                     HorizontalAlignment="Stretch" Width="auto" 
-                     Background="{ Binding ElementName=LoginViewElement, Path=Background}" 
-                     Foreground="{ Binding ElementName=LoginViewElement, Path=Foreground}" 
-                     BorderBrush="{ Binding ElementName=LoginViewElement, Path=BorderBrush}"></PasswordBox>
+                         HorizontalAlignment="Stretch" Width="auto" 
+                         Background="{ Binding ElementName=LoginViewElement, Path=Background}" 
+                         Foreground="{ Binding ElementName=LoginViewElement, Path=Foreground}" 
+                         BorderBrush="{ Binding ElementName=LoginViewElement, Path=FieldBorderBrushProperty}"></PasswordBox>
 
             <TextBox Grid.Row="10" Grid.Column="0" Margin="0,20,0,0" IsReadOnly="True"
                  TextWrapping="Wrap" BorderBrush="Transparent" 
