@@ -47,7 +47,9 @@ namespace Tanzu.Toolkit.ViewModels
         private string _targetName;
         private bool _isLoggedIn;
         private string _selectedStack;
+        private string _selectedBuildpack;
         private List<string> _stackOptions = new List<string> { "windows", "cflinuxfs3" };
+        private List<string> _buildpackOptions = new List<string> { "junk", "fix this", "not real" };
         private bool _binaryDeployment;
         private string _deploymentButtonLabel;
         private bool _expanded;
@@ -238,6 +240,17 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
+        public string SelectedBuildpack
+        {
+            get => _selectedBuildpack;
+
+            set
+            {
+                _selectedBuildpack = value;
+                RaisePropertyChangedEvent("SelectedBuildpack");
+            }
+        }
+
         public CloudFoundryOrganization SelectedOrg
         {
             get => _selectedOrg;
@@ -307,6 +320,11 @@ namespace Tanzu.Toolkit.ViewModels
         public List<string> StackOptions
         {
             get => _stackOptions;
+        }
+
+        public List<string> BuildpackOptions
+        {
+            get => _buildpackOptions;
         }
 
         public bool DeploymentInProgress { get; internal set; }
@@ -442,7 +460,8 @@ namespace Tanzu.Toolkit.ViewModels
                 stack: SelectedStack,
                 binaryDeployment: BinaryDeployment,
                 projectName: _projectName,
-                manifestPath: ManifestPath);
+                manifestPath: ManifestPath,
+                buildpack: SelectedBuildpack);
 
             if (!deploymentResult.Succeeded)
             {

@@ -16,6 +16,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         private const string _fakeAppName = "fake app name";
         private const string _fakeProjName = "fake project name";
         private const string _fakeStack = "windows";
+        //private const string _fakeBuildpack = "junk";
         private const string _fakeProjPath = "this\\is\\a\\fake\\path\\to\\a\\project\\directory";
         private const string _realPathToFakeDeploymentDir = "TestFakes";
         private const string FakeTargetFrameworkMoniker = "junk";
@@ -270,8 +271,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                It.IsAny<StdOutDelegate>(),
                                It.IsAny<StdErrDelegate>(),
                                null,
-                               false, 
-                               It.IsAny<string>(), 
+                               false,
+                               It.IsAny<string>(),
+                               null,
                                null))
                 .ReturnsAsync(FakeSuccessDetailedResult);
 
@@ -296,6 +298,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                     null,
                                     false,
                                     _fakeProjName,
+                                    null,
                                     null))
                     .ReturnsAsync(FakeSuccessDetailedResult);
 
@@ -327,7 +330,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                     It.IsAny<StdErrDelegate>(),
                                     stack,
                                     false,
-                                    _fakeProjName, 
+                                    _fakeProjName,
+                                    null,
                                     null))
                     .ReturnsAsync(FakeSuccessDetailedResult);
 
@@ -339,7 +343,40 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             await _sut.StartDeployment();
         }
-        
+
+        [TestMethod]
+        [TestCategory("StartDeployment")]
+        [DataRow("hwc_buildpack")]
+        [DataRow("myCustombuildpack")]
+        [DataRow("junk")]
+        public async Task StartDeploymentTask_PassesSelectedBuildpack_ForDeployment(string bp)
+        {
+            MockCloudFoundryService.Setup(mock =>
+                mock.DeployAppAsync(_fakeCfInstance,
+                                    _fakeOrg,
+                                    _fakeSpace,
+                                    _fakeAppName,
+                                    _realPathToFakeDeploymentDir,
+                                    _defaultFullFWFlag,
+                                    It.IsAny<StdOutDelegate>(),
+                                    It.IsAny<StdErrDelegate>(),
+                                    "cflinuxfs3",
+                                    false,
+                                    _fakeProjName,
+                                    null,
+                                    bp))
+                    .ReturnsAsync(FakeSuccessDetailedResult);
+
+            _sut.AppName = _fakeAppName;
+            _sut.SelectedOrg = _fakeOrg;
+            _sut.SelectedSpace = _fakeSpace;
+            _sut.SelectedStack = "cflinuxfs3";
+            _sut.SelectedBuildpack = bp;
+            Assert.IsNotNull(_sut.SelectedBuildpack);
+
+            await _sut.StartDeployment();
+        }
+
         [TestMethod]
         [TestCategory("StartDeployment")]
         public async Task StartDeploymentTask_PassesDirectoryPath_ForDeployment()
@@ -357,7 +394,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                     It.IsAny<StdErrDelegate>(),
                                     _fakeStack,
                                     false,
-                                    _fakeProjName, 
+                                    _fakeProjName,
+                                    null,
                                     null))
                     .ReturnsAsync(FakeSuccessDetailedResult);
 
@@ -389,7 +427,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                     It.IsAny<StdErrDelegate>(),
                                     _fakeStack,
                                     isBinaryDeployment,
-                                    _fakeProjName, 
+                                    _fakeProjName,
+                                    null,
                                     null))
                     .ReturnsAsync(FakeSuccessDetailedResult);
 
@@ -424,7 +463,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                     It.IsAny<StdErrDelegate>(),
                                     _fakeStack,
                                     It.IsAny<bool>(),
-                                    expectedProjectName, 
+                                    expectedProjectName,
+                                    null,
                                     null))
                     .ReturnsAsync(FakeSuccessDetailedResult);
 
@@ -459,8 +499,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                              expectedStdOutCallback,
                              expectedStdErrCallback,
                              null,
-                             false, 
-                             _fakeProjName, 
+                             false,
+                             _fakeProjName,
+                             null,
                              null))
                 .ReturnsAsync(FakeSuccessDetailedResult);
 
@@ -488,8 +529,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                expectedStdOutCallback,
                                expectedStdErrCallback,
                                null,
-                               false, 
-                               _fakeProjName, 
+                               false,
+                               _fakeProjName,
+                               null,
                                null))
                     .ReturnsAsync(FakeFailureDetailedResult);
 
@@ -534,8 +576,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                expectedStdOutCallback,
                                expectedStdErrCallback,
                                null,
-                               false, 
-                               _fakeProjName, 
+                               false,
+                               _fakeProjName,
+                               null,
                                null))
                     .ReturnsAsync(FakeFailureDetailedResult);
 
@@ -575,7 +618,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                expectedStdErrCallback,
                                null,
                                false,
-                               _fakeProjName, 
+                               _fakeProjName,
+                               null,
                                null))
                     .ReturnsAsync(invalidRefreshTokenFailure);
 
@@ -614,6 +658,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                null,
                                false,
                                _fakeProjName,
+                               null,
                                null))
                     .ReturnsAsync(redundantErrorInfoResult);
 
