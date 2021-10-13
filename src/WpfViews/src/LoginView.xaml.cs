@@ -1,6 +1,7 @@
 ﻿using System.Security;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.WpfViews.Commands;
 using Tanzu.Toolkit.WpfViews.ThemeService;
@@ -31,6 +32,8 @@ namespace Tanzu.Toolkit.WpfViews
 
             MouseDown += Window_MouseDown;
         }
+
+        public static readonly DependencyProperty FieldBorderBrushProperty = DependencyProperty.Register("FieldBorderBrushProperty", typeof(Brush), typeof(LoginView), new PropertyMetadata(default(Brush)));
 
         public SecureString GetPassword()
         {
