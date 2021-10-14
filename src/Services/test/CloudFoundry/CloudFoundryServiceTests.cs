@@ -6,10 +6,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Serilog;
 using Tanzu.Toolkit.CloudFoundryApiClient;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CloudFoundry;
-using Tanzu.Toolkit.Services.CommandProcess;
 using Tanzu.Toolkit.Services.CommandProcess;
 using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.ErrorDialog;
@@ -963,6 +963,186 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
+        [TestCategory("GetBuildpackNames")]
+        public async Task GetBuildpackNamesAsync_ReturnsSuccessfulResult_WhenListBuildpacksSucceeds()
+        {
+            var fakeBuildpacksResponse = new List<Buildpack>
+            {
+                new Buildpack
+                {
+                    Name = "Bp1",
+                },
+                new Buildpack
+                {
+                    Name = "Bp2",
+                },
+                new Buildpack
+                {
+                    Name = "Bp3",
+                },
+            };
+
+            _mockCfCliService.Setup(m => m.GetOAuthToken()).Returns(_fakeAccessToken);
+
+            _mockCfApiClient.Setup(m => m.ListBuildpacks(_fakeValidTarget, _fakeAccessToken)).ReturnsAsync(fakeBuildpacksResponse);
+
+            var result = await _sut.GetBuildpackNamesAsync(_fakeValidTarget);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.AreEqual(fakeBuildpacksResponse.Count, result.Content.Count);
+            for (int i = 0; i < fakeBuildpacksResponse.Count; i++)
+            {
+                Assert.AreEqual(fakeBuildpacksResponse[i].Name, result.Content[i]);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("GetBuildpackNames")]
+        public async Task GetBuildpackNamesAsync_ReturnsFailedResult_WhenTokenRetrievalThrowsInvalidRefreshTokenException()
+        {
+
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Throws(new InvalidRefreshTokenException());
+
+            DetailedResult<List<string>> result = await _sut.GetBuildpackNamesAsync(_fakeValidTarget);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.AreEqual(null, result.CmdResult);
+            Assert.AreEqual(null, result.Content);
+            Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
+        }
+
+        [TestMethod]
+        [TestCategory("GetBuildpackNames")]
+        public async Task GetBuildpackNamesAsync_ReturnsFailedResult_WhenListBuildpacksThrowsException()
+        {
+            var fakeExceptionMsg = "junk";
+
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns(_fakeValidAccessToken);
+
+            _mockCfApiClient.Setup(m => m.
+                ListBuildpacks(_fakeValidTarget, _fakeValidAccessToken))
+                    .Throws(new Exception(fakeExceptionMsg));
+
+            var result = await _sut.GetBuildpackNamesAsync(_fakeValidTarget);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsNull(result.CmdResult);
+            Assert.IsNull(result.Content);
+
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("GetBuildpackNames")]
+        public async Task GetBuildpackNamesAsync_RetriesWithFreshToken_WhenListBuildpacksThrowsException()
+        {
+            var fakeExceptionMsg = "junk";
+            var fakeBuildpacksResponse = new List<Buildpack>
+            {
+                new Buildpack
+                {
+                    Name = "Bp1",
+                },
+                new Buildpack
+                {
+                    Name = "Bp2",
+                },
+                new Buildpack
+                {
+                    Name = "Bp3",
+                },
+            };
+
+            var expectedResultContent = new List<string>
+            {
+                fakeBuildpacksResponse[0].Name,
+                fakeBuildpacksResponse[1].Name,
+                fakeBuildpacksResponse[2].Name,
+            };
+
+            _mockCfCliService.SetupSequence(m => m.
+                GetOAuthToken())
+                    .Returns(expiredAccessToken) // simulate stale cached token on first attempt
+                    .Returns(_fakeValidAccessToken); // simulate fresh cached token on second attempt
+
+            _mockCfApiClient.Setup(m => m.
+                ListBuildpacks(_fakeValidTarget, expiredAccessToken))
+                    .Throws(new Exception(fakeExceptionMsg));
+
+            _mockCfApiClient.Setup(m => m.
+                ListBuildpacks(_fakeValidTarget, _fakeValidAccessToken))
+                    .ReturnsAsync(fakeBuildpacksResponse);
+
+            var result = await _sut.GetBuildpackNamesAsync(_fakeValidTarget);
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.AreEqual(null, result.CmdResult);
+            Assert.AreEqual(expectedResultContent.Count, result.Content.Count);
+
+            _mockCfCliService.Verify(m => m.ClearCachedAccessToken(), Times.Once);
+            _mockCfApiClient.Verify(m => m.ListBuildpacks(_fakeValidTarget, expiredAccessToken), Times.Once);
+            _mockCfApiClient.Verify(m => m.ListBuildpacks(_fakeValidTarget, _fakeValidAccessToken), Times.Once);
+            _mockLogger.Verify(m => m.Information(It.Is<string>(s => s.Contains("retry")), fakeExceptionMsg, It.IsAny<int>()), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("GetBuildpackNames")]
+        public async Task GetBuildpackNamesAsync_ReturnsFailedResult_WhenListBuildpacksThrowsException_AndThereAreZeroRetriesLeft()
+        {
+            var fakeExceptionMsg = "junk";
+
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns(_fakeValidAccessToken);
+
+            _mockCfApiClient.Setup(m => m.
+                ListBuildpacks(_fakeValidTarget, _fakeValidAccessToken))
+                    .Throws(new Exception(fakeExceptionMsg));
+
+            var result = await _sut.GetBuildpackNamesAsync(_fakeValidTarget, retryAmount: 0);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsNull(result.CmdResult);
+            Assert.IsNull(result.Content);
+
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("GetBuildpackNames")]
+        public async Task GetBuildpackNamesAsync_ReturnsFailedResult_WhenTokenCannotBeFound()
+        {
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns((string)null);
+
+            var result = await _sut.GetBuildpackNamesAsync(_fakeValidTarget);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsNull(result.CmdResult);
+            Assert.IsNull(result.Content);
+
+            Assert.IsTrue(_mockCfApiClient.Invocations.Count == 0);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
         [TestCategory("StopApp")]
         public async Task StopAppAsync_ReturnsSuccessfulResult_AndUpdatesAppState()
         {
@@ -1047,7 +1227,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             _mockCfApiClient.Setup(m => m.
                 StopAppWithGuid(FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
-                    .ReturnsAsync(true); 
+                    .ReturnsAsync(true);
 
             var result = await _sut.StopAppAsync(FakeApp);
 
