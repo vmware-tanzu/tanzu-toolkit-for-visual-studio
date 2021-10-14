@@ -12,102 +12,95 @@
         BorderBrush="{Binding ElementName=LoginViewElement, Path=Foreground }"
         BorderThickness="1"
         SizeToContent="Height"
-        Title="Login" Icon="Resources/AddCloud.png" Width="480">
+        Title="Login" Icon="Resources/AddCloud.png" Width="500">
 
     <Window.Resources>
         <converters:VisibilityConverter x:Key="Visibility" />
         <converters:VisibilityConverter x:Key="CollapsedVisibility" ReserveSpace="False" />
+        <converters:VisibilityConverter x:Key="InverseCollapsedVisibility" ReserveSpace="False" Reversed="True"/>
         <errors:UrlValidationRule x:Key="UrlValidationRule"/>
 
-        <ControlTemplate x:Key="validationTemplate">
-            <DockPanel>
-                <TextBlock Foreground="Red" FontSize="20">!</TextBlock>
-                <AdornedElementPlaceholder/>
-            </DockPanel>
-        </ControlTemplate>
-
-        <Style x:Key="textBoxInError" TargetType="{x:Type TextBox}">
+        <Style x:Key="ApiAddressFieldStyle" TargetType="{x:Type TextBox}">
             <Style.Triggers>
-                <Trigger Property="Validation.HasError" Value="true">
-                    <Setter Property="ToolTip"
-                            Value="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=(Validation.Errors)/ErrorContent}"/>
-                </Trigger>
+                <DataTrigger Binding="{Binding ApiAddressIsValid}" Value="False">
+                    <Setter Property="BorderBrush" Value="Red" />
+                    <Setter Property="BorderThickness" Value="1" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding ApiAddressIsValid}" Value="True">
+                    <Setter Property="BorderBrush" Value="{ Binding ElementName=LoginViewElement, Path=FieldBorderBrushProperty}" />
+                    <Setter Property="BorderThickness" Value="1" />
+                </DataTrigger>
             </Style.Triggers>
         </Style>
-
     </Window.Resources>
 
-
-    <DockPanel LastChildFill="False">
-        <StackPanel Orientation="Horizontal" Margin="12,12,0,16" DockPanel.Dock="Top">
-            <Image Source="Resources/tasicon.png" Width="32" Margin="4" Grid.Row="0" Grid.Column="0"/>
-            <TextBlock FontSize="24" Text="Log In to Tanzu Application Service" Margin="4" Grid.Row="0" Grid.Column="1"/>
+    <StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="12">
+            <Image
+                Source="Resources/tasicon.png"
+                Width="32"
+                Margin="4"/>
+            <TextBlock
+                Text="Log In to Tanzu Application Service"
+                FontSize="24"
+                Margin="4"/>
         </StackPanel>
 
-        <Grid Margin="50,0,50,0" DockPanel.Dock="Top">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto"></RowDefinition>
-                <RowDefinition Height="auto"></RowDefinition>
-                <RowDefinition Height="auto"></RowDefinition>
-                <RowDefinition Height="auto"></RowDefinition>
-                <RowDefinition Height="auto"></RowDefinition>
-                <RowDefinition Height="auto"></RowDefinition>
-                <RowDefinition Height="auto"></RowDefinition>
-                <RowDefinition Height="auto"></RowDefinition>
-                <RowDefinition Height="auto"></RowDefinition>
-                <RowDefinition Height="auto"></RowDefinition>
-                <RowDefinition Height="auto"></RowDefinition>
-            </Grid.RowDefinitions>
+        <StackPanel Margin="52,0">
+            <Label Content="Connection Name"/>
+            <TextBox 
+                Name="tbConnectionName"
+                BorderBrush="{ Binding ElementName=LoginViewElement, Path=FieldBorderBrushProperty}"
+                HorizontalAlignment="Stretch" Width="auto" Text="{ Binding Path=ConnectionName }"
+                Background="{ Binding ElementName=LoginViewElement, Path=Background}"/>
 
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"></ColumnDefinition>
-            </Grid.ColumnDefinitions>
+            <Label Content="TAS Api Address"/>
+            <TextBox
+                Text="{Binding Target}"
+                Name="tbUrl"
+                Style="{DynamicResource ApiAddressFieldStyle}"
+                LostFocus="TbUrl_LostFocus"
+                HorizontalAlignment="Stretch"
+                Width="auto"
+                Background="{ Binding ElementName=LoginViewElement, Path=Background}"/>
+            <TextBlock
+                Text="{Binding ApiAddressError}"
+                Foreground="Red"
+                Visibility="{Binding Path=ApiAddressIsValid, Converter={StaticResource InverseCollapsedVisibility}}"/>
 
-            <Label Content="Connection Name" Grid.Row="2" Grid.Column="0"></Label>
-            <TextBox Name="tbConnectionName" Grid.Row="3" Grid.Column="1"
-                     BorderBrush="{ Binding ElementName=LoginViewElement, Path=FieldBorderBrushProperty}"
-                     HorizontalAlignment="Stretch" Width="auto" Text="{ Binding Path=ConnectionName }" 
-                     Background="{ Binding ElementName=LoginViewElement, Path=Background}"></TextBox>
+            <Label Content="Username"/>
+            <TextBox
+                Name="tbUsername"
+                Text="{ Binding Path=Username }"
+                HorizontalAlignment="Stretch"
+                Width="auto"
+                BorderBrush="{ Binding ElementName=LoginViewElement, Path=FieldBorderBrushProperty}"
+                Background="{ Binding ElementName=LoginViewElement, Path=Background}"/>
 
-            <Label Content="TAS Api Address" Grid.Row="4" Grid.Column="0"></Label>
-            <TextBox Name="tbUrl" Grid.Row="5" Grid.Column="1"
-                     Validation.ErrorTemplate="{StaticResource validationTemplate}"
-                     Style="{StaticResource textBoxInError}"
-                     BorderBrush="{ Binding ElementName=LoginViewElement, Path=FieldBorderBrushProperty}"
-                     HorizontalAlignment="Stretch" Width="auto" 
-                     Background="{ Binding ElementName=LoginViewElement, Path=Background}">
-                <TextBox.Text>
-                    <Binding Path="Target" UpdateSourceTrigger="PropertyChanged">
-                        <Binding.ValidationRules>
-                            <errors:UrlValidationRule/>
-                        </Binding.ValidationRules>
-                    </Binding>
-                </TextBox.Text>
-            </TextBox>
+            <Label Content="Password"/>
+            <PasswordBox
+                Name="pbPassword"
+                HorizontalAlignment="Stretch"
+                Width="auto"
+                Background="{ Binding ElementName=LoginViewElement, Path=Background}"
+                Foreground="{ Binding ElementName=LoginViewElement, Path=Foreground}"
+                BorderBrush="{ Binding ElementName=LoginViewElement, Path=FieldBorderBrushProperty}"/>
 
-            <Label Content="Username" Grid.Row="6" Grid.Column="0"></Label>
-            <TextBox Name="tbUsername" Grid.Row="7" Grid.Column="1"
-                     HorizontalAlignment="Stretch" Width="auto" Text="{ Binding Path=Username }" 
-                     BorderBrush="{ Binding ElementName=LoginViewElement, Path=FieldBorderBrushProperty}"
-                     Background="{ Binding ElementName=LoginViewElement, Path=Background}"></TextBox>
-
-            <Label Content="Password" Grid.Row="8" Grid.Column="0" ></Label>
-            <PasswordBox Name="pbPassword" Grid.Row="9" Grid.Column="1"
-                         HorizontalAlignment="Stretch" Width="auto" 
-                         Background="{ Binding ElementName=LoginViewElement, Path=Background}" 
-                         Foreground="{ Binding ElementName=LoginViewElement, Path=Foreground}" 
-                         BorderBrush="{ Binding ElementName=LoginViewElement, Path=FieldBorderBrushProperty}"></PasswordBox>
-
-            <TextBox Grid.Row="10" Grid.Column="0" Margin="0,20,0,0" IsReadOnly="True"
-                 TextWrapping="Wrap" BorderBrush="Transparent" 
-                 ScrollViewer.VerticalScrollBarVisibility="Auto"
-                 Foreground="Crimson" MinLines="3" MaxLines="3" 
-                 Background="Transparent" Text="{Binding  Path=ErrorMessage}" 
-                 Visibility="{Binding Path=HasErrors, Converter={StaticResource CollapsedVisibility}}"/>
-        </Grid>
+            <TextBox
+                Text="{Binding  Path=ErrorMessage}"
+                Margin="0,20,0,0"
+                IsReadOnly="True"
+                TextWrapping="Wrap"
+                BorderBrush="Transparent"
+                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                Foreground="Crimson"
+                MinLines="3"
+                MaxLines="3"
+                Background="Transparent"
+                Visibility="{Binding Path=HasErrors, Converter={StaticResource CollapsedVisibility}}"/>
+        </StackPanel>
 
         <StackPanel
-            DockPanel.Dock="Bottom"
             Orientation="Horizontal"
             Margin="12"
             Height="auto"
@@ -127,5 +120,5 @@
                 Click="Close"
                 Content="Cancel"/>
         </StackPanel>
-    </DockPanel>
+    </StackPanel>
 </Window>
