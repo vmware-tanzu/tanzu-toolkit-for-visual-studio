@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System.Collections.Generic;
 using System.Net;
 using System.Security;
 using System.Threading.Tasks;
@@ -17,6 +18,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         private const bool SkipSsl = true;
         private const string FakePwStr = "fakePw";
         private static SecureString FakeSecurePw;
+        private List<string> _receivedEvents;
 
         private static LoginViewModel _sut;
 
@@ -36,58 +38,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 PasswordEmpty = () => { return false; },
                 SkipSsl = SkipSsl,
             };
-        }
 
-        [TestMethod]
-        [TestCategory("LogIn")]
-        public async Task LogIn_SetsErrorMessage_WhenTargetUriNull()
-        {
-            bool errorMessagePropertyChangedCalled = false;
-            _sut.Target = null;
-
-            _sut.PropertyChanged += (s, args) =>
+            _receivedEvents = new List<string>();
+            _sut.PropertyChanged += (sender, e) =>
             {
-                if (args.PropertyName == "ErrorMessage")
-                {
-                    errorMessagePropertyChangedCalled = true;
-                }
+                _receivedEvents.Add(e.PropertyName);
             };
-
-            await _sut.LogIn(null);
-
-            Assert.IsTrue(errorMessagePropertyChangedCalled);
-            Assert.IsTrue(_sut.HasErrors);
-            Assert.AreEqual(LoginViewModel.TargetEmptyMessage, _sut.ErrorMessage);
-
-            MockDialogService.Verify(ds => ds.CloseDialog(It.IsAny<object>(), true), Times.Never);
-            MockDialogService.Verify(ds => ds.ShowDialog(It.IsAny<string>(), null), Times.Never);
-            MockCloudFoundryService.Verify(mock => mock.ConnectToCFAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SecureString>(), It.IsAny<bool>()), Times.Never);
-        }
-
-        [TestMethod]
-        [TestCategory("LogIn")]
-        public async Task LogIn_SetsErrorMessage_WhenTargetUriMalformed()
-        {
-            bool errorMessagePropertyChangedCalled = false;
-            _sut.Target = "some-poorly-formatted-uri";
-
-            _sut.PropertyChanged += (s, args) =>
-            {
-                if (args.PropertyName == "ErrorMessage")
-                {
-                    errorMessagePropertyChangedCalled = true;
-                }
-            };
-
-            await _sut.LogIn(null);
-
-            Assert.IsTrue(errorMessagePropertyChangedCalled);
-            Assert.IsTrue(_sut.HasErrors);
-            Assert.AreEqual(LoginViewModel.TargetInvalidFormatMessage, _sut.ErrorMessage);
-
-            MockDialogService.Verify(ds => ds.CloseDialog(It.IsAny<object>(), true), Times.Never);
-            MockDialogService.Verify(ds => ds.ShowDialog(It.IsAny<string>(), null), Times.Never);
-            MockCloudFoundryService.Verify(mock => mock.ConnectToCFAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SecureString>(), It.IsAny<bool>()), Times.Never);
         }
 
         [TestMethod]
@@ -243,6 +199,23 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsTrue(_sut.VerifyApiAddress(_sut.Target));
 
             Assert.IsFalse(_sut.CanLogIn());
+        }
+
+        [TestMethod]
+        [TestCategory("VerifyApiAddress")]
+        [DataRow("", false, LoginViewModel.TargetEmptyMessage)]
+        [DataRow(" ", false, LoginViewModel.TargetEmptyMessage)]
+        [DataRow("_", false, LoginViewModel.TargetInvalidFormatMessage)]
+        [DataRow(null, false, LoginViewModel.TargetEmptyMessage)]
+        [DataRow("www.api.com", false, LoginViewModel.TargetInvalidFormatMessage)]
+        [DataRow("http://www.api.com", true, null)]
+        [DataRow("https://my.cool.url", true, null)]
+        public void VerifyApiAddress_SetsApiAddressIsValid_AndSetsApiAddressError(string apiAddr, bool expectedValidity, string expectedError)
+        {
+            _sut.VerifyApiAddress(apiAddr);
+            Assert.AreEqual(expectedValidity, _sut.ApiAddressIsValid);
+            Assert.AreEqual(expectedError, _sut.ApiAddressError);
+            Assert.IsTrue(_receivedEvents.Contains("ApiAddressIsValid"));
         }
     }
 }

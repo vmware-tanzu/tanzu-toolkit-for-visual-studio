@@ -15,6 +15,7 @@ namespace Tanzu.Toolkit.ViewModels
         private bool _skipSsl;
         private bool _hasErrors;
         private string _errorMessage;
+        private bool _apiAddressIsValid;
         private string _connectionName;
         private ITasExplorerViewModel _tasExplorer;
 
@@ -97,6 +98,32 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
+        public bool ApiAddressIsValid
+        {
+            get { return _apiAddressIsValid; }
+
+            set
+            {
+                _apiAddressIsValid = value;
+                RaisePropertyChangedEvent("ApiAddressIsValid");
+            }
+        }
+
+        private string _apiAddressError;
+
+        public string ApiAddressError
+        {
+            get { return _apiAddressError; }
+
+            set
+            {
+                _apiAddressError = value;
+                RaisePropertyChangedEvent("ApiAddressError");
+            }
+        }
+
+
+
         public Func<SecureString> GetPassword { get; set; }
 
         public Func<bool> PasswordEmpty { get; set; }
@@ -131,25 +158,28 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool VerifyApiAddress(string apiAddress)
         {
-            if (string.IsNullOrEmpty(apiAddress))
+            if (string.IsNullOrWhiteSpace(apiAddress))
             {
-                ErrorMessage = TargetEmptyMessage;
+                ApiAddressError = TargetEmptyMessage;
+                ApiAddressIsValid = false;
+
                 return false;
             }
-
-            try
+            else if (!Uri.IsWellFormedUriString(apiAddress, UriKind.Absolute))
             {
-                var uri = new Uri(apiAddress);
-                ErrorMessage = null;
+                ApiAddressError = TargetInvalidFormatMessage;
+                ApiAddressIsValid = false;
+
+                return false;
+            }
+            else
+            {
+                ApiAddressError = null;
+                ApiAddressIsValid = true;
                 HasErrors = false;
-            }
-            catch
-            {
-                ErrorMessage = TargetInvalidFormatMessage;
-                return false;
-            }
 
-            return true;
+                return true;
+            }
         }
     }
 }
