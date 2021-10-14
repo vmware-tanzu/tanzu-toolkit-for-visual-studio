@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.CloudFoundryApiClient;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.OrgsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.SpacesResponse;
@@ -405,6 +406,85 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 Succeeded = true,
                 Content = appsToReturn,
+            };
+        }
+
+        public async Task<DetailedResult<List<string>>> GetBuildpackNamesAsync(string apiAddress, int retryAmount = 1)
+        {
+            string accessToken;
+            try
+            {
+                accessToken = _cfCliService.GetOAuthToken();
+            }
+            catch (InvalidRefreshTokenException)
+            {
+                var msg = "Unable to retrieve buildpacks because the connection has expired. Please log back in to re-authenticate.";
+                _logger.Information(msg);
+
+                return new DetailedResult<List<string>>
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                    Content = null,
+                    FailureType = FailureType.InvalidRefreshToken,
+                };
+            }
+
+            if (accessToken == null)
+            {
+                _logger.Error("CloudFoundryService attempted to get buildpacks but was unable to look up an access token.");
+
+                return new DetailedResult<List<string>>()
+                {
+                    Succeeded = false,
+                    Explanation = $"CloudFoundryService attempted to get buildpacks but was unable to look up an access token.",
+                };
+            }
+
+            List<Buildpack> buildpacksFromApi;
+            try
+            {
+                buildpacksFromApi = await _cfApiClient.ListBuildpacks(apiAddress, accessToken);
+            }
+            catch (Exception originalException)
+            {
+                if (retryAmount > 0)
+                {
+                    _logger.Information("GetBuildpackNamesAsync caught an exception when trying to retrieve buildpacks: {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).", originalException.Message, retryAmount);
+                    _cfCliService.ClearCachedAccessToken();
+                    retryAmount -= 1;
+                    return await GetBuildpackNamesAsync(apiAddress, retryAmount);
+                }
+                else
+                {
+                    _logger.Error("{Error}. See logs for more details: toolkit-diagnostics.log", originalException.Message);
+
+                    return new DetailedResult<List<string>>()
+                    {
+                        Succeeded = false,
+                        Explanation = originalException.Message,
+                    };
+                }
+            }
+
+            var buildpackNames = new List<string>();
+
+            foreach (Buildpack buildpack in buildpacksFromApi)
+            {
+                if (string.IsNullOrWhiteSpace(buildpack.Name))
+                {
+                    _logger.Error("CloudFoundryService.GetBuildpackNamesAsync encountered a buildpack without a name; omitting it from the returned list of buildpacks.");
+                }
+                else
+                {
+                    buildpackNames.Add(buildpack.Name);
+                }
+            }
+
+            return new DetailedResult<List<string>>()
+            {
+                Succeeded = true,
+                Content = buildpackNames,
             };
         }
 
