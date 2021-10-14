@@ -15,6 +15,7 @@ namespace Tanzu.Toolkit.ViewModels
         private bool _skipSsl;
         private bool _hasErrors;
         private string _errorMessage;
+        private string _apiAddressError;
         private bool _apiAddressIsValid;
         private string _connectionName;
         private ITasExplorerViewModel _tasExplorer;
@@ -23,6 +24,8 @@ namespace Tanzu.Toolkit.ViewModels
             : base(services)
         {
             SkipSsl = true;
+
+            ApiAddressIsValid = true;
 
             _tasExplorer = services.GetRequiredService<ITasExplorerViewModel>();
         }
@@ -109,8 +112,6 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        private string _apiAddressError;
-
         public string ApiAddressError
         {
             get { return _apiAddressError; }
@@ -121,8 +122,6 @@ namespace Tanzu.Toolkit.ViewModels
                 RaisePropertyChangedEvent("ApiAddressError");
             }
         }
-
-
 
         public Func<SecureString> GetPassword { get; set; }
 
@@ -176,7 +175,6 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 ApiAddressError = null;
                 ApiAddressIsValid = true;
-                HasErrors = false;
 
                 return true;
             }

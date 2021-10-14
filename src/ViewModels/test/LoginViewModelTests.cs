@@ -47,6 +47,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("ctor")]
+        public void Constructor_SetsApiAddressIsValid_ToTrue()
+        {
+            Assert.IsTrue(_sut.ApiAddressIsValid);
+        }
+
+        [TestMethod]
         [TestCategory("LogIn")]
         public async Task LogIn_SetsErrorMessage_WhenLoginRequestFails()
         {
