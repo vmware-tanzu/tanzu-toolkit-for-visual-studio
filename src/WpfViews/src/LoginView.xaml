@@ -3,7 +3,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:converters="clr-namespace:Tanzu.Toolkit.WpfViews.Converters"
+        xmlns:converters="clr-namespace:Tanzu.Toolkit.WpfViews.Converters" 
+        xmlns:errors="clr-namespace:Tanzu.Toolkit.VisualStudio.WpfViews.Errors"
         Name ="LoginViewElement"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
@@ -16,7 +17,26 @@
     <Window.Resources>
         <converters:VisibilityConverter x:Key="Visibility" />
         <converters:VisibilityConverter x:Key="CollapsedVisibility" ReserveSpace="False" />
+        <errors:UrlValidationRule x:Key="UrlValidationRule"/>
+
+        <ControlTemplate x:Key="validationTemplate">
+            <DockPanel>
+                <TextBlock Foreground="Red" FontSize="20">!</TextBlock>
+                <AdornedElementPlaceholder/>
+            </DockPanel>
+        </ControlTemplate>
+
+        <Style x:Key="textBoxInError" TargetType="{x:Type TextBox}">
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="true">
+                    <Setter Property="ToolTip"
+                            Value="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=(Validation.Errors)/ErrorContent}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
     </Window.Resources>
+
 
     <DockPanel LastChildFill="False">
         <StackPanel Orientation="Horizontal" Margin="12,12,0,16" DockPanel.Dock="Top">
@@ -51,10 +71,19 @@
 
             <Label Content="TAS Api Address" Grid.Row="4" Grid.Column="0"></Label>
             <TextBox Name="tbUrl" Grid.Row="5" Grid.Column="1"
-                     LostFocus="TbUrl_LostFocus"
+                     Validation.ErrorTemplate="{StaticResource validationTemplate}"
+                     Style="{StaticResource textBoxInError}"
                      BorderBrush="{ Binding ElementName=LoginViewElement, Path=FieldBorderBrushProperty}"
-                     HorizontalAlignment="Stretch" Width="auto" Text="{ Binding Path=Target }" 
-                     Background="{ Binding ElementName=LoginViewElement, Path=Background}"></TextBox>
+                     HorizontalAlignment="Stretch" Width="auto" 
+                     Background="{ Binding ElementName=LoginViewElement, Path=Background}">
+                <TextBox.Text>
+                    <Binding Path="Target" UpdateSourceTrigger="PropertyChanged">
+                        <Binding.ValidationRules>
+                            <errors:UrlValidationRule/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
 
             <Label Content="Username" Grid.Row="6" Grid.Column="0"></Label>
             <TextBox Name="tbUsername" Grid.Row="7" Grid.Column="1"
