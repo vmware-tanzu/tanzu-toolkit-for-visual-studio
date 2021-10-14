@@ -21,16 +21,16 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string DeploymentErrorMsg = "Encountered an issue while deploying app:";
         internal const string GetOrgsFailureMsg = "Unable to fetch orgs.";
         internal const string GetSpacesFailureMsg = "Unable to fetch spaces.";
+        internal const string GetBuildpacksFailureMsg = "Unable to fetch buildpacks.";
         internal const string SingleLoginErrorTitle = "Unable to add more TAS connections.";
         internal const string SingleLoginErrorMessage1 = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
         internal const string SingleLoginErrorMessage2 = "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Application Service Explorer & re-connecting to a new one.";
         internal const string FullFrameworkTFM = ".NETFramework";
         internal const string ManifestNotFoundTitle = "Unable to set manifest path";
         internal const string DirectoryNotFoundTitle = "Unable to set push directory path";
-
         private string _appName;
         internal readonly bool _fullFrameworkDeployment = false;
-        private readonly IErrorDialog _dialogService;
+        private readonly IErrorDialog _errorDialogService;
         internal IOutputViewModel OutputViewModel;
         internal ITasExplorerViewModel TasExplorerViewModel;
 
@@ -49,7 +49,7 @@ namespace Tanzu.Toolkit.ViewModels
         private string _selectedStack;
         private string _selectedBuildpack;
         private List<string> _stackOptions = new List<string> { "windows", "cflinuxfs3" };
-        private List<string> _buildpackOptions = new List<string> { "junk", "fix this", "not real" };
+        private List<string> _buildpackOptions;
         private bool _binaryDeployment;
         private string _deploymentButtonLabel;
         private bool _expanded;
@@ -58,7 +58,7 @@ namespace Tanzu.Toolkit.ViewModels
         public DeploymentDialogViewModel(IServiceProvider services, string projectName, string directoryOfProjectToDeploy, string targetFrameworkMoniker)
             : base(services)
         {
-            _dialogService = services.GetRequiredService<IErrorDialog>();
+            _errorDialogService = services.GetRequiredService<IErrorDialog>();
             TasExplorerViewModel = services.GetRequiredService<ITasExplorerViewModel>();
 
             IView outputView = ViewLocatorService.NavigateTo(nameof(ViewModels.OutputViewModel)) as IView;
@@ -76,6 +76,7 @@ namespace Tanzu.Toolkit.ViewModels
             CfInstanceOptions = new List<CloudFoundryInstance>();
             CfOrgOptions = new List<CloudFoundryOrganization>();
             CfSpaceOptions = new List<CloudFoundrySpace>();
+            BuildpackOptions = new List<string>();
 
             SetManifestIfDefaultExists();
 
@@ -85,6 +86,7 @@ namespace Tanzu.Toolkit.ViewModels
                 IsLoggedIn = true;
 
                 ThreadingService.StartTask(UpdateCfOrgOptions);
+                ThreadingService.StartTask(UpdateBuildpackOptions);
             }
 
             DeploymentDirectoryPath = PathToProjectRootDir;
@@ -141,7 +143,7 @@ namespace Tanzu.Toolkit.ViewModels
                 }
                 else
                 {
-                    _dialogService.DisplayErrorDialog(ManifestNotFoundTitle, $"'{value}' does not appear to be a valid path to a manifest.");
+                    _errorDialogService.DisplayErrorDialog(ManifestNotFoundTitle, $"'{value}' does not appear to be a valid path to a manifest.");
                 }
             }
         }
@@ -172,7 +174,7 @@ namespace Tanzu.Toolkit.ViewModels
                 }
                 else
                 {
-                    _dialogService.DisplayErrorDialog(DirectoryNotFoundTitle, $"'{value}' does not appear to be a valid path to a directory.");
+                    _errorDialogService.DisplayErrorDialog(DirectoryNotFoundTitle, $"'{value}' does not appear to be a valid path to a directory.");
                     _directoryPath = null;
                     DirectoryPathLabel = "<none specified>";
                 }
@@ -325,6 +327,13 @@ namespace Tanzu.Toolkit.ViewModels
         public List<string> BuildpackOptions
         {
             get => _buildpackOptions;
+
+            set
+            {
+                _buildpackOptions = value;
+
+                RaisePropertyChangedEvent("BuildpackOptions");
+            }
         }
 
         public bool DeploymentInProgress { get; internal set; }
@@ -414,7 +423,7 @@ namespace Tanzu.Toolkit.ViewModels
                 else
                 {
                     Logger.Error($"{GetOrgsFailureMsg}. {orgsResponse}");
-                    _dialogService.DisplayErrorDialog(GetOrgsFailureMsg, orgsResponse.Explanation);
+                    _errorDialogService.DisplayErrorDialog(GetOrgsFailureMsg, orgsResponse.Explanation);
                 }
             }
         }
@@ -436,7 +445,29 @@ namespace Tanzu.Toolkit.ViewModels
                 else
                 {
                     Logger.Error($"{GetSpacesFailureMsg}. {spacesResponse}");
-                    _dialogService.DisplayErrorDialog(GetSpacesFailureMsg, spacesResponse.Explanation);
+                    _errorDialogService.DisplayErrorDialog(GetSpacesFailureMsg, spacesResponse.Explanation);
+                }
+            }
+        }
+
+        public async Task UpdateBuildpackOptions()
+        {
+            if (TasExplorerViewModel.TasConnection == null)
+            {
+                BuildpackOptions = new List<string>();
+            }
+            else
+            {
+                var buildpacksRespsonse = await CloudFoundryService.GetBuildpackNamesAsync(TasExplorerViewModel.TasConnection.CloudFoundryInstance.ApiAddress);
+
+                if (buildpacksRespsonse.Succeeded)
+                {
+                    BuildpackOptions = buildpacksRespsonse.Content;
+                }
+                else
+                {
+                    Logger.Error(GetBuildpacksFailureMsg + " {BuildpacksResponseError}", buildpacksRespsonse.Explanation);
+                    _errorDialogService.DisplayErrorDialog(GetBuildpacksFailureMsg, buildpacksRespsonse.Explanation);
                 }
             }
         }
@@ -481,7 +512,7 @@ namespace Tanzu.Toolkit.ViewModels
                     SelectedSpace.SpaceName,
                     deploymentResult.ToString());
 
-                _dialogService.DisplayErrorDialog(errorTitle, errorMsg);
+                _errorDialogService.DisplayErrorDialog(errorTitle, errorMsg);
             }
 
             DeploymentInProgress = false;
