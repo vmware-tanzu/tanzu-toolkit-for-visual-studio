@@ -81,6 +81,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("ctor")]
+        public void Constructor_SetsBuildpackOptionsToEmptyList()
+        {
+            CollectionAssert.AreEqual(new List<string>(), _sut.BuildpackOptions);
+        }
+
+        [TestMethod]
+        [TestCategory("ctor")]
         [DataRow("fake cf name")]
         [DataRow("junk name")]
         [DataRow("asdf")]
@@ -131,6 +138,18 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
             MockThreadingService.Verify(m => m.StartTask(_sut.UpdateCfOrgOptions), Times.Once);
+        }
+        
+        [TestMethod]
+        [TestCategory("ctor")]
+        public void Constructor_UpdatesBuildpackOptions_WhenTasConnectionIsNotNull()
+        {
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(new FakeCfInstanceViewModel(FakeCfInstance, Services));
+
+            _sut = new DeploymentDialogViewModel(Services, null, _fakeProjPath, FakeTargetFrameworkMoniker);
+
+            Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
+            MockThreadingService.Verify(m => m.StartTask(_sut.UpdateBuildpackOptions), Times.Once);
         }
 
         [TestMethod]
@@ -1292,6 +1311,68 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.AreEqual(2, _receivedEvents.Count);
             Assert.IsTrue(_receivedEvents.Contains("Expanded"));
             Assert.IsTrue(_receivedEvents.Contains("ExpansionButtonText"));
+        }
+
+        [TestMethod]
+        [TestCategory("UpdateBuildpackOptions")]
+        public async Task UpdateBuildpackOptions_SetsBuildpackOptionsToEmptyList_WhenNotLoggedIn()
+        {
+            Assert.IsNull(_sut.TasExplorerViewModel.TasConnection);
+
+            CollectionAssert.DoesNotContain(_receivedEvents, "BuildpackOptions");
+
+            await _sut.UpdateBuildpackOptions();
+
+            CollectionAssert.AreEqual(new List<string>(), _sut.BuildpackOptions);
+            CollectionAssert.Contains(_receivedEvents, "BuildpackOptions");
+        }
+        
+        [TestMethod]
+        [TestCategory("UpdateBuildpackOptions")]
+        public async Task UpdateBuildpackOptions_SetsBuildpackOptionsToQueryContent_WhenQuerySucceeds()
+        {
+            var fakeCf = new FakeCfInstanceViewModel(FakeCfInstance, Services);
+            var fakeBuildpacksContent = new List<string>
+            {
+                "my_cool_bp",
+                "ruby_buildpack",
+                "topaz_buildpack",
+                "emerald_buildpack",
+            };
+            var fakeBuildpacksResponse = new DetailedResult<List<string>>(succeeded: true, content: fakeBuildpacksContent);
+
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(fakeCf);
+
+            MockCloudFoundryService.Setup(m => m.GetBuildpackNamesAsync(fakeCf.CloudFoundryInstance.ApiAddress, 1)).ReturnsAsync(fakeBuildpacksResponse);
+
+            Assert.AreNotEqual(fakeBuildpacksContent, _sut.BuildpackOptions);
+            CollectionAssert.DoesNotContain(_receivedEvents, "BuildpackOptions");
+            
+            await _sut.UpdateBuildpackOptions();
+
+            Assert.AreEqual(fakeBuildpacksContent, _sut.BuildpackOptions);
+            CollectionAssert.Contains(_receivedEvents, "BuildpackOptions");
+        }
+
+        [TestMethod]
+        [TestCategory("UpdateBuildpackOptions")]
+        public async Task UpdateBuildpackOptions_DoesNotChangeBuildpackOptions_AndRaisesError_WhenQueryFails()
+        {
+            var fakeCf = new FakeCfInstanceViewModel(FakeCfInstance, Services);
+            const string fakeFailureReason = "junk";
+            var fakeBuildpacksResponse = new DetailedResult<List<string>>(succeeded: false, content: null, explanation: fakeFailureReason, cmdDetails: null);
+
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(fakeCf);
+
+            MockCloudFoundryService.Setup(m => m.GetBuildpackNamesAsync(fakeCf.CloudFoundryInstance.ApiAddress, 1)).ReturnsAsync(fakeBuildpacksResponse);
+
+            var initialBuildpackOptions = _sut.BuildpackOptions;
+            CollectionAssert.DoesNotContain(_receivedEvents, "BuildpackOptions");
+
+            await _sut.UpdateBuildpackOptions();
+
+            Assert.AreEqual(initialBuildpackOptions, _sut.BuildpackOptions);
+            CollectionAssert.DoesNotContain(_receivedEvents, "BuildpackOptions");
         }
     }
 
