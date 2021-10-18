@@ -77,7 +77,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\AsyncDelegatingCommand.cs" />
-    <Compile Include="Errors\UrlValidationRule.cs" />
     <Compile Include="ICloudExplorerView.cs" />
     <Compile Include="ILoginView.cs" />
     <Compile Include="IDeploymentDialogView.cs" />
