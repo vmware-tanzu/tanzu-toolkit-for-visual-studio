@@ -3,8 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:converters="clr-namespace:Tanzu.Toolkit.WpfViews.Converters" 
-        xmlns:errors="clr-namespace:Tanzu.Toolkit.VisualStudio.WpfViews.Errors"
+        xmlns:converters="clr-namespace:Tanzu.Toolkit.WpfViews.Converters"
         Name ="LoginViewElement"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
@@ -18,7 +17,6 @@
         <converters:VisibilityConverter x:Key="Visibility" />
         <converters:VisibilityConverter x:Key="CollapsedVisibility" ReserveSpace="False" />
         <converters:VisibilityConverter x:Key="InverseCollapsedVisibility" ReserveSpace="False" Reversed="True"/>
-        <errors:UrlValidationRule x:Key="UrlValidationRule"/>
 
         <Style x:Key="ApiAddressFieldStyle" TargetType="{x:Type TextBox}">
             <Style.Triggers>
