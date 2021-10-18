@@ -6,26 +6,20 @@
         xmlns:converters="clr-namespace:Tanzu.Toolkit.WpfViews.Converters"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:wpfviews="clr-namespace:Tanzu.Toolkit.VisualStudio.WpfViews"
-        mc:Ignorable="d"
         Name="DeploymentDialogViewElement"
         Title="Deploy to Tanzu Application Service"
         Icon="Resources/tas_16px.png"
         Width="500"
-        Height="335"
         BorderBrush="{Binding ElementName=DeploymentDialogViewElement, Path=Foreground }"
         BorderThickness="1"
         ResizeMode="NoResize"
         WindowStyle="None"
-        d:DesignHeight="500" d:DesignWidth="800">
+        SizeToContent="Height">
 
     <Window.Resources>
-        <sys:Double x:Key="collapsedWindowHeight">335</sys:Double>
-        <sys:Double x:Key="expandedWindowHeight">430</sys:Double>
-        <sys:Double x:Key="collapsedGridBodyHeight">210</sys:Double>
-        <sys:Double x:Key="expandedGridBodyHeight">320</sys:Double>
-
         <converters:VisibilityConverter x:Key="Visibility" />
         <converters:VisibilityConverter x:Key="InverseVisibility" Reversed="True"/>
+        <converters:VisibilityConverter x:Key="ExpansionConverter" ReserveSpace="False" />
 
         <Style x:Key="RoundedButtonStyle" TargetType="{x:Type Button}">
             <Setter Property="Template">
@@ -46,7 +40,7 @@
             <TextBlock FontSize="24" Text="Push to Tanzu Application Service" Margin="4" Grid.Row="0" Grid.Column="1"/>
         </StackPanel>
 
-        <Grid x:Name="GridBody" Width="414" Height="{StaticResource collapsedGridBodyHeight}" VerticalAlignment="Top" Margin="8,8,8,0" DockPanel.Dock="Top">
+        <Grid x:Name="GridBody" Width="414" VerticalAlignment="Top" Margin="8,8,8,0" DockPanel.Dock="Top">
             <Grid.RowDefinitions>
                 <!--ROW 0-->
                 <RowDefinition Height="42"></RowDefinition>
@@ -63,11 +57,13 @@
                 <!--ROW 6-->
                 <RowDefinition Height="32"></RowDefinition>
                 <!--ROW 7-->
-                <RowDefinition Height="32"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
                 <!--ROW 8-->
-                <RowDefinition Height="32"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
                 <!--ROW 9-->
-                <RowDefinition Height="32"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+                <!--ROW 10-->
+                <RowDefinition Height="auto"></RowDefinition>
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
@@ -97,7 +93,8 @@
                    Visibility="{Binding IsLoggedIn, Converter={StaticResource Visibility}}"/>
 
             <!--ROW 1-->
-            <!--Intentionally empty-->
+            <Separator Grid.Row="1"
+                       Visibility="Hidden"/>
 
             <!--ROW 2-->
             <TextBlock Grid.Row="2" Text="App Manifest:" VerticalAlignment="Center"/>
@@ -212,14 +209,20 @@
             </Button>
 
             <!--ROW 7-->
-            <Separator Grid.Row="7" Grid.ColumnSpan="2" Visibility="{Binding Expanded, Converter={StaticResource Visibility}}"/>
+            <Separator Grid.Row="7" Grid.ColumnSpan="2" 
+                       Margin="0,12"
+                       Visibility="{Binding Expanded, Converter={StaticResource ExpansionConverter}}"/>
 
             <!--ROW 8-->
-            <TextBlock Grid.Row="8" Text="Directory to Push:" VerticalAlignment="Center" ToolTip="Path to app directory or to a zip file of the contents of the app directory"/>
+            <TextBlock Grid.Row="8" 
+                       Text="Directory to Push:" 
+                       VerticalAlignment="Center" 
+                       Visibility="{Binding Expanded, Converter={StaticResource ExpansionConverter}}"
+                       ToolTip="Path to app directory or to a zip file of the contents of the app directory"/>
 
-            <Grid Grid.Row="8" Grid.Column="1" VerticalAlignment="Center">
+            <Grid Grid.Row="8" Grid.Column="1" VerticalAlignment="Center" Visibility="{Binding Expanded, Converter={StaticResource ExpansionConverter}}">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="24"></RowDefinition>
+                    <RowDefinition Height="32"></RowDefinition>
                 </Grid.RowDefinitions>
 
                 <Grid.ColumnDefinitions>
@@ -236,7 +239,10 @@
                     ToolTip="{Binding DirectoryPathLabel}"/>
 
                 <Button 
-                    MaxWidth="32" MinWidth="32" Padding="0"
+                    MaxWidth="32" 
+                    MinWidth="32" 
+                    Height="24"
+                    Padding="0"
                     Grid.Row="0"
                     Grid.Column="1"
                     IsEnabled="{Binding IsLoggedIn}"
@@ -248,20 +254,34 @@
             </Grid>
 
             <!-- ROW 9-->
-            <StackPanel VerticalAlignment="Center" Grid.Row="9" >
-                <TextBlock VerticalAlignment="Center" Text="Stack:"/>
+            <StackPanel VerticalAlignment="Center" Grid.Row="9" Visibility="{Binding Expanded, Converter={StaticResource ExpansionConverter}}">
+                <TextBlock VerticalAlignment="Center" Text="Buildpack:" />
             </StackPanel>
 
             <ComboBox Grid.Row="9" Grid.Column="1" Margin="0,4" 
+                      Visibility="{Binding Expanded, Converter={StaticResource ExpansionConverter}}"
+                      ItemsSource="{Binding BuildpackOptions}" 
+                      IsEnabled="{Binding IsLoggedIn}"
+                      SelectedItem="{Binding SelectedBuildpack}">
+            </ComboBox>
+            
+            <!-- ROW 10-->
+            <StackPanel VerticalAlignment="Center" Grid.Row="10" Visibility="{Binding Expanded, Converter={StaticResource ExpansionConverter}}">
+                <TextBlock VerticalAlignment="Center" Text="Stack:"/>
+            </StackPanel>
+
+            <ComboBox Grid.Row="10" Grid.Column="1" Margin="0,4" 
+                      Visibility="{Binding Expanded, Converter={StaticResource ExpansionConverter}}"
                       ItemsSource="{Binding StackOptions}" 
                       IsEnabled="{Binding IsLoggedIn}"
                       SelectedItem="{Binding SelectedStack}">
             </ComboBox>
+            
         </Grid>
 
         <StackPanel 
             DockPanel.Dock="Bottom"
-            Margin="0,0,12,12"
+            Margin="12"
             Orientation="Horizontal"
             Grid.Row="7"
             Grid.Column="1"

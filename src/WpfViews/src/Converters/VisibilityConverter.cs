@@ -8,7 +8,6 @@ namespace Tanzu.Toolkit.WpfViews.Converters
     public class VisibilityConverter : IValueConverter
     {
         public bool Reversed { get; set; }
-
         public bool ReserveSpace { get; set; }
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

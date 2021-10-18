@@ -32,7 +32,7 @@ namespace Tanzu.Toolkit.WpfViews
             _viewModel = viewModel;
             UploadAppCommand = new DelegatingCommand(viewModel.DeployApp, viewModel.CanDeployApp);
             OpenLoginDialogCommand = new DelegatingCommand(viewModel.OpenLoginView, viewModel.CanOpenLoginView);
-            ToggleAdvancedOptionsCommand = new DelegatingCommand(ToggleAdvancedOptions, viewModel.CanToggleAdvancedOptions);
+            ToggleAdvancedOptionsCommand = new DelegatingCommand(viewModel.ToggleAdvancedOptions, viewModel.CanToggleAdvancedOptions);
 
             themeService.SetTheme(this);
             DataContext = viewModel;
@@ -72,22 +72,6 @@ namespace Tanzu.Toolkit.WpfViews
             if (openFolderDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 _viewModel.DeploymentDirectoryPath = openFolderDialog.SelectedPath;
-            }
-        }
-
-        private void ToggleAdvancedOptions(object arg)
-        {
-            _viewModel.ToggleAdvancedOptions(arg);
-            
-            if (_viewModel.Expanded)
-            {
-                Height = (double)Resources["expandedWindowHeight"];
-                GridBody.Height = (double)Resources["expandedGridBodyHeight"]; ;
-            }
-            else
-            {
-                Height = (double)Resources["collapsedWindowHeight"];
-                GridBody.Height = (double)Resources["collapsedGridBodyHeight"]; ;
             }
         }
 
