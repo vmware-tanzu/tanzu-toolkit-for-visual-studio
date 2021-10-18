@@ -1029,6 +1029,26 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
             MockThreadingService.Verify(m => m.StartTask(_sut.UpdateCfOrgOptions), Times.Once);
         }
+        
+        [TestMethod]
+        [TestCategory("OpenLoginView")]
+        public void OpenLoginView_UpdatesBuildpackOptions_WhenTasConnectionGetsSet()
+        {
+            MockTasExplorerViewModel.Setup(m => m.
+                OpenLoginView(null))
+                    .Callback(() =>
+                    {
+                        MockTasExplorerViewModel.SetupGet(m => m.TasConnection)
+                            .Returns(new CfInstanceViewModel(FakeCfInstance, null, Services));
+                    });
+
+            Assert.IsNull(_sut.TasExplorerViewModel.TasConnection);
+
+            _sut.OpenLoginView(null);
+
+            Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
+            MockThreadingService.Verify(m => m.StartTask(_sut.UpdateBuildpackOptions), Times.Once);
+        }
 
         [TestMethod]
         [TestCategory("IsLoggedIn")]

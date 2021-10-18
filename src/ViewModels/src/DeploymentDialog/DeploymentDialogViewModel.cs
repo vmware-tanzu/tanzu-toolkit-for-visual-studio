@@ -402,6 +402,7 @@ namespace Tanzu.Toolkit.ViewModels
                 IsLoggedIn = true;
 
                 ThreadingService.StartTask(UpdateCfOrgOptions);
+                ThreadingService.StartTask(UpdateBuildpackOptions);
             }
         }
 
