@@ -1363,7 +1363,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(fakeCf);
 
-            MockCloudFoundryService.Setup(m => m.GetBuildpackNamesAsync(fakeCf.CloudFoundryInstance.ApiAddress, 1)).ReturnsAsync(fakeBuildpacksResponse);
+            MockCloudFoundryService.Setup(m => m.GetUniqueBuildpackNamesAsync(fakeCf.CloudFoundryInstance.ApiAddress, 1)).ReturnsAsync(fakeBuildpacksResponse);
 
             Assert.AreNotEqual(fakeBuildpacksContent, _sut.BuildpackOptions);
             CollectionAssert.DoesNotContain(_receivedEvents, "BuildpackOptions");
@@ -1384,7 +1384,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(fakeCf);
 
-            MockCloudFoundryService.Setup(m => m.GetBuildpackNamesAsync(fakeCf.CloudFoundryInstance.ApiAddress, 1)).ReturnsAsync(fakeBuildpacksResponse);
+            MockCloudFoundryService.Setup(m => m.GetUniqueBuildpackNamesAsync(fakeCf.CloudFoundryInstance.ApiAddress, 1)).ReturnsAsync(fakeBuildpacksResponse);
 
             var initialBuildpackOptions = _sut.BuildpackOptions;
             CollectionAssert.DoesNotContain(_receivedEvents, "BuildpackOptions");
