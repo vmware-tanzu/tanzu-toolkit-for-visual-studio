@@ -409,7 +409,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             };
         }
 
-        public async Task<DetailedResult<List<string>>> GetBuildpackNamesAsync(string apiAddress, int retryAmount = 1)
+        public async Task<DetailedResult<List<string>>> GetUniqueBuildpackNamesAsync(string apiAddress, int retryAmount = 1)
         {
             string accessToken;
             try
@@ -450,10 +450,10 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 if (retryAmount > 0)
                 {
-                    _logger.Information("GetBuildpackNamesAsync caught an exception when trying to retrieve buildpacks: {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).", originalException.Message, retryAmount);
+                    _logger.Information("GetUniqueBuildpackNamesAsync caught an exception when trying to retrieve buildpacks: {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).", originalException.Message, retryAmount);
                     _cfCliService.ClearCachedAccessToken();
                     retryAmount -= 1;
-                    return await GetBuildpackNamesAsync(apiAddress, retryAmount);
+                    return await GetUniqueBuildpackNamesAsync(apiAddress, retryAmount);
                 }
                 else
                 {
@@ -473,9 +473,9 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 if (string.IsNullOrWhiteSpace(buildpack.Name))
                 {
-                    _logger.Error("CloudFoundryService.GetBuildpackNamesAsync encountered a buildpack without a name; omitting it from the returned list of buildpacks.");
+                    _logger.Error("CloudFoundryService.GetUniqueBuildpackNamesAsync encountered a buildpack without a name; omitting it from the returned list of buildpacks.");
                 }
-                else
+                else if (!buildpackNames.Contains(buildpack.Name))
                 {
                     buildpackNames.Add(buildpack.Name);
                 }
@@ -795,7 +795,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                         startCommand = $"cmd /c .\\{projectName} --server.urls=http://*:%PORT%";
                     }
 
-                    if (stack == "cflinuxfs3") 
+                    if (stack == "cflinuxfs3")
                     {
                         buildpack = "dotnet_core_buildpack";
                         startCommand = null;

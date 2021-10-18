@@ -459,7 +459,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
-                var buildpacksRespsonse = await CloudFoundryService.GetBuildpackNamesAsync(TasExplorerViewModel.TasConnection.CloudFoundryInstance.ApiAddress);
+                var buildpacksRespsonse = await CloudFoundryService.GetUniqueBuildpackNamesAsync(TasExplorerViewModel.TasConnection.CloudFoundryInstance.ApiAddress);
 
                 if (buildpacksRespsonse.Succeeded)
                 {

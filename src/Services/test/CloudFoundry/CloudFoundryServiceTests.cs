@@ -964,7 +964,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
         [TestMethod]
         [TestCategory("GetBuildpackNames")]
-        public async Task GetBuildpackNamesAsync_ReturnsSuccessfulResult_WhenListBuildpacksSucceeds()
+        public async Task GetUniqueBuildpackNamesAsync_ReturnsSuccessfulResult_WhenListBuildpacksSucceeds()
         {
             var fakeBuildpacksResponse = new List<Buildpack>
             {
@@ -978,7 +978,15 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 },
                 new Buildpack
                 {
-                    Name = "Bp3",
+                    Name = "repeated buildpack name",
+                },
+                new Buildpack
+                {
+                    Name = "repeated buildpack name",
+                },
+                new Buildpack
+                {
+                    Name = "repeated buildpack name",
                 },
             };
 
@@ -986,26 +994,26 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             _mockCfApiClient.Setup(m => m.ListBuildpacks(_fakeValidTarget, _fakeAccessToken)).ReturnsAsync(fakeBuildpacksResponse);
 
-            var result = await _sut.GetBuildpackNamesAsync(_fakeValidTarget);
+            var result = await _sut.GetUniqueBuildpackNamesAsync(_fakeValidTarget);
 
             Assert.IsTrue(result.Succeeded);
-            Assert.AreEqual(fakeBuildpacksResponse.Count, result.Content.Count);
-            for (int i = 0; i < fakeBuildpacksResponse.Count; i++)
+            Assert.AreEqual(3, result.Content.Count); // ensure duplicate names aren't repeated in resulting list
+            foreach (Buildpack bp in fakeBuildpacksResponse)
             {
-                Assert.AreEqual(fakeBuildpacksResponse[i].Name, result.Content[i]);
+                CollectionAssert.Contains(result.Content, bp.Name);
             }
         }
 
         [TestMethod]
         [TestCategory("GetBuildpackNames")]
-        public async Task GetBuildpackNamesAsync_ReturnsFailedResult_WhenTokenRetrievalThrowsInvalidRefreshTokenException()
+        public async Task GetUniqueBuildpackNamesAsync_ReturnsFailedResult_WhenTokenRetrievalThrowsInvalidRefreshTokenException()
         {
 
             _mockCfCliService.Setup(m => m.
                 GetOAuthToken())
                     .Throws(new InvalidRefreshTokenException());
 
-            DetailedResult<List<string>> result = await _sut.GetBuildpackNamesAsync(_fakeValidTarget);
+            DetailedResult<List<string>> result = await _sut.GetUniqueBuildpackNamesAsync(_fakeValidTarget);
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
@@ -1017,7 +1025,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
         [TestMethod]
         [TestCategory("GetBuildpackNames")]
-        public async Task GetBuildpackNamesAsync_ReturnsFailedResult_WhenListBuildpacksThrowsException()
+        public async Task GetUniqueBuildpackNamesAsync_ReturnsFailedResult_WhenListBuildpacksThrowsException()
         {
             var fakeExceptionMsg = "junk";
 
@@ -1029,7 +1037,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 ListBuildpacks(_fakeValidTarget, _fakeValidAccessToken))
                     .Throws(new Exception(fakeExceptionMsg));
 
-            var result = await _sut.GetBuildpackNamesAsync(_fakeValidTarget);
+            var result = await _sut.GetUniqueBuildpackNamesAsync(_fakeValidTarget);
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
@@ -1043,7 +1051,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
         [TestMethod]
         [TestCategory("GetBuildpackNames")]
-        public async Task GetBuildpackNamesAsync_RetriesWithFreshToken_WhenListBuildpacksThrowsException()
+        public async Task GetUniqueBuildpackNamesAsync_RetriesWithFreshToken_WhenListBuildpacksThrowsException()
         {
             var fakeExceptionMsg = "junk";
             var fakeBuildpacksResponse = new List<Buildpack>
@@ -1082,7 +1090,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 ListBuildpacks(_fakeValidTarget, _fakeValidAccessToken))
                     .ReturnsAsync(fakeBuildpacksResponse);
 
-            var result = await _sut.GetBuildpackNamesAsync(_fakeValidTarget);
+            var result = await _sut.GetUniqueBuildpackNamesAsync(_fakeValidTarget);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Succeeded);
@@ -1098,7 +1106,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
         [TestMethod]
         [TestCategory("GetBuildpackNames")]
-        public async Task GetBuildpackNamesAsync_ReturnsFailedResult_WhenListBuildpacksThrowsException_AndThereAreZeroRetriesLeft()
+        public async Task GetUniqueBuildpackNamesAsync_ReturnsFailedResult_WhenListBuildpacksThrowsException_AndThereAreZeroRetriesLeft()
         {
             var fakeExceptionMsg = "junk";
 
@@ -1110,7 +1118,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 ListBuildpacks(_fakeValidTarget, _fakeValidAccessToken))
                     .Throws(new Exception(fakeExceptionMsg));
 
-            var result = await _sut.GetBuildpackNamesAsync(_fakeValidTarget, retryAmount: 0);
+            var result = await _sut.GetUniqueBuildpackNamesAsync(_fakeValidTarget, retryAmount: 0);
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
@@ -1124,13 +1132,13 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
         [TestMethod]
         [TestCategory("GetBuildpackNames")]
-        public async Task GetBuildpackNamesAsync_ReturnsFailedResult_WhenTokenCannotBeFound()
+        public async Task GetUniqueBuildpackNamesAsync_ReturnsFailedResult_WhenTokenCannotBeFound()
         {
             _mockCfCliService.Setup(m => m.
                 GetOAuthToken())
                     .Returns((string)null);
 
-            var result = await _sut.GetBuildpackNamesAsync(_fakeValidTarget);
+            var result = await _sut.GetUniqueBuildpackNamesAsync(_fakeValidTarget);
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
