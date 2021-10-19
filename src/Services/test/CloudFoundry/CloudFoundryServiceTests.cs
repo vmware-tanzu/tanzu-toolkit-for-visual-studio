@@ -13,7 +13,7 @@ using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.CommandProcess;
 using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.ErrorDialog;
-using Tanzu.Toolkit.Services.FileLocator;
+using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
 using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
@@ -30,7 +30,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         private Mock<ICfCliService> _mockCfCliService;
         private Mock<IErrorDialog> _mockErrorDialogWindowService;
         private Mock<ICommandProcessService> _mockCommandProcessService;
-        private Mock<IFileLocatorService> _mockFileLocatorService;
+        private Mock<IFileService> _mockFileService;
         private Mock<ILoggingService> _mockLoggingService;
         private Mock<ILogger> _mockLogger;
 
@@ -44,7 +44,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             _mockCfCliService = new Mock<ICfCliService>();
             _mockErrorDialogWindowService = new Mock<IErrorDialog>();
             _mockCommandProcessService = new Mock<ICommandProcessService>();
-            _mockFileLocatorService = new Mock<IFileLocatorService>();
+            _mockFileService = new Mock<IFileService>();
             _mockLoggingService = new Mock<ILoggingService>();
 
             _mockLogger = new Mock<ILogger>();
@@ -54,7 +54,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             serviceCollection.AddSingleton(_mockCfCliService.Object);
             serviceCollection.AddSingleton(_mockErrorDialogWindowService.Object);
             serviceCollection.AddSingleton(_mockCommandProcessService.Object);
-            serviceCollection.AddSingleton(_mockFileLocatorService.Object);
+            serviceCollection.AddSingleton(_mockFileService.Object);
             serviceCollection.AddSingleton(_mockLoggingService.Object);
 
             _services = serviceCollection.BuildServiceProvider();
@@ -227,12 +227,12 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             _mockCfCliService.Setup(m => m.
                 GetApiVersion()).ReturnsAsync((Version)null);
 
-            _mockFileLocatorService.SetupSet(m => m.
+            _mockFileService.SetupSet(m => m.
                 CliVersion = expectedCliVersion).Verifiable();
 
             ConnectResult result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
 
-            _mockFileLocatorService.VerifyAll();
+            _mockFileService.VerifyAll();
             _mockCfCliService.VerifyAll();
             _mockErrorDialogWindowService.Verify(m => m.
                 DisplayErrorDialog(CloudFoundryService.CcApiVersionUndetectableErrTitle, CloudFoundryService.CcApiVersionUndetectableErrMsg),
@@ -264,12 +264,12 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 _mockCfCliService.Setup(m => m.
                     GetApiVersion()).ReturnsAsync(mockApiVersion);
 
-                _mockFileLocatorService.SetupSet(m => m.
+                _mockFileService.SetupSet(m => m.
                     CliVersion = expectedCliVersion).Verifiable();
 
                 ConnectResult result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
 
-                _mockFileLocatorService.VerifyAll();
+                _mockFileService.VerifyAll();
                 _mockCfCliService.VerifyAll();
             }
         }
@@ -299,12 +299,12 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 _mockCfCliService.Setup(m => m.
                     GetApiVersion()).ReturnsAsync(mockApiVersion);
 
-                _mockFileLocatorService.SetupSet(m => m.
+                _mockFileService.SetupSet(m => m.
                     CliVersion = expectedCliVersion).Verifiable();
 
                 ConnectResult result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
 
-                _mockFileLocatorService.VerifyAll();
+                _mockFileService.VerifyAll();
                 _mockCfCliService.VerifyAll();
             }
         }
@@ -334,12 +334,12 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 _mockCfCliService.Setup(m => m.
                     GetApiVersion()).ReturnsAsync(mockApiVersion);
 
-                _mockFileLocatorService.SetupSet(m => m.
+                _mockFileService.SetupSet(m => m.
                     CliVersion = expectedCliVersion).Verifiable();
 
                 ConnectResult result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
 
-                _mockFileLocatorService.VerifyAll();
+                _mockFileService.VerifyAll();
                 _mockCfCliService.VerifyAll();
             }
         }
@@ -369,12 +369,12 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 _mockCfCliService.Setup(m => m.
                     GetApiVersion()).ReturnsAsync(mockApiVersion);
 
-                _mockFileLocatorService.SetupSet(m => m.
+                _mockFileService.SetupSet(m => m.
                     CliVersion = expectedCliVersion).Verifiable();
 
                 ConnectResult result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
 
-                _mockFileLocatorService.VerifyAll();
+                _mockFileService.VerifyAll();
                 _mockCfCliService.VerifyAll();
             }
         }
@@ -1576,7 +1576,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 mock.PushAppAsync(FakeApp.AppName, FakeApp.ParentSpace.ParentOrg.OrgName, FakeApp.ParentSpace.SpaceName, null, null, _fakeProjectPath, null, null, null, null))
                     .ReturnsAsync(fakeCfPushResponse);
 
-            _mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
+            _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
             DetailedResult result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, _defaultFullFWFlag, stdOutCallback: null, stdErrCallback: null, stack: null, binaryDeployment: false, projectName: null, manifestPath: null);
 
@@ -1595,7 +1595,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 mock.PushAppAsync(FakeApp.AppName, FakeApp.ParentSpace.ParentOrg.OrgName, FakeApp.ParentSpace.SpaceName, null, null, _fakeProjectPath, null, stack, null, null))
                     .ReturnsAsync(_fakeSuccessDetailedResult);
 
-            _mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
+            _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
             DetailedResult result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, _defaultFullFWFlag, stdOutCallback: null, stdErrCallback: null, stack: stack, binaryDeployment: false, projectName: null, manifestPath: null);
 
@@ -1613,7 +1613,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 mock.PushAppAsync(FakeApp.AppName, FakeApp.ParentSpace.ParentOrg.OrgName, FakeApp.ParentSpace.SpaceName, null, null, _fakeProjectPath, expectedBuildpackValue, expectedStackValue, null, null))
                     .ReturnsAsync(_fakeSuccessDetailedResult);
 
-            _mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
+            _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
             bool fullFWIndicator = true;
             DetailedResult result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, fullFWIndicator, stdOutCallback: null, stdErrCallback: null, stack: null, binaryDeployment: false, projectName: null, manifestPath: null);
@@ -1625,20 +1625,20 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("DeployApp")]
         public async Task DeployAppAsync_ReturnsFalseResult_WhenProjDirContainsNoFiles()
         {
-            _mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(false);
+            _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(false);
 
             var result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, _defaultFullFWFlag, stdOutCallback: null, stdErrCallback: null, stack: null, binaryDeployment: true, projectName: null, manifestPath: null);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains(CloudFoundryService.EmptyOutputDirMessage));
-            _mockFileLocatorService.VerifyAll();
+            _mockFileService.VerifyAll();
         }
 
         [TestMethod]
         [TestCategory("DeployApp")]
         public async Task DeployAppAsync_ReturnsFailedResult_WhenCfCliDeploymentThrowsInvalidRefreshTokenException()
         {
-            _mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
+            _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
             _mockCfCliService.Setup(mock => mock.
                 PushAppAsync(FakeApp.AppName, FakeOrg.OrgName, FakeSpace.SpaceName, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), _fakeProjectPath, It.IsAny<string>(), It.IsAny<string>(), null, null))
@@ -1655,7 +1655,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("DeployApp")]
         public async Task DeployAppAsync_SpecifiesBuildpack_AndStartCommand_WhenBinaryDeploymentIsTrue()
         {
-            _mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
+            _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
             var expectedProjectName = "junk proj name";
             var expectedBuildpack = "binary_buildpack";
@@ -1694,7 +1694,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("DeployApp")]
         public async Task DeployAppAsync_SpecifiesDotNetCoreBuildpack_WhenBinaryDeploymentIsTrue_AndStackIsLinux()
         {
-            _mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
+            _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
             var expectedProjectName = "junk proj name";
             var expectedBuildpack = "dotnet_core_buildpack";

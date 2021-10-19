@@ -1,5 +1,5 @@
 ﻿using Serilog;
-using Tanzu.Toolkit.Services.FileLocator;
+using Tanzu.Toolkit.Services.File;
 
 namespace Tanzu.Toolkit.Services.Logging
 {
@@ -7,12 +7,12 @@ namespace Tanzu.Toolkit.Services.Logging
     {
         public ILogger Logger { get; }
 
-        public LoggingService(IFileLocatorService fileLocatorService)
+        public LoggingService(IFileService fileService)
         {
             Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.File(
-                    path: fileLocatorService.PathToLogsFile,
+                    path: fileService.PathToLogsFile,
                     shared: true, // allow multiple processes to share same log file
                     fileSizeLimitBytes: 32768, // 32 KiB
                     rollOnFileSizeLimit: true,
