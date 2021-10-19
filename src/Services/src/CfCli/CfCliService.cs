@@ -9,7 +9,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Services.CommandProcess;
-using Tanzu.Toolkit.Services.FileLocator;
+using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
 using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
@@ -38,7 +38,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         internal const string _deleteAppCmd = "delete -f"; // -f avoids confirmation prompt
         internal const string _invalidRefreshTokenError = "The token expired, was revoked, or the token ID is incorrect. Please log back in to re-authenticate.";
 
-        private readonly IFileLocatorService _fileLocatorService;
+        private readonly IFileService _fileService;
         private readonly ILogger _logger;
 
         private object _cfEnvironmentLock = new object();
@@ -54,7 +54,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         {
             ConfigFilePath = configFilePath;
             Services = services;
-            _fileLocatorService = services.GetRequiredService<IFileLocatorService>();
+            _fileService = services.GetRequiredService<IFileService>();
             var logSvc = services.GetRequiredService<ILoggingService>();
             _logger = logSvc.Logger;
         }
@@ -414,7 +414,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         /// <returns>A <see cref="DetailedResult"/> containing the results of the CF command.</returns>
         public DetailedResult ExecuteCfCliCommand(string arguments, string workingDir = null)
         {
-            string pathToCfExe = _fileLocatorService.FullPathToCfExe;
+            string pathToCfExe = _fileService.FullPathToCfExe;
             if (string.IsNullOrEmpty(pathToCfExe))
             {
                 return new DetailedResult(false, _cfExePathErrorMsg);
@@ -460,7 +460,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         /// <returns>An awaitable <see cref="Task"/> which will return a <see cref="DetailedResult"/> containing the results of the CF command.</returns>
         internal async Task<DetailedResult> RunCfCommandAsync(string arguments, StdOutDelegate stdOutCallback = null, StdErrDelegate stdErrCallback = null, string workingDir = null)
         {
-            string pathToCfExe = _fileLocatorService.FullPathToCfExe;
+            string pathToCfExe = _fileService.FullPathToCfExe;
             if (string.IsNullOrEmpty(pathToCfExe))
             {
                 return new DetailedResult(false, $"Unable to locate cf.exe.");

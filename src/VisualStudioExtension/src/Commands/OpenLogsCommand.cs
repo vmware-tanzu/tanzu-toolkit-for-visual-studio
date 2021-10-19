@@ -10,7 +10,7 @@ using Microsoft.VisualStudio.Shell;
 using Serilog;
 using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.ErrorDialog;
-using Tanzu.Toolkit.Services.FileLocator;
+using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
 using Task = System.Threading.Tasks.Task;
 
@@ -37,7 +37,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         private readonly AsyncPackage _package;
 
         public static DTE2 Dte { get; private set; }
-        private static IFileLocatorService _fileLocatorService;
+        private static IFileService _fileService;
         private static ILogger _logger;
         private static IErrorDialog _dialogService;
 
@@ -92,12 +92,12 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             Instance = new OpenLogsCommand(package, commandService);
 
             Dte = await package.GetServiceAsync(typeof(DTE)) as DTE2;
-            _fileLocatorService = services.GetRequiredService<IFileLocatorService>();
+            _fileService = services.GetRequiredService<IFileService>();
             _dialogService = services.GetRequiredService<IErrorDialog>();
             var logSvc = services.GetRequiredService<ILoggingService>();
              
             Assumes.Present(Dte);
-            Assumes.Present(_fileLocatorService);
+            Assumes.Present(_fileService);
             Assumes.Present(_dialogService);
             Assumes.Present(logSvc);
 
@@ -115,7 +115,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
-            var logFilePath = _fileLocatorService.PathToLogsFile;
+            var logFilePath = _fileService.PathToLogsFile;
             var tmpFilePath = GenerateTmpFileName(logFilePath);
 
             var alreadyOpen = Dte.ItemOperations.IsFileOpen(tmpFilePath);

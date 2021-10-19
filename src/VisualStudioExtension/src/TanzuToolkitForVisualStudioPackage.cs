@@ -12,7 +12,7 @@ using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.CommandProcess;
 using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.ErrorDialog;
-using Tanzu.Toolkit.Services.FileLocator;
+using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
@@ -117,7 +117,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<IViewLocatorService, WpfViewLocatorService>();
             services.AddSingleton<IDialogService, WpfDialogService>();
             services.AddSingleton<ICfCliService>(provider => new CfCliService(assemblyBasePath, provider));
-            services.AddSingleton<IFileLocatorService>(new FileLocatorService(assemblyBasePath));
+            services.AddSingleton<IFileService>(new FileService(assemblyBasePath));
             services.AddSingleton<ILoggingService, LoggingService>();
             services.AddSingleton<IViewService, VsToolWindowService>();
             services.AddSingleton<IThreadingService, ThreadingService>();

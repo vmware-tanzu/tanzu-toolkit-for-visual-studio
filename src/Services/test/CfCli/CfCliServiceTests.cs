@@ -8,7 +8,7 @@ using System.Security;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CommandProcess;
-using Tanzu.Toolkit.Services.FileLocator;
+using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
 using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
@@ -34,7 +34,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
 
         private Mock<ICfCliService> _mockCfCliService;
         private Mock<ICommandProcessService> _mockCommandProcessService;
-        private Mock<IFileLocatorService> _mockFileLocatorService;
+        private Mock<IFileService> _mockFileService;
         private Mock<ILoggingService> _mockLoggingService;
         private Mock<ILogger> _mockLogger;
 
@@ -44,7 +44,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var serviceCollection = new ServiceCollection();
             _mockCfCliService = new Mock<ICfCliService>();
             _mockCommandProcessService = new Mock<ICommandProcessService>();
-            _mockFileLocatorService = new Mock<IFileLocatorService>();
+            _mockFileService = new Mock<IFileService>();
             _mockLoggingService = new Mock<ILoggingService>();
 
             _mockLogger = new Mock<ILogger>();
@@ -52,19 +52,19 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
 
             serviceCollection.AddSingleton(_mockCfCliService.Object);
             serviceCollection.AddSingleton(_mockCommandProcessService.Object);
-            serviceCollection.AddSingleton(_mockFileLocatorService.Object);
+            serviceCollection.AddSingleton(_mockFileService.Object);
             serviceCollection.AddSingleton(_mockLoggingService.Object);
 
             _services = serviceCollection.BuildServiceProvider();
 
-            _mockFileLocatorService.SetupGet(mock => mock.FullPathToCfExe).Returns(_fakePathToCfExe);
+            _mockFileService.SetupGet(mock => mock.FullPathToCfExe).Returns(_fakePathToCfExe);
             _sut = new CfCliService(_fakeCfCliConfigFilePath, _services);
         }
 
         [TestCleanup]
         public void TestCleanup()
         {
-            _mockFileLocatorService.VerifyAll();
+            _mockFileService.VerifyAll();
             _mockCommandProcessService.VerifyAll();
             _mockLogger.VerifyAll();
         }
@@ -143,7 +143,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("RunCfCommandAsync")]
         public async Task RunCfCommandAsync_ReturnsFalseResult_WhenCfExeCouldNotBeFound()
         {
-            _mockFileLocatorService.SetupGet(mock => mock.FullPathToCfExe).Returns((string)null);
+            _mockFileService.SetupGet(mock => mock.FullPathToCfExe).Returns((string)null);
 
             DetailedResult result = await _sut.RunCfCommandAsync(_fakeArguments);
 
@@ -254,7 +254,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         [TestCategory("ExecuteCfCliCommand")]
         public void ExecuteCfCliCommand_ReturnsFalseResult_WhenCfExeCouldNotBeFound()
         {
-            _mockFileLocatorService.SetupGet(mock => mock.
+            _mockFileService.SetupGet(mock => mock.
               FullPathToCfExe)
                 .Returns((string)null);
 
@@ -1002,7 +1002,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         {
             var fakeAppName = "my fake app";
 
-            _mockFileLocatorService.SetupGet(m => m.
+            _mockFileService.SetupGet(m => m.
                 FullPathToCfExe)
                     .Returns((string)null);
 

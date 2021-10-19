@@ -12,7 +12,7 @@ using Tanzu.Toolkit.CloudFoundryApiClient.Models.SpacesResponse;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.ErrorDialog;
-using Tanzu.Toolkit.Services.FileLocator;
+using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
 using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
@@ -27,7 +27,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
         private readonly ICfApiClient _cfApiClient;
         private readonly ICfCliService _cfCliService;
-        private readonly IFileLocatorService _fileLocatorService;
+        private readonly IFileService _fileService;
         private readonly IErrorDialog _dialogService;
         private readonly ILogger _logger;
 
@@ -35,7 +35,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         {
             _cfApiClient = services.GetRequiredService<ICfApiClient>();
             _cfCliService = services.GetRequiredService<ICfCliService>();
-            _fileLocatorService = services.GetRequiredService<IFileLocatorService>();
+            _fileService = services.GetRequiredService<IFileService>();
             _dialogService = services.GetRequiredService<IErrorDialog>();
 
             var logSvc = services.GetRequiredService<ILoggingService>();
@@ -769,7 +769,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
         public async Task<DetailedResult> DeployAppAsync(CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, string appName, string pathToDeploymentDirectory, bool fullFrameworkDeployment, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string stack, bool binaryDeployment, string projectName, string manifestPath = null, string buildpack = null)
         {
-            if (!_fileLocatorService.DirContainsFiles(pathToDeploymentDirectory))
+            if (!_fileService.DirContainsFiles(pathToDeploymentDirectory))
             {
                 return new DetailedResult(false, EmptyOutputDirMessage);
             }
@@ -876,7 +876,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             Version apiVersion = await _cfCliService.GetApiVersion();
             if (apiVersion == null)
             {
-                _fileLocatorService.CliVersion = 7;
+                _fileService.CliVersion = 7;
                 _dialogService.DisplayErrorDialog(CcApiVersionUndetectableErrTitle, CcApiVersionUndetectableErrMsg);
             }
             else
@@ -886,7 +886,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                     case 2:
                         if (apiVersion < new Version("2.128.0"))
                         {
-                            _fileLocatorService.CliVersion = 6;
+                            _fileService.CliVersion = 6;
 
                             string errorTitle = "API version not supported";
                             string errorMsg = "Detected a Cloud Controller API version lower than the minimum supported version (2.128.0); some features of this extension may not work as expected for the given instance.";
@@ -896,11 +896,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                         }
                         else if (apiVersion < new Version("2.150.0"))
                         {
-                            _fileLocatorService.CliVersion = 6;
+                            _fileService.CliVersion = 6;
                         }
                         else
                         {
-                            _fileLocatorService.CliVersion = 7;
+                            _fileService.CliVersion = 7;
                         }
 
                         break;
@@ -908,7 +908,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                     case 3:
                         if (apiVersion < new Version("3.63.0"))
                         {
-                            _fileLocatorService.CliVersion = 6;
+                            _fileService.CliVersion = 6;
 
                             string errorTitle = "API version not supported";
                             string errorMsg = "Detected a Cloud Controller API version lower than the minimum supported version (3.63.0); some features of this extension may not work as expected for the given instance.";
@@ -918,17 +918,17 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                         }
                         else if (apiVersion < new Version("3.85.0"))
                         {
-                            _fileLocatorService.CliVersion = 6;
+                            _fileService.CliVersion = 6;
                         }
                         else
                         {
-                            _fileLocatorService.CliVersion = 7;
+                            _fileService.CliVersion = 7;
                         }
 
                         break;
 
                     default:
-                        _fileLocatorService.CliVersion = 7;
+                        _fileService.CliVersion = 7;
                         _logger.Information("Detected an unexpected Cloud Controller API version: {apiVersion}. CLI version has been set to 7 by default.", apiVersion);
 
                         break;
