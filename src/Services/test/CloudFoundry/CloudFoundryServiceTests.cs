@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -67,6 +68,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         {
             _mockCfApiClient.VerifyAll();
             _mockCfCliService.VerifyAll();
+            _mockFileService.VerifyAll();
         }
 
         [TestMethod]
@@ -1785,6 +1787,94 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsTrue(result.Explanation.Contains(FakeApp.AppName));
             Assert.IsTrue(result.Explanation.Contains("Please log back in to re-authenticate"));
             Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
+        }
+
+        [TestMethod]
+        [TestCategory("CreateManifestFile")]
+        public void CreateManifestFile_ReturnsSuccessfulResult_WhenFileCreatedAtGivenPath()
+        {
+            string pathToFileCreation = "some//junk//path";
+
+            /* Assemble list of strings that should appear in the content that 
+             * gets passed to the file-creation method. This is NOT A COMPREHENSIVE LIST. */
+            List<string> expectedManifestEntries = new List<string>
+            {
+                "version: 1",
+                $"name: {exampleManifest.Applications[0].Name}",
+                $"name: {exampleManifest.Applications[1].Name}",
+                "applications:",
+                "buildpacks:",
+                "env:",
+                "routes:",
+                "health-check-http-endpoint:", // ensure hyphenated keys are properly serialized
+                "disk_quota:", // ensure keys with underscores are properly serialized
+            };
+
+            foreach (AppConfig app in exampleManifest.Applications)
+            {
+                if (app.Buildpacks != null)
+                {
+                    foreach (string bpName in app.Buildpacks)
+                    {
+                        expectedManifestEntries.Add(bpName);
+                    }
+                }
+
+                foreach (string key in app.Env.Values)
+                {
+                    expectedManifestEntries.Add(key);
+                }
+
+                foreach (string val in app.Env.Values)
+                {
+                    expectedManifestEntries.Add(val);
+                }
+
+                if (app.Routes != null)
+                {
+                    foreach (RouteConfig rc in app.Routes)
+                    {
+                        expectedManifestEntries.Add($"- route: {rc.Route}");
+                        if (rc.Protocol != null)
+                        {
+                            expectedManifestEntries.Add(rc.Protocol);
+                        }
+                    }
+                }
+            }
+
+            _mockFileService.Setup(m => m.
+                WriteTextToFile(pathToFileCreation, It.Is<string>(s => s.StartsWith("---\n")
+                    && expectedManifestEntries.All(expectedStr => s.Contains(expectedStr))
+                ))).Verifiable();
+
+            var result = _sut.CreateManifestFile(pathToFileCreation, exampleManifest);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.IsNull(result.CmdResult);
+            Assert.AreEqual(FailureType.None, result.FailureType);
+
+            _mockFileService.VerifyAll();
+        }
+
+        [TestMethod]
+        [TestCategory("CreateManifestFile")]
+        public void CreateManifestFile_ReturnsFailedResult_WhenFileCreationThrowsException()
+        {
+            string pathToFileCreation = "some//junk//path";
+            string fakeExceptionMsg = "Couldn't create file because... we want to simulate an exception :)";
+            var fileCreationException = new Exception(fakeExceptionMsg);
+
+            _mockFileService.Setup(m => m.WriteTextToFile(pathToFileCreation, It.IsAny<string>())).Throws(fileCreationException);
+
+            var result = _sut.CreateManifestFile(pathToFileCreation, exampleManifest);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.AreEqual(fakeExceptionMsg, result.Explanation);
+            Assert.IsNull(result.CmdResult);
+            Assert.AreEqual(FailureType.None, result.FailureType);
         }
     }
 }
