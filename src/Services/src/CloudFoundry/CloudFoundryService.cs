@@ -14,6 +14,8 @@ using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.Services.CloudFoundry
@@ -849,6 +851,34 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
 
             return logsResult;
+        }
+
+        public DetailedResult CreateManifestFile(string location, AppManifest manifest)
+        {
+            try
+            {
+                var serializer = new SerializerBuilder()
+                    .WithNamingConvention(CfAppManifestNamingConvention.Instance)
+                    .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull)
+                    .Build();
+
+                string ymlContents = serializer.Serialize(manifest);
+
+                _fileService.WriteTextToFile(location, "---\n" + ymlContents);
+
+                return new DetailedResult
+                {
+                    Succeeded = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new DetailedResult
+                {
+                    Succeeded = false,
+                    Explanation = ex.Message,
+                };
+            }
         }
 
         private void FormatExceptionMessage(Exception ex, List<string> message)
