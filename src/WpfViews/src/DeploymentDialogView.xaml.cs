@@ -88,5 +88,18 @@ namespace Tanzu.Toolkit.WpfViews
             }
 
         }
+
+        private void ListBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            foreach (string item in e.RemovedItems)
+            {
+                _viewModel.RemoveFromSelectedBuildpacks(item);
+            }
+
+            foreach (string item in e.AddedItems)
+            {
+                _viewModel.AddToSelectedBuildpacks(item);
+            }
+        }
     }
 }

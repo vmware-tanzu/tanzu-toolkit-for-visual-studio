@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
@@ -47,7 +49,7 @@ namespace Tanzu.Toolkit.ViewModels
         private string _targetName;
         private bool _isLoggedIn;
         private string _selectedStack;
-        private string _selectedBuildpack;
+        private ObservableCollection<string> _selectedBuildpacks;
         private List<string> _stackOptions = new List<string> { "windows", "cflinuxfs3" };
         private List<string> _buildpackOptions;
         private bool _binaryDeployment;
@@ -66,6 +68,7 @@ namespace Tanzu.Toolkit.ViewModels
 
             DeploymentInProgress = false;
             PathToProjectRootDir = directoryOfProjectToDeploy;
+            SelectedBuildpacks = new ObservableCollection<string>();
 
             if (targetFrameworkMoniker.StartsWith(FullFrameworkTFM))
             {
@@ -242,14 +245,14 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public string SelectedBuildpack
+        public ObservableCollection<string> SelectedBuildpacks
         {
-            get => _selectedBuildpack;
+            get => _selectedBuildpacks;
 
             set
             {
-                _selectedBuildpack = value;
-                RaisePropertyChangedEvent("SelectedBuildpack");
+                _selectedBuildpacks = value;
+                RaisePropertyChangedEvent("SelectedBuildpacks");
             }
         }
 
@@ -459,6 +462,8 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
+                BuildpackOptions = new List<string> { "Loading buildpacks..." };
+
                 var buildpacksRespsonse = await CloudFoundryService.GetUniqueBuildpackNamesAsync(TasExplorerViewModel.TasConnection.CloudFoundryInstance.ApiAddress);
 
                 if (buildpacksRespsonse.Succeeded)
@@ -467,6 +472,8 @@ namespace Tanzu.Toolkit.ViewModels
                 }
                 else
                 {
+                    BuildpackOptions = new List<string>();
+
                     Logger.Error(GetBuildpacksFailureMsg + " {BuildpacksResponseError}", buildpacksRespsonse.Explanation);
                     _errorDialogService.DisplayErrorDialog(GetBuildpacksFailureMsg, buildpacksRespsonse.Explanation);
                 }
@@ -476,6 +483,24 @@ namespace Tanzu.Toolkit.ViewModels
         public void ToggleAdvancedOptions(object arg = null)
         {
             Expanded = !Expanded;
+        }
+
+        public void AddToSelectedBuildpacks(object arg)
+        {
+            if (arg is string buildpackName)
+            {
+                SelectedBuildpacks.Add(buildpackName);
+                RaisePropertyChangedEvent("SelectedBuildpacks");
+            }
+        }
+
+        public void RemoveFromSelectedBuildpacks(object arg)
+        {
+            if (arg is string buildpackName)
+            {
+                SelectedBuildpacks.Remove(buildpackName);
+                RaisePropertyChangedEvent("SelectedBuildpacks");
+            }
         }
 
         internal async Task StartDeployment()
@@ -493,7 +518,7 @@ namespace Tanzu.Toolkit.ViewModels
                 binaryDeployment: BinaryDeployment,
                 projectName: _projectName,
                 manifestPath: ManifestPath,
-                buildpack: SelectedBuildpack);
+                buildpack: SelectedBuildpacks.Last());
 
             if (!deploymentResult.Succeeded)
             {
