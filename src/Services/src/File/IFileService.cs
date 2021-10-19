@@ -1,6 +1,6 @@
-﻿namespace Tanzu.Toolkit.Services.FileLocator
+﻿namespace Tanzu.Toolkit.Services.File
 {
-    public interface IFileLocatorService
+    public interface IFileService
     {
         string FullPathToCfExe { get; }
         string VsixPackageBaseDir { get; }
@@ -9,5 +9,7 @@
         string PathToCfCliConfigFile { get; }
 
         bool DirContainsFiles(string dirPath);
+        string ReadFileContents(string filePath);
+        void WriteTextToFile(string filePath, string contentsToWrite);
     }
 }
