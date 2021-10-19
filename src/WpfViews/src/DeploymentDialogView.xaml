@@ -20,6 +20,7 @@
         <converters:VisibilityConverter x:Key="Visibility" />
         <converters:VisibilityConverter x:Key="InverseVisibility" Reversed="True"/>
         <converters:VisibilityConverter x:Key="ExpansionConverter" ReserveSpace="False" />
+        <converters:ListToStringConverter x:Key="SelectedBuildpacksStringListConverter" EmptyListMessage="&lt;none selected&gt;" />
 
         <Style x:Key="RoundedButtonStyle" TargetType="{x:Type Button}">
             <Setter Property="Template">
@@ -32,6 +33,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
     </Window.Resources>
 
     <DockPanel LastChildFill="False">
@@ -40,7 +42,7 @@
             <TextBlock FontSize="24" Text="Push to Tanzu Application Service" Margin="4" Grid.Row="0" Grid.Column="1"/>
         </StackPanel>
 
-        <Grid x:Name="GridBody" Width="414" VerticalAlignment="Top" Margin="8,8,8,0" DockPanel.Dock="Top">
+        <Grid x:Name="MainContent" Width="414" VerticalAlignment="Top" Margin="8,8,8,0" DockPanel.Dock="Top">
             <Grid.RowDefinitions>
                 <!--ROW 0-->
                 <RowDefinition Height="42"></RowDefinition>
@@ -56,14 +58,6 @@
                 <RowDefinition Height="32"></RowDefinition>
                 <!--ROW 6-->
                 <RowDefinition Height="32"></RowDefinition>
-                <!--ROW 7-->
-                <RowDefinition Height="auto"></RowDefinition>
-                <!--ROW 8-->
-                <RowDefinition Height="auto"></RowDefinition>
-                <!--ROW 9-->
-                <RowDefinition Height="auto"></RowDefinition>
-                <!--ROW 10-->
-                <RowDefinition Height="auto"></RowDefinition>
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
@@ -71,7 +65,7 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
-            <!--ROW 0-->
+            <!--MAIN GRID ROW 0-->
             <StackPanel VerticalAlignment="Center" Grid.Row="0">
                 <TextBlock VerticalAlignment="Center" Text="Deployment Target:" />
             </StackPanel>
@@ -92,11 +86,11 @@
                    Margin="4,0,0,0"
                    Visibility="{Binding IsLoggedIn, Converter={StaticResource Visibility}}"/>
 
-            <!--ROW 1-->
+            <!--MAIN GRID ROW 1-->
             <Separator Grid.Row="1"
                        Visibility="Hidden"/>
 
-            <!--ROW 2-->
+            <!--MAIN GRID ROW 2-->
             <TextBlock Grid.Row="2" Text="App Manifest:" VerticalAlignment="Center"/>
 
             <Grid Grid.Row="2" Grid.Column="1" VerticalAlignment="Center">
@@ -129,7 +123,7 @@
                 </Button>
             </Grid>
 
-            <!--ROW 3-->
+            <!--MAIN GRID ROW 3-->
             <TextBlock Grid.Row="3" Text="App Name:" VerticalAlignment="Center"/>
 
             <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="1" 
@@ -140,7 +134,7 @@
                      VerticalAlignment="Center" 
                      VerticalContentAlignment="Center"/>
 
-            <!--ROW 4-->
+            <!--MAIN GRID ROW 4-->
             <StackPanel VerticalAlignment="Center" Grid.Row="4">
                 <TextBlock VerticalAlignment="Center" Text="Target Organization:"/>
             </StackPanel>
@@ -157,7 +151,7 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
 
-            <!--ROW 5-->
+            <!--MAIN GRID ROW 5-->
             <StackPanel VerticalAlignment="Center" Grid.Row="5">
                 <TextBlock VerticalAlignment="Center" Text="Target Space:"/>
             </StackPanel>
@@ -173,7 +167,7 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
 
-            <!--ROW 6-->
+            <!--MAIN GRID ROW 6-->
             <Button Command="{Binding ElementName=DeploymentDialogViewElement, Path=ToggleAdvancedOptionsCommand}"
                     Grid.Row="6"
                     Grid.Column="0"
@@ -207,20 +201,40 @@
                            Margin="2"/>
                 </Grid>
             </Button>
+        </Grid>
 
-            <!--ROW 7-->
-            <Separator Grid.Row="7" Grid.ColumnSpan="2" 
-                       Margin="0,12"
-                       Visibility="{Binding Expanded, Converter={StaticResource ExpansionConverter}}"/>
+        <Grid
+            Name="HiddenContent"
+            Visibility="{Binding Expanded, Converter={StaticResource ExpansionConverter}}"
+            Width="414"
+            VerticalAlignment="Top"
+            Margin="8,8,8,0"
+            DockPanel.Dock="Top">
+            
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+                
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="128"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
 
-            <!--ROW 8-->
-            <TextBlock Grid.Row="8" 
-                       Text="Directory to Push:" 
-                       VerticalAlignment="Center" 
-                       Visibility="{Binding Expanded, Converter={StaticResource ExpansionConverter}}"
-                       ToolTip="Path to app directory or to a zip file of the contents of the app directory"/>
+            <!--HIDDEN GRID ROW 0-->
+            <Separator Grid.Row="0" Grid.ColumnSpan="2" 
+                        Margin="0,12"/>
 
-            <Grid Grid.Row="8" Grid.Column="1" VerticalAlignment="Center" Visibility="{Binding Expanded, Converter={StaticResource ExpansionConverter}}">
+            <!--HIDDEN GRID ROW 1-->
+            <TextBlock Grid.Row="1" 
+                        Text="Directory to Push:" 
+                        VerticalAlignment="Center" 
+                        ToolTip="Path to app directory or to a zip file of the contents of the app directory"/>
+
+            <Grid Grid.Row="1" Grid.Column="1" VerticalAlignment="Center">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="32"></RowDefinition>
                 </Grid.RowDefinitions>
@@ -253,30 +267,64 @@
                 </Button>
             </Grid>
 
-            <!-- ROW 9-->
-            <StackPanel VerticalAlignment="Center" Grid.Row="9" Visibility="{Binding Expanded, Converter={StaticResource ExpansionConverter}}">
-                <TextBlock VerticalAlignment="Center" Text="Buildpack:" />
+            <!--HIDDEN GRID ROW 2-->
+            <StackPanel
+                VerticalAlignment="Center"
+                Grid.Row="2"
+                Grid.Column="0">
+                
+                <TextBlock
+                    VerticalAlignment="Top"
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    Text="Buildpack:"/>
+                
+                <TextBlock
+                    Text="(If multiple buildpacks selected, only the *last* buildpack will be used)"
+                    Visibility="{Binding IsLoggedIn, Converter={StaticResource ExpansionConverter}}"
+                    Foreground="Gray"
+                    Margin="4"
+                    TextWrapping="Wrap"
+                    FontSize="10"
+                    FontStyle="Italic"
+                    />
             </StackPanel>
 
-            <ComboBox Grid.Row="9" Grid.Column="1" Margin="0,4" 
-                      Visibility="{Binding Expanded, Converter={StaticResource ExpansionConverter}}"
-                      ItemsSource="{Binding BuildpackOptions}" 
-                      IsEnabled="{Binding IsLoggedIn}"
-                      SelectedItem="{Binding SelectedBuildpack}">
-            </ComboBox>
-            
-            <!-- ROW 10-->
-            <StackPanel VerticalAlignment="Center" Grid.Row="10" Visibility="{Binding Expanded, Converter={StaticResource ExpansionConverter}}">
+            <StackPanel
+                Grid.Row="2"
+                Grid.Column="1">
+
+                <Label
+                    Content="{Binding SelectedBuildpacks, Converter={StaticResource SelectedBuildpacksStringListConverter}}"
+                    ToolTip="{Binding SelectedBuildpacks, Converter={StaticResource SelectedBuildpacksStringListConverter}}"
+                    IsEnabled="{Binding IsLoggedIn}"/>
+
+                <ListBox
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    Margin="0,4"
+                    MaxHeight="128"
+                    SelectionMode="Multiple"
+                    Visibility="{Binding IsLoggedIn, Converter={StaticResource ExpansionConverter}}"
+                    ItemsSource="{Binding BuildpackOptions}"
+                    IsEnabled="{Binding IsLoggedIn}"
+                    SelectionChanged="ListBox_SelectionChanged"/>
+            </StackPanel>
+
+
+            <!--HIDDEN GRID ROW 3-->
+            <StackPanel VerticalAlignment="Center" Grid.Row="3">
                 <TextBlock VerticalAlignment="Center" Text="Stack:"/>
             </StackPanel>
 
-            <ComboBox Grid.Row="10" Grid.Column="1" Margin="0,4" 
-                      Visibility="{Binding Expanded, Converter={StaticResource ExpansionConverter}}"
-                      ItemsSource="{Binding StackOptions}" 
-                      IsEnabled="{Binding IsLoggedIn}"
-                      SelectedItem="{Binding SelectedStack}">
+            <ComboBox
+                Grid.Row="3"
+                Grid.Column="1"
+                Margin="0,4"
+                ItemsSource="{Binding StackOptions}"
+                IsEnabled="{Binding IsLoggedIn}"
+                SelectedItem="{Binding SelectedStack}">
             </ComboBox>
-            
         </Grid>
 
         <StackPanel 

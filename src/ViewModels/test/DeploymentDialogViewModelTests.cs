@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,7 +17,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         private const string _fakeAppName = "fake app name";
         private const string _fakeProjName = "fake project name";
         private const string _fakeStack = "windows";
-        //private const string _fakeBuildpack = "junk";
+        private const string _fakeBuildpackName1 = "bp1";
+        private const string _fakeBuildpackName2 = "bp2";
+        private const string _fakeBuildpackName3 = "bp3";
+        private ObservableCollection<string> _fakeSelectedBuildpacks;
         private const string _fakeProjPath = "this\\is\\a\\fake\\path\\to\\a\\project\\directory";
         private const string _realPathToFakeDeploymentDir = "TestFakes";
         private const string FakeTargetFrameworkMoniker = "junk";
@@ -39,7 +43,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsTrue(Directory.Exists(_realPathToFakeDeploymentDir));
 
+            _fakeSelectedBuildpacks = new ObservableCollection<string> { _fakeBuildpackName1, _fakeBuildpackName2, _fakeBuildpackName3 };
+
             _sut = new DeploymentDialogViewModel(Services, _fakeProjName, _realPathToFakeDeploymentDir, FakeTargetFrameworkMoniker);
+
+            _sut.SelectedBuildpacks = _fakeSelectedBuildpacks;
 
             _receivedEvents = new List<string>();
             _sut.PropertyChanged += (sender, e) =>
@@ -276,6 +284,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 AppName = _fakeAppName,
                 SelectedOrg = _fakeOrg,
                 SelectedSpace = _fakeSpace,
+                SelectedBuildpacks = _fakeSelectedBuildpacks,
             };
 
             bool expectedFullFWFlag = true;
@@ -293,7 +302,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                false,
                                It.IsAny<string>(),
                                null,
-                               null))
+                               _fakeSelectedBuildpacks.Last()))
                 .ReturnsAsync(FakeSuccessDetailedResult);
 
             await _sut.StartDeployment();
@@ -318,7 +327,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                     false,
                                     _fakeProjName,
                                     null,
-                                    null))
+                                    _fakeSelectedBuildpacks.Last()))
                     .ReturnsAsync(FakeSuccessDetailedResult);
 
             _sut.AppName = _fakeAppName;
@@ -351,7 +360,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                     false,
                                     _fakeProjName,
                                     null,
-                                    null))
+                                    _fakeSelectedBuildpacks.Last()))
                     .ReturnsAsync(FakeSuccessDetailedResult);
 
             _sut.AppName = _fakeAppName;
@@ -365,11 +374,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("StartDeployment")]
-        [DataRow("hwc_buildpack")]
-        [DataRow("myCustombuildpack")]
-        [DataRow("junk")]
-        public async Task StartDeploymentTask_PassesSelectedBuildpack_ForDeployment(string bp)
+        public async Task StartDeploymentTask_PassesTheLastItemInSelectedBuildpacks_ForDeployment()
         {
+            var fakeSelectedBuildpacks = new ObservableCollection<string> { "first item", "middle item", "last item" };
+
             MockCloudFoundryService.Setup(mock =>
                 mock.DeployAppAsync(_fakeCfInstance,
                                     _fakeOrg,
@@ -383,15 +391,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                     false,
                                     _fakeProjName,
                                     null,
-                                    bp))
+                                    fakeSelectedBuildpacks.Last()))
                     .ReturnsAsync(FakeSuccessDetailedResult);
 
             _sut.AppName = _fakeAppName;
             _sut.SelectedOrg = _fakeOrg;
             _sut.SelectedSpace = _fakeSpace;
             _sut.SelectedStack = "cflinuxfs3";
-            _sut.SelectedBuildpack = bp;
-            Assert.IsNotNull(_sut.SelectedBuildpack);
+            _sut.SelectedBuildpacks = fakeSelectedBuildpacks;
+            Assert.IsNotNull(_sut.SelectedBuildpacks);
 
             await _sut.StartDeployment();
         }
@@ -415,7 +423,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                     false,
                                     _fakeProjName,
                                     null,
-                                    null))
+                                    _fakeSelectedBuildpacks.Last()))
                     .ReturnsAsync(FakeSuccessDetailedResult);
 
             _sut.AppName = _fakeAppName;
@@ -448,7 +456,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                     isBinaryDeployment,
                                     _fakeProjName,
                                     null,
-                                    null))
+                                    _fakeSelectedBuildpacks.Last()))
                     .ReturnsAsync(FakeSuccessDetailedResult);
 
             _sut.AppName = _fakeAppName;
@@ -484,7 +492,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                     It.IsAny<bool>(),
                                     expectedProjectName,
                                     null,
-                                    null))
+                                    _fakeSelectedBuildpacks.Last()))
                     .ReturnsAsync(FakeSuccessDetailedResult);
 
             _sut.AppName = _fakeAppName;
@@ -521,7 +529,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                              false,
                              _fakeProjName,
                              null,
-                             null))
+                             _fakeSelectedBuildpacks.Last()))
                 .ReturnsAsync(FakeSuccessDetailedResult);
 
             await _sut.StartDeployment();
@@ -551,7 +559,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                false,
                                _fakeProjName,
                                null,
-                               null))
+                               _fakeSelectedBuildpacks.Last()))
                     .ReturnsAsync(FakeFailureDetailedResult);
 
             var expectedErrorTitle = $"{DeploymentDialogViewModel.DeploymentErrorMsg} {_fakeAppName}.";
@@ -598,7 +606,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                false,
                                _fakeProjName,
                                null,
-                               null))
+                               _fakeSelectedBuildpacks.Last()))
                     .ReturnsAsync(FakeFailureDetailedResult);
 
             var expectedErrorTitle = $"{DeploymentDialogViewModel.DeploymentErrorMsg} {_fakeAppName}.";
@@ -639,7 +647,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                false,
                                _fakeProjName,
                                null,
-                               null))
+                               _fakeSelectedBuildpacks.Last()))
                     .ReturnsAsync(invalidRefreshTokenFailure);
 
             MockTasExplorerViewModel.SetupSet(m => m.AuthenticationRequired = true).Verifiable();
@@ -678,7 +686,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                false,
                                _fakeProjName,
                                null,
-                               null))
+                               _fakeSelectedBuildpacks.Last()))
                     .ReturnsAsync(redundantErrorInfoResult);
 
             await _sut.StartDeployment();
@@ -1376,7 +1384,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("UpdateBuildpackOptions")]
-        public async Task UpdateBuildpackOptions_DoesNotChangeBuildpackOptions_AndRaisesError_WhenQueryFails()
+        public async Task UpdateBuildpackOptions_SetsBuildpackOptionsToEmptyList_AndRaisesError_WhenQueryFails()
         {
             var fakeCf = new FakeCfInstanceViewModel(FakeCfInstance, Services);
             const string fakeFailureReason = "junk";
@@ -1386,13 +1394,94 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             MockCloudFoundryService.Setup(m => m.GetUniqueBuildpackNamesAsync(fakeCf.CloudFoundryInstance.ApiAddress, 1)).ReturnsAsync(fakeBuildpacksResponse);
 
-            var initialBuildpackOptions = _sut.BuildpackOptions;
             CollectionAssert.DoesNotContain(_receivedEvents, "BuildpackOptions");
 
             await _sut.UpdateBuildpackOptions();
 
-            Assert.AreEqual(initialBuildpackOptions, _sut.BuildpackOptions);
-            CollectionAssert.DoesNotContain(_receivedEvents, "BuildpackOptions");
+            CollectionAssert.AreEquivalent(new List<string>(), _sut.BuildpackOptions);
+        }
+
+        [TestMethod]
+        [TestCategory("AddToSelectedBuildpacks")]
+        public void AddToSelectedBuildpacks_AddsToSelectedBuildpacks_AndRaisesPropChangedEvent_WhenArgIsString()
+        {
+            string item = "new entry";
+            List<string> initialSelectedBps = _sut.SelectedBuildpacks.ToList();
+
+            CollectionAssert.DoesNotContain(initialSelectedBps, item);
+            CollectionAssert.DoesNotContain(_receivedEvents, "SelectedBuildpacks");
+
+            _sut.AddToSelectedBuildpacks(item);
+
+            var updatedSelectedBps = _sut.SelectedBuildpacks;
+
+            CollectionAssert.AreNotEquivalent(initialSelectedBps, updatedSelectedBps);
+            Assert.AreEqual(initialSelectedBps.Count + 1, updatedSelectedBps.Count);
+            CollectionAssert.Contains(updatedSelectedBps, item);
+
+            CollectionAssert.Contains(_receivedEvents, "SelectedBuildpacks");
+        }
+
+        [TestMethod]
+        [TestCategory("AddToSelectedBuildpacks")]
+        public void AddToSelectedBuildpacks_DoesNothing_WhenArgIsNotString()
+        {
+            object nonStringItem = new object();
+            List<string> initialSelectedBps = _sut.SelectedBuildpacks.ToList();
+
+            CollectionAssert.DoesNotContain(initialSelectedBps, nonStringItem);
+            CollectionAssert.DoesNotContain(_receivedEvents, "SelectedBuildpacks");
+
+            _sut.AddToSelectedBuildpacks(nonStringItem);
+
+            var updatedSelectedBps = _sut.SelectedBuildpacks;
+
+            CollectionAssert.AreEquivalent(initialSelectedBps, updatedSelectedBps);
+            CollectionAssert.DoesNotContain(_receivedEvents, "SelectedBuildpacks");
+        }
+
+        [TestMethod]
+        [TestCategory("RemoveFromSelectedBuildpacks")]
+        public void RemoveFromSelectedBuildpacks_RemovesFromSelectedBuildpacks_AndRaisesPropChangedEvent_WhenArgIsString()
+        {
+            string item = "existing entry";
+
+            _sut.SelectedBuildpacks = new System.Collections.ObjectModel.ObservableCollection<string>
+            {
+                item
+            };
+
+            List<string> initialSelectedBps = _sut.SelectedBuildpacks.ToList();
+            CollectionAssert.Contains(initialSelectedBps, item);
+
+            _receivedEvents.Clear();
+            CollectionAssert.DoesNotContain(_receivedEvents, "SelectedBuildpacks");
+
+            _sut.RemoveFromSelectedBuildpacks(item);
+
+            var updatedSelectedBps = _sut.SelectedBuildpacks;
+
+            CollectionAssert.AreNotEquivalent(initialSelectedBps, updatedSelectedBps);
+            Assert.AreEqual(initialSelectedBps.Count - 1, updatedSelectedBps.Count);
+            CollectionAssert.DoesNotContain(updatedSelectedBps, item);
+
+            CollectionAssert.Contains(_receivedEvents, "SelectedBuildpacks");
+        }
+
+        [TestMethod]
+        [TestCategory("RemoveFromSelectedBuildpacks")]
+        public void RemoveFromSelectedBuildpacks_DoesNothing_WhenArgIsNotString()
+        {
+            object nonStringItem = new object();
+
+            List<string> initialSelectedBps = _sut.SelectedBuildpacks.ToList();
+
+            _sut.RemoveFromSelectedBuildpacks(nonStringItem);
+
+            var updatedSelectedBps = _sut.SelectedBuildpacks;
+
+            CollectionAssert.AreEquivalent(initialSelectedBps, updatedSelectedBps);
+            CollectionAssert.DoesNotContain(_receivedEvents, "SelectedBuildpacks");
         }
     }
 
