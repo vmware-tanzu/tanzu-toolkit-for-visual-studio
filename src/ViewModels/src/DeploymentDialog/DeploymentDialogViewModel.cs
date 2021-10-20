@@ -29,6 +29,7 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string SingleLoginErrorMessage2 = "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Application Service Explorer & re-connecting to a new one.";
         internal const string FullFrameworkTFM = ".NETFramework";
         internal const string ManifestNotFoundTitle = "Unable to set manifest path";
+        internal const string ManifestParsingErrorTitle = "Unable to parse app manifest";
         internal const string DirectoryNotFoundTitle = "Unable to set push directory path";
         private string _appName;
         internal readonly bool _fullFrameworkDeployment = false;
@@ -134,15 +135,28 @@ namespace Tanzu.Toolkit.ViewModels
                     _manifestPath = value;
                     ManifestPathLabel = "<none selected>";
                 }
-                else if (File.Exists(value))
+                else if (FileService.FileExists(value))
                 {
                     _manifestPath = value;
 
                     ManifestPathLabel = _manifestPath;
 
-                    string[] manifestLines = File.ReadAllLines(_manifestPath);
-                    SetAppNameFromManifest(manifestLines);
-                    SetStackFromManifest(manifestLines);
+                    var parsingResult = CloudFoundryService.ParseManifestFile(_manifestPath);
+
+                    if (parsingResult.Succeeded)
+                    {
+                        var appManifest = parsingResult.Content;
+
+                        // TODO: decide how to handle multiple apps specified in the same manifest
+
+                        SetAppNameFromManifest(appManifest);
+                        SetStackFromManifest(appManifest);
+                        SetBuildpacksFromManifest(appManifest);
+                    }
+                    else
+                    {
+                        _errorDialogService.DisplayErrorDialog(ManifestParsingErrorTitle, parsingResult.Explanation);
+                    }
                 }
                 else
                 {
@@ -563,29 +577,29 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        private void SetAppNameFromManifest(string[] manifestContents)
+        private void SetAppNameFromManifest(AppManifest appManifest)
         {
-            foreach (string line in manifestContents)
+            var appName = appManifest.Applications[0].Name;
+            if (!string.IsNullOrWhiteSpace(appName))
             {
-                if (line.StartsWith("- name"))
-                {
-                    AppName = line.Substring(line.IndexOf(":") + 1).Trim();
-                }
+                AppName = appName;
             }
         }
 
-        private void SetStackFromManifest(string[] manifestContents)
+        private void SetStackFromManifest(AppManifest appManifest)
         {
-            foreach (string line in manifestContents)
-            {
-                if (line.Contains("stack: "))
-                {
-                    var detectedStack = line.Substring(line.IndexOf(":") + 1).Trim();
+            SelectedStack = appManifest.Applications[0].Stack;
+        }
 
-                    if (_stackOptions.Contains(detectedStack))
-                    {
-                        SelectedStack = detectedStack;
-                    }
+        private void SetBuildpacksFromManifest(AppManifest appManifest)
+        {
+            var bps = appManifest.Applications[0].Buildpacks;
+            if (bps != null)
+            {
+                SelectedBuildpacks.Clear();
+                foreach (string bp in appManifest.Applications[0].Buildpacks)
+                {
+                    AddToSelectedBuildpacks(bp);
                 }
             }
         }

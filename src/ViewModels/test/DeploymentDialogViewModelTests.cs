@@ -135,7 +135,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsNull(_sut.TargetName);
         }
-        
+
         [TestMethod]
         [TestCategory("ctor")]
         public void Constructor_UpdatesCfOrgOptions_WhenTasConnectionIsNotNull()
@@ -147,7 +147,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
             MockThreadingService.Verify(m => m.StartTask(_sut.UpdateCfOrgOptions), Times.Once);
         }
-        
+
         [TestMethod]
         [TestCategory("ctor")]
         public void Constructor_UpdatesBuildpackOptions_WhenTasConnectionIsNotNull()
@@ -182,7 +182,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsTrue(_sut.CanDeployApp(null));
         }
-        
+
         [TestMethod]
         [TestCategory("CanDeployApp")]
         public void CanDeployApp_ReturnsFalse_WhenAppNameEmpty()
@@ -206,7 +206,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsFalse(_sut.CanDeployApp(null));
         }
-        
+
         [TestMethod]
         [TestCategory("CanDeployApp")]
         public void CanDeployApp_ReturnsFalse_WhenSelectedSpaceEmpty()
@@ -218,7 +218,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsFalse(_sut.CanDeployApp(null));
         }
-        
+
         [TestMethod]
         [TestCategory("CanDeployApp")]
         public void CanDeployApp_ReturnsFalse_WhenNotLoggedIn()
@@ -230,7 +230,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsFalse(_sut.CanDeployApp(null));
         }
-        
+
         [TestMethod]
         [TestCategory("DeployApp")]
         public void DeployApp_SetsDeploymentInProgress_AndInvokesStartDeployment_AndClosesDeploymentDialog_WhenCanDeployAppIsTrue()
@@ -472,7 +472,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             MockCloudFoundryService.VerifyAll();
         }
-        
+
         [TestMethod]
         [TestCategory("StartDeployment")]
         public async Task StartDeployment_PassesProjectName_ForDeployment()
@@ -694,7 +694,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockErrorDialogService.Verify(m => m.
               DisplayErrorDialog(
                 It.Is<string>(s => s.Contains(DeploymentDialogViewModel.DeploymentErrorMsg)),
-                It.Is<string>(s => s.Contains(significantErrorInfo) && !s.Contains(specialRedundantErrorContent))), 
+                It.Is<string>(s => s.Contains(significantErrorInfo) && !s.Contains(specialRedundantErrorContent))),
                 Times.Once);
         }
 
@@ -987,7 +987,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                         MockTasExplorerViewModel.SetupGet(m => m.TasConnection)
                             .Returns(new CfInstanceViewModel(FakeCfInstance, null, Services));
                     });
-        
+
             //act
             _sut.OpenLoginView(null);
 
@@ -995,14 +995,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
             Assert.IsTrue(_sut.IsLoggedIn);
         }
-        
+
         [TestMethod]
         [TestCategory("OpenLoginView")]
         public void OpenLoginView_SetsTargetName_WhenTasConnectionIsNotNull()
         {
             var initialTargetName = _sut.TargetName;
             Assert.IsNull(_sut.TasExplorerViewModel.TasConnection);
-            
+
             MockTasExplorerViewModel.Setup(m => m.
                 OpenLoginView(null))
                     .Callback(() =>
@@ -1037,7 +1037,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
             MockThreadingService.Verify(m => m.StartTask(_sut.UpdateCfOrgOptions), Times.Once);
         }
-        
+
         [TestMethod]
         [TestCategory("OpenLoginView")]
         public void OpenLoginView_UpdatesBuildpackOptions_WhenTasConnectionGetsSet()
@@ -1128,24 +1128,43 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ManifestPath")]
         public void ManifestPathSetter_SetsAppName_WhenManifestExistsAndContainsAppName()
         {
-            var manifestPath = "TestFakes/fake-manifest.yml";
-            var expectedFakeAppNameFromManifest = "my-cool-app";
+            var pathToFakeManifest = "some//fake//path";
+            var expectedAppName1 = "app1";
 
-            Assert.IsTrue(File.ReadAllText(manifestPath).Contains("- name"));
-            Assert.IsTrue(File.ReadAllText(manifestPath).Contains(expectedFakeAppNameFromManifest));
+            var fakeAppManifest = new AppManifest
+            {
+                Applications = new List<AppConfig>
+                {
+                    new AppConfig
+                    {
+                        Name = expectedAppName1,
+                    }
+                }
+            };
 
-            Assert.AreNotEqual(expectedFakeAppNameFromManifest, _sut.AppName);
+            var fakeManifestParsingResponse = new DetailedResult<AppManifest>
+            {
+                Succeeded = true,
+                Content = fakeAppManifest,
+            };
 
-            _sut.ManifestPath = manifestPath;
+            MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
+            MockCloudFoundryService.Setup(m => m.ParseManifestFile(pathToFakeManifest)).Returns(fakeManifestParsingResponse);
 
-            Assert.AreEqual(expectedFakeAppNameFromManifest, _sut.AppName);
+            Assert.AreNotEqual(expectedAppName1, _sut.AppName);
+
+            _sut.ManifestPath = pathToFakeManifest;
+
+            Assert.AreEqual(expectedAppName1, _sut.AppName);
         }
-        
+
         [TestMethod]
         [TestCategory("ManifestPath")]
         public void ManifestPathSetter_DisplaysError_AndDoesNotChangeAppName_WhenManifestDoesNotExist()
         {
-            var pathToNonexistentManifest = "bogus//path";
+            var pathToNonexistentManifest = "some//fake//path";
+            MockFileService.Setup(m => m.FileExists(pathToNonexistentManifest)).Returns(false);
+
             var initialAppName = _sut.AppName;
 
             MockErrorDialogService.Setup(m => m.
@@ -1161,12 +1180,30 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ManifestPath")]
         public void ManifestPathSetter_DoesNotChangeAppName_WhenManifestExistsButDoesNotContainAppName()
         {
-            var pathToInvalidManifest = "TestFakes/fake-invalid-manifest.yml";
+            var pathToFakeManifest = "some//fake//path";
 
-            Assert.IsFalse(File.ReadAllText(pathToInvalidManifest).Contains("- name"));
+            var fakeAppManifest = new AppManifest
+            {
+                Applications = new List<AppConfig>
+                {
+                    new AppConfig
+                    {
+                    }
+                }
+            };
+
+            var fakeManifestParsingResponse = new DetailedResult<AppManifest>
+            {
+                Succeeded = true,
+                Content = fakeAppManifest,
+            };
+
+            MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
+            MockCloudFoundryService.Setup(m => m.ParseManifestFile(pathToFakeManifest)).Returns(fakeManifestParsingResponse);
+
             var initialAppName = _sut.AppName;
 
-            _sut.ManifestPath = pathToInvalidManifest;
+            _sut.ManifestPath = pathToFakeManifest;
 
             Assert.AreEqual(initialAppName, _sut.AppName);
         }
@@ -1176,11 +1213,30 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("SelectedStack")]
         public void ManifestPathSetter_SetsSelectedStack_WhenManifestExistsAndContainsStack()
         {
-            var pathToFakeManifest = "TestFakes/fake-manifest.yml";
+            var pathToFakeManifest = "some//fake//path";
+            var expectedAppName1 = "app1";
             var expectedFakeStackNameFromManifest = "windows";
 
-            Assert.IsTrue(File.ReadAllText(pathToFakeManifest).Contains("stack:"));
-            Assert.IsTrue(File.ReadAllText(pathToFakeManifest).Contains(expectedFakeStackNameFromManifest));
+            var fakeAppManifest = new AppManifest
+            {
+                Applications = new List<AppConfig>
+                {
+                    new AppConfig
+                    {
+                        Name = expectedAppName1,
+                        Stack = expectedFakeStackNameFromManifest,
+                    }
+                }
+            };
+
+            var fakeManifestParsingResponse = new DetailedResult<AppManifest>
+            {
+                Succeeded = true,
+                Content = fakeAppManifest,
+            };
+
+            MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
+            MockCloudFoundryService.Setup(m => m.ParseManifestFile(pathToFakeManifest)).Returns(fakeManifestParsingResponse);
 
             Assert.AreNotEqual(expectedFakeStackNameFromManifest, _sut.SelectedStack);
 
@@ -1207,18 +1263,160 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("SelectedStack")]
         public void ManifestPathSetter_DoesNotChangeStack_WhenManifestExistsAndContainsInvalidStack()
         {
-            var pathToInvalidManifest = "TestFakes/fake-invalid-manifest.yml";
-            var expectedInvalidFakeStackNameFromManifest = "my-cool-stack";
+            var pathToFakeManifest = "some//fake//path";
+            var invalidStackName = "asdf";
+
+            var fakeAppManifest = new AppManifest
+            {
+                Applications = new List<AppConfig>
+                {
+                    new AppConfig
+                    {
+                        Name = "junk",
+                        Stack = invalidStackName,
+                    }
+                }
+            };
+
+            var fakeManifestParsingResponse = new DetailedResult<AppManifest>
+            {
+                Succeeded = true,
+                Content = fakeAppManifest,
+            };
+
+            MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
+            MockCloudFoundryService.Setup(m => m.ParseManifestFile(pathToFakeManifest)).Returns(fakeManifestParsingResponse);
+
             var initialStack = _sut.SelectedStack;
 
-            var fakeManifestContents = File.ReadAllText(pathToInvalidManifest);
-
-            Assert.IsTrue(fakeManifestContents.Contains("stack:"));
-            Assert.IsTrue(fakeManifestContents.Contains(expectedInvalidFakeStackNameFromManifest));
-
-            _sut.ManifestPath = pathToInvalidManifest;
+            _sut.ManifestPath = pathToFakeManifest;
 
             Assert.AreEqual(initialStack, _sut.SelectedStack);
+        }
+
+        [TestMethod]
+        [TestCategory("ManifestPath")]
+        [TestCategory("SelectedBuildpacks")]
+        public void ManifestPathSetter_SetsSelectedBuildpacks_WhenManifestExistsAndContainsOneBuildpack()
+        {
+            var pathToFakeManifest = "some//fake//path";
+            var expectedAppName1 = "app1";
+            var expectedBuildpackName1 = "my_cool_bp";
+            var expectedSelectedBuildpacks = new ObservableCollection<string> { expectedBuildpackName1 };
+
+            var fakeAppManifest = new AppManifest
+            {
+                Applications = new List<AppConfig>
+                {
+                    new AppConfig
+                    {
+                        Name = expectedAppName1,
+                        Buildpacks = new List<string>
+                        {
+                            expectedBuildpackName1,
+                        }
+                    }
+                }
+            };
+
+            var fakeManifestParsingResponse = new DetailedResult<AppManifest>
+            {
+                Succeeded = true,
+                Content = fakeAppManifest,
+            };
+
+            MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
+            MockCloudFoundryService.Setup(m => m.ParseManifestFile(pathToFakeManifest)).Returns(fakeManifestParsingResponse);
+
+            CollectionAssert.AreNotEquivalent(expectedSelectedBuildpacks, _sut.SelectedBuildpacks);
+
+            _sut.ManifestPath = pathToFakeManifest;
+
+            CollectionAssert.AreEquivalent(expectedSelectedBuildpacks, _sut.SelectedBuildpacks);
+        }
+
+        [TestMethod]
+        [TestCategory("ManifestPath")]
+        [TestCategory("SelectedBuildpacks")]
+        public void ManifestPathSetter_SetsSelectedBuildpacks_WhenManifestExistsAndContainsMoreThanOneBuildpack()
+        {
+            var pathToFakeManifest = "some//fake//path";
+            var expectedAppName1 = "app1";
+            var expectedBuildpackName1 = "my_cool_bp";
+            var expectedBuildpackName2 = "another";
+            var expectedBuildpackName3 = "junk";
+            var expectedSelectedBuildpacks = new ObservableCollection<string> { expectedBuildpackName1, expectedBuildpackName2, expectedBuildpackName3 };
+
+            var fakeAppManifest = new AppManifest
+            {
+                Applications = new List<AppConfig>
+                {
+                    new AppConfig
+                    {
+                        Name = expectedAppName1,
+                        Buildpacks = new List<string>
+                        {
+                            expectedBuildpackName1,
+                            expectedBuildpackName2,
+                            expectedBuildpackName3,
+                        }
+                    }
+                }
+            };
+
+            var fakeManifestParsingResponse = new DetailedResult<AppManifest>
+            {
+                Succeeded = true,
+                Content = fakeAppManifest,
+            };
+
+            MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
+            MockCloudFoundryService.Setup(m => m.ParseManifestFile(pathToFakeManifest)).Returns(fakeManifestParsingResponse);
+
+            CollectionAssert.AreNotEquivalent(expectedSelectedBuildpacks, _sut.SelectedBuildpacks);
+
+            _sut.ManifestPath = pathToFakeManifest;
+
+            CollectionAssert.AreEquivalent(expectedSelectedBuildpacks, _sut.SelectedBuildpacks);
+        }
+
+        [TestMethod]
+        [TestCategory("ManifestPath")]
+        [TestCategory("SelectedBuildpacks")]
+        public void ManifestPathSetter_DoesNotChangeSelectedBuildpacks_AndDisplaysError_WhenManifestDoesNotExist()
+        {
+            var pathToNonexistentManifest = "bogus//path";
+            var initialBuildpack = _sut.SelectedBuildpacks;
+
+            MockFileService.Setup(m => m.FileExists(pathToNonexistentManifest)).Returns(false);
+
+            _sut.ManifestPath = pathToNonexistentManifest;
+
+            Assert.AreEqual(initialBuildpack, _sut.SelectedBuildpacks);
+            MockErrorDialogService.Verify(m => m.DisplayErrorDialog(DeploymentDialogViewModel.ManifestNotFoundTitle, It.Is<string>(s => s.Contains(pathToNonexistentManifest) && s.Contains("does not appear to be a valid path to a manifest"))), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("ManifestPath")]
+        [TestCategory("SelectedBuildpacks")]
+        public void ManifestPathSetter_DoesNotChangeSelectedBuildpacks_AndDisplaysError_WhenManifestParsingFails()
+        {
+            var pathToManifest = "bogus//path";
+            var initialBuildpack = _sut.SelectedBuildpacks;
+            var fakeParsingFailureMsg = "junk";
+            var fakeParsingFailureResponse = new DetailedResult<AppManifest>
+            {
+                Succeeded = false,
+                Explanation = fakeParsingFailureMsg,
+            };
+
+            MockFileService.Setup(m => m.FileExists(pathToManifest)).Returns(true);
+            MockCloudFoundryService.Setup(m => m.ParseManifestFile(pathToManifest)).Returns(fakeParsingFailureResponse);
+
+            _sut.ManifestPath = pathToManifest;
+
+            Assert.AreEqual(initialBuildpack, _sut.SelectedBuildpacks);
+            MockErrorDialogService.Verify(m => m.DisplayErrorDialog(DeploymentDialogViewModel.ManifestParsingErrorTitle, fakeParsingFailureMsg), Times.Once);
         }
 
         [TestMethod]
@@ -1354,7 +1552,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             CollectionAssert.AreEqual(new List<string>(), _sut.BuildpackOptions);
             CollectionAssert.Contains(_receivedEvents, "BuildpackOptions");
         }
-        
+
         [TestMethod]
         [TestCategory("UpdateBuildpackOptions")]
         public async Task UpdateBuildpackOptions_SetsBuildpackOptionsToQueryContent_WhenQuerySucceeds()
@@ -1375,7 +1573,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.AreNotEqual(fakeBuildpacksContent, _sut.BuildpackOptions);
             CollectionAssert.DoesNotContain(_receivedEvents, "BuildpackOptions");
-            
+
             await _sut.UpdateBuildpackOptions();
 
             Assert.AreEqual(fakeBuildpacksContent, _sut.BuildpackOptions);
@@ -1439,7 +1637,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             CollectionAssert.AreEquivalent(initialSelectedBps, updatedSelectedBps);
             CollectionAssert.DoesNotContain(_receivedEvents, "SelectedBuildpacks");
         }
-        
+
         [TestMethod]
         [TestCategory("AddToSelectedBuildpacks")]
         public void AddToSelectedBuildpacks_DoesNothing_WhenStringAlreadyExistsInSelectedBuildpacks()

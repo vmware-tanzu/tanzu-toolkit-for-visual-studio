@@ -5,6 +5,7 @@ using Serilog;
 using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.Dialog;
+using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
@@ -25,6 +26,7 @@ namespace Tanzu.Toolkit.ViewModels
             ViewLocatorService = services.GetRequiredService<IViewLocatorService>();
             ThreadingService = services.GetRequiredService<IThreadingService>();
             UiDispatcherService = services.GetRequiredService<IUiDispatcherService>();
+            FileService = services.GetRequiredService<IFileService>();
             var logSvc = services.GetRequiredService<ILoggingService>();
             Logger = logSvc.Logger;
         }
@@ -40,6 +42,8 @@ namespace Tanzu.Toolkit.ViewModels
         public IUiDispatcherService UiDispatcherService { get; }
 
         public IDialogService DialogService { get; }
+
+        public IFileService FileService { get; }
 
         public ILogger Logger { get; }
 
