@@ -9,7 +9,9 @@
         string PathToCfCliConfigFile { get; }
 
         bool DirContainsFiles(string dirPath);
+        bool FileExists(string filePath);
         string ReadFileContents(string filePath);
+        string[] ReadFileLines(string filePath);
         void WriteTextToFile(string filePath, string contentsToWrite);
     }
 }

@@ -109,5 +109,15 @@ namespace Tanzu.Toolkit.Services.File
         {
             return System.IO.File.ReadAllText(filePath);
         }
+
+        public string[] ReadFileLines(string filePath)
+        {
+            return System.IO.File.ReadAllLines(filePath);
+        }
+
+        public bool FileExists(string filePath)
+        {
+            return System.IO.File.Exists(filePath);
+        }
     }
 }

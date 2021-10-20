@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Serilog;
@@ -9,6 +10,7 @@ using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.CommandProcess;
 using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.ErrorDialog;
+using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
@@ -27,6 +29,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         protected Mock<ILogger> MockLogger { get; set; }
         protected Mock<IThreadingService> MockThreadingService { get; set; }
         protected Mock<IUiDispatcherService> MockUiDispatcherService { get; set; }
+        protected Mock<IFileService> MockFileService { get; set; }
         protected Mock<ITasExplorerViewModel> MockTasExplorerViewModel { get; set; }
 
         protected const string FakeCfName = "fake cf name";
@@ -51,6 +54,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         protected static readonly DetailedResult FakeSuccessDetailedResult = new DetailedResult(true, null, FakeSuccessCmdResult);
         protected static readonly DetailedResult FakeFailureDetailedResult = new DetailedResult(false, "junk error", FakeFailureCmdResult);
 
+        internal string[] sampleManifestLines = File.ReadAllLines("TestFakes//fake-manifest.yml");
+        internal string[] sampleInvalidManifestLines = File.ReadAllLines("TestFakes//fake-invalid-manifest.yml");
+        internal string[] multiBuildpackManifestLines = File.ReadAllLines("TestFakes//fake-multi-buildpack-manifest.yml");
+
         protected ViewModelTestSupport()
         {
             RenewMockServices();
@@ -67,6 +74,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockLoggingService = new Mock<ILoggingService>();
             MockThreadingService = new Mock<IThreadingService>();
             MockUiDispatcherService = new Mock<IUiDispatcherService>();
+            MockFileService = new Mock<IFileService>();
             MockTasExplorerViewModel = new Mock<ITasExplorerViewModel>();
 
             MockLogger = new Mock<ILogger>();
@@ -80,6 +88,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             services.AddSingleton(MockThreadingService.Object);
             services.AddSingleton(MockUiDispatcherService.Object);
             services.AddSingleton(MockTasExplorerViewModel.Object);
+            services.AddSingleton(MockFileService.Object);
 
             Services = services.BuildServiceProvider();
         }

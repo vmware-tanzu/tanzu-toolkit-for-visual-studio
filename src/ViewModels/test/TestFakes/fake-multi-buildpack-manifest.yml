@@ -3,3 +3,5 @@
   stack: windows
   buildpacks:
   - my_cool_bp
+  - another_buildpack
+  - final_buildpack
