@@ -39,7 +39,7 @@ namespace Tanzu.Toolkit.Services
             Content = content;
         }
 
-        public T Content { get; internal set; }
+        public T Content { get; set; }
     }
 
     public enum FailureType
