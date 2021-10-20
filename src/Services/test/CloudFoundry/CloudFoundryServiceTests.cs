@@ -1876,5 +1876,59 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNull(result.CmdResult);
             Assert.AreEqual(FailureType.None, result.FailureType);
         }
+
+        [TestMethod]
+        [TestCategory("ParseManifestFile")]
+        public void ParseManifestFile_ReturnsSuccessfulResult_WhenFileExists_AndParsingSucceeds()
+        {
+            var manifestPath = "some//path";
+            var fakeManifestContent = exampleManifestYaml;
+
+            _mockFileService.Setup(m => m.FileExists(manifestPath)).Returns(true);
+            _mockFileService.Setup(m => m.ReadFileContents(manifestPath)).Returns(fakeManifestContent);
+
+            var result = _sut.ParseManifestFile(manifestPath);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.IsNotNull(result.Content);
+            Assert.AreEqual("app1", result.Content.Applications[0].Name);
+            Assert.IsNull(result.CmdResult);
+        }
+
+        [TestMethod]
+        [TestCategory("ParseManifestFile")]
+        public void ParseManifestFile_ReturnsFailedResult_WhenFileDoesNotExist()
+        {
+            var manifestPath = "nonexistent//path";
+
+            _mockFileService.Setup(m => m.FileExists(manifestPath)).Returns(false);
+
+            var result = _sut.ParseManifestFile(manifestPath);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsTrue(result.Explanation.Contains($"No file exists at {manifestPath}"));
+            Assert.IsNull(result.Content);
+            Assert.IsNull(result.CmdResult);
+        }
+
+        [TestMethod]
+        [TestCategory("ParseManifestFile")]
+        public void ParseManifestFile_ReturnsFailedResult_WhenParsingFails()
+        {
+            var manifestPath = "some//path";
+            var parsingExMsg = "Couldn't parse file because I said so";
+            var parsingException = new Exception(parsingExMsg);
+
+            _mockFileService.Setup(m => m.FileExists(manifestPath)).Returns(true);
+            _mockFileService.Setup(m => m.ReadFileContents(manifestPath)).Throws(parsingException);
+            
+            var result = _sut.ParseManifestFile(manifestPath);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsTrue(result.Explanation.Contains(parsingExMsg));
+            Assert.IsNull(result.Content);
+            Assert.IsNull(result.CmdResult);
+        }
     }
 }

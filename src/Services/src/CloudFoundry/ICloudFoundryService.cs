@@ -19,5 +19,6 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         Task<DetailedResult<string>> GetRecentLogs(CloudFoundryApp app);
         Task<DetailedResult<List<string>>> GetUniqueBuildpackNamesAsync(string apiAddress, int retryAmount = 1);
         DetailedResult CreateManifestFile(string location, AppManifest manifest);
+        DetailedResult<AppManifest> ParseManifestFile(string pathToManifestFile);
     }
 }
