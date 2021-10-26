@@ -487,7 +487,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public void AddToSelectedBuildpacks(object arg)
         {
-            if (arg is string buildpackName)
+            if (arg is string buildpackName && !SelectedBuildpacks.Contains(buildpackName))
             {
                 SelectedBuildpacks.Add(buildpackName);
                 RaisePropertyChangedEvent("SelectedBuildpacks");
