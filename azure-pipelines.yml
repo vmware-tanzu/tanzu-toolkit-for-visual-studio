@@ -1,6 +1,9 @@
 trigger:
 - main
 
+pr:
+  drafts: false
+
 pool:
   vmImage: 'windows-2019'
 
