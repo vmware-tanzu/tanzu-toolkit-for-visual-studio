@@ -127,26 +127,9 @@ namespace Tanzu.Toolkit.Services.Tests
                                 Protocol = "http2"
                             },
                         },
-                        Services = new List<ServiceConfig>
-                        {
-                            new ServiceConfig
-                            {
-                                Name = "my-service1",
-                            },
-                            new ServiceConfig
-                            {
-                                Name = "my-service2",
-                            },
-                            new ServiceConfig
-                            {
-                                Name = "my-service-with-arbitrary-params",
-                                BindingName = "my-binding",
-                                Parameters = new Dictionary<object, object>
-                                {
-                                    { "key1", "value1" },
-                                    { "key2", "value2" },
-                                }
-                            },
+                        Services = new List<string> {
+                            "my-service1",
+                            "my-service2",
                         },
                         Stack = "cflinuxfs3",
                         Metadata = new MetadataConfig
