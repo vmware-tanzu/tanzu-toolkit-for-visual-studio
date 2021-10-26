@@ -40,7 +40,7 @@ namespace Tanzu.Toolkit.WpfViews
             
             MouseDown += Window_MouseDown;
         }
-
+       
         private void CfOrgOptions_ComboBox_DropDownClosed(object sender, System.EventArgs e)
         {
             _viewModel.UpdateCfSpaceOptions();
@@ -89,16 +89,19 @@ namespace Tanzu.Toolkit.WpfViews
 
         }
 
-        private void ListBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        private void CheckBox_Checked(object sender, RoutedEventArgs e)
         {
-            foreach (string item in e.RemovedItems)
+            if (e.Source is System.Windows.Controls.CheckBox cb)
             {
-                _viewModel.RemoveFromSelectedBuildpacks(item);
+                _viewModel.AddToSelectedBuildpacks(cb.Content);
             }
+        }
 
-            foreach (string item in e.AddedItems)
+        private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (e.Source is System.Windows.Controls.CheckBox cb)
             {
-                _viewModel.AddToSelectedBuildpacks(item);
+                _viewModel.RemoveFromSelectedBuildpacks(cb.Content);
             }
         }
     }

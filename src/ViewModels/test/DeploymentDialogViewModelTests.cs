@@ -1439,6 +1439,27 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             CollectionAssert.AreEquivalent(initialSelectedBps, updatedSelectedBps);
             CollectionAssert.DoesNotContain(_receivedEvents, "SelectedBuildpacks");
         }
+        
+        [TestMethod]
+        [TestCategory("AddToSelectedBuildpacks")]
+        public void AddToSelectedBuildpacks_DoesNothing_WhenStringAlreadyExistsInSelectedBuildpacks()
+        {
+            var item = "junk";
+            _sut.SelectedBuildpacks = new ObservableCollection<string> { item, "extra", "stuff" };
+            List<string> initialSelectedBps = _sut.SelectedBuildpacks.ToList();
+
+            _receivedEvents.Clear();
+
+            CollectionAssert.Contains(initialSelectedBps, item);
+            CollectionAssert.DoesNotContain(_receivedEvents, "SelectedBuildpacks");
+
+            _sut.AddToSelectedBuildpacks(item);
+
+            var updatedSelectedBps = _sut.SelectedBuildpacks;
+
+            CollectionAssert.AreEquivalent(initialSelectedBps, updatedSelectedBps);
+            CollectionAssert.DoesNotContain(_receivedEvents, "SelectedBuildpacks");
+        }
 
         [TestMethod]
         [TestCategory("RemoveFromSelectedBuildpacks")]
