@@ -15,11 +15,6 @@ applications:
   services:
   - my-service1
   - my-service2
-  - name: my-service-with-arbitrary-params
-    binding_name: my-binding
-    parameters:
-      key1: value1
-      key2: value2
   stack: cflinuxfs3
   metadata:
     annotations:
