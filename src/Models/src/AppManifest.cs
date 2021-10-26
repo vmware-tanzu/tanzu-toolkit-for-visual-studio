@@ -27,7 +27,7 @@ namespace Tanzu.Toolkit.Models
         public bool RandomRoute { get; set; }
         public bool DefaultRoute { get; set; }
         public List<RouteConfig> Routes { get; set; }
-        public List<ServiceConfig> Services { get; set; }
+        public List<string> Services { get; set; }
         public List<SidecarConfig> Sidecars { get; set; }
         public string Stack { get; set; }
     }
