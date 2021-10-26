@@ -299,16 +299,30 @@
                     ToolTip="{Binding SelectedBuildpacks, Converter={StaticResource SelectedBuildpacksStringListConverter}}"
                     IsEnabled="{Binding IsLoggedIn}"/>
 
-                <ListBox
+                <ListView
+                    ItemsSource="{Binding BuildpackOptions}"
                     Grid.Row="2"
                     Grid.Column="1"
                     Margin="0,4"
                     MaxHeight="128"
-                    SelectionMode="Multiple"
                     Visibility="{Binding IsLoggedIn, Converter={StaticResource ExpansionConverter}}"
-                    ItemsSource="{Binding BuildpackOptions}"
-                    IsEnabled="{Binding IsLoggedIn}"
-                    SelectionChanged="ListBox_SelectionChanged"/>
+                    SelectionMode="Multiple"
+                    IsEnabled="{Binding IsLoggedIn}">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="Focusable" Value="false"/>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemTemplate>
+                    <DataTemplate>
+                       <CheckBox 
+                           Content="{Binding}" 
+                           IsChecked="{Binding IsChecked}"
+                           Checked="CheckBox_Checked"
+                           Unchecked="CheckBox_Unchecked"/>
+                    </DataTemplate>
+                  </ListView.ItemTemplate>
+                </ListView>
             </StackPanel>
 
 
