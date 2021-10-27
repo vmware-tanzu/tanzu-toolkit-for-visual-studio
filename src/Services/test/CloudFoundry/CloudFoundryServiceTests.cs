@@ -1,18 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Serilog;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Tanzu.Toolkit.CloudFoundryApiClient;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.CommandProcess;
-using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
@@ -1575,12 +1574,12 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             var fakeCfPushResponse = new DetailedResult(false, fakeFailureExplanation);
 
             _mockCfCliService.Setup(mock =>
-                mock.PushAppAsync(FakeApp.AppName, FakeApp.ParentSpace.ParentOrg.OrgName, FakeApp.ParentSpace.SpaceName, null, null, _fakeProjectPath, null, null, null, null))
+                mock.PushAppAsync(_fakeManifestPath, _fakeProjectPath, FakeApp.ParentSpace.ParentOrg.OrgName, FakeApp.ParentSpace.SpaceName, _fakeOutCallback, _fakeErrCallback))
                     .ReturnsAsync(fakeCfPushResponse);
 
             _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
-            DetailedResult result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, _defaultFullFWFlag, stdOutCallback: null, stdErrCallback: null, stack: null, binaryDeployment: false, projectName: null, manifestPath: null);
+            DetailedResult result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, _defaultFullFWFlag, stdOutCallback: _fakeOutCallback, stdErrCallback: _fakeErrCallback, stack: null, binaryDeployment: false, projectName: null, manifestPath: _fakeManifestPath);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains(fakeFailureExplanation));
@@ -1594,31 +1593,12 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         public async Task DeployAppAsync_ReturnsTrueResult_WhenCfTargetAndPushCommandsSucceed(string stack)
         {
             _mockCfCliService.Setup(mock =>
-                mock.PushAppAsync(FakeApp.AppName, FakeApp.ParentSpace.ParentOrg.OrgName, FakeApp.ParentSpace.SpaceName, null, null, _fakeProjectPath, null, stack, null, null))
+                mock.PushAppAsync(_fakeManifestPath, _fakeProjectPath, FakeApp.ParentSpace.ParentOrg.OrgName, FakeApp.ParentSpace.SpaceName, _fakeOutCallback, _fakeErrCallback))
                     .ReturnsAsync(_fakeSuccessDetailedResult);
 
             _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
-            DetailedResult result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, _defaultFullFWFlag, stdOutCallback: null, stdErrCallback: null, stack: stack, binaryDeployment: false, projectName: null, manifestPath: null);
-
-            Assert.IsTrue(result.Succeeded);
-        }
-
-        [TestMethod]
-        [TestCategory("DeployApp")]
-        public async Task DeployAppAsync_SpecifiesHWCBuildpack_AndWindowsStack_WhenFullFWDeploymentIsTrue()
-        {
-            string expectedBuildpackValue = "hwc_buildpack";
-            string expectedStackValue = "windows";
-
-            _mockCfCliService.Setup(mock =>
-                mock.PushAppAsync(FakeApp.AppName, FakeApp.ParentSpace.ParentOrg.OrgName, FakeApp.ParentSpace.SpaceName, null, null, _fakeProjectPath, expectedBuildpackValue, expectedStackValue, null, null))
-                    .ReturnsAsync(_fakeSuccessDetailedResult);
-
-            _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
-
-            bool fullFWIndicator = true;
-            DetailedResult result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, fullFWIndicator, stdOutCallback: null, stdErrCallback: null, stack: null, binaryDeployment: false, projectName: null, manifestPath: null);
+            DetailedResult result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, _defaultFullFWFlag, stdOutCallback: _fakeOutCallback, stdErrCallback: _fakeErrCallback, stack: stack, binaryDeployment: false, projectName: null, manifestPath: _fakeManifestPath);
 
             Assert.IsTrue(result.Succeeded);
         }
@@ -1643,92 +1623,14 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
             _mockCfCliService.Setup(mock => mock.
-                PushAppAsync(FakeApp.AppName, FakeOrg.OrgName, FakeSpace.SpaceName, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), _fakeProjectPath, It.IsAny<string>(), It.IsAny<string>(), null, null))
+                PushAppAsync(_fakeManifestPath, _fakeProjectPath, FakeOrg.OrgName, FakeSpace.SpaceName, _fakeOutCallback, _fakeErrCallback))
                     .Throws(new InvalidRefreshTokenException());
 
-            var result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, _defaultFullFWFlag, stdOutCallback: null, stdErrCallback: null, stack: null, binaryDeployment: false, projectName: null, manifestPath: null);
+            var result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, _defaultFullFWFlag, stdOutCallback: _fakeOutCallback, stdErrCallback: _fakeErrCallback, stack: null, binaryDeployment: false, projectName: null, manifestPath: _fakeManifestPath);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
             Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
-        }
-
-        [TestMethod]
-        [TestCategory("DeployApp")]
-        public async Task DeployAppAsync_SpecifiesBuildpack_AndStartCommand_WhenBinaryDeploymentIsTrue()
-        {
-            _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
-
-            var expectedProjectName = "junk proj name";
-            var expectedBuildpack = "binary_buildpack";
-            var expectedStartCommand = $"cmd /c .\\{expectedProjectName} --urls=http://*:%PORT%";
-
-            _mockCfCliService.Setup(mock =>
-                mock.PushAppAsync(FakeApp.AppName,
-                                  FakeApp.ParentSpace.ParentOrg.OrgName,
-                                  FakeApp.ParentSpace.SpaceName,
-                                  It.IsAny<StdOutDelegate>(),
-                                  It.IsAny<StdErrDelegate>(),
-                                  _fakeProjectPath,
-                                  expectedBuildpack,
-                                  It.IsAny<string>(),
-                                  expectedStartCommand,
-                                  null))
-                    .ReturnsAsync(_fakeSuccessDetailedResult);
-
-            await _sut.DeployAppAsync(FakeCfInstance,
-                                      FakeOrg,
-                                      FakeSpace,
-                                      FakeApp.AppName,
-                                      _fakeProjectPath,
-                                      _defaultFullFWFlag,
-                                      null,
-                                      null,
-                                      manifestPath: null,
-                                      binaryDeployment: true,
-                                      projectName: expectedProjectName,
-                                      stack: "windows");
-
-            _mockCfCliService.VerifyAll();
-        }
-
-        [TestMethod]
-        [TestCategory("DeployApp")]
-        public async Task DeployAppAsync_SpecifiesDotNetCoreBuildpack_WhenBinaryDeploymentIsTrue_AndStackIsLinux()
-        {
-            _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
-
-            var expectedProjectName = "junk proj name";
-            var expectedBuildpack = "dotnet_core_buildpack";
-            string expectedStartCommand = null;
-
-            _mockCfCliService.Setup(mock =>
-                mock.PushAppAsync(FakeApp.AppName,
-                                  FakeApp.ParentSpace.ParentOrg.OrgName,
-                                  FakeApp.ParentSpace.SpaceName,
-                                  It.IsAny<StdOutDelegate>(),
-                                  It.IsAny<StdErrDelegate>(),
-                                  _fakeProjectPath,
-                                  expectedBuildpack,
-                                  It.IsAny<string>(),
-                                  expectedStartCommand,
-                                  null))
-                    .ReturnsAsync(_fakeSuccessDetailedResult);
-
-            await _sut.DeployAppAsync(FakeCfInstance,
-                                      FakeOrg,
-                                      FakeSpace,
-                                      FakeApp.AppName,
-                                      _fakeProjectPath,
-                                      _defaultFullFWFlag,
-                                      null,
-                                      null,
-                                      manifestPath: null,
-                                      binaryDeployment: true,
-                                      projectName: expectedProjectName,
-                                      stack: "cflinuxfs3");
-
-            _mockCfCliService.VerifyAll();
         }
 
 
