@@ -182,7 +182,7 @@ namespace Tanzu.Toolkit.ViewModels
 
             set
             {
-                if (Directory.Exists(value))
+                if (FileService.DirectoryExists(value))
                 {
                     _directoryPath = value;
                     DirectoryPathLabel = value;
@@ -520,19 +520,14 @@ namespace Tanzu.Toolkit.ViewModels
         internal async Task StartDeployment()
         {
             var deploymentResult = await CloudFoundryService.DeployAppAsync(
+                AppName,
+                ManifestPath,
+                DeploymentDirectoryPath,
                 SelectedSpace.ParentOrg.ParentCf,
                 SelectedSpace.ParentOrg,
                 SelectedSpace,
-                AppName,
-                DeploymentDirectoryPath,
-                _fullFrameworkDeployment,
                 stdOutCallback: OutputViewModel.AppendLine,
-                stdErrCallback: OutputViewModel.AppendLine,
-                stack: SelectedStack,
-                binaryDeployment: BinaryDeployment,
-                projectName: _projectName,
-                manifestPath: ManifestPath,
-                buildpack: SelectedBuildpacks.Last());
+                stdErrCallback: OutputViewModel.AppendLine);
 
             if (!deploymentResult.Succeeded)
             {
@@ -563,11 +558,11 @@ namespace Tanzu.Toolkit.ViewModels
             var expectedManifestLocation1 = Path.Combine(PathToProjectRootDir, "manifest.yaml");
             var expectedManifestLocation2 = Path.Combine(PathToProjectRootDir, "manifest.yml");
 
-            if (File.Exists(expectedManifestLocation1))
+            if (FileService.FileExists(expectedManifestLocation1))
             {
                 ManifestPath = expectedManifestLocation1;
             }
-            else if (File.Exists(expectedManifestLocation2))
+            else if (FileService.FileExists(expectedManifestLocation2))
             {
                 ManifestPath = expectedManifestLocation2;
             }
