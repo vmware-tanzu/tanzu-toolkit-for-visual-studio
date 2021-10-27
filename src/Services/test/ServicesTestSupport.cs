@@ -2,6 +2,7 @@
 using System.Security;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services.CommandProcess;
+using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.Services.Tests
 {
@@ -53,6 +54,9 @@ namespace Tanzu.Toolkit.Services.Tests
         protected static readonly bool _skipSsl = true;
         protected static readonly string _fakeValidAccessToken = "valid token";
         protected static readonly string _fakeProjectPath = "this\\is\\a\\fake\\path";
+        protected static readonly string _fakeManifestPath = "this\\is\\a\\fake\\path"; 
+        protected static readonly StdOutDelegate _fakeOutCallback = content => { };
+        protected static readonly StdErrDelegate _fakeErrCallback = content => { };
 
         protected static readonly CloudFoundryInstance FakeCfInstance = new CloudFoundryInstance("fake cf", _fakeValidTarget);
         protected static readonly CloudFoundryOrganization FakeOrg = new CloudFoundryOrganization("fake org", "fake org guid", FakeCfInstance);
