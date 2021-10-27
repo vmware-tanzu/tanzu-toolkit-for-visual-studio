@@ -15,7 +15,6 @@ using Tanzu.Toolkit.Services.CommandProcess;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
-using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 {
@@ -33,8 +32,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         private Mock<IFileService> _mockFileService;
         private Mock<ILoggingService> _mockLoggingService;
         private Mock<ILogger> _mockLogger;
-
-        private readonly bool _defaultFullFWFlag = false;
 
         [TestInitialize]
         public void TestInit()
@@ -1579,7 +1576,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
-            DetailedResult result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, _defaultFullFWFlag, stdOutCallback: _fakeOutCallback, stdErrCallback: _fakeErrCallback, stack: null, binaryDeployment: false, projectName: null, manifestPath: _fakeManifestPath);
+            DetailedResult result = await _sut.DeployAppAsync(FakeApp.AppName, _fakeManifestPath, _fakeProjectPath, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains(fakeFailureExplanation));
@@ -1598,7 +1595,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
-            DetailedResult result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, _defaultFullFWFlag, stdOutCallback: _fakeOutCallback, stdErrCallback: _fakeErrCallback, stack: stack, binaryDeployment: false, projectName: null, manifestPath: _fakeManifestPath);
+            DetailedResult result = await _sut.DeployAppAsync(FakeApp.AppName, _fakeManifestPath, _fakeProjectPath, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
 
             Assert.IsTrue(result.Succeeded);
         }
@@ -1609,7 +1606,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         {
             _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(false);
 
-            var result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, _defaultFullFWFlag, stdOutCallback: null, stdErrCallback: null, stack: null, binaryDeployment: true, projectName: null, manifestPath: null);
+            DetailedResult result = await _sut.DeployAppAsync(FakeApp.AppName, _fakeManifestPath, _fakeProjectPath, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains(CloudFoundryService.EmptyOutputDirMessage));
@@ -1626,7 +1623,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 PushAppAsync(_fakeManifestPath, _fakeProjectPath, FakeOrg.OrgName, FakeSpace.SpaceName, _fakeOutCallback, _fakeErrCallback))
                     .Throws(new InvalidRefreshTokenException());
 
-            var result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, _defaultFullFWFlag, stdOutCallback: _fakeOutCallback, stdErrCallback: _fakeErrCallback, stack: null, binaryDeployment: false, projectName: null, manifestPath: _fakeManifestPath);
+            DetailedResult result = await _sut.DeployAppAsync(FakeApp.AppName, _fakeManifestPath, _fakeProjectPath, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);

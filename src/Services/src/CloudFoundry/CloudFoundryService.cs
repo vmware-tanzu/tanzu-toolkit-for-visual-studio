@@ -768,41 +768,16 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             };
         }
 
-        public async Task<DetailedResult> DeployAppAsync(CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, string appName, string pathToDeploymentDirectory, bool fullFrameworkDeployment, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string stack, bool binaryDeployment, string projectName, string manifestPath = null, string buildpack = null)
+        public async Task<DetailedResult> DeployAppAsync(string appName, string manifestPath, string pathToDeploymentDirectory, CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback)
         {
             if (!_fileService.DirContainsFiles(pathToDeploymentDirectory))
             {
                 return new DetailedResult(false, EmptyOutputDirMessage);
             }
 
-            string startCommand = null;
-
-            if (fullFrameworkDeployment)
-            {
-                buildpack = "hwc_buildpack";
-                stack = "windows";
-            }
-
             DetailedResult cfPushResult;
             try
             {
-                if (binaryDeployment)
-                {
-                    buildpack = "binary_buildpack";
-                    startCommand = $"cmd /c .\\{projectName} --urls=http://*:%PORT%";
-
-                    if (fullFrameworkDeployment)
-                    {
-                        startCommand = $"cmd /c .\\{projectName} --server.urls=http://*:%PORT%";
-                    }
-
-                    if (stack == "cflinuxfs3")
-                    {
-                        buildpack = "dotnet_core_buildpack";
-                        startCommand = null;
-                    }
-                }
-
                 cfPushResult = await _cfCliService.PushAppAsync(manifestPath, pathToDeploymentDirectory, targetOrg.OrgName, targetSpace.SpaceName, stdOutCallback, stdErrCallback);
             }
             catch (InvalidRefreshTokenException)
