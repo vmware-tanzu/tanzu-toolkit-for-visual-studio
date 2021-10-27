@@ -803,7 +803,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                     }
                 }
 
-                cfPushResult = await _cfCliService.PushAppAsync(appName, targetOrg.OrgName, targetSpace.SpaceName, stdOutCallback, stdErrCallback, pathToDeploymentDirectory, buildpack, stack, startCommand, manifestPath);
+                cfPushResult = await _cfCliService.PushAppAsync(manifestPath, pathToDeploymentDirectory, targetOrg.OrgName, targetSpace.SpaceName, stdOutCallback, stdErrCallback);
             }
             catch (InvalidRefreshTokenException)
             {

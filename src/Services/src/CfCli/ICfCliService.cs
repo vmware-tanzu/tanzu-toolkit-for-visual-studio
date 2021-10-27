@@ -16,9 +16,9 @@ namespace Tanzu.Toolkit.Services.CfCli
         Task<DetailedResult> StopAppByNameAsync(string appName);
         Task<DetailedResult> StartAppByNameAsync(string appName);
         Task<DetailedResult> DeleteAppByNameAsync(string appName, bool removeMappedRoutes = true);
-        Task<DetailedResult> PushAppAsync(string appName, string orgName, string spaceName, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string appDirPath, string buildpack = null, string stack = null, string startCommand = null, string manifestPath = null);
         Task<Version> GetApiVersion();
         Task<DetailedResult<string>> GetRecentAppLogs(string appName, string orgName, string spaceName);
         void ClearCachedAccessToken();
+        Task<DetailedResult> PushAppAsync(string manifestPath, string appDirPath, string orgName, string spaceName, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback);
     }
 }
