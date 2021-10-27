@@ -71,6 +71,11 @@ namespace Tanzu.Toolkit.Services.File
             }
         }
 
+        public bool DirectoryExists(string dirPath)
+        {
+            return Directory.Exists(dirPath);
+        }
+
         public bool DirContainsFiles(string dirPath)
         {
             return Directory.Exists(dirPath) && Directory.GetFiles(dirPath).Length > 0;

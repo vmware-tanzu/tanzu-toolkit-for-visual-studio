@@ -14,6 +14,7 @@ using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
+using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.ViewModels.Tests
 {
@@ -53,6 +54,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         protected static readonly DetailedResult FakeSuccessDetailedResult = new DetailedResult(true, null, FakeSuccessCmdResult);
         protected static readonly DetailedResult FakeFailureDetailedResult = new DetailedResult(false, "junk error", FakeFailureCmdResult);
+
+        protected static readonly string _fakeProjectPath = "this\\is\\a\\fake\\path\\to\\a\\project\\directory";
+        protected static readonly string _fakeManifestPath = "this\\is\\a\\fake\\path\\to\\a\\manifest";
+        protected static readonly StdOutDelegate _fakeOutCallback = content => { };
+        protected static readonly StdErrDelegate _fakeErrCallback = content => { };
 
         internal string[] sampleManifestLines = File.ReadAllLines("TestFakes//fake-manifest.yml");
         internal string[] sampleInvalidManifestLines = File.ReadAllLines("TestFakes//fake-invalid-manifest.yml");
