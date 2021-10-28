@@ -775,8 +775,13 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             string pathToDeploymentDirectory = app.Path;
             string appName = app.Name;
 
-            string manifestPath = _fileService.GetUniquePathForTempFile($"temp_manifest_{appName}");
-            var manifestCreationResult = CreateManifestFile(manifestPath, appManifest);
+            if (!_fileService.DirContainsFiles(pathToDeploymentDirectory))
+            {
+                return new DetailedResult(false, EmptyOutputDirMessage);
+            }
+
+            string newManifestPath = _fileService.GetUniquePathForTempFile($"temp_manifest_{appName}");
+            var manifestCreationResult = CreateManifestFile(newManifestPath, appManifest);
 
             if (!manifestCreationResult.Succeeded)
             {
@@ -784,20 +789,17 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 return new DetailedResult(false, $"Manifest compilation failed while attempting to push app {appName}:\n{manifestCreationResult.Explanation}");
             }
 
-            if (!_fileService.DirContainsFiles(pathToDeploymentDirectory))
-            {
-                return new DetailedResult(false, EmptyOutputDirMessage);
-            }
-
             DetailedResult cfPushResult;
             try
             {
-                cfPushResult = await _cfCliService.PushAppAsync(manifestPath, pathToDeploymentDirectory, targetOrg.OrgName, targetSpace.SpaceName, stdOutCallback, stdErrCallback);
+                cfPushResult = await _cfCliService.PushAppAsync(newManifestPath, pathToDeploymentDirectory, targetOrg.OrgName, targetSpace.SpaceName, stdOutCallback, stdErrCallback);
             }
             catch (InvalidRefreshTokenException)
             {
                 var msg = "Unable to deploy app '{AppName}' to '{CfName}' because the connection has expired. Please log back in to re-authenticate.";
                 _logger.Information(msg, appName, targetCf.InstanceName);
+
+                _fileService.DeleteFile(newManifestPath);
 
                 return new DetailedResult
                 {
@@ -809,9 +811,13 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
             if (!cfPushResult.Succeeded)
             {
+                _fileService.DeleteFile(newManifestPath);
+
                 _logger.Error("Successfully targeted org '{targetOrgName}' and space '{targetSpaceName}' but app deployment failed at the `cf push` stage.\n{cfPushResult}", targetOrg.OrgName, targetSpace.SpaceName, cfPushResult.Explanation);
                 return new DetailedResult(false, cfPushResult.Explanation);
             }
+
+            _fileService.DeleteFile(newManifestPath);
 
             return new DetailedResult(true, $"App successfully deploying to org '{targetOrg.OrgName}', space '{targetSpace.SpaceName}'...");
         }

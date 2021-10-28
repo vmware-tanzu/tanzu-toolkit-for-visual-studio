@@ -8,6 +8,7 @@
         int CliVersion { get; set; }
         string PathToCfCliConfigFile { get; }
 
+        void DeleteFile(string filePath);
         bool DirContainsFiles(string dirPath);
         bool DirectoryExists(string dirPath);
         bool FileExists(string filePath);
