@@ -53,7 +53,6 @@ namespace Tanzu.Toolkit.ViewModels
         private ObservableCollection<string> _selectedBuildpacks;
         private List<string> _stackOptions = new List<string> { "windows", "cflinuxfs3" };
         private List<string> _buildpackOptions;
-        private bool _binaryDeployment;
         private string _deploymentButtonLabel;
         private bool _expanded;
         private string _expansionButtonText;
@@ -110,18 +109,6 @@ namespace Tanzu.Toolkit.ViewModels
             _projectName = projectName;
 
             Expanded = false;
-        }
-
-        public bool BinaryDeployment
-        {
-            get => _binaryDeployment;
-
-            internal set
-            {
-                DeploymentButtonLabel = value ? "Push app (from binaries)" : "Push app (from source)";
-                _binaryDeployment = value;
-                RaisePropertyChangedEvent("BinaryDeployment");
-            }
         }
 
         public string AppName
@@ -194,8 +181,6 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     _directoryPath = value;
                     DirectoryPathLabel = value;
-
-                    BinaryDeployment = value != PathToProjectRootDir;
 
                     ManifestModel.Applications[0].Path = value;
                 }
