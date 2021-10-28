@@ -281,17 +281,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.AppName = _fakeAppName;
             _sut.SelectedSpace = _fakeSpace; // space must be set to faciliate lookup of parent org & grandparent cf
 
-            string expectedAppName = _sut.AppName;
+            AppManifest expectedManifest = _sut.ManifestModel;
             CloudFoundryInstance expectedCf = _sut.SelectedSpace.ParentOrg.ParentCf;
             CloudFoundryOrganization expectedOrg = _sut.SelectedSpace.ParentOrg;
             CloudFoundrySpace expectedSpace = _sut.SelectedSpace;
-            string expectedManifestPath = _sut.ManifestPath;
-            string expectedProjectPath = _sut.DeploymentDirectoryPath;
             StdOutDelegate expectedStdOutCallback = _sut.OutputViewModel.AppendLine;
             StdErrDelegate expectedStdErrCallback = _sut.OutputViewModel.AppendLine;
 
             MockCloudFoundryService.Setup(mock => mock.
-              DeployAppAsync(expectedAppName, expectedManifestPath, expectedProjectPath, expectedCf, expectedOrg, expectedSpace, expectedStdOutCallback, expectedStdErrCallback))
+              DeployAppAsync(expectedManifest, expectedCf, expectedOrg, expectedSpace, expectedStdOutCallback, expectedStdErrCallback))
                 .ReturnsAsync(FakeSuccessDetailedResult);
 
             _sut.AppName = _fakeAppName;
@@ -311,17 +309,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.AppName = _fakeAppName;
             _sut.SelectedSpace = _fakeSpace; // space must be set to faciliate lookup of parent org & grandparent cf
 
-            string expectedAppName = _sut.AppName;
+            AppManifest expectedManifest = _sut.ManifestModel;
             CloudFoundryInstance expectedCf = _sut.SelectedSpace.ParentOrg.ParentCf;
             CloudFoundryOrganization expectedOrg = _sut.SelectedSpace.ParentOrg;
             CloudFoundrySpace expectedSpace = _sut.SelectedSpace;
-            string expectedManifestPath = _sut.ManifestPath;
-            string expectedProjectPath = _sut.DeploymentDirectoryPath;
             StdOutDelegate expectedStdOutCallback = _sut.OutputViewModel.AppendLine;
             StdErrDelegate expectedStdErrCallback = _sut.OutputViewModel.AppendLine;
 
             MockCloudFoundryService.Setup(mock => mock.
-              DeployAppAsync(expectedAppName, expectedManifestPath, expectedProjectPath, expectedCf, expectedOrg, expectedSpace, expectedStdOutCallback, expectedStdErrCallback))
+              DeployAppAsync(expectedManifest, expectedCf, expectedOrg, expectedSpace, expectedStdOutCallback, expectedStdErrCallback))
                 .ReturnsAsync(FakeFailureDetailedResult);
 
             var expectedErrorTitle = $"{DeploymentDialogViewModel.DeploymentErrorMsg} {_fakeAppName}.";
@@ -351,20 +347,18 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.AppName = _fakeAppName;
             _sut.SelectedSpace = _fakeSpace; // space must be set to faciliate lookup of parent org & grandparent cf
 
-            string expectedAppName = _sut.AppName;
+            AppManifest expectedManifest = _sut.ManifestModel;
             CloudFoundryInstance expectedCf = _sut.SelectedSpace.ParentOrg.ParentCf;
             CloudFoundryOrganization expectedOrg = _sut.SelectedSpace.ParentOrg;
             CloudFoundrySpace expectedSpace = _sut.SelectedSpace;
-            string expectedManifestPath = _sut.ManifestPath;
-            string expectedProjectPath = _sut.DeploymentDirectoryPath;
             StdOutDelegate expectedStdOutCallback = _sut.OutputViewModel.AppendLine;
             StdErrDelegate expectedStdErrCallback = _sut.OutputViewModel.AppendLine;
 
             string expectedErrorTitle = $"{DeploymentDialogViewModel.DeploymentErrorMsg} {_fakeAppName}.";
             string expectedErrorMsg = $"{FakeFailureDetailedResult.Explanation}";
-
+            
             MockCloudFoundryService.Setup(mock => mock.
-              DeployAppAsync(expectedAppName, expectedManifestPath, expectedProjectPath, expectedCf, expectedOrg, expectedSpace, expectedStdOutCallback, expectedStdErrCallback))
+              DeployAppAsync(expectedManifest, expectedCf, expectedOrg, expectedSpace, expectedStdOutCallback, expectedStdErrCallback))
                 .ReturnsAsync(FakeFailureDetailedResult);
 
             await _sut.StartDeployment();
@@ -381,20 +375,17 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 FailureType = FailureType.InvalidRefreshToken
             };
             
-            _sut.AppName = _fakeAppName;
             _sut.SelectedSpace = _fakeSpace; // space must be set to faciliate lookup of parent org & grandparent cf
 
-            string expectedAppName = _sut.AppName;
+            AppManifest expectedManifest = _sut.ManifestModel;
             CloudFoundryInstance expectedCf = _sut.SelectedSpace.ParentOrg.ParentCf;
             CloudFoundryOrganization expectedOrg = _sut.SelectedSpace.ParentOrg;
             CloudFoundrySpace expectedSpace = _sut.SelectedSpace;
-            string expectedManifestPath = _sut.ManifestPath;
-            string expectedProjectPath = _sut.DeploymentDirectoryPath;
             StdOutDelegate expectedStdOutCallback = _sut.OutputViewModel.AppendLine;
             StdErrDelegate expectedStdErrCallback = _sut.OutputViewModel.AppendLine;
 
             MockCloudFoundryService.Setup(mock => mock.
-              DeployAppAsync(expectedAppName, expectedManifestPath, expectedProjectPath, expectedCf, expectedOrg, expectedSpace, expectedStdOutCallback, expectedStdErrCallback))
+              DeployAppAsync(expectedManifest, expectedCf, expectedOrg, expectedSpace, expectedStdOutCallback, expectedStdErrCallback))
                 .ReturnsAsync(invalidRefreshTokenFailure);
 
             MockTasExplorerViewModel.SetupSet(m => m.AuthenticationRequired = true).Verifiable();
@@ -416,17 +407,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.AppName = _fakeAppName;
             _sut.SelectedSpace = _fakeSpace; // space must be set to faciliate lookup of parent org & grandparent cf
 
-            string expectedAppName = _sut.AppName;
+            AppManifest expectedManifest = _sut.ManifestModel;
             CloudFoundryInstance expectedCf = _sut.SelectedSpace.ParentOrg.ParentCf;
             CloudFoundryOrganization expectedOrg = _sut.SelectedSpace.ParentOrg;
             CloudFoundrySpace expectedSpace = _sut.SelectedSpace;
-            string expectedManifestPath = _sut.ManifestPath;
-            string expectedProjectPath = _sut.DeploymentDirectoryPath;
             StdOutDelegate expectedStdOutCallback = _sut.OutputViewModel.AppendLine;
             StdErrDelegate expectedStdErrCallback = _sut.OutputViewModel.AppendLine;
 
             MockCloudFoundryService.Setup(mock => mock.
-              DeployAppAsync(expectedAppName, expectedManifestPath, expectedProjectPath, expectedCf, expectedOrg, expectedSpace, expectedStdOutCallback, expectedStdErrCallback))
+              DeployAppAsync(expectedManifest, expectedCf, expectedOrg, expectedSpace, expectedStdOutCallback, expectedStdErrCallback))
                 .ReturnsAsync(redundantErrorInfoResult);
 
             await _sut.StartDeployment();
@@ -1163,6 +1152,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("SelectedStack")]
         public void SelectedStackSetter_SetsValue_WhenValueExistsInStackOptions()
         {
+            Assert.Fail("TODO: add tests that ensure the ManifestModel gets updated when 'selectedXYZ' properties change");
+
             var stackVal = "windows";
 
             Assert.IsTrue(_sut.StackOptions.Contains(stackVal));

@@ -124,5 +124,11 @@ namespace Tanzu.Toolkit.Services.File
         {
             return System.IO.File.Exists(filePath);
         }
+
+        public string GetUniquePathForTempFile(string fileName = "")
+        {
+            string uniqueFileName = fileName + DateTimeOffset.Now.ToUnixTimeSeconds().ToString();
+            return Path.Combine(VsixPackageBaseDir, "tmp", uniqueFileName);
+        }
     }
 }

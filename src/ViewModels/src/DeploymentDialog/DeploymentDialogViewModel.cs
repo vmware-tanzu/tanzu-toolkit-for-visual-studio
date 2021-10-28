@@ -57,6 +57,7 @@ namespace Tanzu.Toolkit.ViewModels
         private string _deploymentButtonLabel;
         private bool _expanded;
         private string _expansionButtonText;
+        private AppManifest _appManifest;
 
         public DeploymentDialogViewModel(IServiceProvider services, string projectName, string directoryOfProjectToDeploy, string targetFrameworkMoniker)
             : base(services)
@@ -145,13 +146,8 @@ namespace Tanzu.Toolkit.ViewModels
 
                     if (parsingResult.Succeeded)
                     {
-                        var appManifest = parsingResult.Content;
-
-                        // TODO: decide how to handle multiple apps specified in the same manifest
-
-                        SetAppNameFromManifest(appManifest);
-                        SetStackFromManifest(appManifest);
-                        SetBuildpacksFromManifest(appManifest);
+                        ManifestModel = parsingResult.Content;
+                        SetViewModelValuesFromManifest(ManifestModel);
                     }
                     else
                     {
@@ -377,6 +373,12 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
+        public AppManifest ManifestModel
+        {
+            get => _appManifest; 
+            set => _appManifest = value;
+        }
+
         public bool CanDeployApp(object arg)
         {
             return !string.IsNullOrEmpty(AppName) && IsLoggedIn && SelectedOrg != null && SelectedSpace != null;
@@ -520,9 +522,7 @@ namespace Tanzu.Toolkit.ViewModels
         internal async Task StartDeployment()
         {
             var deploymentResult = await CloudFoundryService.DeployAppAsync(
-                AppName,
-                ManifestPath,
-                DeploymentDirectoryPath,
+                ManifestModel,
                 SelectedSpace.ParentOrg.ParentCf,
                 SelectedSpace.ParentOrg,
                 SelectedSpace,
@@ -570,6 +570,12 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 ManifestPath = null;
             }
+        }
+        private void SetViewModelValuesFromManifest(AppManifest manifest)
+        {
+            SetAppNameFromManifest(manifest);
+            SetStackFromManifest(manifest);
+            SetBuildpacksFromManifest(manifest);
         }
 
         private void SetAppNameFromManifest(AppManifest appManifest)
