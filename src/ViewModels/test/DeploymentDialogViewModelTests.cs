@@ -44,9 +44,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             _fakeSelectedBuildpacks = new ObservableCollection<string> { _fakeBuildpackName1, _fakeBuildpackName2, _fakeBuildpackName3 };
 
-            _sut = new DeploymentDialogViewModel(Services, _fakeProjName, _fakeProjectPath, FakeTargetFrameworkMoniker);
-
-            _sut.SelectedBuildpacks = _fakeSelectedBuildpacks;
+            _sut = new DeploymentDialogViewModel(Services, _fakeProjName, _fakeProjectPath, FakeTargetFrameworkMoniker)
+            {
+                ManifestModel = _fakeManifestModel,
+                SelectedBuildpacks = _fakeSelectedBuildpacks,
+            };
 
             _receivedEvents = new List<string>();
             _sut.PropertyChanged += (sender, e) =>
@@ -169,6 +171,22 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.AreEqual(_fakeProjectPath, _sut.PathToProjectRootDir);
             Assert.AreEqual(_sut.PathToProjectRootDir, _sut.DeploymentDirectoryPath);
             Assert.AreEqual(_sut.PathToProjectRootDir, _sut.DirectoryPathLabel);
+        }
+
+        [TestMethod]
+        [TestCategory("ctor")]
+        [TestCategory("ManifestModel")]
+        public void Constructor_SetsManifestModel_ToNewAppManifest_WhenNoDefaultManifestExistsAtAnExpectedPath()
+        {
+            // ensure no "default" manifest is picked up when sut is constructed
+            MockFileService.Setup(m => m.FileExists(It.Is<string>(s => s.Contains("manifest.yaml")))).Returns(false);
+            MockFileService.Setup(m => m.FileExists(It.Is<string>(s => s.Contains("manifest.yml")))).Returns(false);
+
+            _sut = new DeploymentDialogViewModel(Services, _fakeProjName, _fakeProjectPath, FakeTargetFrameworkMoniker);
+
+            Assert.IsNotNull(_sut.ManifestModel);
+            Assert.AreEqual(_fakeProjName, _sut.ManifestModel.Applications[0].Name);
+            Assert.AreEqual(_fakeProjectPath, _sut.ManifestModel.Applications[0].Path);
         }
 
         [TestMethod]
@@ -1150,56 +1168,71 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("SelectedStack")]
-        public void SelectedStackSetter_SetsValue_WhenValueExistsInStackOptions()
+        [TestCategory("ManifestModel")]
+        public void SelectedStackSetter_SetsValueInManifestModel_WhenValueExistsInStackOptions()
         {
-            Assert.Fail("TODO: add tests that ensure the ManifestModel gets updated when 'selectedXYZ' properties change");
-
             var stackVal = "windows";
+            var initialStackInManifestModel = _sut.ManifestModel.Applications[0].Stack;
 
             Assert.IsTrue(_sut.StackOptions.Contains(stackVal));
+            Assert.AreNotEqual(stackVal, initialStackInManifestModel);
 
             _sut.SelectedStack = stackVal;
 
             Assert.AreEqual(stackVal, _sut.SelectedStack);
+            Assert.AreEqual(stackVal, _sut.ManifestModel.Applications[0].Stack);
             Assert.AreEqual(1, _receivedEvents.Count);
             Assert.AreEqual("SelectedStack", _receivedEvents[0]);
         }
 
         [TestMethod]
         [TestCategory("SelectedStack")]
+        [TestCategory("ManifestModel")]
         public void SelectedStackSetter_DoesNotSetValue_WhenValueDoesNotExistInStackOptions()
         {
             var bogusStackVal = "junk";
             var initialSelectedStack = _sut.SelectedStack;
+            var initialStackInManifestModel = _sut.ManifestModel.Applications[0].Stack;
 
             Assert.IsFalse(_sut.StackOptions.Contains(bogusStackVal));
+            Assert.AreNotEqual(bogusStackVal, initialStackInManifestModel);
 
             _sut.SelectedStack = bogusStackVal;
 
             Assert.AreEqual(initialSelectedStack, _sut.SelectedStack);
+            Assert.AreNotEqual(initialStackInManifestModel, _sut.SelectedStack);
+            Assert.AreEqual(initialStackInManifestModel, _sut.ManifestModel.Applications[0].Stack);
             Assert.AreEqual(0, _receivedEvents.Count);
         }
 
         [TestMethod]
         [TestCategory("DeploymentDirectoryPath")]
-        public void DirectoryPathSetter_SetsDirectoryPathLabel_WhenDirectoryExistsAtGivenPath()
+        [TestCategory("DirectoryPathLabel")]
+        [TestCategory("ManifestModel")]
+        public void DirectoryPathSetter_SetsDirectoryPathLabel_AndPathInManifestModel_WhenDirectoryExistsAtGivenPath()
         {
             _sut.DeploymentDirectoryPath = "junk//path";
             var initialDirectoryPathLabel = _sut.DirectoryPathLabel;
+            var initialPathInManifestModel = _sut.ManifestModel.Applications[0].Path;
 
             Assert.IsNull(_sut.DeploymentDirectoryPath);
             Assert.AreEqual("<none specified>", _sut.DirectoryPathLabel);
+            Assert.AreNotEqual(initialPathInManifestModel, _sut.DeploymentDirectoryPath);
+            Assert.AreNotEqual(_fakeProjectPath, initialPathInManifestModel);
 
             _sut.DeploymentDirectoryPath = _fakeProjectPath;
 
             Assert.IsNotNull(_sut.DeploymentDirectoryPath);
             Assert.AreNotEqual(initialDirectoryPathLabel, _sut.DirectoryPathLabel);
+            Assert.AreEqual(_fakeProjectPath, _sut.ManifestModel.Applications[0].Path);
             Assert.AreEqual(_fakeProjectPath, _sut.DirectoryPathLabel);
             Assert.AreEqual(_fakeProjectPath, _sut.DeploymentDirectoryPath);
         }
 
         [TestMethod]
         [TestCategory("DeploymentDirectoryPath")]
+        [TestCategory("DirectoryPathLabel")]
+        [TestCategory("ManifestModel")]
         public void DirectoryPathSetter_DisplaysError_AndSetsDirectoryPathLabelToNoneSpecified_WhenNoDirectoryExistsAtGivenPath()
         {
             var fakePath = "asdf//junk";
@@ -1207,11 +1240,16 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             _sut.DirectoryPathLabel = "fake initial value";
 
+            var initialPathInManifestModel = _sut.ManifestModel.Applications[0].Path;
+            Assert.AreNotEqual(initialPathInManifestModel, _sut.DeploymentDirectoryPath);
+            Assert.AreNotEqual(fakePath, initialPathInManifestModel);
+
             Assert.AreNotEqual("<none specified>", _sut.DirectoryPathLabel);
 
             _sut.DeploymentDirectoryPath = fakePath;
 
             Assert.AreEqual("<none specified>", _sut.DirectoryPathLabel);
+            Assert.AreNotEqual(initialPathInManifestModel, _sut.DeploymentDirectoryPath);
 
             MockErrorDialogService.Verify(
                 m => m.DisplayErrorDialog(DeploymentDialogViewModel.DirectoryNotFoundTitle, It.Is<string>(s => s.Contains(fakePath) && s.Contains("does not appear to be a valid path"))),
@@ -1332,77 +1370,100 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("AddToSelectedBuildpacks")]
-        public void AddToSelectedBuildpacks_AddsToSelectedBuildpacks_AndRaisesPropChangedEvent_WhenArgIsString()
+        [TestCategory("ManifestModel")]
+        public void AddToSelectedBuildpacks_AddsToSelectedBuildpacks_AndAddsToManifestModelBuildpacks_AndRaisesPropChangedEvent_WhenArgIsString()
         {
             string item = "new entry";
             List<string> initialSelectedBps = _sut.SelectedBuildpacks.ToList();
+            var initialBpsInManifestModel = _sut.ManifestModel.Applications[0].Buildpacks;
 
             CollectionAssert.DoesNotContain(initialSelectedBps, item);
+            CollectionAssert.DoesNotContain(initialBpsInManifestModel, item);
             CollectionAssert.DoesNotContain(_receivedEvents, "SelectedBuildpacks");
 
             _sut.AddToSelectedBuildpacks(item);
 
             var updatedSelectedBps = _sut.SelectedBuildpacks;
+            var updatedManifestModelBps = _sut.ManifestModel.Applications[0].Buildpacks;
 
             CollectionAssert.AreNotEquivalent(initialSelectedBps, updatedSelectedBps);
+            CollectionAssert.AreNotEquivalent(initialSelectedBps, updatedManifestModelBps);
             Assert.AreEqual(initialSelectedBps.Count + 1, updatedSelectedBps.Count);
+            Assert.AreEqual(initialSelectedBps.Count + 1, updatedManifestModelBps.Count);
             CollectionAssert.Contains(updatedSelectedBps, item);
+            CollectionAssert.Contains(updatedManifestModelBps, item);
 
             CollectionAssert.Contains(_receivedEvents, "SelectedBuildpacks");
         }
 
         [TestMethod]
         [TestCategory("AddToSelectedBuildpacks")]
+        [TestCategory("ManifestModel")]
         public void AddToSelectedBuildpacks_DoesNothing_WhenArgIsNotString()
         {
             object nonStringItem = new object();
             List<string> initialSelectedBps = _sut.SelectedBuildpacks.ToList();
+            var initialBpsInManifestModel = _sut.ManifestModel.Applications[0].Buildpacks;
 
             CollectionAssert.DoesNotContain(initialSelectedBps, nonStringItem);
+            CollectionAssert.DoesNotContain(initialBpsInManifestModel, nonStringItem);
             CollectionAssert.DoesNotContain(_receivedEvents, "SelectedBuildpacks");
 
             _sut.AddToSelectedBuildpacks(nonStringItem);
 
             var updatedSelectedBps = _sut.SelectedBuildpacks;
+            var updatedBpsInManifestModel = _sut.ManifestModel.Applications[0].Buildpacks;
 
             CollectionAssert.AreEquivalent(initialSelectedBps, updatedSelectedBps);
+            CollectionAssert.AreEquivalent(initialBpsInManifestModel, updatedBpsInManifestModel);
             CollectionAssert.DoesNotContain(_receivedEvents, "SelectedBuildpacks");
         }
 
         [TestMethod]
         [TestCategory("AddToSelectedBuildpacks")]
+        [TestCategory("ManifestModel")]
         public void AddToSelectedBuildpacks_DoesNothing_WhenStringAlreadyExistsInSelectedBuildpacks()
         {
-            var item = "junk";
-            _sut.SelectedBuildpacks = new ObservableCollection<string> { item, "extra", "stuff" };
+            string item = _sut.ManifestModel.Applications[0].Buildpacks[0];
+
+            _sut.SelectedBuildpacks = new ObservableCollection<string>(_sut.ManifestModel.Applications[0].Buildpacks);
+
             List<string> initialSelectedBps = _sut.SelectedBuildpacks.ToList();
+            var initialBpsInManifestModel = _sut.ManifestModel.Applications[0].Buildpacks;
+            
+            CollectionAssert.AreEquivalent(initialSelectedBps, initialBpsInManifestModel);
 
             _receivedEvents.Clear();
 
             CollectionAssert.Contains(initialSelectedBps, item);
+            CollectionAssert.Contains(initialBpsInManifestModel, item);
             CollectionAssert.DoesNotContain(_receivedEvents, "SelectedBuildpacks");
 
             _sut.AddToSelectedBuildpacks(item);
 
             var updatedSelectedBps = _sut.SelectedBuildpacks;
+            var updatedBpsInManifestModel = _sut.ManifestModel.Applications[0].Buildpacks;
 
             CollectionAssert.AreEquivalent(initialSelectedBps, updatedSelectedBps);
+            CollectionAssert.AreEquivalent(initialBpsInManifestModel, updatedBpsInManifestModel);
             CollectionAssert.DoesNotContain(_receivedEvents, "SelectedBuildpacks");
         }
 
         [TestMethod]
         [TestCategory("RemoveFromSelectedBuildpacks")]
-        public void RemoveFromSelectedBuildpacks_RemovesFromSelectedBuildpacks_AndRaisesPropChangedEvent_WhenArgIsString()
+        [TestCategory("ManifestModel")]
+        public void RemoveFromSelectedBuildpacks_RemovesFromSelectedBuildpacks_AndRemovesFromManifestModelBuildpacks_AndRaisesPropChangedEvent_WhenArgIsString()
         {
-            string item = "existing entry";
+            string item = _sut.ManifestModel.Applications[0].Buildpacks[0];
 
-            _sut.SelectedBuildpacks = new System.Collections.ObjectModel.ObservableCollection<string>
-            {
-                item
-            };
+            _sut.SelectedBuildpacks = new ObservableCollection<string>(_sut.ManifestModel.Applications[0].Buildpacks);
 
             List<string> initialSelectedBps = _sut.SelectedBuildpacks.ToList();
+            var initialBpsInManifestModel = _sut.ManifestModel.Applications[0].Buildpacks;
+
             CollectionAssert.Contains(initialSelectedBps, item);
+            CollectionAssert.Contains(initialBpsInManifestModel, item);
+            CollectionAssert.AreEquivalent(initialSelectedBps, initialBpsInManifestModel);
 
             _receivedEvents.Clear();
             CollectionAssert.DoesNotContain(_receivedEvents, "SelectedBuildpacks");
@@ -1410,27 +1471,35 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.RemoveFromSelectedBuildpacks(item);
 
             var updatedSelectedBps = _sut.SelectedBuildpacks;
+            var updatedBpsInManifestModel = _sut.ManifestModel.Applications[0].Buildpacks;
 
             CollectionAssert.AreNotEquivalent(initialSelectedBps, updatedSelectedBps);
+            CollectionAssert.AreNotEquivalent(initialBpsInManifestModel, updatedBpsInManifestModel);
             Assert.AreEqual(initialSelectedBps.Count - 1, updatedSelectedBps.Count);
+            Assert.AreEqual(initialBpsInManifestModel.Count - 1, updatedBpsInManifestModel.Count);
             CollectionAssert.DoesNotContain(updatedSelectedBps, item);
+            CollectionAssert.DoesNotContain(updatedBpsInManifestModel, item);
 
             CollectionAssert.Contains(_receivedEvents, "SelectedBuildpacks");
         }
 
         [TestMethod]
         [TestCategory("RemoveFromSelectedBuildpacks")]
+        [TestCategory("ManifestModel")]
         public void RemoveFromSelectedBuildpacks_DoesNothing_WhenArgIsNotString()
         {
             object nonStringItem = new object();
 
             List<string> initialSelectedBps = _sut.SelectedBuildpacks.ToList();
+            var initialBpsInManifestModel = _sut.ManifestModel.Applications[0].Buildpacks;
 
             _sut.RemoveFromSelectedBuildpacks(nonStringItem);
 
             var updatedSelectedBps = _sut.SelectedBuildpacks;
+            var updatedBpsInManifestModel = _sut.ManifestModel.Applications[0].Buildpacks;
 
             CollectionAssert.AreEquivalent(initialSelectedBps, updatedSelectedBps);
+            CollectionAssert.AreEquivalent(initialBpsInManifestModel, updatedBpsInManifestModel);
             CollectionAssert.DoesNotContain(_receivedEvents, "SelectedBuildpacks");
         }
     }
