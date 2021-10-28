@@ -1567,19 +1567,43 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("DeployApp")]
         public async Task DeployAppAsync_ReturnsFalseResult_WhenCfPushCommandFails()
         {
+            var expectedAppName = exampleManifest.Applications[0].Name;
+            var expectedProjPath = exampleManifest.Applications[0].Path;
+
             const string fakeFailureExplanation = "junk";
             var fakeCfPushResponse = new DetailedResult(false, fakeFailureExplanation);
 
-            _mockCfCliService.Setup(mock =>
-                mock.PushAppAsync(_fakeManifestPath, _fakeProjectPath, FakeApp.ParentSpace.ParentOrg.OrgName, FakeApp.ParentSpace.SpaceName, _fakeOutCallback, _fakeErrCallback))
-                    .ReturnsAsync(fakeCfPushResponse);
-
             _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
-            DetailedResult result = await _sut.DeployAppAsync(FakeApp.AppName, _fakeManifestPath, _fakeProjectPath, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
+            _mockFileService.Setup(mock => mock.GetUniquePathForTempFile($"temp_manifest_{expectedAppName}")).Returns(_fakeManifestPath);
+
+            _mockCfCliService.Setup(mock =>
+                mock.PushAppAsync(_fakeManifestPath, expectedProjPath, FakeApp.ParentSpace.ParentOrg.OrgName, FakeApp.ParentSpace.SpaceName, _fakeOutCallback, _fakeErrCallback))
+                    .ReturnsAsync(fakeCfPushResponse);
+
+            DetailedResult result = await _sut.DeployAppAsync(exampleManifest, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains(fakeFailureExplanation));
+        }
+        
+        [TestMethod]
+        [TestCategory("DeployApp")]
+        public async Task DeployAppAsync_ReturnsFalseResult_WhenManifestCreationFails()
+        {
+            var fakeManifestCreationException = new Exception("bummer dude");
+
+            var expectedAppName = exampleManifest.Applications[0].Name;
+            var expectedProjPath = exampleManifest.Applications[0].Path;
+
+            _mockFileService.Setup(mock => mock.GetUniquePathForTempFile($"temp_manifest_{expectedAppName}")).Returns(_fakeManifestPath);
+
+            _mockFileService.Setup(mock => mock.WriteTextToFile(_fakeManifestPath, It.IsAny<string>())).Throws(fakeManifestCreationException);
+
+            DetailedResult result = await _sut.DeployAppAsync(exampleManifest, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsTrue(result.Explanation.Contains(fakeManifestCreationException.Message));
         }
 
         [TestMethod]
@@ -1589,13 +1613,18 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [DataRow("junk")]
         public async Task DeployAppAsync_ReturnsTrueResult_WhenCfTargetAndPushCommandsSucceed(string stack)
         {
-            _mockCfCliService.Setup(mock =>
-                mock.PushAppAsync(_fakeManifestPath, _fakeProjectPath, FakeApp.ParentSpace.ParentOrg.OrgName, FakeApp.ParentSpace.SpaceName, _fakeOutCallback, _fakeErrCallback))
-                    .ReturnsAsync(_fakeSuccessDetailedResult);
+            var expectedAppName = exampleManifest.Applications[0].Name;
+            var expectedProjPath = exampleManifest.Applications[0].Path;
 
             _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
-            DetailedResult result = await _sut.DeployAppAsync(FakeApp.AppName, _fakeManifestPath, _fakeProjectPath, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
+            _mockFileService.Setup(mock => mock.GetUniquePathForTempFile($"temp_manifest_{expectedAppName}")).Returns(_fakeManifestPath);
+
+            _mockCfCliService.Setup(mock =>
+                mock.PushAppAsync(_fakeManifestPath, expectedProjPath, FakeApp.ParentSpace.ParentOrg.OrgName, FakeApp.ParentSpace.SpaceName, _fakeOutCallback, _fakeErrCallback))
+                    .ReturnsAsync(_fakeSuccessDetailedResult);
+
+            DetailedResult result = await _sut.DeployAppAsync(exampleManifest, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
 
             Assert.IsTrue(result.Succeeded);
         }
@@ -1606,7 +1635,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         {
             _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(false);
 
-            DetailedResult result = await _sut.DeployAppAsync(FakeApp.AppName, _fakeManifestPath, _fakeProjectPath, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
+            DetailedResult result = await _sut.DeployAppAsync(exampleManifest, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains(CloudFoundryService.EmptyOutputDirMessage));
@@ -1617,13 +1646,18 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("DeployApp")]
         public async Task DeployAppAsync_ReturnsFailedResult_WhenCfCliDeploymentThrowsInvalidRefreshTokenException()
         {
+            var expectedAppName = exampleManifest.Applications[0].Name;
+            var expectedProjPath = exampleManifest.Applications[0].Path;
+
             _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
+            _mockFileService.Setup(mock => mock.GetUniquePathForTempFile($"temp_manifest_{expectedAppName}")).Returns(_fakeManifestPath);
+
             _mockCfCliService.Setup(mock => mock.
-                PushAppAsync(_fakeManifestPath, _fakeProjectPath, FakeOrg.OrgName, FakeSpace.SpaceName, _fakeOutCallback, _fakeErrCallback))
+                PushAppAsync(_fakeManifestPath, expectedProjPath, FakeOrg.OrgName, FakeSpace.SpaceName, _fakeOutCallback, _fakeErrCallback))
                     .Throws(new InvalidRefreshTokenException());
 
-            DetailedResult result = await _sut.DeployAppAsync(FakeApp.AppName, _fakeManifestPath, _fakeProjectPath, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
+            DetailedResult result = await _sut.DeployAppAsync(exampleManifest, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
