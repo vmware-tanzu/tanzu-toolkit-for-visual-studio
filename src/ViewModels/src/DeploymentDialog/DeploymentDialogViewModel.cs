@@ -53,7 +53,6 @@ namespace Tanzu.Toolkit.ViewModels
         private ObservableCollection<string> _selectedBuildpacks;
         private List<string> _stackOptions = new List<string> { "windows", "cflinuxfs3" };
         private List<string> _buildpackOptions;
-        private string _deploymentButtonLabel;
         private bool _expanded;
         private string _expansionButtonText;
         private AppManifest _appManifest;
@@ -201,17 +200,6 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 _directoryPathLabel = value;
                 RaisePropertyChangedEvent("DirectoryPathLabel");
-            }
-        }
-
-        public string DeploymentButtonLabel
-        {
-            get => _deploymentButtonLabel;
-
-            set
-            {
-                _deploymentButtonLabel = value;
-                RaisePropertyChangedEvent("DeploymentButtonLabel");
             }
         }
 
