@@ -64,6 +64,124 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         internal string[] sampleInvalidManifestLines = File.ReadAllLines("TestFakes//fake-invalid-manifest.yml");
         internal string[] multiBuildpackManifestLines = File.ReadAllLines("TestFakes//fake-multi-buildpack-manifest.yml");
 
+        protected AppManifest _fakeManifestModel = new AppManifest
+        {
+            Version = 1,
+            Applications = new List<AppConfig>
+                {
+                    new AppConfig
+                    {
+                        Name = "app1",
+                        Buildpacks = new List<string>
+                        {
+                            "ruby_buildpack",
+                            "java_buildpack",
+                            "my_cool_buildpack",
+                        },
+                        Env = new Dictionary<string, string>
+                        {
+                            {"VAR1", "value1" },
+                            {"VAR2", "value2" },
+                        },
+                        Routes = new List<RouteConfig>
+                        {
+                            new RouteConfig
+                            {
+                                Route = "route.example.com",
+                            },
+                            new RouteConfig
+                            {
+                                Route = "another-route.example.com",
+                                Protocol = "http2"
+                            },
+                        },
+                        Services = new List<string> {
+                            "my-service1",
+                            "my-service2",
+                        },
+                        Stack = "cflinuxfs3",
+                        Metadata = new MetadataConfig
+                        {
+                            Annotations = new Dictionary<string, string>
+                            {
+                                { "contact", "bob@example.com jane@example.com" },
+                            },
+                            Labels = new Dictionary<string, string>
+                            {
+                                { "sensitive", "true" },
+                            },
+                        },
+                        Processes = new List<ProcessConfig>
+                        {
+                            new ProcessConfig
+                            {
+                                Type = "web",
+                                Command = "start-web.sh",
+                                DiskQuota = "512M",
+                                HealthCheckHttpEndpoint = "/healthcheck",
+                                HealthCheckType = "http",
+                                HealthCheckInvocationTimeout = 10,
+                                Instances = 3,
+                                Memory = "500M",
+                                Timeout = 10,
+                            },
+                            new ProcessConfig
+                            {
+                                Type = "worker",
+                                Command = "start-worker.sh",
+                                DiskQuota = "1G",
+                                HealthCheckType = "process",
+                                Instances = 2,
+                                Memory = "256M",
+                                Timeout = 15,
+                            },
+                        },
+                        Path = "some//fake//path",
+                    },
+                    new AppConfig
+                    {
+                        Name = "app2",
+                        Env = new Dictionary<string, string>
+                        {
+                            { "VAR1", "value1" },
+                        },
+                        Processes = new List<ProcessConfig>
+                        {
+                            new ProcessConfig
+                            {
+                                Type = "web",
+                                Instances = 1,
+                                Memory = "256M",
+                            },
+                        },
+                        Sidecars = new List<SidecarConfig>
+                        {
+                            new SidecarConfig
+                            {
+                                Name = "authenticator",
+                                ProcessTypes = new List<string>
+                                {
+                                    "web",
+                                    "worker",
+                                },
+                                Command = "bundle exec run-authenticator",
+                                Memory = "800M",
+                            },
+                            new SidecarConfig
+                            {
+                                Name = "upcaser",
+                                ProcessTypes = new List<string>
+                                {
+                                    "worker",
+                                },
+                                Command = "./tr-server",
+                                Memory = "2G",
+                            }
+                        }
+                    }
+                }
+        };
+
         protected ViewModelTestSupport()
         {
             RenewMockServices();

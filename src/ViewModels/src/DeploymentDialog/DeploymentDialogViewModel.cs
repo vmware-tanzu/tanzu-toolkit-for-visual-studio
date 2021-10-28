@@ -82,6 +82,18 @@ namespace Tanzu.Toolkit.ViewModels
             CfOrgOptions = new List<CloudFoundryOrganization>();
             CfSpaceOptions = new List<CloudFoundrySpace>();
             BuildpackOptions = new List<string>();
+            ManifestModel = new AppManifest
+            {
+                Version = 1,
+                Applications = new List<AppConfig>
+                {
+                    new AppConfig
+                    {
+                        Name = projectName,
+                        Path = directoryOfProjectToDeploy,
+                    }
+                }
+            };
 
             SetManifestIfDefaultExists();
 
@@ -184,6 +196,8 @@ namespace Tanzu.Toolkit.ViewModels
                     DirectoryPathLabel = value;
 
                     BinaryDeployment = value != PathToProjectRootDir;
+
+                    ManifestModel.Applications[0].Path = value;
                 }
                 else
                 {
@@ -251,6 +265,8 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     _selectedStack = value;
                     RaisePropertyChangedEvent("SelectedStack");
+
+                    ManifestModel.Applications[0].Stack = value;
                 }
             }
         }
@@ -507,6 +523,8 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 SelectedBuildpacks.Add(buildpackName);
                 RaisePropertyChangedEvent("SelectedBuildpacks");
+
+                ManifestModel.Applications[0].Buildpacks = SelectedBuildpacks.ToList();
             }
         }
 
@@ -516,6 +534,8 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 SelectedBuildpacks.Remove(buildpackName);
                 RaisePropertyChangedEvent("SelectedBuildpacks");
+                
+                ManifestModel.Applications[0].Buildpacks = SelectedBuildpacks.ToList();
             }
         }
 
@@ -571,6 +591,7 @@ namespace Tanzu.Toolkit.ViewModels
                 ManifestPath = null;
             }
         }
+
         private void SetViewModelValuesFromManifest(AppManifest manifest)
         {
             SetAppNameFromManifest(manifest);
