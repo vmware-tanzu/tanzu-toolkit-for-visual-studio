@@ -1257,30 +1257,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("BinaryDeployment")]
-        [TestCategory("DeploymentButtonLabel")]
-        public void BinaryDeployment_SetsDeploymentButtonLabelToPushSource_WhenSetToFalse()
-        {
-            _sut.DeploymentButtonLabel = "fake initial value";
-
-            _sut.BinaryDeployment = false;
-
-            Assert.AreEqual("Push app (from source)", _sut.DeploymentButtonLabel);
-        }
-
-        [TestMethod]
-        [TestCategory("BinaryDeployment")]
-        [TestCategory("DeploymentButtonLabel")]
-        public void BinaryDeployment_SetsDeploymentButtonLabelToPushBinaries_WhenSetToTrue()
-        {
-            _sut.DeploymentButtonLabel = "fake initial value";
-
-            _sut.BinaryDeployment = true;
-
-            Assert.AreEqual("Push app (from binaries)", _sut.DeploymentButtonLabel);
-        }
-
-        [TestMethod]
         [TestCategory("ToggleAdvancedOptions")]
         [DataRow(true, false)]
         [DataRow(false, true)]

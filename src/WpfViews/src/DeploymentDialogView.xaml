@@ -335,15 +335,16 @@
             HorizontalAlignment="Right">
 
             <Button 
-                Content="{ Binding DeploymentButtonLabel }" 
-                Width="160" 
+                Content="Push App" 
                 HorizontalAlignment="Right"
-                Margin="0,4"
+                Margin="4"
+                Padding="4"
                 Command="{ Binding ElementName=DeploymentDialogViewElement, Path=UploadAppCommand }" 
                 CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
 
             <Button 
-                Margin="8,4,0,4"
+                Margin="4"
+                Padding="4"
                 Click="Close"
                 Content="Cancel"/>
         </StackPanel>
