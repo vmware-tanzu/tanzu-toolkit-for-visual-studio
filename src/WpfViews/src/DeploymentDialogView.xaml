@@ -210,7 +210,7 @@
             VerticalAlignment="Top"
             Margin="8,8,8,0"
             DockPanel.Dock="Top">
-            
+
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
@@ -218,7 +218,7 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
-                
+
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="128"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
@@ -268,27 +268,12 @@
             </Grid>
 
             <!--HIDDEN GRID ROW 2-->
-            <StackPanel
-                VerticalAlignment="Center"
+            <TextBlock
+                VerticalAlignment="Top"
+                Margin="0,4"
                 Grid.Row="2"
-                Grid.Column="0">
-                
-                <TextBlock
-                    VerticalAlignment="Top"
-                    Grid.Row="2"
-                    Grid.Column="0"
-                    Text="Buildpack:"/>
-                
-                <TextBlock
-                    Text="(If multiple buildpacks selected, only the *last* buildpack will be used)"
-                    Visibility="{Binding IsLoggedIn, Converter={StaticResource ExpansionConverter}}"
-                    Foreground="Gray"
-                    Margin="4"
-                    TextWrapping="Wrap"
-                    FontSize="10"
-                    FontStyle="Italic"
-                    />
-            </StackPanel>
+                Grid.Column="0"
+                Text="Buildpack:"/>
 
             <StackPanel
                 Grid.Row="2"
@@ -314,14 +299,14 @@
                         </Style>
                     </ListView.ItemContainerStyle>
                     <ListView.ItemTemplate>
-                    <DataTemplate>
-                       <CheckBox 
+                        <DataTemplate>
+                            <CheckBox 
                            Content="{Binding}" 
                            IsChecked="{Binding IsChecked}"
                            Checked="CheckBox_Checked"
                            Unchecked="CheckBox_Unchecked"/>
-                    </DataTemplate>
-                  </ListView.ItemTemplate>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
                 </ListView>
             </StackPanel>
 
