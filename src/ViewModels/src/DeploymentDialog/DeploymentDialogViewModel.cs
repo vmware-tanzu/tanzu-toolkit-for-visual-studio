@@ -369,6 +369,20 @@ namespace Tanzu.Toolkit.ViewModels
             set => _appManifest = value;
         }
 
+        private bool _buildpacksLoading;
+
+        public bool BuildpacksLoading
+        {
+            get { return _buildpacksLoading; }
+
+            set
+            {
+                _buildpacksLoading = value;
+                RaisePropertyChangedEvent("BuildpacksLoading");
+            }
+        }
+
+
         public bool CanDeployApp(object arg)
         {
             return !string.IsNullOrEmpty(AppName) && IsLoggedIn && SelectedOrg != null && SelectedSpace != null;
@@ -468,6 +482,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
+                BuildpacksLoading = true;
                 var buildpacksRespsonse = await CloudFoundryService.GetUniqueBuildpackNamesAsync(TasExplorerViewModel.TasConnection.CloudFoundryInstance.ApiAddress);
 
                 if (buildpacksRespsonse.Succeeded)
@@ -482,10 +497,12 @@ namespace Tanzu.Toolkit.ViewModels
                     }
 
                     BuildpackOptions = bpOtps;
+                    BuildpacksLoading = false;
                 }
                 else
                 {
                     BuildpackOptions = new List<BuildpackListItem>();
+                    BuildpacksLoading = false;
 
                     Logger.Error(GetBuildpacksFailureMsg + " {BuildpacksResponseError}", buildpacksRespsonse.Explanation);
                     _errorDialogService.DisplayErrorDialog(GetBuildpacksFailureMsg, buildpacksRespsonse.Explanation);
