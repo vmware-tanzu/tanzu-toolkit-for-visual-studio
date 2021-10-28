@@ -512,6 +512,12 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
+        public void ClearSelectedBuildpacks(object arg = null)
+        {
+            SelectedBuildpacks.Clear();
+            RaisePropertyChangedEvent("SelectedBuildpacks");
+        }
+
         internal async Task StartDeployment()
         {
             var deploymentResult = await CloudFoundryService.DeployAppAsync(
