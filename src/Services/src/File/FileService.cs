@@ -130,5 +130,10 @@ namespace Tanzu.Toolkit.Services.File
             string uniqueFileName = fileName + DateTimeOffset.Now.ToUnixTimeSeconds().ToString();
             return Path.Combine(VsixPackageBaseDir, "tmp", uniqueFileName);
         }
+
+        public void DeleteFile(string filePath)
+        {
+            System.IO.File.Delete(filePath);
+        }
     }
 }

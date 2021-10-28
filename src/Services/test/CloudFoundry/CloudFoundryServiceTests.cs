@@ -1585,8 +1585,10 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains(fakeFailureExplanation));
+
+            _mockFileService.Verify(m => m.DeleteFile(_fakeManifestPath), Times.Once); // ensure temp manifest was deleted
         }
-        
+
         [TestMethod]
         [TestCategory("DeployApp")]
         public async Task DeployAppAsync_ReturnsFalseResult_WhenManifestCreationFails()
@@ -1595,6 +1597,8 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             var expectedAppName = exampleManifest.Applications[0].Name;
             var expectedProjPath = exampleManifest.Applications[0].Path;
+
+            _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
             _mockFileService.Setup(mock => mock.GetUniquePathForTempFile($"temp_manifest_{expectedAppName}")).Returns(_fakeManifestPath);
 
@@ -1627,6 +1631,8 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             DetailedResult result = await _sut.DeployAppAsync(exampleManifest, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
 
             Assert.IsTrue(result.Succeeded);
+
+            _mockFileService.Verify(m => m.DeleteFile(_fakeManifestPath), Times.Once); // ensure temp manifest was deleted
         }
 
         [TestMethod]
@@ -1639,7 +1645,13 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains(CloudFoundryService.EmptyOutputDirMessage));
+
+            // ensure temp manifest was never created
+            _mockFileService.Verify(mock => mock.GetUniquePathForTempFile(It.IsAny<string>()), Times.Never);
+            _mockFileService.Verify(mock => mock.WriteTextToFile(_fakeManifestPath, It.IsAny<string>()), Times.Never);
+
             _mockFileService.VerifyAll();
+
         }
 
         [TestMethod]
@@ -1662,6 +1674,8 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
             Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
+
+            _mockFileService.Verify(m => m.DeleteFile(_fakeManifestPath), Times.Once); // ensure temp manifest was deleted
         }
 
 
