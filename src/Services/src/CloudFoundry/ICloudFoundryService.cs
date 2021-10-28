@@ -19,6 +19,6 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         Task<DetailedResult<List<string>>> GetUniqueBuildpackNamesAsync(string apiAddress, int retryAmount = 1);
         DetailedResult CreateManifestFile(string location, AppManifest manifest);
         DetailedResult<AppManifest> ParseManifestFile(string pathToManifestFile);
-        Task<DetailedResult> DeployAppAsync(string appName, string manifestPath, string pathToDeploymentDirectory, CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback);
+        Task<DetailedResult> DeployAppAsync(AppManifest appManifest, CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback);
     }
 }

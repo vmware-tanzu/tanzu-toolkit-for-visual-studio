@@ -11,6 +11,7 @@
         bool DirContainsFiles(string dirPath);
         bool DirectoryExists(string dirPath);
         bool FileExists(string filePath);
+        string GetUniquePathForTempFile(string fileName = "");
         string ReadFileContents(string filePath);
         string[] ReadFileLines(string filePath);
         void WriteTextToFile(string filePath, string contentsToWrite);

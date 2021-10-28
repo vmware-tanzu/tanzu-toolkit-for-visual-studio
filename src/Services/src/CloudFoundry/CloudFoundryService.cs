@@ -768,8 +768,22 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             };
         }
 
-        public async Task<DetailedResult> DeployAppAsync(string appName, string manifestPath, string pathToDeploymentDirectory, CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback)
+        public async Task<DetailedResult> DeployAppAsync(AppManifest appManifest, CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback)
         {
+            AppConfig app = appManifest.Applications[0];
+
+            string pathToDeploymentDirectory = app.Path;
+            string appName = app.Name;
+
+            string manifestPath = _fileService.GetUniquePathForTempFile($"temp_manifest_{appName}");
+            var manifestCreationResult = CreateManifestFile(manifestPath, appManifest);
+
+            if (!manifestCreationResult.Succeeded)
+            {
+                _logger.Error("Unable to push app due to manifest creation failure: {ManifestCreationError}", manifestCreationResult.Explanation);
+                return new DetailedResult(false, $"Manifest compilation failed while attempting to push app {appName}:\n{manifestCreationResult.Explanation}");
+            }
+
             if (!_fileService.DirContainsFiles(pathToDeploymentDirectory))
             {
                 return new DetailedResult(false, EmptyOutputDirMessage);
