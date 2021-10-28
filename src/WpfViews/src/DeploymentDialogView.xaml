@@ -9,7 +9,7 @@
         Name="DeploymentDialogViewElement"
         Title="Deploy to Tanzu Application Service"
         Icon="Resources/tas_16px.png"
-        Width="500"
+        Width="600"
         BorderBrush="{Binding ElementName=DeploymentDialogViewElement, Path=Foreground }"
         BorderThickness="1"
         ResizeMode="NoResize"
@@ -42,7 +42,7 @@
             <TextBlock FontSize="24" Text="Push to Tanzu Application Service" Margin="4" Grid.Row="0" Grid.Column="1"/>
         </StackPanel>
 
-        <Grid x:Name="MainContent" Width="414" VerticalAlignment="Top" Margin="8,8,8,0" DockPanel.Dock="Top">
+        <Grid x:Name="MainContent" Width="500" VerticalAlignment="Top" Margin="8,8,8,0" DockPanel.Dock="Top">
             <Grid.RowDefinitions>
                 <!--ROW 0-->
                 <RowDefinition Height="42"></RowDefinition>
@@ -206,7 +206,7 @@
         <Grid
             Name="HiddenContent"
             Visibility="{Binding Expanded, Converter={StaticResource ExpansionConverter}}"
-            Width="414"
+            Width="500"
             VerticalAlignment="Top"
             Margin="8,8,8,0"
             DockPanel.Dock="Top">
@@ -270,7 +270,7 @@
             <!--HIDDEN GRID ROW 2-->
             <TextBlock
                 VerticalAlignment="Top"
-                Margin="0,4"
+                Margin="0,6,0,0"
                 Grid.Row="2"
                 Grid.Column="0"
                 Text="Buildpack:"/>
@@ -279,10 +279,40 @@
                 Grid.Row="2"
                 Grid.Column="1">
 
-                <Label
-                    Content="{Binding SelectedBuildpacks, Converter={StaticResource SelectedBuildpacksStringListConverter}}"
-                    ToolTip="{Binding SelectedBuildpacks, Converter={StaticResource SelectedBuildpacksStringListConverter}}"
-                    IsEnabled="{Binding IsLoggedIn}"/>
+                <Grid Grid.Row="2" Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="32"></RowDefinition>
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="32"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label
+                        Content="{Binding SelectedBuildpacks, Converter={StaticResource SelectedBuildpacksStringListConverter}}"
+                        ToolTip="{Binding SelectedBuildpacks, Converter={StaticResource SelectedBuildpacksStringListConverter}}"
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        IsEnabled="{Binding IsLoggedIn}"/>
+
+                    <Button
+                        Grid.Column="1"
+                        MinHeight="0"
+                        MinWidth="0"
+                        IsEnabled="{Binding IsLoggedIn}"
+                        Command="{Binding ElementName=DeploymentDialogViewElement, Path=ClearBuildpackSelectionCommand}"
+                        VerticalAlignment="Center">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <ContentPresenter />
+                            </ControlTemplate>
+                        </Button.Template>
+                        <TextBlock
+                            Text="Clear"
+                            FontStyle="Italic"/>
+                    </Button>
+                </Grid>
 
                 <ListView
                     ItemsSource="{Binding BuildpackOptions}"
