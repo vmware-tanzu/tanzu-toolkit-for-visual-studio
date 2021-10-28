@@ -17,6 +17,7 @@ namespace Tanzu.Toolkit.WpfViews
         public ICommand UploadAppCommand { get; }
         public ICommand OpenLoginDialogCommand { get; }
         public ICommand ToggleAdvancedOptionsCommand { get; }
+        public ICommand ClearBuildpackSelectionCommand { get; }
 
         public Brush HyperlinkBrush { get { return (Brush)GetValue(HyperlinkBrushProperty); } set { SetValue(HyperlinkBrushProperty, value); } }
 
@@ -33,6 +34,7 @@ namespace Tanzu.Toolkit.WpfViews
             UploadAppCommand = new DelegatingCommand(viewModel.DeployApp, viewModel.CanDeployApp);
             OpenLoginDialogCommand = new DelegatingCommand(viewModel.OpenLoginView, viewModel.CanOpenLoginView);
             ToggleAdvancedOptionsCommand = new DelegatingCommand(viewModel.ToggleAdvancedOptions, viewModel.CanToggleAdvancedOptions);
+            ClearBuildpackSelectionCommand = new DelegatingCommand(viewModel.ClearSelectedBuildpacks, (object arg) => { return true; });
 
             themeService.SetTheme(this);
             DataContext = viewModel;
