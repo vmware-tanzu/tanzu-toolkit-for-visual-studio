@@ -314,13 +314,22 @@
                     </Button>
                 </Grid>
 
+                <StackPanel Visibility="{Binding IsLoggedIn, Converter={StaticResource Visibility}}">
+                <TextBlock
+                    Text="Loading Buildpacks..."
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    Margin="4,0,0,4"
+                    FontStyle="Italic"
+                    Visibility="{Binding BuildpacksLoading, Converter={StaticResource Visibility}}"/>
+
                 <ListView
                     ItemsSource="{Binding BuildpackOptions}"
                     Grid.Row="2"
                     Grid.Column="1"
                     Margin="0,4"
                     MaxHeight="128"
-                    Visibility="{Binding IsLoggedIn, Converter={StaticResource ExpansionConverter}}"
+                    Visibility="{Binding BuildpacksLoading, Converter={StaticResource InverseVisibility}}"
                     SelectionMode="Multiple"
                     IsEnabled="{Binding IsLoggedIn}">
                     <ListView.ItemContainerStyle>
@@ -338,6 +347,7 @@
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
+                </StackPanel>
             </StackPanel>
 
 
