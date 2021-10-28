@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -52,7 +53,7 @@ namespace Tanzu.Toolkit.ViewModels
         private string _selectedStack;
         private ObservableCollection<string> _selectedBuildpacks;
         private List<string> _stackOptions = new List<string> { "windows", "cflinuxfs3" };
-        private List<string> _buildpackOptions;
+        private List<BuildpackListItem> _buildpackOptions;
         private bool _expanded;
         private string _expansionButtonText;
         private AppManifest _appManifest;
@@ -79,7 +80,7 @@ namespace Tanzu.Toolkit.ViewModels
             CfInstanceOptions = new List<CloudFoundryInstance>();
             CfOrgOptions = new List<CloudFoundryOrganization>();
             CfSpaceOptions = new List<CloudFoundrySpace>();
-            BuildpackOptions = new List<string>();
+            BuildpackOptions = new List<BuildpackListItem>();
             ManifestModel = new AppManifest
             {
                 Version = 1,
@@ -326,7 +327,7 @@ namespace Tanzu.Toolkit.ViewModels
             get => _stackOptions;
         }
 
-        public List<string> BuildpackOptions
+        public List<BuildpackListItem> BuildpackOptions
         {
             get => _buildpackOptions;
 
@@ -364,7 +365,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public AppManifest ManifestModel
         {
-            get => _appManifest; 
+            get => _appManifest;
             set => _appManifest = value;
         }
 
@@ -463,21 +464,28 @@ namespace Tanzu.Toolkit.ViewModels
         {
             if (TasExplorerViewModel.TasConnection == null)
             {
-                BuildpackOptions = new List<string>();
+                BuildpackOptions = new List<BuildpackListItem>();
             }
             else
             {
-                BuildpackOptions = new List<string> { "Loading buildpacks..." };
-
                 var buildpacksRespsonse = await CloudFoundryService.GetUniqueBuildpackNamesAsync(TasExplorerViewModel.TasConnection.CloudFoundryInstance.ApiAddress);
 
                 if (buildpacksRespsonse.Succeeded)
                 {
-                    BuildpackOptions = buildpacksRespsonse.Content;
+                    var bpOtps = new List<BuildpackListItem>();
+
+                    foreach (string bpName in buildpacksRespsonse.Content)
+                    {
+                        bool nameSpecifiedInManifest = ManifestModel.Applications[0].Buildpacks.Contains(bpName);
+
+                        bpOtps.Add(new BuildpackListItem { Name = bpName, IsSelected = nameSpecifiedInManifest });
+                    }
+
+                    BuildpackOptions = bpOtps;
                 }
                 else
                 {
-                    BuildpackOptions = new List<string>();
+                    BuildpackOptions = new List<BuildpackListItem>();
 
                     Logger.Error(GetBuildpacksFailureMsg + " {BuildpacksResponseError}", buildpacksRespsonse.Explanation);
                     _errorDialogService.DisplayErrorDialog(GetBuildpacksFailureMsg, buildpacksRespsonse.Explanation);
@@ -507,7 +515,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 SelectedBuildpacks.Remove(buildpackName);
                 RaisePropertyChangedEvent("SelectedBuildpacks");
-                
+
                 ManifestModel.Applications[0].Buildpacks = SelectedBuildpacks.ToList();
             }
         }
@@ -515,6 +523,12 @@ namespace Tanzu.Toolkit.ViewModels
         public void ClearSelectedBuildpacks(object arg = null)
         {
             SelectedBuildpacks.Clear();
+
+            foreach (BuildpackListItem bpItem in BuildpackOptions)
+            {
+                bpItem.IsSelected = false;
+            }
+
             RaisePropertyChangedEvent("SelectedBuildpacks");
         }
 
@@ -602,6 +616,42 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     AddToSelectedBuildpacks(bp);
                 }
+            }
+        }
+    }
+
+    public class BuildpackListItem : INotifyPropertyChanged
+    {
+        private string _name;
+        private bool _isSelected;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public string Name
+        {
+            get => _name;
+            set
+            {
+                _name = value;
+            }
+        }
+
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set
+            {
+                _isSelected = value;
+                RaisePropertyChangedEvent("IsSelected");
+            }
+        }
+        protected void RaisePropertyChangedEvent(string propertyName)
+        {
+            var handler = PropertyChanged;
+
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(propertyName));
             }
         }
     }

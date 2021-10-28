@@ -330,11 +330,11 @@
                     </ListView.ItemContainerStyle>
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <CheckBox 
-                           Content="{Binding}" 
-                           IsChecked="{Binding IsChecked}"
-                           Checked="CheckBox_Checked"
-                           Unchecked="CheckBox_Unchecked"/>
+                            <CheckBox
+                                Content="{Binding Name}"
+                                IsChecked="{Binding IsSelected}"
+                                Checked="CheckBox_Checked"
+                                Unchecked="CheckBox_Unchecked"/>
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>

@@ -92,7 +92,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ctor")]
         public void Constructor_SetsBuildpackOptionsToEmptyList()
         {
-            CollectionAssert.AreEqual(new List<string>(), _sut.BuildpackOptions);
+            CollectionAssert.AreEqual(new List<BuildpackListItem>(), _sut.BuildpackOptions);
         }
 
         [TestMethod]
@@ -374,7 +374,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             string expectedErrorTitle = $"{DeploymentDialogViewModel.DeploymentErrorMsg} {_fakeAppName}.";
             string expectedErrorMsg = $"{FakeFailureDetailedResult.Explanation}";
-            
+
             MockCloudFoundryService.Setup(mock => mock.
               DeployAppAsync(expectedManifest, expectedCf, expectedOrg, expectedSpace, expectedStdOutCallback, expectedStdErrCallback))
                 .ReturnsAsync(FakeFailureDetailedResult);
@@ -392,7 +392,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
                 FailureType = FailureType.InvalidRefreshToken
             };
-            
+
             _sut.SelectedSpace = _fakeSpace; // space must be set to faciliate lookup of parent org & grandparent cf
 
             AppManifest expectedManifest = _sut.ManifestModel;
@@ -1294,7 +1294,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             await _sut.UpdateBuildpackOptions();
 
-            CollectionAssert.AreEqual(new List<string>(), _sut.BuildpackOptions);
+            CollectionAssert.AreEqual(new List<BuildpackListItem>(), _sut.BuildpackOptions);
             CollectionAssert.Contains(_receivedEvents, "BuildpackOptions");
         }
 
@@ -1321,7 +1321,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             await _sut.UpdateBuildpackOptions();
 
-            Assert.AreEqual(fakeBuildpacksContent, _sut.BuildpackOptions);
+            Assert.AreEqual(fakeBuildpacksContent.Count, _sut.BuildpackOptions.Count);
+            foreach (BuildpackListItem bp in _sut.BuildpackOptions)
+            {
+                Assert.IsTrue(fakeBuildpacksContent.Contains(bp.Name));
+            }
+
             CollectionAssert.Contains(_receivedEvents, "BuildpackOptions");
         }
 
@@ -1341,7 +1346,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             await _sut.UpdateBuildpackOptions();
 
-            CollectionAssert.AreEquivalent(new List<string>(), _sut.BuildpackOptions);
+            CollectionAssert.AreEquivalent(new List<BuildpackListItem>(), _sut.BuildpackOptions);
         }
 
         [TestMethod]
@@ -1406,7 +1411,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             List<string> initialSelectedBps = _sut.SelectedBuildpacks.ToList();
             var initialBpsInManifestModel = _sut.ManifestModel.Applications[0].Buildpacks;
-            
+
             CollectionAssert.AreEquivalent(initialSelectedBps, initialBpsInManifestModel);
 
             _receivedEvents.Clear();
