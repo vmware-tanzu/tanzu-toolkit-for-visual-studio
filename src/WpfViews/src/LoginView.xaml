@@ -60,6 +60,7 @@
                 LostFocus="TbUrl_LostFocus"
                 HorizontalAlignment="Stretch"
                 Width="auto"
+                Foreground="{ Binding ElementName=LoginViewElement, Path=Foreground}"
                 Background="{ Binding ElementName=LoginViewElement, Path=Background}"/>
             <TextBlock
                 Text="{Binding ApiAddressError}"
