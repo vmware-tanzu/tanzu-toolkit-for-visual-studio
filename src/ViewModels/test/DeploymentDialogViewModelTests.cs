@@ -1483,6 +1483,25 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             CollectionAssert.AreEquivalent(initialBpsInManifestModel, updatedBpsInManifestModel);
             CollectionAssert.DoesNotContain(_receivedEvents, "SelectedBuildpacks");
         }
+
+        [TestMethod]
+        [TestCategory("AppName")]
+        [TestCategory("ManifestModel")]
+        public void AppNameSetter_SetsValueInManifestModel()
+        {
+            var nameVal = "windows";
+            var initialStackInManifestModel = _sut.ManifestModel.Applications[0].Name;
+
+            Assert.AreNotEqual(nameVal, initialStackInManifestModel);
+
+            _sut.AppName = nameVal;
+
+            Assert.AreEqual(nameVal, _sut.AppName);
+            Assert.AreEqual(nameVal, _sut.ManifestModel.Applications[0].Name);
+            Assert.AreEqual(1, _receivedEvents.Count);
+            Assert.AreEqual("AppName", _receivedEvents[0]);
+        }
+
     }
 
     public class FakeOutputView : ViewModelTestSupport, IView

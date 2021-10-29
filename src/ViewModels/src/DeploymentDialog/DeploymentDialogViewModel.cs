@@ -119,6 +119,8 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 _appName = value;
                 RaisePropertyChangedEvent("AppName");
+
+                ManifestModel.Applications[0].Name = value;
             }
         }
 
