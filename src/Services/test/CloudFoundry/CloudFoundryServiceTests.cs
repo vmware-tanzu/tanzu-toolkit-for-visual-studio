@@ -1767,7 +1767,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                     }
                 }
 
-                foreach (string key in app.Env.Values)
+                foreach (string key in app.Env.Keys)
                 {
                     expectedManifestEntries.Add(key);
                 }

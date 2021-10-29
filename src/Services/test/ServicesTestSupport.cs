@@ -116,8 +116,11 @@ namespace Tanzu.Toolkit.Services.Tests
                         },
                         Env = new Dictionary<string, string>
                         {
-                            {"VAR1", "value1" },
-                            {"VAR2", "value2" },
+                            {"my_snake_case_var_key", "my_snake_case_var_val" },
+                            {"my-kebab-case-var-key", "my-kebab-case-var-val" },
+                            {"myCamelCaseVarKey", "myCamelCaseVarVal" },
+                            {"MyPascalCaseVarKey", "MyPascalCaseVarVal" },
+                            {"MY_UPPER_CASE_VAR_KEY", "MY_UPPER_CASE_VAR_VAL" },
                         },
                         Routes = new List<RouteConfig>
                         {
