@@ -853,7 +853,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 var serializer = new SerializerBuilder()
                     .WithNamingConvention(CfAppManifestNamingConvention.Instance)
-                    .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull)
+                    .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults)
                     .Build();
 
                 string ymlContents = serializer.Serialize(manifest);
