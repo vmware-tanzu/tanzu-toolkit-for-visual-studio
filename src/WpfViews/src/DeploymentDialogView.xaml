@@ -317,6 +317,7 @@
                 <StackPanel Visibility="{Binding IsLoggedIn, Converter={StaticResource Visibility}}">
                 <TextBlock
                     Text="Loading Buildpacks..."
+                    Foreground="Gray"
                     Grid.Row="2"
                     Grid.Column="1"
                     Margin="4,0,0,4"
