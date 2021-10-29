@@ -319,7 +319,18 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Buildpack[] buildpacks;
 
             var numPreviousResults = (pageNum - 1) * resultsPerPage;
-            
+            int numStackTypesPerBuildpack = 3;
+            /* INTENTION: assign Buildpacks prop to contain a list like this:
+             * bp.Name = fakeBuildpack1, bp.Stack = fakeStack1
+             * bp.Name = fakeBuildpack1, bp.Stack = fakeStack2
+             * bp.Name = fakeBuildpack1, bp.Stack = fakeStack3
+             * bp.Name = fakeBuildpack2, bp.Stack = fakeStack1
+             * bp.Name = fakeBuildpack2, bp.Stack = fakeStack2
+             * bp.Name = fakeBuildpack2, bp.Stack = fakeStack3
+             * bp.Name = fakeBuildpack3, bp.Stack = fakeStack1
+             * ...
+             */
+
             if (isLastPage)
             {
                 int numResourcesInLastPage = totalResults % resultsPerPage;
@@ -327,10 +338,13 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 
                 for (int i = 0; i < numResourcesInLastPage; i++)
                 {
+                    int buildpackId = i / numStackTypesPerBuildpack + 1 + numPreviousResults;
+                    int stackTypeId = i % numStackTypesPerBuildpack + 1 + numPreviousResults;
+
                     buildpacks[i] = new Buildpack
                     {
-                        Name = $"fakeBuildpack{i / 3 + 1 + numPreviousResults}",
-                        Stack = $"fakeStack{i % 3 + 1 + numPreviousResults}",
+                        Name = $"fakeBuildpack{buildpackId}",
+                        Stack = $"fakeStack{stackTypeId}",
                     };
                 }
             }
@@ -340,13 +354,17 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 
                 for (int i = 0; i < resultsPerPage; i++)
                 {
+                    int buildpackId = i / numStackTypesPerBuildpack + 1 + numPreviousResults;
+                    int stackTypeId = i % numStackTypesPerBuildpack + 1 + numPreviousResults;
+
                     buildpacks[i] = new Buildpack
                     {
-                        Name = $"fakeBuildpack{i / 3 + 1 + numPreviousResults}",
-                        Stack = $"fakeStack{i % 3 + 1 + numPreviousResults}",
+                        Name = $"fakeBuildpack{buildpackId}",
+                        Stack = $"fakeStack{stackTypeId}",
                     };
                 }
             }
+
             Buildpacks = buildpacks;
         }
     }
