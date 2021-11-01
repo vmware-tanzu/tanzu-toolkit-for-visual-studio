@@ -9,6 +9,7 @@ using Tanzu.Toolkit.CloudFoundryApiClient.Models;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.OrgsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.SpacesResponse;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models.StacksResponse;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.ErrorDialog;
@@ -912,6 +913,86 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                     Explanation = ex.Message,
                 };
             }
+        }
+
+        public async Task<DetailedResult<List<string>>> GetStackNamesAsync(CloudFoundryInstance cf, int retryAmount = 1)
+        {
+            string apiAddress = cf.ApiAddress;
+
+            string accessToken;
+            try
+            {
+                accessToken = _cfCliService.GetOAuthToken();
+            }
+            catch (InvalidRefreshTokenException)
+            {
+                var msg = "Unable to retrieve stacks for '{CfName}' because the connection has expired. Please log back in to re-authenticate.";
+                _logger.Information(msg, cf.InstanceName);
+
+                return new DetailedResult<List<string>>
+                {
+                    Succeeded = false,
+                    Explanation = msg.Replace("{CfName}", cf.InstanceName),
+                    Content = null,
+                    FailureType = FailureType.InvalidRefreshToken,
+                };
+            }
+
+            if (accessToken == null)
+            {
+                _logger.Error("CloudFoundryService attempted to get stacks for {apiAddress} but was unable to look up an access token.", apiAddress);
+
+                return new DetailedResult<List<string>>()
+                {
+                    Succeeded = false,
+                    Explanation = $"CloudFoundryService attempted to get stacks for '{apiAddress}' but was unable to look up an access token.",
+                };
+            }
+
+            List<Stack> stacksFromApi;
+            try
+            {
+                stacksFromApi = await _cfApiClient.ListStacks(apiAddress, accessToken);
+            }
+            catch (Exception originalException)
+            {
+                if (retryAmount > 0)
+                {
+                    _logger.Information("GetStackNamesAsync caught an exception when trying to retrieve stacks: {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).", originalException.Message, retryAmount);
+                    _cfCliService.ClearCachedAccessToken();
+                    retryAmount -= 1;
+                    return await GetStackNamesAsync(cf, retryAmount);
+                }
+                else
+                {
+                    _logger.Error("{Error}. See logs for more details: toolkit-diagnostics.log", originalException.Message);
+
+                    return new DetailedResult<List<string>>()
+                    {
+                        Succeeded = false,
+                        Explanation = originalException.Message,
+                    };
+                }
+            }
+
+            var stackNamesToReturn = new List<string>();
+            foreach (Stack stack in stacksFromApi)
+            {
+                if (stack.Name == null)
+                {
+                    _logger.Error("CloudFoundryService.GetStackNamesAsync encountered a stack without a name; omitting it from the returned list of stacks.");
+                }
+                else
+                {
+                    stackNamesToReturn.Add(stack.Name);
+                }
+            }
+
+            return new DetailedResult<List<string>>()
+            {
+                Succeeded = true,
+                Content = stackNamesToReturn,
+            };
         }
 
         private void FormatExceptionMessage(Exception ex, List<string> message)

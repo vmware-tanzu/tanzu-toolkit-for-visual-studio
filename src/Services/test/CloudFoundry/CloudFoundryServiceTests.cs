@@ -1678,7 +1678,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             _mockFileService.Verify(m => m.DeleteFile(_fakeManifestPath), Times.Once); // ensure temp manifest was deleted
         }
 
-
         [TestMethod]
         [TestCategory("GetRecentLogs")]
         public async Task GetRecentLogs_ReturnsSuccessResult_WhenWrappedMethodSucceeds()
@@ -1877,5 +1876,179 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNull(result.Content);
             Assert.IsNull(result.CmdResult);
         }
+
+        [TestMethod]
+        [TestCategory("GetStacks")]
+        public async Task GetStackNamesAsync_ReturnsFailedResult_WhenTokenCannotBeFound()
+        {
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns((string)null);
+
+            var result = await _sut.GetStackNamesAsync(FakeCfInstance);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsNull(result.CmdResult);
+            Assert.IsNull(result.Content);
+
+            Assert.IsTrue(_mockCfApiClient.Invocations.Count == 0);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("GetStacks")]
+        public async Task GetStackNamesAsync_RetriesWithFreshToken_WhenListStacksThrowsException()
+        {
+            var fakeExceptionMsg = "junk";
+            var fakeStacksResponse = new List<CloudFoundryApiClient.Models.StacksResponse.Stack>
+            {
+                new CloudFoundryApiClient.Models.StacksResponse.Stack
+                {
+                    Name = _stack1Name,
+                    Guid = _stack1Guid,
+                },
+                new CloudFoundryApiClient.Models.StacksResponse.Stack
+                {
+                    Name = _stack2Name,
+                    Guid = _stack2Guid,
+                },
+            };
+
+            var expectedResultContent = new List<string>
+            {
+                _stack1Name,
+                _stack2Name,
+            };
+
+            _mockCfCliService.SetupSequence(m => m.
+                GetOAuthToken())
+                    .Returns(expiredAccessToken) // simulate stale cached token on first attempt
+                    .Returns(_fakeValidAccessToken); // simulate fresh cached token on second attempt
+
+            _mockCfApiClient.Setup(m => m.
+                ListStacks(FakeCfInstance.ApiAddress, expiredAccessToken))
+                    .Throws(new Exception(fakeExceptionMsg));
+
+            _mockCfApiClient.Setup(m => m.
+                ListStacks(FakeCfInstance.ApiAddress, _fakeValidAccessToken))
+                    .ReturnsAsync(fakeStacksResponse);
+
+            var result = await _sut.GetStackNamesAsync(FakeCfInstance);
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.AreEqual(null, result.CmdResult);
+            Assert.AreEqual(expectedResultContent.Count, result.Content.Count);
+
+            _mockCfCliService.Verify(m => m.ClearCachedAccessToken(), Times.Once);
+            _mockCfApiClient.Verify(m => m.ListStacks(FakeCfInstance.ApiAddress, It.IsAny<string>()), Times.Exactly(2));
+            _mockLogger.Verify(m => m.Information(It.Is<string>(s => s.Contains("retry")), fakeExceptionMsg, It.IsAny<int>()), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("GetStacks")]
+        public async Task GetStackNamesAsync_ReturnsFailedResult_WhenListStacksThrowsException_AndThereAreZeroRetriesLeft()
+        {
+            var fakeExceptionMsg = "junk";
+
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns(_fakeValidAccessToken);
+
+            _mockCfApiClient.Setup(m => m.
+                ListStacks(FakeCfInstance.ApiAddress, _fakeValidAccessToken))
+                    .Throws(new Exception(fakeExceptionMsg));
+
+            var result = await _sut.GetStackNamesAsync(FakeCfInstance, retryAmount: 0);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsNull(result.CmdResult);
+            Assert.IsNull(result.Content);
+
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("GetStacks")]
+        public async Task GetStackNamesAsync_ReturnsSuccessfulResult_WhenListStacksSucceeds()
+        {
+            var fakeStacksResponse = new List<CloudFoundryApiClient.Models.StacksResponse.Stack>
+            {
+                new CloudFoundryApiClient.Models.StacksResponse.Stack
+                {
+                    Name = _stack1Name,
+                    Guid = _stack1Guid,
+                },
+                new CloudFoundryApiClient.Models.StacksResponse.Stack
+                {
+                    Name = _stack2Name,
+                    Guid = _stack2Guid,
+                },
+                new CloudFoundryApiClient.Models.StacksResponse.Stack
+                {
+                    Name = _stack3Name,
+                    Guid = _stack3Guid,
+                },
+                new CloudFoundryApiClient.Models.StacksResponse.Stack
+                {
+                    Name = _stack4Name,
+                    Guid = _stack4Guid,
+                },
+            };
+
+            var expectedResultContent = new List<string>
+            {
+                _stack1Name,
+                _stack2Name,
+                _stack3Name,
+                _stack4Name,
+            };
+
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns(_fakeValidAccessToken);
+
+            _mockCfApiClient.Setup(m => m.
+                ListStacks(FakeCfInstance.ApiAddress, _fakeValidAccessToken))
+                    .ReturnsAsync(fakeStacksResponse);
+
+            DetailedResult<List<string>> result = await _sut.GetStackNamesAsync(FakeCfInstance);
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.AreEqual(null, result.CmdResult);
+            Assert.AreEqual(expectedResultContent.Count, result.Content.Count);
+
+            for (int i = 0; i < expectedResultContent.Count; i++)
+            {
+                Assert.AreEqual(expectedResultContent[i], result.Content[i]);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("GetStacks")]
+        public async Task GetStackNamesAsync_ReturnsFailedResult_WhenTokenRetrievalThrowsInvalidRefreshTokenException()
+        {
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Throws(new InvalidRefreshTokenException());
+
+            DetailedResult<List<string>> result = await _sut.GetStackNamesAsync(FakeCfInstance);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.AreEqual(null, result.CmdResult);
+            Assert.AreEqual(null, result.Content);
+            Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
+        }
+
     }
 }
