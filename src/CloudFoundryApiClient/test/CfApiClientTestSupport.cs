@@ -4,6 +4,7 @@ using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.BasicInfoResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.OrgsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.SpacesResponse;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models.StacksResponse;
 
 namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 {
@@ -111,6 +112,34 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             totalResults: 125,
             totalPages: 3,
             resultsPerPage: 50));
+
+        internal static readonly string _fakeStacksJsonResponsePage1 = JsonConvert.SerializeObject(new FakeStacksResponse(
+            apiAddress: _fakeCfApiAddress,
+            pageNum: 1,
+            totalResults: 10,
+            totalPages: 4,
+            resultsPerPage: 3));
+
+        internal static readonly string _fakeStacksJsonResponsePage2 = JsonConvert.SerializeObject(new FakeStacksResponse(
+            apiAddress: _fakeCfApiAddress,
+            pageNum: 2,
+            totalResults: 10,
+            totalPages: 4,
+            resultsPerPage: 3));
+
+        internal static readonly string _fakeStacksJsonResponsePage3 = JsonConvert.SerializeObject(new FakeStacksResponse(
+            apiAddress: _fakeCfApiAddress,
+            pageNum: 3,
+            totalResults: 10,
+            totalPages: 4,
+            resultsPerPage: 3));
+
+        internal static readonly string _fakeStacksJsonResponsePage4 = JsonConvert.SerializeObject(new FakeStacksResponse(
+            apiAddress: _fakeCfApiAddress,
+            pageNum: 4,
+            totalResults: 10,
+            totalPages: 4,
+            resultsPerPage: 3));
     }
 
     internal class FakeBasicInfoResponse : BasicInfoResponse
@@ -368,4 +397,60 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Buildpacks = buildpacks;
         }
     }
+
+    internal class FakeStacksResponse : StacksResponse
+    {
+        public FakeStacksResponse(string apiAddress, int pageNum, int totalResults, int totalPages, int resultsPerPage) : base()
+        {
+            bool isFirstPage = pageNum == 1;
+            bool isLastPage = pageNum == totalPages;
+
+            var firstHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListStacksPath}?page=1&per_page={resultsPerPage}" };
+            var lastHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListStacksPath}?page={totalPages}&per_page={resultsPerPage}" };
+            var nextHref = isLastPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListStacksPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
+            var previousHref = isFirstPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListStacksPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
+
+            Pagination = new Pagination
+            {
+                Total_results = totalResults,
+                Total_pages = totalPages,
+                First = firstHref,
+                Last = lastHref,
+                Next = nextHref,
+                Previous = previousHref,
+            };
+
+            Stack[] stacks;
+            if (isLastPage)
+            {
+                int numResourcesInLastPage = totalResults % resultsPerPage;
+                stacks = new Stack[numResourcesInLastPage];
+
+                for (int i = 0; i < numResourcesInLastPage; i++)
+                {
+                    stacks[i] = new Stack
+                    {
+                        Name = $"fakeStack{i + 1}",
+                        Guid = $"fakeStackId-{i + 1}",
+                    };
+                }
+            }
+            else
+            {
+                stacks = new Stack[resultsPerPage];
+
+                for (int i = 0; i < resultsPerPage; i++)
+                {
+                    stacks[i] = new Stack
+                    {
+                        Name = $"fakeStack{i + 1}",
+                        Guid = $"fakeStackId-{i + 1}",
+                    };
+                }
+            }
+
+            Stacks = stacks;
+        }
+    }
+
 }

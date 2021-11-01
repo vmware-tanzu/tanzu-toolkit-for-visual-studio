@@ -10,6 +10,7 @@ using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.BasicInfoResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.OrgsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.SpacesResponse;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models.StacksResponse;
 
 namespace Tanzu.Toolkit.CloudFoundryApiClient
 {
@@ -22,6 +23,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         internal const string ListAppsPath = "/v3/apps";
         internal const string ListBuildpacksPath = "/v3/buildpacks";
         internal const string DeleteAppsPath = "/v3/apps";
+        internal const string ListStacksPath = "/v3/stacks";
 
         internal const string DefaultAuthClientId = "cf";
         internal const string DefaultAuthClientSecret = "";
@@ -313,6 +315,23 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             return false;
         }
 
+        public async Task<List<Stack>> ListStacks(string cfTarget, string accessToken)
+        {
+            // trust any certificate
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            ServicePointManager.ServerCertificateValidationCallback +=
+                (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+            var uri = new UriBuilder(cfTarget)
+            {
+                Path = ListStacksPath,
+            };
+
+            HypertextReference firstPageHref = new HypertextReference() { Href = uri.ToString() };
+
+            return await GetRemainingPagesForType(firstPageHref, accessToken, new List<Stack>());
+        }
+
         private async Task<Uri> GetAuthServerUriFromCfTarget(string cfTargetString)
         {
             try
@@ -403,6 +422,13 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             {
                 var results = JsonConvert.DeserializeObject<BuildpacksResponse>(resultContent);
                 resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Buildpacks.ToList());
+
+                nextPageHref = results.Pagination.Next;
+            }
+            else if (typeof(TResourceType) == typeof(Stack))
+            {
+                var results = JsonConvert.DeserializeObject<StacksResponse>(resultContent);
+                resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Stacks.ToList());
 
                 nextPageHref = results.Pagination.Next;
             }

@@ -1,10 +1,10 @@
-﻿using System;
-using System.Net;
-using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Newtonsoft.Json;
 using RichardSzalay.MockHttp;
+using System;
+using System.Net;
+using System.Threading.Tasks;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.Token;
 
@@ -539,6 +539,67 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 
             Assert.AreEqual(1, _mockHttp.GetMatchCount(cfDeleteAppRequest));
             Assert.IsNotNull(expectedException);
+        }
+
+        [TestMethod]
+        public async Task ListStacks_ThrowsException_WhenStatusCodeIsNotASuccess()
+        {
+            string expectedPath = CfApiClient.ListStacksPath;
+
+            MockedRequest stacksRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond(HttpStatusCode.Unauthorized);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            Exception expectedException = null;
+            try
+            {
+                var result = await _sut.ListStacks(_fakeCfApiAddress, _fakeAccessToken);
+            }
+            catch (Exception ex)
+            {
+                expectedException = ex;
+            }
+
+            Assert.IsNotNull(expectedException);
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(stacksRequest));
+        }
+
+        [TestMethod]
+        public async Task ListStacks_ReturnsListOfAllVisibleStacks_WhenResponseContainsMultiplePages()
+        {
+            string expectedPath = CfApiClient.ListStacksPath;
+            string page2Identifier = "?page=2&per_page=3";
+            string page3Identifier = "?page=3&per_page=3";
+            string page4Identifier = "?page=4&per_page=3";
+
+            MockedRequest stacksRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
+                    .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                    .Respond("application/json", _fakeStacksJsonResponsePage1);
+
+            MockedRequest stacksPage2Request = _mockHttp.Expect(_fakeCfApiAddress + expectedPath + page2Identifier)
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond("application/json", _fakeStacksJsonResponsePage2);
+
+            MockedRequest stacksPage3Request = _mockHttp.Expect(_fakeCfApiAddress + expectedPath + page3Identifier)
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond("application/json", _fakeStacksJsonResponsePage3);
+
+            MockedRequest stacksPage4Request = _mockHttp.Expect(_fakeCfApiAddress + expectedPath + page4Identifier)
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond("application/json", _fakeStacksJsonResponsePage4);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.ListStacks(_fakeCfApiAddress, _fakeAccessToken);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(10, result.Count);
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(stacksRequest));
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(stacksPage2Request));
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(stacksPage3Request));
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(stacksPage4Request));
         }
 
         [TestMethod]
