@@ -47,6 +47,15 @@ namespace Tanzu.Toolkit.Services.Tests
         protected const string _app3State = "STARTED";
         protected const string _app4State = "STOPPED";
 
+        protected const string _stack1Name = "stack1";
+        protected const string _stack2Name = "stack2";
+        protected const string _stack3Name = "stack3";
+        protected const string _stack4Name = "stack4";
+        protected const string _stack1Guid = "stack-1-id";
+        protected const string _stack2Guid = "stack-2-id";
+        protected const string _stack3Guid = "stack-3-id";
+        protected const string _stack4Guid = "stack-4-id";
+
         protected static readonly string _fakeValidTarget = "https://my.fake.target";
         protected static readonly string _fakeValidUsername = "junk";
         protected static readonly SecureString _fakeValidPassword = new SecureString();
