@@ -4,6 +4,7 @@ using Tanzu.Toolkit.CloudFoundryApiClient.Models;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.OrgsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.SpacesResponse;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models.StacksResponse;
 
 namespace Tanzu.Toolkit.CloudFoundryApiClient
 {
@@ -25,5 +26,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
 
         Task<bool> DeleteAppWithGuid(string cfTarget, string accessToken, string appGuid);
         Task<List<Buildpack>> ListBuildpacks(string cfApiAddress, string accessToken);
+        Task<List<Stack>> ListStacks(string cfTarget, string accessToken);
     }
 }
