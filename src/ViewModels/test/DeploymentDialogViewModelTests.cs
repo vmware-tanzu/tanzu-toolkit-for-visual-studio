@@ -90,9 +90,18 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("ctor")]
+        [TestCategory("BuildpackOptions")]
         public void Constructor_SetsBuildpackOptionsToEmptyList()
         {
             CollectionAssert.AreEqual(new List<BuildpackListItem>(), _sut.BuildpackOptions);
+        }
+        
+        [TestMethod]
+        [TestCategory("ctor")]
+        [TestCategory("StackOptions")]
+        public void Constructor_SetsStackOptionsToEmptyList()
+        {
+            CollectionAssert.AreEqual(new List<string>(), _sut.StackOptions);
         }
 
         [TestMethod]
@@ -151,6 +160,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("ctor")]
+        [TestCategory("BuildpackOptions")]
         public void Constructor_UpdatesBuildpackOptions_WhenTasConnectionIsNotNull()
         {
             MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(new FakeCfInstanceViewModel(FakeCfInstance, Services));
@@ -159,6 +169,19 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
             MockThreadingService.Verify(m => m.StartTask(_sut.UpdateBuildpackOptions), Times.Once);
+        }
+        
+        [TestMethod]
+        [TestCategory("ctor")]
+        [TestCategory("StackOptions")]
+        public void Constructor_UpdatesStackOptions_WhenTasConnectionIsNotNull()
+        {
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(new FakeCfInstanceViewModel(FakeCfInstance, Services));
+
+            _sut = new DeploymentDialogViewModel(Services, null, _fakeProjectPath, FakeTargetFrameworkMoniker);
+
+            Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
+            MockThreadingService.Verify(m => m.StartTask(_sut.UpdateStackOptions), Times.Once);
         }
 
         [TestMethod]
@@ -787,6 +810,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("OpenLoginView")]
+        [TestCategory("BuildpackOptions")]
         public void OpenLoginView_UpdatesBuildpackOptions_WhenTasConnectionGetsSet()
         {
             MockTasExplorerViewModel.Setup(m => m.
@@ -803,6 +827,27 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
             MockThreadingService.Verify(m => m.StartTask(_sut.UpdateBuildpackOptions), Times.Once);
+        }
+        
+        [TestMethod]
+        [TestCategory("OpenLoginView")]
+        [TestCategory("StackOptions")]
+        public void OpenLoginView_UpdatesStackOptions_WhenTasConnectionGetsSet()
+        {
+            MockTasExplorerViewModel.Setup(m => m.
+                OpenLoginView(null))
+                    .Callback(() =>
+                    {
+                        MockTasExplorerViewModel.SetupGet(m => m.TasConnection)
+                            .Returns(new CfInstanceViewModel(FakeCfInstance, null, Services));
+                    });
+
+            Assert.IsNull(_sut.TasExplorerViewModel.TasConnection);
+
+            _sut.OpenLoginView(null);
+
+            Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
+            MockThreadingService.Verify(m => m.StartTask(_sut.UpdateStackOptions), Times.Once);
         }
 
         [TestMethod]
@@ -848,27 +893,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.AreEqual(1, _receivedEvents.Count);
             Assert.IsTrue(_receivedEvents.Contains("TargetName"));
-        }
-
-        [TestMethod]
-        [TestCategory("StackOptions")]
-        public void StackOptions_Returns_LinuxAndWindows()
-        {
-            Assert.AreEqual(2, _sut.StackOptions.Count);
-            Assert.IsTrue(_sut.StackOptions.Contains("windows"));
-            Assert.IsTrue(_sut.StackOptions.Contains("cflinuxfs3"));
-        }
-
-        [TestMethod]
-        [TestCategory("StackOptions")]
-        public void StackOptions_Returns_Windows_WhenTargetFrameworkIsNETFramework()
-        {
-            _sut = new DeploymentDialogViewModel(Services, null, _fakeProjectPath, targetFrameworkMoniker: DeploymentDialogViewModel.FullFrameworkTFM);
-
-            Assert.IsTrue(_sut._fullFrameworkDeployment);
-
-            Assert.AreEqual(1, _sut.StackOptions.Count);
-            Assert.IsTrue(_sut.StackOptions.Contains("windows"));
         }
 
         [TestMethod]
@@ -1007,42 +1031,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("ManifestPath")]
-        [TestCategory("SelectedStack")]
-        public void ManifestPathSetter_DoesNotChangeStack_WhenManifestExistsAndContainsInvalidStack()
-        {
-            var pathToFakeManifest = "some//fake//path";
-            var invalidStackName = "asdf";
-
-            var fakeAppManifest = new AppManifest
-            {
-                Applications = new List<AppConfig>
-                {
-                    new AppConfig
-                    {
-                        Name = "junk",
-                        Stack = invalidStackName,
-                    }
-                }
-            };
-
-            var fakeManifestParsingResponse = new DetailedResult<AppManifest>
-            {
-                Succeeded = true,
-                Content = fakeAppManifest,
-            };
-
-            MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
-            MockCloudFoundryService.Setup(m => m.ParseManifestFile(pathToFakeManifest)).Returns(fakeManifestParsingResponse);
-
-            var initialStack = _sut.SelectedStack;
-
-            _sut.ManifestPath = pathToFakeManifest;
-
-            Assert.AreEqual(initialStack, _sut.SelectedStack);
-        }
-
-        [TestMethod]
-        [TestCategory("ManifestPath")]
         [TestCategory("SelectedBuildpacks")]
         public void ManifestPathSetter_SetsSelectedBuildpacks_WhenManifestExistsAndContainsOneBuildpack()
         {
@@ -1169,12 +1157,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         [TestCategory("SelectedStack")]
         [TestCategory("ManifestModel")]
-        public void SelectedStackSetter_SetsValueInManifestModel_WhenValueExistsInStackOptions()
+        public void SelectedStackSetter_SetsValueInManifestModel()
         {
             var stackVal = "windows";
             var initialStackInManifestModel = _sut.ManifestModel.Applications[0].Stack;
 
-            Assert.IsTrue(_sut.StackOptions.Contains(stackVal));
             Assert.AreNotEqual(stackVal, initialStackInManifestModel);
 
             _sut.SelectedStack = stackVal;
@@ -1183,26 +1170,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.AreEqual(stackVal, _sut.ManifestModel.Applications[0].Stack);
             Assert.AreEqual(1, _receivedEvents.Count);
             Assert.AreEqual("SelectedStack", _receivedEvents[0]);
-        }
-
-        [TestMethod]
-        [TestCategory("SelectedStack")]
-        [TestCategory("ManifestModel")]
-        public void SelectedStackSetter_DoesNotSetValue_WhenValueDoesNotExistInStackOptions()
-        {
-            var bogusStackVal = "junk";
-            var initialSelectedStack = _sut.SelectedStack;
-            var initialStackInManifestModel = _sut.ManifestModel.Applications[0].Stack;
-
-            Assert.IsFalse(_sut.StackOptions.Contains(bogusStackVal));
-            Assert.AreNotEqual(bogusStackVal, initialStackInManifestModel);
-
-            _sut.SelectedStack = bogusStackVal;
-
-            Assert.AreEqual(initialSelectedStack, _sut.SelectedStack);
-            Assert.AreNotEqual(initialStackInManifestModel, _sut.SelectedStack);
-            Assert.AreEqual(initialStackInManifestModel, _sut.ManifestModel.Applications[0].Stack);
-            Assert.AreEqual(0, _receivedEvents.Count);
         }
 
         [TestMethod]
@@ -1502,6 +1469,64 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.AreEqual("AppName", _receivedEvents[0]);
         }
 
+        [TestMethod]
+        [TestCategory("UpdateStackOptions")]
+        public async Task UpdateStackOptions_SetsStackOptionsToEmptyList_WhenNotLoggedIn()
+        {
+            Assert.IsNull(_sut.TasExplorerViewModel.TasConnection);
+
+            CollectionAssert.DoesNotContain(_receivedEvents, "StackOptions");
+
+            await _sut.UpdateStackOptions();
+
+            CollectionAssert.AreEqual(new List<string>(), _sut.StackOptions);
+            CollectionAssert.Contains(_receivedEvents, "StackOptions");
+        }
+
+        [TestMethod]
+        [TestCategory("UpdateStackOptions")]
+        public async Task UpdateStackOptions_SetsStackOptionsToQueryContent_WhenQuerySucceeds()
+        {
+            var fakeCf = new FakeCfInstanceViewModel(FakeCfInstance, Services);
+            var fakeStacksContent = new List<string>
+            {
+                "cool_stack",
+                "uncool_stack",
+                "junk_stack",
+            };
+            var fakeStacksResponse = new DetailedResult<List<string>>(succeeded: true, content: fakeStacksContent);
+
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(fakeCf);
+
+            MockCloudFoundryService.Setup(m => m.GetStackNamesAsync(fakeCf.CloudFoundryInstance, 1)).ReturnsAsync(fakeStacksResponse);
+
+            Assert.AreNotEqual(fakeStacksContent, _sut.StackOptions);
+            CollectionAssert.DoesNotContain(_receivedEvents, "StackOptions");
+
+            await _sut.UpdateStackOptions();
+
+            CollectionAssert.AreEquivalent(fakeStacksContent, _sut.StackOptions);
+            CollectionAssert.Contains(_receivedEvents, "StackOptions");
+        }
+
+        [TestMethod]
+        [TestCategory("UpdateStackOptions")]
+        public async Task UpdateStackOptions_SetsStackOptionsToEmptyList_AndRaisesError_WhenQueryFails()
+        {
+            var fakeCf = new FakeCfInstanceViewModel(FakeCfInstance, Services);
+            const string fakeFailureReason = "junk";
+            var fakeStacksResponse = new DetailedResult<List<string>>(succeeded: false, content: null, explanation: fakeFailureReason, cmdDetails: null);
+
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(fakeCf);
+
+            MockCloudFoundryService.Setup(m => m.GetStackNamesAsync(fakeCf.CloudFoundryInstance, 1)).ReturnsAsync(fakeStacksResponse);
+
+            CollectionAssert.DoesNotContain(_receivedEvents, "StackOptions");
+
+            await _sut.UpdateStackOptions();
+
+            CollectionAssert.AreEquivalent(new List<string>(), _sut.StackOptions);
+        }
     }
 
     public class FakeOutputView : ViewModelTestSupport, IView
