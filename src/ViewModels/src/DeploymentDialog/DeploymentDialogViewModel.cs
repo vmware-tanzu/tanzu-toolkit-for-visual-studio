@@ -25,6 +25,7 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string GetOrgsFailureMsg = "Unable to fetch orgs.";
         internal const string GetSpacesFailureMsg = "Unable to fetch spaces.";
         internal const string GetBuildpacksFailureMsg = "Unable to fetch buildpacks.";
+        internal const string GetStacksFailureMsg = "Unable to fetch stacks.";
         internal const string SingleLoginErrorTitle = "Unable to add more TAS connections.";
         internal const string SingleLoginErrorMessage1 = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
         internal const string SingleLoginErrorMessage2 = "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Application Service Explorer & re-connecting to a new one.";
@@ -32,6 +33,7 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string ManifestNotFoundTitle = "Unable to set manifest path";
         internal const string ManifestParsingErrorTitle = "Unable to parse app manifest";
         internal const string DirectoryNotFoundTitle = "Unable to set push directory path";
+
         private string _appName;
         internal readonly bool _fullFrameworkDeployment = false;
         private readonly IErrorDialog _errorDialogService;
@@ -52,11 +54,13 @@ namespace Tanzu.Toolkit.ViewModels
         private bool _isLoggedIn;
         private string _selectedStack;
         private ObservableCollection<string> _selectedBuildpacks;
-        private List<string> _stackOptions = new List<string> { "windows", "cflinuxfs3" };
+        private List<string> _stackOptions;
         private List<BuildpackListItem> _buildpackOptions;
         private bool _expanded;
         private string _expansionButtonText;
         private AppManifest _appManifest;
+        private bool _buildpacksLoading = false;
+        private bool _stacksLoading = false;
 
         public DeploymentDialogViewModel(IServiceProvider services, string projectName, string directoryOfProjectToDeploy, string targetFrameworkMoniker)
             : base(services)
@@ -74,13 +78,14 @@ namespace Tanzu.Toolkit.ViewModels
             if (targetFrameworkMoniker.StartsWith(FullFrameworkTFM))
             {
                 _fullFrameworkDeployment = true;
-                _stackOptions = new List<string> { "windows" };
             }
 
             CfInstanceOptions = new List<CloudFoundryInstance>();
             CfOrgOptions = new List<CloudFoundryOrganization>();
             CfSpaceOptions = new List<CloudFoundrySpace>();
             BuildpackOptions = new List<BuildpackListItem>();
+            StackOptions = new List<string>();
+
             ManifestModel = new AppManifest
             {
                 Version = 1,
@@ -103,6 +108,7 @@ namespace Tanzu.Toolkit.ViewModels
 
                 ThreadingService.StartTask(UpdateCfOrgOptions);
                 ThreadingService.StartTask(UpdateBuildpackOptions);
+                ThreadingService.StartTask(UpdateStackOptions);
             }
 
             DeploymentDirectoryPath = PathToProjectRootDir;
@@ -237,13 +243,10 @@ namespace Tanzu.Toolkit.ViewModels
 
             set
             {
-                if (_stackOptions.Contains(value))
-                {
-                    _selectedStack = value;
-                    RaisePropertyChangedEvent("SelectedStack");
+                _selectedStack = value;
+                RaisePropertyChangedEvent("SelectedStack");
 
-                    ManifestModel.Applications[0].Stack = value;
-                }
+                ManifestModel.Applications[0].Stack = value;
             }
         }
 
@@ -327,6 +330,12 @@ namespace Tanzu.Toolkit.ViewModels
         public List<string> StackOptions
         {
             get => _stackOptions;
+
+            internal set
+            {
+                _stackOptions = value;
+                RaisePropertyChangedEvent("StackOptions");
+            }
         }
 
         public List<BuildpackListItem> BuildpackOptions
@@ -371,8 +380,6 @@ namespace Tanzu.Toolkit.ViewModels
             set => _appManifest = value;
         }
 
-        private bool _buildpacksLoading;
-
         public bool BuildpacksLoading
         {
             get { return _buildpacksLoading; }
@@ -384,6 +391,16 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
+        public bool StacksLoading
+        {
+            get { return _stacksLoading; }
+
+            set
+            {
+                _stacksLoading = value;
+                RaisePropertyChangedEvent("StacksLoading");
+            }
+        }
 
         public bool CanDeployApp(object arg)
         {
@@ -428,6 +445,7 @@ namespace Tanzu.Toolkit.ViewModels
 
                 ThreadingService.StartTask(UpdateCfOrgOptions);
                 ThreadingService.StartTask(UpdateBuildpackOptions);
+                ThreadingService.StartTask(UpdateStackOptions);
             }
         }
 
@@ -508,6 +526,33 @@ namespace Tanzu.Toolkit.ViewModels
 
                     Logger.Error(GetBuildpacksFailureMsg + " {BuildpacksResponseError}", buildpacksRespsonse.Explanation);
                     _errorDialogService.DisplayErrorDialog(GetBuildpacksFailureMsg, buildpacksRespsonse.Explanation);
+                }
+            }
+        }
+
+        public async Task UpdateStackOptions()
+        {
+            if (TasExplorerViewModel.TasConnection == null)
+            {
+                StackOptions = new List<string>();
+            }
+            else
+            {
+                StacksLoading = true;
+                var stacksRespsonse = await CloudFoundryService.GetStackNamesAsync(TasExplorerViewModel.TasConnection.CloudFoundryInstance);
+
+                if (stacksRespsonse.Succeeded)
+                {
+                    StackOptions = stacksRespsonse.Content;
+                    StacksLoading = false;
+                }
+                else
+                {
+                    StackOptions = new List<string>();
+                    StacksLoading = false;
+
+                    Logger.Error(GetStacksFailureMsg + " {StacksResponseError}", stacksRespsonse.Explanation);
+                    _errorDialogService.DisplayErrorDialog(GetStacksFailureMsg, stacksRespsonse.Explanation);
                 }
             }
         }
