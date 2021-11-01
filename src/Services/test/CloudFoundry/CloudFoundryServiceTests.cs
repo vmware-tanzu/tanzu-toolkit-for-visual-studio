@@ -1,21 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Serilog;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Tanzu.Toolkit.CloudFoundryApiClient;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.CommandProcess;
-using Tanzu.Toolkit.Services.CommandProcess;
-using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.ErrorDialog;
-using Tanzu.Toolkit.Services.FileLocator;
+using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
-using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 {
@@ -30,11 +29,9 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         private Mock<ICfCliService> _mockCfCliService;
         private Mock<IErrorDialog> _mockErrorDialogWindowService;
         private Mock<ICommandProcessService> _mockCommandProcessService;
-        private Mock<IFileLocatorService> _mockFileLocatorService;
+        private Mock<IFileService> _mockFileService;
         private Mock<ILoggingService> _mockLoggingService;
         private Mock<ILogger> _mockLogger;
-
-        private readonly bool _defaultFullFWFlag = false;
 
         [TestInitialize]
         public void TestInit()
@@ -44,7 +41,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             _mockCfCliService = new Mock<ICfCliService>();
             _mockErrorDialogWindowService = new Mock<IErrorDialog>();
             _mockCommandProcessService = new Mock<ICommandProcessService>();
-            _mockFileLocatorService = new Mock<IFileLocatorService>();
+            _mockFileService = new Mock<IFileService>();
             _mockLoggingService = new Mock<ILoggingService>();
 
             _mockLogger = new Mock<ILogger>();
@@ -54,7 +51,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             serviceCollection.AddSingleton(_mockCfCliService.Object);
             serviceCollection.AddSingleton(_mockErrorDialogWindowService.Object);
             serviceCollection.AddSingleton(_mockCommandProcessService.Object);
-            serviceCollection.AddSingleton(_mockFileLocatorService.Object);
+            serviceCollection.AddSingleton(_mockFileService.Object);
             serviceCollection.AddSingleton(_mockLoggingService.Object);
 
             _services = serviceCollection.BuildServiceProvider();
@@ -67,6 +64,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         {
             _mockCfApiClient.VerifyAll();
             _mockCfCliService.VerifyAll();
+            _mockFileService.VerifyAll();
         }
 
         [TestMethod]
@@ -227,12 +225,12 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             _mockCfCliService.Setup(m => m.
                 GetApiVersion()).ReturnsAsync((Version)null);
 
-            _mockFileLocatorService.SetupSet(m => m.
+            _mockFileService.SetupSet(m => m.
                 CliVersion = expectedCliVersion).Verifiable();
 
             ConnectResult result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
 
-            _mockFileLocatorService.VerifyAll();
+            _mockFileService.VerifyAll();
             _mockCfCliService.VerifyAll();
             _mockErrorDialogWindowService.Verify(m => m.
                 DisplayErrorDialog(CloudFoundryService.CcApiVersionUndetectableErrTitle, CloudFoundryService.CcApiVersionUndetectableErrMsg),
@@ -264,12 +262,12 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 _mockCfCliService.Setup(m => m.
                     GetApiVersion()).ReturnsAsync(mockApiVersion);
 
-                _mockFileLocatorService.SetupSet(m => m.
+                _mockFileService.SetupSet(m => m.
                     CliVersion = expectedCliVersion).Verifiable();
 
                 ConnectResult result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
 
-                _mockFileLocatorService.VerifyAll();
+                _mockFileService.VerifyAll();
                 _mockCfCliService.VerifyAll();
             }
         }
@@ -299,12 +297,12 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 _mockCfCliService.Setup(m => m.
                     GetApiVersion()).ReturnsAsync(mockApiVersion);
 
-                _mockFileLocatorService.SetupSet(m => m.
+                _mockFileService.SetupSet(m => m.
                     CliVersion = expectedCliVersion).Verifiable();
 
                 ConnectResult result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
 
-                _mockFileLocatorService.VerifyAll();
+                _mockFileService.VerifyAll();
                 _mockCfCliService.VerifyAll();
             }
         }
@@ -334,12 +332,12 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 _mockCfCliService.Setup(m => m.
                     GetApiVersion()).ReturnsAsync(mockApiVersion);
 
-                _mockFileLocatorService.SetupSet(m => m.
+                _mockFileService.SetupSet(m => m.
                     CliVersion = expectedCliVersion).Verifiable();
 
                 ConnectResult result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
 
-                _mockFileLocatorService.VerifyAll();
+                _mockFileService.VerifyAll();
                 _mockCfCliService.VerifyAll();
             }
         }
@@ -369,12 +367,12 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 _mockCfCliService.Setup(m => m.
                     GetApiVersion()).ReturnsAsync(mockApiVersion);
 
-                _mockFileLocatorService.SetupSet(m => m.
+                _mockFileService.SetupSet(m => m.
                     CliVersion = expectedCliVersion).Verifiable();
 
                 ConnectResult result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
 
-                _mockFileLocatorService.VerifyAll();
+                _mockFileService.VerifyAll();
                 _mockCfCliService.VerifyAll();
             }
         }
@@ -963,6 +961,194 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
+        [TestCategory("GetBuildpackNames")]
+        public async Task GetUniqueBuildpackNamesAsync_ReturnsSuccessfulResult_WhenListBuildpacksSucceeds()
+        {
+            var fakeBuildpacksResponse = new List<Buildpack>
+            {
+                new Buildpack
+                {
+                    Name = "Bp1",
+                },
+                new Buildpack
+                {
+                    Name = "Bp2",
+                },
+                new Buildpack
+                {
+                    Name = "repeated buildpack name",
+                },
+                new Buildpack
+                {
+                    Name = "repeated buildpack name",
+                },
+                new Buildpack
+                {
+                    Name = "repeated buildpack name",
+                },
+            };
+
+            _mockCfCliService.Setup(m => m.GetOAuthToken()).Returns(_fakeAccessToken);
+
+            _mockCfApiClient.Setup(m => m.ListBuildpacks(_fakeValidTarget, _fakeAccessToken)).ReturnsAsync(fakeBuildpacksResponse);
+
+            var result = await _sut.GetUniqueBuildpackNamesAsync(_fakeValidTarget);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.AreEqual(3, result.Content.Count); // ensure duplicate names aren't repeated in resulting list
+            foreach (Buildpack bp in fakeBuildpacksResponse)
+            {
+                CollectionAssert.Contains(result.Content, bp.Name);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("GetBuildpackNames")]
+        public async Task GetUniqueBuildpackNamesAsync_ReturnsFailedResult_WhenTokenRetrievalThrowsInvalidRefreshTokenException()
+        {
+
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Throws(new InvalidRefreshTokenException());
+
+            DetailedResult<List<string>> result = await _sut.GetUniqueBuildpackNamesAsync(_fakeValidTarget);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.AreEqual(null, result.CmdResult);
+            Assert.AreEqual(null, result.Content);
+            Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
+        }
+
+        [TestMethod]
+        [TestCategory("GetBuildpackNames")]
+        public async Task GetUniqueBuildpackNamesAsync_ReturnsFailedResult_WhenListBuildpacksThrowsException()
+        {
+            var fakeExceptionMsg = "junk";
+
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns(_fakeValidAccessToken);
+
+            _mockCfApiClient.Setup(m => m.
+                ListBuildpacks(_fakeValidTarget, _fakeValidAccessToken))
+                    .Throws(new Exception(fakeExceptionMsg));
+
+            var result = await _sut.GetUniqueBuildpackNamesAsync(_fakeValidTarget);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsNull(result.CmdResult);
+            Assert.IsNull(result.Content);
+
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("GetBuildpackNames")]
+        public async Task GetUniqueBuildpackNamesAsync_RetriesWithFreshToken_WhenListBuildpacksThrowsException()
+        {
+            var fakeExceptionMsg = "junk";
+            var fakeBuildpacksResponse = new List<Buildpack>
+            {
+                new Buildpack
+                {
+                    Name = "Bp1",
+                },
+                new Buildpack
+                {
+                    Name = "Bp2",
+                },
+                new Buildpack
+                {
+                    Name = "Bp3",
+                },
+            };
+
+            var expectedResultContent = new List<string>
+            {
+                fakeBuildpacksResponse[0].Name,
+                fakeBuildpacksResponse[1].Name,
+                fakeBuildpacksResponse[2].Name,
+            };
+
+            _mockCfCliService.SetupSequence(m => m.
+                GetOAuthToken())
+                    .Returns(expiredAccessToken) // simulate stale cached token on first attempt
+                    .Returns(_fakeValidAccessToken); // simulate fresh cached token on second attempt
+
+            _mockCfApiClient.Setup(m => m.
+                ListBuildpacks(_fakeValidTarget, expiredAccessToken))
+                    .Throws(new Exception(fakeExceptionMsg));
+
+            _mockCfApiClient.Setup(m => m.
+                ListBuildpacks(_fakeValidTarget, _fakeValidAccessToken))
+                    .ReturnsAsync(fakeBuildpacksResponse);
+
+            var result = await _sut.GetUniqueBuildpackNamesAsync(_fakeValidTarget);
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.AreEqual(null, result.CmdResult);
+            Assert.AreEqual(expectedResultContent.Count, result.Content.Count);
+
+            _mockCfCliService.Verify(m => m.ClearCachedAccessToken(), Times.Once);
+            _mockCfApiClient.Verify(m => m.ListBuildpacks(_fakeValidTarget, expiredAccessToken), Times.Once);
+            _mockCfApiClient.Verify(m => m.ListBuildpacks(_fakeValidTarget, _fakeValidAccessToken), Times.Once);
+            _mockLogger.Verify(m => m.Information(It.Is<string>(s => s.Contains("retry")), fakeExceptionMsg, It.IsAny<int>()), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("GetBuildpackNames")]
+        public async Task GetUniqueBuildpackNamesAsync_ReturnsFailedResult_WhenListBuildpacksThrowsException_AndThereAreZeroRetriesLeft()
+        {
+            var fakeExceptionMsg = "junk";
+
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns(_fakeValidAccessToken);
+
+            _mockCfApiClient.Setup(m => m.
+                ListBuildpacks(_fakeValidTarget, _fakeValidAccessToken))
+                    .Throws(new Exception(fakeExceptionMsg));
+
+            var result = await _sut.GetUniqueBuildpackNamesAsync(_fakeValidTarget, retryAmount: 0);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsNull(result.CmdResult);
+            Assert.IsNull(result.Content);
+
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("GetBuildpackNames")]
+        public async Task GetUniqueBuildpackNamesAsync_ReturnsFailedResult_WhenTokenCannotBeFound()
+        {
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns((string)null);
+
+            var result = await _sut.GetUniqueBuildpackNamesAsync(_fakeValidTarget);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsNull(result.CmdResult);
+            Assert.IsNull(result.Content);
+
+            Assert.IsTrue(_mockCfApiClient.Invocations.Count == 0);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
         [TestCategory("StopApp")]
         public async Task StopAppAsync_ReturnsSuccessfulResult_AndUpdatesAppState()
         {
@@ -1047,7 +1233,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             _mockCfApiClient.Setup(m => m.
                 StopAppWithGuid(FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
-                    .ReturnsAsync(true); 
+                    .ReturnsAsync(true);
 
             var result = await _sut.StopAppAsync(FakeApp);
 
@@ -1381,19 +1567,47 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("DeployApp")]
         public async Task DeployAppAsync_ReturnsFalseResult_WhenCfPushCommandFails()
         {
+            var expectedAppName = exampleManifest.Applications[0].Name;
+            var expectedProjPath = exampleManifest.Applications[0].Path;
+
             const string fakeFailureExplanation = "junk";
             var fakeCfPushResponse = new DetailedResult(false, fakeFailureExplanation);
 
+            _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
+
+            _mockFileService.Setup(mock => mock.GetUniquePathForTempFile($"temp_manifest_{expectedAppName}")).Returns(_fakeManifestPath);
+
             _mockCfCliService.Setup(mock =>
-                mock.PushAppAsync(FakeApp.AppName, FakeApp.ParentSpace.ParentOrg.OrgName, FakeApp.ParentSpace.SpaceName, null, null, _fakeProjectPath, null, null, null, null))
+                mock.PushAppAsync(_fakeManifestPath, expectedProjPath, FakeApp.ParentSpace.ParentOrg.OrgName, FakeApp.ParentSpace.SpaceName, _fakeOutCallback, _fakeErrCallback))
                     .ReturnsAsync(fakeCfPushResponse);
 
-            _mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
-
-            DetailedResult result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, _defaultFullFWFlag, stdOutCallback: null, stdErrCallback: null, stack: null, binaryDeployment: false, projectName: null, manifestPath: null);
+            DetailedResult result = await _sut.DeployAppAsync(exampleManifest, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains(fakeFailureExplanation));
+
+            _mockFileService.Verify(m => m.DeleteFile(_fakeManifestPath), Times.Once); // ensure temp manifest was deleted
+        }
+
+        [TestMethod]
+        [TestCategory("DeployApp")]
+        public async Task DeployAppAsync_ReturnsFalseResult_WhenManifestCreationFails()
+        {
+            var fakeManifestCreationException = new Exception("bummer dude");
+
+            var expectedAppName = exampleManifest.Applications[0].Name;
+            var expectedProjPath = exampleManifest.Applications[0].Path;
+
+            _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
+
+            _mockFileService.Setup(mock => mock.GetUniquePathForTempFile($"temp_manifest_{expectedAppName}")).Returns(_fakeManifestPath);
+
+            _mockFileService.Setup(mock => mock.WriteTextToFile(_fakeManifestPath, It.IsAny<string>())).Throws(fakeManifestCreationException);
+
+            DetailedResult result = await _sut.DeployAppAsync(exampleManifest, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsTrue(result.Explanation.Contains(fakeManifestCreationException.Message));
         }
 
         [TestMethod]
@@ -1403,142 +1617,65 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [DataRow("junk")]
         public async Task DeployAppAsync_ReturnsTrueResult_WhenCfTargetAndPushCommandsSucceed(string stack)
         {
-            _mockCfCliService.Setup(mock =>
-                mock.PushAppAsync(FakeApp.AppName, FakeApp.ParentSpace.ParentOrg.OrgName, FakeApp.ParentSpace.SpaceName, null, null, _fakeProjectPath, null, stack, null, null))
-                    .ReturnsAsync(_fakeSuccessDetailedResult);
+            var expectedAppName = exampleManifest.Applications[0].Name;
+            var expectedProjPath = exampleManifest.Applications[0].Path;
 
-            _mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
+            _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
 
-            DetailedResult result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, _defaultFullFWFlag, stdOutCallback: null, stdErrCallback: null, stack: stack, binaryDeployment: false, projectName: null, manifestPath: null);
-
-            Assert.IsTrue(result.Succeeded);
-        }
-
-        [TestMethod]
-        [TestCategory("DeployApp")]
-        public async Task DeployAppAsync_SpecifiesHWCBuildpack_AndWindowsStack_WhenFullFWDeploymentIsTrue()
-        {
-            string expectedBuildpackValue = "hwc_buildpack";
-            string expectedStackValue = "windows";
+            _mockFileService.Setup(mock => mock.GetUniquePathForTempFile($"temp_manifest_{expectedAppName}")).Returns(_fakeManifestPath);
 
             _mockCfCliService.Setup(mock =>
-                mock.PushAppAsync(FakeApp.AppName, FakeApp.ParentSpace.ParentOrg.OrgName, FakeApp.ParentSpace.SpaceName, null, null, _fakeProjectPath, expectedBuildpackValue, expectedStackValue, null, null))
+                mock.PushAppAsync(_fakeManifestPath, expectedProjPath, FakeApp.ParentSpace.ParentOrg.OrgName, FakeApp.ParentSpace.SpaceName, _fakeOutCallback, _fakeErrCallback))
                     .ReturnsAsync(_fakeSuccessDetailedResult);
 
-            _mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
-
-            bool fullFWIndicator = true;
-            DetailedResult result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, fullFWIndicator, stdOutCallback: null, stdErrCallback: null, stack: null, binaryDeployment: false, projectName: null, manifestPath: null);
+            DetailedResult result = await _sut.DeployAppAsync(exampleManifest, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
 
             Assert.IsTrue(result.Succeeded);
+
+            _mockFileService.Verify(m => m.DeleteFile(_fakeManifestPath), Times.Once); // ensure temp manifest was deleted
         }
 
         [TestMethod]
         [TestCategory("DeployApp")]
         public async Task DeployAppAsync_ReturnsFalseResult_WhenProjDirContainsNoFiles()
         {
-            _mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(false);
+            _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(false);
 
-            var result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, _defaultFullFWFlag, stdOutCallback: null, stdErrCallback: null, stack: null, binaryDeployment: true, projectName: null, manifestPath: null);
+            DetailedResult result = await _sut.DeployAppAsync(exampleManifest, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains(CloudFoundryService.EmptyOutputDirMessage));
-            _mockFileLocatorService.VerifyAll();
+
+            // ensure temp manifest was never created
+            _mockFileService.Verify(mock => mock.GetUniquePathForTempFile(It.IsAny<string>()), Times.Never);
+            _mockFileService.Verify(mock => mock.WriteTextToFile(_fakeManifestPath, It.IsAny<string>()), Times.Never);
+
+            _mockFileService.VerifyAll();
+
         }
 
         [TestMethod]
         [TestCategory("DeployApp")]
         public async Task DeployAppAsync_ReturnsFailedResult_WhenCfCliDeploymentThrowsInvalidRefreshTokenException()
         {
-            _mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
+            var expectedAppName = exampleManifest.Applications[0].Name;
+            var expectedProjPath = exampleManifest.Applications[0].Path;
+
+            _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
+
+            _mockFileService.Setup(mock => mock.GetUniquePathForTempFile($"temp_manifest_{expectedAppName}")).Returns(_fakeManifestPath);
 
             _mockCfCliService.Setup(mock => mock.
-                PushAppAsync(FakeApp.AppName, FakeOrg.OrgName, FakeSpace.SpaceName, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), _fakeProjectPath, It.IsAny<string>(), It.IsAny<string>(), null, null))
+                PushAppAsync(_fakeManifestPath, expectedProjPath, FakeOrg.OrgName, FakeSpace.SpaceName, _fakeOutCallback, _fakeErrCallback))
                     .Throws(new InvalidRefreshTokenException());
 
-            var result = await _sut.DeployAppAsync(FakeCfInstance, FakeOrg, FakeSpace, FakeApp.AppName, _fakeProjectPath, _defaultFullFWFlag, stdOutCallback: null, stdErrCallback: null, stack: null, binaryDeployment: false, projectName: null, manifestPath: null);
+            DetailedResult result = await _sut.DeployAppAsync(exampleManifest, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
             Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
-        }
 
-        [TestMethod]
-        [TestCategory("DeployApp")]
-        public async Task DeployAppAsync_SpecifiesBuildpack_AndStartCommand_WhenBinaryDeploymentIsTrue()
-        {
-            _mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
-
-            var expectedProjectName = "junk proj name";
-            var expectedBuildpack = "binary_buildpack";
-            var expectedStartCommand = $"cmd /c .\\{expectedProjectName} --urls=http://*:%PORT%";
-
-            _mockCfCliService.Setup(mock =>
-                mock.PushAppAsync(FakeApp.AppName,
-                                  FakeApp.ParentSpace.ParentOrg.OrgName,
-                                  FakeApp.ParentSpace.SpaceName,
-                                  It.IsAny<StdOutDelegate>(),
-                                  It.IsAny<StdErrDelegate>(),
-                                  _fakeProjectPath,
-                                  expectedBuildpack,
-                                  It.IsAny<string>(),
-                                  expectedStartCommand,
-                                  null))
-                    .ReturnsAsync(_fakeSuccessDetailedResult);
-
-            await _sut.DeployAppAsync(FakeCfInstance,
-                                      FakeOrg,
-                                      FakeSpace,
-                                      FakeApp.AppName,
-                                      _fakeProjectPath,
-                                      _defaultFullFWFlag,
-                                      null,
-                                      null,
-                                      manifestPath: null,
-                                      binaryDeployment: true,
-                                      projectName: expectedProjectName,
-                                      stack: "windows");
-
-            _mockCfCliService.VerifyAll();
-        }
-
-        [TestMethod]
-        [TestCategory("DeployApp")]
-        public async Task DeployAppAsync_SpecifiesDotNetCoreBuildpack_WhenBinaryDeploymentIsTrue_AndStackIsLinux()
-        {
-            _mockFileLocatorService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
-
-            var expectedProjectName = "junk proj name";
-            var expectedBuildpack = "dotnet_core_buildpack";
-            string expectedStartCommand = null;
-
-            _mockCfCliService.Setup(mock =>
-                mock.PushAppAsync(FakeApp.AppName,
-                                  FakeApp.ParentSpace.ParentOrg.OrgName,
-                                  FakeApp.ParentSpace.SpaceName,
-                                  It.IsAny<StdOutDelegate>(),
-                                  It.IsAny<StdErrDelegate>(),
-                                  _fakeProjectPath,
-                                  expectedBuildpack,
-                                  It.IsAny<string>(),
-                                  expectedStartCommand,
-                                  null))
-                    .ReturnsAsync(_fakeSuccessDetailedResult);
-
-            await _sut.DeployAppAsync(FakeCfInstance,
-                                      FakeOrg,
-                                      FakeSpace,
-                                      FakeApp.AppName,
-                                      _fakeProjectPath,
-                                      _defaultFullFWFlag,
-                                      null,
-                                      null,
-                                      manifestPath: null,
-                                      binaryDeployment: true,
-                                      projectName: expectedProjectName,
-                                      stack: "cflinuxfs3");
-
-            _mockCfCliService.VerifyAll();
+            _mockFileService.Verify(m => m.DeleteFile(_fakeManifestPath), Times.Once); // ensure temp manifest was deleted
         }
 
 
@@ -1597,6 +1734,148 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsTrue(result.Explanation.Contains(FakeApp.AppName));
             Assert.IsTrue(result.Explanation.Contains("Please log back in to re-authenticate"));
             Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
+        }
+
+        [TestMethod]
+        [TestCategory("CreateManifestFile")]
+        public void CreateManifestFile_ReturnsSuccessfulResult_WhenFileCreatedAtGivenPath()
+        {
+            string pathToFileCreation = "some//junk//path";
+
+            /* Assemble list of strings that should appear in the content that 
+             * gets passed to the file-creation method. This is NOT A COMPREHENSIVE LIST. */
+            List<string> expectedManifestEntries = new List<string>
+            {
+                "version: 1",
+                $"name: {exampleManifest.Applications[0].Name}",
+                $"name: {exampleManifest.Applications[1].Name}",
+                "applications:",
+                "buildpacks:",
+                "env:",
+                "routes:",
+                "health-check-http-endpoint:", // ensure hyphenated keys are properly serialized
+                "disk_quota:", // ensure keys with underscores are properly serialized
+            };
+
+            foreach (AppConfig app in exampleManifest.Applications)
+            {
+                if (app.Buildpacks != null)
+                {
+                    foreach (string bpName in app.Buildpacks)
+                    {
+                        expectedManifestEntries.Add(bpName);
+                    }
+                }
+
+                foreach (string key in app.Env.Keys)
+                {
+                    expectedManifestEntries.Add(key);
+                }
+
+                foreach (string val in app.Env.Values)
+                {
+                    expectedManifestEntries.Add(val);
+                }
+
+                if (app.Routes != null)
+                {
+                    foreach (RouteConfig rc in app.Routes)
+                    {
+                        expectedManifestEntries.Add($"- route: {rc.Route}");
+                        if (rc.Protocol != null)
+                        {
+                            expectedManifestEntries.Add(rc.Protocol);
+                        }
+                    }
+                }
+            }
+
+            _mockFileService.Setup(m => m.
+                WriteTextToFile(pathToFileCreation, It.Is<string>(s => s.StartsWith("---\n")
+                    && expectedManifestEntries.All(expectedStr => s.Contains(expectedStr))
+                ))).Verifiable();
+
+            var result = _sut.CreateManifestFile(pathToFileCreation, exampleManifest);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.IsNull(result.CmdResult);
+            Assert.AreEqual(FailureType.None, result.FailureType);
+
+            _mockFileService.VerifyAll();
+        }
+
+        [TestMethod]
+        [TestCategory("CreateManifestFile")]
+        public void CreateManifestFile_ReturnsFailedResult_WhenFileCreationThrowsException()
+        {
+            string pathToFileCreation = "some//junk//path";
+            string fakeExceptionMsg = "Couldn't create file because... we want to simulate an exception :)";
+            var fileCreationException = new Exception(fakeExceptionMsg);
+
+            _mockFileService.Setup(m => m.WriteTextToFile(pathToFileCreation, It.IsAny<string>())).Throws(fileCreationException);
+
+            var result = _sut.CreateManifestFile(pathToFileCreation, exampleManifest);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.AreEqual(fakeExceptionMsg, result.Explanation);
+            Assert.IsNull(result.CmdResult);
+            Assert.AreEqual(FailureType.None, result.FailureType);
+        }
+
+        [TestMethod]
+        [TestCategory("ParseManifestFile")]
+        public void ParseManifestFile_ReturnsSuccessfulResult_WhenFileExists_AndParsingSucceeds()
+        {
+            var manifestPath = "some//path";
+            var fakeManifestContent = exampleManifestYaml;
+
+            _mockFileService.Setup(m => m.FileExists(manifestPath)).Returns(true);
+            _mockFileService.Setup(m => m.ReadFileContents(manifestPath)).Returns(fakeManifestContent);
+
+            var result = _sut.ParseManifestFile(manifestPath);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.IsNotNull(result.Content);
+            Assert.AreEqual("app1", result.Content.Applications[0].Name);
+            Assert.IsNull(result.CmdResult);
+        }
+
+        [TestMethod]
+        [TestCategory("ParseManifestFile")]
+        public void ParseManifestFile_ReturnsFailedResult_WhenFileDoesNotExist()
+        {
+            var manifestPath = "nonexistent//path";
+
+            _mockFileService.Setup(m => m.FileExists(manifestPath)).Returns(false);
+
+            var result = _sut.ParseManifestFile(manifestPath);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsTrue(result.Explanation.Contains($"No file exists at {manifestPath}"));
+            Assert.IsNull(result.Content);
+            Assert.IsNull(result.CmdResult);
+        }
+
+        [TestMethod]
+        [TestCategory("ParseManifestFile")]
+        public void ParseManifestFile_ReturnsFailedResult_WhenParsingFails()
+        {
+            var manifestPath = "some//path";
+            var parsingExMsg = "Couldn't parse file because I said so";
+            var parsingException = new Exception(parsingExMsg);
+
+            _mockFileService.Setup(m => m.FileExists(manifestPath)).Returns(true);
+            _mockFileService.Setup(m => m.ReadFileContents(manifestPath)).Throws(parsingException);
+            
+            var result = _sut.ParseManifestFile(manifestPath);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsTrue(result.Explanation.Contains(parsingExMsg));
+            Assert.IsNull(result.Content);
+            Assert.IsNull(result.CmdResult);
         }
     }
 }

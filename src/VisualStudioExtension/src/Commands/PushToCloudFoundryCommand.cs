@@ -120,8 +120,8 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                     string tfm = proj.Properties.Item("TargetFrameworkMoniker").Value.ToString();
                     if (tfm.StartsWith(".NETFramework") && !File.Exists(Path.Combine(projectDirectory, "Web.config")))
                     {
-                        string msg = $"This project appears to target .NET Framework; deploying it to Tanzu Application Service requires a 'Web.config' file at it's base directory, but none was found in {projectDirectory}";
-                        _dialogService.DisplayErrorDialog("Unable to deploy to Tanzu Application Service", msg);
+                        string msg = $"This project appears to target .NET Framework; pushing it to Tanzu Application Service requires a 'Web.config' file at it's base directory, but none was found in {projectDirectory}";
+                        _dialogService.DisplayErrorDialog("Unable to push to Tanzu Application Service", msg);
                     }
                     else
                     {
@@ -142,7 +142,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-                _dialogService.DisplayErrorDialog("Unable to deploy to Tanzu Application Service", ex.Message);
+                _dialogService.DisplayErrorDialog("Unable to push to Tanzu Application Service", ex.Message);
             }
         }
 

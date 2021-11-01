@@ -90,6 +90,27 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             totalResults: 125,
             totalPages: 3,
             resultsPerPage: 50));
+
+        internal static readonly string _fakeBuildpacksJsonResponsePage1 = JsonConvert.SerializeObject(new FakeBuildpacksResponse(
+            apiAddress: _fakeCfApiAddress,
+            pageNum: 1,
+            totalResults: 125,
+            totalPages: 3,
+            resultsPerPage: 50));
+
+        internal static readonly string _fakeBuildpacksJsonResponsePage2 = JsonConvert.SerializeObject(new FakeBuildpacksResponse(
+            apiAddress: _fakeCfApiAddress,
+            pageNum: 2,
+            totalResults: 125,
+            totalPages: 3,
+            resultsPerPage: 50));
+
+        internal static readonly string _fakeBuildpacksJsonResponsePage3 = JsonConvert.SerializeObject(new FakeBuildpacksResponse(
+            apiAddress: _fakeCfApiAddress,
+            pageNum: 3,
+            totalResults: 125,
+            totalPages: 3,
+            resultsPerPage: 50));
     }
 
     internal class FakeBasicInfoResponse : BasicInfoResponse
@@ -270,6 +291,81 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             }
 
             Apps = apps;
+        }
+    }
+
+    internal class FakeBuildpacksResponse : BuildpacksResponse
+    {
+        public FakeBuildpacksResponse(string apiAddress, int pageNum, int totalResults, int totalPages, int resultsPerPage)
+        {
+            bool isFirstPage = pageNum == 1;
+            bool isLastPage = pageNum == totalPages;
+
+            var firstHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListBuildpacksPath}?page=1&per_page={resultsPerPage}" };
+            var lastHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListBuildpacksPath}?page={totalPages}&per_page={resultsPerPage}" };
+            var nextHref = isLastPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListBuildpacksPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
+            var previousHref = isFirstPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListBuildpacksPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
+
+            Pagination = new Pagination
+            {
+                Total_results = totalResults,
+                Total_pages = totalPages,
+                First = firstHref,
+                Last = lastHref,
+                Next = nextHref,
+                Previous = previousHref,
+            };
+
+            Buildpack[] buildpacks;
+
+            var numPreviousResults = (pageNum - 1) * resultsPerPage;
+            int numStackTypesPerBuildpack = 3;
+            /* INTENTION: assign Buildpacks prop to contain a list like this:
+             * bp.Name = fakeBuildpack1, bp.Stack = fakeStack1
+             * bp.Name = fakeBuildpack1, bp.Stack = fakeStack2
+             * bp.Name = fakeBuildpack1, bp.Stack = fakeStack3
+             * bp.Name = fakeBuildpack2, bp.Stack = fakeStack1
+             * bp.Name = fakeBuildpack2, bp.Stack = fakeStack2
+             * bp.Name = fakeBuildpack2, bp.Stack = fakeStack3
+             * bp.Name = fakeBuildpack3, bp.Stack = fakeStack1
+             * ...
+             */
+
+            if (isLastPage)
+            {
+                int numResourcesInLastPage = totalResults % resultsPerPage;
+                buildpacks = new Buildpack[numResourcesInLastPage];
+
+                for (int i = 0; i < numResourcesInLastPage; i++)
+                {
+                    int buildpackId = i / numStackTypesPerBuildpack + 1 + numPreviousResults;
+                    int stackTypeId = i % numStackTypesPerBuildpack + 1 + numPreviousResults;
+
+                    buildpacks[i] = new Buildpack
+                    {
+                        Name = $"fakeBuildpack{buildpackId}",
+                        Stack = $"fakeStack{stackTypeId}",
+                    };
+                }
+            }
+            else
+            {
+                buildpacks = new Buildpack[resultsPerPage];
+
+                for (int i = 0; i < resultsPerPage; i++)
+                {
+                    int buildpackId = i / numStackTypesPerBuildpack + 1 + numPreviousResults;
+                    int stackTypeId = i % numStackTypesPerBuildpack + 1 + numPreviousResults;
+
+                    buildpacks[i] = new Buildpack
+                    {
+                        Name = $"fakeBuildpack{buildpackId}",
+                        Stack = $"fakeStack{stackTypeId}",
+                    };
+                }
+            }
+
+            Buildpacks = buildpacks;
         }
     }
 }

@@ -5,14 +5,16 @@ using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.CloudFoundryApiClient;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.OrgsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.SpacesResponse;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.ErrorDialog;
-using Tanzu.Toolkit.Services.FileLocator;
+using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
+using YamlDotNet.Serialization;
 using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.Services.CloudFoundry
@@ -26,7 +28,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
         private readonly ICfApiClient _cfApiClient;
         private readonly ICfCliService _cfCliService;
-        private readonly IFileLocatorService _fileLocatorService;
+        private readonly IFileService _fileService;
         private readonly IErrorDialog _dialogService;
         private readonly ILogger _logger;
 
@@ -34,7 +36,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         {
             _cfApiClient = services.GetRequiredService<ICfApiClient>();
             _cfCliService = services.GetRequiredService<ICfCliService>();
-            _fileLocatorService = services.GetRequiredService<IFileLocatorService>();
+            _fileService = services.GetRequiredService<IFileService>();
             _dialogService = services.GetRequiredService<IErrorDialog>();
 
             var logSvc = services.GetRequiredService<ILoggingService>();
@@ -408,6 +410,85 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             };
         }
 
+        public async Task<DetailedResult<List<string>>> GetUniqueBuildpackNamesAsync(string apiAddress, int retryAmount = 1)
+        {
+            string accessToken;
+            try
+            {
+                accessToken = _cfCliService.GetOAuthToken();
+            }
+            catch (InvalidRefreshTokenException)
+            {
+                var msg = "Unable to retrieve buildpacks because the connection has expired. Please log back in to re-authenticate.";
+                _logger.Information(msg);
+
+                return new DetailedResult<List<string>>
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                    Content = null,
+                    FailureType = FailureType.InvalidRefreshToken,
+                };
+            }
+
+            if (accessToken == null)
+            {
+                _logger.Error("CloudFoundryService attempted to get buildpacks but was unable to look up an access token.");
+
+                return new DetailedResult<List<string>>()
+                {
+                    Succeeded = false,
+                    Explanation = $"CloudFoundryService attempted to get buildpacks but was unable to look up an access token.",
+                };
+            }
+
+            List<Buildpack> buildpacksFromApi;
+            try
+            {
+                buildpacksFromApi = await _cfApiClient.ListBuildpacks(apiAddress, accessToken);
+            }
+            catch (Exception originalException)
+            {
+                if (retryAmount > 0)
+                {
+                    _logger.Information("GetUniqueBuildpackNamesAsync caught an exception when trying to retrieve buildpacks: {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).", originalException.Message, retryAmount);
+                    _cfCliService.ClearCachedAccessToken();
+                    retryAmount -= 1;
+                    return await GetUniqueBuildpackNamesAsync(apiAddress, retryAmount);
+                }
+                else
+                {
+                    _logger.Error("{Error}. See logs for more details: toolkit-diagnostics.log", originalException.Message);
+
+                    return new DetailedResult<List<string>>()
+                    {
+                        Succeeded = false,
+                        Explanation = originalException.Message,
+                    };
+                }
+            }
+
+            var buildpackNames = new List<string>();
+
+            foreach (Buildpack buildpack in buildpacksFromApi)
+            {
+                if (string.IsNullOrWhiteSpace(buildpack.Name))
+                {
+                    _logger.Error("CloudFoundryService.GetUniqueBuildpackNamesAsync encountered a buildpack without a name; omitting it from the returned list of buildpacks.");
+                }
+                else if (!buildpackNames.Contains(buildpack.Name))
+                {
+                    buildpackNames.Add(buildpack.Name);
+                }
+            }
+
+            return new DetailedResult<List<string>>()
+            {
+                Succeeded = true,
+                Content = buildpackNames,
+            };
+        }
+
         /// <summary>
         /// Stop <paramref name="app"/> using token from <see cref="CfCliService"/>.
         /// <para>
@@ -687,48 +768,38 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             };
         }
 
-        public async Task<DetailedResult> DeployAppAsync(CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, string appName, string pathToDeploymentDirectory, bool fullFrameworkDeployment, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string stack, bool binaryDeployment, string projectName, string manifestPath = null)
+        public async Task<DetailedResult> DeployAppAsync(AppManifest appManifest, CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback)
         {
-            if (!_fileLocatorService.DirContainsFiles(pathToDeploymentDirectory))
+            AppConfig app = appManifest.Applications[0];
+
+            string pathToDeploymentDirectory = app.Path;
+            string appName = app.Name;
+
+            if (!_fileService.DirContainsFiles(pathToDeploymentDirectory))
             {
                 return new DetailedResult(false, EmptyOutputDirMessage);
             }
 
-            string buildpack = null;
-            string startCommand = null;
+            string newManifestPath = _fileService.GetUniquePathForTempFile($"temp_manifest_{appName}");
+            var manifestCreationResult = CreateManifestFile(newManifestPath, appManifest);
 
-            if (fullFrameworkDeployment)
+            if (!manifestCreationResult.Succeeded)
             {
-                buildpack = "hwc_buildpack";
-                stack = "windows";
+                _logger.Error("Unable to push app due to manifest creation failure: {ManifestCreationError}", manifestCreationResult.Explanation);
+                return new DetailedResult(false, $"Manifest compilation failed while attempting to push app {appName}:\n{manifestCreationResult.Explanation}");
             }
 
             DetailedResult cfPushResult;
             try
             {
-                if (binaryDeployment)
-                {
-                    buildpack = "binary_buildpack";
-                    startCommand = $"cmd /c .\\{projectName} --urls=http://*:%PORT%";
-
-                    if (fullFrameworkDeployment)
-                    {
-                        startCommand = $"cmd /c .\\{projectName} --server.urls=http://*:%PORT%";
-                    }
-
-                    if (stack == "cflinuxfs3") 
-                    {
-                        buildpack = "dotnet_core_buildpack";
-                        startCommand = null;
-                    }
-                }
-
-                cfPushResult = await _cfCliService.PushAppAsync(appName, targetOrg.OrgName, targetSpace.SpaceName, stdOutCallback, stdErrCallback, pathToDeploymentDirectory, buildpack, stack, startCommand, manifestPath);
+                cfPushResult = await _cfCliService.PushAppAsync(newManifestPath, pathToDeploymentDirectory, targetOrg.OrgName, targetSpace.SpaceName, stdOutCallback, stdErrCallback);
             }
             catch (InvalidRefreshTokenException)
             {
                 var msg = "Unable to deploy app '{AppName}' to '{CfName}' because the connection has expired. Please log back in to re-authenticate.";
                 _logger.Information(msg, appName, targetCf.InstanceName);
+
+                _fileService.DeleteFile(newManifestPath);
 
                 return new DetailedResult
                 {
@@ -740,9 +811,13 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
             if (!cfPushResult.Succeeded)
             {
+                _fileService.DeleteFile(newManifestPath);
+
                 _logger.Error("Successfully targeted org '{targetOrgName}' and space '{targetSpaceName}' but app deployment failed at the `cf push` stage.\n{cfPushResult}", targetOrg.OrgName, targetSpace.SpaceName, cfPushResult.Explanation);
                 return new DetailedResult(false, cfPushResult.Explanation);
             }
+
+            _fileService.DeleteFile(newManifestPath);
 
             return new DetailedResult(true, $"App successfully deploying to org '{targetOrg.OrgName}', space '{targetSpace.SpaceName}'...");
         }
@@ -772,6 +847,73 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             return logsResult;
         }
 
+        public DetailedResult CreateManifestFile(string location, AppManifest manifest)
+        {
+            try
+            {
+                var serializer = new SerializerBuilder()
+                    .WithNamingConvention(CfAppManifestNamingConvention.Instance)
+                    .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults)
+                    .Build();
+
+                string ymlContents = serializer.Serialize(manifest);
+
+                _fileService.WriteTextToFile(location, "---\n" + ymlContents);
+
+                return new DetailedResult
+                {
+                    Succeeded = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new DetailedResult
+                {
+                    Succeeded = false,
+                    Explanation = ex.Message,
+                };
+            }
+        }
+
+        public DetailedResult<AppManifest> ParseManifestFile(string pathToManifestFile)
+        {
+            if (!_fileService.FileExists(pathToManifestFile))
+            {
+                return new DetailedResult<AppManifest>
+                {
+                    Succeeded = false,
+                    Content = null,
+                    Explanation = $"No file exists at {pathToManifestFile}",
+                };
+            }
+
+            try
+            {
+                string manifestContents = _fileService.ReadFileContents(pathToManifestFile);
+
+                var deserializer = new DeserializerBuilder()
+                    .WithNamingConvention(CfAppManifestNamingConvention.Instance)
+                    .Build();
+
+                var manifest = deserializer.Deserialize<AppManifest>(manifestContents);
+
+                return new DetailedResult<AppManifest>
+                {
+                    Succeeded = true,
+                    Content = manifest,
+                };
+            }
+            catch (Exception ex)
+            {
+                return new DetailedResult<AppManifest>
+                {
+                    Succeeded = false,
+                    Content = null,
+                    Explanation = ex.Message,
+                };
+            }
+        }
+
         private void FormatExceptionMessage(Exception ex, List<string> message)
         {
             if (ex is AggregateException aex)
@@ -797,7 +939,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             Version apiVersion = await _cfCliService.GetApiVersion();
             if (apiVersion == null)
             {
-                _fileLocatorService.CliVersion = 7;
+                _fileService.CliVersion = 7;
                 _dialogService.DisplayErrorDialog(CcApiVersionUndetectableErrTitle, CcApiVersionUndetectableErrMsg);
             }
             else
@@ -807,7 +949,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                     case 2:
                         if (apiVersion < new Version("2.128.0"))
                         {
-                            _fileLocatorService.CliVersion = 6;
+                            _fileService.CliVersion = 6;
 
                             string errorTitle = "API version not supported";
                             string errorMsg = "Detected a Cloud Controller API version lower than the minimum supported version (2.128.0); some features of this extension may not work as expected for the given instance.";
@@ -817,11 +959,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                         }
                         else if (apiVersion < new Version("2.150.0"))
                         {
-                            _fileLocatorService.CliVersion = 6;
+                            _fileService.CliVersion = 6;
                         }
                         else
                         {
-                            _fileLocatorService.CliVersion = 7;
+                            _fileService.CliVersion = 7;
                         }
 
                         break;
@@ -829,7 +971,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                     case 3:
                         if (apiVersion < new Version("3.63.0"))
                         {
-                            _fileLocatorService.CliVersion = 6;
+                            _fileService.CliVersion = 6;
 
                             string errorTitle = "API version not supported";
                             string errorMsg = "Detected a Cloud Controller API version lower than the minimum supported version (3.63.0); some features of this extension may not work as expected for the given instance.";
@@ -839,17 +981,17 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                         }
                         else if (apiVersion < new Version("3.85.0"))
                         {
-                            _fileLocatorService.CliVersion = 6;
+                            _fileService.CliVersion = 6;
                         }
                         else
                         {
-                            _fileLocatorService.CliVersion = 7;
+                            _fileService.CliVersion = 7;
                         }
 
                         break;
 
                     default:
-                        _fileLocatorService.CliVersion = 7;
+                        _fileService.CliVersion = 7;
                         _logger.Information("Detected an unexpected Cloud Controller API version: {apiVersion}. CLI version has been set to 7 by default.", apiVersion);
 
                         break;

@@ -80,7 +80,7 @@
         <Parent guid="guidTanzuToolkitPackageCmdSet" id="ProjContextMenuGroup" />
         <Icon guid="guidImages1" id="bmpPic1" />
 				<Strings>
-          <ButtonText>Deploy To Tanzu Application Service</ButtonText>
+          <ButtonText>Push To Tanzu Application Service</ButtonText>
         </Strings>
 			</Button>
       

@@ -6,26 +6,21 @@
         xmlns:converters="clr-namespace:Tanzu.Toolkit.WpfViews.Converters"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:wpfviews="clr-namespace:Tanzu.Toolkit.VisualStudio.WpfViews"
-        mc:Ignorable="d"
         Name="DeploymentDialogViewElement"
-        Title="Deploy to Tanzu Application Service"
+        Title="Push to Tanzu Application Service"
         Icon="Resources/tas_16px.png"
-        Width="500"
-        Height="335"
+        Width="600"
         BorderBrush="{Binding ElementName=DeploymentDialogViewElement, Path=Foreground }"
         BorderThickness="1"
         ResizeMode="NoResize"
         WindowStyle="None"
-        d:DesignHeight="500" d:DesignWidth="800">
+        SizeToContent="Height">
 
     <Window.Resources>
-        <sys:Double x:Key="collapsedWindowHeight">335</sys:Double>
-        <sys:Double x:Key="expandedWindowHeight">430</sys:Double>
-        <sys:Double x:Key="collapsedGridBodyHeight">210</sys:Double>
-        <sys:Double x:Key="expandedGridBodyHeight">320</sys:Double>
-
         <converters:VisibilityConverter x:Key="Visibility" />
         <converters:VisibilityConverter x:Key="InverseVisibility" Reversed="True"/>
+        <converters:VisibilityConverter x:Key="ExpansionConverter" ReserveSpace="False" />
+        <converters:ListToStringConverter x:Key="SelectedBuildpacksStringListConverter" EmptyListMessage="&lt;none selected&gt;" />
 
         <Style x:Key="RoundedButtonStyle" TargetType="{x:Type Button}">
             <Setter Property="Template">
@@ -38,6 +33,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
     </Window.Resources>
 
     <DockPanel LastChildFill="False">
@@ -46,7 +42,7 @@
             <TextBlock FontSize="24" Text="Push to Tanzu Application Service" Margin="4" Grid.Row="0" Grid.Column="1"/>
         </StackPanel>
 
-        <Grid x:Name="GridBody" Width="414" Height="{StaticResource collapsedGridBodyHeight}" VerticalAlignment="Top" Margin="8,8,8,0" DockPanel.Dock="Top">
+        <Grid x:Name="MainContent" Width="500" VerticalAlignment="Top" Margin="8,8,8,0" DockPanel.Dock="Top">
             <Grid.RowDefinitions>
                 <!--ROW 0-->
                 <RowDefinition Height="42"></RowDefinition>
@@ -62,12 +58,6 @@
                 <RowDefinition Height="32"></RowDefinition>
                 <!--ROW 6-->
                 <RowDefinition Height="32"></RowDefinition>
-                <!--ROW 7-->
-                <RowDefinition Height="32"></RowDefinition>
-                <!--ROW 8-->
-                <RowDefinition Height="32"></RowDefinition>
-                <!--ROW 9-->
-                <RowDefinition Height="32"></RowDefinition>
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
@@ -75,9 +65,9 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
-            <!--ROW 0-->
+            <!--MAIN GRID ROW 0-->
             <StackPanel VerticalAlignment="Center" Grid.Row="0">
-                <TextBlock VerticalAlignment="Center" Text="Deployment Target:" />
+                <TextBlock VerticalAlignment="Center" Text="Target Environment:" />
             </StackPanel>
 
             <Button Grid.Row="0" 
@@ -96,10 +86,11 @@
                    Margin="4,0,0,0"
                    Visibility="{Binding IsLoggedIn, Converter={StaticResource Visibility}}"/>
 
-            <!--ROW 1-->
-            <!--Intentionally empty-->
+            <!--MAIN GRID ROW 1-->
+            <Separator Grid.Row="1"
+                       Visibility="Hidden"/>
 
-            <!--ROW 2-->
+            <!--MAIN GRID ROW 2-->
             <TextBlock Grid.Row="2" Text="App Manifest:" VerticalAlignment="Center"/>
 
             <Grid Grid.Row="2" Grid.Column="1" VerticalAlignment="Center">
@@ -132,7 +123,7 @@
                 </Button>
             </Grid>
 
-            <!--ROW 3-->
+            <!--MAIN GRID ROW 3-->
             <TextBlock Grid.Row="3" Text="App Name:" VerticalAlignment="Center"/>
 
             <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="1" 
@@ -143,7 +134,7 @@
                      VerticalAlignment="Center" 
                      VerticalContentAlignment="Center"/>
 
-            <!--ROW 4-->
+            <!--MAIN GRID ROW 4-->
             <StackPanel VerticalAlignment="Center" Grid.Row="4">
                 <TextBlock VerticalAlignment="Center" Text="Target Organization:"/>
             </StackPanel>
@@ -160,7 +151,7 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
 
-            <!--ROW 5-->
+            <!--MAIN GRID ROW 5-->
             <StackPanel VerticalAlignment="Center" Grid.Row="5">
                 <TextBlock VerticalAlignment="Center" Text="Target Space:"/>
             </StackPanel>
@@ -176,7 +167,7 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
 
-            <!--ROW 6-->
+            <!--MAIN GRID ROW 6-->
             <Button Command="{Binding ElementName=DeploymentDialogViewElement, Path=ToggleAdvancedOptionsCommand}"
                     Grid.Row="6"
                     Grid.Column="0"
@@ -210,16 +201,42 @@
                            Margin="2"/>
                 </Grid>
             </Button>
+        </Grid>
 
-            <!--ROW 7-->
-            <Separator Grid.Row="7" Grid.ColumnSpan="2" Visibility="{Binding Expanded, Converter={StaticResource Visibility}}"/>
+        <Grid
+            Name="HiddenContent"
+            Visibility="{Binding Expanded, Converter={StaticResource ExpansionConverter}}"
+            Width="500"
+            VerticalAlignment="Top"
+            Margin="8,8,8,0"
+            DockPanel.Dock="Top">
 
-            <!--ROW 8-->
-            <TextBlock Grid.Row="8" Text="Directory to Push:" VerticalAlignment="Center" ToolTip="Path to app directory or to a zip file of the contents of the app directory"/>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
 
-            <Grid Grid.Row="8" Grid.Column="1" VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="128"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <!--HIDDEN GRID ROW 0-->
+            <Separator Grid.Row="0" Grid.ColumnSpan="2" 
+                        Margin="0,12"/>
+
+            <!--HIDDEN GRID ROW 1-->
+            <TextBlock Grid.Row="1" 
+                        Text="Directory to Push:" 
+                        VerticalAlignment="Center" 
+                        ToolTip="Path to app directory or to a zip file of the contents of the app directory"/>
+
+            <Grid Grid.Row="1" Grid.Column="1" VerticalAlignment="Center">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="24"></RowDefinition>
+                    <RowDefinition Height="32"></RowDefinition>
                 </Grid.RowDefinitions>
 
                 <Grid.ColumnDefinitions>
@@ -236,7 +253,10 @@
                     ToolTip="{Binding DirectoryPathLabel}"/>
 
                 <Button 
-                    MaxWidth="32" MinWidth="32" Padding="0"
+                    MaxWidth="32" 
+                    MinWidth="32" 
+                    Height="24"
+                    Padding="0"
                     Grid.Row="0"
                     Grid.Column="1"
                     IsEnabled="{Binding IsLoggedIn}"
@@ -247,36 +267,125 @@
                 </Button>
             </Grid>
 
-            <!-- ROW 9-->
-            <StackPanel VerticalAlignment="Center" Grid.Row="9" >
+            <!--HIDDEN GRID ROW 2-->
+            <TextBlock
+                VerticalAlignment="Top"
+                Margin="0,6,0,0"
+                Grid.Row="2"
+                Grid.Column="0"
+                Text="Buildpack:"/>
+
+            <StackPanel
+                Grid.Row="2"
+                Grid.Column="1">
+
+                <Grid Grid.Row="2" Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="32"></RowDefinition>
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="32"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label
+                        Content="{Binding SelectedBuildpacks, Converter={StaticResource SelectedBuildpacksStringListConverter}}"
+                        ToolTip="{Binding SelectedBuildpacks, Converter={StaticResource SelectedBuildpacksStringListConverter}}"
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        IsEnabled="{Binding IsLoggedIn}"/>
+
+                    <Button
+                        Grid.Column="1"
+                        MinHeight="0"
+                        MinWidth="0"
+                        IsEnabled="{Binding IsLoggedIn}"
+                        Command="{Binding ElementName=DeploymentDialogViewElement, Path=ClearBuildpackSelectionCommand}"
+                        VerticalAlignment="Center">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <ContentPresenter />
+                            </ControlTemplate>
+                        </Button.Template>
+                        <TextBlock
+                            Text="Clear"
+                            FontStyle="Italic"/>
+                    </Button>
+                </Grid>
+
+                <StackPanel Visibility="{Binding IsLoggedIn, Converter={StaticResource Visibility}}">
+                <TextBlock
+                    Text="Loading Buildpacks..."
+                    Foreground="Gray"
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    Margin="4,0,0,4"
+                    FontStyle="Italic"
+                    Visibility="{Binding BuildpacksLoading, Converter={StaticResource Visibility}}"/>
+
+                <ListView
+                    ItemsSource="{Binding BuildpackOptions}"
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    Margin="0,4"
+                    MaxHeight="128"
+                    Visibility="{Binding BuildpacksLoading, Converter={StaticResource InverseVisibility}}"
+                    SelectionMode="Multiple"
+                    IsEnabled="{Binding IsLoggedIn}">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="Focusable" Value="false"/>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox
+                                Content="{Binding Name}"
+                                IsChecked="{Binding IsSelected}"
+                                Checked="CheckBox_Checked"
+                                Unchecked="CheckBox_Unchecked"/>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                </StackPanel>
+            </StackPanel>
+
+
+            <!--HIDDEN GRID ROW 3-->
+            <StackPanel VerticalAlignment="Center" Grid.Row="3">
                 <TextBlock VerticalAlignment="Center" Text="Stack:"/>
             </StackPanel>
 
-            <ComboBox Grid.Row="9" Grid.Column="1" Margin="0,4" 
-                      ItemsSource="{Binding StackOptions}" 
-                      IsEnabled="{Binding IsLoggedIn}"
-                      SelectedItem="{Binding SelectedStack}">
+            <ComboBox
+                Grid.Row="3"
+                Grid.Column="1"
+                Margin="0,4"
+                ItemsSource="{Binding StackOptions}"
+                IsEnabled="{Binding IsLoggedIn}"
+                SelectedItem="{Binding SelectedStack}">
             </ComboBox>
         </Grid>
 
         <StackPanel 
             DockPanel.Dock="Bottom"
-            Margin="0,0,12,12"
+            Margin="12"
             Orientation="Horizontal"
             Grid.Row="7"
             Grid.Column="1"
             HorizontalAlignment="Right">
 
             <Button 
-                Content="{ Binding DeploymentButtonLabel }" 
-                Width="160" 
+                Content="Push App" 
                 HorizontalAlignment="Right"
-                Margin="0,4"
+                Margin="4"
+                Padding="4"
                 Command="{ Binding ElementName=DeploymentDialogViewElement, Path=UploadAppCommand }" 
                 CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
 
             <Button 
-                Margin="8,4,0,4"
+                Margin="4"
+                Padding="4"
                 Click="Close"
                 Content="Cancel"/>
         </StackPanel>

@@ -1,20 +1,20 @@
 ﻿using System;
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Tanzu.Toolkit.Services.FileLocator;
+using Tanzu.Toolkit.Services.File;
 
-namespace Tanzu.Toolkit.Services.Tests.FileLocator
+namespace Tanzu.Toolkit.Services.Tests.File
 {
     [TestClass]
-    public class FileLocatorServiceTests : ServicesTestSupport
+    public class FileServiceTests : ServicesTestSupport
     {
-        private FileLocatorService _sut;
+        private FileService _sut;
 
         [TestInitialize]
         public void TestInit()
         {
             var fakeAssemblyBaseDir = Path.GetDirectoryName(GetType().Assembly.Location);
-            _sut = new FileLocatorService(fakeAssemblyBaseDir);
+            _sut = new FileService(fakeAssemblyBaseDir);
         }
 
         [TestMethod]
@@ -76,7 +76,7 @@ namespace Tanzu.Toolkit.Services.Tests.FileLocator
         public void FullPathToCfExe_ThrowsException_WhenExecutableFileNotFound()
         {
             var fakeAssemblyBaseDir = "/fake/path";
-            _sut = new FileLocatorService(fakeAssemblyBaseDir)
+            _sut = new FileService(fakeAssemblyBaseDir)
             {
                 CliVersion = 7,
             };

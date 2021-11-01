@@ -1,7 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
@@ -21,16 +24,17 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string DeploymentErrorMsg = "Encountered an issue while deploying app:";
         internal const string GetOrgsFailureMsg = "Unable to fetch orgs.";
         internal const string GetSpacesFailureMsg = "Unable to fetch spaces.";
+        internal const string GetBuildpacksFailureMsg = "Unable to fetch buildpacks.";
         internal const string SingleLoginErrorTitle = "Unable to add more TAS connections.";
         internal const string SingleLoginErrorMessage1 = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
         internal const string SingleLoginErrorMessage2 = "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Application Service Explorer & re-connecting to a new one.";
         internal const string FullFrameworkTFM = ".NETFramework";
         internal const string ManifestNotFoundTitle = "Unable to set manifest path";
+        internal const string ManifestParsingErrorTitle = "Unable to parse app manifest";
         internal const string DirectoryNotFoundTitle = "Unable to set push directory path";
-
         private string _appName;
         internal readonly bool _fullFrameworkDeployment = false;
-        private readonly IErrorDialog _dialogService;
+        private readonly IErrorDialog _errorDialogService;
         internal IOutputViewModel OutputViewModel;
         internal ITasExplorerViewModel TasExplorerViewModel;
 
@@ -47,16 +51,17 @@ namespace Tanzu.Toolkit.ViewModels
         private string _targetName;
         private bool _isLoggedIn;
         private string _selectedStack;
+        private ObservableCollection<string> _selectedBuildpacks;
         private List<string> _stackOptions = new List<string> { "windows", "cflinuxfs3" };
-        private bool _binaryDeployment;
-        private string _deploymentButtonLabel;
+        private List<BuildpackListItem> _buildpackOptions;
         private bool _expanded;
         private string _expansionButtonText;
+        private AppManifest _appManifest;
 
         public DeploymentDialogViewModel(IServiceProvider services, string projectName, string directoryOfProjectToDeploy, string targetFrameworkMoniker)
             : base(services)
         {
-            _dialogService = services.GetRequiredService<IErrorDialog>();
+            _errorDialogService = services.GetRequiredService<IErrorDialog>();
             TasExplorerViewModel = services.GetRequiredService<ITasExplorerViewModel>();
 
             IView outputView = ViewLocatorService.NavigateTo(nameof(ViewModels.OutputViewModel)) as IView;
@@ -64,6 +69,7 @@ namespace Tanzu.Toolkit.ViewModels
 
             DeploymentInProgress = false;
             PathToProjectRootDir = directoryOfProjectToDeploy;
+            SelectedBuildpacks = new ObservableCollection<string>();
 
             if (targetFrameworkMoniker.StartsWith(FullFrameworkTFM))
             {
@@ -74,6 +80,19 @@ namespace Tanzu.Toolkit.ViewModels
             CfInstanceOptions = new List<CloudFoundryInstance>();
             CfOrgOptions = new List<CloudFoundryOrganization>();
             CfSpaceOptions = new List<CloudFoundrySpace>();
+            BuildpackOptions = new List<BuildpackListItem>();
+            ManifestModel = new AppManifest
+            {
+                Version = 1,
+                Applications = new List<AppConfig>
+                {
+                    new AppConfig
+                    {
+                        Name = projectName,
+                        Path = directoryOfProjectToDeploy,
+                    }
+                }
+            };
 
             SetManifestIfDefaultExists();
 
@@ -83,24 +102,13 @@ namespace Tanzu.Toolkit.ViewModels
                 IsLoggedIn = true;
 
                 ThreadingService.StartTask(UpdateCfOrgOptions);
+                ThreadingService.StartTask(UpdateBuildpackOptions);
             }
 
             DeploymentDirectoryPath = PathToProjectRootDir;
             _projectName = projectName;
 
             Expanded = false;
-        }
-
-        public bool BinaryDeployment
-        {
-            get => _binaryDeployment;
-
-            internal set
-            {
-                DeploymentButtonLabel = value ? "Push app (from binaries)" : "Push app (from source)";
-                _binaryDeployment = value;
-                RaisePropertyChangedEvent("BinaryDeployment");
-            }
         }
 
         public string AppName
@@ -111,6 +119,8 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 _appName = value;
                 RaisePropertyChangedEvent("AppName");
+
+                ManifestModel.Applications[0].Name = value;
             }
         }
 
@@ -127,19 +137,27 @@ namespace Tanzu.Toolkit.ViewModels
                     _manifestPath = value;
                     ManifestPathLabel = "<none selected>";
                 }
-                else if (File.Exists(value))
+                else if (FileService.FileExists(value))
                 {
                     _manifestPath = value;
 
                     ManifestPathLabel = _manifestPath;
 
-                    string[] manifestLines = File.ReadAllLines(_manifestPath);
-                    SetAppNameFromManifest(manifestLines);
-                    SetStackFromManifest(manifestLines);
+                    var parsingResult = CloudFoundryService.ParseManifestFile(_manifestPath);
+
+                    if (parsingResult.Succeeded)
+                    {
+                        ManifestModel = parsingResult.Content;
+                        SetViewModelValuesFromManifest(ManifestModel);
+                    }
+                    else
+                    {
+                        _errorDialogService.DisplayErrorDialog(ManifestParsingErrorTitle, parsingResult.Explanation);
+                    }
                 }
                 else
                 {
-                    _dialogService.DisplayErrorDialog(ManifestNotFoundTitle, $"'{value}' does not appear to be a valid path to a manifest.");
+                    _errorDialogService.DisplayErrorDialog(ManifestNotFoundTitle, $"'{value}' does not appear to be a valid path to a manifest.");
                 }
             }
         }
@@ -161,16 +179,16 @@ namespace Tanzu.Toolkit.ViewModels
 
             set
             {
-                if (Directory.Exists(value))
+                if (FileService.DirectoryExists(value))
                 {
                     _directoryPath = value;
                     DirectoryPathLabel = value;
 
-                    BinaryDeployment = value != PathToProjectRootDir;
+                    ManifestModel.Applications[0].Path = value;
                 }
                 else
                 {
-                    _dialogService.DisplayErrorDialog(DirectoryNotFoundTitle, $"'{value}' does not appear to be a valid path to a directory.");
+                    _errorDialogService.DisplayErrorDialog(DirectoryNotFoundTitle, $"'{value}' does not appear to be a valid path to a directory.");
                     _directoryPath = null;
                     DirectoryPathLabel = "<none specified>";
                 }
@@ -185,17 +203,6 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 _directoryPathLabel = value;
                 RaisePropertyChangedEvent("DirectoryPathLabel");
-            }
-        }
-
-        public string DeploymentButtonLabel
-        {
-            get => _deploymentButtonLabel;
-
-            set
-            {
-                _deploymentButtonLabel = value;
-                RaisePropertyChangedEvent("DeploymentButtonLabel");
             }
         }
 
@@ -234,7 +241,20 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     _selectedStack = value;
                     RaisePropertyChangedEvent("SelectedStack");
+
+                    ManifestModel.Applications[0].Stack = value;
                 }
+            }
+        }
+
+        public ObservableCollection<string> SelectedBuildpacks
+        {
+            get => _selectedBuildpacks;
+
+            set
+            {
+                _selectedBuildpacks = value;
+                RaisePropertyChangedEvent("SelectedBuildpacks");
             }
         }
 
@@ -309,6 +329,18 @@ namespace Tanzu.Toolkit.ViewModels
             get => _stackOptions;
         }
 
+        public List<BuildpackListItem> BuildpackOptions
+        {
+            get => _buildpackOptions;
+
+            set
+            {
+                _buildpackOptions = value;
+
+                RaisePropertyChangedEvent("BuildpackOptions");
+            }
+        }
+
         public bool DeploymentInProgress { get; internal set; }
 
         public string TargetName
@@ -332,6 +364,26 @@ namespace Tanzu.Toolkit.ViewModels
                 RaisePropertyChangedEvent("IsLoggedIn");
             }
         }
+
+        public AppManifest ManifestModel
+        {
+            get => _appManifest;
+            set => _appManifest = value;
+        }
+
+        private bool _buildpacksLoading;
+
+        public bool BuildpacksLoading
+        {
+            get { return _buildpacksLoading; }
+
+            set
+            {
+                _buildpacksLoading = value;
+                RaisePropertyChangedEvent("BuildpacksLoading");
+            }
+        }
+
 
         public bool CanDeployApp(object arg)
         {
@@ -375,6 +427,7 @@ namespace Tanzu.Toolkit.ViewModels
                 IsLoggedIn = true;
 
                 ThreadingService.StartTask(UpdateCfOrgOptions);
+                ThreadingService.StartTask(UpdateBuildpackOptions);
             }
         }
 
@@ -396,7 +449,7 @@ namespace Tanzu.Toolkit.ViewModels
                 else
                 {
                     Logger.Error($"{GetOrgsFailureMsg}. {orgsResponse}");
-                    _dialogService.DisplayErrorDialog(GetOrgsFailureMsg, orgsResponse.Explanation);
+                    _errorDialogService.DisplayErrorDialog(GetOrgsFailureMsg, orgsResponse.Explanation);
                 }
             }
         }
@@ -418,7 +471,43 @@ namespace Tanzu.Toolkit.ViewModels
                 else
                 {
                     Logger.Error($"{GetSpacesFailureMsg}. {spacesResponse}");
-                    _dialogService.DisplayErrorDialog(GetSpacesFailureMsg, spacesResponse.Explanation);
+                    _errorDialogService.DisplayErrorDialog(GetSpacesFailureMsg, spacesResponse.Explanation);
+                }
+            }
+        }
+
+        public async Task UpdateBuildpackOptions()
+        {
+            if (TasExplorerViewModel.TasConnection == null)
+            {
+                BuildpackOptions = new List<BuildpackListItem>();
+            }
+            else
+            {
+                BuildpacksLoading = true;
+                var buildpacksRespsonse = await CloudFoundryService.GetUniqueBuildpackNamesAsync(TasExplorerViewModel.TasConnection.CloudFoundryInstance.ApiAddress);
+
+                if (buildpacksRespsonse.Succeeded)
+                {
+                    var bpOtps = new List<BuildpackListItem>();
+
+                    foreach (string bpName in buildpacksRespsonse.Content)
+                    {
+                        bool nameSpecifiedInManifest = ManifestModel.Applications[0].Buildpacks.Contains(bpName);
+
+                        bpOtps.Add(new BuildpackListItem { Name = bpName, IsSelected = nameSpecifiedInManifest });
+                    }
+
+                    BuildpackOptions = bpOtps;
+                    BuildpacksLoading = false;
+                }
+                else
+                {
+                    BuildpackOptions = new List<BuildpackListItem>();
+                    BuildpacksLoading = false;
+
+                    Logger.Error(GetBuildpacksFailureMsg + " {BuildpacksResponseError}", buildpacksRespsonse.Explanation);
+                    _errorDialogService.DisplayErrorDialog(GetBuildpacksFailureMsg, buildpacksRespsonse.Explanation);
                 }
             }
         }
@@ -428,21 +517,49 @@ namespace Tanzu.Toolkit.ViewModels
             Expanded = !Expanded;
         }
 
+        public void AddToSelectedBuildpacks(object arg)
+        {
+            if (arg is string buildpackName && !SelectedBuildpacks.Contains(buildpackName))
+            {
+                SelectedBuildpacks.Add(buildpackName);
+                RaisePropertyChangedEvent("SelectedBuildpacks");
+
+                ManifestModel.Applications[0].Buildpacks = SelectedBuildpacks.ToList();
+            }
+        }
+
+        public void RemoveFromSelectedBuildpacks(object arg)
+        {
+            if (arg is string buildpackName)
+            {
+                SelectedBuildpacks.Remove(buildpackName);
+                RaisePropertyChangedEvent("SelectedBuildpacks");
+
+                ManifestModel.Applications[0].Buildpacks = SelectedBuildpacks.ToList();
+            }
+        }
+
+        public void ClearSelectedBuildpacks(object arg = null)
+        {
+            SelectedBuildpacks.Clear();
+
+            foreach (BuildpackListItem bpItem in BuildpackOptions)
+            {
+                bpItem.IsSelected = false;
+            }
+
+            RaisePropertyChangedEvent("SelectedBuildpacks");
+        }
+
         internal async Task StartDeployment()
         {
             var deploymentResult = await CloudFoundryService.DeployAppAsync(
+                ManifestModel,
                 SelectedSpace.ParentOrg.ParentCf,
                 SelectedSpace.ParentOrg,
                 SelectedSpace,
-                AppName,
-                DeploymentDirectoryPath,
-                _fullFrameworkDeployment,
                 stdOutCallback: OutputViewModel.AppendLine,
-                stdErrCallback: OutputViewModel.AppendLine,
-                stack: SelectedStack,
-                binaryDeployment: BinaryDeployment,
-                projectName: _projectName,
-                manifestPath: ManifestPath);
+                stdErrCallback: OutputViewModel.AppendLine);
 
             if (!deploymentResult.Succeeded)
             {
@@ -462,7 +579,7 @@ namespace Tanzu.Toolkit.ViewModels
                     SelectedSpace.SpaceName,
                     deploymentResult.ToString());
 
-                _dialogService.DisplayErrorDialog(errorTitle, errorMsg);
+                _errorDialogService.DisplayErrorDialog(errorTitle, errorMsg);
             }
 
             DeploymentInProgress = false;
@@ -473,11 +590,11 @@ namespace Tanzu.Toolkit.ViewModels
             var expectedManifestLocation1 = Path.Combine(PathToProjectRootDir, "manifest.yaml");
             var expectedManifestLocation2 = Path.Combine(PathToProjectRootDir, "manifest.yml");
 
-            if (File.Exists(expectedManifestLocation1))
+            if (FileService.FileExists(expectedManifestLocation1))
             {
                 ManifestPath = expectedManifestLocation1;
             }
-            else if (File.Exists(expectedManifestLocation2))
+            else if (FileService.FileExists(expectedManifestLocation2))
             {
                 ManifestPath = expectedManifestLocation2;
             }
@@ -487,30 +604,73 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        private void SetAppNameFromManifest(string[] manifestContents)
+        private void SetViewModelValuesFromManifest(AppManifest manifest)
         {
-            foreach (string line in manifestContents)
+            SetAppNameFromManifest(manifest);
+            SetStackFromManifest(manifest);
+            SetBuildpacksFromManifest(manifest);
+        }
+
+        private void SetAppNameFromManifest(AppManifest appManifest)
+        {
+            var appName = appManifest.Applications[0].Name;
+            if (!string.IsNullOrWhiteSpace(appName))
             {
-                if (line.StartsWith("- name"))
-                {
-                    AppName = line.Substring(line.IndexOf(":") + 1).Trim();
-                }
+                AppName = appName;
             }
         }
 
-        private void SetStackFromManifest(string[] manifestContents)
+        private void SetStackFromManifest(AppManifest appManifest)
         {
-            foreach (string line in manifestContents)
-            {
-                if (line.Contains("stack: "))
-                {
-                    var detectedStack = line.Substring(line.IndexOf(":") + 1).Trim();
+            SelectedStack = appManifest.Applications[0].Stack;
+        }
 
-                    if (_stackOptions.Contains(detectedStack))
-                    {
-                        SelectedStack = detectedStack;
-                    }
+        private void SetBuildpacksFromManifest(AppManifest appManifest)
+        {
+            var bps = appManifest.Applications[0].Buildpacks;
+            if (bps != null)
+            {
+                SelectedBuildpacks.Clear();
+                foreach (string bp in appManifest.Applications[0].Buildpacks)
+                {
+                    AddToSelectedBuildpacks(bp);
                 }
+            }
+        }
+    }
+
+    public class BuildpackListItem : INotifyPropertyChanged
+    {
+        private string _name;
+        private bool _isSelected;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public string Name
+        {
+            get => _name;
+            set
+            {
+                _name = value;
+            }
+        }
+
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set
+            {
+                _isSelected = value;
+                RaisePropertyChangedEvent("IsSelected");
+            }
+        }
+        protected void RaisePropertyChangedEvent(string propertyName)
+        {
+            var handler = PropertyChanged;
+
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(propertyName));
             }
         }
     }

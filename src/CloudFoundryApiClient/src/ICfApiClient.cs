@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.OrgsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.SpacesResponse;
@@ -25,5 +26,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         Task<bool> StartAppWithGuid(string cfTarget, string accessToken, string appGuid);
 
         Task<bool> DeleteAppWithGuid(string cfTarget, string accessToken, string appGuid);
+        Task<List<Buildpack>> ListBuildpacks(string cfApiAddress, string accessToken);
     }
 }

@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 
 namespace Tanzu.Toolkit.ViewModels
 {
@@ -8,6 +10,7 @@ namespace Tanzu.Toolkit.ViewModels
         string ManifestPath { get; set; }
         string DeploymentDirectoryPath { get; set; }
         bool Expanded { get; set; }
+        ObservableCollection<string> SelectedBuildpacks { get; set; }
 
         bool CanDeployApp(object arg);
         bool CanToggleAdvancedOptions(object arg);
@@ -17,5 +20,8 @@ namespace Tanzu.Toolkit.ViewModels
         void ToggleAdvancedOptions(object arg);
         Task UpdateCfOrgOptions();
         Task UpdateCfSpaceOptions();
+        void AddToSelectedBuildpacks(object arg);
+        void RemoveFromSelectedBuildpacks(object arg);
+        void ClearSelectedBuildpacks(object arg = null);
     }
 }

@@ -17,6 +17,7 @@ namespace Tanzu.Toolkit.WpfViews
         public ICommand UploadAppCommand { get; }
         public ICommand OpenLoginDialogCommand { get; }
         public ICommand ToggleAdvancedOptionsCommand { get; }
+        public ICommand ClearBuildpackSelectionCommand { get; }
 
         public Brush HyperlinkBrush { get { return (Brush)GetValue(HyperlinkBrushProperty); } set { SetValue(HyperlinkBrushProperty, value); } }
 
@@ -32,7 +33,8 @@ namespace Tanzu.Toolkit.WpfViews
             _viewModel = viewModel;
             UploadAppCommand = new DelegatingCommand(viewModel.DeployApp, viewModel.CanDeployApp);
             OpenLoginDialogCommand = new DelegatingCommand(viewModel.OpenLoginView, viewModel.CanOpenLoginView);
-            ToggleAdvancedOptionsCommand = new DelegatingCommand(ToggleAdvancedOptions, viewModel.CanToggleAdvancedOptions);
+            ToggleAdvancedOptionsCommand = new DelegatingCommand(viewModel.ToggleAdvancedOptions, viewModel.CanToggleAdvancedOptions);
+            ClearBuildpackSelectionCommand = new DelegatingCommand(viewModel.ClearSelectedBuildpacks, (object arg) => { return true; });
 
             themeService.SetTheme(this);
             DataContext = viewModel;
@@ -40,7 +42,7 @@ namespace Tanzu.Toolkit.WpfViews
             
             MouseDown += Window_MouseDown;
         }
-
+       
         private void CfOrgOptions_ComboBox_DropDownClosed(object sender, System.EventArgs e)
         {
             _viewModel.UpdateCfSpaceOptions();
@@ -75,22 +77,6 @@ namespace Tanzu.Toolkit.WpfViews
             }
         }
 
-        private void ToggleAdvancedOptions(object arg)
-        {
-            _viewModel.ToggleAdvancedOptions(arg);
-            
-            if (_viewModel.Expanded)
-            {
-                Height = (double)Resources["expandedWindowHeight"];
-                GridBody.Height = (double)Resources["expandedGridBodyHeight"]; ;
-            }
-            else
-            {
-                Height = (double)Resources["collapsedWindowHeight"];
-                GridBody.Height = (double)Resources["collapsedGridBodyHeight"]; ;
-            }
-        }
-
         private void Close(object sender, RoutedEventArgs e)
         {
             Close();
@@ -103,6 +89,22 @@ namespace Tanzu.Toolkit.WpfViews
                 DragMove();
             }
 
+        }
+
+        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (e.Source is System.Windows.Controls.CheckBox cb)
+            {
+                _viewModel.AddToSelectedBuildpacks(cb.Content);
+            }
+        }
+
+        private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (e.Source is System.Windows.Controls.CheckBox cb)
+            {
+                _viewModel.RemoveFromSelectedBuildpacks(cb.Content);
+            }
         }
     }
 }

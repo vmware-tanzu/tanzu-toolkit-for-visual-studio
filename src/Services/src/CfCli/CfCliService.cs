@@ -9,7 +9,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Services.CommandProcess;
-using Tanzu.Toolkit.Services.FileLocator;
+using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
 using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
@@ -38,7 +38,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         internal const string _deleteAppCmd = "delete -f"; // -f avoids confirmation prompt
         internal const string _invalidRefreshTokenError = "The token expired, was revoked, or the token ID is incorrect. Please log back in to re-authenticate.";
 
-        private readonly IFileLocatorService _fileLocatorService;
+        private readonly IFileService _fileService;
         private readonly ILogger _logger;
 
         private object _cfEnvironmentLock = new object();
@@ -54,7 +54,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         {
             ConfigFilePath = configFilePath;
             Services = services;
-            _fileLocatorService = services.GetRequiredService<IFileLocatorService>();
+            _fileService = services.GetRequiredService<IFileService>();
             var logSvc = services.GetRequiredService<ILoggingService>();
             _logger = logSvc.Logger;
         }
@@ -303,40 +303,15 @@ namespace Tanzu.Toolkit.Services.CfCli
             return result;
         }
 
-        /// <summary>
-        /// Invokes `cf push` with the specified app name. Assumes the proper org & space have already been targeted.
-        /// </summary>
-        /// <param name="appName"></param>
-        /// <param name="stdOutCallback"></param>
-        /// <param name="stdErrCallback"></param>
-        /// <param name="appDir"></param>
-        public async Task<DetailedResult> PushAppAsync(string appName, string orgName, string spaceName, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback, string appDirPath, string buildpack = null, string stack = null, string startCommand = null, string manifestPath = null)
+        public async Task<DetailedResult> PushAppAsync(string manifestPath, string appDirPath, string orgName, string spaceName, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback)
         {
-            string args = $"push \"{appName}\"";
+            string args = $"push -f \"{manifestPath}\"";
 
-            if (buildpack != null)
+            if (!_fileService.FileExists(manifestPath))
             {
-                args += $" -b {buildpack}";
-            }
-
-            if (stack != null)
-            {
-                args += $" -s {stack}";
-            }
-
-            if (startCommand != null)
-            {
-                args += $" -c \"{startCommand}\"";
-            }
-
-            if (manifestPath != null)
-            {
-                args += $" -f \"{manifestPath}\"";
-            }
-
-            if (appDirPath != null)
-            {
-                args += $" -p \"{appDirPath}\"";
+                string msg = $"Unable to deploy app; no manifest file found at '{manifestPath}'";
+                _logger.Error(msg);
+                return new DetailedResult(false, explanation: msg);
             }
 
             Task<DetailedResult> deployTask;
@@ -345,7 +320,7 @@ namespace Tanzu.Toolkit.Services.CfCli
                 var targetOrgResult = TargetOrg(orgName);
                 if (!targetOrgResult.Succeeded)
                 {
-                    string msg = $"Unable to deploy app '{appName}'; failed to target org '{orgName}'.\n{targetOrgResult.Explanation}";
+                    string msg = $"Unable to deploy app from '{manifestPath}'; failed to target org '{orgName}'.\n{targetOrgResult.Explanation}";
                     _logger.Error(msg);
                     return new DetailedResult(false, explanation: msg, targetOrgResult.CmdResult);
                 }
@@ -353,7 +328,7 @@ namespace Tanzu.Toolkit.Services.CfCli
                 var targetSpaceResult = TargetSpace(spaceName);
                 if (!targetSpaceResult.Succeeded)
                 {
-                    string msg = $"Unable to deploy app '{appName}'; failed to target space '{spaceName}'.\n{targetSpaceResult.Explanation}";
+                    string msg = $"Unable to deploy app from '{manifestPath}'; failed to target space '{spaceName}'.\n{targetSpaceResult.Explanation}";
                     _logger.Error(msg);
                     return new DetailedResult(false, explanation: msg, targetSpaceResult.CmdResult);
                 }
@@ -367,6 +342,7 @@ namespace Tanzu.Toolkit.Services.CfCli
 
             return deployResult;
         }
+
 
         public async Task<DetailedResult<string>> GetRecentAppLogs(string appName, string orgName, string spaceName)
         {
@@ -414,7 +390,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         /// <returns>A <see cref="DetailedResult"/> containing the results of the CF command.</returns>
         public DetailedResult ExecuteCfCliCommand(string arguments, string workingDir = null)
         {
-            string pathToCfExe = _fileLocatorService.FullPathToCfExe;
+            string pathToCfExe = _fileService.FullPathToCfExe;
             if (string.IsNullOrEmpty(pathToCfExe))
             {
                 return new DetailedResult(false, _cfExePathErrorMsg);
@@ -460,7 +436,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         /// <returns>An awaitable <see cref="Task"/> which will return a <see cref="DetailedResult"/> containing the results of the CF command.</returns>
         internal async Task<DetailedResult> RunCfCommandAsync(string arguments, StdOutDelegate stdOutCallback = null, StdErrDelegate stdErrCallback = null, string workingDir = null)
         {
-            string pathToCfExe = _fileLocatorService.FullPathToCfExe;
+            string pathToCfExe = _fileService.FullPathToCfExe;
             if (string.IsNullOrEmpty(pathToCfExe))
             {
                 return new DetailedResult(false, $"Unable to locate cf.exe.");

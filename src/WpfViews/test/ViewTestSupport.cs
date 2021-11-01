@@ -6,6 +6,7 @@ using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.ErrorDialog;
+using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
@@ -30,6 +31,7 @@ namespace Tanzu.Toolkit.WpfViews.Tests
         protected Mock<IThreadingService> mockThreadingService;
         protected Mock<IThemeService> mockThemeService;
         protected Mock<IViewService> mockViewService;
+        protected Mock<IFileService> mockFileService;
 
         // ViewModels
         protected Mock<ITasExplorerViewModel> mockTasExplorerViewModel;
@@ -47,6 +49,7 @@ namespace Tanzu.Toolkit.WpfViews.Tests
             mockThemeService = new Mock<IThemeService>();
             mockViewService = new Mock<IViewService>();
             mockTasExplorerViewModel = new Mock<ITasExplorerViewModel>();
+            mockFileService = new Mock<IFileService>();
 
             mockLogger = new Mock<ILogger>();
             mockLoggingService.SetupGet(m => m.Logger).Returns(mockLogger.Object);
@@ -61,6 +64,7 @@ namespace Tanzu.Toolkit.WpfViews.Tests
             services.AddSingleton(mockThemeService.Object);
             services.AddSingleton(mockViewService.Object);
             services.AddSingleton(mockTasExplorerViewModel.Object);
+            services.AddSingleton(mockFileService.Object);
 
             this.services = services.BuildServiceProvider();
         }

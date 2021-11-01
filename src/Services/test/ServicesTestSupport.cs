@@ -1,6 +1,8 @@
-﻿using System.Security;
+﻿using System.Collections.Generic;
+using System.Security;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services.CommandProcess;
+using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.Services.Tests
 {
@@ -52,6 +54,9 @@ namespace Tanzu.Toolkit.Services.Tests
         protected static readonly bool _skipSsl = true;
         protected static readonly string _fakeValidAccessToken = "valid token";
         protected static readonly string _fakeProjectPath = "this\\is\\a\\fake\\path";
+        protected static readonly string _fakeManifestPath = "this\\is\\a\\fake\\path"; 
+        protected static readonly StdOutDelegate _fakeOutCallback = content => { };
+        protected static readonly StdErrDelegate _fakeErrCallback = content => { };
 
         protected static readonly CloudFoundryInstance FakeCfInstance = new CloudFoundryInstance("fake cf", _fakeValidTarget);
         protected static readonly CloudFoundryOrganization FakeOrg = new CloudFoundryOrganization("fake org", "fake org guid", FakeCfInstance);
@@ -95,5 +100,126 @@ namespace Tanzu.Toolkit.Services.Tests
          * This is a real JWT from the Jamestown CF environment which expired on June 8th 2021
          */
         internal static readonly string expiredAccessToken = "eyJhbGciOiJSUzI1NiIsImprdSI6Imh0dHBzOi8vdWFhLnN5cy5qYW1lc3Rvd24uY2YtYXBwLmNvbS90b2tlbl9rZXlzIiwia2lkIjoia2V5LTEiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiIyNmY3ZGFhNTI5MDM0OGVmOWQyZTRkYTg4MmZiMWMyZiIsInN1YiI6IjY0NzljMjY0LWE3YTQtNGRiYS05MGFmLTk1MGE4YTMyODE5ZSIsInNjb3BlIjpbIm9wZW5pZCIsInJvdXRpbmcucm91dGVyX2dyb3Vwcy53cml0ZSIsIm5ldHdvcmsud3JpdGUiLCJzY2ltLnJlYWQiLCJjbG91ZF9jb250cm9sbGVyLmFkbWluIiwidWFhLnVzZXIiLCJyb3V0aW5nLnJvdXRlcl9ncm91cHMucmVhZCIsImNsb3VkX2NvbnRyb2xsZXIucmVhZCIsInBhc3N3b3JkLndyaXRlIiwiY2xvdWRfY29udHJvbGxlci53cml0ZSIsIm5ldHdvcmsuYWRtaW4iLCJkb3BwbGVyLmZpcmVob3NlIiwic2NpbS53cml0ZSJdLCJjbGllbnRfaWQiOiJjZiIsImNpZCI6ImNmIiwiYXpwIjoiY2YiLCJncmFudF90eXBlIjoicGFzc3dvcmQiLCJ1c2VyX2lkIjoiNjQ3OWMyNjQtYTdhNC00ZGJhLTkwYWYtOTUwYThhMzI4MTllIiwib3JpZ2luIjoidWFhIiwidXNlcl9uYW1lIjoiYWRtaW4iLCJlbWFpbCI6ImFkbWluIiwiYXV0aF90aW1lIjoxNjIzMTY0ODE2LCJyZXZfc2lnIjoiNDFkOTJiYiIsImlhdCI6MTYyMzE4MTEzNSwiZXhwIjoxNjIzMTg4MzM1LCJpc3MiOiJodHRwczovL3VhYS5zeXMuamFtZXN0b3duLmNmLWFwcC5jb20vb2F1dGgvdG9rZW4iLCJ6aWQiOiJ1YWEiLCJhdWQiOlsiY2xvdWRfY29udHJvbGxlciIsInNjaW0iLCJwYXNzd29yZCIsImNmIiwidWFhIiwib3BlbmlkIiwiZG9wcGxlciIsIm5ldHdvcmsiLCJyb3V0aW5nLnJvdXRlcl9ncm91cHMiXX0.qCfIxuJb2Xv21pq9idUO44PY50n4FY1cTwpmoWbjAmVs2Cu1smeD2L8gJFSZtg04MlKEJLspfSwfsAfu4YTbUB_iWyBmrZybnZFNrU335z8jReAnHTD5Nq5wVvPLNKdwVy3VyyhHTpD7BQ-oTPLDFaVTysoqR8C13ln0Sbr8jctOHVGRS8sOxJVedtRrLAhQUtZJUPpxbq4msFa0YWLQfXRwWTUc4boYOqtHx1jXg5T2qOJDcUF8MvvLE5ROnfsRciMEtCjCqJsteIEG2lfHcE7JwH3XXSJoiz1pIBoDw1DEUplHmNgQ1saK7tNQu-gg4RVWHFKvqhnGwT94buwHkA";
+
+        internal readonly AppManifest exampleManifest = new AppManifest
+        {
+            Version = 1,
+            Applications = new List<AppConfig>
+                {
+                    new AppConfig
+                    {
+                        Name = "app1",
+                        Buildpacks = new List<string>
+                        {
+                            "ruby_buildpack",
+                            "java_buildpack",
+                        },
+                        Env = new Dictionary<string, string>
+                        {
+                            {"my_snake_case_var_key", "my_snake_case_var_val" },
+                            {"my-kebab-case-var-key", "my-kebab-case-var-val" },
+                            {"myCamelCaseVarKey", "myCamelCaseVarVal" },
+                            {"MyPascalCaseVarKey", "MyPascalCaseVarVal" },
+                            {"MY_UPPER_CASE_VAR_KEY", "MY_UPPER_CASE_VAR_VAL" },
+                        },
+                        Routes = new List<RouteConfig>
+                        {
+                            new RouteConfig
+                            {
+                                Route = "route.example.com",
+                            },
+                            new RouteConfig
+                            {
+                                Route = "another-route.example.com",
+                                Protocol = "http2"
+                            },
+                        },
+                        Services = new List<string> {
+                            "my-service1",
+                            "my-service2",
+                        },
+                        Stack = "cflinuxfs3",
+                        Metadata = new MetadataConfig
+                        {
+                            Annotations = new Dictionary<string, string>
+                            {
+                                { "contact", "bob@example.com jane@example.com" },
+                            },
+                            Labels = new Dictionary<string, string>
+                            {
+                                { "sensitive", "true" },
+                            },
+                        },
+                        Processes = new List<ProcessConfig>
+                        {
+                            new ProcessConfig
+                            {
+                                Type = "web",
+                                Command = "start-web.sh",
+                                DiskQuota = "512M",
+                                HealthCheckHttpEndpoint = "/healthcheck",
+                                HealthCheckType = "http",
+                                HealthCheckInvocationTimeout = 10,
+                                Instances = 3,
+                                Memory = "500M",
+                                Timeout = 10,
+                            },
+                            new ProcessConfig
+                            {
+                                Type = "worker",
+                                Command = "start-worker.sh",
+                                DiskQuota = "1G",
+                                HealthCheckType = "process",
+                                Instances = 2,
+                                Memory = "256M",
+                                Timeout = 15,
+                            },
+                        }
+                    },
+                    new AppConfig
+                    {
+                        Name = "app2",
+                        Env = new Dictionary<string, string>
+                        {
+                            { "VAR1", "value1" },
+                        },
+                        Processes = new List<ProcessConfig>
+                        {
+                            new ProcessConfig
+                            {
+                                Type = "web",
+                                Instances = 1,
+                                Memory = "256M",
+                            },
+                        },
+                        Sidecars = new List<SidecarConfig>
+                        {
+                            new SidecarConfig
+                            {
+                                Name = "authenticator",
+                                ProcessTypes = new List<string>
+                                {
+                                    "web",
+                                    "worker",
+                                },
+                                Command = "bundle exec run-authenticator",
+                                Memory = "800M",
+                            },
+                            new SidecarConfig
+                            {
+                                Name = "upcaser",
+                                ProcessTypes = new List<string>
+                                {
+                                    "worker",
+                                },
+                                Command = "./tr-server",
+                                Memory = "2G",
+                            }
+                        }
+                    }
+                }
+        };
+
+        internal readonly string exampleManifestYaml = System.IO.File.ReadAllText("TestFakes/SampleManifest.yml");
     }
 }

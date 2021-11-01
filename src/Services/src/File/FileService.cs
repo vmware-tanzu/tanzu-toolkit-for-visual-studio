@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
 
-namespace Tanzu.Toolkit.Services.FileLocator
+namespace Tanzu.Toolkit.Services.File
 {
-    public class FileLocatorService : IFileLocatorService
+    public class FileService : IFileService
     {
         private const string _cfCliV6ExeName = "cf6.exe";
         private const string _cfCliV6Dir = "Resources";
@@ -18,7 +18,7 @@ namespace Tanzu.Toolkit.Services.FileLocator
         private readonly string _pathToCf7Exe;
         private readonly string _vsixBaseDirPath;
 
-        public FileLocatorService(string vsixBaseDirPath)
+        public FileService(string vsixBaseDirPath)
         {
             _vsixBaseDirPath = vsixBaseDirPath;
 
@@ -52,14 +52,14 @@ namespace Tanzu.Toolkit.Services.FileLocator
                 switch (_cliVersion)
                 {
                     case 6:
-                        if (File.Exists(_pathToCf6Exe))
+                        if (System.IO.File.Exists(_pathToCf6Exe))
                         {
                             return _pathToCf6Exe;
                         }
 
                         break;
                     case 7:
-                        if (File.Exists(_pathToCf7Exe))
+                        if (System.IO.File.Exists(_pathToCf7Exe))
                         {
                             return _pathToCf7Exe;
                         }
@@ -69,6 +69,11 @@ namespace Tanzu.Toolkit.Services.FileLocator
 
                 throw new Exception($"Unable to locate cf.exe for CLI version {_cliVersion}.");
             }
+        }
+
+        public bool DirectoryExists(string dirPath)
+        {
+            return Directory.Exists(dirPath);
         }
 
         public bool DirContainsFiles(string dirPath)
@@ -98,6 +103,44 @@ namespace Tanzu.Toolkit.Services.FileLocator
             {
                 return Path.Combine(VsixPackageBaseDir, _defaultCfCliDir, _defaultCfCliConfigFileName);
             }
+        }
+
+        public void WriteTextToFile(string filePath, string contentsToWrite)
+        {
+            System.IO.File.WriteAllText(filePath, contentsToWrite);
+        }
+
+        public string ReadFileContents(string filePath)
+        {
+            return System.IO.File.ReadAllText(filePath);
+        }
+
+        public string[] ReadFileLines(string filePath)
+        {
+            return System.IO.File.ReadAllLines(filePath);
+        }
+
+        public bool FileExists(string filePath)
+        {
+            return System.IO.File.Exists(filePath);
+        }
+
+        public string GetUniquePathForTempFile(string fileName = "")
+        {
+            string tmpDirPath = Path.Combine(VsixPackageBaseDir, "tmp");
+
+            if (!Directory.Exists(tmpDirPath))
+            {
+                Directory.CreateDirectory(tmpDirPath);
+            }
+
+            string uniqueFileName = fileName + DateTimeOffset.Now.ToUnixTimeSeconds().ToString();
+            return Path.Combine(tmpDirPath, uniqueFileName);
+        }
+
+        public void DeleteFile(string filePath)
+        {
+            System.IO.File.Delete(filePath);
         }
     }
 }
