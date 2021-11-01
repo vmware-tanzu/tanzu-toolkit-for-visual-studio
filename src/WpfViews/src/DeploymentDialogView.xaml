@@ -7,7 +7,7 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:wpfviews="clr-namespace:Tanzu.Toolkit.VisualStudio.WpfViews"
         Name="DeploymentDialogViewElement"
-        Title="Deploy to Tanzu Application Service"
+        Title="Push to Tanzu Application Service"
         Icon="Resources/tas_16px.png"
         Width="600"
         BorderBrush="{Binding ElementName=DeploymentDialogViewElement, Path=Foreground }"
@@ -67,7 +67,7 @@
 
             <!--MAIN GRID ROW 0-->
             <StackPanel VerticalAlignment="Center" Grid.Row="0">
-                <TextBlock VerticalAlignment="Center" Text="Deployment Target:" />
+                <TextBlock VerticalAlignment="Center" Text="Target Environment:" />
             </StackPanel>
 
             <Button Grid.Row="0" 
