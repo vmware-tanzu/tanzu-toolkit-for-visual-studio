@@ -101,31 +101,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             return visibleOrgs;
         }
 
-        public async Task<List<Space>> ListSpaces(string cfTarget, string accessToken)
-        {
-            try
-            {
-                // trust any certificate
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-                ServicePointManager.ServerCertificateValidationCallback +=
-                    (sender, cert, chain, sslPolicyErrors) => { return true; };
-
-                var uri = new UriBuilder(cfTarget)
-                {
-                    Path = ListSpacesPath,
-                };
-
-                HypertextReference firstPageHref = new HypertextReference() { Href = uri.ToString() };
-
-                return await GetRemainingPagesForType(firstPageHref, accessToken, new List<Space>());
-            }
-            catch (Exception e)
-            {
-                System.Diagnostics.Debug.WriteLine(e);
-                return null;
-            }
-        }
-
         /// <summary>
         /// Recursively requests all pages of results for spaces under the org specified by <paramref name="orgGuid"/>.
         /// <para>
