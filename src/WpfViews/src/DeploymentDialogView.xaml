@@ -452,27 +452,40 @@
 
         </Grid>
 
-        <StackPanel 
-            DockPanel.Dock="Bottom"
-            Margin="12"
-            Orientation="Horizontal"
-            Grid.Row="7"
-            Grid.Column="1"
-            HorizontalAlignment="Right">
+        <Grid DockPanel.Dock="Bottom">
+            <StackPanel 
+                Margin="12"
+                Orientation="Horizontal"
+                HorizontalAlignment="Left">
 
-            <Button 
-                Content="Push App" 
-                HorizontalAlignment="Right"
-                Margin="4"
-                Padding="4"
-                Command="{ Binding ElementName=DeploymentDialogViewElement, Path=UploadAppCommand }" 
-                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
+                <Button
+                    Margin="4"
+                    Padding="4"
+                    Click="Close"
+                    Content="Cancel"/>
+            
+            </StackPanel>
 
-            <Button 
-                Margin="4"
-                Padding="4"
-                Click="Close"
-                Content="Cancel"/>
-        </StackPanel>
+            <StackPanel 
+                Margin="12"
+                Orientation="Horizontal"
+                HorizontalAlignment="Right">
+
+                <Button 
+                    Content="Save As Manifest File..." 
+                    Margin="4"
+                    Padding="4"
+                    IsEnabled="{Binding IsLoggedIn}"
+                    Click="SaveManifestButton_Click"/>
+                
+                <Button 
+                    Content="Push App" 
+                    Margin="4"
+                    Padding="4"
+                    Command="{ Binding ElementName=DeploymentDialogViewElement, Path=UploadAppCommand }" 
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
+            
+            </StackPanel>
+        </Grid>
     </DockPanel>
 </Window>

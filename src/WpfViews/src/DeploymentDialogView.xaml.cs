@@ -107,5 +107,15 @@ namespace Tanzu.Toolkit.WpfViews
                 _viewModel.RemoveFromSelectedBuildpacks(cb.Content);
             }
         }
+
+        private void SaveManifestButton_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+
+            if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                _viewModel.SaveManifestAsFile(saveFileDialog.FileName);
+            }
+        }
     }
 }
