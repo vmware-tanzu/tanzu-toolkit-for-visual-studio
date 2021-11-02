@@ -852,12 +852,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         {
             try
             {
-                var serializer = new SerializerBuilder()
-                    .WithNamingConvention(CfAppManifestNamingConvention.Instance)
-                    .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults)
-                    .Build();
-
-                string ymlContents = serializer.Serialize(manifest);
+                string ymlContents = SerializeManifest(manifest);
 
                 _fileService.WriteTextToFile(location, "---\n" + ymlContents);
 
@@ -874,6 +869,16 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                     Explanation = ex.Message,
                 };
             }
+        }
+
+        public string SerializeManifest(AppManifest manifest)
+        {
+            var serializer = new SerializerBuilder()
+                                .WithNamingConvention(CfAppManifestNamingConvention.Instance)
+                                .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults)
+                                .Build();
+
+            return serializer.Serialize(manifest);
         }
 
         public DetailedResult<AppManifest> ParseManifestFile(string pathToManifestFile)

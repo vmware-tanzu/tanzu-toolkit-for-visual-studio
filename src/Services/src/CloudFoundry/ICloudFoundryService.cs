@@ -21,5 +21,6 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         DetailedResult<AppManifest> ParseManifestFile(string pathToManifestFile);
         Task<DetailedResult> DeployAppAsync(AppManifest appManifest, CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback);
         Task<DetailedResult<List<string>>> GetStackNamesAsync(CloudFoundryInstance cf, int retryAmount = 1);
+        string SerializeManifest(AppManifest manifest);
     }
 }
