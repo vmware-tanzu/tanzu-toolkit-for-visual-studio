@@ -208,8 +208,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut = new DeploymentDialogViewModel(Services, _fakeProjName, _fakeProjectPath, FakeTargetFrameworkMoniker);
 
             Assert.IsNotNull(_sut.ManifestModel);
-            Assert.AreEqual(_fakeProjName, _sut.ManifestModel.Applications[0].Name);
-            Assert.AreEqual(_fakeProjectPath, _sut.ManifestModel.Applications[0].Path);
+            Assert.IsNotNull(_sut.ManifestModel.Applications[0]);
+            
+            var manifestModelApp = _sut.ManifestModel.Applications[0];
+            Assert.IsNotNull(manifestModelApp.Name);
+            Assert.IsNotNull(manifestModelApp.Path);
+            Assert.IsNotNull(manifestModelApp.Buildpacks);
+            Assert.AreEqual(_fakeProjName, manifestModelApp.Name);
+            Assert.AreEqual(_fakeProjectPath, manifestModelApp.Path);
+            CollectionAssert.AreEquivalent(new List<string>(), manifestModelApp.Buildpacks);
         }
 
         [TestMethod]

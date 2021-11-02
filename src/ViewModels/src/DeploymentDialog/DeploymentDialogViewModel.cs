@@ -95,6 +95,7 @@ namespace Tanzu.Toolkit.ViewModels
                     {
                         Name = projectName,
                         Path = directoryOfProjectToDeploy,
+                        Buildpacks = new List<string>(),
                     }
                 }
             };
