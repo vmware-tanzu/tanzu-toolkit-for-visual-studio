@@ -610,17 +610,17 @@ namespace Tanzu.Toolkit.ViewModels
             RaisePropertyChangedEvent("SelectedBuildpacks");
         }
 
-        public void SaveManifestAsFile(string newFilePath)
+        public void WriteManifestToFile(string path)
         {
             try
             {
                 var manifestContents = CloudFoundryService.SerializeManifest(ManifestModel);
 
-                FileService.WriteTextToFile(newFilePath, manifestContents);
+                FileService.WriteTextToFile(path, manifestContents);
             }
             catch (Exception ex)
             {
-                var errorMsg = $"Encountered an error while writing manifest contents to new file {newFilePath} : {ex.Message}";
+                var errorMsg = $"Encountered an error while writing manifest contents to new file {path} : {ex.Message}";
                 
                 Logger.Error(errorMsg);
 
