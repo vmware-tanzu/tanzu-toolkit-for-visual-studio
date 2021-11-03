@@ -610,6 +610,24 @@ namespace Tanzu.Toolkit.ViewModels
             RaisePropertyChangedEvent("SelectedBuildpacks");
         }
 
+        public void SaveManifestAsFile(string newFilePath)
+        {
+            try
+            {
+                var manifestContents = CloudFoundryService.SerializeManifest(ManifestModel);
+
+                FileService.WriteTextToFile(newFilePath, manifestContents);
+            }
+            catch (Exception ex)
+            {
+                var errorMsg = $"Encountered an error while writing manifest contents to new file {newFilePath} : {ex.Message}";
+                
+                Logger.Error(errorMsg);
+
+                _errorDialogService.DisplayErrorDialog("Unable to save manifest file", errorMsg);
+            }
+        }
+
         internal async Task StartDeployment()
         {
             var deploymentResult = await CloudFoundryService.DeployAppAsync(
