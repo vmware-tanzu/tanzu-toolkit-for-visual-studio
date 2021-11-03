@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -95,7 +96,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             CollectionAssert.AreEqual(new List<BuildpackListItem>(), _sut.BuildpackOptions);
         }
-        
+
         [TestMethod]
         [TestCategory("ctor")]
         [TestCategory("StackOptions")]
@@ -170,7 +171,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
             MockThreadingService.Verify(m => m.StartTask(_sut.UpdateBuildpackOptions), Times.Once);
         }
-        
+
         [TestMethod]
         [TestCategory("ctor")]
         [TestCategory("StackOptions")]
@@ -209,7 +210,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsNotNull(_sut.ManifestModel);
             Assert.IsNotNull(_sut.ManifestModel.Applications[0]);
-            
+
             var manifestModelApp = _sut.ManifestModel.Applications[0];
             Assert.IsNotNull(manifestModelApp.Name);
             Assert.IsNotNull(manifestModelApp.Path);
@@ -835,7 +836,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
             MockThreadingService.Verify(m => m.StartTask(_sut.UpdateBuildpackOptions), Times.Once);
         }
-        
+
         [TestMethod]
         [TestCategory("OpenLoginView")]
         [TestCategory("StackOptions")]
@@ -1596,6 +1597,36 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             await _sut.UpdateStackOptions();
 
             CollectionAssert.AreEquivalent(new List<string>(), _sut.StackOptions);
+        }
+
+        [TestMethod]
+        [TestCategory("SaveManifestAsFile")]
+        public void SaveManifestAsFile_WritesSerializedManifestToGivenFilePath()
+        {
+            var fakeFilePath = "junk";
+            var fakeSerializedManifest = "fake yaml content";
+
+            MockCloudFoundryService.Setup(m => m.SerializeManifest(_sut.ManifestModel)).Returns(fakeSerializedManifest);
+
+            _sut.SaveManifestAsFile(fakeFilePath);
+
+            MockFileService.Verify(m => m.WriteTextToFile(fakeFilePath, fakeSerializedManifest), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("SaveManifestAsFile")]
+        public void SaveManifestAsFile_DisplaysErrorDialog_AndLogsError_WhenFileCreationFails()
+        {
+            var fakeFilePath = "junk";
+            var fakeSerializedManifest = "fake yaml content";
+            var fakeExceptionMsg = ":(";
+
+            MockCloudFoundryService.Setup(m => m.SerializeManifest(_sut.ManifestModel)).Returns(fakeSerializedManifest);
+            MockFileService.Setup(m => m.WriteTextToFile(fakeFilePath, fakeSerializedManifest)).Throws(new Exception(fakeExceptionMsg));
+
+            _sut.SaveManifestAsFile(fakeFilePath);
+
+            MockErrorDialogService.Verify(m => m.DisplayErrorDialog("Unable to save manifest file", It.Is<string>(s => s.Contains(fakeExceptionMsg) && s.Contains(fakeFilePath))), Times.Once);
         }
     }
 
