@@ -113,6 +113,7 @@ namespace Tanzu.Toolkit.WpfViews
             SaveFileDialog saveFileDialog = new SaveFileDialog()
             {
                 DefaultExt = "yml",
+                InitialDirectory = _viewModel.PathToProjectRootDir,
             };
 
             if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
