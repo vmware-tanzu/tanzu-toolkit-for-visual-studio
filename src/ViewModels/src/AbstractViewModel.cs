@@ -27,6 +27,7 @@ namespace Tanzu.Toolkit.ViewModels
             ThreadingService = services.GetRequiredService<IThreadingService>();
             UiDispatcherService = services.GetRequiredService<IUiDispatcherService>();
             FileService = services.GetRequiredService<IFileService>();
+            SerializationService = services.GetRequiredService<ISerializationService>();
             var logSvc = services.GetRequiredService<ILoggingService>();
             Logger = logSvc.Logger;
         }
@@ -46,6 +47,8 @@ namespace Tanzu.Toolkit.ViewModels
         public IFileService FileService { get; }
 
         public ILogger Logger { get; }
+        
+        public ISerializationService SerializationService { get; }
 
         public object ActiveView
         {

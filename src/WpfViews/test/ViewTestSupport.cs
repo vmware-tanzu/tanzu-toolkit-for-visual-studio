@@ -32,6 +32,7 @@ namespace Tanzu.Toolkit.WpfViews.Tests
         protected Mock<IThemeService> mockThemeService;
         protected Mock<IViewService> mockViewService;
         protected Mock<IFileService> mockFileService;
+        protected Mock<ISerializationService> mockSerializationService;
 
         // ViewModels
         protected Mock<ITasExplorerViewModel> mockTasExplorerViewModel;
@@ -50,6 +51,7 @@ namespace Tanzu.Toolkit.WpfViews.Tests
             mockViewService = new Mock<IViewService>();
             mockTasExplorerViewModel = new Mock<ITasExplorerViewModel>();
             mockFileService = new Mock<IFileService>();
+            mockSerializationService = new Mock<ISerializationService>();
 
             mockLogger = new Mock<ILogger>();
             mockLoggingService.SetupGet(m => m.Logger).Returns(mockLogger.Object);
@@ -65,6 +67,7 @@ namespace Tanzu.Toolkit.WpfViews.Tests
             services.AddSingleton(mockViewService.Object);
             services.AddSingleton(mockTasExplorerViewModel.Object);
             services.AddSingleton(mockFileService.Object);
+            services.AddSingleton(mockSerializationService.Object);
 
             this.services = services.BuildServiceProvider();
         }

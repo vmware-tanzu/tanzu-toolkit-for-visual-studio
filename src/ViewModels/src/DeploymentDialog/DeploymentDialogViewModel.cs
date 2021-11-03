@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
+using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.ErrorDialog;
 
 [assembly: InternalsVisibleTo("Tanzu.Toolkit.ViewModels.Tests")]
@@ -163,16 +164,19 @@ namespace Tanzu.Toolkit.ViewModels
 
                     ManifestPathLabel = _manifestPath;
 
-                    var parsingResult = CloudFoundryService.ParseManifestFile(_manifestPath);
+                    try
+                    {
+                        string manifestContents = FileService.ReadFileContents(value);
 
-                    if (parsingResult.Succeeded)
-                    {
-                        ManifestModel = parsingResult.Content;
+                        AppManifest parsedManifest = SerializationService.ParseCfAppManifest(manifestContents);
+                        
+                        ManifestModel = parsedManifest;
                         SetViewModelValuesFromManifest(ManifestModel);
+
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        _errorDialogService.DisplayErrorDialog(ManifestParsingErrorTitle, parsingResult.Explanation);
+                        _errorDialogService.DisplayErrorDialog(ManifestParsingErrorTitle, ex.Message);
                     }
                 }
                 else
@@ -614,14 +618,14 @@ namespace Tanzu.Toolkit.ViewModels
         {
             try
             {
-                var manifestContents = CloudFoundryService.SerializeManifest(ManifestModel);
+                var manifestContents = SerializationService.SerializeCfAppManifest(ManifestModel);
 
                 FileService.WriteTextToFile(path, manifestContents);
             }
             catch (Exception ex)
             {
                 var errorMsg = $"Encountered an error while writing manifest contents to new file {path} : {ex.Message}";
-                
+
                 Logger.Error(errorMsg);
 
                 _errorDialogService.DisplayErrorDialog("Unable to save manifest file", errorMsg);
