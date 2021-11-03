@@ -110,7 +110,10 @@ namespace Tanzu.Toolkit.WpfViews
 
         private void SaveManifestButton_Click(object sender, RoutedEventArgs e)
         {
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            SaveFileDialog saveFileDialog = new SaveFileDialog()
+            {
+                DefaultExt = "yml",
+            };
 
             if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
