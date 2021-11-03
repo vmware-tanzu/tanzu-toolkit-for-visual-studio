@@ -1608,7 +1608,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             MockCloudFoundryService.Setup(m => m.SerializeManifest(_sut.ManifestModel)).Returns(fakeSerializedManifest);
 
-            _sut.SaveManifestAsFile(fakeFilePath);
+            _sut.WriteManifestToFile(fakeFilePath);
 
             MockFileService.Verify(m => m.WriteTextToFile(fakeFilePath, fakeSerializedManifest), Times.Once);
         }
@@ -1624,7 +1624,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockCloudFoundryService.Setup(m => m.SerializeManifest(_sut.ManifestModel)).Returns(fakeSerializedManifest);
             MockFileService.Setup(m => m.WriteTextToFile(fakeFilePath, fakeSerializedManifest)).Throws(new Exception(fakeExceptionMsg));
 
-            _sut.SaveManifestAsFile(fakeFilePath);
+            _sut.WriteManifestToFile(fakeFilePath);
 
             MockErrorDialogService.Verify(m => m.DisplayErrorDialog("Unable to save manifest file", It.Is<string>(s => s.Contains(fakeExceptionMsg) && s.Contains(fakeFilePath))), Times.Once);
         }

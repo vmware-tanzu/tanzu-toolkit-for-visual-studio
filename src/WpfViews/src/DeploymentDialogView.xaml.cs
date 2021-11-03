@@ -118,7 +118,7 @@ namespace Tanzu.Toolkit.WpfViews
 
             if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                _viewModel.SaveManifestAsFile(saveFileDialog.FileName);
+                _viewModel.WriteManifestToFile(saveFileDialog.FileName);
             }
         }
     }
