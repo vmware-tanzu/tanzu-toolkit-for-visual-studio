@@ -30,6 +30,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         private Mock<IErrorDialog> _mockErrorDialogWindowService;
         private Mock<ICommandProcessService> _mockCommandProcessService;
         private Mock<IFileService> _mockFileService;
+        private Mock<ISerializationService> _mockSerializationService;
         private Mock<ILoggingService> _mockLoggingService;
         private Mock<ILogger> _mockLogger;
 
@@ -42,6 +43,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             _mockErrorDialogWindowService = new Mock<IErrorDialog>();
             _mockCommandProcessService = new Mock<ICommandProcessService>();
             _mockFileService = new Mock<IFileService>();
+            _mockSerializationService = new Mock<ISerializationService>();
             _mockLoggingService = new Mock<ILoggingService>();
 
             _mockLogger = new Mock<ILogger>();
@@ -52,6 +54,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             serviceCollection.AddSingleton(_mockErrorDialogWindowService.Object);
             serviceCollection.AddSingleton(_mockCommandProcessService.Object);
             serviceCollection.AddSingleton(_mockFileService.Object);
+            serviceCollection.AddSingleton(_mockSerializationService.Object);
             serviceCollection.AddSingleton(_mockLoggingService.Object);
 
             _services = serviceCollection.BuildServiceProvider();
@@ -1740,59 +1743,14 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         public void CreateManifestFile_ReturnsSuccessfulResult_WhenFileCreatedAtGivenPath()
         {
             string pathToFileCreation = "some//junk//path";
+            string fakeManifestContent = "some yaml";
+            string expectedWriteStr = $"---\n{fakeManifestContent}";
 
-            /* Assemble list of strings that should appear in the content that 
-             * gets passed to the file-creation method. This is NOT A COMPREHENSIVE LIST. */
-            List<string> expectedManifestEntries = new List<string>
-            {
-                "version: 1",
-                $"name: {exampleManifest.Applications[0].Name}",
-                $"name: {exampleManifest.Applications[1].Name}",
-                "applications:",
-                "buildpacks:",
-                "env:",
-                "routes:",
-                "health-check-http-endpoint:", // ensure hyphenated keys are properly serialized
-                "disk_quota:", // ensure keys with underscores are properly serialized
-            };
+            _mockSerializationService.Setup(m => m.SerializeCfAppManifest(exampleManifest))
+                .Returns(fakeManifestContent);
 
-            foreach (AppConfig app in exampleManifest.Applications)
-            {
-                if (app.Buildpacks != null)
-                {
-                    foreach (string bpName in app.Buildpacks)
-                    {
-                        expectedManifestEntries.Add(bpName);
-                    }
-                }
-
-                foreach (string key in app.Env.Keys)
-                {
-                    expectedManifestEntries.Add(key);
-                }
-
-                foreach (string val in app.Env.Values)
-                {
-                    expectedManifestEntries.Add(val);
-                }
-
-                if (app.Routes != null)
-                {
-                    foreach (RouteConfig rc in app.Routes)
-                    {
-                        expectedManifestEntries.Add($"- route: {rc.Route}");
-                        if (rc.Protocol != null)
-                        {
-                            expectedManifestEntries.Add(rc.Protocol);
-                        }
-                    }
-                }
-            }
-
-            _mockFileService.Setup(m => m.
-                WriteTextToFile(pathToFileCreation, It.Is<string>(s => s.StartsWith("---\n")
-                    && expectedManifestEntries.All(expectedStr => s.Contains(expectedStr))
-                ))).Verifiable();
+            _mockFileService.Setup(m => m.WriteTextToFile(pathToFileCreation, expectedWriteStr))
+                .Verifiable();
 
             var result = _sut.CreateManifestFile(pathToFileCreation, exampleManifest);
 
@@ -1821,60 +1779,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.AreEqual(fakeExceptionMsg, result.Explanation);
             Assert.IsNull(result.CmdResult);
             Assert.AreEqual(FailureType.None, result.FailureType);
-        }
-
-        [TestMethod]
-        [TestCategory("ParseManifestFile")]
-        public void ParseManifestFile_ReturnsSuccessfulResult_WhenFileExists_AndParsingSucceeds()
-        {
-            var manifestPath = "some//path";
-            var fakeManifestContent = exampleManifestYaml;
-
-            _mockFileService.Setup(m => m.FileExists(manifestPath)).Returns(true);
-            _mockFileService.Setup(m => m.ReadFileContents(manifestPath)).Returns(fakeManifestContent);
-
-            var result = _sut.ParseManifestFile(manifestPath);
-
-            Assert.IsTrue(result.Succeeded);
-            Assert.IsNull(result.Explanation);
-            Assert.IsNotNull(result.Content);
-            Assert.AreEqual("app1", result.Content.Applications[0].Name);
-            Assert.IsNull(result.CmdResult);
-        }
-
-        [TestMethod]
-        [TestCategory("ParseManifestFile")]
-        public void ParseManifestFile_ReturnsFailedResult_WhenFileDoesNotExist()
-        {
-            var manifestPath = "nonexistent//path";
-
-            _mockFileService.Setup(m => m.FileExists(manifestPath)).Returns(false);
-
-            var result = _sut.ParseManifestFile(manifestPath);
-
-            Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.Explanation.Contains($"No file exists at {manifestPath}"));
-            Assert.IsNull(result.Content);
-            Assert.IsNull(result.CmdResult);
-        }
-
-        [TestMethod]
-        [TestCategory("ParseManifestFile")]
-        public void ParseManifestFile_ReturnsFailedResult_WhenParsingFails()
-        {
-            var manifestPath = "some//path";
-            var parsingExMsg = "Couldn't parse file because I said so";
-            var parsingException = new Exception(parsingExMsg);
-
-            _mockFileService.Setup(m => m.FileExists(manifestPath)).Returns(true);
-            _mockFileService.Setup(m => m.ReadFileContents(manifestPath)).Throws(parsingException);
-            
-            var result = _sut.ParseManifestFile(manifestPath);
-
-            Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.Explanation.Contains(parsingExMsg));
-            Assert.IsNull(result.Content);
-            Assert.IsNull(result.CmdResult);
         }
 
         [TestMethod]
