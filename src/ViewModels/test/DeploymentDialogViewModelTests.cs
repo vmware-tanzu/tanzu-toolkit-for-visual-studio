@@ -908,6 +908,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public void ManifestPathSetter_SetsAppName_WhenManifestExistsAndContainsAppName()
         {
             var pathToFakeManifest = "some//fake//path";
+            var fakeManifestContent = "some yaml";
             var expectedAppName1 = "app1";
 
             var fakeAppManifest = new AppManifest
@@ -928,7 +929,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             };
 
             MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
-            MockCloudFoundryService.Setup(m => m.ParseManifestFile(pathToFakeManifest)).Returns(fakeManifestParsingResponse);
+            MockFileService.Setup(m => m.ReadFileContents(pathToFakeManifest)).Returns(fakeManifestContent);
+            MockSerializationService.Setup(m => m.ParseCfAppManifest(fakeManifestContent)).Returns(fakeAppManifest);
 
             Assert.AreNotEqual(expectedAppName1, _sut.AppName);
 
@@ -942,6 +944,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public void ManifestPathSetter_SetsStartCommand_WhenManifestExistsAndContainsStartCommand()
         {
             var pathToFakeManifest = "some//fake//path";
+            var fakeManifestContent = "some yaml";
             var expectedStartCommand = "my expected command";
 
             var fakeAppManifest = new AppManifest
@@ -955,14 +958,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 }
             };
 
-            var fakeManifestParsingResponse = new DetailedResult<AppManifest>
-            {
-                Succeeded = true,
-                Content = fakeAppManifest,
-            };
-
             MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
-            MockCloudFoundryService.Setup(m => m.ParseManifestFile(pathToFakeManifest)).Returns(fakeManifestParsingResponse);
+            MockFileService.Setup(m => m.ReadFileContents(pathToFakeManifest)).Returns(fakeManifestContent);
+            MockSerializationService.Setup(m => m.ParseCfAppManifest(fakeManifestContent)).Returns(fakeAppManifest);
 
             Assert.AreNotEqual(expectedStartCommand, _sut.StartCommand);
 
@@ -994,6 +992,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public void ManifestPathSetter_DoesNotChangeAppName_WhenManifestExistsButDoesNotContainAppName()
         {
             var pathToFakeManifest = "some//fake//path";
+            var fakeManifestContent = "some yaml";
 
             var fakeAppManifest = new AppManifest
             {
@@ -1012,7 +1011,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             };
 
             MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
-            MockCloudFoundryService.Setup(m => m.ParseManifestFile(pathToFakeManifest)).Returns(fakeManifestParsingResponse);
+            MockFileService.Setup(m => m.ReadFileContents(pathToFakeManifest)).Returns(fakeManifestContent);
+            MockSerializationService.Setup(m => m.ParseCfAppManifest(fakeManifestContent)).Returns(fakeAppManifest);
 
             var initialAppName = _sut.AppName;
 
@@ -1027,6 +1027,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public void ManifestPathSetter_SetsSelectedStack_WhenManifestExistsAndContainsStack()
         {
             var pathToFakeManifest = "some//fake//path";
+            var fakeManifestContent = "some yaml";
             var expectedAppName1 = "app1";
             var expectedFakeStackNameFromManifest = "windows";
 
@@ -1049,7 +1050,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             };
 
             MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
-            MockCloudFoundryService.Setup(m => m.ParseManifestFile(pathToFakeManifest)).Returns(fakeManifestParsingResponse);
+            MockFileService.Setup(m => m.ReadFileContents(pathToFakeManifest)).Returns(fakeManifestContent);
+            MockSerializationService.Setup(m => m.ParseCfAppManifest(fakeManifestContent)).Returns(fakeAppManifest);
 
             Assert.AreNotEqual(expectedFakeStackNameFromManifest, _sut.SelectedStack);
 
@@ -1077,6 +1079,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public void ManifestPathSetter_SetsSelectedBuildpacks_WhenManifestExistsAndContainsOneBuildpack()
         {
             var pathToFakeManifest = "some//fake//path";
+            var fakeManifestContent = "some yaml";
             var expectedAppName1 = "app1";
             var expectedBuildpackName1 = "my_cool_bp";
             var expectedSelectedBuildpacks = new ObservableCollection<string> { expectedBuildpackName1 };
@@ -1103,7 +1106,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             };
 
             MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
-            MockCloudFoundryService.Setup(m => m.ParseManifestFile(pathToFakeManifest)).Returns(fakeManifestParsingResponse);
+            MockFileService.Setup(m => m.ReadFileContents(pathToFakeManifest)).Returns(fakeManifestContent);
+            MockSerializationService.Setup(m => m.ParseCfAppManifest(fakeManifestContent)).Returns(fakeAppManifest);
 
             CollectionAssert.AreNotEquivalent(expectedSelectedBuildpacks, _sut.SelectedBuildpacks);
 
@@ -1118,6 +1122,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public void ManifestPathSetter_SetsSelectedBuildpacks_WhenManifestExistsAndContainsMoreThanOneBuildpack()
         {
             var pathToFakeManifest = "some//fake//path";
+            var fakeManifestContent = "some yaml";
             var expectedAppName1 = "app1";
             var expectedBuildpackName1 = "my_cool_bp";
             var expectedBuildpackName2 = "another";
@@ -1148,7 +1153,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             };
 
             MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
-            MockCloudFoundryService.Setup(m => m.ParseManifestFile(pathToFakeManifest)).Returns(fakeManifestParsingResponse);
+            MockFileService.Setup(m => m.ReadFileContents(pathToFakeManifest)).Returns(fakeManifestContent);
+            MockSerializationService.Setup(m => m.ParseCfAppManifest(fakeManifestContent)).Returns(fakeAppManifest);
 
             CollectionAssert.AreNotEquivalent(expectedSelectedBuildpacks, _sut.SelectedBuildpacks);
 
@@ -1178,22 +1184,21 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("SelectedBuildpacks")]
         public void ManifestPathSetter_DoesNotChangeSelectedBuildpacks_AndDisplaysError_WhenManifestParsingFails()
         {
-            var pathToManifest = "bogus//path";
+            var pathToFakeManifest = "bogus//path";
+            var fakeManifestContent = "some yaml";
+            var fakeExceptionMsg = "parser didn't get out of bed this morning";
+            var fakeParsingException = new Exception(fakeExceptionMsg);
+
             var initialBuildpack = _sut.SelectedBuildpacks;
-            var fakeParsingFailureMsg = "junk";
-            var fakeParsingFailureResponse = new DetailedResult<AppManifest>
-            {
-                Succeeded = false,
-                Explanation = fakeParsingFailureMsg,
-            };
 
-            MockFileService.Setup(m => m.FileExists(pathToManifest)).Returns(true);
-            MockCloudFoundryService.Setup(m => m.ParseManifestFile(pathToManifest)).Returns(fakeParsingFailureResponse);
+            MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
+            MockFileService.Setup(m => m.ReadFileContents(pathToFakeManifest)).Returns(fakeManifestContent);
+            MockSerializationService.Setup(m => m.ParseCfAppManifest(fakeManifestContent)).Throws(fakeParsingException);
 
-            _sut.ManifestPath = pathToManifest;
+            _sut.ManifestPath = pathToFakeManifest;
 
             Assert.AreEqual(initialBuildpack, _sut.SelectedBuildpacks);
-            MockErrorDialogService.Verify(m => m.DisplayErrorDialog(DeploymentDialogViewModel.ManifestParsingErrorTitle, fakeParsingFailureMsg), Times.Once);
+            MockErrorDialogService.Verify(m => m.DisplayErrorDialog(DeploymentDialogViewModel.ManifestParsingErrorTitle, fakeExceptionMsg), Times.Once);
         }
 
         [TestMethod]
@@ -1600,13 +1605,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("SaveManifestAsFile")]
-        public void SaveManifestAsFile_WritesSerializedManifestToGivenFilePath()
+        [TestCategory("WriteManifestToFile")]
+        public void WriteManifestToFile_WritesSerializedManifestToGivenFilePath()
         {
             var fakeFilePath = "junk";
             var fakeSerializedManifest = "fake yaml content";
 
-            MockCloudFoundryService.Setup(m => m.SerializeManifest(_sut.ManifestModel)).Returns(fakeSerializedManifest);
+            MockSerializationService.Setup(m => m.SerializeCfAppManifest(It.IsAny<AppManifest>())).Returns(fakeSerializedManifest);
 
             _sut.WriteManifestToFile(fakeFilePath);
 
@@ -1614,14 +1619,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("SaveManifestAsFile")]
-        public void SaveManifestAsFile_DisplaysErrorDialog_AndLogsError_WhenFileCreationFails()
+        [TestCategory("WriteManifestToFile")]
+        public void WriteManifestToFile_DisplaysErrorDialog_AndLogsError_WhenFileCreationFails()
         {
             var fakeFilePath = "junk";
             var fakeSerializedManifest = "fake yaml content";
             var fakeExceptionMsg = ":(";
 
-            MockCloudFoundryService.Setup(m => m.SerializeManifest(_sut.ManifestModel)).Returns(fakeSerializedManifest);
+            MockSerializationService.Setup(m => m.SerializeCfAppManifest(It.IsAny<AppManifest>())).Returns(fakeSerializedManifest);
             MockFileService.Setup(m => m.WriteTextToFile(fakeFilePath, fakeSerializedManifest)).Throws(new Exception(fakeExceptionMsg));
 
             _sut.WriteManifestToFile(fakeFilePath);

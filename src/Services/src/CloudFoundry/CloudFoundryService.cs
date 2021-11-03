@@ -15,7 +15,6 @@ using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
-using YamlDotNet.Serialization;
 using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.Services.CloudFoundry
@@ -32,6 +31,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         private readonly IFileService _fileService;
         private readonly IErrorDialog _dialogService;
         private readonly ILogger _logger;
+        private readonly ISerializationService _serializationService;
 
         public CloudFoundryService(IServiceProvider services)
         {
@@ -39,6 +39,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             _cfCliService = services.GetRequiredService<ICfCliService>();
             _fileService = services.GetRequiredService<IFileService>();
             _dialogService = services.GetRequiredService<IErrorDialog>();
+            _serializationService = services.GetRequiredService<ISerializationService>();
 
             var logSvc = services.GetRequiredService<ILoggingService>();
             _logger = logSvc.Logger;
@@ -852,13 +853,13 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         {
             try
             {
-                string ymlContents = SerializeManifest(manifest);
+                var ymlContents = _serializationService.SerializeCfAppManifest(manifest);
 
                 _fileService.WriteTextToFile(location, "---\n" + ymlContents);
 
                 return new DetailedResult
                 {
-                    Succeeded = true
+                    Succeeded = true,
                 };
             }
             catch (Exception ex)
@@ -866,55 +867,6 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 return new DetailedResult
                 {
                     Succeeded = false,
-                    Explanation = ex.Message,
-                };
-            }
-        }
-
-        public string SerializeManifest(AppManifest manifest)
-        {
-            var serializer = new SerializerBuilder()
-                                .WithNamingConvention(CfAppManifestNamingConvention.Instance)
-                                .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults)
-                                .Build();
-
-            return serializer.Serialize(manifest);
-        }
-
-        public DetailedResult<AppManifest> ParseManifestFile(string pathToManifestFile)
-        {
-            if (!_fileService.FileExists(pathToManifestFile))
-            {
-                return new DetailedResult<AppManifest>
-                {
-                    Succeeded = false,
-                    Content = null,
-                    Explanation = $"No file exists at {pathToManifestFile}",
-                };
-            }
-
-            try
-            {
-                string manifestContents = _fileService.ReadFileContents(pathToManifestFile);
-
-                var deserializer = new DeserializerBuilder()
-                    .WithNamingConvention(CfAppManifestNamingConvention.Instance)
-                    .Build();
-
-                var manifest = deserializer.Deserialize<AppManifest>(manifestContents);
-
-                return new DetailedResult<AppManifest>
-                {
-                    Succeeded = true,
-                    Content = manifest,
-                };
-            }
-            catch (Exception ex)
-            {
-                return new DetailedResult<AppManifest>
-                {
-                    Succeeded = false,
-                    Content = null,
                     Explanation = ex.Message,
                 };
             }
