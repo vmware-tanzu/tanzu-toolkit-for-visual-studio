@@ -18,6 +18,7 @@ namespace Tanzu.Toolkit.WpfViews
         public ICommand OpenLoginDialogCommand { get; }
         public ICommand ToggleAdvancedOptionsCommand { get; }
         public ICommand ClearBuildpackSelectionCommand { get; }
+        public string PlaceholderText { get; set; }
 
         public Brush HyperlinkBrush { get { return (Brush)GetValue(HyperlinkBrushProperty); } set { SetValue(HyperlinkBrushProperty, value); } }
 
