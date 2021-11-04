@@ -387,6 +387,7 @@
                                 <CheckBox
                                 Content="{Binding Name}"
                                 IsChecked="{Binding IsSelected}"
+                                IsEnabled="{Binding CompatibleWithStack}"
                                 Checked="CheckBox_Checked"
                                 Unchecked="CheckBox_Unchecked"/>
                             </DataTemplate>
