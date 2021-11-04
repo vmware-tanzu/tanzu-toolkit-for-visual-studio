@@ -16,7 +16,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         Task<DetailedResult> StartAppAsync(CloudFoundryApp app, bool skipSsl = true, int retryAmount = 1);
         Task<DetailedResult> DeleteAppAsync(CloudFoundryApp app, bool skipSsl = true, bool removeRoutes = true, int retryAmount = 1);
         Task<DetailedResult<string>> GetRecentLogs(CloudFoundryApp app);
-        Task<DetailedResult<List<string>>> GetUniqueBuildpackNamesAsync(string apiAddress, int retryAmount = 1);
+        Task<DetailedResult<List<CfBuildpack>>> GetBuildpacksAsync(string apiAddress, int retryAmount = 1);
         DetailedResult CreateManifestFile(string location, AppManifest manifest);
         Task<DetailedResult> DeployAppAsync(AppManifest appManifest, CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback);
         Task<DetailedResult<List<string>>> GetStackNamesAsync(CloudFoundryInstance cf, int retryAmount = 1);

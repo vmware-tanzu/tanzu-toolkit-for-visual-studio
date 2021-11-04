@@ -964,30 +964,43 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
-        [TestCategory("GetBuildpackNames")]
-        public async Task GetUniqueBuildpackNamesAsync_ReturnsSuccessfulResult_WhenListBuildpacksSucceeds()
+        [TestCategory("GetBuildpacks")]
+        public async Task GetBuildpacksAsync_ReturnsSuccessfulResult_WhenListBuildpacksSucceeds()
         {
-            var fakeBuildpacksResponse = new List<Buildpack>
+            Buildpack fakeBp1 = new Buildpack
             {
-                new Buildpack
+                Name = "Bp1",
+                Stack = "StackA",
+            };
+            Buildpack fakeBp2 = new Buildpack
+            {
+                Name = "Bp2",
+                Stack = "StackA",
+            };
+            Buildpack fakeBp3 = new Buildpack
+            {
+                Name = "Bp3",
+                Stack = "StackZ",
+            };
+
+            var fakeBuildpacksResponse = new List<Buildpack> { fakeBp1, fakeBp2, fakeBp3 };
+
+            var expectedResultContent = new List<CfBuildpack>
+            {
+                new CfBuildpack
                 {
-                    Name = "Bp1",
+                    Name = fakeBp1.Name,
+                    Stack = fakeBp1.Stack,
                 },
-                new Buildpack
+                new CfBuildpack
                 {
-                    Name = "Bp2",
+                    Name = fakeBp2.Name,
+                    Stack = fakeBp2.Stack,
                 },
-                new Buildpack
+                new CfBuildpack
                 {
-                    Name = "repeated buildpack name",
-                },
-                new Buildpack
-                {
-                    Name = "repeated buildpack name",
-                },
-                new Buildpack
-                {
-                    Name = "repeated buildpack name",
+                    Name = fakeBp3.Name,
+                    Stack = fakeBp3.Stack,
                 },
             };
 
@@ -995,26 +1008,26 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             _mockCfApiClient.Setup(m => m.ListBuildpacks(_fakeValidTarget, _fakeAccessToken)).ReturnsAsync(fakeBuildpacksResponse);
 
-            var result = await _sut.GetUniqueBuildpackNamesAsync(_fakeValidTarget);
+            var result = await _sut.GetBuildpacksAsync(_fakeValidTarget);
 
             Assert.IsTrue(result.Succeeded);
-            Assert.AreEqual(3, result.Content.Count); // ensure duplicate names aren't repeated in resulting list
-            foreach (Buildpack bp in fakeBuildpacksResponse)
+            Assert.AreEqual(expectedResultContent.Count, result.Content.Count);
+            foreach (CfBuildpack bp in result.Content)
             {
-                CollectionAssert.Contains(result.Content, bp.Name);
+                Assert.IsTrue(expectedResultContent.Any(originalBuildpack => originalBuildpack.Name == bp.Name && originalBuildpack.Stack == bp.Stack));
             }
         }
 
         [TestMethod]
-        [TestCategory("GetBuildpackNames")]
-        public async Task GetUniqueBuildpackNamesAsync_ReturnsFailedResult_WhenTokenRetrievalThrowsInvalidRefreshTokenException()
+        [TestCategory("GetBuildpacks")]
+        public async Task GetBuildpacksAsync_ReturnsFailedResult_WhenTokenRetrievalThrowsInvalidRefreshTokenException()
         {
 
             _mockCfCliService.Setup(m => m.
                 GetOAuthToken())
                     .Throws(new InvalidRefreshTokenException());
 
-            DetailedResult<List<string>> result = await _sut.GetUniqueBuildpackNamesAsync(_fakeValidTarget);
+            DetailedResult<List<CfBuildpack>> result = await _sut.GetBuildpacksAsync(_fakeValidTarget);
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
@@ -1025,8 +1038,8 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
-        [TestCategory("GetBuildpackNames")]
-        public async Task GetUniqueBuildpackNamesAsync_ReturnsFailedResult_WhenListBuildpacksThrowsException()
+        [TestCategory("GetBuildpacks")]
+        public async Task GetBuildpacksAsync_ReturnsFailedResult_WhenListBuildpacksThrowsException()
         {
             var fakeExceptionMsg = "junk";
 
@@ -1038,7 +1051,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 ListBuildpacks(_fakeValidTarget, _fakeValidAccessToken))
                     .Throws(new Exception(fakeExceptionMsg));
 
-            var result = await _sut.GetUniqueBuildpackNamesAsync(_fakeValidTarget);
+            var result = await _sut.GetBuildpacksAsync(_fakeValidTarget);
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
@@ -1051,31 +1064,45 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
-        [TestCategory("GetBuildpackNames")]
-        public async Task GetUniqueBuildpackNamesAsync_RetriesWithFreshToken_WhenListBuildpacksThrowsException()
+        [TestCategory("GetBuildpacks")]
+        public async Task GetBuildpacksAsync_RetriesWithFreshToken_WhenListBuildpacksThrowsException()
         {
             var fakeExceptionMsg = "junk";
-            var fakeBuildpacksResponse = new List<Buildpack>
+            Buildpack fakeBp1 = new Buildpack
             {
-                new Buildpack
-                {
-                    Name = "Bp1",
-                },
-                new Buildpack
-                {
-                    Name = "Bp2",
-                },
-                new Buildpack
-                {
-                    Name = "Bp3",
-                },
+                Name = "Bp1",
+                Stack = "StackA",
+            };
+            Buildpack fakeBp2 = new Buildpack
+            {
+                Name = "Bp2",
+                Stack = "StackA",
+            };
+            Buildpack fakeBp3 = new Buildpack
+            {
+                Name = "Bp3",
+                Stack = "StackZ",
             };
 
-            var expectedResultContent = new List<string>
+            var fakeBuildpacksResponse = new List<Buildpack> { fakeBp1, fakeBp2, fakeBp3 };
+
+            var expectedResultContent = new List<CfBuildpack>
             {
-                fakeBuildpacksResponse[0].Name,
-                fakeBuildpacksResponse[1].Name,
-                fakeBuildpacksResponse[2].Name,
+                new CfBuildpack
+                {
+                    Name = fakeBp1.Name,
+                    Stack = fakeBp1.Stack,
+                },
+                new CfBuildpack
+                {
+                    Name = fakeBp2.Name,
+                    Stack = fakeBp2.Stack,
+                },
+                new CfBuildpack
+                {
+                    Name = fakeBp3.Name,
+                    Stack = fakeBp3.Stack,
+                },
             };
 
             _mockCfCliService.SetupSequence(m => m.
@@ -1091,7 +1118,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 ListBuildpacks(_fakeValidTarget, _fakeValidAccessToken))
                     .ReturnsAsync(fakeBuildpacksResponse);
 
-            var result = await _sut.GetUniqueBuildpackNamesAsync(_fakeValidTarget);
+            var result = await _sut.GetBuildpacksAsync(_fakeValidTarget);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Succeeded);
@@ -1106,8 +1133,8 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
-        [TestCategory("GetBuildpackNames")]
-        public async Task GetUniqueBuildpackNamesAsync_ReturnsFailedResult_WhenListBuildpacksThrowsException_AndThereAreZeroRetriesLeft()
+        [TestCategory("GetBuildpacks")]
+        public async Task GetBuildpacksAsync_ReturnsFailedResult_WhenListBuildpacksThrowsException_AndThereAreZeroRetriesLeft()
         {
             var fakeExceptionMsg = "junk";
 
@@ -1119,7 +1146,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 ListBuildpacks(_fakeValidTarget, _fakeValidAccessToken))
                     .Throws(new Exception(fakeExceptionMsg));
 
-            var result = await _sut.GetUniqueBuildpackNamesAsync(_fakeValidTarget, retryAmount: 0);
+            var result = await _sut.GetBuildpacksAsync(_fakeValidTarget, retryAmount: 0);
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
@@ -1132,14 +1159,14 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
-        [TestCategory("GetBuildpackNames")]
-        public async Task GetUniqueBuildpackNamesAsync_ReturnsFailedResult_WhenTokenCannotBeFound()
+        [TestCategory("GetBuildpacks")]
+        public async Task GetBuildpacksAsync_ReturnsFailedResult_WhenTokenCannotBeFound()
         {
             _mockCfCliService.Setup(m => m.
                 GetOAuthToken())
                     .Returns((string)null);
 
-            var result = await _sut.GetUniqueBuildpackNamesAsync(_fakeValidTarget);
+            var result = await _sut.GetBuildpacksAsync(_fakeValidTarget);
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);

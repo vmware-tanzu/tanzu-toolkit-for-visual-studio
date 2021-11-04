@@ -169,10 +169,22 @@ namespace Tanzu.Toolkit.ViewModels
                         string manifestContents = FileService.ReadFileContents(value);
 
                         AppManifest parsedManifest = SerializationService.ParseCfAppManifest(manifestContents);
-                        
-                        ManifestModel = parsedManifest;
-                        SetViewModelValuesFromManifest(ManifestModel);
 
+                        /** Create 2 AppManifest instances with the same initial data;
+                         * the props in this view model should change so that the UI
+                         * displays the new incoming manifest data -- those props will
+                         * change the ManifestModel so it stays in sync with the state
+                         * of this view model. Unintentded side effects arise when using
+                         * a single instance of an AppManifest to both read new info from
+                         * and to record state on -- deep cloning the initial AppManifest
+                         * allows for the new manifest info to stay independent from the
+                         * ManifestModel data & unchanged despite any state changes to
+                         * the view model.
+                         */
+                        AppManifest modelInstance = parsedManifest.DeepClone();
+                        
+                        ManifestModel = modelInstance;
+                        SetViewModelValuesFromManifest(parsedManifest);
                     }
                     catch (Exception ex)
                     {
@@ -265,6 +277,16 @@ namespace Tanzu.Toolkit.ViewModels
                 RaisePropertyChangedEvent("SelectedStack");
 
                 ManifestModel.Applications[0].Stack = value;
+
+                foreach (BuildpackListItem b in BuildpackOptions)
+                {
+                    b.EvalutateStackCompatibility(value);
+                    if (!b.CompatibleWithStack && b.IsSelected)
+                    {
+                        b.IsSelected = false;
+                        RemoveFromSelectedBuildpacks(b.Name);
+                    }
+                }
             }
         }
 
@@ -521,17 +543,40 @@ namespace Tanzu.Toolkit.ViewModels
             else
             {
                 BuildpacksLoading = true;
-                var buildpacksRespsonse = await CloudFoundryService.GetUniqueBuildpackNamesAsync(TasExplorerViewModel.TasConnection.CloudFoundryInstance.ApiAddress);
+                var buildpacksRespsonse = await CloudFoundryService.GetBuildpacksAsync(TasExplorerViewModel.TasConnection.CloudFoundryInstance.ApiAddress);
 
                 if (buildpacksRespsonse.Succeeded)
                 {
                     var bpOtps = new List<BuildpackListItem>();
 
-                    foreach (string bpName in buildpacksRespsonse.Content)
+                    foreach (CfBuildpack bp in buildpacksRespsonse.Content)
                     {
-                        bool nameSpecifiedInManifest = ManifestModel.Applications[0].Buildpacks.Contains(bpName);
+                        bool nameSpecifiedInManifest = ManifestModel.Applications[0].Buildpacks.Contains(bp.Name);
+                        bool bpCompatibleWithSelectedStack = SelectedStack == null || SelectedStack == bp.Stack;
+                        bool nameAlreadyExistsInOptions = bpOtps.Any(b => b.Name == bp.Name);
 
-                        bpOtps.Add(new BuildpackListItem { Name = bpName, IsSelected = nameSpecifiedInManifest });
+                        if (nameAlreadyExistsInOptions) // don't add duplicate bp names, just add to list of viable stacks
+                        {
+                            var existingBp = bpOtps.FirstOrDefault(b => b.Name == bp.Name);
+
+                            if (!existingBp.ValidStacks.Contains(bp.Stack))
+                            {
+                                existingBp.ValidStacks.Add(bp.Stack);
+                            }
+                        }
+                        else
+                        {
+                            var newBp = new BuildpackListItem
+                            {
+                                Name = bp.Name,
+                                ValidStacks = new List<string> { bp.Stack },
+                                IsSelected = nameSpecifiedInManifest,
+                            };
+
+                            newBp.EvalutateStackCompatibility(SelectedStack);
+
+                            bpOtps.Add(newBp);
+                        }
                     }
 
                     BuildpackOptions = bpOtps;
@@ -709,13 +754,26 @@ namespace Tanzu.Toolkit.ViewModels
 
         private void SetBuildpacksFromManifest(AppManifest appManifest)
         {
-            var bps = appManifest.Applications[0].Buildpacks;
+            AppConfig appConfig = appManifest.Applications[0];
+            
+            var bps = appConfig.Buildpacks;
+            var stack = appConfig.Stack;
+
             if (bps != null)
             {
-                SelectedBuildpacks.Clear();
-                foreach (string bp in appManifest.Applications[0].Buildpacks)
+                ClearSelectedBuildpacks();
+
+                foreach (string bpName in bps)
                 {
-                    AddToSelectedBuildpacks(bp);
+                    AddToSelectedBuildpacks(bpName);
+
+                    // mark corresponding buildpack option as selected
+                    var existingBpOption = BuildpackOptions.FirstOrDefault(b => b.Name == bpName);
+                    if (existingBpOption != null)
+                    {
+                        existingBpOption.IsSelected = true;
+                        existingBpOption.EvalutateStackCompatibility(stack);
+                    }
                 }
             }
         }
@@ -731,6 +789,7 @@ namespace Tanzu.Toolkit.ViewModels
     {
         private string _name;
         private bool _isSelected;
+        private bool _compatibleWithStack;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -752,6 +811,26 @@ namespace Tanzu.Toolkit.ViewModels
                 RaisePropertyChangedEvent("IsSelected");
             }
         }
+
+        public bool CompatibleWithStack
+        {
+            get { return _compatibleWithStack; }
+            
+            private set
+            {
+                _compatibleWithStack = value;
+
+                RaisePropertyChangedEvent("CompatibleWithStack");
+            }
+        }
+
+        public List<string> ValidStacks { get; set; }
+
+        public void EvalutateStackCompatibility(string stackName)
+        {
+            CompatibleWithStack = ValidStacks.Contains(stackName) || stackName == null;
+        }
+
         protected void RaisePropertyChangedEvent(string propertyName)
         {
             var handler = PropertyChanged;
