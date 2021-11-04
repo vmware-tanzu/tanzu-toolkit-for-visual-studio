@@ -412,7 +412,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             };
         }
 
-        public async Task<DetailedResult<List<string>>> GetUniqueBuildpackNamesAsync(string apiAddress, int retryAmount = 1)
+        public async Task<DetailedResult<List<CfBuildpack>>> GetBuildpacksAsync(string apiAddress, int retryAmount = 1)
         {
             string accessToken;
             try
@@ -424,7 +424,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 var msg = "Unable to retrieve buildpacks because the connection has expired. Please log back in to re-authenticate.";
                 _logger.Information(msg);
 
-                return new DetailedResult<List<string>>
+                return new DetailedResult<List<CfBuildpack>>
                 {
                     Succeeded = false,
                     Explanation = msg,
@@ -437,7 +437,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 _logger.Error("CloudFoundryService attempted to get buildpacks but was unable to look up an access token.");
 
-                return new DetailedResult<List<string>>()
+                return new DetailedResult<List<CfBuildpack>>()
                 {
                     Succeeded = false,
                     Explanation = $"CloudFoundryService attempted to get buildpacks but was unable to look up an access token.",
@@ -453,16 +453,16 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 if (retryAmount > 0)
                 {
-                    _logger.Information("GetUniqueBuildpackNamesAsync caught an exception when trying to retrieve buildpacks: {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).", originalException.Message, retryAmount);
+                    _logger.Information("GetBuildpacksAsync caught an exception when trying to retrieve buildpacks: {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).", originalException.Message, retryAmount);
                     _cfCliService.ClearCachedAccessToken();
                     retryAmount -= 1;
-                    return await GetUniqueBuildpackNamesAsync(apiAddress, retryAmount);
+                    return await GetBuildpacksAsync(apiAddress, retryAmount);
                 }
                 else
                 {
                     _logger.Error("{Error}. See logs for more details: toolkit-diagnostics.log", originalException.Message);
 
-                    return new DetailedResult<List<string>>()
+                    return new DetailedResult<List<CfBuildpack>>()
                     {
                         Succeeded = false,
                         Explanation = originalException.Message,
@@ -470,24 +470,28 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
             }
 
-            var buildpackNames = new List<string>();
+            var buildpacks = new List<CfBuildpack>();
 
             foreach (Buildpack buildpack in buildpacksFromApi)
             {
                 if (string.IsNullOrWhiteSpace(buildpack.Name))
                 {
-                    _logger.Error("CloudFoundryService.GetUniqueBuildpackNamesAsync encountered a buildpack without a name; omitting it from the returned list of buildpacks.");
+                    _logger.Error("CloudFoundryService.GetBuildpacksAsync encountered a buildpack without a name; omitting it from the returned list of buildpacks.");
                 }
-                else if (!buildpackNames.Contains(buildpack.Name))
+                if (string.IsNullOrWhiteSpace(buildpack.Stack))
                 {
-                    buildpackNames.Add(buildpack.Name);
+                    _logger.Error("CloudFoundryService.GetBuildpacksAsync encountered a buildpack without a stack; omitting it from the returned list of buildpacks.");
+                }
+                else
+                {
+                    buildpacks.Add(new CfBuildpack { Name = buildpack.Name, Stack = buildpack.Stack });
                 }
             }
 
-            return new DetailedResult<List<string>>()
+            return new DetailedResult<List<CfBuildpack>>()
             {
                 Succeeded = true,
-                Content = buildpackNames,
+                Content = buildpacks,
             };
         }
 
