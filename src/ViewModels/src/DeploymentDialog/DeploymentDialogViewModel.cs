@@ -45,6 +45,7 @@ namespace Tanzu.Toolkit.ViewModels
         private List<CloudFoundrySpace> _cfSpaces;
         private CloudFoundryOrganization _selectedOrg;
         private CloudFoundrySpace _selectedSpace;
+        private string _startCmmd;
         private string _projectName;
         private string _manifestPathLabel;
         private string _manifestPath;
@@ -128,6 +129,19 @@ namespace Tanzu.Toolkit.ViewModels
                 RaisePropertyChangedEvent("AppName");
 
                 ManifestModel.Applications[0].Name = value;
+            }
+        }
+
+        public string StartCommand
+        {
+            get => _startCmmd;
+
+            set
+            {
+                _startCmmd = value;
+                RaisePropertyChangedEvent("StartCommand");
+
+                ManifestModel.Applications[0].Command = value;
             }
         }
 
@@ -655,6 +669,7 @@ namespace Tanzu.Toolkit.ViewModels
             SetAppNameFromManifest(manifest);
             SetStackFromManifest(manifest);
             SetBuildpacksFromManifest(manifest);
+            SetStartCommandFromManifest(manifest);
         }
 
         private void SetAppNameFromManifest(AppManifest appManifest)
@@ -681,6 +696,14 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     AddToSelectedBuildpacks(bp);
                 }
+            }
+        }
+        private void SetStartCommandFromManifest(AppManifest appManifest)
+        {
+            var startCmmd = appManifest.Applications[0].Command;
+            if (!string.IsNullOrWhiteSpace(startCmmd))
+            {
+                StartCommand = startCmmd;
             }
         }
     }

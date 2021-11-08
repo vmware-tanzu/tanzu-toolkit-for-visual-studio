@@ -58,6 +58,7 @@
                 <RowDefinition Height="32"></RowDefinition>
                 <!--ROW 6-->
                 <RowDefinition Height="32"></RowDefinition>
+
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
@@ -259,6 +260,7 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
@@ -421,6 +423,33 @@
                     </Style>
                 </TextBlock.Style>
             </TextBlock>
+
+            <!--HIDDEN GRID ROW 3-->
+            <StackPanel VerticalAlignment="Center" Grid.Row="4">
+                <TextBlock VerticalAlignment="Center" Text="Start Command"/>
+            </StackPanel>
+
+            <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="1" 
+                     Margin="0,4" 
+                     Height="24"
+                     x:Name="StartCommandField"
+                     Text="{Binding StartCommand}" 
+                     IsEnabled="{Binding IsLoggedIn}"
+                     VerticalAlignment="Center" 
+                     VerticalContentAlignment="Center"/>
+            <TextBlock IsHitTestVisible="False" Text="Enter Start Command Here&lt;Optional&gt;" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="9,7,0,3" Foreground="DarkGray" Grid.Column="1" Grid.Row="4" Width="216" Height="22">
+                <TextBlock.Style>
+                    <Style TargetType="{x:Type TextBlock}">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Text, ElementName=StartCommandField}" Value="">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
         </Grid>
 
         <StackPanel 

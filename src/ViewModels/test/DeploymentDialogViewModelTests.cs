@@ -938,6 +938,40 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("ManifestPath")]
+        public void ManifestPathSetter_SetsStartCommand_WhenManifestExistsAndContainsStartCommand()
+        {
+            var pathToFakeManifest = "some//fake//path";
+            var expectedStartCommand = "my expected command";
+
+            var fakeAppManifest = new AppManifest
+            {
+                Applications = new List<AppConfig>
+                {
+                    new AppConfig
+                    {
+                        Command = expectedStartCommand,
+                    }
+                }
+            };
+
+            var fakeManifestParsingResponse = new DetailedResult<AppManifest>
+            {
+                Succeeded = true,
+                Content = fakeAppManifest,
+            };
+
+            MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
+            MockCloudFoundryService.Setup(m => m.ParseManifestFile(pathToFakeManifest)).Returns(fakeManifestParsingResponse);
+
+            Assert.AreNotEqual(expectedStartCommand, _sut.StartCommand);
+
+            _sut.ManifestPath = pathToFakeManifest;
+
+            Assert.AreEqual(expectedStartCommand, _sut.StartCommand);
+        }
+
+        [TestMethod]
+        [TestCategory("ManifestPath")]
         public void ManifestPathSetter_DisplaysError_AndDoesNotChangeAppName_WhenManifestDoesNotExist()
         {
             var pathToNonexistentManifest = "some//fake//path";
@@ -1474,6 +1508,35 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.AreEqual(nameVal, _sut.ManifestModel.Applications[0].Name);
             Assert.AreEqual(1, _receivedEvents.Count);
             Assert.AreEqual("AppName", _receivedEvents[0]);
+        }
+        [TestMethod]
+        [TestCategory("StartCommand")]
+        [TestCategory("ManifestModel")]
+        public void StartCommandSetter_SetsValueInManifestModel()
+        {
+            var nameVal = "start cmmd";
+            var initialStartCmmdInManifestModel = _sut.ManifestModel.Applications[0].Command;
+
+            Assert.AreNotEqual(nameVal, initialStartCmmdInManifestModel);
+
+            _sut.StartCommand = nameVal;
+
+            Assert.AreEqual(nameVal, _sut.StartCommand);
+            Assert.AreEqual(nameVal, _sut.ManifestModel.Applications[0].Command);
+            Assert.AreEqual(1, _receivedEvents.Count);
+            Assert.AreEqual("StartCommand", _receivedEvents[0]);
+        }
+
+        [TestMethod]
+        [TestCategory("StartCommand")]
+        public void StartCommand_SetterRaisesPropChangedEvent()
+        {
+            Assert.AreEqual(0, _receivedEvents.Count);
+
+            _sut.StartCommand = "new start command";
+
+            Assert.AreEqual(1, _receivedEvents.Count);
+            Assert.IsTrue(_receivedEvents.Contains("StartCommand"));
         }
 
         [TestMethod]
