@@ -5,7 +5,6 @@ using System.Windows.Media;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.WpfViews.Commands;
 using Tanzu.Toolkit.WpfViews.ThemeService;
-
 namespace Tanzu.Toolkit.WpfViews
 {
     /// <summary>
