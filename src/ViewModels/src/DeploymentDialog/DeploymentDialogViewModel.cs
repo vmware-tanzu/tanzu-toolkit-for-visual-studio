@@ -140,7 +140,6 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 _startCmmd = value;
                 RaisePropertyChangedEvent("StartCommand");
-
                 ManifestModel.Applications[0].Command = value;
             }
         }
