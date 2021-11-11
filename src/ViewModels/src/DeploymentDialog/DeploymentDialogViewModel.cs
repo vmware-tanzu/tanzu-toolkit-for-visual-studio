@@ -700,10 +700,8 @@ namespace Tanzu.Toolkit.ViewModels
         private void SetStartCommandFromManifest(AppManifest appManifest)
         {
             var startCmmd = appManifest.Applications[0].Command;
-            if (!string.IsNullOrWhiteSpace(startCmmd))
-            {
-                StartCommand = startCmmd;
-            }
+           
+            StartCommand = string.IsNullOrWhiteSpace(startCmmd) ? null : startCmmd;
         }
     }
 
