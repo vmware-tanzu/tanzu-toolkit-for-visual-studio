@@ -684,7 +684,7 @@ namespace Tanzu.Toolkit.ViewModels
         {
             var deploymentResult = await CloudFoundryService.DeployAppAsync(
                 ManifestModel,
-                SelectedSpace.ParentOrg.ParentCf,
+                null, SelectedSpace.ParentOrg.ParentCf,
                 SelectedSpace.ParentOrg,
                 SelectedSpace,
                 stdOutCallback: OutputViewModel.AppendLine,
