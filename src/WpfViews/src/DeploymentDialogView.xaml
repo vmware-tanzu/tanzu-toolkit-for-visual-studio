@@ -10,7 +10,7 @@
         Title="Push to Tanzu Application Service"
         Icon="Resources/tas_16px.png"
         Width="600"
-        BorderBrush="{Binding ElementName=DeploymentDialogViewElement, Path=Foreground }"
+        BorderBrush="Gray"
         BorderThickness="1"
         ResizeMode="NoResize"
         WindowStyle="None"
