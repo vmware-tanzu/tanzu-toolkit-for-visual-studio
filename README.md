@@ -1,27 +1,13 @@
 # tanzu-toolkit-for-visual-studio
 
+The `TanzuToolkit` solution provides an extension for Visual Studio that enables management of Tanzu Application Service environments directly within the IDE. This product is still under development; releases are not officially supported. 
 
-### Table of Contents
+**Disclaimer:** SSL certificates are not validated when connecting to Tanzu Application Service using this extension.
 
-- [Introduction](#introduction)
-- [Disclaimer](#disclaimer)
-- [Install](#install)
-- [Demo Video](#demo-video)
-- [Usage](#usage)
-- [Version Support](#version-support)
-- [Notes](#notes)
-
-
-
-## Introduction
-
-The `TanzuToolkit` solution provides a VSIX extension that allows Visual Studio users to interact with Tanzu Application Service from within their IDE.
-
-## Disclaimer
-- This product is still under development and, as such, may lack some features.
-- Our team uses [this board in ZenHub](https://app.zenhub.com/workspaces/net-dev-x---visual-studio-extensions-604161e65a9f390012665e4d/board?repos=327998348) to track progress.
-- All VSIX files for this extension are from the pre-release version and are not publicly supported.
-- The extension currently doesn't support SSL validation when connecting to Tanzu Application Service.
+## Visual Studio Extension Features
+- [Tanzu Application Service Explorer](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/wiki/Tanzu-Application-Service-Explorer)
+- [App Deployment window](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/wiki/App-Deployment-Window)
+- [Tanzu Output window](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/wiki/Tanzu-Output-Window)
 
 ## Install
 - To install this extension, you will need Visual Studio version 16.0 or higher.
@@ -29,35 +15,7 @@ The `TanzuToolkit` solution provides a VSIX extension that allows Visual Studio 
 - Download the `Tanzu.Toolkit.VisualStudio.vsix` file & double-click to prompt an installation into your Visual Studio instance.
 - To uninstall this extension from Visual Studio, visit the Visual Studio Extension Manager found under the `Extensions` menu.
 
-## Demo Video
+## More Info
+Check out our [Wiki](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/wiki)!
 
-[[Demo video]![demo](https://user-images.githubusercontent.com/52456455/114413841-56d54700-9b7c-11eb-9baa-504a50bccb02.PNG)](https://user-images.githubusercontent.com/52456455/114176128-c2af7980-9908-11eb-831b-f2ac34bc3e61.mp4)
-
-[[Demo video 0.0.2]![demo2](https://user-images.githubusercontent.com/52456455/127934814-eacd1e95-59ec-4ef7-99b4-e4a82d8fbfd2.PNG)
-)](https://user-images.githubusercontent.com/52456455/129071159-f94b71ba-23ad-4955-8d2b-12d4cf080a46.mp4)
-
-
-## Screenshots
-
-![newscreenshot1](https://user-images.githubusercontent.com/52456455/129063507-9aa54439-4ddd-4872-9d28-7034b06a5198.PNG)
-![newscreenshot2](https://user-images.githubusercontent.com/52456455/129063550-0a12fab6-e4bd-489a-a256-8de70af50052.PNG)
-![newscreenshot3](https://user-images.githubusercontent.com/52456455/129063566-0061109d-e4ed-40e7-b1da-25f7e53de1f8.PNG)
-
-
-## Usage
-- The Tanzu Cloud Explorer is located under the 'View' tab in VS. This window is where you can sign into your cloud instance and manage it.
-- To deploy an app, right click on a project in the Solution Explorer window and click 'Deploy to Tanzu application Service'. This will open up a new window, which allows you to choose the org and space for the app.
-  - After clicking the 'Deploy' button, you can view the output in the 'Tanzu Output' window (found under the 'View' menu).
-  - The newly deployed app will show up in the Tanzu Cloud Explorer window after pressing the refresh button.
-
-## Version Support
-- Our extension supports Cloud Controller API version 3.63.0 and greater. 
-- To maximize the range of supported CC API versions, 2 versions of the CF CLI are bundled with this extension: CF CLI v6 & CF CLI v7:
-  - If Tanzu Application Service is running CC API version 3 ... 
-    - ... above 3.85.0, this extension uses CF CLI v7.
-    - ... between 3.63.0 - 3.85.0, this VS extension uses CF CLI v6.
-
-As of September 2021 we are still working on an MVP & are not yet advertising this tool publicly.
-
-## Notes
-- This extension uses the CF CLI to perform certain operations on Tanzu Application Service. All CF CLI binaries & config files can be found in the installation directory for this Visual Studio Extension (by default, this extension is installed in `c:\users\<user>\appdata\local\microsoft\visualstudio\<vs-instance>\extensions\vmware\tanzu toolkit for visual studio\<vsix-version>`)
+Our team uses [this board in ZenHub](https://app.zenhub.com/workspaces/net-dev-x---visual-studio-extensions-604161e65a9f390012665e4d/board?repos=327998348) to track progress.
