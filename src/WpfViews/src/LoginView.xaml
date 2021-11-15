@@ -8,7 +8,7 @@
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         ResizeMode="NoResize"
-        BorderBrush="{Binding ElementName=LoginViewElement, Path=Foreground }"
+        BorderBrush="Gray"
         BorderThickness="1"
         SizeToContent="Height"
         Title="Login" Icon="Resources/AddCloud.png" Width="500">
