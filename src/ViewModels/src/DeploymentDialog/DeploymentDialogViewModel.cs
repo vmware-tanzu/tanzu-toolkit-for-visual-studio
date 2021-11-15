@@ -181,7 +181,7 @@ namespace Tanzu.Toolkit.ViewModels
                          * the view model.
                          */
                         AppManifest modelInstance = parsedManifest.DeepClone();
-                        
+
                         ManifestModel = modelInstance;
                         SetViewModelValuesFromManifest(parsedManifest);
                     }
@@ -684,7 +684,8 @@ namespace Tanzu.Toolkit.ViewModels
         {
             var deploymentResult = await CloudFoundryService.DeployAppAsync(
                 ManifestModel,
-                null, SelectedSpace.ParentOrg.ParentCf,
+                PathToProjectRootDir,
+                SelectedSpace.ParentOrg.ParentCf,
                 SelectedSpace.ParentOrg,
                 SelectedSpace,
                 stdOutCallback: OutputViewModel.AppendLine,
@@ -759,7 +760,7 @@ namespace Tanzu.Toolkit.ViewModels
         private void SetBuildpacksFromManifest(AppManifest appManifest)
         {
             AppConfig appConfig = appManifest.Applications[0];
-            
+
             var bps = appConfig.Buildpacks;
             var stack = appConfig.Stack;
 
@@ -827,7 +828,7 @@ namespace Tanzu.Toolkit.ViewModels
         public bool CompatibleWithStack
         {
             get { return _compatibleWithStack; }
-            
+
             private set
             {
                 _compatibleWithStack = value;
