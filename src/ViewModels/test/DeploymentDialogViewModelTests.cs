@@ -1459,8 +1459,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var initialPathInManifestModel = _sut.ManifestModel.Applications[0].Path;
 
             Assert.IsNull(_sut.DeploymentDirectoryPath);
+            Assert.IsNull(initialPathInManifestModel);
             Assert.AreEqual("<Default App Directory>", _sut.DirectoryPathLabel);
-            Assert.AreNotEqual(initialPathInManifestModel, _sut.DeploymentDirectoryPath);
             Assert.AreNotEqual(_fakeProjectPath, initialPathInManifestModel);
 
             _sut.DeploymentDirectoryPath = _fakeProjectPath;
@@ -1476,7 +1476,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("DeploymentDirectoryPath")]
         [TestCategory("DirectoryPathLabel")]
         [TestCategory("ManifestModel")]
-        public void DirectoryPathSetter_DisplaysError_AndSetsDirectoryPathLabelToNoneSpecified_WhenNoDirectoryExistsAtGivenPath()
+        public void DirectoryPathSetter_DisplaysError_AndSetsDirectoryPathLabelToDefaultAppDirectory_AndSetsManifestModelPathValueToNull_WhenNoDirectoryExistsAtGivenPath()
         {
             var fakePath = "asdf//junk";
             Assert.IsFalse(Directory.Exists(fakePath));
@@ -1484,6 +1484,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.DirectoryPathLabel = "fake initial value";
 
             var initialPathInManifestModel = _sut.ManifestModel.Applications[0].Path;
+            Assert.IsNotNull(initialPathInManifestModel);
             Assert.AreNotEqual(initialPathInManifestModel, _sut.DeploymentDirectoryPath);
             Assert.AreNotEqual(fakePath, initialPathInManifestModel);
 
@@ -1493,6 +1494,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.AreEqual("<Default App Directory>", _sut.DirectoryPathLabel);
             Assert.AreNotEqual(initialPathInManifestModel, _sut.DeploymentDirectoryPath);
+            Assert.IsNull(_sut.ManifestModel.Applications[0].Path);
 
             MockErrorDialogService.Verify(
                 m => m.DisplayErrorDialog(DeploymentDialogViewModel.DirectoryNotFoundTitle, It.Is<string>(s => s.Contains(fakePath) && s.Contains("does not appear to be a valid path"))),

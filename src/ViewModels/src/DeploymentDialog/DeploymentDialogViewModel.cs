@@ -226,6 +226,8 @@ namespace Tanzu.Toolkit.ViewModels
                     if (value != null)
                     {
                         _errorDialogService.DisplayErrorDialog(DirectoryNotFoundTitle, $"'{value}' does not appear to be a valid path to a directory.");
+
+                        ManifestModel.Applications[0].Path = null;
                     }
 
                     _directoryPath = null;
