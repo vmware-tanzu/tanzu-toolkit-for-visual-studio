@@ -99,25 +99,34 @@
                 Visibility="{Binding Path=HasErrors, Converter={StaticResource CollapsedVisibility}}"/>
         </StackPanel>
 
-        <StackPanel
-            Orientation="Horizontal"
-            Margin="12"
-            Height="auto"
-            HorizontalAlignment="Right">
+        <Grid>
+            <StackPanel
+                Orientation="Horizontal"
+                Margin="12"
+                Height="auto"
+                HorizontalAlignment="Right">
 
-            <Button
-                Content="Log In"
-                Margin="4"
-                Padding="4,0"
-                HorizontalAlignment="Right"
-                Command="{ Binding ElementName=LoginViewElement, Path=AddCloudCommand }" 
-                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
+                <Button
+                    Content="Log In"
+                    Margin="4"
+                    Padding="4,0"
+                    HorizontalAlignment="Right"
+                    Command="{ Binding ElementName=LoginViewElement, Path=AddCloudCommand }" 
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
+            </StackPanel>
 
-            <Button
-                Margin="4"
-                Padding="4,0"
-                Click="Close"
-                Content="Cancel"/>
-        </StackPanel>
+            <StackPanel
+                Orientation="Horizontal"
+                Margin="12"
+                Height="auto"
+                HorizontalAlignment="Left">
+
+                <Button
+                    Margin="4"
+                    Padding="4,0"
+                    Click="Close"
+                    Content="Cancel"/>
+            </StackPanel>
+        </Grid>
     </StackPanel>
 </Window>
