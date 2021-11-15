@@ -87,6 +87,7 @@ namespace Tanzu.Toolkit.ViewModels
             CfSpaceOptions = new List<CloudFoundrySpace>();
             BuildpackOptions = new List<BuildpackListItem>();
             StackOptions = new List<string>();
+            DeploymentDirectoryPath = null;
 
             ManifestModel = new AppManifest
             {
@@ -96,7 +97,6 @@ namespace Tanzu.Toolkit.ViewModels
                     new AppConfig
                     {
                         Name = projectName,
-                        Path = directoryOfProjectToDeploy,
                         Buildpacks = new List<string>(),
                     }
                 }
@@ -114,7 +114,6 @@ namespace Tanzu.Toolkit.ViewModels
                 ThreadingService.StartTask(UpdateStackOptions);
             }
 
-            DeploymentDirectoryPath = PathToProjectRootDir;
             _projectName = projectName;
 
             Expanded = false;
@@ -224,9 +223,13 @@ namespace Tanzu.Toolkit.ViewModels
                 }
                 else
                 {
-                    _errorDialogService.DisplayErrorDialog(DirectoryNotFoundTitle, $"'{value}' does not appear to be a valid path to a directory.");
+                    if (value != null)
+                    {
+                        _errorDialogService.DisplayErrorDialog(DirectoryNotFoundTitle, $"'{value}' does not appear to be a valid path to a directory.");
+                    }
+
                     _directoryPath = null;
-                    DirectoryPathLabel = "<none specified>";
+                    DirectoryPathLabel = "<Default App Directory>";
                 }
             }
         }
@@ -736,6 +739,7 @@ namespace Tanzu.Toolkit.ViewModels
             SetStackFromManifest(manifest);
             SetBuildpacksFromManifest(manifest);
             SetStartCommandFromManifest(manifest);
+            SetPathFromManifest(manifest);
         }
 
         private void SetAppNameFromManifest(AppManifest appManifest)
@@ -777,11 +781,19 @@ namespace Tanzu.Toolkit.ViewModels
                 }
             }
         }
+
         private void SetStartCommandFromManifest(AppManifest appManifest)
         {
             var startCmmd = appManifest.Applications[0].Command;
-           
+
             StartCommand = string.IsNullOrWhiteSpace(startCmmd) ? null : startCmmd;
+        }
+
+        private void SetPathFromManifest(AppManifest appManifest)
+        {
+            var path = appManifest.Applications[0].Path;
+
+            DeploymentDirectoryPath = string.IsNullOrWhiteSpace(path) ? null : path;
         }
     }
 
