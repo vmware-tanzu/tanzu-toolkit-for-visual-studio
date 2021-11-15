@@ -66,6 +66,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockDialogService.VerifyAll();
             MockTasExplorerViewModel.VerifyAll();
             MockErrorDialogService.VerifyAll();
+            MockSerializationService.VerifyAll();
         }
 
 
@@ -187,18 +188,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("ctor")]
-        [TestCategory("DeploymentDirectoryPath")]
-        public void Constructor_SetsDefaultDirectoryPath_EqualToProjectDirPath()
-        {
-            _sut = new DeploymentDialogViewModel(Services, null, _fakeProjectPath, FakeTargetFrameworkMoniker);
-
-            Assert.AreEqual(_fakeProjectPath, _sut.PathToProjectRootDir);
-            Assert.AreEqual(_sut.PathToProjectRootDir, _sut.DeploymentDirectoryPath);
-            Assert.AreEqual(_sut.PathToProjectRootDir, _sut.DirectoryPathLabel);
-        }
-
-        [TestMethod]
-        [TestCategory("ctor")]
         [TestCategory("ManifestModel")]
         public void Constructor_SetsManifestModel_ToNewAppManifest_WhenNoDefaultManifestExistsAtAnExpectedPath()
         {
@@ -213,11 +202,53 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             var manifestModelApp = _sut.ManifestModel.Applications[0];
             Assert.IsNotNull(manifestModelApp.Name);
-            Assert.IsNotNull(manifestModelApp.Path);
             Assert.IsNotNull(manifestModelApp.Buildpacks);
             Assert.AreEqual(_fakeProjName, manifestModelApp.Name);
-            Assert.AreEqual(_fakeProjectPath, manifestModelApp.Path);
             CollectionAssert.AreEquivalent(new List<string>(), manifestModelApp.Buildpacks);
+        }
+
+        [TestMethod]
+        [TestCategory("ctor")]
+        [TestCategory("DeploymentDirectoryPath")]
+        [TestCategory("DeploymentDirectoryPathLabel")]
+        public void Constructor_SetsDeploymentDirectoryPathToNull_AndSetsDirectoryPathLabelToDefaultAppDirectory_WhenPathNotSpecifiedByManifest()
+        {
+            _sut = new DeploymentDialogViewModel(Services, _fakeProjName, _fakeProjectPath, FakeTargetFrameworkMoniker);
+
+            Assert.IsNull(_sut.ManifestModel.Applications[0].Path); // ensure path not specified
+
+            Assert.IsNull(_sut.DeploymentDirectoryPath);
+            Assert.AreEqual("<Default App Directory>", _sut.DirectoryPathLabel);
+
+            MockErrorDialogService.Verify(m => m.DisplayErrorDialog(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        }
+
+        [TestMethod]
+        [TestCategory("ctor")]
+        [TestCategory("DeploymentDirectoryPath")]
+        [TestCategory("DeploymentDirectoryPathLabel")]
+        public void Constructor_SetsDeploymentDirectoryPathAndDirectoryPathLabel_ToPathValue_WhenManifestSpecifiesPath()
+        {
+            var fakeAppPath = _fakeProjectPath;
+            var expectedDefaultManifestPath = Path.Combine(_fakeProjectPath, "manifest.yml");
+            var expectedPathValue = _fakeManifestModel.Applications[0].Path;
+            var fakeManifestContent = "some yaml";
+
+            MockFileService.Setup(m => m.DirectoryExists(expectedPathValue)).Returns(true);
+
+            // simulate that the manifest path value came from a default "manifest.yml" file
+            MockFileService.Setup(m => m.FileExists(expectedDefaultManifestPath)).Returns(true);
+
+            MockFileService.Setup(m => m.ReadFileContents(expectedDefaultManifestPath)).Returns(fakeManifestContent);
+            MockSerializationService.Setup(m => m.ParseCfAppManifest(fakeManifestContent)).Returns(_fakeManifestModel);
+
+            _sut = new DeploymentDialogViewModel(Services, _fakeProjName, fakeAppPath, FakeTargetFrameworkMoniker);
+
+            Assert.IsNotNull(_sut.ManifestModel.Applications[0].Path); // ensure path value specified
+            Assert.AreEqual(expectedPathValue, _sut.ManifestModel.Applications[0].Path);
+
+            Assert.AreEqual(expectedPathValue, _sut.DeploymentDirectoryPath);
+            Assert.AreEqual(expectedPathValue, _sut.DirectoryPathLabel);
         }
 
         [TestMethod]
@@ -1202,6 +1233,76 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("ManifestPath")]
+        [TestCategory("DeploymentDirectoryPath")]
+        [TestCategory("DeploymentDirectoryPathLabel")]
+        public void ManifestPathSetter_SetsDeploymentDirectoryPathToNull_AndSetsDirectoryPathLabelToDefaultAppDirectory_WhenPathNotSpecifiedByManifest()
+        {
+            var newManifestPath = _fakeManifestPath;
+            var fakeManifestContent = "some yaml";
+
+            var manifestThatDoesNotSpecifyPath = new AppManifest
+            {
+                Applications = new List<AppConfig>
+                {
+                    new AppConfig
+                    {
+                        Path = null,
+                    }
+                }
+            };
+
+            MockFileService.Setup(m => m.ReadFileContents(newManifestPath)).Returns(fakeManifestContent);
+            MockSerializationService.Setup(m => m.ParseCfAppManifest(fakeManifestContent)).Returns(manifestThatDoesNotSpecifyPath);
+
+            _sut.ManifestPath = newManifestPath;
+
+            Assert.IsNull(_sut.ManifestModel.Applications[0].Path);
+
+            Assert.IsNull(_sut.DeploymentDirectoryPath);
+            Assert.AreEqual("<Default App Directory>", _sut.DirectoryPathLabel);
+        }
+
+        [TestMethod]
+        [TestCategory("ManifestPath")]
+        [TestCategory("DeploymentDirectoryPath")]
+        [TestCategory("DeploymentDirectoryPathLabel")]
+        public void ManifestPathSetter_SetsDeploymentDirectoryPathAndDirectoryPathLabel_ToPathValue_WhenManifestSpecifiesPath()
+        {
+            var newManifestPath = _fakeManifestPath;
+            var pathValInNewManifest = "some\\path\\to\\an\\app\\dir";
+            var fakeManifestContent = "some yaml";
+
+            var manifestThatSpecifiesAppDirPath = new AppManifest
+            {
+                Applications = new List<AppConfig>
+                {
+                    new AppConfig
+                    {
+                        Path = pathValInNewManifest,
+                    }
+                }
+            };
+
+            MockFileService.Setup(m => m.ReadFileContents(newManifestPath)).Returns(fakeManifestContent);
+
+            MockSerializationService.Setup(m => m.ParseCfAppManifest(fakeManifestContent)).Returns(manifestThatSpecifiesAppDirPath);
+
+            MockFileService.Setup(m => m.DirectoryExists(pathValInNewManifest)).Returns(true);
+
+            _sut.ManifestPath = newManifestPath;
+
+            Assert.IsNotNull(_sut.ManifestModel.Applications[0].Path);
+            Assert.AreEqual(pathValInNewManifest, _sut.ManifestModel.Applications[0].Path);
+
+            Assert.IsNotNull(_sut.DeploymentDirectoryPath);
+            Assert.AreEqual(pathValInNewManifest, _sut.DeploymentDirectoryPath);
+            
+            Assert.IsNotNull(_sut.DirectoryPathLabel);
+            Assert.AreEqual(pathValInNewManifest, _sut.DirectoryPathLabel);
+        }
+
+        [TestMethod]
         [TestCategory("SelectedStack")]
         [TestCategory("ManifestModel")]
         public void SelectedStackSetter_SetsValueInManifestModel()
@@ -1353,7 +1454,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var initialPathInManifestModel = _sut.ManifestModel.Applications[0].Path;
 
             Assert.IsNull(_sut.DeploymentDirectoryPath);
-            Assert.AreEqual("<none specified>", _sut.DirectoryPathLabel);
+            Assert.AreEqual("<Default App Directory>", _sut.DirectoryPathLabel);
             Assert.AreNotEqual(initialPathInManifestModel, _sut.DeploymentDirectoryPath);
             Assert.AreNotEqual(_fakeProjectPath, initialPathInManifestModel);
 
@@ -1381,11 +1482,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.AreNotEqual(initialPathInManifestModel, _sut.DeploymentDirectoryPath);
             Assert.AreNotEqual(fakePath, initialPathInManifestModel);
 
-            Assert.AreNotEqual("<none specified>", _sut.DirectoryPathLabel);
+            Assert.AreNotEqual("<Default App Directory>", _sut.DirectoryPathLabel);
 
             _sut.DeploymentDirectoryPath = fakePath;
 
-            Assert.AreEqual("<none specified>", _sut.DirectoryPathLabel);
+            Assert.AreEqual("<Default App Directory>", _sut.DirectoryPathLabel);
             Assert.AreNotEqual(initialPathInManifestModel, _sut.DeploymentDirectoryPath);
 
             MockErrorDialogService.Verify(
