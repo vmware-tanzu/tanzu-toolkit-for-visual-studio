@@ -1321,6 +1321,129 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("SelectedStack")]
+        [TestCategory("SelectedBuildpacks")]
+        public void SelectedStackSetter_EvaluatesStackCompatibilityWithBuildpackOptions_AndDeselectsIncompatibleBuildpacks()
+        {
+            var newStackVal = "windows";
+            var initialStackInManifestModel = _sut.ManifestModel.Applications[0].Stack;
+
+            /** Matrix: all possible buildpack selection / stack compatibility changes when changing selectedStack value
+             * 	oldComp	oldSelected	newComp	newSelected
+             * 	0	    0		    0	    0	    incompatibleDeselectedBpToStayIncompatibleAndDeselected
+             * 	0	    0		    0	    1	    N/A - no spontaneous selection
+             * 	0	    0		    1	    0	    incompatibleDeselectedBpToBecomeCompatibleAndStayDeselected
+             * 	0	    0		    1	    1	    N/A - no spontaneous selection
+             * 	0	    1		    0	    0	    N/A - can't start compatible and selected
+             * 	0	    1		    0	    1	    N/A - can't start compatible and selected
+             * 	0	    1		    1	    0	    N/A - can't start compatible and selected
+             * 	0	    1		    1	    1	    N/A - can't start compatible and selected
+             * 	1	    0		    0	    0	    compatibleDeselectedBpToBecomeIncompatibleAndStayDeselected
+             * 	1	    0		    0	    1	    N/A - no spontaneous selection
+             * 	1	    0		    1	    0	    compatibleDeselectedBpToStayCompatibleAndDeselected
+             * 	1	    0		    1	    1	    N/A - no spontaneous selection
+             * 	1	    1		    0	    0	    compatibleSelectedBpToBecomeIncompatibleAndDeselected
+             * 	1	    1		    0	    1	    N/A - can't be selected if not compatible
+             * 	1	    1		    1	    0   	N/A - should say selected if compatible with both new & old stacks
+             * 	1	    1		    1	    1	    compatibleSelectedBpToStayCompatibleAndSelected 
+             */
+
+            var incompatibleDeselectedBpToStayIncompatibleAndDeselected = new FakeBuildpackListItem(
+                "incompatibleDeselectedBpToStayIncompatibleAndDeselected",
+                selected: false,
+                compatibleWithCurrentStack: false,
+                stacks: new List<string> { "unusedStack" });
+
+            var incompatibleDeselectedBpToBecomeCompatibleAndStayDeselected = new FakeBuildpackListItem(
+                "incompatibleDeselectedBpToBecomeCompatibleAndStayDeselected",
+                selected: false,
+                compatibleWithCurrentStack: false,
+                stacks: new List<string> { newStackVal });
+
+            var compatibleDeselectedBpToBecomeIncompatibleAndStayDeselected = new FakeBuildpackListItem(
+                "compatibleDeselectedBpToBecomeIncompatibleAndStayDeselected",
+                selected: false,
+                compatibleWithCurrentStack: true,
+                stacks: new List<string> { initialStackInManifestModel });
+
+            var compatibleDeselectedBpToStayCompatibleAndDeselected = new FakeBuildpackListItem(
+                "compatibleDeselectedBpToStayCompatibleAndDeselected",
+                selected: false,
+                compatibleWithCurrentStack: true,
+                stacks: new List<string> { initialStackInManifestModel, newStackVal });
+
+            var compatibleSelectedBpToBecomeIncompatibleAndDeselected = new FakeBuildpackListItem(
+                "compatibleSelectedBpToBecomeIncompatibleAndDeselected",
+                selected: true,
+                compatibleWithCurrentStack: true,
+                stacks: new List<string> { initialStackInManifestModel });
+
+            var compatibleSelectedBpToStayCompatibleAndSelected = new FakeBuildpackListItem(
+                "compatibleSelectedBpToStayCompatibleAndSelected",
+                selected: true,
+                compatibleWithCurrentStack: true,
+                stacks: new List<string> { initialStackInManifestModel, newStackVal });
+
+            _sut.BuildpackOptions = new List<BuildpackListItem>
+            {
+                incompatibleDeselectedBpToStayIncompatibleAndDeselected,
+                incompatibleDeselectedBpToBecomeCompatibleAndStayDeselected,
+                compatibleDeselectedBpToBecomeIncompatibleAndStayDeselected,
+                compatibleDeselectedBpToStayCompatibleAndDeselected,
+                compatibleSelectedBpToBecomeIncompatibleAndDeselected,
+                compatibleSelectedBpToStayCompatibleAndSelected,
+            };
+
+            _sut.SelectedBuildpacks = new ObservableCollection<string>
+            {
+                compatibleSelectedBpToBecomeIncompatibleAndDeselected.Name,
+                compatibleSelectedBpToStayCompatibleAndSelected.Name,
+            };
+
+            _receivedEvents.Clear();
+
+            Assert.AreNotEqual(newStackVal, initialStackInManifestModel);
+
+            Assert.IsFalse(incompatibleDeselectedBpToStayIncompatibleAndDeselected.IsSelected);
+            Assert.IsFalse(incompatibleDeselectedBpToStayIncompatibleAndDeselected.CompatibleWithStack);
+            Assert.IsFalse(incompatibleDeselectedBpToBecomeCompatibleAndStayDeselected.IsSelected);
+            Assert.IsFalse(incompatibleDeselectedBpToBecomeCompatibleAndStayDeselected.CompatibleWithStack);
+            Assert.IsFalse(compatibleDeselectedBpToBecomeIncompatibleAndStayDeselected.IsSelected);
+            Assert.IsTrue(compatibleDeselectedBpToBecomeIncompatibleAndStayDeselected.CompatibleWithStack);
+            Assert.IsFalse(compatibleDeselectedBpToStayCompatibleAndDeselected.IsSelected);
+            Assert.IsTrue(compatibleDeselectedBpToStayCompatibleAndDeselected.CompatibleWithStack);
+            Assert.IsTrue(compatibleSelectedBpToBecomeIncompatibleAndDeselected.IsSelected);
+            Assert.IsTrue(compatibleSelectedBpToBecomeIncompatibleAndDeselected.CompatibleWithStack);
+            Assert.IsTrue(compatibleSelectedBpToStayCompatibleAndSelected.IsSelected);
+            Assert.IsTrue(compatibleSelectedBpToStayCompatibleAndSelected.CompatibleWithStack);
+
+            Assert.AreEqual(0, _receivedEvents.Count);
+
+            _sut.SelectedStack = newStackVal;
+
+            Assert.AreEqual(newStackVal, _sut.SelectedStack);
+            Assert.AreEqual(2, _receivedEvents.Count);
+            CollectionAssert.Contains(_receivedEvents, "SelectedStack");
+            CollectionAssert.Contains(_receivedEvents, "SelectedBuildpacks");
+
+            Assert.IsFalse(incompatibleDeselectedBpToStayIncompatibleAndDeselected.IsSelected);
+            Assert.IsFalse(incompatibleDeselectedBpToStayIncompatibleAndDeselected.CompatibleWithStack);
+            Assert.IsFalse(incompatibleDeselectedBpToBecomeCompatibleAndStayDeselected.IsSelected);
+            Assert.IsTrue(incompatibleDeselectedBpToBecomeCompatibleAndStayDeselected.CompatibleWithStack);
+            Assert.IsFalse(compatibleDeselectedBpToBecomeIncompatibleAndStayDeselected.IsSelected);
+            Assert.IsFalse(compatibleDeselectedBpToBecomeIncompatibleAndStayDeselected.CompatibleWithStack);
+            Assert.IsFalse(compatibleDeselectedBpToStayCompatibleAndDeselected.IsSelected);
+            Assert.IsTrue(compatibleDeselectedBpToStayCompatibleAndDeselected.CompatibleWithStack);
+            Assert.IsFalse(compatibleSelectedBpToBecomeIncompatibleAndDeselected.IsSelected);
+            Assert.IsFalse(compatibleSelectedBpToBecomeIncompatibleAndDeselected.CompatibleWithStack);
+            Assert.IsTrue(compatibleSelectedBpToStayCompatibleAndSelected.IsSelected);
+            Assert.IsTrue(compatibleSelectedBpToStayCompatibleAndSelected.CompatibleWithStack);
+
+            Assert.AreEqual(1, _sut.SelectedBuildpacks.Count);
+            CollectionAssert.Contains(_sut.SelectedBuildpacks, compatibleSelectedBpToStayCompatibleAndSelected.Name);
+        }
+
+        [TestMethod]
         [TestCategory("DeploymentDirectoryPath")]
         [TestCategory("DirectoryPathLabel")]
         [TestCategory("ManifestModel")]
@@ -1418,29 +1541,78 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task UpdateBuildpackOptions_SetsBuildpackOptionsToQueryContent_WhenQuerySucceeds()
         {
             var fakeCf = new FakeCfInstanceViewModel(FakeCfInstance, Services);
-            var fakeBuildpacksContent = new List<string>
+            var fakeBuildpacksContent = new List<CfBuildpack>
             {
-                "my_cool_bp",
-                "ruby_buildpack",
-                "topaz_buildpack",
-                "emerald_buildpack",
+                new CfBuildpack
+                {
+                    Name = "bp1",
+                    Stack = "stack1",
+                },
+                new CfBuildpack
+                {
+                    Name = "bp1",
+                    Stack = "stack2",
+                },
+                new CfBuildpack
+                {
+                    Name = "bp1",
+                    Stack = "stack3",
+                },
+                new CfBuildpack
+                {
+                    Name = "bp2",
+                    Stack = "stack1",
+                },
+                new CfBuildpack
+                {
+                    Name = "bp3",
+                    Stack = "stack2",
+                },
             };
-            var fakeBuildpacksResponse = new DetailedResult<List<string>>(succeeded: true, content: fakeBuildpacksContent);
+            var numUniqueBpNamesInFakeResponse = fakeBuildpacksContent.GroupBy(bp => bp.Name).Select(g => g.FirstOrDefault()).ToList().Count;
+
+            var fakeBuildpacksResponse = new DetailedResult<List<CfBuildpack>>
+            {
+                Succeeded = true,
+                Content = fakeBuildpacksContent
+            };
+
+            // simulate builpack specification in a pre-loaded manifest; expect corresponding bp list item to be marked as selected
+            _sut.ManifestModel.Applications[0].Buildpacks = new List<string> { "bp2" };
+
+            // simulate existing stack selection; expect corresponding bp list items to be appopriately marked as (in)compatible
+            _sut.SelectedStack = "stack1";
 
             MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(fakeCf);
 
-            MockCloudFoundryService.Setup(m => m.GetUniqueBuildpackNamesAsync(fakeCf.CloudFoundryInstance.ApiAddress, 1)).ReturnsAsync(fakeBuildpacksResponse);
+            MockCloudFoundryService.Setup(m => m.GetBuildpacksAsync(fakeCf.CloudFoundryInstance.ApiAddress, 1)).ReturnsAsync(fakeBuildpacksResponse);
 
-            Assert.AreNotEqual(fakeBuildpacksContent, _sut.BuildpackOptions);
+            CollectionAssert.AreNotEquivalent(fakeBuildpacksContent, _sut.BuildpackOptions);
             CollectionAssert.DoesNotContain(_receivedEvents, "BuildpackOptions");
 
             await _sut.UpdateBuildpackOptions();
 
-            Assert.AreEqual(fakeBuildpacksContent.Count, _sut.BuildpackOptions.Count);
-            foreach (BuildpackListItem bp in _sut.BuildpackOptions)
-            {
-                Assert.IsTrue(fakeBuildpacksContent.Contains(bp.Name));
-            }
+            Assert.AreEqual(numUniqueBpNamesInFakeResponse, _sut.BuildpackOptions.Count);
+
+            Assert.IsTrue(_sut.BuildpackOptions.Exists(bp => bp.Name == "bp1"
+                                                             && bp.ValidStacks.Count == 3
+                                                             && bp.ValidStacks.Contains("stack1")
+                                                             && bp.ValidStacks.Contains("stack2")
+                                                             && bp.ValidStacks.Contains("stack3")
+                                                             && bp.IsSelected == false
+                                                             && bp.CompatibleWithStack == true));
+
+            Assert.IsTrue(_sut.BuildpackOptions.Exists(bp => bp.Name == "bp2"
+                                                             && bp.ValidStacks.Count == 1
+                                                             && bp.ValidStacks.Contains("stack1")
+                                                             && bp.IsSelected == true
+                                                             && bp.CompatibleWithStack == true));
+
+            Assert.IsTrue(_sut.BuildpackOptions.Exists(bp => bp.Name == "bp3"
+                                                             && bp.ValidStacks.Count == 1
+                                                             && bp.ValidStacks.Contains("stack2")
+                                                             && bp.IsSelected == false
+                                                             && bp.CompatibleWithStack == false));
 
             CollectionAssert.Contains(_receivedEvents, "BuildpackOptions");
         }
@@ -1451,11 +1623,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             var fakeCf = new FakeCfInstanceViewModel(FakeCfInstance, Services);
             const string fakeFailureReason = "junk";
-            var fakeBuildpacksResponse = new DetailedResult<List<string>>(succeeded: false, content: null, explanation: fakeFailureReason, cmdDetails: null);
+            var fakeBuildpacksResponse = new DetailedResult<List<CfBuildpack>>(succeeded: false, content: null, explanation: fakeFailureReason, cmdDetails: null);
 
             MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(fakeCf);
 
-            MockCloudFoundryService.Setup(m => m.GetUniqueBuildpackNamesAsync(fakeCf.CloudFoundryInstance.ApiAddress, 1)).ReturnsAsync(fakeBuildpacksResponse);
+            MockCloudFoundryService.Setup(m => m.GetBuildpacksAsync(fakeCf.CloudFoundryInstance.ApiAddress, 1)).ReturnsAsync(fakeBuildpacksResponse);
 
             CollectionAssert.DoesNotContain(_receivedEvents, "BuildpackOptions");
 
@@ -1751,6 +1923,26 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public void Show()
         {
             ShowMethodWasCalled = true;
+        }
+    }
+
+    public class FakeBuildpackListItem : BuildpackListItem
+    {
+        public FakeBuildpackListItem(string name, bool selected, bool compatibleWithCurrentStack, List<string> stacks)
+        {
+            Name = name;
+            IsSelected = selected;
+            ValidStacks = stacks;
+            if (compatibleWithCurrentStack)
+            {
+                // set CompatibleWithStack to true
+                EvalutateStackCompatibility(null);
+            }
+            else
+            {
+                // set CompatibleWithStack to false
+                EvalutateStackCompatibility("some junk that should purposefully not appear in list of stacks");
+            }
         }
     }
 }
