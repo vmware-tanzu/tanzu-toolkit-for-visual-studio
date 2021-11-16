@@ -774,11 +774,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             };
         }
 
-        public async Task<DetailedResult> DeployAppAsync(AppManifest appManifest, CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback)
+        public async Task<DetailedResult> DeployAppAsync(AppManifest appManifest, string defaultAppPath, CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback)
         {
             AppConfig app = appManifest.Applications[0];
 
-            string pathToDeploymentDirectory = app.Path;
+            string pathToDeploymentDirectory = app.Path ?? defaultAppPath;
             string appName = app.Name;
 
             if (!_fileService.DirContainsFiles(pathToDeploymentDirectory))
