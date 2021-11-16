@@ -778,7 +778,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         {
             AppConfig app = appManifest.Applications[0];
 
-            string pathToDeploymentDirectory = app.Path == null ? defaultAppPath : app.Path;
+            string pathToDeploymentDirectory = app.Path ?? defaultAppPath;
             string appName = app.Name;
 
             if (!_fileService.DirContainsFiles(pathToDeploymentDirectory))
