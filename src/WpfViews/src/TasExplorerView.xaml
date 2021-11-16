@@ -13,6 +13,7 @@
     <UserControl.Resources>
         <converters:VisibilityConverter x:Key="Visibility" />
         <converters:VisibilityConverter x:Key="InverseVisibility" Reversed="True"/>
+        <converters:VisibilityConverter x:Key="ExpansionConverter" ReserveSpace="False" />
 
         <Style x:Key="RoundedButtonStyle" TargetType="{x:Type Button}">
             <Setter Property="Background" Value="Transparent"/>
@@ -55,9 +56,10 @@
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
+    
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition/>
         </Grid.RowDefinitions>
 
@@ -67,17 +69,28 @@
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.ColumnSpan="3" Background="{Binding ElementName=TasExplorerViewElement, Path=WizardFooterBrush}">
-            <Button Style="{DynamicResource RoundedButtonStyle}"
-                    Command ="{ Binding ElementName=TasExplorerViewElement, Path=OpenLoginFormCommand }" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}">
-                <Image Source="Resources/tanzu_nc_dark.png" Stretch="Uniform" Width="16px" Height="16px"
-                       ToolTip="Log in to Tanzu Application Service"/>
-            </Button>
+        <StackPanel Grid.Row="0" Grid.ColumnSpan="3">
+            <StackPanel
+                Orientation="Horizontal"
+                Background="{Binding ElementName=TasExplorerViewElement, Path=WizardFooterBrush}">
+                <Button
+                    Style="{DynamicResource RoundedButtonStyle}"
+                    Command="{ Binding ElementName=TasExplorerViewElement, Path=OpenLoginFormCommand }"
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}">
+                    <Image
+                        Source="Resources/tanzu_nc_dark.png"
+                        Stretch="Uniform"
+                        Width="16px"
+                        Height="16px"
+                        Margin="6"
+                        ToolTip="Log in to Tanzu Application Service"/>
+                </Button>
 
-            <Button Style="{DynamicResource RoundedButtonStyle}"
+                <Button
+                    Style="{DynamicResource RoundedButtonStyle}"
                     Command ="{ Binding ElementName=TasExplorerViewElement, Path=RefreshAllCommand }">
-                <Grid>
-                    <Image Source="Resources/Refresh_16x.png" 
+                    <Grid>
+                        <Image Source="Resources/Refresh_16x.png" 
                            Grid.Row="0"
                            Grid.Column="0"
                            Stretch="Uniform" 
@@ -85,21 +98,21 @@
                            Height="16px"
                            ToolTip="Refresh All Cloud Connections" 
                            RenderTransformOrigin="0.5 0.5"
-                           Visibility="{Binding IsRefreshingAll, Converter={StaticResource Visibility}}">
-                        <Image.RenderTransform>
-                            <RotateTransform x:Name="Rotation" Angle="0"/>
-                        </Image.RenderTransform>
-                        <Image.Triggers>
-                            <EventTrigger RoutedEvent="Loaded">
-                                <BeginStoryboard>
-                                    <Storyboard RepeatBehavior="Forever">
-                                        <DoubleAnimation Storyboard.TargetName="Rotation" Storyboard.TargetProperty="Angle" From="0" To="360"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </Image.Triggers>
-                    </Image>
-                    <Image Source="Resources/Refresh_16x.png" 
+                           Visibility="{Binding IsRefreshingAll, Converter={StaticResource ExpansionConverter}}">
+                            <Image.RenderTransform>
+                                <RotateTransform x:Name="Rotation" Angle="0"/>
+                            </Image.RenderTransform>
+                            <Image.Triggers>
+                                <EventTrigger RoutedEvent="Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard RepeatBehavior="Forever">
+                                            <DoubleAnimation Storyboard.TargetName="Rotation" Storyboard.TargetProperty="Angle" From="0" To="360"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Image.Triggers>
+                        </Image>
+                        <Image Source="Resources/Refresh_16x.png" 
                            Grid.Row="0"
                            Grid.Column="0"
                            Stretch="Uniform" 
@@ -108,31 +121,41 @@
                            ToolTip="Refresh all"
                            RenderTransformOrigin="0.5 0.5"
                            Visibility="{Binding IsRefreshingAll, Converter={StaticResource InverseVisibility}}">
-                    </Image>
-                </Grid>
-            </Button>
-        </StackPanel>
+                        </Image>
+                    </Grid>
+                </Button>
+            </StackPanel>
 
-        <StackPanel Grid.Row="1" Grid.ColumnSpan="3">
-            <Button 
-             Margin="0,0,0,244"
-             FontSize="12"
-             Foreground="Black"
-             Background="#FFFFE2"
-             Command="{Binding ElementName=TasExplorerViewElement, Path=ReAuthenticateCommand}"
-             Visibility="{Binding AuthenticationRequired, Converter={StaticResource Visibility}}" Grid.ColumnSpan="3">
-                <DockPanel HorizontalAlignment="Stretch" Width="285" Height="23">
-                    <Label Content="Disconnected: Click here to re-authenticate" DockPanel.Dock="Right" 
-                       VerticalAlignment="Top" Width="275" Foreground="Black" FontSize="11" Height="24" Margin="0,-2,0,0"/>
-                    <Image Stretch="Uniform" DockPanel.Dock="Left" VerticalAlignment="Center" 
-                       Source="Resources/StatusWarning.png" Height="25" Width="11" Margin="0,0,0,4"/>
+            <Button
+                FontSize="12"
+                Foreground="Black"
+                Background="#FFFFE2"
+                Command="{Binding ElementName=TasExplorerViewElement, Path=ReAuthenticateCommand}"
+                Visibility="{Binding AuthenticationRequired, Converter={StaticResource Visibility}}" Grid.ColumnSpan="3">
+                <DockPanel
+                    HorizontalAlignment="Stretch"
+                    Width="285"
+                    Height="23">
+                    <Label
+                        Content="Disconnected: Click here to re-authenticate"
+                        DockPanel.Dock="Right"
+                        VerticalAlignment="Top"
+                        Width="275"
+                        Foreground="Black"
+                        FontSize="11"
+                        Height="24"/>
+                    <Image
+                        Stretch="Uniform"
+                        DockPanel.Dock="Left"
+                        VerticalAlignment="Center"
+                        Source="Resources/StatusWarning.png"
+                        Height="25"
+                        Width="11"/>
                 </DockPanel>
             </Button>
         </StackPanel>
 
-        <Rectangle Grid.Row="1" Grid.RowSpan="1" Grid.ColumnSpan="3" />
-
-        <TreeView ItemsSource="{Binding TreeRoot}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,20,0,3">
+        <TreeView ItemsSource="{Binding TreeRoot}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="Transparent">
             <TreeView.ItemContainerStyle>
                 <!-- This Style binds a TreeViewItem to a TreeViewItemViewModel. -->
                 <Style TargetType="{x:Type TreeViewItem}">
