@@ -33,9 +33,9 @@ steps:
 # NuGet tool installer
 # Acquires a specific version of NuGet from the internet or the tools cache and adds it to the PATH. Use this task to change the version of NuGet used in the NuGet tasks.
 - task: NuGetToolInstaller@1
-  displayName: 'Use NuGet 5.8.x'
+  displayName: 'Use NuGet 5.11.0'
   inputs:
-    versionSpec: 5.8.x
+    versionSpec: 5.11.0
 
 # NuGet
 # Restore, pack, or push NuGet packages, or run a NuGet command. 
