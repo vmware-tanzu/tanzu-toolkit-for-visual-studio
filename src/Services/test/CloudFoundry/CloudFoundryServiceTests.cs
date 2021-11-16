@@ -1720,7 +1720,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 }
             };
 
-            var defaultAppPath = "fake\\app\\path";
+            var defaultAppPath = @"fake\app\path";
 
             Assert.IsNull(appManifest.Applications[0].Path); // ensure manifest app path null
 
@@ -1748,12 +1748,12 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 {
                     new AppConfig()
                     {
-                        Path = "manifest\\app\\path",
+                        Path = @"manifest\app\path",
                     },
                 }
             };
 
-            var defaultAppPath = "fake\\app\\path";
+            var defaultAppPath = @"fake\app\path";
             var manifestAppPath = appManifest.Applications[0].Path;
 
             Assert.IsNotNull(appManifest.Applications[0].Path); // ensure manifest app path is not null
