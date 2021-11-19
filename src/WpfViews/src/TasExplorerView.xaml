@@ -241,7 +241,7 @@
                 <DataTemplate DataType="{x:Type ViewModels:AppViewModel}">
                     <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="18"></RowDefinition>
+                            <RowDefinition Height="auto"></RowDefinition>
                         </Grid.RowDefinitions>
 
                         <Grid.ColumnDefinitions>
