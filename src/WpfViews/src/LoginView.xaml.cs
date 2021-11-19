@@ -1,4 +1,5 @@
-﻿using System.Security;
+﻿using Microsoft.VisualStudio.PlatformUI;
+using System.Security;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -11,7 +12,7 @@ namespace Tanzu.Toolkit.WpfViews
     /// <summary>
     /// Interaction logic for LoginView.xaml.
     /// </summary>
-    public partial class LoginView : Window, ILoginView
+    public partial class LoginView : DialogWindow, ILoginView
     {
         private ILoginViewModel _viewModel;
 
