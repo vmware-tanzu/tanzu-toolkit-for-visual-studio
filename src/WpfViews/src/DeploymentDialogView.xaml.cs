@@ -1,17 +1,18 @@
-﻿using System.Windows;
+﻿using Microsoft.VisualStudio.PlatformUI;
+using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.WpfViews.Commands;
 using Tanzu.Toolkit.WpfViews.ThemeService;
-namespace Tanzu.Toolkit.WpfViews
 
+namespace Tanzu.Toolkit.WpfViews
 {
     /// <summary>
     /// Interaction logic for DeploymentDialogView.xaml.
     /// </summary>
-    public partial class DeploymentDialogView : Window, IDeploymentDialogView
+    public partial class DeploymentDialogView : DialogWindow, IDeploymentDialogView
     {
         private IDeploymentDialogViewModel _viewModel;
         public ICommand UploadAppCommand { get; }
