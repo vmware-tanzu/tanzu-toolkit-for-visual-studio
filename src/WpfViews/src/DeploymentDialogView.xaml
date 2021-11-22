@@ -8,7 +8,6 @@
     Name="DeploymentDialogViewElement"
     Title="Push to Tanzu Application Service"
     Icon="Resources/tas_16px.png"
-    Width="600"
     BorderBrush="Gray"
     BorderThickness="1"
     ResizeMode="NoResize"
@@ -33,15 +32,20 @@
             </Setter>
         </Style>
 
+        <Style x:Key="FieldNameStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
     </ui:DialogWindow.Resources>
 
-    <DockPanel LastChildFill="False">
-        <StackPanel Orientation="Horizontal" Margin="12,12,0,0" DockPanel.Dock="Top">
+    <DockPanel LastChildFill="False" >
+        <StackPanel Orientation="Horizontal" Margin="12" DockPanel.Dock="Top">
             <Image Source="Resources/tasicon.png" Width="32" Margin="4" Grid.Row="0" Grid.Column="0"/>
             <TextBlock FontSize="24" Text="Push to Tanzu Application Service" Margin="4" Grid.Row="0" Grid.Column="1"/>
         </StackPanel>
 
-        <Grid x:Name="MainContent" Width="500" VerticalAlignment="Top" Margin="8,8,8,0" DockPanel.Dock="Top">
+        <Grid x:Name="MainContent" VerticalAlignment="Top" Margin="48,0" DockPanel.Dock="Top">
             <Grid.RowDefinitions>
                 <!--ROW 0-->
                 <RowDefinition Height="4*"></RowDefinition>
@@ -66,10 +70,11 @@
             </Grid.ColumnDefinitions>
 
             <!--MAIN GRID ROW 0-->
-            <StackPanel VerticalAlignment="Center" Grid.Row="0" Margin="0,10,0,4">
-                <TextBlock VerticalAlignment="Center" Text="Target Environment" RenderTransformOrigin="0.51,0.966" />
+            <StackPanel VerticalAlignment="Center" Grid.Row="0">
+                <TextBlock
+                    Text="Target Environment"
+                    Style="{StaticResource FieldNameStyle}"/>
             </StackPanel>
-
 
             <Button
                 Grid.Row="0"
@@ -98,7 +103,7 @@
             <TextBlock
                 Grid.Row="2"
                 Text="App Manifest"
-                VerticalAlignment="Center"/>
+                Style="{StaticResource FieldNameStyle}"/>
 
             <Grid
                 Grid.Row="2"
@@ -141,8 +146,7 @@
             <TextBlock
                 Grid.Row="3"
                 Text="App Name"
-                VerticalAlignment="Center"
-                Margin="0,4"/>
+                Style="{StaticResource FieldNameStyle}"/>
 
             <TextBox
                 Grid.Row="3"
@@ -178,7 +182,9 @@
 
             <!--MAIN GRID ROW 4-->
             <StackPanel VerticalAlignment="Center" Grid.Row="4" Margin="0,4">
-                <TextBlock VerticalAlignment="Center" Text="Target Organization"/>
+                <TextBlock
+                    Text="Target Organization"
+                    Style="{StaticResource FieldNameStyle}"/>
             </StackPanel>
 
             <ComboBox
@@ -222,7 +228,9 @@
             
             <!--MAIN GRID ROW 5-->
             <StackPanel VerticalAlignment="Center" Grid.Row="5" Margin="0,4">
-                <TextBlock VerticalAlignment="Center" Text="Target Space"/>
+                <TextBlock
+                    Text="Target Space"
+                    Style="{StaticResource FieldNameStyle}"/>
             </StackPanel>
 
             <ComboBox
@@ -307,9 +315,8 @@
         <Grid
             Name="HiddenContent"
             Visibility="{Binding Expanded, Converter={StaticResource ExpansionConverter}}"
-            Width="500"
             VerticalAlignment="Top"
-            Margin="8,8,8,0"
+            Margin="48,0"
             DockPanel.Dock="Top">
 
             <Grid.RowDefinitions>
@@ -327,13 +334,16 @@
             </Grid.ColumnDefinitions>
 
             <!--HIDDEN GRID ROW 0-->
-            <Separator Grid.Row="0" Grid.ColumnSpan="2" 
-                        Margin="0,12"/>
+            <Separator
+                Grid.Row="0"
+                Grid.ColumnSpan="2"
+                Margin="0,12"/>
 
             <!--HIDDEN GRID ROW 1-->
-            <TextBlock Grid.Row="1" 
-                        Text="Directory to Push" 
-                        VerticalAlignment="Center" />
+            <TextBlock
+                Grid.Row="1"
+                Text="Directory to Push"
+                Style="{StaticResource FieldNameStyle}"/>
 
             <Grid Grid.Row="1" Grid.Column="1" VerticalAlignment="Center">
                 <Grid.RowDefinitions>
@@ -457,7 +467,9 @@
 
             <!--HIDDEN GRID ROW 3-->
             <StackPanel VerticalAlignment="Center" Grid.Row="3">
-                <TextBlock VerticalAlignment="Center" Text="Stack"/>
+                <TextBlock
+                    Text="Stack"
+                    Style="{StaticResource FieldNameStyle}"/>
             </StackPanel>
 
             <ComboBox
@@ -493,7 +505,9 @@
 
             <!--HIDDEN GRID ROW 3-->
             <StackPanel VerticalAlignment="Center" Grid.Row="4">
-                <TextBlock VerticalAlignment="Center" Text="Start Command"/>
+                <TextBlock
+                    Text="Start Command"
+                    Style="{StaticResource FieldNameStyle}"/>
             </StackPanel>
 
             <TextBox
