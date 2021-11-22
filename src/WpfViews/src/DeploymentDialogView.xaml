@@ -12,7 +12,7 @@
     BorderThickness="1"
     ResizeMode="NoResize"
     WindowStyle="None"
-    SizeToContent="Height">
+    SizeToContent="WidthAndHeight">
 
     <ui:DialogWindow.Resources>
         <converters:VisibilityConverter x:Key="Visibility" />
