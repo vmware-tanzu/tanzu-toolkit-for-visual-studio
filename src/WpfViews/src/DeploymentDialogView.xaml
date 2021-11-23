@@ -65,8 +65,8 @@
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="*" MinWidth="200"/>
+                <ColumnDefinition Width="2*" MinWidth="400"/>
             </Grid.ColumnDefinitions>
 
             <!--MAIN GRID ROW 0-->
@@ -120,12 +120,14 @@
                     <ColumnDefinition Width="32"/>
                 </Grid.ColumnDefinitions>
 
-                <Label 
+                <TextBlock 
                     VerticalAlignment="Center"
                     Grid.Row="0"
                     Grid.Column="0"
+                    HorizontalAlignment="Left"
+                    MaxWidth="350"
                     IsEnabled="{Binding IsLoggedIn}"
-                    Content="{Binding ManifestPathLabel}" 
+                    Text="{Binding ManifestPathLabel}" 
                     ToolTip="{Binding ManifestPathLabel}"/>
 
                 <Button 
@@ -329,8 +331,8 @@
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"></ColumnDefinition>
-                <ColumnDefinition Width="2*"></ColumnDefinition>
+                <ColumnDefinition Width="*" MinWidth="200"/>
+                <ColumnDefinition Width="2*" MinWidth="400"/>
             </Grid.ColumnDefinitions>
 
             <!--HIDDEN GRID ROW 0-->
@@ -355,12 +357,14 @@
                     <ColumnDefinition Width="32"/>
                 </Grid.ColumnDefinitions>
 
-                <Label 
+                <TextBlock 
                     VerticalAlignment="Center"
                     Grid.Row="0"
                     Grid.Column="0"
+                    HorizontalAlignment="Left"
+                    MaxWidth="350"
                     IsEnabled="{Binding IsLoggedIn}"
-                    Content="{Binding DirectoryPathLabel}" 
+                    Text="{Binding DirectoryPathLabel}" 
                     ToolTip="{Binding DirectoryPathLabel}"/>
 
                 <Button 
@@ -399,10 +403,12 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <Label
-                        Content="{Binding SelectedBuildpacks, Converter={StaticResource SelectedBuildpacksStringListConverter}}"
+                    <TextBlock
+                        Text="{Binding SelectedBuildpacks, Converter={StaticResource SelectedBuildpacksStringListConverter}}"
                         ToolTip="{Binding SelectedBuildpacks, Converter={StaticResource SelectedBuildpacksStringListConverter}}"
                         Grid.Column="0"
+                        MaxWidth="350"
+                        HorizontalAlignment="Left"
                         VerticalAlignment="Center"
                         IsEnabled="{Binding IsLoggedIn}"/>
 
@@ -410,6 +416,8 @@
                         Grid.Column="1"
                         MinHeight="0"
                         MinWidth="0"
+                        Margin="4"
+                        HorizontalAlignment="Right"
                         IsEnabled="{Binding IsLoggedIn}"
                         Command="{Binding ElementName=DeploymentDialogViewElement, Path=ClearBuildpackSelectionCommand}"
                         VerticalAlignment="Center">
@@ -419,6 +427,7 @@
                             </ControlTemplate>
                         </Button.Template>
                         <TextBlock
+                            Foreground="{Binding ElementName=DeploymentDialogViewElement, Path=HyperlinkBrush}"
                             Text="Clear"
                             FontStyle="Italic"/>
                     </Button>
