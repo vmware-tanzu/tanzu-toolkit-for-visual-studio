@@ -180,7 +180,9 @@
                                 Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
                                 Style="{StaticResource RowItemStyle}">
                             <Button.ContextMenu>
-                                <ContextMenu>
+                                <ContextMenu
+                                    FontSize="{DynamicResource VsFont.EnvironmentFontSize}"
+                                    FontFamily="{DynamicResource VsFont.EnvironmentFontFamily}">
                                     <MenuItem Header="Delete Connection" 
                                               Command="{Binding PlacementTarget.Tag.DeleteConnectionCommand, 
                                                                 RelativeSource={RelativeSource Mode=FindAncestor, 
@@ -202,7 +204,9 @@
                                 Style="{StaticResource RowItemStyle}"
                                 Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
                             <Button.ContextMenu>
-                                <ContextMenu>
+                                <ContextMenu
+                                    FontSize="{DynamicResource VsFont.EnvironmentFontSize}"
+                                    FontFamily="{DynamicResource VsFont.EnvironmentFontFamily}">
                                     <MenuItem Header="Refresh Org" 
                                               Command="{Binding PlacementTarget.Tag.RefreshOrgCommand, 
                                                                 RelativeSource={RelativeSource Mode=FindAncestor, 
@@ -224,7 +228,9 @@
                                 Style="{StaticResource RowItemStyle}"
                                 Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
                             <Button.ContextMenu>
-                                <ContextMenu>
+                                <ContextMenu
+                                    FontSize="{DynamicResource VsFont.EnvironmentFontSize}"
+                                    FontFamily="{DynamicResource VsFont.EnvironmentFontFamily}">
                                     <MenuItem Header="Refresh Space" 
                                               Command="{Binding PlacementTarget.Tag.RefreshSpaceCommand, 
                                                                 RelativeSource={RelativeSource Mode=FindAncestor, 
@@ -263,7 +269,9 @@
                                 Style="{StaticResource RowItemStyle}"
                                 Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
                             <Button.ContextMenu>
-                                <ContextMenu>
+                                <ContextMenu
+                                    FontSize="{DynamicResource VsFont.EnvironmentFontSize}"
+                                    FontFamily="{DynamicResource VsFont.EnvironmentFontFamily}">
                                     <MenuItem Header="Start App" 
                                               Command="{Binding PlacementTarget.Tag.StartCfAppCommand, 
                                                                 RelativeSource={RelativeSource Mode=FindAncestor, 
