@@ -183,7 +183,7 @@
                                 <ContextMenu
                                     FontSize="{DynamicResource VsFont.EnvironmentFontSize}"
                                     FontFamily="{DynamicResource VsFont.EnvironmentFontFamily}">
-                                    <MenuItem Header="Delete Connection" 
+                                    <MenuItem Header="Disconnect" 
                                               Command="{Binding PlacementTarget.Tag.DeleteConnectionCommand, 
                                                                 RelativeSource={RelativeSource Mode=FindAncestor, 
                                                                 AncestorType=ContextMenu}}"
