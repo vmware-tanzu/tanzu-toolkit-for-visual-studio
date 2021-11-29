@@ -37,7 +37,6 @@
             <Setter Property="Margin" Value="0,0,8,0"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
-
     </ui:DialogWindow.Resources>
 
     <DockPanel LastChildFill="False" >
@@ -155,7 +154,10 @@
                 Grid.Row="3"
                 Grid.Column="1"
                 Grid.ColumnSpan="1" 
-                Margin="0,4" 
+                Margin="0,4"
+                HorizontalAlignment="Left"
+                MinWidth="450"
+                MaxWidth="450"
                 x:Name="AppNameField"
                 Text="{Binding AppName}" 
                 IsEnabled="{Binding IsLoggedIn}"
@@ -525,6 +527,9 @@
                 Grid.Column="1"
                 Grid.ColumnSpan="1"
                 Margin="0,4"
+                HorizontalAlignment="Left"
+                MinWidth="450"
+                MaxWidth="450"
                 x:Name="StartCommandField"
                 Text="{Binding StartCommand}" 
                 IsEnabled="{Binding IsLoggedIn}"
@@ -532,6 +537,7 @@
                 VerticalContentAlignment="Center"/>
             
             <TextBlock
+                x:Name="StartCommandTextPlaceholder"
                 IsHitTestVisible="False"
                 Text="Enter Start Command Here&lt;Optional&gt;"
                 VerticalAlignment="Center"
