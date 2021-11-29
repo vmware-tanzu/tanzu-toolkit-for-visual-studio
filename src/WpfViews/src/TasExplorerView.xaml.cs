@@ -52,7 +52,7 @@ namespace Tanzu.Toolkit.WpfViews
             RefreshSpaceCommand = new AsyncDelegatingCommand(viewModel.RefreshSpace, viewModel.CanRefreshSpace);
             RefreshOrgCommand = new AsyncDelegatingCommand(viewModel.RefreshOrg, viewModel.CanRefreshOrg);
             RefreshAllCommand = new DelegatingCommand(viewModel.RefreshAllItems, viewModel.CanInitiateFullRefresh);
-            DeleteConnectionCommand = new DelegatingCommand(viewModel.DeleteConnection, viewModel.CanRemoveCloudConnecion);
+            DeleteConnectionCommand = new DelegatingCommand(viewModel.LogOutTas, viewModel.CanLogOutTas);
             ReAuthenticateCommand = new DelegatingCommand(viewModel.ReAuthenticate, viewModel.CanReAuthenticate);
 
             themeService.SetTheme(this);

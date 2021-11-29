@@ -23,6 +23,7 @@ namespace Tanzu.Toolkit.ViewModels
         private volatile int _numRefreshThreads = 0;
         private object _refreshLock = new object();
         private bool _authenticationRequired;
+        private bool _isLoggedIn;
         private ObservableCollection<TreeViewItemViewModel> treeRoot;
         private readonly IServiceProvider _services;
         private readonly IThreadingService _threadingService;
@@ -130,6 +131,18 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
+        public bool IsLoggedIn
+        {
+            get => _isLoggedIn;
+
+            set
+            {
+                _isLoggedIn = value;
+
+                RaisePropertyChangedEvent("IsLoggedIn");
+            }
+        }
+
         public bool CanOpenLoginView(object arg)
         {
             return true;
@@ -175,11 +188,6 @@ namespace Tanzu.Toolkit.ViewModels
             return !IsRefreshingAll;
         }
 
-        public bool CanRemoveCloudConnecion(object arg)
-        {
-            return true;
-        }
-
         public bool CanDisplayRecentAppLogs(object arg)
         {
             return true;
@@ -188,6 +196,11 @@ namespace Tanzu.Toolkit.ViewModels
         public bool CanReAuthenticate(object arg)
         {
             return AuthenticationRequired;
+        }
+
+        public bool CanLogOutTas(object arg)
+        {
+            return IsLoggedIn;
         }
 
         public void OpenLoginView(object parent)
@@ -207,6 +220,7 @@ namespace Tanzu.Toolkit.ViewModels
                 if (successfullyLoggedIn)
                 {
                     AuthenticationRequired = false;
+                    IsLoggedIn = true;
 
                     if (!ThreadingService.IsPolling)
                     {
@@ -411,18 +425,17 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public void DeleteConnection(object arg)
+        public void LogOutTas(object arg)
         {
-            if (arg is CfInstanceViewModel)
-            {
-                TasConnection = null;
-            }
+            TasConnection = null;
+            IsLoggedIn = false;
         }
 
         public void ReAuthenticate(object arg)
         {
-            DeleteConnection(TasConnection);
+            LogOutTas(TasConnection);
             OpenLoginView(null);
         }
+
     }
 }
