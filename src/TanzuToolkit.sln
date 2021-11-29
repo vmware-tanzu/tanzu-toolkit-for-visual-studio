@@ -16,8 +16,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tanzu.Toolkit.ViewModels", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tanzu.Toolkit.ViewModels.Tests", "ViewModels\test\Tanzu.Toolkit.ViewModels.Tests.csproj", "{F3EB0E9D-3535-4C43-B003-8A9788308FBD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tanzu.Toolkit.WpfApp", "WpfApp\src\Tanzu.Toolkit.WpfApp.csproj", "{73A694F8-D539-4D99-A480-349EB93D4E8B}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tanzu.Toolkit.Models", "Models\src\Tanzu.Toolkit.Models.csproj", "{9486BBEE-472D-4D0A-9644-A34151F66F62}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tanzu.Toolkit.CloudFoundryApiClient", "CloudFoundryApiClient\src\Tanzu.Toolkit.CloudFoundryApiClient.csproj", "{56A68904-C31A-45E7-8617-FB8FDCFB49CB}"
@@ -50,10 +48,6 @@ Global
 		{F3EB0E9D-3535-4C43-B003-8A9788308FBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F3EB0E9D-3535-4C43-B003-8A9788308FBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F3EB0E9D-3535-4C43-B003-8A9788308FBD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{73A694F8-D539-4D99-A480-349EB93D4E8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{73A694F8-D539-4D99-A480-349EB93D4E8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{73A694F8-D539-4D99-A480-349EB93D4E8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{73A694F8-D539-4D99-A480-349EB93D4E8B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9486BBEE-472D-4D0A-9644-A34151F66F62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9486BBEE-472D-4D0A-9644-A34151F66F62}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9486BBEE-472D-4D0A-9644-A34151F66F62}.Release|Any CPU.ActiveCfg = Release|Any CPU
