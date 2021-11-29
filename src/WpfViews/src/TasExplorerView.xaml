@@ -88,6 +88,20 @@
 
                 <Button
                     Style="{DynamicResource RoundedButtonStyle}"
+                    Command="{ Binding ElementName=TasExplorerViewElement, Path=LogoutCommand }"
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                    Visibility="{Binding IsLoggedIn, Converter={StaticResource Visibility}}">
+                    <Image
+                        Source="Resources/bluelogout.png"
+                        Stretch="Uniform"
+                        Width="16px"
+                        Height="16px"
+                        Margin="6"
+                        ToolTip="Log out of Tanzu Application Service"/>
+                </Button>
+
+                <Button
+                    Style="{DynamicResource RoundedButtonStyle}"
                     Command ="{ Binding ElementName=TasExplorerViewElement, Path=RefreshAllCommand }">
                     <Grid>
                         <Image Source="Resources/Refresh_16x.png" 

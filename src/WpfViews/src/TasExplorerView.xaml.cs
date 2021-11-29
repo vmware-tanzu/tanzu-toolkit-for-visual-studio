@@ -26,6 +26,7 @@ namespace Tanzu.Toolkit.WpfViews
         public ICommand RefreshAllCommand { get; }
         public ICommand DeleteConnectionCommand { get; }
         public ICommand ReAuthenticateCommand { get; }
+        public ICommand LogoutCommand { get; }
         public IViewModel ViewModel { get; private set; }
 
         public Brush ListItemMouseOverBrush { get { return (Brush)GetValue(ListItemMouseOverBrushProperty); } set { SetValue(ListItemMouseOverBrushProperty, value); } }
@@ -54,6 +55,7 @@ namespace Tanzu.Toolkit.WpfViews
             RefreshAllCommand = new DelegatingCommand(viewModel.RefreshAllItems, viewModel.CanInitiateFullRefresh);
             DeleteConnectionCommand = new DelegatingCommand(viewModel.DeleteConnection, viewModel.CanRemoveCloudConnecion);
             ReAuthenticateCommand = new DelegatingCommand(viewModel.ReAuthenticate, viewModel.CanReAuthenticate);
+            LogoutCommand = new DelegatingCommand(viewModel.LogOutTas, viewModel.CanLogOutTas);
 
             themeService.SetTheme(this);
 
