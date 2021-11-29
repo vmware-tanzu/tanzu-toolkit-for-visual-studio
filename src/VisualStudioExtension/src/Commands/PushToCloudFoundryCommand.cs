@@ -2,7 +2,6 @@
 using EnvDTE80;
 using Microsoft;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
@@ -10,7 +9,9 @@ using System.ComponentModel.Design;
 using System.IO;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.ViewModels;
-using Tanzu.Toolkit.WpfViews;
+using Tanzu.Toolkit.VisualStudio.Services;
+using Tanzu.Toolkit.VisualStudio.Views;
+using Tanzu.Toolkit.VisualStudio.VSToolWindows;
 using Task = System.Threading.Tasks.Task;
 
 namespace Tanzu.Toolkit.VisualStudio.Commands

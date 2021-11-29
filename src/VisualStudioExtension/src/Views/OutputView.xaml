@@ -1,0 +1,22 @@
+﻿<UserControl
+    x:Class="Tanzu.Toolkit.VisualStudio.Views.OutputView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Name="OutputViewElement">
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <ScrollViewer x:Name="OutputScrollViewer" VerticalScrollBarVisibility="Auto">
+            <TextBox
+                Text="{Binding OutputContent}"
+                FontFamily="Courier New"
+                Margin="4"
+                IsReadOnly="True"
+                TextChanged="TextBox_TextChanged"
+                />
+        </ScrollViewer>
+    </Grid>
+</UserControl>
