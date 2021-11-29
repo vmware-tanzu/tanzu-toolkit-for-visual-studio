@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using Tanzu.Toolkit.VisualStudio.VSToolWindows;
 using Task = System.Threading.Tasks.Task;
 
 namespace Tanzu.Toolkit.VisualStudio.Commands
