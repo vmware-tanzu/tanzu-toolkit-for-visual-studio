@@ -18,10 +18,9 @@ using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.VisualStudio.Commands;
-using Tanzu.Toolkit.VisualStudio.WpfViews.Services;
-using Tanzu.Toolkit.WpfViews;
-using Tanzu.Toolkit.WpfViews.Services;
-using Tanzu.Toolkit.WpfViews.ThemeService;
+using Tanzu.Toolkit.VisualStudio.Services;
+using Tanzu.Toolkit.VisualStudio.Views;
+using Tanzu.Toolkit.VisualStudio.VSToolWindows;
 using Task = System.Threading.Tasks.Task;
 
 namespace Tanzu.Toolkit.VisualStudio
@@ -114,14 +113,14 @@ namespace Tanzu.Toolkit.VisualStudio
 
             /* Services */
             services.AddSingleton<ICloudFoundryService, CloudFoundryService>();
-            services.AddSingleton<IViewLocatorService, WpfViewLocatorService>();
-            services.AddSingleton<IDialogService, WpfDialogService>();
+            services.AddSingleton<IViewLocatorService, VsViewLocatorService>();
+            services.AddSingleton<IDialogService, DialogService>();
             services.AddSingleton<ICfCliService>(provider => new CfCliService(assemblyBasePath, provider));
             services.AddSingleton<IFileService>(new FileService(assemblyBasePath));
             services.AddSingleton<ILoggingService, LoggingService>();
             services.AddSingleton<IViewService, VsToolWindowService>();
             services.AddSingleton<IThreadingService, ThreadingService>();
-            services.AddSingleton<IErrorDialog>(new ErrorDialogWindowService(this));
+            services.AddSingleton<IErrorDialog>(new ErrorDialogService(this));
             services.AddSingleton<IUiDispatcherService, UiDispatcherService>();
             services.AddSingleton<IThemeService>(new ThemeService());
             services.AddTransient<ICommandProcessService, CommandProcessService>();
@@ -142,7 +141,6 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddTransient<ITasExplorerView, TasExplorerView>();
             services.AddTransient<IDeploymentDialogView, DeploymentDialogView>();
             services.AddTransient<ILoginView, LoginView>();
-            
         }
     }
 }
