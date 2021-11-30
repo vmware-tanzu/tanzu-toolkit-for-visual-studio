@@ -9,8 +9,15 @@ The `TanzuToolkit` solution provides an extension for Visual Studio that enables
 - [App Deployment window](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/wiki/App-Deployment-Window)
 - [Tanzu Output window](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/wiki/Tanzu-Output-Window)
 
+### Overview
 
 https://user-images.githubusercontent.com/22666145/143893236-b10e3ed8-ad07-4f92-bd3b-640188cee336.mp4
+
+### App Deployment using a Manifest
+
+https://user-images.githubusercontent.com/22666145/144128093-8d1686c3-eac1-4bf1-baaa-8eb7c262f5d0.mp4
+
+
 
 
 ## Install
