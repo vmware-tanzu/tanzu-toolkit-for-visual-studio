@@ -10,6 +10,7 @@ using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.CommandProcess;
+using Tanzu.Toolkit.Services.DataPersistence;
 using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.File;
@@ -125,6 +126,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<IThemeService>(new ThemeService());
             services.AddTransient<ICommandProcessService, CommandProcessService>();
             services.AddSingleton<ISerializationService, SerializationService>();
+            services.AddSingleton<IDataPersistenceService, DataPersistenceService>();
 
             /* Tool Windows */
             services.AddTransient<TanzuTasExplorerToolWindow>();
