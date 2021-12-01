@@ -139,19 +139,6 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 _isLoggedIn = value;
 
-                //need to check if logged in and allow to logout
-                if (value == true)
-                {
-                    if (TasConnection != null)
-                    {
-                        TasConnection.IsExpanded = false;
-                    }
-                    else
-                    {
-                        Logger.Error("Set AuthenticationRequired => true but there is no TasConnection to collapse");
-                    }
-                }
-
                 RaisePropertyChangedEvent("IsLoggedIn");
             }
         }
