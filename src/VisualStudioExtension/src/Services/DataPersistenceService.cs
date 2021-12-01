@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Settings;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Settings;
 using Serilog;
 using System;
@@ -16,9 +17,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services
         private WritableSettingsStore _writableSettingsStore;
         private ILogger _logger;
 
-        public DataPersistenceService(IServiceProvider services)
+        public DataPersistenceService(IServiceProvider VsPackage, IServiceProvider services)
         {
-            var settingsManager = new ShellSettingsManager(services);
+            var settingsManager = new ShellSettingsManager(VsPackage);
+
             _readOnlySettingsStore = settingsManager.GetReadOnlySettingsStore(SettingsScope.UserSettings);
             _writableSettingsStore = settingsManager.GetWritableSettingsStore(SettingsScope.UserSettings);
 

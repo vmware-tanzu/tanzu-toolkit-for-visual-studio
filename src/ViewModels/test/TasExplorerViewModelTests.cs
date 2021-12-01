@@ -40,10 +40,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     });
 
 
-            _sut = new TasExplorerViewModel(Services);
             _receivedEvents = new List<string>();
-
             _fakeTasConnection = new FakeCfInstanceViewModel(FakeCfInstance, Services);
+
+            _sut = new TasExplorerViewModel(Services);
+            _sut.PropertyChanged += (sender, e) =>
+            {
+                _receivedEvents.Add(e.PropertyName);
+            };
         }
 
         [TestCleanup]
@@ -181,34 +185,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 DisplayErrorDialog(TasExplorerViewModel.SingleLoginErrorTitle,
                                    It.Is<string>(s => s.Contains(TasExplorerViewModel.SingleLoginErrorMessage1) && s.Contains(TasExplorerViewModel.SingleLoginErrorMessage2))),
                     Times.Once);
-        }
-
-        [TestMethod]
-        [TestCategory("OpenLoginView")]
-        public void OpenLoginView_SetsAuthenticationRequiredToFalse_WhenTasConnectionGetsSet()
-        {
-            _sut = new TasExplorerViewModel(Services)
-            {
-                AuthenticationRequired = true
-            };
-
-            MockDialogService.Setup(mock => mock.
-                ShowDialog(typeof(LoginViewModel).Name, null))
-                    .Callback(() =>
-                    {
-                        // Simulate successful login by setting TasConnection as if LoginViewModel had done so
-
-                        _sut.TasConnection = _fakeTasConnection;
-                    });
-
-            Assert.IsTrue(_sut.AuthenticationRequired);
-            Assert.IsNull(_sut.TasConnection);
-
-            Assert.IsTrue(_sut.CanOpenLoginView(null));
-            _sut.OpenLoginView(null);
-
-            Assert.IsNotNull(_sut.TasConnection);
-            Assert.IsFalse(_sut.AuthenticationRequired);
         }
 
         [TestMethod]
@@ -1003,6 +979,57 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsNotNull(_sut.TasConnection);
             Assert.AreEqual(FakeCfInstance, _sut.TasConnection.CloudFoundryInstance);
+        }
+
+        [TestMethod]
+        [TestCategory("SetConnection")]
+        public void SetConnection_SetsAuthenticationRequiredToFalse_WhenTasConnectionIsNull()
+        {
+            _sut.AuthenticationRequired = true;
+            _receivedEvents.Clear();
+
+            Assert.IsNull(_sut.TasConnection);
+            Assert.IsTrue(_sut.AuthenticationRequired);
+
+            Assert.AreEqual(0, _receivedEvents.Count);
+
+            _sut.SetConnection(FakeCfInstance);
+
+            Assert.IsFalse(_sut.AuthenticationRequired);
+            CollectionAssert.Contains(_receivedEvents, "AuthenticationRequired");
+        }
+
+        [TestMethod]
+        [TestCategory("SetConnection")]
+        public void SetConnection_StartsBackgroundRefreshTask_WhenTasConnectionIsNull()
+        {
+            Assert.IsNull(_sut.TasConnection);
+
+            _sut.SetConnection(FakeCfInstance);
+
+            MockThreadingService.Verify(m => m.StartUiBackgroundPoller(_sut.RefreshAllItems, null, It.IsAny<int>()), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("SetConnection")]
+        public void SetConnection_SavesConnectionName_WhenTasConnectionIsNull()
+        {
+            Assert.IsNull(_sut.TasConnection);
+
+            _sut.SetConnection(FakeCfInstance);
+
+            MockDataPersistenceService.Verify(m => m.WriteStringData(TasExplorerViewModel.ConnectionNameKey, FakeCfInstance.InstanceName), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("SetConnection")]
+        public void SetConnection_SavesConnectionApiAddress_WhenTasConnectionIsNull()
+        {
+            Assert.IsNull(_sut.TasConnection);
+
+            _sut.SetConnection(FakeCfInstance);
+            
+            MockDataPersistenceService.Verify(m => m.WriteStringData(TasExplorerViewModel.ConnectionAddressKey, FakeCfInstance.ApiAddress), Times.Once);
         }
 
         [TestMethod]
