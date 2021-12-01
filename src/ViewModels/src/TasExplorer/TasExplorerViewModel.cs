@@ -188,11 +188,6 @@ namespace Tanzu.Toolkit.ViewModels
             return !IsRefreshingAll;
         }
 
-        public bool CanRemoveCloudConnecion(object arg)
-        {
-            return true;
-        }
-
         public bool CanDisplayRecentAppLogs(object arg)
         {
             return true;
@@ -430,23 +425,17 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public void DeleteConnection(object arg)
+        public void LogOutTas(object arg)
         {
-            if (arg is CfInstanceViewModel)
-            {
-                TasConnection = null;
-            }
+             TasConnection = null;
+             IsLoggedIn = false;
         }
 
         public void ReAuthenticate(object arg)
         {
-            DeleteConnection(TasConnection);
+            LogOutTas(TasConnection);
             OpenLoginView(null);
         }
 
-        public void LogOutTas(object arg) 
-        {
-           DeleteConnection(TasConnection);
-        }
     }
 }

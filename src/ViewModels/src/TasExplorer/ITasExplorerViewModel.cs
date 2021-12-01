@@ -16,7 +16,6 @@ namespace Tanzu.Toolkit.ViewModels
         bool CanRefreshSpace(object arg);
         bool CanRefreshOrg(object arg);
         bool CanInitiateFullRefresh(object arg);
-        bool CanRemoveCloudConnecion(object arg);
         bool CanDisplayRecentAppLogs(object arg);
         Task StopCfApp(object arg);
         Task StartCfApp(object arg);
@@ -24,12 +23,11 @@ namespace Tanzu.Toolkit.ViewModels
         Task RefreshSpace(object arg);
         Task RefreshOrg(object arg);
         void RefreshAllItems(object arg);
-        void DeleteConnection(object arg);
+        void LogOutTas(object arg);
         Task DisplayRecentAppLogs(object app);
         bool CanReAuthenticate(object arg);
         void ReAuthenticate(object cf);
         void SetConnection(CloudFoundryInstance cf);
-        void LogOutTas(object arg);
         bool CanLogOutTas(object arg);
     }
 }

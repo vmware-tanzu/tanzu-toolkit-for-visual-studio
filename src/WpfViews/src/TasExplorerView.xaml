@@ -14,6 +14,7 @@
         <converters:VisibilityConverter x:Key="Visibility" />
         <converters:VisibilityConverter x:Key="InverseVisibility" Reversed="True"/>
         <converters:VisibilityConverter x:Key="ExpansionConverter" ReserveSpace="False" />
+        <converters:VisibilityConverter x:Key="ReverseExpansionConverter" ReserveSpace="False" Reversed="True" />
 
         <Style x:Key="RoundedButtonStyle" TargetType="{x:Type Button}">
             <Setter Property="Background" Value="Transparent"/>
@@ -76,7 +77,8 @@
                 <Button
                     Style="{DynamicResource RoundedButtonStyle}"
                     Command="{ Binding ElementName=TasExplorerViewElement, Path=OpenLoginFormCommand }"
-                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}">
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                    Visibility="{Binding IsLoggedIn, Converter={StaticResource ReverseExpansionConverter}}">
                     <Image
                         Source="Resources/tanzu_nc_dark.png"
                         Stretch="Uniform"
@@ -88,9 +90,9 @@
 
                 <Button
                     Style="{DynamicResource RoundedButtonStyle}"
-                    Command="{ Binding ElementName=TasExplorerViewElement, Path=LogoutCommand }"
+                    Command="{ Binding ElementName=TasExplorerViewElement, Path=DeleteConnectionCommand }"
                     CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
-                    Visibility="{Binding IsLoggedIn, Converter={StaticResource Visibility}}">
+                    Visibility="{Binding IsLoggedIn, Converter={StaticResource ExpansionConverter}}">
                     <Image
                         Source="Resources/bluelogout.png"
                         Stretch="Uniform"
