@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Tanzu.Toolkit.Models
+﻿namespace Tanzu.Toolkit.Models
 {
     public class CloudFoundryInstance
     {
@@ -8,11 +6,9 @@ namespace Tanzu.Toolkit.Models
         {
             InstanceName = name;
             ApiAddress = apiAddress;
-            InstanceId = Guid.NewGuid().ToString("D"); // 'D' format includes hyphens
         }
 
         public string InstanceName { get; set; }
-        public string InstanceId { get; set; }
         public string ApiAddress { get; set; }
     }
 }

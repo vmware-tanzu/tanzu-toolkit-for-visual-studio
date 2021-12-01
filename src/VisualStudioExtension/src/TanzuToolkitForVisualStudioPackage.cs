@@ -126,7 +126,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<IThemeService>(new ThemeService());
             services.AddTransient<ICommandProcessService, CommandProcessService>();
             services.AddSingleton<ISerializationService, SerializationService>();
-            services.AddSingleton<IDataPersistenceService, DataPersistenceService>();
+            services.AddSingleton<IDataPersistenceService>(provider => new DataPersistenceService(this, provider));
 
             /* Tool Windows */
             services.AddTransient<TanzuTasExplorerToolWindow>();
