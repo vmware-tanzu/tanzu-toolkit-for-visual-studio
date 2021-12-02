@@ -990,6 +990,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.LogOutTas(_sut.TasConnection);
 
             Assert.IsNull(_sut.TasConnection);
+            Assert.IsFalse(_sut.IsLoggedIn);
         }
 
 
