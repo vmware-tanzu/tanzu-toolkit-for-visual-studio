@@ -984,9 +984,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public void LogOutTas_SetsTasConnectionToNull_AndSetsIsLoggedInToFalse()
         {
             _sut.TasConnection = _fakeTasConnection;
+            _sut.IsLoggedIn = true;
 
             Assert.IsNotNull(_sut.TasConnection);
-            Assert.IsTrue(_sut.IsLoggedIn); // NOTE: idk if this will currently pass or not; might have to change test setup
+            Assert.IsTrue(_sut.IsLoggedIn); 
             _sut.LogOutTas(_sut.TasConnection);
 
             Assert.IsNull(_sut.TasConnection);
