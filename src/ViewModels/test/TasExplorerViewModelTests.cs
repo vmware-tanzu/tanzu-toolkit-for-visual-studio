@@ -979,32 +979,18 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsFalse(_sut.TasConnection.IsExpanded);
         }
 
-        [TestMethod]
-        [TestCategory("DeleteConnection")]
-        public void DeleteConnection_SetsTasConnectionToNull_WhenArgIsCfInstanceViewModel()
+        [TestCategory("LogOutTas")]
+        public void LogOutTas_SetsTasConnectionToNull_AndSetsIsLoggedInToFalse()
         {
             _sut.TasConnection = _fakeTasConnection;
+            _sut.IsLoggedIn = true;
 
             Assert.IsNotNull(_sut.TasConnection);
-            Assert.IsTrue(_sut.TasConnection is CfInstanceViewModel);
-
-            _sut.DeleteConnection(_sut.TasConnection);
+            Assert.IsTrue(_sut.IsLoggedIn);
+            _sut.LogOutTas(_sut.TasConnection);
 
             Assert.IsNull(_sut.TasConnection);
-        }
-
-        [TestMethod]
-        [TestCategory("DeleteConnection")]
-        public void DeleteConnection_DoesNotChangeTasConnection_WhenArgIsNotCfInstanceViewModel()
-        {
-            _sut.TasConnection = _fakeTasConnection;
-
-            Assert.IsNotNull(_sut.TasConnection);
-
-            var initialConnection = _sut.TasConnection;
-            _sut.DeleteConnection("bad arg");
-
-            Assert.AreEqual(initialConnection, _sut.TasConnection);
+            Assert.IsFalse(_sut.IsLoggedIn);
         }
 
         [TestMethod]
