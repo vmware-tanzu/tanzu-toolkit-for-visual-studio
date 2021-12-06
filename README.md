@@ -17,7 +17,9 @@ https://user-images.githubusercontent.com/22666145/143893236-b10e3ed8-ad07-4f92-
 
 https://user-images.githubusercontent.com/22666145/144128093-8d1686c3-eac1-4bf1-baaa-8eb7c262f5d0.mp4
 
+### Deploying 'Published' .NET apps
 
+https://user-images.githubusercontent.com/22666145/144897999-087c5a76-b844-4bb4-9e33-dabd4d42210f.mp4
 
 
 ## Install
