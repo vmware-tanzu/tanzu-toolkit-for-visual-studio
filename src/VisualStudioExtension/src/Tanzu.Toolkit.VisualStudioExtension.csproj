@@ -58,9 +58,13 @@
     <Compile Include="Views\Commands\DelegatingCommand.cs" />
     <Compile Include="Views\Converters\ListToStringConverter.cs" />
     <Compile Include="Views\Converters\VisibilityConverter.cs" />
+    <Compile Include="Views\ISsoDialogView.cs" />
     <Compile Include="Views\LoadingSpinnerSmall.cs" />
     <Compile Include="Views\LoginPromptButton.xaml.cs">
       <DependentUpon>LoginPromptButton.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SsoDialog.xaml.cs">
+      <DependentUpon>SsoDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="VSToolWindows\OutputToolWindow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -217,6 +221,10 @@
     <Page Include="Views\OutputView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\SsoDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Styles\Styles.xaml">
       <Generator>MSBuild:Compile</Generator>

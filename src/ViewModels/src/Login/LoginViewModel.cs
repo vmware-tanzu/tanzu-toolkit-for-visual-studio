@@ -3,6 +3,7 @@ using System;
 using System.Security;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
+using Tanzu.Toolkit.ViewModels.SsoDialog;
 
 namespace Tanzu.Toolkit.ViewModels
 {
@@ -132,6 +133,11 @@ namespace Tanzu.Toolkit.ViewModels
             return !(string.IsNullOrWhiteSpace(ConnectionName) || string.IsNullOrWhiteSpace(Target) || string.IsNullOrWhiteSpace(Username) || PasswordEmpty()) && VerifyApiAddress(Target);
         }
 
+        public bool CanOpenSsoDialog(object arg = null)
+        {
+            return !string.IsNullOrWhiteSpace(Target) && ApiAddressIsValid;
+        }
+
         public async Task LogIn(object arg)
         {
             HasErrors = false;
@@ -178,6 +184,11 @@ namespace Tanzu.Toolkit.ViewModels
 
                 return true;
             }
+        }
+
+        public void OpenSsoDialog(object apiAddress = null)
+        {
+            DialogService.ShowDialog(typeof(SsoDialogViewModel).Name);
         }
     }
 }
