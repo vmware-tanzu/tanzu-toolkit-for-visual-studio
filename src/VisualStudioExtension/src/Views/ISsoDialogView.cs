@@ -2,6 +2,5 @@
 {
     public interface ISsoDialogView
     {
-        void InitializeComponent();
     }
 }

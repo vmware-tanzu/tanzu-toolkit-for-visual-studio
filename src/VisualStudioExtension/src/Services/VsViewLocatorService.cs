@@ -24,7 +24,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services
             var viewTypeName = GetViewName(viewModelName);
             var type = Type.GetType(_viewNamespace + "." + viewTypeName);
             CurrentView = viewTypeName;
-            return ServiceProvider.GetService(type);
+            var service = ServiceProvider.GetService(type);
+            return service;
         }
 
         public virtual string GetViewName(string viewModelName)
