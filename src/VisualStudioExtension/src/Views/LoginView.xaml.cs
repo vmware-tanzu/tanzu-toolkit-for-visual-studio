@@ -13,6 +13,9 @@ namespace Tanzu.Toolkit.VisualStudio.Views
     public partial class LoginView : DialogWindow, ILoginView
     {
         private ILoginViewModel _viewModel;
+        public ICommand AddCloudCommand { get; }
+        public ICommand SsoCommand { get; }
+
 
         public LoginView()
         {
@@ -22,6 +25,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         public LoginView(ILoginViewModel viewModel)
         {
             AddCloudCommand = new AsyncDelegatingCommand(viewModel.LogIn, viewModel.CanLogIn);
+            SsoCommand = new DelegatingCommand(viewModel.OpenSsoDialog, viewModel.CanOpenSsoDialog);
             viewModel.GetPassword = GetPassword;
             viewModel.PasswordEmpty = PasswordBoxEmpty;
             DataContext = viewModel;
@@ -40,8 +44,6 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         {
             return string.IsNullOrWhiteSpace(pbPassword.Password);
         }
-
-        public ICommand AddCloudCommand { get; }
 
         private void Close(object sender, RoutedEventArgs e)
         {

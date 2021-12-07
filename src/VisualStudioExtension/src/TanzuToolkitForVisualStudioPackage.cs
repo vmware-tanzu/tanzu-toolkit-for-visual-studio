@@ -18,6 +18,7 @@ using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
 using Tanzu.Toolkit.ViewModels;
+using Tanzu.Toolkit.ViewModels.SsoDialog;
 using Tanzu.Toolkit.VisualStudio.Commands;
 using Tanzu.Toolkit.VisualStudio.Services;
 using Tanzu.Toolkit.VisualStudio.Views;
@@ -137,12 +138,14 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<ITasExplorerViewModel, TasExplorerViewModel>();
             services.AddTransient<IDeploymentDialogViewModel, DeploymentDialogViewModel>();
             services.AddTransient<ILoginViewModel, LoginViewModel>();
+            services.AddTransient<ISsoDialogViewModel, SsoDialogViewModel>();
 
             /* Views */
             services.AddSingleton<IOutputView, OutputView>();
             services.AddTransient<ITasExplorerView, TasExplorerView>();
             services.AddTransient<IDeploymentDialogView, DeploymentDialogView>();
             services.AddTransient<ILoginView, LoginView>();
+            services.AddTransient<ISsoDialogView, SsoDialogView>();
         }
     }
 }

@@ -94,6 +94,10 @@
                 MaxLines="3"
                 Background="Transparent"
                 Visibility="{Binding Path=HasErrors, Converter={StaticResource CollapsedVisibility}}"/>
+
+            <Button
+                Content="Sign in with SSO"
+                Command="{Binding ElementName=LoginViewElement, Path=SsoCommand}"/>
         </StackPanel>
 
         <Grid>
