@@ -63,8 +63,8 @@
     <Compile Include="Views\LoginPromptButton.xaml.cs">
       <DependentUpon>LoginPromptButton.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\SsoDialog.xaml.cs">
-      <DependentUpon>SsoDialog.xaml</DependentUpon>
+    <Compile Include="Views\SsoDialogView.xaml.cs">
+      <DependentUpon>SsoDialogView.xaml</DependentUpon>
     </Compile>
     <Compile Include="VSToolWindows\OutputToolWindow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -222,7 +222,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\SsoDialog.xaml">
+    <Page Include="Views\SsoDialogView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

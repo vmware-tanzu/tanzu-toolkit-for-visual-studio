@@ -59,14 +59,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             const string expectedErrorMessage = "my fake error message";
 
-            MockCloudFoundryService.Setup(mock => mock.ConnectToCFAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SecureString>(), It.IsAny<bool>()))
+            MockCloudFoundryService.Setup(mock => mock.LoginWithCredentials(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SecureString>(), It.IsAny<bool>()))
                 .ReturnsAsync(new ConnectResult(false, expectedErrorMessage));
 
             await _sut.LogIn(null);
 
             Assert.IsTrue(_sut.HasErrors);
             Assert.AreEqual(expectedErrorMessage, _sut.ErrorMessage);
-            MockCloudFoundryService.Verify(mock => mock.ConnectToCFAsync(FakeTarget, FakeUsername, FakeSecurePw, SkipSsl), Times.Once);
+            MockCloudFoundryService.Verify(mock => mock.LoginWithCredentials(FakeTarget, FakeUsername, FakeSecurePw, SkipSsl), Times.Once);
             MockDialogService.Verify(ds => ds.CloseDialog(It.IsAny<object>(), true), Times.Never);
         }
 
@@ -75,7 +75,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task LogIn_SetsConnectionOnTasExplorer_WhenLoginRequestSucceeds()
         {
             MockCloudFoundryService.Setup(mock => mock.
-              ConnectToCFAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SecureString>(), It.IsAny<bool>()))
+              LoginWithCredentials(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SecureString>(), It.IsAny<bool>()))
                 .ReturnsAsync(new ConnectResult(true, null));
 
             MockTasExplorerViewModel.Setup(m => m.SetConnection(It.IsAny<CloudFoundryInstance>())).Verifiable();
@@ -83,7 +83,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             await _sut.LogIn(null);
 
             Assert.IsFalse(_sut.HasErrors);
-            MockCloudFoundryService.Verify(mock => mock.ConnectToCFAsync(FakeTarget, FakeUsername, FakeSecurePw, SkipSsl), Times.Once);
+            MockCloudFoundryService.Verify(mock => mock.LoginWithCredentials(FakeTarget, FakeUsername, FakeSecurePw, SkipSsl), Times.Once);
             MockDialogService.Verify(mock => mock.CloseDialog(It.IsAny<object>(), It.IsAny<bool>()), Times.Once);
             MockDialogService.Verify(ds => ds.CloseDialog(It.IsAny<object>(), true), Times.Once);
 
@@ -94,13 +94,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("LogIn")]
         public async Task LogIn_ClosesDialog_WhenLoginRequestSucceeds()
         {
-            MockCloudFoundryService.Setup(mock => mock.ConnectToCFAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SecureString>(), It.IsAny<bool>()))
+            MockCloudFoundryService.Setup(mock => mock.LoginWithCredentials(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SecureString>(), It.IsAny<bool>()))
                .ReturnsAsync(new ConnectResult(true, null));
 
             await _sut.LogIn(null);
 
             Assert.IsFalse(_sut.HasErrors);
-            MockCloudFoundryService.Verify(mock => mock.ConnectToCFAsync(FakeTarget, FakeUsername, FakeSecurePw, SkipSsl), Times.Once);
+            MockCloudFoundryService.Verify(mock => mock.LoginWithCredentials(FakeTarget, FakeUsername, FakeSecurePw, SkipSsl), Times.Once);
             MockDialogService.Verify(mock => mock.CloseDialog(It.IsAny<object>(), It.IsAny<bool>()), Times.Once);
             MockDialogService.Verify(ds => ds.CloseDialog(It.IsAny<object>(), true), Times.Once);
         }

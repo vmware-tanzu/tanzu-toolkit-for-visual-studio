@@ -134,9 +134,9 @@ namespace Tanzu.Toolkit.VisualStudio
             /* View Models */
             services.AddSingleton<IOutputViewModel, OutputViewModel>();
             services.AddSingleton<ITasExplorerViewModel, TasExplorerViewModel>();
+            services.AddSingleton<ISsoDialogViewModel, SsoDialogViewModel>(); // must be a singleton for the view to properly show prompt
             services.AddTransient<IDeploymentDialogViewModel, DeploymentDialogViewModel>();
             services.AddTransient<ILoginViewModel, LoginViewModel>();
-            services.AddTransient<ISsoDialogViewModel, SsoDialogViewModel>();
 
             /* Views */
             services.AddSingleton<IOutputView, OutputView>();
