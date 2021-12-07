@@ -332,13 +332,39 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             return await GetRemainingPagesForType(firstPageHref, accessToken, new List<Stack>());
         }
 
-        private async Task<Uri> GetAuthServerUriFromCfTarget(string cfTargetString)
+        public async Task<LoginInfoResponse> GetLoginServerInformation(string cfApiAddress)
+        {
+            var loginServerUri = await GetAuthServerUriFromCfTarget(cfApiAddress);
+
+            var uri = new UriBuilder(loginServerUri)
+            {
+                Path = "/login", // the /login endpoint should be identical to the /info endpoint (for CF UAA v 75.10.0)
+            };
+
+            var request = new HttpRequestMessage(HttpMethod.Get, uri.ToString());
+            request.Headers.Add("Accept", "application/json");
+
+            var response = await _httpClient.SendAsync(request);
+
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                var jsonContent = await response.Content.ReadAsStringAsync();
+
+                var deserializedResponse = JsonConvert.DeserializeObject<LoginInfoResponse>(jsonContent);
+                
+                return deserializedResponse;
+            }
+
+            return null;
+        }
+
+        private async Task<Uri> GetAuthServerUriFromCfTarget(string cfApiAddress)
         {
             try
             {
                 Uri authServerUri = null;
 
-                var uri = new UriBuilder(cfTargetString)
+                var uri = new UriBuilder(cfApiAddress)
                 {
                     Path = "/",
                     Port = -1,
