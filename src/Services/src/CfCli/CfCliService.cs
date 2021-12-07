@@ -343,7 +343,6 @@ namespace Tanzu.Toolkit.Services.CfCli
             return deployResult;
         }
 
-
         public async Task<DetailedResult<string>> GetRecentAppLogs(string appName, string orgName, string spaceName)
         {
             var args = $"logs \"{appName}\" --recent";
@@ -377,6 +376,21 @@ namespace Tanzu.Toolkit.Services.CfCli
             bool succeeded = recentLogsResult.Succeeded;
 
             return new DetailedResult<string>(content, succeeded, explanation, cmdDetails);
+        }
+        
+        public async Task<DetailedResult> LoginWithSsoPasscode(string apiAddress, string passcode)
+        {
+            string args = $"login -a \"{apiAddress}\" --sso-passcode \"{passcode}\"";
+
+            var processCancellationTriggers = new List<string> { "OK", "Invalid passcode" };
+
+            Task<DetailedResult> loginTask;
+            lock (_cfEnvironmentLock)
+            {
+                loginTask = Task.Run(async () => await RunCfCommandAsync(args, cancellationTriggers: processCancellationTriggers));
+            }
+
+            return await loginTask;
         }
 
         /// <summary>
@@ -425,6 +439,8 @@ namespace Tanzu.Toolkit.Services.CfCli
             return new DetailedResult(false, reason, cmdResult: result);
         }
 
+        
+        
         /// <summary>
         /// Initiate a CF CLI command process by invoking the <see cref="CommandProcessService"/>.
         /// This method is asynchronous, meaning it cannot be used within a lock statement.
@@ -433,8 +449,9 @@ namespace Tanzu.Toolkit.Services.CfCli
         /// <param name="stdOutCallback"></param>
         /// <param name="stdErrCallback"></param>
         /// <param name="workingDir"></param>
+        /// <param name="cancellationTriggers"></param>
         /// <returns>An awaitable <see cref="Task"/> which will return a <see cref="DetailedResult"/> containing the results of the CF command.</returns>
-        internal async Task<DetailedResult> RunCfCommandAsync(string arguments, StdOutDelegate stdOutCallback = null, StdErrDelegate stdErrCallback = null, string workingDir = null)
+        internal async Task<DetailedResult> RunCfCommandAsync(string arguments, StdOutDelegate stdOutCallback = null, StdErrDelegate stdErrCallback = null, string workingDir = null, List<string> cancellationTriggers = null)
         {
             string pathToCfExe = _fileService.FullPathToCfExe;
             if (string.IsNullOrEmpty(pathToCfExe))
@@ -448,7 +465,7 @@ namespace Tanzu.Toolkit.Services.CfCli
             };
 
             ICommandProcessService cmdProcessService = Services.GetRequiredService<ICommandProcessService>();
-            CommandResult result = await Task.Run(() => cmdProcessService.RunExecutable(pathToCfExe, arguments, workingDir, envVars, stdOutCallback, stdErrCallback));
+            CommandResult result = await Task.Run(() => cmdProcessService.RunExecutable(pathToCfExe, arguments, workingDir, envVars, stdOutCallback, stdErrCallback, processCancelTriggers: cancellationTriggers));
 
             if (result.ExitCode == 0)
             {

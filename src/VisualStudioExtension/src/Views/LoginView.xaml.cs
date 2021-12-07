@@ -25,7 +25,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         public LoginView(ILoginViewModel viewModel)
         {
             AddCloudCommand = new AsyncDelegatingCommand(viewModel.LogIn, viewModel.CanLogIn);
-            SsoCommand = new DelegatingCommand(viewModel.OpenSsoDialog, viewModel.CanOpenSsoDialog);
+            SsoCommand = new AsyncDelegatingCommand(viewModel.OpenSsoDialog, viewModel.CanOpenSsoDialog);
             viewModel.GetPassword = GetPassword;
             viewModel.PasswordEmpty = PasswordBoxEmpty;
             DataContext = viewModel;

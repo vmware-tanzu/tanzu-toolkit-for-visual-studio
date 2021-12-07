@@ -20,5 +20,6 @@ namespace Tanzu.Toolkit.Services.CfCli
         Task<DetailedResult<string>> GetRecentAppLogs(string appName, string orgName, string spaceName);
         void ClearCachedAccessToken();
         Task<DetailedResult> PushAppAsync(string manifestPath, string appDirPath, string orgName, string spaceName, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback);
+        Task<DetailedResult> LoginWithSsoPasscode(string apiAddress, string passcode);
     }
 }

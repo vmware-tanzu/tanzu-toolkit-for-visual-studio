@@ -20,6 +20,7 @@ namespace Tanzu.Toolkit.ViewModels
         private bool _apiAddressIsValid;
         private string _connectionName;
         private ITasExplorerViewModel _tasExplorer;
+        private ISsoDialogViewModel _ssoDialog;
 
         public LoginViewModel(IServiceProvider services)
             : base(services)
@@ -29,6 +30,7 @@ namespace Tanzu.Toolkit.ViewModels
             ApiAddressIsValid = true;
 
             _tasExplorer = services.GetRequiredService<ITasExplorerViewModel>();
+            _ssoDialog = services.GetRequiredService<ISsoDialogViewModel>();
         }
 
         public string ConnectionName
@@ -147,7 +149,7 @@ namespace Tanzu.Toolkit.ViewModels
                 return;
             }
 
-            var result = await CloudFoundryService.ConnectToCFAsync(Target, Username, GetPassword(), SkipSsl);
+            var result = await CloudFoundryService.LoginWithCredentials(Target, Username, GetPassword(), SkipSsl);
             ErrorMessage = result.ErrorMessage;
 
             if (result.IsLoggedIn)
@@ -186,9 +188,25 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public void OpenSsoDialog(object apiAddress = null)
+        public async Task OpenSsoDialog(object arg = null)
         {
-            DialogService.ShowDialog(typeof(SsoDialogViewModel).Name);
+            if (string.IsNullOrWhiteSpace(Target))
+            {
+                ErrorMessage = "Must specify an API address to log in via SSO.";
+                HasErrors = true;
+            }
+            else
+            {
+                var ssoPromptResult = await CloudFoundryService.GetSsoPrompt(Target);
+
+                if (ssoPromptResult.Succeeded)
+                {
+                    var ssoUrlPrompt = ssoPromptResult.Content;
+
+                    _ssoDialog.ApiAddress = Target;
+                    _ssoDialog.ShowWithPrompt(ssoUrlPrompt);
+                }
+            }
         }
     }
 }
