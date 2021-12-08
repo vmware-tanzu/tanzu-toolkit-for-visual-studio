@@ -57,10 +57,14 @@
     <Compile Include="Services\DialogService.cs" />
     <Compile Include="Views\Commands\AsyncDelegatingCommand.cs" />
     <Compile Include="Views\Commands\DelegatingCommand.cs" />
+    <Compile Include="Views\AppDeletionConfirmationView.xaml.cs">
+      <DependentUpon>AppDeletionConfirmationView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Converters\ListToStringConverter.cs" />
     <Compile Include="Views\Converters\PageNumberConverter.cs" />
     <Compile Include="Views\Converters\VisibilityConverter.cs" />
     <Compile Include="Views\ISsoDialogView.cs" />
+    <Compile Include="Views\IAppDeletionConfirmationView.cs" />
     <Compile Include="Views\LoadingSpinnerSmall.cs" />
     <Compile Include="Views\LoginPromptButton.xaml.cs">
       <DependentUpon>LoginPromptButton.xaml</DependentUpon>
@@ -183,6 +187,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
+	<Resource Include="Views\Resources\StatusWarning64.png" />
+	<Resource Include="Views\Resources\tanzuiconico.ico" />
     <Resource Include="Views\Resources\blue_logout.png" />
     <Resource Include="Views\Resources\tasicon.png" />
     <Resource Include="Views\Resources\tas_16px.png" />
@@ -218,6 +224,10 @@
     <Resource Include="Views\Resources\02_tanzu_newconnection_blue_dark_16x.png" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Views\AppDeletionConfirmationView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\DeploymentDialogView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

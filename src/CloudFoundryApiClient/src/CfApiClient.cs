@@ -25,6 +25,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         internal const string DeleteAppsPath = "/v3/apps";
         internal const string ListStacksPath = "/v3/stacks";
         internal const string LoginInfoPath = "/login"; // the /login endpoint should be identical to the /info endpoint (for CF UAA v 75.10.0)
+        internal const string ListRoutesPath = "/v3/routes";
+        internal const string DeleteRoutesPath = "/v3/routes";
 
         internal const string DefaultAuthClientId = "cf";
         internal const string DefaultAuthClientSecret = "";
@@ -163,6 +165,24 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             HypertextReference firstPageHref = new HypertextReference() { Href = uri.ToString() };
 
             return await GetRemainingPagesForType(firstPageHref, accessToken, new List<App>());
+        }
+
+        public async Task<List<Route>> ListRoutesForApp(string cfTarget, string accessToken, string appGuid)
+        {
+            // trust any certificate
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            ServicePointManager.ServerCertificateValidationCallback +=
+                (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+            var uri = new UriBuilder(cfTarget)
+            {
+                Path = ListRoutesPath,
+                Query = $"app_guids={appGuid}",
+            };
+
+            HypertextReference firstPageHref = new HypertextReference() { Href = uri.ToString() };
+
+            return await GetRemainingPagesForType(firstPageHref, accessToken, new List<Route>());
         }
 
         public async Task<List<Buildpack>> ListBuildpacks(string cfApiAddress, string accessToken)
@@ -305,6 +325,37 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             if (response.StatusCode != HttpStatusCode.Accepted)
             {
                 throw new Exception($"Response from DELETE `{deleteAppPath}` was {response.StatusCode}");
+            }
+
+            if (response.StatusCode == HttpStatusCode.Accepted)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> DeleteRouteWithGuid(string cfTarget, string accessToken, string routeGuid)
+        {
+            // trust any certificate
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            ServicePointManager.ServerCertificateValidationCallback +=
+                (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+            var deleteRoutePath = DeleteRoutesPath + $"/{routeGuid}";
+
+            var uri = new UriBuilder(cfTarget)
+            {
+                Path = deleteRoutePath,
+            };
+
+            var request = new HttpRequestMessage(HttpMethod.Delete, uri.ToString());
+            request.Headers.Add("Authorization", "Bearer " + accessToken);
+
+            var response = await _httpClient.SendAsync(request);
+            if (response.StatusCode != HttpStatusCode.Accepted)
+            {
+                throw new Exception($"Response from DELETE `{deleteRoutePath}` was {response.StatusCode}");
             }
 
             if (response.StatusCode == HttpStatusCode.Accepted)
@@ -462,6 +513,13 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             {
                 var results = JsonConvert.DeserializeObject<StacksResponse>(resultContent);
                 resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Stacks.ToList());
+
+                nextPageHref = results.Pagination.Next;
+            }
+            else if (typeof(TResourceType) == typeof(Route))
+            {
+                var results = JsonConvert.DeserializeObject<RoutesResponse>(resultContent);
+                resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Routes.ToList());
 
                 nextPageHref = results.Pagination.Next;
             }

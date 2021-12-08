@@ -336,6 +336,61 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         }
 
         [TestMethod]
+        public async Task ListRoutesForApp_ThrowsException_WhenStatusCodeIsNotASuccess()
+        {
+            string expectedPath = CfApiClient.ListRoutesPath;
+
+            MockedRequest routesRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond(HttpStatusCode.Unauthorized);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            Exception expectedException = null;
+            try
+            {
+                var result = await _sut.ListRoutesForApp(_fakeCfApiAddress, _fakeAccessToken, "appGuid");
+            }
+            catch (Exception ex)
+            {
+                expectedException = ex;
+            }
+
+            Assert.IsNotNull(expectedException);
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(routesRequest));
+        }
+
+        [TestMethod]
+        public async Task ListRoutesForApp_ReturnsListOfAllVisibleRoutes_WhenResponseContainsMultiplePages()
+        {
+            string expectedPath = CfApiClient.ListRoutesPath;
+            string page2Identifier = "?page=2&per_page=50";
+            string page3Identifier = "?page=3&per_page=50";
+
+            MockedRequest routesRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
+                    .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                    .Respond("application/json", _fakeRoutesJsonResponsePage1);
+
+            MockedRequest routesPage2Request = _mockHttp.Expect(_fakeCfApiAddress + expectedPath + page2Identifier)
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond("application/json", _fakeRoutesJsonResponsePage2);
+
+            MockedRequest routesPage3Request = _mockHttp.Expect(_fakeCfApiAddress + expectedPath + page3Identifier)
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond("application/json", _fakeRoutesJsonResponsePage3);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.ListRoutesForApp(_fakeCfApiAddress, _fakeAccessToken, "fake guid");
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(125, result.Count);
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(routesRequest));
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(routesPage2Request));
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(routesPage3Request));
+        }
+
+        [TestMethod]
         public async Task StopAppWithGuid_ThrowsException_WhenStatusCodeIsNotASuccess()
         {
             string fakeAppGuid = "1234";
@@ -786,5 +841,61 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Assert.AreEqual(1, _mockHttp.GetMatchCount(cfBasicInfoRequest));
             Assert.AreEqual(1, _mockHttp.GetMatchCount(loginServerInfoRequest));
         }
+
+
+        [TestMethod]
+        [TestCategory("DeleteRouteWithGuid")]
+        public async Task DeleteRouteWithGuid_ReturnsTrue_WhenStatusCodeIs202()
+        {
+            var fakeAppGuid = "my fake guid";
+            string expectedPath = _fakeCfApiAddress + CfApiClient.DeleteRoutesPath + $"/{fakeAppGuid}";
+
+            MockedRequest cfDeleteRouteRequest = _mockHttp.Expect(expectedPath)
+               .Respond(HttpStatusCode.Accepted);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            Exception resultException = null;
+            bool routeWasDeleted = false;
+            try
+            {
+                routeWasDeleted = await _sut.DeleteRouteWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
+            }
+            catch (Exception e)
+            {
+                resultException = e;
+            }
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(cfDeleteRouteRequest));
+            Assert.IsNull(resultException);
+            Assert.IsTrue(routeWasDeleted);
+        }
+
+        [TestMethod]
+        [TestCategory("DeleteRouteWithGuid")]
+        public async Task DeleteRouteWithGuid_ThrowsException_WhenStatusCodeIsNot202()
+        {
+            Exception expectedException = null;
+            var fakeAppGuid = "my fake guid";
+            string expectedPath = _fakeCfApiAddress + CfApiClient.DeleteRoutesPath + $"/{fakeAppGuid}";
+
+            MockedRequest cfDeleteRouteRequest = _mockHttp.Expect(expectedPath)
+               .Respond(HttpStatusCode.BadRequest);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            try
+            {
+                await _sut.DeleteRouteWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
+            }
+            catch (Exception e)
+            {
+                expectedException = e;
+            }
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(cfDeleteRouteRequest));
+            Assert.IsNotNull(expectedException);
+        }
+
     }
 }

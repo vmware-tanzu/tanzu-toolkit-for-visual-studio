@@ -14,7 +14,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         Task<DetailedResult<List<CloudFoundryApp>>> GetAppsForSpaceAsync(CloudFoundrySpace space, bool skipSsl = true, int retryAmount = 1);
         Task<DetailedResult> StopAppAsync(CloudFoundryApp app, bool skipSsl = true, int retryAmount = 1);
         Task<DetailedResult> StartAppAsync(CloudFoundryApp app, bool skipSsl = true, int retryAmount = 1);
-        Task<DetailedResult> DeleteAppAsync(CloudFoundryApp app, bool skipSsl = true, bool removeRoutes = true, int retryAmount = 1);
+        Task<DetailedResult> DeleteAppAsync(CloudFoundryApp app, bool skipSsl = true, bool removeRoutes = false, int retryAmount = 1);
         Task<DetailedResult<string>> GetRecentLogs(CloudFoundryApp app);
         Task<DetailedResult<List<CfBuildpack>>> GetBuildpacksAsync(string apiAddress, int retryAmount = 1);
         DetailedResult CreateManifestFile(string location, AppManifest manifest);
@@ -25,5 +25,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         DetailedResult TargetApi(string targetApiAddress, bool skipSsl);
         bool IsValidConnection();
         void LogoutCfUser();
+        Task<DetailedResult> DeleteAllRoutesForAppAsync(CloudFoundryApp app);
+        Task<DetailedResult<List<CloudFoundryRoute>>> GetRoutesForAppAsync(CloudFoundryApp app, int retryAmount = 1);
     }
 }
