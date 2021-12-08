@@ -140,6 +140,27 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             totalResults: 10,
             totalPages: 4,
             resultsPerPage: 3));
+
+        internal static readonly string _fakeRoutesJsonResponsePage1 = JsonConvert.SerializeObject(new FakeRoutesResponse(
+            apiAddress: _fakeCfApiAddress,
+            pageNum: 1,
+            totalResults: 125,
+            totalPages: 3,
+            resultsPerPage: 50));
+
+        internal static readonly string _fakeRoutesJsonResponsePage2 = JsonConvert.SerializeObject(new FakeRoutesResponse(
+            apiAddress: _fakeCfApiAddress,
+            pageNum: 2,
+            totalResults: 125,
+            totalPages: 3,
+            resultsPerPage: 50));
+
+        internal static readonly string _fakeRoutesJsonResponsePage3 = JsonConvert.SerializeObject(new FakeRoutesResponse(
+            apiAddress: _fakeCfApiAddress,
+            pageNum: 3,
+            totalResults: 125,
+            totalPages: 3,
+            resultsPerPage: 50));
     }
 
     internal class FakeBasicInfoResponse : BasicInfoResponse
@@ -450,6 +471,59 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             }
 
             Stacks = stacks;
+        }
+    }
+
+    internal class FakeRoutesResponse : RoutesResponse
+    {
+        public FakeRoutesResponse(string apiAddress, int pageNum, int totalResults, int totalPages, int resultsPerPage) : base()
+        {
+            bool isFirstPage = pageNum == 1;
+            bool isLastPage = pageNum == totalPages;
+
+            var firstHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListRoutesPath}?page=1&per_page={resultsPerPage}" };
+            var lastHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListRoutesPath}?page={totalPages}&per_page={resultsPerPage}" };
+            var nextHref = isLastPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListRoutesPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
+            var previousHref = isFirstPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListRoutesPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
+
+            Pagination = new Pagination
+            {
+                Total_results = totalResults,
+                Total_pages = totalPages,
+                First = firstHref,
+                Last = lastHref,
+                Next = nextHref,
+                Previous = previousHref,
+            };
+
+            Route[] routes;
+            if (isLastPage)
+            {
+                int numResourcesInLastPage = totalResults % resultsPerPage;
+                routes = new Route[numResourcesInLastPage];
+
+                for (int i = 0; i < numResourcesInLastPage; i++)
+                {
+                    routes[i] = new Route
+                    {
+                        Guid = $"fakeRouteId-{i + 1}",
+                    };
+                }
+            }
+            else
+            {
+                routes = new Route[resultsPerPage];
+
+                for (int i = 0; i < resultsPerPage; i++)
+                {
+                    routes[i] = new Route
+                    {
+                        Guid = $"fakeRouteId-{i + 1}",
+                    };
+                }
+            }
+
+            Routes = routes;
         }
     }
 

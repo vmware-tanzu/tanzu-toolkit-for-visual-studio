@@ -1467,30 +1467,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
         [TestMethod]
         [TestCategory("DeleteApp")]
-        public async Task DeleteAppAsync_ReturnsFailedResult_WhenDeleteAppWithGuidThrowsException()
-        {
-            var fakeExceptionMsg = "junk";
-
-            _mockCfCliService.Setup(m => m.
-                GetOAuthToken())
-                    .Returns(_fakeValidAccessToken);
-
-            _mockCfApiClient.Setup(m => m.
-                DeleteAppWithGuid(FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
-                    .Throws(new Exception(fakeExceptionMsg));
-
-            DetailedResult result = await _sut.DeleteAppAsync(FakeApp);
-
-            Assert.IsFalse(result.Succeeded);
-            Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
-            Assert.IsNull(result.CmdResult);
-
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
-        }
-
-        [TestMethod]
-        [TestCategory("DeleteApp")]
         public async Task DeleteAppAsync_RetriesWithFreshToken_WhenDeleteAppWithGuidThrowsException()
         {
             var fakeExceptionMsg = "junk";
@@ -1558,6 +1534,95 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result.Explanation);
             Assert.IsNull(result.CmdResult);
             Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
+        }
+
+        [TestMethod]
+        [TestCategory("DeleteApp")]
+        public async Task DeleteAppAsync_DeletesRoutes_WhenRemoveRoutesIsTrue()
+        {
+            var expectedApiAddress = FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress;
+
+            var fakeRoute1 = new Route
+            {
+                Guid = "fake-route-guid-1",
+            };
+            var fakeRoute2 = new Route
+            {
+                Guid = "fake-route-guid-2",
+            };
+
+            var fakeRoutesResponse = new List<Route>
+            {
+                fakeRoute1,
+                fakeRoute2,
+            };
+
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns(_fakeValidAccessToken);
+
+            _mockCfApiClient.Setup(m => m.
+                ListRoutesForApp(expectedApiAddress, _fakeValidAccessToken, FakeApp.AppId))
+                    .ReturnsAsync(fakeRoutesResponse);
+
+            _mockCfApiClient.Setup(m => m.
+                DeleteRouteWithGuid(expectedApiAddress, _fakeValidAccessToken, It.IsAny<string>()))
+                    .ReturnsAsync(true);
+
+            _mockCfApiClient.Setup(m => m.
+                DeleteAppWithGuid(FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
+                    .ReturnsAsync(true);
+
+            var result = await _sut.DeleteAppAsync(FakeApp, removeRoutes: true);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+
+            _mockCfApiClient.Verify(m => m.DeleteRouteWithGuid(expectedApiAddress, _fakeValidAccessToken, fakeRoute1.Guid), Times.Once);
+            _mockCfApiClient.Verify(m => m.DeleteRouteWithGuid(expectedApiAddress, _fakeValidAccessToken, fakeRoute2.Guid), Times.Once);
+            _mockCfApiClient.Verify(m => m.DeleteAppWithGuid(expectedApiAddress, _fakeValidAccessToken, FakeApp.AppId), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("DeleteApp")]
+        public async Task DeleteAppAsync_ReturnsFailedResult_WhenRemoveRoutesIsTrue_AndRoutesFailToDelete()
+        {
+            var fakeRoute1 = new Route
+            {
+                Guid = "fake-route-guid-1",
+            };
+            var fakeRoute2 = new Route
+            {
+                Guid = "fake-route-guid-2",
+            };
+
+            var fakeRoutesResponse = new List<Route>
+            {
+                fakeRoute1,
+                fakeRoute2,
+            };
+
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns(_fakeValidAccessToken);
+
+            _mockCfApiClient.Setup(m => m.
+                ListRoutesForApp(FakeCfInstance.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
+                    .ReturnsAsync(fakeRoutesResponse);
+
+            _mockCfApiClient.Setup(m => m.
+                DeleteRouteWithGuid(FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, It.IsAny<string>()))
+                    .ReturnsAsync(false);
+
+            var result = await _sut.DeleteAppAsync(FakeApp, removeRoutes: true);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsTrue(result.Explanation.Contains(CloudFoundryService.RouteDeletionErrorMsg));
+            Assert.IsTrue(result.Explanation.Contains($"Please try deleting '{FakeApp.AppName}' again"));
+
+            // ensure app does not get deleted if routes could not be deleted
+            _mockCfApiClient.Verify(m => m.DeleteAppWithGuid(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
         [TestMethod]
@@ -2109,6 +2174,406 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             _mockCfCliService.Verify(m => m.Logout(), Times.Once);
             _mockCfCliService.Verify(m => m.ClearCachedAccessToken(), Times.Once);
+        }
+        [TestMethod]
+        [TestCategory("GetRoutes")]
+        public async Task GetRoutesForAppAsync_ReturnsFailedResult_WhenTokenCannotBeFound()
+        {
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns((string)null);
+
+            var result = await _sut.GetRoutesForAppAsync(FakeApp);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsNull(result.CmdResult);
+            Assert.IsNull(result.Content);
+
+            Assert.IsTrue(_mockCfApiClient.Invocations.Count == 0);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("GetRoutes")]
+        public async Task GetRoutesForAppAsync_RetriesWithFreshToken_WhenListRoutesThrowsException()
+        {
+            var fakeExceptionMsg = "junk";
+
+            var fakeRoute1 = new Route
+            {
+                Guid = "fake-route-guid-1",
+            };
+            var fakeRoute2 = new Route
+            {
+                Guid = "fake-route-guid-2",
+            };
+
+            var fakeRoutesResponse = new List<Route>
+            {
+                fakeRoute1,
+                fakeRoute2,
+            };
+
+            var expectedResultContent = new List<CloudFoundryRoute>
+            {
+                new CloudFoundryRoute(fakeRoute1.Guid),
+                new CloudFoundryRoute(fakeRoute2.Guid),
+            };
+
+            _mockCfCliService.SetupSequence(m => m.
+                GetOAuthToken())
+                    .Returns(expiredAccessToken) // simulate stale cached token on first attempt
+                    .Returns(_fakeValidAccessToken); // simulate fresh cached token on second attempt
+
+            _mockCfApiClient.Setup(m => m.
+                ListRoutesForApp(FakeCfInstance.ApiAddress, expiredAccessToken, FakeApp.AppId))
+                    .Throws(new Exception(fakeExceptionMsg));
+
+            _mockCfApiClient.Setup(m => m.
+                ListRoutesForApp(FakeCfInstance.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
+                    .ReturnsAsync(fakeRoutesResponse);
+
+            var result = await _sut.GetRoutesForAppAsync(FakeApp);
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.IsNull(result.CmdResult);
+            Assert.AreEqual(expectedResultContent.Count, result.Content.Count);
+
+            for (int i = 0; i < expectedResultContent.Count; i++)
+            {
+                Assert.AreEqual(expectedResultContent[i].RouteGuid, result.Content[i].RouteGuid);
+            }
+
+            _mockCfCliService.Verify(m => m.ClearCachedAccessToken(), Times.Once);
+            _mockCfApiClient.Verify(m => m.ListRoutesForApp(FakeCfInstance.ApiAddress, It.IsAny<string>(), FakeApp.AppId), Times.Exactly(2));
+            _mockLogger.Verify(m => m.Information(It.Is<string>(s => s.Contains("retry")), fakeExceptionMsg, It.IsAny<int>()), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("GetRoutes")]
+        public async Task GetRoutesForAppAsync_ReturnsFailedResult_WhenListRoutesThrowsException_AndThereAreZeroRetriesLeft()
+        {
+            var fakeExceptionMsg = "junk";
+
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns(_fakeValidAccessToken);
+
+            _mockCfApiClient.Setup(m => m.
+                ListRoutesForApp(FakeCfInstance.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
+                    .Throws(new Exception(fakeExceptionMsg));
+
+            var result = await _sut.GetRoutesForAppAsync(FakeApp, retryAmount: 0);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsNull(result.CmdResult);
+            Assert.IsNull(result.Content);
+
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("GetRoutes")]
+        public async Task GetRoutesForAppAsync_ReturnsSuccessfulResult_WhenListRoutesSucceeds()
+        {
+            var fakeRoute1 = new Route
+            {
+                Guid = "fake-route-guid-1",
+            };
+            var fakeRoute2 = new Route
+            {
+                Guid = "fake-route-guid-2",
+            };
+            var fakeRoute3 = new Route
+            {
+                Guid = "", // expect this route to be omitted from final result
+            };
+
+            var fakeRoutesResponse = new List<Route>
+            {
+                fakeRoute1,
+                fakeRoute2,
+                fakeRoute3,
+            };
+
+            var expectedResultContent = new List<CloudFoundryRoute>
+            {
+                new CloudFoundryRoute(fakeRoute1.Guid),
+                new CloudFoundryRoute(fakeRoute2.Guid),
+            };
+
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns(_fakeValidAccessToken);
+
+            _mockCfApiClient.Setup(m => m.
+                ListRoutesForApp(FakeCfInstance.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
+                    .ReturnsAsync(fakeRoutesResponse);
+
+            var result = await _sut.GetRoutesForAppAsync(FakeApp);
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.IsNull(result.CmdResult);
+            Assert.AreEqual(expectedResultContent.Count, result.Content.Count);
+
+            for (int i = 0; i < expectedResultContent.Count; i++)
+            {
+                Assert.AreEqual(expectedResultContent[i].RouteGuid, result.Content[i].RouteGuid);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("GetRoutes")]
+        public async Task GetRoutesForAppAsync_ReturnsFailedResult_WhenTokenRetrievalThrowsInvalidRefreshTokenException()
+        {
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Throws(new InvalidRefreshTokenException());
+
+            var result = await _sut.GetRoutesForAppAsync(FakeApp);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsTrue(result.Explanation.Contains(FakeApp.AppName));
+            Assert.AreEqual(null, result.CmdResult);
+            Assert.AreEqual(null, result.Content);
+            Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
+        }
+
+        [TestMethod]
+        [TestCategory("DeleteAllRoutesForAppAsync")]
+        public async Task DeleteAllRoutesForAppAsync_DeletesEachRoute_AndReturnsSuccessfulResult_WhenRoutesCanBeFoundForApp()
+        {
+            var expectedAddress = FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress;
+            var expectedAppGuid = FakeApp.AppId;
+
+            var fakeRoutesResponse = new List<Route>
+            {
+                new Route
+                {
+                    Guid = "this-is-a-fake-guid-1",
+                },
+                new Route
+                {
+                    Guid = "this-is-a-fake-guid-2",
+                },
+            };
+
+            _mockCfCliService.Setup(m => m.GetOAuthToken()).Returns(_fakeValidAccessToken);
+            _mockCfApiClient.Setup(m => m.ListRoutesForApp(expectedAddress, _fakeValidAccessToken, expectedAppGuid)).ReturnsAsync(fakeRoutesResponse);
+            _mockCfApiClient.Setup(m => m.DeleteRouteWithGuid(expectedAddress, _fakeValidAccessToken, It.IsAny<string>())).ReturnsAsync(true); // pretend deletion succeeded for any route guid
+
+            var result = await _sut.DeleteAllRoutesForAppAsync(FakeApp);
+
+            Assert.IsTrue(result.Succeeded);
+
+            foreach (Route route in fakeRoutesResponse)
+            {
+                _mockCfApiClient.Verify(m => m.DeleteRouteWithGuid(expectedAddress, _fakeValidAccessToken, route.Guid), Times.Once);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("DeleteAllRoutesForAppAsync")]
+        public async Task DeleteAllRoutesForAppAsync_ReturnsFailedResult_WhenTokenRetrievalThrowsInvalidRefreshTokenException()
+        {
+            _mockCfCliService.Setup(m => m
+               .GetOAuthToken())
+                   .Throws(new InvalidRefreshTokenException());
+
+            var result = await _sut.DeleteAllRoutesForAppAsync(FakeApp);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsTrue(result.Explanation.Contains("Unable to retrieve routes"));
+            Assert.IsTrue(result.Explanation.Contains(FakeApp.AppName));
+            Assert.IsTrue(result.Explanation.Contains("Please log back in to re-authenticate"));
+            Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
+        }
+
+        [TestMethod]
+        [TestCategory("DeleteAllRoutesForAppAsync")]
+        public async Task DeleteAllRoutesForAppAsync_ReturnsFailedResult_WhenTokenCannotBeFound()
+        {
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns((string)null);
+
+            var result = await _sut.DeleteAllRoutesForAppAsync(FakeApp);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsNull(result.CmdResult);
+
+            Assert.IsTrue(_mockCfApiClient.Invocations.Count == 0);
+            _mockLogger.Verify(m => m.Error(It.Is<string>(s => s.Contains("CloudFoundryService attempted to get routes for '{appName}' but was unable to look up an access token.")), FakeApp.AppName), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("DeleteAllRoutesForAppAsync")]
+        public async Task DeleteAllRoutesForAppAsync_ReturnsFailedResult_WhenListRoutesThrowsException_AndThereAreZeroRetriesLeft()
+        {
+            var fakeExceptionMsg = "junk";
+
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns(_fakeValidAccessToken);
+
+            _mockCfApiClient.Setup(m => m.
+                ListRoutesForApp(FakeCfInstance.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
+                    .Throws(new Exception(fakeExceptionMsg));
+
+            var result = await _sut.DeleteAllRoutesForAppAsync(FakeApp);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsNull(result.CmdResult);
+
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("DeleteAllRoutesForAppAsync")]
+        public async Task DeleteAllRoutesForAppAsync_ReturnsFailedResult_WhenAllRouteDeletionsFail()
+        {
+            var expectedAddress = FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress;
+            var expectedAppGuid = FakeApp.AppId;
+
+            var fakeRoutesResponse = new List<Route>
+            {
+                new Route
+                {
+                    Guid = "this-is-a-fake-guid-1",
+                },
+                new Route
+                {
+                    Guid = "this-is-a-fake-guid-2",
+                },
+            };
+
+            _mockCfCliService.Setup(m => m.GetOAuthToken()).Returns(_fakeValidAccessToken);
+            _mockCfApiClient.Setup(m => m.ListRoutesForApp(expectedAddress, _fakeValidAccessToken, expectedAppGuid)).ReturnsAsync(fakeRoutesResponse);
+            _mockCfApiClient.Setup(m => m.DeleteRouteWithGuid(expectedAddress, _fakeValidAccessToken, It.IsAny<string>())).ReturnsAsync(false); // pretend deletion fails for every route guid
+
+            var result = await _sut.DeleteAllRoutesForAppAsync(FakeApp);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsTrue(result.Explanation.Contains(CloudFoundryService.RouteDeletionErrorMsg));
+            Assert.IsNull(result.CmdResult);
+        }
+
+        [TestMethod]
+        [TestCategory("DeleteAllRoutesForAppAsync")]
+        public async Task DeleteAllRoutesForAppAsync_ReturnsFailedResult_WhenOneRouteDeletionFails()
+        {
+            var expectedAddress = FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress;
+            var expectedAppGuid = FakeApp.AppId;
+
+            var fakeRoutesResponse = new List<Route>
+            {
+                new Route
+                {
+                    Guid = "this-is-a-fake-guid-1",
+                },
+                new Route
+                {
+                    Guid = "this-is-a-fake-guid-2",
+                },
+            };
+
+            _mockCfCliService.Setup(m => m.GetOAuthToken()).Returns(_fakeValidAccessToken);
+            _mockCfApiClient.Setup(m => m.ListRoutesForApp(expectedAddress, _fakeValidAccessToken, expectedAppGuid)).ReturnsAsync(fakeRoutesResponse);
+            _mockCfApiClient.SetupSequence(m => m.DeleteRouteWithGuid(expectedAddress, _fakeValidAccessToken, It.IsAny<string>()))
+                .ReturnsAsync(true) // pretend first deletion succeeds
+                .ReturnsAsync(false); // pretend second deletion fails
+
+            var result = await _sut.DeleteAllRoutesForAppAsync(FakeApp);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsTrue(result.Explanation.Contains(CloudFoundryService.RouteDeletionErrorMsg));
+            Assert.IsNull(result.CmdResult);
+        }
+
+        [TestMethod]
+        [TestCategory("DeleteAllRoutesForAppAsync")]
+        public async Task DeleteAllRoutesForAppAsync_ReturnsFailedResult_WhenAllRouteDeletionsThrowExceptions()
+        {
+            var expectedAddress = FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress;
+            var expectedAppGuid = FakeApp.AppId;
+
+            var fakeRoutesResponse = new List<Route>
+            {
+                new Route
+                {
+                    Guid = "this-is-a-fake-guid-1",
+                },
+                new Route
+                {
+                    Guid = "this-is-a-fake-guid-2",
+                },
+            };
+
+            _mockCfCliService.Setup(m => m.GetOAuthToken()).Returns(_fakeValidAccessToken);
+            _mockCfApiClient.Setup(m => m.ListRoutesForApp(expectedAddress, _fakeValidAccessToken, expectedAppGuid)).ReturnsAsync(fakeRoutesResponse);
+            _mockCfApiClient.Setup(m => m.DeleteRouteWithGuid(expectedAddress, _fakeValidAccessToken, It.IsAny<string>())).Throws(new Exception());
+
+            var result = await _sut.DeleteAllRoutesForAppAsync(FakeApp);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsTrue(result.Explanation.Contains(CloudFoundryService.RouteDeletionErrorMsg));
+            Assert.IsNull(result.CmdResult);
+        }
+
+        [TestMethod]
+        [TestCategory("DeleteAllRoutesForAppAsync")]
+        public async Task DeleteAllRoutesForAppAsync_ReturnsFailedResult_WhenOneRouteDeletionThrowsException()
+        {
+            var expectedAddress = FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress;
+            var expectedAppGuid = FakeApp.AppId;
+
+            var fakeRoutesResponse = new List<Route>
+            {
+                new Route
+                {
+                    Guid = "this-is-a-fake-guid-1",
+                },
+                new Route
+                {
+                    Guid = "this-is-a-fake-guid-2",
+                },
+            };
+
+            _mockCfCliService.Setup(m => m.GetOAuthToken()).Returns(_fakeValidAccessToken);
+            _mockCfApiClient.Setup(m => m.ListRoutesForApp(expectedAddress, _fakeValidAccessToken, expectedAppGuid)).ReturnsAsync(fakeRoutesResponse);
+            _mockCfApiClient.SetupSequence(m => m.DeleteRouteWithGuid(expectedAddress, _fakeValidAccessToken, It.IsAny<string>()))
+                .ReturnsAsync(true) // pretend first deletion succeeds
+                .Throws(new Exception()); // this will trigger a retry with a fresh access token
+
+            var result = await _sut.DeleteAllRoutesForAppAsync(FakeApp);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsTrue(result.Explanation.Contains(CloudFoundryService.RouteDeletionErrorMsg));
+            Assert.IsNull(result.CmdResult);
         }
     }
 }
