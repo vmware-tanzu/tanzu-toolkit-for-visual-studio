@@ -16,6 +16,7 @@ using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
 using Tanzu.Toolkit.ViewModels.SsoDialog;
+using Tanzu.Toolkit.ViewModels.AppDeletionConfirmation;
 using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.ViewModels.Tests
@@ -38,6 +39,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         protected Mock<IDataPersistenceService> MockDataPersistenceService { get; set; }
         protected Mock<ISsoDialogViewModel> MockSsoViewModel { get; set; }
         protected Mock<ILoginViewModel> MockLoginViewModel { get; set; }
+        protected Mock<IAppDeletionConfirmationViewModel> MockAppDeletionConfirmationViewModel { get; set; }
+
 
         protected const string FakeCfName = "fake cf name";
         protected const string FakeCfApiAddress = "http://fake.api.address";
@@ -210,6 +213,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockDataPersistenceService = new Mock<IDataPersistenceService>();
             MockSsoViewModel = new Mock<ISsoDialogViewModel>();
             MockLoginViewModel = new Mock<ILoginViewModel>();
+            MockAppDeletionConfirmationViewModel = new Mock<IAppDeletionConfirmationViewModel>();
 
             MockLogger = new Mock<ILogger>();
             MockLoggingService.SetupGet(m => m.Logger).Returns(MockLogger.Object);
@@ -227,6 +231,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             services.AddSingleton(MockDataPersistenceService.Object);
             services.AddSingleton(MockSsoViewModel.Object);
             services.AddSingleton(MockLoginViewModel.Object);
+            services.AddSingleton(MockAppDeletionConfirmationViewModel.Object);
 
             Services = services.BuildServiceProvider();
         }

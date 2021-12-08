@@ -1,0 +1,84 @@
+﻿<platform:DialogWindow x:Class="Tanzu.Toolkit.VisualStudio.Views.AppDeletionConfirmationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Tanzu.Toolkit.VisualStudio.Views"
+             xmlns:platform="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
+             xmlns:toolkit="clr-namespace:Community.VisualStudio.Toolkit;assembly=Community.VisualStudio.Toolkit"
+             toolkit:Themes.UseVsTheme="True"
+             mc:Ignorable="d"
+             Name ="AppDeletionConfirmationViewElement"
+             Title="Confirm App Deletion"
+             MinHeight="200"
+             MinWidth="300"
+             SizeToContent="WidthAndHeight"
+             WindowStyle="None"
+             HasDialogFrame="False"
+             BorderBrush="Gray"
+             BorderThickness="1"
+             ResizeMode="NoResize" Height="171.525" Width="348.723">
+
+    <DockPanel>
+        
+    <Grid Margin="10" VerticalAlignment="Center" DockPanel.Dock="Top">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Column="0" Grid.Row="0" Margin="8,8,8,8" Grid.RowSpan="4" VerticalAlignment="Top">
+            <Image
+                Margin="12"
+                Source="Resources/StatusWarning64.png"
+                Height="64"
+                RenderOptions.BitmapScalingMode="Fant"
+                />
+        </StackPanel>
+
+        <Label Grid.Column="1" Margin="0,12,20,0" Grid.Row="0" Grid.ColumnSpan="3" >Are you sure you want to delete this app?</Label>
+
+        <Label Grid.Column="2" Grid.Row="1" Grid.ColumnSpan="2" Margin="30,10,0,20">
+            <CheckBox Grid.Row="3" IsChecked="{ Binding DeleteRoutes}">Delete associated routes?</CheckBox>
+        </Label>
+
+    </Grid >
+
+        <Grid Grid.Row="2" Grid.ColumnSpan="3" DockPanel.Dock="Bottom">
+            <StackPanel
+                Orientation="Horizontal"
+                Margin="12"
+                Height="auto"
+                HorizontalAlignment="Right">
+
+                <Button
+                    Content="OK"
+                    Margin="4"
+                    Padding="4"
+                    Command="{ Binding ElementName=AppDeletionConfirmationViewElement, Path=DeleteAppCommand }" 
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                    HorizontalAlignment="Right"/>
+            </StackPanel>
+
+            <StackPanel
+                Orientation="Horizontal"
+                Margin="12"
+                Height="auto"
+                HorizontalAlignment="Left">
+
+                <Button
+                    Margin="4"
+                    Padding="4"
+                    Click="Close"
+                    Content="Cancel"/>
+            </StackPanel>
+        </Grid>
+    </DockPanel>
+
+</platform:DialogWindow>

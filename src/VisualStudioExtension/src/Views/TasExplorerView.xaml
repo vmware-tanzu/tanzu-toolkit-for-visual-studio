@@ -304,7 +304,7 @@
                                         </MenuItem.Icon>
                                     </MenuItem>
                                     <MenuItem Header="Delete App" 
-                                              Command="{Binding PlacementTarget.Tag.DeleteCfAppCommand, 
+                                              Command="{Binding PlacementTarget.Tag.OpenDeletionViewCommand, 
                                                                 RelativeSource={RelativeSource Mode=FindAncestor, 
                                                                 AncestorType=ContextMenu}}"
                                               CommandParameter="{Binding App}">
@@ -342,7 +342,7 @@
                 <DataTemplate DataType="{x:Type ViewModels:LoginPromptViewModel}">
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                         <Button Command="{Binding ElementName=TasExplorerViewElement, Path=OpenLoginFormCommand}">
-                            <local:LoginPromptButton/>
+                             <local:LoginPromptButton/>
                         </Button>
                     </StackPanel>
                 </DataTemplate>

@@ -18,7 +18,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         public ICommand OpenLoginFormCommand { get; }
         public ICommand StopCfAppCommand { get; }
         public ICommand StartCfAppCommand { get; }
-        public ICommand DeleteCfAppCommand { get; }
+        public ICommand OpenDeletionViewCommand { get; }
         public ICommand DisplayRecentAppLogsCommand { get; }
         public ICommand RefreshSpaceCommand { get; }
         public ICommand RefreshOrgCommand { get; }
@@ -46,7 +46,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             OpenLoginFormCommand = new DelegatingCommand(viewModel.OpenLoginView, viewModel.CanOpenLoginView);
             StopCfAppCommand = new AsyncDelegatingCommand(viewModel.StopCfApp, viewModel.CanStopCfApp);
             StartCfAppCommand = new AsyncDelegatingCommand(viewModel.StartCfApp, viewModel.CanStartCfApp);
-            DeleteCfAppCommand = new AsyncDelegatingCommand(viewModel.DeleteCfApp, viewModel.CanDeleteCfApp);
+            OpenDeletionViewCommand = new DelegatingCommand(viewModel.OpenDeletionView, viewModel.CanOpenDeletionView);
             DisplayRecentAppLogsCommand = new AsyncDelegatingCommand(viewModel.DisplayRecentAppLogs, viewModel.CanDisplayRecentAppLogs);
             RefreshSpaceCommand = new AsyncDelegatingCommand(viewModel.RefreshSpace, viewModel.CanRefreshSpace);
             RefreshOrgCommand = new AsyncDelegatingCommand(viewModel.RefreshOrg, viewModel.CanRefreshOrg);
