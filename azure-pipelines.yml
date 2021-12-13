@@ -13,7 +13,7 @@ variables:
   - name: minor
     value: 0
   - name: patch
-    value: 3
+    value: 4 
   - name: DOTNET_SKIP_FIRST_TIME_EXPERIENCE
     value: true
   - name: DOTNET_CLI_TELEMETRY_OPTOUT
