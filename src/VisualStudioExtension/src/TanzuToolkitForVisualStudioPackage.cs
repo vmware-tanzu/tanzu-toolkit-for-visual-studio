@@ -135,14 +135,14 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<IOutputViewModel, OutputViewModel>();
             services.AddSingleton<ITasExplorerViewModel, TasExplorerViewModel>();
             services.AddSingleton<ISsoDialogViewModel, SsoDialogViewModel>(); // must be a singleton for the view to properly show prompt
+            services.AddSingleton<ILoginViewModel, LoginViewModel>();
             services.AddTransient<IDeploymentDialogViewModel, DeploymentDialogViewModel>();
-            services.AddTransient<ILoginViewModel, LoginViewModel>();
 
             /* Views */
             services.AddSingleton<IOutputView, OutputView>();
+            services.AddSingleton<ILoginView, LoginView>();
             services.AddTransient<ITasExplorerView, TasExplorerView>();
             services.AddTransient<IDeploymentDialogView, DeploymentDialogView>();
-            services.AddTransient<ILoginView, LoginView>();
             services.AddTransient<ISsoDialogView, SsoDialogView>();
         }
     }
