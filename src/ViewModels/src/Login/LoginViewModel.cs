@@ -154,13 +154,18 @@ namespace Tanzu.Toolkit.ViewModels
 
             if (result.IsLoggedIn)
             {
-                _tasExplorer.SetConnection(new CloudFoundryInstance(ConnectionName, Target));
+                SetConnection();
             }
 
             if (!HasErrors)
             {
                 DialogService.CloseDialog(arg, true);
             }
+        }
+
+        public void SetConnection()
+        {
+            _tasExplorer.SetConnection(new CloudFoundryInstance(ConnectionName, Target));
         }
 
         public bool VerifyApiAddress(string apiAddress)
@@ -204,9 +209,15 @@ namespace Tanzu.Toolkit.ViewModels
                     var ssoUrlPrompt = ssoPromptResult.Content;
 
                     _ssoDialog.ApiAddress = Target;
-                    _ssoDialog.ShowWithPrompt(ssoUrlPrompt);
+                    _ssoDialog.ShowWithPrompt(ssoUrlPrompt, this);
                 }
             }
         }
+
+        public void CloseDialog()
+        {
+            DialogService.CloseDialogByName(nameof(LoginViewModel));
+        }
+
     }
 }
