@@ -20,7 +20,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services
         public void CloseDialog(object dialogWindow, bool result)
         {
             var asWindows = dialogWindow as Window;
-            asWindows.DialogResult = result;
+            asWindows.Hide();
         }
 
         public IDialogResult ShowDialog(string dialogName, object parameter = null)
@@ -28,9 +28,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services
             var dialog = _viewLocatorService.NavigateTo(dialogName, parameter) as DependencyObject;
             var dialogWindow = Window.GetWindow(dialog);
             var result = dialogWindow.ShowDialog();
-            // dialogWindow.Parent = Application.Current.MainWindow;
-
             return new DialogResult() { Result = result };
+        }
+
+        public void CloseDialogByName(string dialogName, object parameter = null)
+        {
+            var dialog = _viewLocatorService.NavigateTo(dialogName, parameter) as DependencyObject;
+            var dialogWindow = Window.GetWindow(dialog);
+            dialogWindow.Hide();
         }
     }
 

@@ -11,11 +11,12 @@ namespace Tanzu.Toolkit.ViewModels.SsoDialog
         private string _errorMessage;
         private string _apiAddress;
 
+        private ILoginViewModel _loginViewModel;
+
         public SsoDialogViewModel(IServiceProvider services) : base(services)
         {
             HasErrors = false;
         }
-
 
         public string ApiAddress
         {
@@ -84,7 +85,7 @@ namespace Tanzu.Toolkit.ViewModels.SsoDialog
         {
             Prompt = prompt;
 
-            DialogService.ShowDialog(typeof(SsoDialogViewModel).Name);
+            DialogService.ShowDialog(nameof(SsoDialogViewModel));
         }
 
         public bool CanLoginWithPasscode(object arg = null)
@@ -107,6 +108,8 @@ namespace Tanzu.Toolkit.ViewModels.SsoDialog
                 if (loginResult.Succeeded)
                 {
                     DialogService.CloseDialog(arg, true);
+
+                    DialogService.CloseDialogByName(nameof(LoginViewModel));
                 }
                 else
                 {
