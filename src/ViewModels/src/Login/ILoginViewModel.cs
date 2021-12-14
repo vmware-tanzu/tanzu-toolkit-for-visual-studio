@@ -20,5 +20,7 @@ namespace Tanzu.Toolkit.ViewModels
         bool VerifyApiAddress(string apiAddress);
         bool CanOpenSsoDialog(object arg = null);
         Task OpenSsoDialog(object apiAddress = null);
+        void CloseDialog();
+        void SetConnection();
     }
 }

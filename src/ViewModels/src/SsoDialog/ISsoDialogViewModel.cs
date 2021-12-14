@@ -9,6 +9,6 @@ namespace Tanzu.Toolkit.ViewModels.SsoDialog
 
         bool CanLoginWithPasscode(object arg = null);
         Task LoginWithPasscodeAsync(object arg = null);
-        void ShowWithPrompt(string prompt);
+        void ShowWithPrompt(string prompt, ILoginViewModel parentWindow);
     }
 }

@@ -81,9 +81,11 @@ namespace Tanzu.Toolkit.ViewModels.SsoDialog
             }
         }
 
-        public void ShowWithPrompt(string prompt)
+        public void ShowWithPrompt(string prompt, ILoginViewModel parentWindow)
         {
             Prompt = prompt;
+
+            _loginViewModel = parentWindow;
 
             DialogService.ShowDialog(nameof(SsoDialogViewModel));
         }
@@ -109,7 +111,8 @@ namespace Tanzu.Toolkit.ViewModels.SsoDialog
                 {
                     DialogService.CloseDialog(arg, true);
 
-                    DialogService.CloseDialogByName(nameof(LoginViewModel));
+                    _loginViewModel.SetConnection();
+                    _loginViewModel.CloseDialog();
                 }
                 else
                 {
