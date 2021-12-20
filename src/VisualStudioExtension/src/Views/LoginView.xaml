@@ -58,27 +58,92 @@
                     Margin="52,0">
             
             <Label Content="API Address"/>
-            
-            <TextBox
-                Text="{Binding Target}"
-                Name="tbUrl"
-                LostFocus="TbUrl_LostFocus"
-                HorizontalAlignment="Stretch"
-                Width="auto"/>
-            
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                <TextBox
+                    Text="{Binding Target}"
+                    Name="tbUrl"
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    LostFocus="TbUrl_LostFocus"
+                    HorizontalAlignment="Stretch"
+                    Width="auto"/>
+
+                <TextBlock
+                    IsHitTestVisible="False"
+                    Text="&lt;Required&gt;"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Left"
+                    Margin="8,0"
+                    Foreground="DarkGray"
+                    Grid.Column="0"
+                    Grid.Row="0">
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Text, ElementName=tbUrl}" Value="">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
+
             <TextBlock
                 Text="{Binding ApiAddressError}"
                 Foreground="Red"
+                TextWrapping="Wrap"
                 Visibility="{Binding Path=ApiAddressIsValid, Converter={StaticResource InverseCollapsedVisibility}}"/>
 
             <Label Content="Connection Name"/>
-            
-            <TextBox 
-                Name="tbConnectionName"
-                HorizontalAlignment="Stretch"
-                Width="auto"
-                Text="{ Binding Path=ConnectionName }"/>
 
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBox 
+                    Name="tbConnectionName"
+                    HorizontalAlignment="Stretch"
+                    Width="auto"
+                    Text="{ Binding Path=ConnectionName }"/>
+
+                <TextBlock
+                        IsHitTestVisible="False"
+                        Text="&lt;Optional&gt;"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Left"
+                        Margin="8,0"
+                        Foreground="DarkGray"
+                        Grid.Column="0"
+                        Grid.Row="0">
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Text, ElementName=tbConnectionName}" Value="">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
+            
             <Grid>
                 <StackPanel
                     Orientation="Horizontal"
