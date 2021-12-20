@@ -124,25 +124,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [DataRow(" ")]
         [DataRow("  ")]
         [DataRow(null)]
-        public void CanLogIn_ReturnsFalse_WhenConnectionNameEmpty(string invalidConnectionName)
-        {
-            _sut.ConnectionName = invalidConnectionName;
-
-            Assert.IsTrue(string.IsNullOrWhiteSpace(_sut.ConnectionName));
-            Assert.IsNotNull(_sut.Target);
-            Assert.IsNotNull(_sut.Username);
-            Assert.IsFalse(_sut.PasswordEmpty());
-            Assert.IsTrue(_sut.VerifyApiAddress(_sut.Target));
-
-            Assert.IsFalse(_sut.CanLogIn());
-        }
-
-        [TestMethod]
-        [TestCategory("CanLogIn")]
-        [DataRow("")]
-        [DataRow(" ")]
-        [DataRow("  ")]
-        [DataRow(null)]
         public void CanLogIn_ReturnsFalse_WhenTargetEmpty(string invalidTargetApiAddress)
         {
             _sut.Target = invalidTargetApiAddress;
@@ -223,6 +204,37 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.AreEqual(expectedValidity, _sut.ApiAddressIsValid);
             Assert.AreEqual(expectedError, _sut.ApiAddressError);
             Assert.IsTrue(_receivedEvents.Contains("ApiAddressIsValid"));
+        }
+
+        [TestMethod]
+        [DataRow("https://www.api.com", "My Cool TAS", "My Cool TAS")]
+        [DataRow("https://www.api.com", "asdf1234", "asdf1234")]
+        [DataRow("https://www.api.com", "", "www.api.com")]
+        [DataRow("https://www.api.com", " ", "www.api.com")]
+        [DataRow("https://www.api.com", null, "www.api.com")]
+        [DataRow("www.api.com", "My Cool TAS", "My Cool TAS")]
+        [DataRow("http://www.api.com", "My Cool TAS", "My Cool TAS")]
+        [DataRow("http://www.api.com", null, "www.api.com")]
+        [DataRow("https://www.api.com/some/endpoint", "My Cool TAS", "My Cool TAS")]
+        [DataRow("https://www.api.com/some/endpoint", null, "www.api.com")]
+        [DataRow("https://www.api.com:80", "My Cool TAS", "My Cool TAS")]
+        [DataRow("https://www.api.com:80", null, "www.api.com")]
+        [DataRow("non-parseable address", "", "Tanzu Application Service")]
+        [DataRow("non-parseable address", " ", "Tanzu Application Service")]
+        [DataRow("non-parseable address", null, "Tanzu Application Service")]
+        [DataRow("www.api.com", "", "Tanzu Application Service")]
+        [DataRow("www.api.com", " ", "Tanzu Application Service")]
+        [DataRow("www.api.com", null, "Tanzu Application Service")]
+        public void SetConnection_SetsConnectionOnTasExplorer(string apiAddressFromDialog, string connectionNameFromDialog, string expectedTasConnectionName)
+        {
+            _sut.Target = apiAddressFromDialog;
+            _sut.ConnectionName = connectionNameFromDialog;
+
+            MockTasExplorerViewModel.Setup(m => m.SetConnection(It.IsAny<CloudFoundryInstance>()));
+
+            _sut.SetConnection();
+
+            MockTasExplorerViewModel.Verify(m => m.SetConnection(It.Is<CloudFoundryInstance>(cf => cf.InstanceName == expectedTasConnectionName && cf.ApiAddress == apiAddressFromDialog)), Times.Once);
         }
     }
 }
