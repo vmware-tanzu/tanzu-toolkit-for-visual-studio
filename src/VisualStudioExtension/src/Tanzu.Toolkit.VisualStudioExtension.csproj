@@ -57,6 +57,7 @@
     <Compile Include="Views\Commands\AsyncDelegatingCommand.cs" />
     <Compile Include="Views\Commands\DelegatingCommand.cs" />
     <Compile Include="Views\Converters\ListToStringConverter.cs" />
+    <Compile Include="Views\Converters\PageNumberConverter.cs" />
     <Compile Include="Views\Converters\VisibilityConverter.cs" />
     <Compile Include="Views\ISsoDialogView.cs" />
     <Compile Include="Views\LoadingSpinnerSmall.cs" />

@@ -17,6 +17,9 @@ namespace Tanzu.Toolkit.ViewModels
         private bool _hasErrors;
         private string _errorMessage;
         private string _apiAddressError;
+        private int _currentPageNum = 1;
+        private int _minPageNum = 1;
+        private int _maxPageNum = 2;
         private bool _apiAddressIsValid;
         private string _connectionName;
         private ITasExplorerViewModel _tasExplorer;
@@ -126,6 +129,17 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
+        public int PageNum
+        {
+            get => _currentPageNum;
+
+            private set
+            {
+                _currentPageNum = value;
+                RaisePropertyChangedEvent("PageNum");
+            }
+        }
+
         public Func<SecureString> GetPassword { get; set; }
 
         public Func<bool> PasswordEmpty { get; set; }
@@ -219,5 +233,25 @@ namespace Tanzu.Toolkit.ViewModels
             DialogService.CloseDialogByName(nameof(LoginViewModel));
         }
 
+        public void IncrementPageNum(object arg = null)
+        {
+            if (PageNum < _maxPageNum)
+            {
+                PageNum += 1;
+            }
+        }
+
+        public void DecrementPageNum(object arg = null)
+        {
+            if (PageNum > _minPageNum)
+            {
+                PageNum -= 1;
+            }
+        }
+
+        public bool CanProceedToAuthentication(object arg = null)
+        {
+            return ApiAddressIsValid && !string.IsNullOrWhiteSpace(Target);
+        }
     }
 }
