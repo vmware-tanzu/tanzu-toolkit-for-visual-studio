@@ -36,6 +36,12 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+
+        <Style x:Key="BoldTextButton" TargetType="{x:Type Button}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontWeight" Value="DemiBold"/>
+        </Style>
     </ui:DialogWindow.Resources>
 
     <StackPanel>
@@ -205,8 +211,27 @@
                 Background="Transparent"
                 Visibility="{Binding Path=HasErrors, Converter={StaticResource CollapsedVisibility}}"/>
 
+            <Grid x:Name="SsoOption">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="5*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="5*"/>
+                </Grid.ColumnDefinitions>
+                
+                <Separator Grid.Column="0" />
+                
+                <TextBlock
+                    Text="or"
+                    Grid.Column="1"
+                    Margin="8"
+                    HorizontalAlignment="Center"/>
+                
+                <Separator Grid.Column="2"/>
+            </Grid>
+
             <Button
                 Content="Sign in with SSO"
+                Style="{StaticResource BoldTextButton}"
                 Command="{Binding ElementName=LoginViewElement, Path=SsoCommand}"/>
             
             <Grid>
