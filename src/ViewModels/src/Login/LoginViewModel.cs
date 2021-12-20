@@ -22,8 +22,9 @@ namespace Tanzu.Toolkit.ViewModels
         private int _maxPageNum = 2;
         private bool _apiAddressIsValid;
         private string _connectionName;
-        private ITasExplorerViewModel _tasExplorer;
         private ISsoDialogViewModel _ssoDialog;
+
+        internal ITasExplorerViewModel _tasExplorer;
 
         public LoginViewModel(IServiceProvider services)
             : base(services)
@@ -146,7 +147,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool CanLogIn(object arg = null)
         {
-            return !(string.IsNullOrWhiteSpace(ConnectionName) || string.IsNullOrWhiteSpace(Target) || string.IsNullOrWhiteSpace(Username) || PasswordEmpty()) && VerifyApiAddress(Target);
+            return !(string.IsNullOrWhiteSpace(Target) || string.IsNullOrWhiteSpace(Username) || PasswordEmpty()) && VerifyApiAddress(Target);
         }
 
         public bool CanOpenSsoDialog(object arg = null)
@@ -179,7 +180,25 @@ namespace Tanzu.Toolkit.ViewModels
 
         public void SetConnection()
         {
-            _tasExplorer.SetConnection(new CloudFoundryInstance(ConnectionName, Target));
+            string name;
+
+            if (string.IsNullOrWhiteSpace(ConnectionName))
+            {
+                try
+                {
+                    name = new Uri(Target).Host;
+                }
+                catch
+                {
+                    name = "Tanzu Application Service";
+                }
+            }
+            else
+            {
+                name = ConnectionName;
+            }
+
+            _tasExplorer.SetConnection(new CloudFoundryInstance(name, Target));
         }
 
         public bool VerifyApiAddress(string apiAddress)
