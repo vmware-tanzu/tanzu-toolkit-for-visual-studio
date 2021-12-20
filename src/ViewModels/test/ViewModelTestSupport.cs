@@ -15,6 +15,7 @@ using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
+using Tanzu.Toolkit.ViewModels.SsoDialog;
 using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.ViewModels.Tests
@@ -35,6 +36,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         protected Mock<ITasExplorerViewModel> MockTasExplorerViewModel { get; set; }
         protected Mock<ISerializationService> MockSerializationService { get; set; }
         protected Mock<IDataPersistenceService> MockDataPersistenceService { get; set; }
+        protected Mock<ISsoDialogViewModel> MockSsoViewModel { get; set; }
 
         protected const string FakeCfName = "fake cf name";
         protected const string FakeCfApiAddress = "http://fake.api.address";
@@ -205,6 +207,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockTasExplorerViewModel = new Mock<ITasExplorerViewModel>();
             MockSerializationService = new Mock<ISerializationService>();
             MockDataPersistenceService = new Mock<IDataPersistenceService>();
+            MockSsoViewModel = new Mock<ISsoDialogViewModel>();
 
             MockLogger = new Mock<ILogger>();
             MockLoggingService.SetupGet(m => m.Logger).Returns(MockLogger.Object);
@@ -220,6 +223,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             services.AddSingleton(MockFileService.Object);
             services.AddSingleton(MockSerializationService.Object);
             services.AddSingleton(MockDataPersistenceService.Object);
+            services.AddSingleton(MockSsoViewModel.Object);
 
             Services = services.BuildServiceProvider();
         }
