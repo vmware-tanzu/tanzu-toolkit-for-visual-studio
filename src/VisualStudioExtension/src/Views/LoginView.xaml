@@ -22,6 +22,8 @@
         <converters:VisibilityConverter x:Key="Visibility" />
         <converters:VisibilityConverter x:Key="CollapsedVisibility" ReserveSpace="False" />
         <converters:VisibilityConverter x:Key="InverseCollapsedVisibility" ReserveSpace="False" Reversed="True"/>
+        <converters:PageNumberConverter x:Key="Page1Displayer" ShowValue="1" ReserveSpace="False"/>
+        <converters:PageNumberConverter x:Key="Page2Displayer" ShowValue="2" ReserveSpace="False"/>
 
         <Style x:Key="ApiAddressFieldStyle" TargetType="{x:Type TextBox}">
             <Style.Triggers>
@@ -37,7 +39,9 @@
     </ui:DialogWindow.Resources>
 
     <StackPanel>
-        <StackPanel Orientation="Horizontal" Margin="12">
+        <StackPanel Name="Header"
+            Orientation="Horizontal"
+            Margin="12">
             <Image
                 Source="Resources/tasicon.png"
                 Width="32"
@@ -49,26 +53,67 @@
                 Margin="4"/>
         </StackPanel>
 
-        <StackPanel Margin="52,0">
-            <Label Content="Connection Name"/>
-            <TextBox 
-                Name="tbConnectionName"
-                HorizontalAlignment="Stretch"
-                Width="auto"
-                Text="{ Binding Path=ConnectionName }"/>
-
-            <Label Content="TAS Api Address"/>
+        <StackPanel Name="TargetPrompt"
+                    Visibility="{Binding PageNum, Converter={StaticResource Page1Displayer}}"
+                    Margin="52,0">
+            
+            <Label Content="API Address"/>
+            
             <TextBox
                 Text="{Binding Target}"
                 Name="tbUrl"
                 LostFocus="TbUrl_LostFocus"
                 HorizontalAlignment="Stretch"
                 Width="auto"/>
+            
             <TextBlock
                 Text="{Binding ApiAddressError}"
                 Foreground="Red"
                 Visibility="{Binding Path=ApiAddressIsValid, Converter={StaticResource InverseCollapsedVisibility}}"/>
 
+            <Label Content="Connection Name"/>
+            
+            <TextBox 
+                Name="tbConnectionName"
+                HorizontalAlignment="Stretch"
+                Width="auto"
+                Text="{ Binding Path=ConnectionName }"/>
+
+            <Grid>
+                <StackPanel
+                    Orientation="Horizontal"
+                    Margin="12"
+                    Height="auto"
+                    HorizontalAlignment="Right">
+
+                    <Button
+                        Content="Next"
+                        IsEnabled="{Binding ApiAddressIsValid}"
+                        Margin="4"
+                        Padding="4,0"
+                        HorizontalAlignment="Right"
+                        Command="{Binding ElementName=LoginViewElement, Path=IncrementPageCommand}"/>
+                </StackPanel>
+
+                <StackPanel
+                    Orientation="Horizontal"
+                    Margin="12"
+                    Height="auto"
+                    HorizontalAlignment="Left">
+
+                    <Button
+                        Margin="4"
+                        Padding="4,0"
+                        Click="Close"
+                        Content="Cancel"/>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+
+        <StackPanel Name="AuthPrompt"
+                    Visibility="{Binding PageNum, Converter={StaticResource Page2Displayer}}"
+                    Margin="52,0">
+            
             <Label Content="Username"/>
             <TextBox
                 Name="tbUsername"
@@ -98,36 +143,36 @@
             <Button
                 Content="Sign in with SSO"
                 Command="{Binding ElementName=LoginViewElement, Path=SsoCommand}"/>
+            
+            <Grid>
+                <StackPanel
+                    Orientation="Horizontal"
+                    Margin="12"
+                    Height="auto"
+                    HorizontalAlignment="Right">
+
+                    <Button
+                        Content="Log In"
+                        Margin="4"
+                        Padding="4,0"
+                        HorizontalAlignment="Right"
+                        Command="{ Binding ElementName=LoginViewElement, Path=AddCloudCommand }" 
+                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
+                </StackPanel>
+
+                <StackPanel
+                    Orientation="Horizontal"
+                    Margin="12"
+                    Height="auto"
+                    HorizontalAlignment="Left">
+
+                    <Button
+                        Margin="4"
+                        Padding="4,0"
+                        Command="{Binding ElementName=LoginViewElement, Path=DecrementPageCommand}"
+                        Content="Back"/>
+                </StackPanel>
+            </Grid>
         </StackPanel>
-
-        <Grid>
-            <StackPanel
-                Orientation="Horizontal"
-                Margin="12"
-                Height="auto"
-                HorizontalAlignment="Right">
-
-                <Button
-                    Content="Log In"
-                    Margin="4"
-                    Padding="4,0"
-                    HorizontalAlignment="Right"
-                    Command="{ Binding ElementName=LoginViewElement, Path=AddCloudCommand }" 
-                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
-            </StackPanel>
-
-            <StackPanel
-                Orientation="Horizontal"
-                Margin="12"
-                Height="auto"
-                HorizontalAlignment="Left">
-
-                <Button
-                    Margin="4"
-                    Padding="4,0"
-                    Click="Close"
-                    Content="Cancel"/>
-            </StackPanel>
-        </Grid>
     </StackPanel>
 </ui:DialogWindow>

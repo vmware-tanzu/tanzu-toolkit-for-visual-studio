@@ -15,7 +15,8 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         private ILoginViewModel _viewModel;
         public ICommand AddCloudCommand { get; }
         public ICommand SsoCommand { get; }
-
+        public ICommand IncrementPageCommand { get; }
+        public ICommand DecrementPageCommand { get; }
 
         public LoginView()
         {
@@ -24,8 +25,13 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         public LoginView(ILoginViewModel viewModel)
         {
+            System.Predicate<object> alwaysTrue = (object arg) => { return true; };
+
             AddCloudCommand = new AsyncDelegatingCommand(viewModel.LogIn, viewModel.CanLogIn);
             SsoCommand = new AsyncDelegatingCommand(viewModel.OpenSsoDialog, viewModel.CanOpenSsoDialog);
+            IncrementPageCommand = new DelegatingCommand(viewModel.IncrementPageNum, viewModel.CanProceedToAuthentication);
+            DecrementPageCommand = new DelegatingCommand(viewModel.DecrementPageNum, alwaysTrue);
+
             viewModel.GetPassword = GetPassword;
             viewModel.PasswordEmpty = PasswordBoxEmpty;
             DataContext = viewModel;
@@ -62,5 +68,6 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         {
             _viewModel.VerifyApiAddress(tbUrl.Text);
         }
+
     }
 }
