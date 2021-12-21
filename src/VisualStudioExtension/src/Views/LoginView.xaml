@@ -62,7 +62,7 @@
         <StackPanel Name="TargetPrompt"
                     Visibility="{Binding PageNum, Converter={StaticResource Page1Displayer}}"
                     Margin="52,0">
-            
+
             <Label Content="API Address"/>
 
             <Grid>
@@ -72,8 +72,9 @@
 
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                
+
                 <TextBox
                     Text="{Binding Target}"
                     Name="tbUrl"
@@ -103,13 +104,16 @@
                         </Style>
                     </TextBlock.Style>
                 </TextBlock>
-            </Grid>
 
-            <TextBlock
-                Text="{Binding ApiAddressError}"
-                Foreground="Red"
-                TextWrapping="Wrap"
-                Visibility="{Binding Path=ApiAddressIsValid, Converter={StaticResource InverseCollapsedVisibility}}"/>
+
+                <TextBlock
+                    Text="{Binding ApiAddressError}"
+                    Foreground="Red"
+                    TextWrapping="Wrap"
+                    Grid.Row="1"
+                    Visibility="{Binding Path=ApiAddressIsValid, Converter={StaticResource InverseCollapsedVisibility}}"/>
+
+            </Grid>
 
             <Label Content="Connection Name"/>
 
@@ -149,11 +153,11 @@
                     </TextBlock.Style>
                 </TextBlock>
             </Grid>
-            
+
             <Grid>
                 <StackPanel
                     Orientation="Horizontal"
-                    Margin="12"
+                    Margin="0,8"
                     Height="auto"
                     HorizontalAlignment="Right">
 
@@ -168,7 +172,7 @@
 
                 <StackPanel
                     Orientation="Horizontal"
-                    Margin="12"
+                    Margin="0,8"
                     Height="auto"
                     HorizontalAlignment="Left">
 
@@ -184,7 +188,7 @@
         <StackPanel Name="AuthPrompt"
                     Visibility="{Binding PageNum, Converter={StaticResource Page2Displayer}}"
                     Margin="52,0">
-            
+
             <Label Content="Username"/>
             <TextBox
                 Name="tbUsername"
@@ -211,29 +215,39 @@
                 Background="Transparent"
                 Visibility="{Binding Path=HasErrors, Converter={StaticResource CollapsedVisibility}}"/>
 
-            <Grid x:Name="SsoOption">
+            <Grid x:Name="SsoOption"
+                  Visibility="{Binding SsoEnabledOnTarget, Converter={StaticResource CollapsedVisibility}}">
+                
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="5*"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="5*"/>
                 </Grid.ColumnDefinitions>
-                
-                <Separator Grid.Column="0" />
-                
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Separator Grid.Column="0" Grid.Row="0"/>
+
                 <TextBlock
                     Text="or"
                     Grid.Column="1"
+                    Grid.Row="0"
                     Margin="8"
                     HorizontalAlignment="Center"/>
-                
-                <Separator Grid.Column="2"/>
+
+                <Separator Grid.Column="2" Grid.Row="0"/>
+
+                <Button
+                    Content="Sign in with SSO"
+                    Style="{StaticResource BoldTextButton}"
+                    Grid.Row="1"
+                    Grid.ColumnSpan="3"
+                    Command="{Binding ElementName=LoginViewElement, Path=SsoCommand}"/>
             </Grid>
 
-            <Button
-                Content="Sign in with SSO"
-                Style="{StaticResource BoldTextButton}"
-                Command="{Binding ElementName=LoginViewElement, Path=SsoCommand}"/>
-            
             <Grid>
                 <StackPanel
                     Orientation="Horizontal"
