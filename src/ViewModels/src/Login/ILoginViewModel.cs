@@ -22,8 +22,8 @@ namespace Tanzu.Toolkit.ViewModels
         Task OpenSsoDialog(object apiAddress = null);
         void CloseDialog();
         void SetConnection();
-        void DecrementPageNum(object arg = null);
-        void IncrementPageNum(object arg = null);
+        void NavigateToTargetPage(object arg = null);
+        Task NavigateToAuthPage(object arg = null);
         bool CanProceedToAuthentication(object arg = null);
     }
 }
