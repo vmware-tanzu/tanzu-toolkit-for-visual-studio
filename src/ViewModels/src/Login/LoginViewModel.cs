@@ -19,6 +19,7 @@ namespace Tanzu.Toolkit.ViewModels
         private string _apiAddressError;
         private int _currentPageNum = 1;
         private bool _ssoEnabled = false;
+        private bool _verifyingApiAddress = false;
         private bool _apiAddressIsValid;
         private string _connectionName;
         private ISsoDialogViewModel _ssoDialog;
@@ -142,11 +143,23 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool SsoEnabledOnTarget
         {
-            get { return _ssoEnabled; }
+            get => _ssoEnabled;
+
             private set
             {
                 _ssoEnabled = value;
                 RaisePropertyChangedEvent("SsoEnabledOnTarget");
+            }
+        }
+
+        public bool VerifyingApiAddress
+        {
+            get => _verifyingApiAddress;
+
+            private set
+            {
+                _verifyingApiAddress = value;
+                RaisePropertyChangedEvent("VerifyingApiAddress");
             }
         }
 
@@ -156,7 +169,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool CanLogIn(object arg = null)
         {
-            return !(string.IsNullOrWhiteSpace(Target) || string.IsNullOrWhiteSpace(Username) || PasswordEmpty()) && VerifyApiAddress(Target);
+            return !(string.IsNullOrWhiteSpace(Target) || string.IsNullOrWhiteSpace(Username) || PasswordEmpty()) && ValidateApiAddress(Target);
         }
 
         public bool CanOpenSsoDialog(object arg = null)
@@ -168,7 +181,7 @@ namespace Tanzu.Toolkit.ViewModels
         {
             HasErrors = false;
 
-            if (!VerifyApiAddress(Target))
+            if (!ValidateApiAddress(Target))
             {
                 return;
             }
@@ -210,7 +223,7 @@ namespace Tanzu.Toolkit.ViewModels
             _tasExplorer.SetConnection(new CloudFoundryInstance(name, Target));
         }
 
-        public bool VerifyApiAddress(string apiAddress)
+        public bool ValidateApiAddress(string apiAddress)
         {
             if (string.IsNullOrWhiteSpace(apiAddress))
             {
@@ -263,11 +276,26 @@ namespace Tanzu.Toolkit.ViewModels
 
         public async Task NavigateToAuthPage(object arg = null)
         {
+            VerifyingApiAddress = true;
+
             var ssoPromptResult = await CloudFoundryService.GetSsoPrompt(Target);
 
-            SsoEnabledOnTarget = ssoPromptResult.Succeeded;
+            if (!ssoPromptResult.Succeeded && ssoPromptResult.FailureType != Toolkit.Services.FailureType.MissingSsoPrompt)
+            {
+                ApiAddressError = $"Unable to establish a connection with ${Target}";
 
-            PageNum = 2;
+                ApiAddressIsValid = false;
+
+                // do not navigate to authentication page
+            }
+            else // either prompt request suceeded or request failed specifically because SSO not enabled
+            {
+                SsoEnabledOnTarget = ssoPromptResult.Succeeded;
+
+                PageNum = 2; // navigate to auth page even if sso not enabled
+            }
+
+            VerifyingApiAddress = false;
         }
 
         public void NavigateToTargetPage(object arg = null)
@@ -279,5 +307,6 @@ namespace Tanzu.Toolkit.ViewModels
         {
             return ApiAddressIsValid && !string.IsNullOrWhiteSpace(Target);
         }
+
     }
 }

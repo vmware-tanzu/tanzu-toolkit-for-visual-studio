@@ -14,7 +14,7 @@
     Icon="Resources/AddCloud.png"
     Width="500"
     xmlns:toolkit="clr-namespace:Community.VisualStudio.Toolkit;assembly=Community.VisualStudio.Toolkit"
-    xmlns:converters="clr-namespace:Tanzu.Toolkit.VisualStudio.Views.Converters"
+    xmlns:converters="clr-namespace:Tanzu.Toolkit.VisualStudio.Views.Converters" xmlns:views="clr-namespace:Tanzu.Toolkit.VisualStudio.Views"
     toolkit:Themes.UseVsTheme="True"
     HasDialogFrame="False">
 
@@ -59,18 +59,21 @@
                 Margin="4"/>
         </StackPanel>
 
-        <StackPanel Name="TargetPrompt"
+        <StackPanel Name="Page1"
                     Visibility="{Binding PageNum, Converter={StaticResource Page1Displayer}}"
                     Margin="52,0">
 
             <Label Content="API Address"/>
 
-            <Grid>
+            <Grid Name="TargetFields">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
@@ -113,23 +116,13 @@
                     Grid.Row="1"
                     Visibility="{Binding Path=ApiAddressIsValid, Converter={StaticResource InverseCollapsedVisibility}}"/>
 
-            </Grid>
-
-            <Label Content="Connection Name"/>
-
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+                <Label Content="Connection Name" Grid.Row="2"/>
 
                 <TextBox 
                     Name="tbConnectionName"
                     HorizontalAlignment="Stretch"
                     Width="auto"
+                    Grid.Row="3"
                     Text="{ Binding Path=ConnectionName }"/>
 
                 <TextBlock
@@ -140,7 +133,7 @@
                         Margin="8,0"
                         Foreground="DarkGray"
                         Grid.Column="0"
-                        Grid.Row="0">
+                        Grid.Row="3">
                     <TextBlock.Style>
                         <Style TargetType="{x:Type TextBlock}">
                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -154,7 +147,7 @@
                 </TextBlock>
             </Grid>
 
-            <Grid>
+            <Grid Name="Page1Buttons" Margin="0,8,0,8">
                 <StackPanel
                     Orientation="Horizontal"
                     Margin="0,8"
@@ -167,7 +160,16 @@
                         Margin="4"
                         Padding="4,0"
                         HorizontalAlignment="Right"
+                        Visibility="{Binding VerifyingApiAddress, Converter={StaticResource InverseCollapsedVisibility}}"
                         Command="{Binding ElementName=LoginViewElement, Path=IncrementPageCommand}"/>
+                    
+                    <Button
+                        Content="Verifying..."
+                        IsEnabled="False"
+                        Margin="4"
+                        Padding="4,0"
+                        HorizontalAlignment="Right"
+                        Visibility="{Binding VerifyingApiAddress, Converter={StaticResource CollapsedVisibility}}"/>
                 </StackPanel>
 
                 <StackPanel
@@ -182,10 +184,11 @@
                         Click="Close"
                         Content="Cancel"/>
                 </StackPanel>
+
             </Grid>
         </StackPanel>
 
-        <StackPanel Name="AuthPrompt"
+        <StackPanel Name="Page2"
                     Visibility="{Binding PageNum, Converter={StaticResource Page2Displayer}}"
                     Margin="52,0">
 
@@ -235,7 +238,7 @@
                     Text="or"
                     Grid.Column="1"
                     Grid.Row="0"
-                    Margin="8"
+                    Margin="8,8,8,8"
                     HorizontalAlignment="Center"/>
 
                 <Separator Grid.Column="2" Grid.Row="0"/>
@@ -248,25 +251,28 @@
                     Command="{Binding ElementName=LoginViewElement, Path=SsoCommand}"/>
             </Grid>
 
-            <Grid>
+
+            <Grid Name="Page2Buttons" Margin="0,8,0,8">
                 <StackPanel
                     Orientation="Horizontal"
-                    Margin="12"
+                    Margin="0,8"
                     Height="auto"
                     HorizontalAlignment="Right">
 
                     <Button
                         Content="Log In"
+                        IsEnabled="{Binding ApiAddressIsValid}"
                         Margin="4"
                         Padding="4,0"
                         HorizontalAlignment="Right"
                         Command="{ Binding ElementName=LoginViewElement, Path=AddCloudCommand }" 
                         CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
+
                 </StackPanel>
 
                 <StackPanel
                     Orientation="Horizontal"
-                    Margin="12"
+                    Margin="0,8"
                     Height="auto"
                     HorizontalAlignment="Left">
 
@@ -276,7 +282,9 @@
                         Command="{Binding ElementName=LoginViewElement, Path=DecrementPageCommand}"
                         Content="Back"/>
                 </StackPanel>
+
             </Grid>
+
         </StackPanel>
     </StackPanel>
 </ui:DialogWindow>

@@ -113,7 +113,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsNotNull(_sut.Target);
             Assert.IsNotNull(_sut.Username);
             Assert.IsFalse(_sut.PasswordEmpty());
-            Assert.IsTrue(_sut.VerifyApiAddress(_sut.Target));
+            Assert.IsTrue(_sut.ValidateApiAddress(_sut.Target));
 
             Assert.IsTrue(_sut.CanLogIn());
         }
@@ -132,7 +132,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsTrue(string.IsNullOrWhiteSpace(_sut.Target));
             Assert.IsNotNull(_sut.Username);
             Assert.IsFalse(_sut.PasswordEmpty());
-            Assert.IsFalse(_sut.VerifyApiAddress(_sut.Target));
+            Assert.IsFalse(_sut.ValidateApiAddress(_sut.Target));
 
             Assert.IsFalse(_sut.CanLogIn());
         }
@@ -147,7 +147,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.Target = invalidTargetApiAddress;
 
             Assert.IsNotNull(_sut.ConnectionName);
-            Assert.IsFalse(_sut.VerifyApiAddress(_sut.Target));
+            Assert.IsFalse(_sut.ValidateApiAddress(_sut.Target));
             Assert.IsNotNull(_sut.Username);
             Assert.IsFalse(_sut.PasswordEmpty());
 
@@ -168,7 +168,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsNotNull(_sut.Target);
             Assert.IsTrue(string.IsNullOrWhiteSpace(_sut.Username));
             Assert.IsFalse(_sut.PasswordEmpty());
-            Assert.IsTrue(_sut.VerifyApiAddress(_sut.Target));
+            Assert.IsTrue(_sut.ValidateApiAddress(_sut.Target));
 
             Assert.IsFalse(_sut.CanLogIn());
         }
@@ -184,7 +184,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsNotNull(_sut.Target);
             Assert.IsNotNull(_sut.Username);
             Assert.IsTrue(_sut.PasswordEmpty());
-            Assert.IsTrue(_sut.VerifyApiAddress(_sut.Target));
+            Assert.IsTrue(_sut.ValidateApiAddress(_sut.Target));
 
             Assert.IsFalse(_sut.CanLogIn());
         }
@@ -200,7 +200,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [DataRow("https://my.cool.url", true, null)]
         public void VerifyApiAddress_SetsApiAddressIsValid_AndSetsApiAddressError(string apiAddr, bool expectedValidity, string expectedError)
         {
-            _sut.VerifyApiAddress(apiAddr);
+            _sut.ValidateApiAddress(apiAddr);
             Assert.AreEqual(expectedValidity, _sut.ApiAddressIsValid);
             Assert.AreEqual(expectedError, _sut.ApiAddressError);
             Assert.IsTrue(_receivedEvents.Contains("ApiAddressIsValid"));

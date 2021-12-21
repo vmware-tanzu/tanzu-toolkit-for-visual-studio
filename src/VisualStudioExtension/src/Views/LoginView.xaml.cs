@@ -66,7 +66,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         private void TbUrl_LostFocus(object sender, RoutedEventArgs e)
         {
-            _viewModel.VerifyApiAddress(tbUrl.Text);
+            _viewModel.ValidateApiAddress(tbUrl.Text);
         }
 
     }
