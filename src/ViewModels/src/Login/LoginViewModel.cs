@@ -18,8 +18,7 @@ namespace Tanzu.Toolkit.ViewModels
         private string _errorMessage;
         private string _apiAddressError;
         private int _currentPageNum = 1;
-        private int _minPageNum = 1;
-        private int _maxPageNum = 2;
+        private bool _ssoEnabled = false;
         private bool _apiAddressIsValid;
         private string _connectionName;
         private ISsoDialogViewModel _ssoDialog;
@@ -141,6 +140,16 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
+        public bool SsoEnabledOnTarget
+        {
+            get { return _ssoEnabled; }
+            private set
+            {
+                _ssoEnabled = value;
+                RaisePropertyChangedEvent("SsoEnabledOnTarget");
+            }
+        }
+
         public Func<SecureString> GetPassword { get; set; }
 
         public Func<bool> PasswordEmpty { get; set; }
@@ -252,20 +261,18 @@ namespace Tanzu.Toolkit.ViewModels
             DialogService.CloseDialogByName(nameof(LoginViewModel));
         }
 
-        public void IncrementPageNum(object arg = null)
+        public async Task NavigateToAuthPage(object arg = null)
         {
-            if (PageNum < _maxPageNum)
-            {
-                PageNum += 1;
-            }
+            var ssoPromptResult = await CloudFoundryService.GetSsoPrompt(Target);
+
+            SsoEnabledOnTarget = ssoPromptResult.Succeeded;
+
+            PageNum = 2;
         }
 
-        public void DecrementPageNum(object arg = null)
+        public void NavigateToTargetPage(object arg = null)
         {
-            if (PageNum > _minPageNum)
-            {
-                PageNum -= 1;
-            }
+            PageNum = 1;
         }
 
         public bool CanProceedToAuthentication(object arg = null)

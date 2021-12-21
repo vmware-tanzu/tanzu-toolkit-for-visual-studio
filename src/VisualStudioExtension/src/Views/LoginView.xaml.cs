@@ -29,8 +29,8 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
             AddCloudCommand = new AsyncDelegatingCommand(viewModel.LogIn, viewModel.CanLogIn);
             SsoCommand = new AsyncDelegatingCommand(viewModel.OpenSsoDialog, viewModel.CanOpenSsoDialog);
-            IncrementPageCommand = new DelegatingCommand(viewModel.IncrementPageNum, viewModel.CanProceedToAuthentication);
-            DecrementPageCommand = new DelegatingCommand(viewModel.DecrementPageNum, alwaysTrue);
+            IncrementPageCommand = new AsyncDelegatingCommand(viewModel.NavigateToAuthPage, viewModel.CanProceedToAuthentication);
+            DecrementPageCommand = new DelegatingCommand(viewModel.NavigateToTargetPage, alwaysTrue);
 
             viewModel.GetPassword = GetPassword;
             viewModel.PasswordEmpty = PasswordBoxEmpty;
