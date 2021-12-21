@@ -46,5 +46,6 @@ namespace Tanzu.Toolkit.Services
     {
         None = 0,
         InvalidRefreshToken = 1,
+        MissingSsoPrompt = 2,
     }
 }
