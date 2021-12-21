@@ -132,7 +132,13 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                     };
                 }
 
-                throw new Exception($"Unable to determine SSO URL.");
+                return new DetailedResult<string>
+                {
+                    Succeeded = false,
+                    Content = null,
+                    Explanation = "Unable to determine SSO URL.",
+                    FailureType = FailureType.MissingSsoPrompt,
+                };
             }
             catch (Exception ex)
             {
