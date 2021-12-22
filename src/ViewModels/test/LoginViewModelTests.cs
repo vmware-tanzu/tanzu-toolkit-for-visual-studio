@@ -328,5 +328,71 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             MockDialogService.Verify(m => m.CloseDialogByName(nameof(LoginViewModel), null), Times.Once);
         }
+
+        [TestMethod]
+        [TestCategory("NavigateToAuthPage")]
+        public async Task NavigateToAuthPage_SetsPageNumberTo2_AndSetsSsoEnabledOnTargetToTrue_WhenSsoPromptSuccessfullyRetrieved()
+        {
+            var fakeSsoPrompt = "junk";
+
+            var fakeSsoPromptResult = new DetailedResult<string>
+            {
+                Succeeded = true,
+                Content = fakeSsoPrompt,
+            };
+
+            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.Target))
+                .ReturnsAsync(fakeSsoPromptResult);
+
+            Assert.AreEqual(1, _sut.PageNum);
+
+            await _sut.NavigateToAuthPage();
+
+            Assert.AreEqual(2, _sut.PageNum);
+            Assert.IsTrue(_sut.SsoEnabledOnTarget);
+        }
+
+        [TestMethod]
+        [TestCategory("NavigateToAuthPage")]
+        public async Task NavigateToAuthPage_SetsPageNumberTo2_AndSetsSsoEnabledOnTargetToFalse_WhenSsoPromptAbsentFromResponse()
+        {
+            var fakeSsoPromptResult = new DetailedResult<string>
+            {
+                Succeeded = false,
+                FailureType = FailureType.MissingSsoPrompt,
+            };
+
+            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.Target))
+                .ReturnsAsync(fakeSsoPromptResult);
+
+            Assert.AreEqual(1, _sut.PageNum);
+
+            await _sut.NavigateToAuthPage();
+
+            Assert.AreEqual(2, _sut.PageNum);
+            Assert.IsFalse(_sut.SsoEnabledOnTarget);
+        }
+
+        [TestMethod]
+        [TestCategory("NavigateToAuthPage")]
+        public async Task NavigateToAuthPage_DoesNotChangePageNumber_AndSetsApiAddressError_WhenSsoPromptRequestFails()
+        {
+            var fakeSsoPromptResult = new DetailedResult<string>
+            {
+                Succeeded = false,
+                FailureType = FailureType.None,
+            };
+
+            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.Target))
+                .ReturnsAsync(fakeSsoPromptResult);
+
+            Assert.AreEqual(1, _sut.PageNum);
+
+            await _sut.NavigateToAuthPage();
+
+            Assert.AreEqual(1, _sut.PageNum);
+            Assert.IsFalse(_sut.ApiAddressIsValid);
+            Assert.AreEqual($"Unable to establish a connection with ${_sut.Target}", _sut.ApiAddressError);
+        }
     }
 }
