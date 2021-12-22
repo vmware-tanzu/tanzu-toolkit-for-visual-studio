@@ -2105,5 +2105,33 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.AreEqual("Unable to determine SSO URL.", result.Explanation);
             Assert.IsNull(result.Content);
         }
+
+        [TestMethod]
+        [TestCategory("LoginWithSsoPasscode")]
+        public async Task LoginWithSsoPasscode_ReturnsSuccessfulResult_WhenLoginSucceeds()
+        {
+            var fakePasscode = "fake sso passcode!";
+
+            _mockCfCliService.Setup(m => m.LoginWithSsoPasscode(_fakeValidTarget, fakePasscode))
+                .ReturnsAsync(_fakeSuccessDetailedResult);
+
+            var result = await _sut.LoginWithSsoPasscode(_fakeValidTarget, fakePasscode);
+
+            Assert.AreEqual(_fakeSuccessDetailedResult, result);
+        }
+
+        [TestMethod]
+        [TestCategory("LoginWithSsoPasscode")]
+        public async Task LoginWithSsoPasscode_ReturnsFailedResult_WhenLoginFails()
+        {
+            var fakePasscode = "fake sso passcode!";
+
+            _mockCfCliService.Setup(m => m.LoginWithSsoPasscode(_fakeValidTarget, fakePasscode))
+                .ReturnsAsync(_fakeFailureDetailedResult);
+
+            var result = await _sut.LoginWithSsoPasscode(_fakeValidTarget, fakePasscode);
+
+            Assert.AreEqual(_fakeFailureDetailedResult, result);
+        }
     }
 }
