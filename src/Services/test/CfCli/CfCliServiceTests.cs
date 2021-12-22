@@ -820,7 +820,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             Assert.IsNull(result.CmdResult);
             Assert.AreEqual("Unable to locate cf.exe.", result.Explanation);
         }
-        
+
         [TestCategory("PushApp")]
         public async Task PushAppAsync_ReturnsFailureResult_WhenManifestCannotBeFound()
         {
@@ -840,7 +840,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             string expectedArgs = $"push -f \"{_fakeManifestPath}\""; // ensure manifest path gets surrounded by quotes
             var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
             var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
-            
+
             _mockFileService.Setup(m => m.FileExists(_fakeManifestPath)).Returns(true);
 
             _mockCommandProcessService.Setup(m => m.
@@ -864,7 +864,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             string expectedArgs = $"push -f \"{_fakeManifestPath}\""; // ensure manifest path gets surrounded by quotes
             var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
             var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
-            
+
             _mockFileService.Setup(m => m.FileExists(_fakeManifestPath)).Returns(true);
 
             _mockCommandProcessService.Setup(m => m.
@@ -932,7 +932,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             _mockCommandProcessService.Setup(m => m.
               RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeSuccessCmdResult);
-            
+
             _mockCommandProcessService.Setup(m => m.
                 RunExecutable(_fakePathToCfExe, expectedArgs, _fakeProjectPath, _defaultEnvVars, _fakeOutCallback, _fakeErrCallback, null))
                     .Returns(mockFailedResult);
@@ -1304,6 +1304,42 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
 
             Assert.IsNotNull(thrownException);
             Assert.IsTrue(thrownException is InvalidRefreshTokenException);
+        }
+
+        [TestMethod]
+        [TestCategory("LoginWithSsoPasscode")]
+        public async Task LoginWithSsoPasscode_ReturnsSuccessResult_WhenLoginCommandSucceeds()
+        {
+            const string fakePasscode = "fake sso passcode";
+            string expectedArgs = $"login -a \"{_fakeValidTarget}\" --sso-passcode \"{fakePasscode}\"";
+            var expectedProcessCancelTriggers = new List<string> { "OK", "Invalid passcode" };
+
+            _mockCommandProcessService.Setup(m => m.
+              RunExecutable(_fakePathToCfExe, expectedArgs, It.IsAny<string>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), expectedProcessCancelTriggers))
+                .Returns(_fakeSuccessCmdResult);
+
+            var result = await _sut.LoginWithSsoPasscode(_fakeValidTarget, fakePasscode);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+        }
+
+        [TestMethod]
+        [TestCategory("LoginWithSsoPasscode")]
+        public async Task LoginWithSsoPasscode_ReturnsFailureResult_WhenLoginCommandFails()
+        {
+            const string fakePasscode = "fake sso passcode";
+            string expectedArgs = $"login -a \"{_fakeValidTarget}\" --sso-passcode \"{fakePasscode}\"";
+            var expectedProcessCancelTriggers = new List<string> { "OK", "Invalid passcode" };
+
+            _mockCommandProcessService.Setup(m => m.
+              RunExecutable(_fakePathToCfExe, expectedArgs, It.IsAny<string>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), expectedProcessCancelTriggers))
+                .Returns(_fakeFailureCmdResult);
+
+            var result = await _sut.LoginWithSsoPasscode(_fakeValidTarget, fakePasscode);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual(_fakeFailureCmdResult.StdErr, result.Explanation);
         }
     }
 }
