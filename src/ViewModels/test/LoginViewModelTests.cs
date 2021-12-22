@@ -407,5 +407,38 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.AreEqual(1, _sut.PageNum);
         }
+
+        [TestMethod]
+        [TestCategory("CanProceedToAuthentication")]
+        [DataRow("https://some.legit.address")]
+        [DataRow("http://my.cool.api")]
+        public void CanProceedToAuthentication_ReturnsTrue(string targetApiAddress)
+        {
+            _sut.Target = targetApiAddress;
+
+            Assert.IsTrue(_sut.CanProceedToAuthentication());
+        }
+
+        [TestMethod]
+        [TestCategory("CanProceedToAuthentication")]
+        [DataRow("")]
+        [DataRow(" ")]
+        [DataRow(null)]
+        public void CanProceedToAuthentication_ReturnsFalse(string targetApiAddress)
+        {
+            _sut.Target = targetApiAddress;
+
+            Assert.IsFalse(_sut.CanProceedToAuthentication());
+        }
+
+        [TestMethod]
+        [TestCategory("CanProceedToAuthentication")]
+        public void CanProceedToAuthentication_ReturnsFalse_WhenApiAddressIsValidMarkedAsFalse()
+        {
+            _sut.Target = "https://some.legit.address";
+            _sut.ApiAddressIsValid = false;
+
+            Assert.IsFalse(_sut.CanProceedToAuthentication());
+        }
     }
 }
