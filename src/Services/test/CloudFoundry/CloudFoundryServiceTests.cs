@@ -1725,7 +1725,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNull(appManifest.Applications[0].Path); // ensure manifest app path null
 
             _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
-            
+
             _mockFileService.Setup(mock => mock.GetUniquePathForTempFile(It.IsAny<string>())).Returns(_fakeManifestPath);
 
             _mockCfCliService.Setup(mock =>
@@ -2045,5 +2045,65 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
         }
 
+        [TestMethod]
+        [TestCategory("GetSsoPrompt")]
+        public async Task GetSsoPrompt_ReturnsSuccessfulResult_WhenLoginServerInfoRequestSucceeds()
+        {
+            var fakePasscode = "fake sso passcode";
+            var fakeLoginInfoResponse = new LoginInfoResponse
+            {
+                Prompts = new Dictionary<string, string[]>
+                {
+                    { CloudFoundryService.CfApiSsoPromptKey, new[] {"fake content type", fakePasscode}}
+                }
+            };
+
+            _mockCfApiClient.Setup(m => m.GetLoginServerInformation(_fakeValidTarget))
+                .ReturnsAsync(fakeLoginInfoResponse);
+
+            var result = await _sut.GetSsoPrompt(_fakeValidTarget);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.AreEqual(fakePasscode, result.Content);
+        }
+
+        [TestMethod]
+        [TestCategory("GetSsoPrompt")]
+        public async Task GetSsoPrompt_ReturnsFailedResult_WhenLoginServerInfoRequestThrowsException()
+        {
+            var fakeLoginInfoRequestFailure = new Exception("Pretending something went wrong while looking up login server info");
+
+            _mockCfApiClient.Setup(m => m.GetLoginServerInformation(_fakeValidTarget))
+                .Throws(fakeLoginInfoRequestFailure);
+
+            var result = await _sut.GetSsoPrompt(_fakeValidTarget);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual(fakeLoginInfoRequestFailure.Message, result.Explanation);
+            Assert.IsNull(result.Content);
+        }
+
+        [TestMethod]
+        [TestCategory("GetSsoPrompt")]
+        public async Task GetSsoPrompt_ReturnsFailedResult_WhenLoginServerInfoDoesNotContainSsoPromptKey()
+        {
+            var fakeLoginInfoResponse = new LoginInfoResponse
+            {
+                Prompts = new Dictionary<string, string[]>
+                {
+                    { "some irrelevant key", new[] {"fake content type", "some content"}}
+                }
+            };
+
+            _mockCfApiClient.Setup(m => m.GetLoginServerInformation(_fakeValidTarget))
+                .ReturnsAsync(fakeLoginInfoResponse);
+
+            var result = await _sut.GetSsoPrompt(_fakeValidTarget);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual("Unable to determine SSO URL.", result.Explanation);
+            Assert.IsNull(result.Content);
+        }
     }
 }
