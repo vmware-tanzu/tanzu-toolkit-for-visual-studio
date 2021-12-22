@@ -236,5 +236,43 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             MockTasExplorerViewModel.Verify(m => m.SetConnection(It.Is<CloudFoundryInstance>(cf => cf.InstanceName == expectedTasConnectionName && cf.ApiAddress == apiAddressFromDialog)), Times.Once);
         }
+
+        [TestMethod]
+        [TestCategory("CanOpenSsoDialog")]
+        [DataRow("http://some.api.address")]
+        [DataRow("https://some.api.address")]
+        public void CanOpenSsoDialog_ReturnsTrue_WhenTargetApiAddressIsValid(string targetApiAddress)
+        {
+            _sut.Target = targetApiAddress;
+
+            _sut.ApiAddressIsValid = true;
+
+            Assert.IsTrue(_sut.CanOpenSsoDialog());
+        }
+
+        [TestMethod]
+        [TestCategory("CanOpenSsoDialog")]
+        [DataRow(null)]
+        [DataRow("")]
+        [DataRow(" ")]
+        public void CanOpenSsoDialog_ReturnsFalse_WhenTargetApiAddressIsNullOrWhitespace(string targetApiAddress)
+        {
+            _sut.Target = targetApiAddress;
+
+            _sut.ApiAddressIsValid = true;
+
+            Assert.IsFalse(_sut.CanOpenSsoDialog());
+        }
+
+        [TestMethod]
+        [TestCategory("CanOpenSsoDialog")]
+        public void CanOpenSsoDialog_ReturnsFalse_WhenTargetApiAddressIsInvalid()
+        {
+            _sut.Target = "junk";
+
+            _sut.ApiAddressIsValid = false;
+
+            Assert.IsFalse(_sut.CanOpenSsoDialog());
+        }
     }
 }
