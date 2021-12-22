@@ -37,6 +37,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         protected Mock<ISerializationService> MockSerializationService { get; set; }
         protected Mock<IDataPersistenceService> MockDataPersistenceService { get; set; }
         protected Mock<ISsoDialogViewModel> MockSsoViewModel { get; set; }
+        protected Mock<ILoginViewModel> MockLoginViewModel { get; set; }
 
         protected const string FakeCfName = "fake cf name";
         protected const string FakeCfApiAddress = "http://fake.api.address";
@@ -208,6 +209,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockSerializationService = new Mock<ISerializationService>();
             MockDataPersistenceService = new Mock<IDataPersistenceService>();
             MockSsoViewModel = new Mock<ISsoDialogViewModel>();
+            MockLoginViewModel = new Mock<ILoginViewModel>();
 
             MockLogger = new Mock<ILogger>();
             MockLoggingService.SetupGet(m => m.Logger).Returns(MockLogger.Object);
@@ -224,6 +226,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             services.AddSingleton(MockSerializationService.Object);
             services.AddSingleton(MockDataPersistenceService.Object);
             services.AddSingleton(MockSsoViewModel.Object);
+            services.AddSingleton(MockLoginViewModel.Object);
 
             Services = services.BuildServiceProvider();
         }
