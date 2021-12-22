@@ -11,7 +11,7 @@ namespace Tanzu.Toolkit.ViewModels.SsoDialog
         private string _errorMessage;
         private string _apiAddress;
 
-        private ILoginViewModel _loginViewModel;
+        internal ILoginViewModel _loginViewModel;
 
         public SsoDialogViewModel(IServiceProvider services) : base(services)
         {
