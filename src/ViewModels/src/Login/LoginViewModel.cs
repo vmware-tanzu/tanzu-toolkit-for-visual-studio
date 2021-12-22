@@ -253,7 +253,6 @@ namespace Tanzu.Toolkit.ViewModels
             if (string.IsNullOrWhiteSpace(Target))
             {
                 ErrorMessage = "Must specify an API address to log in via SSO.";
-                HasErrors = true;
             }
             else
             {
