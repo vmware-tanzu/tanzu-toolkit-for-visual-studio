@@ -3,10 +3,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security;
-using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Services.CommandProcess;
 using Tanzu.Toolkit.Services.File;
@@ -438,7 +435,6 @@ namespace Tanzu.Toolkit.Services.CfCli
 
             return new DetailedResult(false, reason, cmdResult: result);
         }
-
         
         
         /// <summary>
