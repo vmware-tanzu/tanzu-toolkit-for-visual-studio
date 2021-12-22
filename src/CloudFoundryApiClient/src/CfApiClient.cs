@@ -346,16 +346,16 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
 
             var response = await _httpClient.SendAsync(request);
 
-            if (response.StatusCode == HttpStatusCode.OK)
+            if (response.StatusCode != HttpStatusCode.OK)
             {
-                var jsonContent = await response.Content.ReadAsStringAsync();
-
-                var deserializedResponse = JsonConvert.DeserializeObject<LoginInfoResponse>(jsonContent);
-                
-                return deserializedResponse;
+                throw new Exception($"Request for login server information was unsuccessful; request to {request.Method} {request.RequestUri} received {response.StatusCode}");
             }
 
-            return null;
+            var jsonContent = await response.Content.ReadAsStringAsync();
+
+            var deserializedResponse = JsonConvert.DeserializeObject<LoginInfoResponse>(jsonContent);
+
+            return deserializedResponse;
         }
 
         private async Task<Uri> GetAuthServerUriFromCfTarget(string cfApiAddress)
