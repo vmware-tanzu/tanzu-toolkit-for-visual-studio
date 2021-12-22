@@ -5,6 +5,7 @@ using RichardSzalay.MockHttp;
 using System;
 using System.Net;
 using System.Threading.Tasks;
+using Tanzu.Toolkit.CloudFoundryApiClient.Models;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.Token;
 
@@ -22,6 +23,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         {
             _mockHttp = new MockHttpMessageHandler();
             _mockHttp.Fallback.Throw(new InvalidOperationException("No matching mock handler"));
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
         }
 
         [TestCleanup]
@@ -657,6 +660,124 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 
             Assert.IsNotNull(expectedException);
             Assert.AreEqual(1, _mockHttp.GetMatchCount(buildpacksRequest));
+        }
+
+        [TestMethod]
+        [TestCategory("GetLoginServerInformation")]
+        public async Task GetLoginServerInformation_ReturnsLoginInfoResponse_WhenRequestsSucceed()
+        {
+            Exception thrownException = null;
+
+            Assert.IsTrue(_fakeBasicInfoJsonResponse.Contains(_fakeLoginAddress));
+
+            var fakeLoginServerInfo = new LoginInfoResponse
+            {
+                Prompts = new System.Collections.Generic.Dictionary<string, string[]>
+                {
+                    { "username", new[] {"text", "Email" } },
+                    { "password", new[] {"password", "Password" } },
+                }
+            };
+
+            MockedRequest cfBasicInfoRequest = _mockHttp.Expect(_fakeCfApiAddress + "/")
+               .Respond("application/json", _fakeBasicInfoJsonResponse);
+
+            MockedRequest loginServerInfoRequest = _mockHttp.Expect(_fakeLoginAddress + "/login")
+               .Respond("application/json", JsonConvert.SerializeObject(fakeLoginServerInfo));
+
+            try
+            {
+                var result = await _sut.GetLoginServerInformation(_fakeCfApiAddress);
+            }
+            catch (Exception ex)
+            {
+                thrownException = ex;
+            }
+
+            Assert.IsNull(thrownException);
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(cfBasicInfoRequest));
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(loginServerInfoRequest));
+        }
+
+        [TestMethod]
+        [TestCategory("GetLoginServerInformation")]
+        public async Task GetLoginServerInformation_ThrowsException_WhenAuthServerAddressLookupFails()
+        {
+            Exception thrownException = null;
+
+            var expectedException = new Exception("Pretending auth server could not be identified");
+
+            MockedRequest cfBasicInfoRequest = _mockHttp.Expect(_fakeCfApiAddress + "/")
+               .Throw(expectedException);
+
+            try
+            {
+                var result = await _sut.GetLoginServerInformation(_fakeCfApiAddress);
+            }
+            catch (Exception ex)
+            {
+                thrownException = ex;
+            }
+
+            Assert.IsNotNull(thrownException);
+            Assert.AreEqual(expectedException, thrownException);
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(cfBasicInfoRequest));
+        }
+
+        [TestMethod]
+        [TestCategory("GetLoginServerInformation")]
+        public async Task GetLoginServerInformation_ThrowsException_WhenJsonResponseParsingFails()
+        {
+            Exception thrownException = null;
+
+            MockedRequest cfBasicInfoRequest = _mockHttp.Expect(_fakeCfApiAddress + "/")
+               .Respond("application/json", _fakeBasicInfoJsonResponse);
+
+            MockedRequest loginServerInfoRequest = _mockHttp.Expect(_fakeLoginAddress + "/login")
+               .Respond("application/json", "this is fake response content that cannot be parsed as JSON! :)");
+
+            try
+            {
+                var result = await _sut.GetLoginServerInformation(_fakeCfApiAddress);
+            }
+            catch (Exception ex)
+            {
+                thrownException = ex;
+            }
+
+            Assert.IsNotNull(thrownException);
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(cfBasicInfoRequest));
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(loginServerInfoRequest));
+        }
+
+        [TestMethod]
+        [TestCategory("GetLoginServerInformation")]
+        public async Task GetLoginServerInformation_ThrowsException_WhenInfoRequestStatusCodeIsNotASuccess()
+        {
+            Exception thrownException = null;
+
+            MockedRequest cfBasicInfoRequest = _mockHttp.Expect(_fakeCfApiAddress + "/")
+               .Respond("application/json", _fakeBasicInfoJsonResponse);
+
+            MockedRequest loginServerInfoRequest = _mockHttp.Expect(_fakeLoginAddress + "/login")
+                .Respond(HttpStatusCode.Unauthorized);
+
+            try
+            {
+                var result = await _sut.GetLoginServerInformation(_fakeCfApiAddress);
+            }
+            catch (Exception ex)
+            {
+                thrownException = ex;
+            }
+
+            Assert.IsNotNull(thrownException);
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(cfBasicInfoRequest));
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(loginServerInfoRequest));
         }
     }
 }
