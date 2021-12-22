@@ -5,6 +5,7 @@ using System.Net;
 using System.Security;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
+using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CloudFoundry;
 
 namespace Tanzu.Toolkit.ViewModels.Tests
@@ -273,6 +274,50 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.ApiAddressIsValid = false;
 
             Assert.IsFalse(_sut.CanOpenSsoDialog());
+        }
+
+        [TestMethod]
+        [TestCategory("OpenSsoDialog")]
+        [DataRow(null)]
+        [DataRow("")]
+        [DataRow(" ")]
+        public async Task OpenSsoDialog_SetsErrorMessage_WhenTargetApiAddressIsNullOrWhitespace(string targetApiAddress)
+        {
+            _sut.Target = targetApiAddress;
+
+            Assert.IsFalse(_sut.HasErrors);
+            Assert.IsNull(_sut.ErrorMessage);
+
+            await _sut.OpenSsoDialog();
+
+            Assert.IsTrue(_sut.HasErrors);
+            Assert.IsNotNull(_sut.ErrorMessage);
+            Assert.IsTrue(_sut.ErrorMessage.Contains("Must specify an API address to log in via SSO"));
+        }
+
+        [TestMethod]
+        [TestCategory("OpenSsoDialog")]
+        public async Task OpenSsoDialog_ShowsSsoDialog_WhenSsoPromptRequestSucceeds()
+        {
+            var fakeTargetApiAddress = "junk";
+            var fakeSsoPrompt = "some prompt that shows sso url";
+
+            var fakeSsoPromptResponse = new DetailedResult<string>
+            {
+                Succeeded = true,
+                Content = fakeSsoPrompt,
+            };
+
+
+            _sut.Target = fakeTargetApiAddress;
+
+            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(fakeTargetApiAddress))
+                .ReturnsAsync(fakeSsoPromptResponse);
+
+            await _sut.OpenSsoDialog();
+
+            MockSsoViewModel.VerifySet(m => m.ApiAddress = fakeTargetApiAddress);
+            MockSsoViewModel.Verify(m => m.ShowWithPrompt(fakeSsoPrompt, _sut), Times.Once);
         }
     }
 }
