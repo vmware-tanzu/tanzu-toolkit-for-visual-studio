@@ -319,5 +319,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockSsoViewModel.VerifySet(m => m.ApiAddress = fakeTargetApiAddress);
             MockSsoViewModel.Verify(m => m.ShowWithPrompt(fakeSsoPrompt, _sut), Times.Once);
         }
+
+        [TestMethod]
+        [TestCategory("CloseDialog")]
+        public void CloseDialog_WrapsDialogServiceCloseDialogByName()
+        {
+            _sut.CloseDialog();
+
+            MockDialogService.Verify(m => m.CloseDialogByName(nameof(LoginViewModel), null), Times.Once);
+        }
     }
 }
