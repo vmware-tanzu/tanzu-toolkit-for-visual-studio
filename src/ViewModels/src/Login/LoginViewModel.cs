@@ -134,7 +134,7 @@ namespace Tanzu.Toolkit.ViewModels
         {
             get => _currentPageNum;
 
-            private set
+            internal set
             {
                 _currentPageNum = value;
                 RaisePropertyChangedEvent("PageNum");

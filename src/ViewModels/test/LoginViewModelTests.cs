@@ -394,5 +394,18 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsFalse(_sut.ApiAddressIsValid);
             Assert.AreEqual($"Unable to establish a connection with ${_sut.Target}", _sut.ApiAddressError);
         }
+
+        [TestMethod]
+        [TestCategory("NavigateToTargetPage")]
+        public void NavigateToTargetPage_SetsPageNumTo1()
+        {
+            _sut.PageNum = 1234;
+
+            Assert.AreNotEqual(1, _sut.PageNum);
+
+            _sut.NavigateToTargetPage();
+
+            Assert.AreEqual(1, _sut.PageNum);
+        }
     }
 }
