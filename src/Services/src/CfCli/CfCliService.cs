@@ -179,6 +179,11 @@ namespace Tanzu.Toolkit.Services.CfCli
             if (result == null || !result.Succeeded)
             {
                 _logger.Error($"TargetApi({apiAddress}, {skipSsl}) failed: {result}");
+
+                if (result.CmdResult.StdErr != null && result.CmdResult.StdErr.Contains("certificate has expired or is not yet valid"))
+                {
+                    result.FailureType = FailureType.InvalidCertificate;
+                }
             }
 
             return result;

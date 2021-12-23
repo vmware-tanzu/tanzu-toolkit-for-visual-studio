@@ -40,6 +40,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
             viewModel.GetPassword = GetPassword;
             viewModel.PasswordEmpty = PasswordBoxEmpty;
+            viewModel.ClearPassword = ClearPassword;
             DataContext = viewModel;
             _viewModel = viewModel;
             
@@ -53,6 +54,11 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         public SecureString GetPassword()
         {
             return pbPassword.SecurePassword;
+        }
+
+        public void ClearPassword()
+        {
+            pbPassword.Clear();
         }
 
         public bool PasswordBoxEmpty()

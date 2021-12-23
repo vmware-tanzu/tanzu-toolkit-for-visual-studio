@@ -14,6 +14,7 @@ namespace Tanzu.Toolkit.ViewModels
         string ErrorMessage { get; set; }
         Func<SecureString> GetPassword { get; set; }
         Func<bool> PasswordEmpty { get; set; }
+        Action ClearPassword { get; set; }
 
         Task LogIn(object arg);
         bool CanLogIn(object arg);
