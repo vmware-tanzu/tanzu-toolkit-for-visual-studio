@@ -81,8 +81,12 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         private void TbUrl_LostFocus(object sender, RoutedEventArgs e)
         {
-            _viewModel.ValidateApiAddress(tbUrl.Text);
         }
 
+        private void TbUrl_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            _viewModel.ValidateApiAddressFormat(tbUrl.Text);
+            _viewModel.ResetTargetDependentFields();
+        }
     }
 }

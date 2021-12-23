@@ -58,9 +58,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 _target = value;
 
-                // reset invalid cert warning when target api address changed
-                CertificateInvalid = false;
-                ProceedWithInvalidCertificate = false;
+                ResetTargetDependentFields();
 
                 RaisePropertyChangedEvent("Target");
             }
@@ -106,10 +104,8 @@ namespace Tanzu.Toolkit.ViewModels
             set
             {
                 _errorMessage = value;
-                if (!string.IsNullOrEmpty(value))
-                {
-                    HasErrors = true;
-                }
+                
+                HasErrors = !string.IsNullOrWhiteSpace(value);
 
                 RaisePropertyChangedEvent("ErrorMessage");
             }
@@ -202,7 +198,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool CanLogIn(object arg = null)
         {
-            return !(string.IsNullOrWhiteSpace(Target) || string.IsNullOrWhiteSpace(Username) || PasswordEmpty()) && ValidateApiAddress(Target);
+            return !(string.IsNullOrWhiteSpace(Target) || string.IsNullOrWhiteSpace(Username) || PasswordEmpty()) && ValidateApiAddressFormat(Target);
         }
 
         public bool CanOpenSsoDialog(object arg = null)
@@ -214,7 +210,7 @@ namespace Tanzu.Toolkit.ViewModels
         {
             HasErrors = false;
 
-            if (!ValidateApiAddress(Target))
+            if (!ValidateApiAddressFormat(Target))
             {
                 return;
             }
@@ -262,28 +258,21 @@ namespace Tanzu.Toolkit.ViewModels
             _tasExplorer.SetConnection(new CloudFoundryInstance(name, Target));
         }
 
-        public bool ValidateApiAddress(string apiAddress)
+        public bool ValidateApiAddressFormat(string apiAddress)
         {
-            if (string.IsNullOrWhiteSpace(apiAddress))
-            {
-                ApiAddressError = TargetEmptyMessage;
-                ApiAddressIsValid = false;
-
-                return false;
-            }
-            else if (!Uri.IsWellFormedUriString(apiAddress, UriKind.Absolute))
-            {
-                ApiAddressError = TargetInvalidFormatMessage;
-                ApiAddressIsValid = false;
-
-                return false;
-            }
-            else
+            if (Uri.IsWellFormedUriString(apiAddress, UriKind.Absolute) || string.IsNullOrWhiteSpace(apiAddress))
             {
                 ApiAddressError = null;
                 ApiAddressIsValid = true;
 
                 return true;
+            }
+            else
+            {
+                ApiAddressError = TargetInvalidFormatMessage;
+                ApiAddressIsValid = false;
+
+                return false;
             }
         }
 
@@ -343,7 +332,6 @@ namespace Tanzu.Toolkit.ViewModels
                             break;
                     }
                 }
-
             }
             else
             {
@@ -358,13 +346,16 @@ namespace Tanzu.Toolkit.ViewModels
                     ApiAddressIsValid = false;
                 }
             }
-                
+
             VerifyingApiAddress = false;
         }
 
         public void NavigateToTargetPage(object arg = null)
         {
             PageNum = 1;
+
+            // clear previous login errors
+            ErrorMessage = null;
         }
 
         public bool CanProceedToAuthentication(object arg = null)
@@ -372,6 +363,20 @@ namespace Tanzu.Toolkit.ViewModels
             bool certValidOrBypassed = !CertificateInvalid || (CertificateInvalid && ProceedWithInvalidCertificate);
 
             return ApiAddressIsValid && !string.IsNullOrWhiteSpace(Target) && certValidOrBypassed;
+        }
+
+        public void ResetTargetDependentFields()
+        {
+            // reset invalid cert warning
+            CertificateInvalid = false;
+            ProceedWithInvalidCertificate = false;
+
+            // clear previous creds
+            Username = null;
+            ClearPassword();
+
+            // clear previous errors
+            ErrorMessage = null;
         }
     }
 }
