@@ -68,28 +68,23 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 if (!targetResult.Succeeded)
                 {
+                    var newErrMsg = LoginFailureMessage + Environment.NewLine + targetResult.Explanation;
+
+                    targetResult.Explanation = newErrMsg;
+
                     return targetResult;
                 }
 
                 DetailedResult authResult = await _cfCliService.AuthenticateAsync(username, password);
-                bool unableToExecuteAuthCmd = authResult.CmdResult == null;
 
-                if (unableToExecuteAuthCmd)
+                if (!authResult.Succeeded)
                 {
-                    throw new Exception(
-                       message: LoginFailureMessage,
-                       innerException: new Exception(
-                           message: $"Unable to connect to Cf CLI"));
-                }
-                else if (!authResult.Succeeded)
-                {
-                    return authResult.FailureType == FailureType.InvalidCertificate
-                        ? authResult
-                        : throw new Exception(
-                            message: LoginFailureMessage,
-                            innerException: new Exception(
-                                message: $"Unable to authenticate user \"{username}\"",
-                                innerException: new Exception(authResult.CmdResult.StdErr)));
+                    if (authResult.FailureType != FailureType.InvalidCertificate)
+                    {
+                        authResult.Explanation = LoginFailureMessage + Environment.NewLine + $"Unable to authenticate user \"{username}\"" + Environment.NewLine + authResult.CmdResult.StdErr;
+                    }
+
+                    return authResult;
                 }
 
                 await MatchCliVersionToApiVersion();
