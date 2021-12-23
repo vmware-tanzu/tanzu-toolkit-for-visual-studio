@@ -20,6 +20,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         Task<bool> DeleteAppWithGuid(string cfTarget, string accessToken, string appGuid);
         Task<List<Buildpack>> ListBuildpacks(string cfApiAddress, string accessToken);
         Task<List<Stack>> ListStacks(string cfTarget, string accessToken);
-        Task<LoginInfoResponse> GetLoginServerInformation(string cfApiAddress);
+        Task<LoginInfoResponse> GetLoginServerInformation(string cfApiAddress, bool trustAllCerts = false);
     }
 }

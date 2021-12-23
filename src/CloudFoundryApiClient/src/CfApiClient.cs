@@ -332,8 +332,16 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             return await GetRemainingPagesForType(firstPageHref, accessToken, new List<Stack>());
         }
 
-        public async Task<LoginInfoResponse> GetLoginServerInformation(string cfApiAddress)
+        public async Task<LoginInfoResponse> GetLoginServerInformation(string cfApiAddress, bool trustAllCerts = false)
         {
+            if (trustAllCerts)
+            {
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+                ServicePointManager.ServerCertificateValidationCallback +=
+                    (sender, cert, chain, sslPolicyErrors) => { return true; };
+            }
+
             var loginServerUri = await GetAuthServerUriFromCfTarget(cfApiAddress);
 
             var uri = new UriBuilder(loginServerUri)

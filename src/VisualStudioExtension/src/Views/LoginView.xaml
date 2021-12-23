@@ -78,6 +78,8 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
                 <TextBox
@@ -109,7 +111,6 @@
                         </Style>
                     </TextBlock.Style>
                 </TextBlock>
-
 
                 <TextBlock
                     Text="{Binding ApiAddressError}"
@@ -147,6 +148,36 @@
                         </Style>
                     </TextBlock.Style>
                 </TextBlock>
+
+                <StackPanel Name="LoginWarning"
+                            Grid.Row="4"
+                            Margin="4"
+                            Visibility="{Binding CertificateInvalid, Converter={StaticResource CollapsedVisibility}}"
+                            Orientation="Horizontal">
+                    <Image
+                        Source="Resources/StatusWarning.png"
+                        VerticalAlignment="Center"
+                        RenderOptions.BitmapScalingMode="Fant"
+                        SnapsToDevicePixels="True"
+                        UseLayoutRounding="True"
+                        Margin="0,8,8,8"
+                        Width="16"/>
+
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Text="Valid certificate not detected"/>
+                </StackPanel>
+
+                <StackPanel Name="CertBypassCheckbox"
+                            Grid.Row="5"
+                            Visibility="{Binding CertificateInvalid, Converter={StaticResource CollapsedVisibility}}"
+                            Orientation="Horizontal">
+                    <CheckBox
+                        Margin="4,0"
+                        IsChecked="{Binding Path=ProceedWithInvalidCertificate, Mode=TwoWay}"
+                        Content="Continue without valid certificate"/>
+                </StackPanel>
+
             </Grid>
 
             <Grid Name="Page1Buttons" Margin="0,8,0,8">
@@ -252,7 +283,6 @@
                     Grid.ColumnSpan="3"
                     Command="{Binding ElementName=LoginViewElement, Path=SsoCommand}"/>
             </Grid>
-
 
             <Grid Name="Page2Buttons" Margin="0,8,0,8">
                 <StackPanel

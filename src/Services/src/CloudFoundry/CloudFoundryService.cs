@@ -45,7 +45,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             _logger = logSvc.Logger;
         }
 
-        public async Task<ConnectResult> LoginWithCredentials(string targetApiAddress, string username, SecureString password, bool skipSsl)
+        public async Task<DetailedResult> LoginWithCredentials(string targetApiAddress, string username, SecureString password, bool skipSsl)
         {
             if (string.IsNullOrEmpty(targetApiAddress))
             {
@@ -64,23 +64,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
             try
             {
-                DetailedResult targetResult = _cfCliService.TargetApi(targetApiAddress, skipSsl);
-                bool unableToExecuteTargetCmd = targetResult.CmdResult == null;
+                var targetResult = TargetApi(targetApiAddress, skipSsl);
 
-                if (unableToExecuteTargetCmd)
+                if (!targetResult.Succeeded)
                 {
-                    throw new Exception(
-                        message: LoginFailureMessage,
-                        innerException: new Exception(
-                            message: $"Unable to connect to CF CLI"));
-                }
-                else if (!targetResult.Succeeded)
-                {
-                    throw new Exception(
-                        message: LoginFailureMessage,
-                        innerException: new Exception(
-                            message: $"Unable to target api at this address: {targetApiAddress}",
-                            innerException: new Exception(targetResult.CmdResult.StdErr)));
+                    return targetResult;
                 }
 
                 DetailedResult authResult = await _cfCliService.AuthenticateAsync(username, password);
@@ -95,33 +83,51 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
                 else if (!authResult.Succeeded)
                 {
-                    throw new Exception(
-                       message: LoginFailureMessage,
-                       innerException: new Exception(
-                           message: $"Unable to authenticate user \"{username}\"",
-                           innerException: new Exception(authResult.CmdResult.StdErr)));
+                    return authResult.FailureType == FailureType.InvalidCertificate
+                        ? authResult
+                        : throw new Exception(
+                            message: LoginFailureMessage,
+                            innerException: new Exception(
+                                message: $"Unable to authenticate user \"{username}\"",
+                                innerException: new Exception(authResult.CmdResult.StdErr)));
                 }
 
                 await MatchCliVersionToApiVersion();
 
-                return new ConnectResult(true, null);
+                return new DetailedResult
+                {
+                    Succeeded = true,
+                    Explanation = null
+                };
             }
             catch (Exception e)
             {
                 var errorMessages = new List<string>();
+
                 FormatExceptionMessage(e, errorMessages);
+
                 var errorMessage = string.Join(Environment.NewLine, errorMessages.ToArray());
-                return new ConnectResult(false, errorMessage);
+
+                return new DetailedResult
+                {
+                    Succeeded = false,
+                    Explanation = errorMessage
+                };
             }
         }
 
-        public async Task<DetailedResult<string>> GetSsoPrompt(string cfApiAddress)
+        public DetailedResult TargetApi(string targetApiAddress, bool skipSsl)
+        {
+            return _cfCliService.TargetApi(targetApiAddress, skipSsl);
+        }
+
+        public async Task<DetailedResult<string>> GetSsoPrompt(string cfApiAddress, bool skipSsl = false)
         {
             try
             {
-                var loginServerInfo = await _cfApiClient.GetLoginServerInformation(cfApiAddress);
+                var loginServerInfo = await _cfApiClient.GetLoginServerInformation(cfApiAddress, skipSsl);
 
-                if (loginServerInfo.Prompts.ContainsKey(CfApiSsoPromptKey)) 
+                if (loginServerInfo.Prompts.ContainsKey(CfApiSsoPromptKey))
                 {
                     string ssoPasscodePrompt = loginServerInfo.Prompts[CfApiSsoPromptKey][1];
 
