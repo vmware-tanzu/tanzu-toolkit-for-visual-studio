@@ -293,6 +293,12 @@
                     HorizontalAlignment="Right">
 
                     <Button
+                        Margin="4"
+                        Padding="4,0"
+                        Command="{Binding ElementName=LoginViewElement, Path=DecrementPageCommand}"
+                        Content="Back"/>
+                    
+                    <Button
                         Content="Log In"
                         IsEnabled="{Binding ApiAddressIsValid}"
                         Margin="4"
@@ -312,8 +318,8 @@
                     <Button
                         Margin="4"
                         Padding="4,0"
-                        Command="{Binding ElementName=LoginViewElement, Path=DecrementPageCommand}"
-                        Content="Back"/>
+                        Click="Close"
+                        Content="Cancel"/>
                 </StackPanel>
 
             </Grid>
