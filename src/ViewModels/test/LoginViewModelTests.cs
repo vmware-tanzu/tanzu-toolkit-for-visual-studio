@@ -61,7 +61,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             const string expectedErrorMessage = "my fake error message";
 
             MockCloudFoundryService.Setup(mock => mock.LoginWithCredentials(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SecureString>(), It.IsAny<bool>()))
-                .ReturnsAsync(new ConnectResult(false, expectedErrorMessage));
+                .ReturnsAsync(new DetailedResult(false, expectedErrorMessage));
 
             await _sut.LogIn(null);
 
@@ -77,7 +77,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             MockCloudFoundryService.Setup(mock => mock.
               LoginWithCredentials(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SecureString>(), It.IsAny<bool>()))
-                .ReturnsAsync(new ConnectResult(true, null));
+                .ReturnsAsync(new DetailedResult(true, null));
 
             MockTasExplorerViewModel.Setup(m => m.SetConnection(It.IsAny<CloudFoundryInstance>())).Verifiable();
 
@@ -96,7 +96,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task LogIn_ClosesDialog_WhenLoginRequestSucceeds()
         {
             MockCloudFoundryService.Setup(mock => mock.LoginWithCredentials(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SecureString>(), It.IsAny<bool>()))
-               .ReturnsAsync(new ConnectResult(true, null));
+               .ReturnsAsync(new DetailedResult(true, null));
 
             await _sut.LogIn(null);
 
@@ -311,7 +311,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             _sut.Target = fakeTargetApiAddress;
 
-            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(fakeTargetApiAddress))
+            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(fakeTargetApiAddress, false))
                 .ReturnsAsync(fakeSsoPromptResponse);
 
             await _sut.OpenSsoDialog();
@@ -341,7 +341,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 Content = fakeSsoPrompt,
             };
 
-            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.Target))
+            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.Target, false))
                 .ReturnsAsync(fakeSsoPromptResult);
 
             Assert.AreEqual(1, _sut.PageNum);
@@ -362,7 +362,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 FailureType = FailureType.MissingSsoPrompt,
             };
 
-            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.Target))
+            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.Target, false))
                 .ReturnsAsync(fakeSsoPromptResult);
 
             Assert.AreEqual(1, _sut.PageNum);
@@ -383,7 +383,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 FailureType = FailureType.None,
             };
 
-            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.Target))
+            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.Target, false))
                 .ReturnsAsync(fakeSsoPromptResult);
 
             Assert.AreEqual(1, _sut.PageNum);
