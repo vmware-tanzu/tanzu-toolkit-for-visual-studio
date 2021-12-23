@@ -392,7 +392,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.AreEqual(1, _sut.PageNum);
             Assert.IsFalse(_sut.ApiAddressIsValid);
-            Assert.AreEqual($"Unable to establish a connection with ${_sut.Target}", _sut.ApiAddressError);
+            Assert.AreEqual($"Unable to establish a connection with {_sut.Target}", _sut.ApiAddressError);
         }
 
         [TestMethod]
