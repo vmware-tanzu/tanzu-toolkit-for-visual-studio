@@ -21,6 +21,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services
                 control.SetResourceReference(TasExplorerView.ListItemMouseOverBrushProperty, ThemedDialogColors.ListItemMouseOverBrushKey);
                 control.SetResourceReference(TasExplorerView.WizardFooterBrushProperty, ThemedDialogColors.WizardFooterBrushKey);
                 control.SetResourceReference(DeploymentDialogView.HyperlinkBrushProperty, ThemedDialogColors.HyperlinkBrushKey);
+                control.SetResourceReference(LoginView.HyperlinkBrushProperty, ThemedDialogColors.HyperlinkBrushKey);
             }
 
             ThemedDialogStyleLoader.SetUseDefaultThemedDialogStyles(element, true);
