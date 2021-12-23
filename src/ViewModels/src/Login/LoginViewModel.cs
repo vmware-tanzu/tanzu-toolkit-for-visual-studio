@@ -281,7 +281,7 @@ namespace Tanzu.Toolkit.ViewModels
 
             if (!ssoPromptResult.Succeeded && ssoPromptResult.FailureType != Toolkit.Services.FailureType.MissingSsoPrompt)
             {
-                ApiAddressError = $"Unable to establish a connection with ${Target}";
+                ApiAddressError = $"Unable to establish a connection with {Target}";
 
                 ApiAddressIsValid = false;
 
