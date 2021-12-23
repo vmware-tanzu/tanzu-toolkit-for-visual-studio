@@ -22,6 +22,8 @@ namespace Tanzu.Toolkit.ViewModels
         private bool _verifyingApiAddress = false;
         private bool _apiAddressIsValid;
         private string _connectionName;
+        private bool _certificateInvalid = false;
+        private bool _proceedWithInvalidCertificate = false;
         private ISsoDialogViewModel _ssoDialog;
 
         internal ITasExplorerViewModel _tasExplorer;
@@ -55,6 +57,11 @@ namespace Tanzu.Toolkit.ViewModels
             set
             {
                 _target = value;
+
+                // reset invalid cert warning when target api address changed
+                CertificateInvalid = false;
+                ProceedWithInvalidCertificate = false;
+
                 RaisePropertyChangedEvent("Target");
             }
         }
@@ -163,7 +170,33 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
+        public bool CertificateInvalid
+        {
+            get => _certificateInvalid;
+
+            set
+            {
+                _certificateInvalid = value;
+
+                RaisePropertyChangedEvent("CertificateInvalid");
+            }
+        }
+
+        public bool ProceedWithInvalidCertificate
+        {
+            get => _proceedWithInvalidCertificate;
+
+            set
+            {
+                _proceedWithInvalidCertificate = value;
+
+                RaisePropertyChangedEvent("ProceedWithInvalidCertificate");
+            }
+        }
+
         public Func<SecureString> GetPassword { get; set; }
+
+        public Action ClearPassword { get; set; }
 
         public Func<bool> PasswordEmpty { get; set; }
 
@@ -186,17 +219,23 @@ namespace Tanzu.Toolkit.ViewModels
                 return;
             }
 
-            var result = await CloudFoundryService.LoginWithCredentials(Target, Username, GetPassword(), SkipSsl);
-            ErrorMessage = result.ErrorMessage;
+            var result = await CloudFoundryService.LoginWithCredentials(Target, Username, GetPassword(), skipSsl: ProceedWithInvalidCertificate);
 
-            if (result.IsLoggedIn)
+            if (result.Succeeded)
             {
+                ErrorMessage = null;
+
                 SetConnection();
-            }
 
-            if (!HasErrors)
-            {
                 DialogService.CloseDialog(arg, true);
+
+                PageNum = 1;
+
+                ClearPassword();
+            }
+            else
+            {
+                ErrorMessage = result.Explanation;
             }
         }
 
@@ -277,23 +316,49 @@ namespace Tanzu.Toolkit.ViewModels
         {
             VerifyingApiAddress = true;
 
-            var ssoPromptResult = await CloudFoundryService.GetSsoPrompt(Target);
+            var certTestResult = CloudFoundryService.TargetApi(Target, skipSsl: ProceedWithInvalidCertificate);
 
-            if (!ssoPromptResult.Succeeded && ssoPromptResult.FailureType != Toolkit.Services.FailureType.MissingSsoPrompt)
+            if (certTestResult.Succeeded)
             {
-                ApiAddressError = $"Unable to establish a connection with {Target}";
+                var ssoPromptResult = await CloudFoundryService.GetSsoPrompt(Target, skipSsl: ProceedWithInvalidCertificate);
 
-                ApiAddressIsValid = false;
+                if (ssoPromptResult.Succeeded)
+                {
+                    SsoEnabledOnTarget = true;
 
-                // do not navigate to authentication page
+                    PageNum = 2;
+                }
+                else
+                {
+                    switch (ssoPromptResult.FailureType)
+                    {
+                        case Toolkit.Services.FailureType.MissingSsoPrompt:
+                            SsoEnabledOnTarget = false;
+                            PageNum = 2;
+                            break;
+
+                        default:
+                            ApiAddressError = $"Unable to establish a connection with {Target}";
+                            ApiAddressIsValid = false;
+                            break;
+                    }
+                }
+
             }
-            else // either prompt request suceeded or request failed specifically because SSO not enabled
+            else
             {
-                SsoEnabledOnTarget = ssoPromptResult.Succeeded;
+                if (certTestResult.FailureType == Toolkit.Services.FailureType.InvalidCertificate)
+                {
+                    CertificateInvalid = true;
+                }
+                else
+                {
+                    ApiAddressError = $"Unable to establish a connection with {Target}";
 
-                PageNum = 2; // navigate to auth page even if sso not enabled
+                    ApiAddressIsValid = false;
+                }
             }
-
+                
             VerifyingApiAddress = false;
         }
 
@@ -304,8 +369,9 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool CanProceedToAuthentication(object arg = null)
         {
-            return ApiAddressIsValid && !string.IsNullOrWhiteSpace(Target);
-        }
+            bool certValidOrBypassed = !CertificateInvalid || (CertificateInvalid && ProceedWithInvalidCertificate);
 
+            return ApiAddressIsValid && !string.IsNullOrWhiteSpace(Target) && certValidOrBypassed;
+        }
     }
 }
