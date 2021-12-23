@@ -2,7 +2,9 @@
 using System.Security;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using Tanzu.Toolkit.ViewModels;
+using Tanzu.Toolkit.VisualStudio.Services;
 using Tanzu.Toolkit.VisualStudio.Views.Commands;
 
 namespace Tanzu.Toolkit.VisualStudio.Views
@@ -18,12 +20,16 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         public ICommand IncrementPageCommand { get; }
         public ICommand DecrementPageCommand { get; }
 
+        public Brush HyperlinkBrush { get { return (Brush)GetValue(HyperlinkBrushProperty); } set { SetValue(HyperlinkBrushProperty, value); } }
+
+        public static readonly DependencyProperty HyperlinkBrushProperty = DependencyProperty.Register("HyperlinkBrush", typeof(Brush), typeof(LoginView), new PropertyMetadata(default(Brush)));
+
         public LoginView()
         {
             InitializeComponent();
         }
 
-        public LoginView(ILoginViewModel viewModel)
+        public LoginView(ILoginViewModel viewModel, IThemeService themeService)
         {
             System.Predicate<object> alwaysTrue = (object arg) => { return true; };
 
@@ -36,6 +42,9 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             viewModel.PasswordEmpty = PasswordBoxEmpty;
             DataContext = viewModel;
             _viewModel = viewModel;
+            
+            themeService.SetTheme(this);
+
             InitializeComponent();
 
             MouseDown += Window_MouseDown;
