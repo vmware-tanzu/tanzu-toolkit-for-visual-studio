@@ -43,8 +43,9 @@ namespace Tanzu.Toolkit.ViewModels
 
             string existingSavedConnectionName = _dataPersistenceService.ReadStringData(ConnectionNameKey);
             string existingSavedConnectionAddress = _dataPersistenceService.ReadStringData(ConnectionAddressKey);
+            bool savedConnectionCredsExist = CloudFoundryService.IsValidConnection();
 
-            if (existingSavedConnectionName == null || existingSavedConnectionAddress == null)
+            if (existingSavedConnectionName == null || existingSavedConnectionAddress == null || !savedConnectionCredsExist)
             {
                 TasConnection = null;
             }
