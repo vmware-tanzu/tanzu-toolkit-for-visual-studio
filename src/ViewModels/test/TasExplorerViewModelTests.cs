@@ -53,13 +53,65 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCleanup]
         public void TestCleanup()
         {
+            MockDataPersistenceService.VerifyAll();
+            MockCloudFoundryService.VerifyAll();
         }
 
         [TestMethod]
         [TestCategory("Ctor")]
-        public void Ctor_SetsTasConnectionToNull()
+        public void Ctor_SetsTasConnectionToNull_WhenSavedConnectionNameNull()
         {
+            MockDataPersistenceService.Setup(m => m.ReadStringData(TasExplorerViewModel.ConnectionNameKey)).Returns((string)null);
+            MockDataPersistenceService.Setup(m => m.ReadStringData(TasExplorerViewModel.ConnectionAddressKey)).Returns("junk non-null value");
+            MockCloudFoundryService.Setup(m => m.IsValidConnection()).Returns(true);
+            
+            _sut = new TasExplorerViewModel(Services);
+
             Assert.IsNull(_sut.TasConnection);
+        }
+
+        [TestMethod]
+        [TestCategory("Ctor")]
+        public void Ctor_SetsTasConnectionToNull_WhenSavedConnectionAddressNull()
+        {
+            MockDataPersistenceService.Setup(m => m.ReadStringData(TasExplorerViewModel.ConnectionNameKey)).Returns("junk non-null value");
+            MockDataPersistenceService.Setup(m => m.ReadStringData(TasExplorerViewModel.ConnectionAddressKey)).Returns((string)null);
+            MockCloudFoundryService.Setup(m => m.IsValidConnection()).Returns(true);
+
+            _sut = new TasExplorerViewModel(Services);
+
+            Assert.IsNull(_sut.TasConnection);
+        }
+
+        [TestMethod]
+        [TestCategory("Ctor")]
+        public void Ctor_SetsTasConnectionToNull_WhenAccessTokenIrretrievable()
+        {
+            MockDataPersistenceService.Setup(m => m.ReadStringData(TasExplorerViewModel.ConnectionNameKey)).Returns("junk non-null value");
+            MockDataPersistenceService.Setup(m => m.ReadStringData(TasExplorerViewModel.ConnectionAddressKey)).Returns("junk non-null value");
+            MockCloudFoundryService.Setup(m => m.IsValidConnection()).Returns(false);
+
+            _sut = new TasExplorerViewModel(Services);
+
+            Assert.IsNull(_sut.TasConnection);
+        }
+
+        [TestMethod]
+        [TestCategory("Ctor")]
+        public void Ctor_RestoresTasConnection_WhenSavedConnectionNameAddressAndTokenExist()
+        {
+            var savedConnectionName = "junk";
+            var savedConnectionAddress = "junk";
+
+            MockDataPersistenceService.Setup(m => m.ReadStringData(TasExplorerViewModel.ConnectionNameKey)).Returns(savedConnectionName);
+            MockDataPersistenceService.Setup(m => m.ReadStringData(TasExplorerViewModel.ConnectionAddressKey)).Returns(savedConnectionAddress);
+            MockCloudFoundryService.Setup(m => m.IsValidConnection()).Returns(true);
+
+            _sut = new TasExplorerViewModel(Services);
+
+            Assert.IsNotNull(_sut.TasConnection);
+            Assert.AreEqual(savedConnectionName, _sut.TasConnection.CloudFoundryInstance.InstanceName);
+            Assert.AreEqual(savedConnectionAddress, _sut.TasConnection.CloudFoundryInstance.ApiAddress);
         }
 
         [TestMethod]
