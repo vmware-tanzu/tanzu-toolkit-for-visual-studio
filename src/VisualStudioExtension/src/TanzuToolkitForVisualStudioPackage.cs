@@ -10,6 +10,7 @@ using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.CommandProcess;
+using Tanzu.Toolkit.Services.DataPersistence;
 using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.File;
@@ -17,6 +18,7 @@ using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
 using Tanzu.Toolkit.ViewModels;
+using Tanzu.Toolkit.ViewModels.SsoDialog;
 using Tanzu.Toolkit.VisualStudio.Commands;
 using Tanzu.Toolkit.VisualStudio.Services;
 using Tanzu.Toolkit.VisualStudio.Views;
@@ -125,6 +127,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<IThemeService>(new ThemeService());
             services.AddTransient<ICommandProcessService, CommandProcessService>();
             services.AddSingleton<ISerializationService, SerializationService>();
+            services.AddSingleton<IDataPersistenceService>(provider => new DataPersistenceService(this, provider));
 
             /* Tool Windows */
             services.AddTransient<TanzuTasExplorerToolWindow>();
@@ -133,14 +136,16 @@ namespace Tanzu.Toolkit.VisualStudio
             /* View Models */
             services.AddSingleton<IOutputViewModel, OutputViewModel>();
             services.AddSingleton<ITasExplorerViewModel, TasExplorerViewModel>();
+            services.AddSingleton<ISsoDialogViewModel, SsoDialogViewModel>(); // must be a singleton for the view to properly show prompt
+            services.AddSingleton<ILoginViewModel, LoginViewModel>();
             services.AddTransient<IDeploymentDialogViewModel, DeploymentDialogViewModel>();
-            services.AddTransient<ILoginViewModel, LoginViewModel>();
 
             /* Views */
             services.AddSingleton<IOutputView, OutputView>();
+            services.AddSingleton<ILoginView, LoginView>();
             services.AddTransient<ITasExplorerView, TasExplorerView>();
             services.AddTransient<IDeploymentDialogView, DeploymentDialogView>();
-            services.AddTransient<ILoginView, LoginView>();
+            services.AddTransient<ISsoDialogView, SsoDialogView>();
         }
     }
 }

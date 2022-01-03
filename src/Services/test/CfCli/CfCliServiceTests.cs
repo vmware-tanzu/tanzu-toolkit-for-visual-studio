@@ -72,10 +72,10 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         public async Task RunCfCommandAsync_ReturnsSuccessfulResult_WhenCommandProcessExitsWithZeroCode()
         {
             _mockCommandProcessService.Setup(mock => mock.
-              RunExecutable(_fakePathToCfExe, _fakeArguments, null, _defaultEnvVars, _fakeOutCallback, _fakeErrCallback))
+              RunExecutable(_fakePathToCfExe, _fakeArguments, null, _defaultEnvVars, _fakeOutCallback, _fakeErrCallback, null))
                 .Returns(new CommandResult(_fakeStdOut, _fakeStdErr, 0));
 
-            var result = await _sut.RunCfCommandAsync(_fakeArguments, _fakeOutCallback, _fakeErrCallback);
+            var result = await _sut.RunCfCommandAsync(_fakeArguments, _fakeOutCallback, _fakeErrCallback, null);
 
             Assert.IsTrue(result.Succeeded);
             Assert.IsNull(result.Explanation);
@@ -89,10 +89,10 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         public async Task RunCfCommandAsync_ReturnsFailedResult_WhenCommandProcessExitsWithNonZeroCode()
         {
             _mockCommandProcessService.Setup(mock => mock.
-              RunExecutable(_fakePathToCfExe, _fakeArguments, null, _defaultEnvVars, _fakeOutCallback, _fakeErrCallback))
+              RunExecutable(_fakePathToCfExe, _fakeArguments, null, _defaultEnvVars, _fakeOutCallback, _fakeErrCallback, null))
                 .Returns(new CommandResult(_fakeStdOut, _fakeStdErr, 1));
 
-            var result = await _sut.RunCfCommandAsync(_fakeArguments, _fakeOutCallback, _fakeErrCallback);
+            var result = await _sut.RunCfCommandAsync(_fakeArguments, _fakeOutCallback, _fakeErrCallback, null);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains(_fakeStdErr));
@@ -108,10 +108,10 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             const string mockStdOutContainingFailedSubstring = "FAILED this is a mock response";
 
             _mockCommandProcessService.Setup(mock => mock.
-              RunExecutable(_fakePathToCfExe, _fakeArguments, null, _defaultEnvVars, _fakeOutCallback, _fakeErrCallback))
+              RunExecutable(_fakePathToCfExe, _fakeArguments, null, _defaultEnvVars, _fakeOutCallback, _fakeErrCallback, null))
                 .Returns(new CommandResult(mockStdOutContainingFailedSubstring, string.Empty, 1));
 
-            var result = await _sut.RunCfCommandAsync(_fakeArguments, _fakeOutCallback, _fakeErrCallback);
+            var result = await _sut.RunCfCommandAsync(_fakeArguments, _fakeOutCallback, _fakeErrCallback, null);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains(mockStdOutContainingFailedSubstring));
@@ -125,10 +125,10 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         public async Task RunCfCommandAsync_ReturnsGenericExplanation_WhenProcessFailsWithoutStdErr()
         {
             _mockCommandProcessService.Setup(mock => mock.
-              RunExecutable(_fakePathToCfExe, _fakeArguments, null, _defaultEnvVars, _fakeOutCallback, _fakeErrCallback))
+              RunExecutable(_fakePathToCfExe, _fakeArguments, null, _defaultEnvVars, _fakeOutCallback, _fakeErrCallback, null))
                 .Returns(new CommandResult(_fakeStdOut, string.Empty, 1));
 
-            var result = await _sut.RunCfCommandAsync(_fakeArguments, _fakeOutCallback, _fakeErrCallback);
+            var result = await _sut.RunCfCommandAsync(_fakeArguments, _fakeOutCallback, _fakeErrCallback, null);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains($"Unable to execute `cf {_fakeArguments}`."));
@@ -143,7 +143,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         {
             _mockFileService.SetupGet(mock => mock.FullPathToCfExe).Returns((string)null);
 
-            DetailedResult result = await _sut.RunCfCommandAsync(_fakeArguments);
+            DetailedResult result = await _sut.RunCfCommandAsync(_fakeArguments, null);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains("Unable to locate cf.exe"));
@@ -156,12 +156,12 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             string expectedWorkingDir = null;
 
             _mockCommandProcessService.Setup(mock => mock.
-                RunExecutable(_fakePathToCfExe, _fakeArguments, expectedWorkingDir, _defaultEnvVars, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>()))
+                RunExecutable(_fakePathToCfExe, _fakeArguments, expectedWorkingDir, _defaultEnvVars, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), null))
                     .Returns(_fakeSuccessResult);
 
-            DetailedResult result = await _sut.RunCfCommandAsync(_fakeArguments);
+            DetailedResult result = await _sut.RunCfCommandAsync(_fakeArguments, null);
 
-            _mockCommandProcessService.Verify(mock => mock.RunExecutable(_fakePathToCfExe, _fakeArguments, expectedWorkingDir, _defaultEnvVars, null, null), Times.Once());
+            _mockCommandProcessService.Verify(mock => mock.RunExecutable(_fakePathToCfExe, _fakeArguments, expectedWorkingDir, _defaultEnvVars, null, null, null), Times.Once());
         }
 
         [TestMethod]
@@ -175,12 +175,12 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var sut = new CfCliService(fakeConfigFilePath, _services);
 
             _mockCommandProcessService.Setup(mock => mock.
-                RunExecutable(_fakePathToCfExe, _fakeArguments, expectedWorkingDir, expectedEnvVars, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>()))
+                RunExecutable(_fakePathToCfExe, _fakeArguments, expectedWorkingDir, expectedEnvVars, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), null))
                     .Returns(_fakeSuccessResult);
 
-            DetailedResult result = await sut.RunCfCommandAsync(_fakeArguments);
+            DetailedResult result = await sut.RunCfCommandAsync(_fakeArguments, null);
 
-            _mockCommandProcessService.Verify(mock => mock.RunExecutable(_fakePathToCfExe, _fakeArguments, expectedWorkingDir, expectedEnvVars, null, null), Times.Once());
+            _mockCommandProcessService.Verify(mock => mock.RunExecutable(_fakePathToCfExe, _fakeArguments, expectedWorkingDir, expectedEnvVars, null, null, null), Times.Once());
         }
 
         [TestMethod]
@@ -188,7 +188,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         public void ExecuteCfCliCommand_ReturnsTrueResult_WhenProcessExitCodeIsZero()
         {
             _mockCommandProcessService.Setup(mock => mock.
-              RunExecutable(_fakePathToCfExe, _fakeArguments, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, _fakeArguments, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeSuccessResult);
 
             DetailedResult result = _sut.ExecuteCfCliCommand(_fakeArguments);
@@ -202,7 +202,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         public void ExecuteCfCliCommand_ReturnsFalseResult_WhenProcessExitCodeIsNotZero()
         {
             _mockCommandProcessService.Setup(mock => mock.
-              RunExecutable(_fakePathToCfExe, _fakeArguments, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, _fakeArguments, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeFailureResult);
 
             DetailedResult result = _sut.ExecuteCfCliCommand(_fakeArguments);
@@ -220,7 +220,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var fakeFailedResult = new CommandResult("FAILED this is a mock response", string.Empty, 1);
 
             _mockCommandProcessService.Setup(mock => mock.
-              RunExecutable(_fakePathToCfExe, _fakeArguments, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, _fakeArguments, null, _defaultEnvVars, null, null, null))
                 .Returns(fakeFailedResult);
 
             DetailedResult result = _sut.ExecuteCfCliCommand(_fakeArguments);
@@ -237,7 +237,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         {
             var fakeFailedResult = new CommandResult("junk output", string.Empty, 1);
             _mockCommandProcessService.Setup(mock => mock.
-              RunExecutable(_fakePathToCfExe, _fakeArguments, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, _fakeArguments, null, _defaultEnvVars, null, null, null))
                 .Returns(fakeFailedResult);
 
             DetailedResult result = _sut.ExecuteCfCliCommand(_fakeArguments);
@@ -267,7 +267,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         public void GetOAuthToken_ReturnsNull_WhenProcessExitsWithNonZeroCode()
         {
             _mockCommandProcessService.Setup(mock => mock.
-              RunExecutable(_fakePathToCfExe, CfCliService._getOAuthTokenCmd, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, CfCliService._getOAuthTokenCmd, null, _defaultEnvVars, null, null, null))
                 .Returns(new CommandResult(_fakeStdOut, _fakeStdErr, exitCode: 1));
 
             var token = _sut.GetOAuthToken();
@@ -280,7 +280,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         public void GetOAuthToken_TrimsPrefix_WhenResultStartsWithBearer()
         {
             _mockCommandProcessService.Setup(mock => mock.
-              RunExecutable(_fakePathToCfExe, CfCliService._getOAuthTokenCmd, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, CfCliService._getOAuthTokenCmd, null, _defaultEnvVars, null, null, null))
                 .Returns(new CommandResult(_fakeRealisticTokenOutput, _fakeStdErr, exitCode: 0));
 
             var token = _sut.GetOAuthToken();
@@ -292,7 +292,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         public void GetOAuthToken_RemovesNewlinesFromTokenResult()
         {
             _mockCommandProcessService.Setup(mock => mock.
-              RunExecutable(_fakePathToCfExe, CfCliService._getOAuthTokenCmd, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, CfCliService._getOAuthTokenCmd, null, _defaultEnvVars, null, null, null))
                 .Returns(new CommandResult(_fakeRealisticTokenOutput, _fakeStdErr, exitCode: 0));
 
             var token = _sut.GetOAuthToken();
@@ -307,14 +307,14 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var fakeTokenResult = new CommandResult(_fakeAccessToken, "", 0);
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null, _defaultEnvVars, null, null, null))
                 .Returns(fakeTokenResult);
 
             var firstResult = _sut.GetOAuthToken();
             Assert.AreEqual(_fakeAccessToken, firstResult);
             Assert.AreEqual(1, _mockCommandProcessService.Invocations.Count);
             _mockCommandProcessService.Verify(m => m.
-              RunExecutable(_fakePathToCfExe, It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null, _defaultEnvVars, null, null),
+              RunExecutable(_fakePathToCfExe, It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null, _defaultEnvVars, null, null, null),
                 Times.Once);
 
             _mockCommandProcessService.Invocations.Clear();
@@ -333,7 +333,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var fakeTokenResult = new CommandResult("my.fake.jwt", "", 0);
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null, _defaultEnvVars, null, null, null))
                 .Returns(fakeTokenResult);
 
             Exception thrownException = null;
@@ -359,7 +359,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var fakeTokenResult = new CommandResult("", CfCliService._invalidRefreshTokenError, 1);
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null, _defaultEnvVars, null, null, null))
                 .Returns(fakeTokenResult);
 
             Exception thrownException = null;
@@ -383,14 +383,14 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var fakeTokenResult = new CommandResult(_fakeAccessToken, "", 0);
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null, _defaultEnvVars, null, null, null))
                 .Returns(fakeTokenResult);
 
             var firstResult = _sut.GetOAuthToken();
             Assert.AreEqual(_fakeAccessToken, firstResult);
             Assert.AreEqual(1, _mockCommandProcessService.Invocations.Count);
             _mockCommandProcessService.Verify(m => m.
-              RunExecutable(_fakePathToCfExe, It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null, _defaultEnvVars, null, null),
+              RunExecutable(_fakePathToCfExe, It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null, _defaultEnvVars, null, null, null),
                 Times.Once);
 
             _mockCommandProcessService.Invocations.Clear();
@@ -411,7 +411,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             Assert.AreEqual(_fakeAccessToken, secondResult);
             Assert.AreEqual(1, _mockCommandProcessService.Invocations.Count);
             _mockCommandProcessService.Verify(m => m.
-              RunExecutable(_fakePathToCfExe, It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null, _defaultEnvVars, null, null),
+              RunExecutable(_fakePathToCfExe, It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null, _defaultEnvVars, null, null, null),
                 Times.Once);
         }
 
@@ -424,7 +424,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             string expectedArgs = $"{CfCliService._targetApiCmd} {fakeApiAddress} --skip-ssl-validation";
 
             _mockCommandProcessService.Setup(mock => mock.
-              RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(new CommandResult(_fakeStdOut, _fakeStdErr, 0));
 
             DetailedResult result = _sut.TargetApi(fakeApiAddress, skipSsl);
@@ -445,7 +445,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             string expectedArgs = $"{CfCliService._targetApiCmd} {fakeApiAddress} --skip-ssl-validation";
 
             _mockCommandProcessService.Setup(mock => mock.
-              RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(new CommandResult(_fakeStdOut, _fakeStdErr, 1));
 
             DetailedResult result = _sut.TargetApi(fakeApiAddress, skipSsl);
@@ -467,7 +467,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             string expectedArgs = $"{CfCliService._authenticateCmd} {fakeUsername} {fakeDecodedPw}";
 
             _mockCommandProcessService.Setup(mock => mock.
-              RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(new CommandResult(_fakeStdOut, _fakeStdErr, 0));
 
             DetailedResult result = await _sut.AuthenticateAsync(fakeUsername, fakePw);
@@ -489,7 +489,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             string expectedArgs = $"{CfCliService._authenticateCmd} {fakeUsername} {fakeDecodedPw}";
 
             _mockCommandProcessService.Setup(mock => mock.
-              RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(new CommandResult(_fakeStdOut, _fakeStdErr, 1));
 
             DetailedResult result = await _sut.AuthenticateAsync(fakeUsername, fakePw);
@@ -510,7 +510,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             CommandResult fakeSuccessResult = new CommandResult(_fakeStdOut, _fakeStdErr, 0);
 
             _mockCommandProcessService.Setup(mock => mock.
-              RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(fakeSuccessResult);
 
             var result = _sut.TargetOrg(fakeOrgName);
@@ -531,7 +531,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             CommandResult fakeFailureResult = new CommandResult(_fakeStdOut, _fakeStdErr, 1);
 
             _mockCommandProcessService.Setup(mock => mock.
-              RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(fakeFailureResult);
 
             var result = _sut.TargetOrg(fakeOrgName);
@@ -552,7 +552,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var tokenFailureResult = new CommandResult("junk", CfCliService._invalidRefreshTokenError, 1);
 
             _mockCommandProcessService.Setup(mock => mock.
-              RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(tokenFailureResult);
 
             Exception thrownException = null;
@@ -578,7 +578,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             CommandResult fakeSuccessResult = new CommandResult(_fakeStdOut, _fakeStdErr, 0);
 
             _mockCommandProcessService.Setup(mock => mock.
-              RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(fakeSuccessResult);
 
             var result = _sut.TargetSpace(fakeSpaceName);
@@ -599,7 +599,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             CommandResult fakeFailureResult = new CommandResult(_fakeStdOut, _fakeStdErr, 1);
 
             _mockCommandProcessService.Setup(mock => mock.
-              RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(fakeFailureResult);
 
             var result = _sut.TargetSpace(fakeSpaceName);
@@ -620,7 +620,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var tokenFailureResult = new CommandResult("junk", CfCliService._invalidRefreshTokenError, 1);
 
             _mockCommandProcessService.Setup(mock => mock.
-              RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(tokenFailureResult);
 
             Exception thrownException = null;
@@ -646,7 +646,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             CommandResult fakeSuccessResult = new CommandResult(_fakeStdOut, _fakeStdErr, 0);
 
             _mockCommandProcessService.Setup(mock => mock.
-              RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(fakeSuccessResult);
 
             DetailedResult result = await _sut.StopAppByNameAsync(fakeAppName);
@@ -667,7 +667,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             CommandResult fakeFailureResult = new CommandResult(_fakeStdOut, _fakeStdErr, 1);
 
             _mockCommandProcessService.Setup(mock => mock.
-              RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(fakeFailureResult);
 
             DetailedResult result = await _sut.StopAppByNameAsync(fakeAppName);
@@ -688,7 +688,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             CommandResult fakeSuccessResult = new CommandResult(_fakeStdOut, _fakeStdErr, 0);
 
             _mockCommandProcessService.Setup(mock => mock.
-              RunExecutable(_fakePathToCfExe, expectedCmdStr, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedCmdStr, null, _defaultEnvVars, null, null, null))
                 .Returns(fakeSuccessResult);
 
             DetailedResult result = await _sut.StartAppByNameAsync(fakeAppName);
@@ -709,7 +709,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             CommandResult fakeFailureResult = new CommandResult(_fakeStdOut, _fakeStdErr, 1);
 
             _mockCommandProcessService.Setup(mock => mock.
-              RunExecutable(_fakePathToCfExe, expectedCmdStr, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedCmdStr, null, _defaultEnvVars, null, null, null))
                 .Returns(fakeFailureResult);
 
             DetailedResult result = await _sut.StartAppByNameAsync(fakeAppName);
@@ -730,7 +730,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             CommandResult fakeSuccessResult = new CommandResult(_fakeStdOut, _fakeStdErr, 0);
 
             _mockCommandProcessService.Setup(mock => mock.
-              RunExecutable(_fakePathToCfExe, expectedCmdStr, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedCmdStr, null, _defaultEnvVars, null, null, null))
                 .Returns(fakeSuccessResult);
 
             DetailedResult result = await _sut.DeleteAppByNameAsync(fakeAppName);
@@ -751,7 +751,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             CommandResult fakeFailureResult = new CommandResult(_fakeStdOut, _fakeStdErr, 1);
 
             _mockCommandProcessService.Setup(mock => mock.
-              RunExecutable(_fakePathToCfExe, expectedCmdStr, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedCmdStr, null, _defaultEnvVars, null, null, null))
                 .Returns(fakeFailureResult);
 
             DetailedResult result = await _sut.DeleteAppByNameAsync(fakeAppName);
@@ -772,7 +772,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             CommandResult fakeSuccessResult = new CommandResult(_fakeStdOut, _fakeStdErr, 0);
 
             _mockCommandProcessService.Setup(mock => mock.
-              RunExecutable(_fakePathToCfExe, expectedCmdStr, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedCmdStr, null, _defaultEnvVars, null, null, null))
                 .Returns(fakeSuccessResult);
 
             DetailedResult result = await _sut.DeleteAppByNameAsync(fakeAppName, removeMappedRoutes: false);
@@ -789,15 +789,15 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeSuccessCmdResult);
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeSuccessCmdResult);
 
             _mockCommandProcessService.Setup(m => m.
-                RunExecutable(_fakePathToCfExe, expectedArgs, _fakeProjectPath, _defaultEnvVars, _fakeOutCallback, _fakeErrCallback))
+                RunExecutable(_fakePathToCfExe, expectedArgs, _fakeProjectPath, _defaultEnvVars, _fakeOutCallback, _fakeErrCallback, null))
                     .Returns(_fakeSuccessCmdResult);
 
             _mockFileService.Setup(m => m.FileExists(_fakeManifestPath)).Returns(true);
@@ -820,7 +820,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             Assert.IsNull(result.CmdResult);
             Assert.AreEqual("Unable to locate cf.exe.", result.Explanation);
         }
-        
+
         [TestCategory("PushApp")]
         public async Task PushAppAsync_ReturnsFailureResult_WhenManifestCannotBeFound()
         {
@@ -840,11 +840,11 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             string expectedArgs = $"push -f \"{_fakeManifestPath}\""; // ensure manifest path gets surrounded by quotes
             var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
             var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
-            
+
             _mockFileService.Setup(m => m.FileExists(_fakeManifestPath)).Returns(true);
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeFailureCmdResult);
 
             var result = await _sut.PushAppAsync(_fakeManifestPath, _fakeProjectPath, FakeOrg.OrgName, FakeSpace.SpaceName, _fakeOutCallback, _fakeErrCallback);
@@ -864,15 +864,15 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             string expectedArgs = $"push -f \"{_fakeManifestPath}\""; // ensure manifest path gets surrounded by quotes
             var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
             var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
-            
+
             _mockFileService.Setup(m => m.FileExists(_fakeManifestPath)).Returns(true);
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeSuccessCmdResult);
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeFailureCmdResult);
 
             var result = await _sut.PushAppAsync(_fakeManifestPath, _fakeProjectPath, FakeOrg.OrgName, FakeSpace.SpaceName, _fakeOutCallback, _fakeErrCallback);
@@ -896,15 +896,15 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             _mockFileService.Setup(m => m.FileExists(_fakeManifestPath)).Returns(true);
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeSuccessCmdResult);
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeSuccessCmdResult);
 
             _mockCommandProcessService.Setup(m => m.
-                RunExecutable(_fakePathToCfExe, expectedArgs, _fakeProjectPath, _defaultEnvVars, _fakeOutCallback, _fakeErrCallback))
+                RunExecutable(_fakePathToCfExe, expectedArgs, _fakeProjectPath, _defaultEnvVars, _fakeOutCallback, _fakeErrCallback, null))
                     .Returns(_fakeFailureCmdResult);
 
             var result = await _sut.PushAppAsync(_fakeManifestPath, _fakeProjectPath, FakeOrg.OrgName, FakeSpace.SpaceName, _fakeOutCallback, _fakeErrCallback);
@@ -926,15 +926,15 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             _mockFileService.Setup(m => m.FileExists(_fakeManifestPath)).Returns(true);
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeSuccessCmdResult);
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeSuccessCmdResult);
-            
+
             _mockCommandProcessService.Setup(m => m.
-                RunExecutable(_fakePathToCfExe, expectedArgs, _fakeProjectPath, _defaultEnvVars, _fakeOutCallback, _fakeErrCallback))
+                RunExecutable(_fakePathToCfExe, expectedArgs, _fakeProjectPath, _defaultEnvVars, _fakeOutCallback, _fakeErrCallback, null))
                     .Returns(mockFailedResult);
 
             var result = await _sut.PushAppAsync(_fakeManifestPath, _fakeProjectPath, FakeOrg.OrgName, FakeSpace.SpaceName, _fakeOutCallback, _fakeErrCallback);
@@ -954,7 +954,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             _mockFileService.Setup(m => m.FileExists(_fakeManifestPath)).Returns(true);
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(invalidRefreshTokenCmdResult);
 
             Exception thrownException = null;
@@ -982,11 +982,11 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             _mockFileService.Setup(m => m.FileExists(_fakeManifestPath)).Returns(true);
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeSuccessCmdResult);
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(invalidRefreshTokenCmdResult);
 
             Exception thrownException = null;
@@ -1015,15 +1015,15 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             _mockFileService.Setup(m => m.FileExists(_fakeManifestPath)).Returns(true);
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeSuccessCmdResult);
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeSuccessCmdResult);
 
             _mockCommandProcessService.Setup(m => m.
-                RunExecutable(_fakePathToCfExe, expectedArgs, _fakeProjectPath, _defaultEnvVars, _fakeOutCallback, _fakeErrCallback))
+                RunExecutable(_fakePathToCfExe, expectedArgs, _fakeProjectPath, _defaultEnvVars, _fakeOutCallback, _fakeErrCallback, null))
                     .Returns(invalidRefreshTokenCmdResult);
 
             Exception thrownException = null;
@@ -1056,7 +1056,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             CommandResult mockCmdResult = new CommandResult(fakeCmdOutput, string.Empty, 0);
 
             _mockCommandProcessService.Setup(m => m.
-                RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null))
+                RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null, null))
                     .Returns(mockCmdResult);
 
             Version result = await _sut.GetApiVersion();
@@ -1073,7 +1073,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var expectedArgs = "api";
 
             _mockCommandProcessService.Setup(m => m.
-                RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null))
+                RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null, null))
                     .Returns(_fakeFailureCmdResult);
 
             Version result = await _sut.GetApiVersion();
@@ -1091,7 +1091,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             CommandResult mockCmdResult = new CommandResult(unparsableContent, string.Empty, 0);
 
             _mockCommandProcessService.Setup(m => m.
-                RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null))
+                RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null, null))
                     .Returns(_fakeFailureCmdResult);
 
             Version result = await _sut.GetApiVersion();
@@ -1113,15 +1113,15 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             CommandResult mockCmdResult = new CommandResult(fakeCmdOutput, string.Empty, 0);
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeSuccessCmdResult);
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeSuccessCmdResult);
 
             _mockCommandProcessService.Setup(m => m.
-                RunExecutable(_fakePathToCfExe, expectedLogsCmdArgs, null, _defaultEnvVars, null, null))
+                RunExecutable(_fakePathToCfExe, expectedLogsCmdArgs, null, _defaultEnvVars, null, null, null))
                     .Returns(mockCmdResult);
 
             var result = await _sut.GetRecentAppLogs(fakeAppName, FakeOrg.OrgName, FakeSpace.SpaceName);
@@ -1147,15 +1147,15 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             CommandResult mockCmdResult = new CommandResult(fakeCmdOutput, errorMsg, 1);
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeSuccessCmdResult);
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeSuccessCmdResult);
 
             _mockCommandProcessService.Setup(m => m.
-                RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null))
+                RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null, null))
                     .Returns(mockCmdResult);
 
             var result = await _sut.GetRecentAppLogs(fakeAppName, FakeOrg.OrgName, FakeSpace.SpaceName);
@@ -1175,7 +1175,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeFailureCmdResult);
 
             var result = await _sut.GetRecentAppLogs(fakeAppName, FakeOrg.OrgName, FakeSpace.SpaceName);
@@ -1196,11 +1196,11 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeSuccessCmdResult);
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeFailureCmdResult);
 
             var result = await _sut.GetRecentAppLogs(fakeAppName, FakeOrg.OrgName, FakeSpace.SpaceName);
@@ -1221,7 +1221,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var invalidRefreshTokenCmdResult = new CommandResult("junk output", CfCliService._invalidRefreshTokenError, 1);
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(invalidRefreshTokenCmdResult);
 
             Exception thrownException = null;
@@ -1249,11 +1249,11 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var invalidRefreshTokenCmdResult = new CommandResult("junk output", CfCliService._invalidRefreshTokenError, 1);
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeSuccessCmdResult);
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(invalidRefreshTokenCmdResult);
 
             Exception thrownException = null;
@@ -1281,15 +1281,15 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var invalidRefreshTokenCmdResult = new CommandResult("junk output", CfCliService._invalidRefreshTokenError, 1);
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeSuccessCmdResult);
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeSuccessCmdResult);
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null))
+              RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null, null))
                     .Returns(invalidRefreshTokenCmdResult);
 
             Exception thrownException = null;
@@ -1304,6 +1304,42 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
 
             Assert.IsNotNull(thrownException);
             Assert.IsTrue(thrownException is InvalidRefreshTokenException);
+        }
+
+        [TestMethod]
+        [TestCategory("LoginWithSsoPasscode")]
+        public async Task LoginWithSsoPasscode_ReturnsSuccessResult_WhenLoginCommandSucceeds()
+        {
+            const string fakePasscode = "fake sso passcode";
+            string expectedArgs = $"login -a \"{_fakeValidTarget}\" --sso-passcode \"{fakePasscode}\"";
+            var expectedProcessCancelTriggers = new List<string> { "OK", "Invalid passcode" };
+
+            _mockCommandProcessService.Setup(m => m.
+              RunExecutable(_fakePathToCfExe, expectedArgs, It.IsAny<string>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), expectedProcessCancelTriggers))
+                .Returns(_fakeSuccessCmdResult);
+
+            var result = await _sut.LoginWithSsoPasscode(_fakeValidTarget, fakePasscode);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+        }
+
+        [TestMethod]
+        [TestCategory("LoginWithSsoPasscode")]
+        public async Task LoginWithSsoPasscode_ReturnsFailureResult_WhenLoginCommandFails()
+        {
+            const string fakePasscode = "fake sso passcode";
+            string expectedArgs = $"login -a \"{_fakeValidTarget}\" --sso-passcode \"{fakePasscode}\"";
+            var expectedProcessCancelTriggers = new List<string> { "OK", "Invalid passcode" };
+
+            _mockCommandProcessService.Setup(m => m.
+              RunExecutable(_fakePathToCfExe, expectedArgs, It.IsAny<string>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), expectedProcessCancelTriggers))
+                .Returns(_fakeFailureCmdResult);
+
+            var result = await _sut.LoginWithSsoPasscode(_fakeValidTarget, fakePasscode);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual(_fakeFailureCmdResult.StdErr, result.Explanation);
         }
     }
 }

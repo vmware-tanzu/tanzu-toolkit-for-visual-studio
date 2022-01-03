@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
+using Tanzu.Toolkit.Services.DataPersistence;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.Threading;
 
@@ -17,6 +18,8 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string SingleLoginErrorTitle = "Unable to add more TAS connections.";
         internal const string SingleLoginErrorMessage1 = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
         internal const string SingleLoginErrorMessage2 = "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Application Service Explorer & re-connecting to a new one.";
+        internal const string ConnectionNameKey = "connection-name";
+        internal const string ConnectionAddressKey = "connection-api-address";
 
         private CfInstanceViewModel _tas;
         private volatile bool _isRefreshingAll = false;
@@ -28,15 +31,29 @@ namespace Tanzu.Toolkit.ViewModels
         private readonly IServiceProvider _services;
         private readonly IThreadingService _threadingService;
         private readonly IErrorDialog _dialogService;
+        private readonly IDataPersistenceService _dataPersistenceService;
 
         public TasExplorerViewModel(IServiceProvider services)
             : base(services)
         {
-            _dialogService = services.GetRequiredService<IErrorDialog>();
             _services = services;
+            _dialogService = services.GetRequiredService<IErrorDialog>();
             _threadingService = services.GetRequiredService<IThreadingService>();
+            _dataPersistenceService = services.GetRequiredService<IDataPersistenceService>();
 
-            TasConnection = null;
+            string existingSavedConnectionName = _dataPersistenceService.ReadStringData(ConnectionNameKey);
+            string existingSavedConnectionAddress = _dataPersistenceService.ReadStringData(ConnectionAddressKey);
+
+            if (existingSavedConnectionName == null || existingSavedConnectionAddress == null)
+            {
+                TasConnection = null;
+            }
+            else
+            {
+                var restoredConnection = new CloudFoundryInstance(name: existingSavedConnectionName, apiAddress: existingSavedConnectionAddress);
+
+                SetConnection(restoredConnection);
+            }
         }
 
         public CfInstanceViewModel TasConnection
@@ -217,18 +234,6 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 DialogService.ShowDialog(typeof(LoginViewModel).Name);
 
-                bool successfullyLoggedIn = TasConnection != null;
-
-                if (successfullyLoggedIn)
-                {
-                    AuthenticationRequired = false;
-                    IsLoggedIn = true;
-
-                    if (!ThreadingService.IsPolling)
-                    {
-                        ThreadingService.StartUiBackgroundPoller(RefreshAllItems, null, 10);
-                    }
-                }
             }
         }
 
@@ -424,6 +429,29 @@ namespace Tanzu.Toolkit.ViewModels
             if (TasConnection == null)
             {
                 TasConnection = new CfInstanceViewModel(cf, this, Services);
+
+                AuthenticationRequired = false;
+
+                IsLoggedIn = true;
+
+                if (!ThreadingService.IsPolling)
+                {
+                    ThreadingService.StartUiBackgroundPoller(RefreshAllItems, null, 10);
+                }
+
+                string existingSavedConnectionName = _dataPersistenceService.ReadStringData(ConnectionNameKey);
+
+                if (existingSavedConnectionName != cf.InstanceName)
+                {
+                    _dataPersistenceService.WriteStringData(ConnectionNameKey, TasConnection.CloudFoundryInstance.InstanceName);
+                }
+
+                string existingSavedConnectionAddress = _dataPersistenceService.ReadStringData(ConnectionAddressKey);
+
+                if (existingSavedConnectionAddress != cf.ApiAddress)
+                {
+                    _dataPersistenceService.WriteStringData(ConnectionAddressKey, TasConnection.CloudFoundryInstance.ApiAddress);
+                }
             }
         }
 

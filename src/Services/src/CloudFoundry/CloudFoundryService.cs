@@ -25,7 +25,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         internal const string CcApiVersionUndetectableErrTitle = "Unable to detect Cloud Controller API version.";
         internal const string CcApiVersionUndetectableErrMsg = "Failed to detect which version of the Cloud Controller API is being run on the provided instance; some features of this extension may not work properly.";
         internal const string LoginFailureMessage = "Login failed.";
-
+        internal const string CfApiSsoPromptKey = "passcode";
         private readonly ICfApiClient _cfApiClient;
         private readonly ICfCliService _cfCliService;
         private readonly IFileService _fileService;
@@ -45,7 +45,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             _logger = logSvc.Logger;
         }
 
-        public async Task<ConnectResult> ConnectToCFAsync(string targetApiAddress, string username, SecureString password, bool skipSsl)
+        public async Task<ConnectResult> LoginWithCredentials(string targetApiAddress, string username, SecureString password, bool skipSsl)
         {
             if (string.IsNullOrEmpty(targetApiAddress))
             {
@@ -113,6 +113,45 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 var errorMessage = string.Join(Environment.NewLine, errorMessages.ToArray());
                 return new ConnectResult(false, errorMessage);
             }
+        }
+
+        public async Task<DetailedResult<string>> GetSsoPrompt(string cfApiAddress)
+        {
+            try
+            {
+                var loginServerInfo = await _cfApiClient.GetLoginServerInformation(cfApiAddress);
+
+                if (loginServerInfo.Prompts.ContainsKey(CfApiSsoPromptKey)) 
+                {
+                    string ssoPasscodePrompt = loginServerInfo.Prompts[CfApiSsoPromptKey][1];
+
+                    return new DetailedResult<string>
+                    {
+                        Succeeded = true,
+                        Content = ssoPasscodePrompt,
+                    };
+                }
+
+                return new DetailedResult<string>
+                {
+                    Succeeded = false,
+                    Explanation = "Unable to determine SSO URL.",
+                    FailureType = FailureType.MissingSsoPrompt,
+                };
+            }
+            catch (Exception ex)
+            {
+                return new DetailedResult<string>
+                {
+                    Succeeded = false,
+                    Explanation = ex.Message,
+                };
+            }
+        }
+
+        public async Task<DetailedResult> LoginWithSsoPasscode(string cfApiAddress, string passcode)
+        {
+            return await _cfCliService.LoginWithSsoPasscode(cfApiAddress, passcode);
         }
 
         /// <summary>

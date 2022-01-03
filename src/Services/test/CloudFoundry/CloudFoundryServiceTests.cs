@@ -74,11 +74,11 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("ConnectToCfAsync")]
         public async Task ConnectToCFAsync_ThrowsExceptions_WhenParametersAreInvalid()
         {
-            await Assert.ThrowsExceptionAsync<ArgumentException>(() => _sut.ConnectToCFAsync(null, null, null, false));
-            await Assert.ThrowsExceptionAsync<ArgumentException>(() => _sut.ConnectToCFAsync(string.Empty, null, null, false));
-            await Assert.ThrowsExceptionAsync<ArgumentException>(() => _sut.ConnectToCFAsync("Junk", null, null, false));
-            await Assert.ThrowsExceptionAsync<ArgumentException>(() => _sut.ConnectToCFAsync("Junk", string.Empty, null, false));
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => _sut.ConnectToCFAsync("Junk", "Junk", null, false));
+            await Assert.ThrowsExceptionAsync<ArgumentException>(() => _sut.LoginWithCredentials(null, null, null, false));
+            await Assert.ThrowsExceptionAsync<ArgumentException>(() => _sut.LoginWithCredentials(string.Empty, null, null, false));
+            await Assert.ThrowsExceptionAsync<ArgumentException>(() => _sut.LoginWithCredentials("Junk", null, null, false));
+            await Assert.ThrowsExceptionAsync<ArgumentException>(() => _sut.LoginWithCredentials("Junk", string.Empty, null, false));
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => _sut.LoginWithCredentials("Junk", "Junk", null, false));
         }
 
         [TestMethod]
@@ -93,7 +93,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
                     .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
 
-            ConnectResult result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
+            ConnectResult result = await _sut.LoginWithCredentials(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
 
             Assert.IsTrue(result.IsLoggedIn);
             Assert.IsNull(result.ErrorMessage);
@@ -107,7 +107,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             _mockCfCliService.Setup(mock => mock.TargetApi(_fakeValidTarget, true))
                 .Returns(new DetailedResult(false, "fake failure message", _fakeFailureCmdResult));
 
-            ConnectResult result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
+            ConnectResult result = await _sut.LoginWithCredentials(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
 
             Assert.IsFalse(result.IsLoggedIn);
             Assert.IsTrue(result.ErrorMessage.Contains(CloudFoundryService.LoginFailureMessage));
@@ -123,7 +123,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             _mockCfCliService.Setup(mock => mock.AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
                 .ReturnsAsync(new DetailedResult(false, "fake failure message", _fakeFailureCmdResult));
 
-            ConnectResult result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
+            ConnectResult result = await _sut.LoginWithCredentials(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
 
             Assert.IsFalse(result.IsLoggedIn);
             Assert.IsTrue(result.ErrorMessage.Contains(CloudFoundryService.LoginFailureMessage));
@@ -140,7 +140,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 TargetApi(_fakeValidTarget, true))
                     .Returns(cfExeMissingResult);
 
-            ConnectResult result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
+            ConnectResult result = await _sut.LoginWithCredentials(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
 
             Assert.IsFalse(result.IsLoggedIn);
             Assert.IsTrue(result.ErrorMessage.Contains(CloudFoundryService.LoginFailureMessage));
@@ -156,7 +156,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             _mockCfCliService.Setup(mock => mock.AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
                 .ReturnsAsync(new DetailedResult(false, "fake failure message", null));
 
-            ConnectResult result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
+            ConnectResult result = await _sut.LoginWithCredentials(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
 
             Assert.IsFalse(result.IsLoggedIn);
             Assert.IsTrue(result.ErrorMessage.Contains(CloudFoundryService.LoginFailureMessage));
@@ -180,7 +180,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
                     .Throws(multilayeredException);
 
-            ConnectResult result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
+            ConnectResult result = await _sut.LoginWithCredentials(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
 
             Assert.IsTrue(result.ErrorMessage.Contains(baseMessage));
             Assert.IsTrue(result.ErrorMessage.Contains(innerMessage));
@@ -206,7 +206,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
               AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
                 .ReturnsAsync(fakeCfAuthResponse);
 
-            var result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
+            var result = await _sut.LoginWithCredentials(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
 
             _mockCfCliService.VerifyAll();
         }
@@ -231,7 +231,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             _mockFileService.SetupSet(m => m.
                 CliVersion = expectedCliVersion).Verifiable();
 
-            ConnectResult result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
+            ConnectResult result = await _sut.LoginWithCredentials(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
 
             _mockFileService.VerifyAll();
             _mockCfCliService.VerifyAll();
@@ -268,7 +268,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 _mockFileService.SetupSet(m => m.
                     CliVersion = expectedCliVersion).Verifiable();
 
-                ConnectResult result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
+                ConnectResult result = await _sut.LoginWithCredentials(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
 
                 _mockFileService.VerifyAll();
                 _mockCfCliService.VerifyAll();
@@ -303,7 +303,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 _mockFileService.SetupSet(m => m.
                     CliVersion = expectedCliVersion).Verifiable();
 
-                ConnectResult result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
+                ConnectResult result = await _sut.LoginWithCredentials(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
 
                 _mockFileService.VerifyAll();
                 _mockCfCliService.VerifyAll();
@@ -338,7 +338,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 _mockFileService.SetupSet(m => m.
                     CliVersion = expectedCliVersion).Verifiable();
 
-                ConnectResult result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
+                ConnectResult result = await _sut.LoginWithCredentials(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
 
                 _mockFileService.VerifyAll();
                 _mockCfCliService.VerifyAll();
@@ -373,7 +373,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 _mockFileService.SetupSet(m => m.
                     CliVersion = expectedCliVersion).Verifiable();
 
-                ConnectResult result = await _sut.ConnectToCFAsync(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
+                ConnectResult result = await _sut.LoginWithCredentials(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
 
                 _mockFileService.VerifyAll();
                 _mockCfCliService.VerifyAll();
@@ -1725,7 +1725,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNull(appManifest.Applications[0].Path); // ensure manifest app path null
 
             _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(true);
-            
+
             _mockFileService.Setup(mock => mock.GetUniquePathForTempFile(It.IsAny<string>())).Returns(_fakeManifestPath);
 
             _mockCfCliService.Setup(mock =>
@@ -2045,5 +2045,93 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
         }
 
+        [TestMethod]
+        [TestCategory("GetSsoPrompt")]
+        public async Task GetSsoPrompt_ReturnsSuccessfulResult_WhenLoginServerInfoRequestSucceeds()
+        {
+            var fakePasscode = "fake sso passcode";
+            var fakeLoginInfoResponse = new LoginInfoResponse
+            {
+                Prompts = new Dictionary<string, string[]>
+                {
+                    { CloudFoundryService.CfApiSsoPromptKey, new[] {"fake content type", fakePasscode}}
+                }
+            };
+
+            _mockCfApiClient.Setup(m => m.GetLoginServerInformation(_fakeValidTarget))
+                .ReturnsAsync(fakeLoginInfoResponse);
+
+            var result = await _sut.GetSsoPrompt(_fakeValidTarget);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.AreEqual(fakePasscode, result.Content);
+        }
+
+        [TestMethod]
+        [TestCategory("GetSsoPrompt")]
+        public async Task GetSsoPrompt_ReturnsFailedResult_WhenLoginServerInfoRequestThrowsException()
+        {
+            var fakeLoginInfoRequestFailure = new Exception("Pretending something went wrong while looking up login server info");
+
+            _mockCfApiClient.Setup(m => m.GetLoginServerInformation(_fakeValidTarget))
+                .Throws(fakeLoginInfoRequestFailure);
+
+            var result = await _sut.GetSsoPrompt(_fakeValidTarget);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual(fakeLoginInfoRequestFailure.Message, result.Explanation);
+            Assert.IsNull(result.Content);
+        }
+
+        [TestMethod]
+        [TestCategory("GetSsoPrompt")]
+        public async Task GetSsoPrompt_ReturnsFailedResult_WhenLoginServerInfoDoesNotContainSsoPromptKey()
+        {
+            var fakeLoginInfoResponse = new LoginInfoResponse
+            {
+                Prompts = new Dictionary<string, string[]>
+                {
+                    { "some irrelevant key", new[] {"fake content type", "some content"}}
+                }
+            };
+
+            _mockCfApiClient.Setup(m => m.GetLoginServerInformation(_fakeValidTarget))
+                .ReturnsAsync(fakeLoginInfoResponse);
+
+            var result = await _sut.GetSsoPrompt(_fakeValidTarget);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual("Unable to determine SSO URL.", result.Explanation);
+            Assert.IsNull(result.Content);
+        }
+
+        [TestMethod]
+        [TestCategory("LoginWithSsoPasscode")]
+        public async Task LoginWithSsoPasscode_ReturnsSuccessfulResult_WhenLoginSucceeds()
+        {
+            var fakePasscode = "fake sso passcode!";
+
+            _mockCfCliService.Setup(m => m.LoginWithSsoPasscode(_fakeValidTarget, fakePasscode))
+                .ReturnsAsync(_fakeSuccessDetailedResult);
+
+            var result = await _sut.LoginWithSsoPasscode(_fakeValidTarget, fakePasscode);
+
+            Assert.AreEqual(_fakeSuccessDetailedResult, result);
+        }
+
+        [TestMethod]
+        [TestCategory("LoginWithSsoPasscode")]
+        public async Task LoginWithSsoPasscode_ReturnsFailedResult_WhenLoginFails()
+        {
+            var fakePasscode = "fake sso passcode!";
+
+            _mockCfCliService.Setup(m => m.LoginWithSsoPasscode(_fakeValidTarget, fakePasscode))
+                .ReturnsAsync(_fakeFailureDetailedResult);
+
+            var result = await _sut.LoginWithSsoPasscode(_fakeValidTarget, fakePasscode);
+
+            Assert.AreEqual(_fakeFailureDetailedResult, result);
+        }
     }
 }

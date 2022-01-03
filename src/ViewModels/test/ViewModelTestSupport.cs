@@ -8,12 +8,14 @@ using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.CommandProcess;
+using Tanzu.Toolkit.Services.DataPersistence;
 using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
+using Tanzu.Toolkit.ViewModels.SsoDialog;
 using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.ViewModels.Tests
@@ -33,6 +35,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         protected Mock<IFileService> MockFileService { get; set; }
         protected Mock<ITasExplorerViewModel> MockTasExplorerViewModel { get; set; }
         protected Mock<ISerializationService> MockSerializationService { get; set; }
+        protected Mock<IDataPersistenceService> MockDataPersistenceService { get; set; }
+        protected Mock<ISsoDialogViewModel> MockSsoViewModel { get; set; }
+        protected Mock<ILoginViewModel> MockLoginViewModel { get; set; }
 
         protected const string FakeCfName = "fake cf name";
         protected const string FakeCfApiAddress = "http://fake.api.address";
@@ -202,6 +207,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockFileService = new Mock<IFileService>();
             MockTasExplorerViewModel = new Mock<ITasExplorerViewModel>();
             MockSerializationService = new Mock<ISerializationService>();
+            MockDataPersistenceService = new Mock<IDataPersistenceService>();
+            MockSsoViewModel = new Mock<ISsoDialogViewModel>();
+            MockLoginViewModel = new Mock<ILoginViewModel>();
 
             MockLogger = new Mock<ILogger>();
             MockLoggingService.SetupGet(m => m.Logger).Returns(MockLogger.Object);
@@ -216,6 +224,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             services.AddSingleton(MockTasExplorerViewModel.Object);
             services.AddSingleton(MockFileService.Object);
             services.AddSingleton(MockSerializationService.Object);
+            services.AddSingleton(MockDataPersistenceService.Object);
+            services.AddSingleton(MockSsoViewModel.Object);
+            services.AddSingleton(MockLoginViewModel.Object);
 
             Services = services.BuildServiceProvider();
         }

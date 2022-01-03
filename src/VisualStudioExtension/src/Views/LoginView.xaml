@@ -15,6 +15,7 @@
     Width="500"
     xmlns:toolkit="clr-namespace:Community.VisualStudio.Toolkit;assembly=Community.VisualStudio.Toolkit"
     xmlns:converters="clr-namespace:Tanzu.Toolkit.VisualStudio.Views.Converters"
+    xmlns:views="clr-namespace:Tanzu.Toolkit.VisualStudio.Views"
     toolkit:Themes.UseVsTheme="True"
     HasDialogFrame="False">
 
@@ -22,6 +23,8 @@
         <converters:VisibilityConverter x:Key="Visibility" />
         <converters:VisibilityConverter x:Key="CollapsedVisibility" ReserveSpace="False" />
         <converters:VisibilityConverter x:Key="InverseCollapsedVisibility" ReserveSpace="False" Reversed="True"/>
+        <converters:PageNumberConverter x:Key="Page1Displayer" ShowValue="1" ReserveSpace="False"/>
+        <converters:PageNumberConverter x:Key="Page2Displayer" ShowValue="2" ReserveSpace="False"/>
 
         <Style x:Key="ApiAddressFieldStyle" TargetType="{x:Type TextBox}">
             <Style.Triggers>
@@ -34,10 +37,19 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+
+        <Style x:Key="BoldTextButton" TargetType="{x:Type Button}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{Binding ElementName=LoginViewElement, Path=HyperlinkBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontWeight" Value="DemiBold"/>
+        </Style>
     </ui:DialogWindow.Resources>
 
     <StackPanel>
-        <StackPanel Orientation="Horizontal" Margin="12">
+        <StackPanel Name="Header"
+            Orientation="Horizontal"
+            Margin="12">
             <Image
                 Source="Resources/tasicon.png"
                 Width="32"
@@ -49,25 +61,138 @@
                 Margin="4"/>
         </StackPanel>
 
-        <StackPanel Margin="52,0">
-            <Label Content="Connection Name"/>
-            <TextBox 
-                Name="tbConnectionName"
-                HorizontalAlignment="Stretch"
-                Width="auto"
-                Text="{ Binding Path=ConnectionName }"/>
+        <StackPanel Name="Page1"
+                    Visibility="{Binding PageNum, Converter={StaticResource Page1Displayer}}"
+                    Margin="52,0">
 
-            <Label Content="TAS Api Address"/>
-            <TextBox
-                Text="{Binding Target}"
-                Name="tbUrl"
-                LostFocus="TbUrl_LostFocus"
-                HorizontalAlignment="Stretch"
-                Width="auto"/>
-            <TextBlock
-                Text="{Binding ApiAddressError}"
-                Foreground="Red"
-                Visibility="{Binding Path=ApiAddressIsValid, Converter={StaticResource InverseCollapsedVisibility}}"/>
+            <Label Content="API Address"/>
+
+            <Grid Name="TargetFields">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBox
+                    Text="{Binding Target}"
+                    Name="tbUrl"
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    LostFocus="TbUrl_LostFocus"
+                    HorizontalAlignment="Stretch"
+                    Width="auto"/>
+
+                <TextBlock
+                    IsHitTestVisible="False"
+                    Text="&lt;Required&gt;"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Left"
+                    Margin="8,0"
+                    Foreground="DarkGray"
+                    Grid.Column="0"
+                    Grid.Row="0">
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Text, ElementName=tbUrl}" Value="">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+
+                <TextBlock
+                    Text="{Binding ApiAddressError}"
+                    Foreground="Red"
+                    TextWrapping="Wrap"
+                    Grid.Row="1"
+                    Visibility="{Binding Path=ApiAddressIsValid, Converter={StaticResource InverseCollapsedVisibility}}"/>
+
+                <Label Content="Connection Name" Grid.Row="2"/>
+
+                <TextBox 
+                    Name="tbConnectionName"
+                    HorizontalAlignment="Stretch"
+                    Width="auto"
+                    Grid.Row="3"
+                    Text="{ Binding Path=ConnectionName }"/>
+
+                <TextBlock
+                        IsHitTestVisible="False"
+                        Text="&lt;Optional&gt;"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Left"
+                        Margin="8,0"
+                        Foreground="DarkGray"
+                        Grid.Column="0"
+                        Grid.Row="3">
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Text, ElementName=tbConnectionName}" Value="">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
+
+            <Grid Name="Page1Buttons" Margin="0,8,0,8">
+                <StackPanel
+                    Orientation="Horizontal"
+                    Margin="0,8"
+                    Height="auto"
+                    HorizontalAlignment="Right">
+
+                    <Button
+                        Content="Next"
+                        IsEnabled="{Binding ApiAddressIsValid}"
+                        Margin="4"
+                        Padding="4,0"
+                        HorizontalAlignment="Right"
+                        Visibility="{Binding VerifyingApiAddress, Converter={StaticResource InverseCollapsedVisibility}}"
+                        Command="{Binding ElementName=LoginViewElement, Path=IncrementPageCommand}"/>
+                    
+                    <Button
+                        Content="Verifying..."
+                        IsEnabled="False"
+                        Margin="4"
+                        Padding="4,0"
+                        HorizontalAlignment="Right"
+                        Visibility="{Binding VerifyingApiAddress, Converter={StaticResource CollapsedVisibility}}"/>
+                </StackPanel>
+
+                <StackPanel
+                    Orientation="Horizontal"
+                    Margin="0,8"
+                    Height="auto"
+                    HorizontalAlignment="Left">
+
+                    <Button
+                        Margin="4"
+                        Padding="4,0"
+                        Click="Close"
+                        Content="Cancel"/>
+                </StackPanel>
+
+            </Grid>
+        </StackPanel>
+
+        <StackPanel Name="Page2"
+                    Visibility="{Binding PageNum, Converter={StaticResource Page2Displayer}}"
+                    Margin="52,0">
 
             <Label Content="Username"/>
             <TextBox
@@ -94,36 +219,74 @@
                 MaxLines="3"
                 Background="Transparent"
                 Visibility="{Binding Path=HasErrors, Converter={StaticResource CollapsedVisibility}}"/>
+
+            <Grid x:Name="SsoOption"
+                  Visibility="{Binding SsoEnabledOnTarget, Converter={StaticResource CollapsedVisibility}}">
+                
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="5*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="5*"/>
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Separator Grid.Column="0" Grid.Row="0"/>
+
+                <TextBlock
+                    Text="or"
+                    Grid.Column="1"
+                    Grid.Row="0"
+                    Margin="8,8,8,8"
+                    HorizontalAlignment="Center"/>
+
+                <Separator Grid.Column="2" Grid.Row="0"/>
+
+                <Button
+                    Content="Sign in with SSO"
+                    Style="{StaticResource BoldTextButton}"
+                    Grid.Row="1"
+                    Grid.ColumnSpan="3"
+                    Command="{Binding ElementName=LoginViewElement, Path=SsoCommand}"/>
+            </Grid>
+
+
+            <Grid Name="Page2Buttons" Margin="0,8,0,8">
+                <StackPanel
+                    Orientation="Horizontal"
+                    Margin="0,8"
+                    Height="auto"
+                    HorizontalAlignment="Right">
+
+                    <Button
+                        Content="Log In"
+                        IsEnabled="{Binding ApiAddressIsValid}"
+                        Margin="4"
+                        Padding="4,0"
+                        HorizontalAlignment="Right"
+                        Command="{ Binding ElementName=LoginViewElement, Path=AddCloudCommand }" 
+                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
+
+                </StackPanel>
+
+                <StackPanel
+                    Orientation="Horizontal"
+                    Margin="0,8"
+                    Height="auto"
+                    HorizontalAlignment="Left">
+
+                    <Button
+                        Margin="4"
+                        Padding="4,0"
+                        Command="{Binding ElementName=LoginViewElement, Path=DecrementPageCommand}"
+                        Content="Back"/>
+                </StackPanel>
+
+            </Grid>
+
         </StackPanel>
-
-        <Grid>
-            <StackPanel
-                Orientation="Horizontal"
-                Margin="12"
-                Height="auto"
-                HorizontalAlignment="Right">
-
-                <Button
-                    Content="Log In"
-                    Margin="4"
-                    Padding="4,0"
-                    HorizontalAlignment="Right"
-                    Command="{ Binding ElementName=LoginViewElement, Path=AddCloudCommand }" 
-                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
-            </StackPanel>
-
-            <StackPanel
-                Orientation="Horizontal"
-                Margin="12"
-                Height="auto"
-                HorizontalAlignment="Left">
-
-                <Button
-                    Margin="4"
-                    Padding="4,0"
-                    Click="Close"
-                    Content="Cancel"/>
-            </StackPanel>
-        </Grid>
     </StackPanel>
 </ui:DialogWindow>

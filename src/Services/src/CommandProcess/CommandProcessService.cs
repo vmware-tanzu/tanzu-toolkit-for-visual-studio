@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
@@ -10,8 +11,10 @@ namespace Tanzu.Toolkit.Services.CommandProcess
         private StdErrDelegate _stdErrCallback;
         private string _stdOutAggregator = "";
         private string _stdErrAggregator = "";
+        private List<string> _cancelTriggers;
+        private int _customExitCode = 1;
 
-        public CommandResult RunExecutable(string executableFilePath, string arguments, string workingDir, Dictionary<string, string> envVars = null, StdOutDelegate stdOutDelegate = null, StdErrDelegate stdErrDelegate = null)
+        public CommandResult RunExecutable(string executableFilePath, string arguments, string workingDir, Dictionary<string, string> envVars = null, StdOutDelegate stdOutAction = null, StdErrDelegate stdErrAction = null, List<string> processCancelTriggers = null)
         {
             // Create Process
             Process process = new Process();
@@ -21,6 +24,7 @@ namespace Tanzu.Toolkit.Services.CommandProcess
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
             process.StartInfo.CreateNoWindow = true;
+
             if (workingDir != null)
             {
                 process.StartInfo.WorkingDirectory = workingDir;
@@ -36,8 +40,9 @@ namespace Tanzu.Toolkit.Services.CommandProcess
             }
 
             // Set output and error handlers
-            _stdOutCallback = stdOutDelegate;
-            _stdErrCallback = stdErrDelegate;
+            _cancelTriggers = processCancelTriggers ?? new List<string>();
+            _stdOutCallback = stdOutAction;
+            _stdErrCallback = stdErrAction;
             _stdOutAggregator = "";
             _stdErrAggregator = "";
             process.OutputDataReceived += new DataReceivedEventHandler(OutputRecorder);
@@ -51,7 +56,18 @@ namespace Tanzu.Toolkit.Services.CommandProcess
             // Begin blocking call
             process.WaitForExit();
 
-            return new CommandResult(_stdOutAggregator, _stdErrAggregator, process.ExitCode);
+            int exitCode;
+
+            try
+            {
+                exitCode = process.ExitCode; // throws InvalidOperationException if process has already been closed
+            }
+            catch (InvalidOperationException)
+            {
+                exitCode = _customExitCode;
+            }
+
+            return new CommandResult(_stdOutAggregator, _stdErrAggregator, exitCode);
         }
 
         private void OutputRecorder(object sendingProcess, DataReceivedEventArgs outLine)
@@ -61,6 +77,12 @@ namespace Tanzu.Toolkit.Services.CommandProcess
             {
                 _stdOutAggregator += $"{outContent}\n";
                 _stdOutCallback?.Invoke(outContent);
+
+                if (_cancelTriggers.Contains(outContent))
+                {
+                    _customExitCode = 0;
+                    (sendingProcess as Process)?.Close();
+                }
             }
         }
 
@@ -71,6 +93,12 @@ namespace Tanzu.Toolkit.Services.CommandProcess
             {
                 _stdErrAggregator += $"{errContent}\n";
                 _stdErrCallback?.Invoke(errContent);
+
+                if (_cancelTriggers.Contains(errContent))
+                {
+                    _customExitCode = 1;
+                    (sendingProcess as Process)?.Close();
+                }
             }
         }
     }

@@ -3,6 +3,7 @@ using System;
 using System.Security;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
+using Tanzu.Toolkit.ViewModels.SsoDialog;
 
 namespace Tanzu.Toolkit.ViewModels
 {
@@ -16,9 +17,14 @@ namespace Tanzu.Toolkit.ViewModels
         private bool _hasErrors;
         private string _errorMessage;
         private string _apiAddressError;
+        private int _currentPageNum = 1;
+        private bool _ssoEnabled = false;
+        private bool _verifyingApiAddress = false;
         private bool _apiAddressIsValid;
         private string _connectionName;
-        private ITasExplorerViewModel _tasExplorer;
+        private ISsoDialogViewModel _ssoDialog;
+
+        internal ITasExplorerViewModel _tasExplorer;
 
         public LoginViewModel(IServiceProvider services)
             : base(services)
@@ -28,6 +34,7 @@ namespace Tanzu.Toolkit.ViewModels
             ApiAddressIsValid = true;
 
             _tasExplorer = services.GetRequiredService<ITasExplorerViewModel>();
+            _ssoDialog = services.GetRequiredService<ISsoDialogViewModel>();
         }
 
         public string ConnectionName
@@ -123,30 +130,68 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
+        public int PageNum
+        {
+            get => _currentPageNum;
+
+            internal set
+            {
+                _currentPageNum = value;
+                RaisePropertyChangedEvent("PageNum");
+            }
+        }
+
+        public bool SsoEnabledOnTarget
+        {
+            get => _ssoEnabled;
+
+            private set
+            {
+                _ssoEnabled = value;
+                RaisePropertyChangedEvent("SsoEnabledOnTarget");
+            }
+        }
+
+        public bool VerifyingApiAddress
+        {
+            get => _verifyingApiAddress;
+
+            private set
+            {
+                _verifyingApiAddress = value;
+                RaisePropertyChangedEvent("VerifyingApiAddress");
+            }
+        }
+
         public Func<SecureString> GetPassword { get; set; }
 
         public Func<bool> PasswordEmpty { get; set; }
 
         public bool CanLogIn(object arg = null)
         {
-            return !(string.IsNullOrWhiteSpace(ConnectionName) || string.IsNullOrWhiteSpace(Target) || string.IsNullOrWhiteSpace(Username) || PasswordEmpty()) && VerifyApiAddress(Target);
+            return !(string.IsNullOrWhiteSpace(Target) || string.IsNullOrWhiteSpace(Username) || PasswordEmpty()) && ValidateApiAddress(Target);
+        }
+
+        public bool CanOpenSsoDialog(object arg = null)
+        {
+            return !string.IsNullOrWhiteSpace(Target) && ApiAddressIsValid;
         }
 
         public async Task LogIn(object arg)
         {
             HasErrors = false;
 
-            if (!VerifyApiAddress(Target))
+            if (!ValidateApiAddress(Target))
             {
                 return;
             }
 
-            var result = await CloudFoundryService.ConnectToCFAsync(Target, Username, GetPassword(), SkipSsl);
+            var result = await CloudFoundryService.LoginWithCredentials(Target, Username, GetPassword(), SkipSsl);
             ErrorMessage = result.ErrorMessage;
 
             if (result.IsLoggedIn)
             {
-                _tasExplorer.SetConnection(new CloudFoundryInstance(ConnectionName, Target));
+                SetConnection();
             }
 
             if (!HasErrors)
@@ -155,7 +200,30 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public bool VerifyApiAddress(string apiAddress)
+        public void SetConnection()
+        {
+            string name;
+
+            if (string.IsNullOrWhiteSpace(ConnectionName))
+            {
+                try
+                {
+                    name = new Uri(Target).Host;
+                }
+                catch
+                {
+                    name = "Tanzu Application Service";
+                }
+            }
+            else
+            {
+                name = ConnectionName;
+            }
+
+            _tasExplorer.SetConnection(new CloudFoundryInstance(name, Target));
+        }
+
+        public bool ValidateApiAddress(string apiAddress)
         {
             if (string.IsNullOrWhiteSpace(apiAddress))
             {
@@ -179,5 +247,65 @@ namespace Tanzu.Toolkit.ViewModels
                 return true;
             }
         }
+
+        public async Task OpenSsoDialog(object arg = null)
+        {
+            if (string.IsNullOrWhiteSpace(Target))
+            {
+                ErrorMessage = "Must specify an API address to log in via SSO.";
+            }
+            else
+            {
+                var ssoPromptResult = await CloudFoundryService.GetSsoPrompt(Target);
+
+                if (ssoPromptResult.Succeeded)
+                {
+                    var ssoUrlPrompt = ssoPromptResult.Content;
+
+                    _ssoDialog.ApiAddress = Target;
+                    _ssoDialog.ShowWithPrompt(ssoUrlPrompt, this);
+                }
+            }
+        }
+
+        public void CloseDialog()
+        {
+            DialogService.CloseDialogByName(nameof(LoginViewModel));
+        }
+
+        public async Task NavigateToAuthPage(object arg = null)
+        {
+            VerifyingApiAddress = true;
+
+            var ssoPromptResult = await CloudFoundryService.GetSsoPrompt(Target);
+
+            if (!ssoPromptResult.Succeeded && ssoPromptResult.FailureType != Toolkit.Services.FailureType.MissingSsoPrompt)
+            {
+                ApiAddressError = $"Unable to establish a connection with {Target}";
+
+                ApiAddressIsValid = false;
+
+                // do not navigate to authentication page
+            }
+            else // either prompt request suceeded or request failed specifically because SSO not enabled
+            {
+                SsoEnabledOnTarget = ssoPromptResult.Succeeded;
+
+                PageNum = 2; // navigate to auth page even if sso not enabled
+            }
+
+            VerifyingApiAddress = false;
+        }
+
+        public void NavigateToTargetPage(object arg = null)
+        {
+            PageNum = 1;
+        }
+
+        public bool CanProceedToAuthentication(object arg = null)
+        {
+            return ApiAddressIsValid && !string.IsNullOrWhiteSpace(Target);
+        }
+
     }
 }

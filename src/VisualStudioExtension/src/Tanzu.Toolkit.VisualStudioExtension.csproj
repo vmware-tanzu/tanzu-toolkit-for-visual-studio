@@ -46,6 +46,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Services\DataPersistenceService.cs" />
     <Compile Include="Services\IThemeService.cs" />
     <Compile Include="Services\ThemeService.cs" />
     <Compile Include="Services\ErrorDialogService.cs" />
@@ -57,10 +58,15 @@
     <Compile Include="Views\Commands\AsyncDelegatingCommand.cs" />
     <Compile Include="Views\Commands\DelegatingCommand.cs" />
     <Compile Include="Views\Converters\ListToStringConverter.cs" />
+    <Compile Include="Views\Converters\PageNumberConverter.cs" />
     <Compile Include="Views\Converters\VisibilityConverter.cs" />
+    <Compile Include="Views\ISsoDialogView.cs" />
     <Compile Include="Views\LoadingSpinnerSmall.cs" />
     <Compile Include="Views\LoginPromptButton.xaml.cs">
       <DependentUpon>LoginPromptButton.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SsoDialogView.xaml.cs">
+      <DependentUpon>SsoDialogView.xaml</DependentUpon>
     </Compile>
     <Compile Include="VSToolWindows\OutputToolWindow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -225,6 +231,10 @@
     <Page Include="Views\OutputView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\SsoDialogView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Styles\Styles.xaml">
       <Generator>MSBuild:Compile</Generator>
