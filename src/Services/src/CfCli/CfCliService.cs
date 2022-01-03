@@ -436,7 +436,6 @@ namespace Tanzu.Toolkit.Services.CfCli
             return new DetailedResult(false, reason, cmdResult: result);
         }
         
-        
         /// <summary>
         /// Initiate a CF CLI command process by invoking the <see cref="CommandProcessService"/>.
         /// This method is asynchronous, meaning it cannot be used within a lock statement.

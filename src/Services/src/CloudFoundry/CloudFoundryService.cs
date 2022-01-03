@@ -135,7 +135,6 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 return new DetailedResult<string>
                 {
                     Succeeded = false,
-                    Content = null,
                     Explanation = "Unable to determine SSO URL.",
                     FailureType = FailureType.MissingSsoPrompt,
                 };
@@ -145,7 +144,6 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 return new DetailedResult<string>
                 {
                     Succeeded = false,
-                    Content = null,
                     Explanation = ex.Message,
                 };
             }
