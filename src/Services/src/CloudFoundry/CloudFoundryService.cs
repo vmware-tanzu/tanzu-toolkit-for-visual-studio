@@ -994,6 +994,20 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             };
         }
 
+        /// <summary>
+        /// Attempts to retrieve cached access token
+        /// </summary>
+        /// <returns>
+        /// True if token is accessible and appears valid.
+        /// <para>
+        /// False otherwise.
+        /// </para>
+        /// </returns>
+        public bool IsValidConnection()
+        {
+            return _cfCliService.GetOAuthToken() != null;
+        }
+
         private void FormatExceptionMessage(Exception ex, List<string> message)
         {
             if (ex is AggregateException aex)

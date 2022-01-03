@@ -23,5 +23,6 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         Task<DetailedResult<string>> GetSsoPrompt(string cfApiAddress, bool skipSsl = false);
         Task<DetailedResult> LoginWithSsoPasscode(string cfApiAddress, string passcode);
         DetailedResult TargetApi(string targetApiAddress, bool skipSsl);
+        bool IsValidConnection();
     }
 }
