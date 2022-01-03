@@ -81,7 +81,6 @@ namespace Tanzu.Toolkit.Services.CommandProcess
                 if (_cancelTriggers.Contains(outContent))
                 {
                     _customExitCode = 0;
-
                     (sendingProcess as Process)?.Close();
                 }
             }
@@ -98,7 +97,6 @@ namespace Tanzu.Toolkit.Services.CommandProcess
                 if (_cancelTriggers.Contains(errContent))
                 {
                     _customExitCode = 1;
-
                     (sendingProcess as Process)?.Close();
                 }
             }
