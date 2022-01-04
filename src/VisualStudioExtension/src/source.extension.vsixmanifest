@@ -5,7 +5,8 @@
     <DisplayName>Tanzu Toolkit for Visual Studio</DisplayName>
     <Description xml:space="preserve">Administer your Tanzu Application Service instances directly from within Visual Studio! </Description>
     <MoreInfo>https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio</MoreInfo>
-    <Icon>tanzu32.png</Icon>
+    <License>..\..\..\LICENSE</License>
+    <Icon>tanzu90.png</Icon>
     <PreviewImage>tanzu200.png</PreviewImage>
     <Preview>true</Preview>
   </Metadata>

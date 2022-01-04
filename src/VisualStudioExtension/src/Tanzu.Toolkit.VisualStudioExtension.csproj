@@ -94,6 +94,10 @@
     <Compile Include="Services\VsToolWindowService.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\..\..\LICENSE">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
@@ -171,6 +175,10 @@
     </Content>
     <Content Include="tanzu32.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="tanzu90.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Resource Include="Views\Resources\blue_logout.png" />
