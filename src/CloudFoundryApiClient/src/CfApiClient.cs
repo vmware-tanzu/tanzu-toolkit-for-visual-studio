@@ -337,7 +337,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             if (trustAllCerts)
             {
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-
                 ServicePointManager.ServerCertificateValidationCallback +=
                     (sender, cert, chain, sslPolicyErrors) => { return true; };
             }

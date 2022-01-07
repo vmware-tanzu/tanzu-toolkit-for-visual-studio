@@ -69,7 +69,6 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         private void Close(object sender, RoutedEventArgs e)
         {
             Hide();
-
             _viewModel.NavigateToTargetPage();
         }
 

@@ -98,9 +98,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             catch (Exception e)
             {
                 var errorMessages = new List<string>();
-
                 FormatExceptionMessage(e, errorMessages);
-
                 var errorMessage = string.Join(Environment.NewLine, errorMessages.ToArray());
 
                 return new DetailedResult
