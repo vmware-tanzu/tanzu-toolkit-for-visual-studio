@@ -104,9 +104,7 @@ namespace Tanzu.Toolkit.ViewModels
             set
             {
                 _errorMessage = value;
-                
                 HasErrors = !string.IsNullOrWhiteSpace(value);
-
                 RaisePropertyChangedEvent("ErrorMessage");
             }
         }
@@ -173,7 +171,6 @@ namespace Tanzu.Toolkit.ViewModels
             set
             {
                 _certificateInvalid = value;
-
                 RaisePropertyChangedEvent("CertificateInvalid");
             }
         }
@@ -185,7 +182,6 @@ namespace Tanzu.Toolkit.ViewModels
             set
             {
                 _proceedWithInvalidCertificate = value;
-
                 RaisePropertyChangedEvent("ProceedWithInvalidCertificate");
             }
         }
@@ -220,13 +216,9 @@ namespace Tanzu.Toolkit.ViewModels
             if (result.Succeeded)
             {
                 ErrorMessage = null;
-
                 SetConnection();
-
                 DialogService.CloseDialog(arg, true);
-
                 PageNum = 1;
-
                 ClearPassword();
             }
             else
@@ -342,7 +334,6 @@ namespace Tanzu.Toolkit.ViewModels
                 else
                 {
                     ApiAddressError = $"Unable to establish a connection with {Target}";
-
                     ApiAddressIsValid = false;
                 }
             }
@@ -361,7 +352,6 @@ namespace Tanzu.Toolkit.ViewModels
         public bool CanProceedToAuthentication(object arg = null)
         {
             bool certValidOrBypassed = !CertificateInvalid || (CertificateInvalid && ProceedWithInvalidCertificate);
-
             return ApiAddressIsValid && !string.IsNullOrWhiteSpace(Target) && certValidOrBypassed;
         }
 
