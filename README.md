@@ -23,8 +23,9 @@ https://user-images.githubusercontent.com/22666145/144897999-087c5a76-b844-4bb4-
 
 
 ## Install
-- To install this extension, you will need Visual Studio version 16.0 or higher.
+- To install this extension, you will need Visual Studio 2019.
 - You can find a pre-release under the `v0.0.3` tag in the ["Releases" section of this repository](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/releases).
+- The latest build can be found [here on vsixgallery.com](https://www.vsixgallery.com/extension/TanzuToolkitForVisualStudio.ff7b6f3e-0410-4ff9-a40a-a719ee9da901)
 - Download the `Tanzu.Toolkit.VisualStudio.vsix` file & double-click to prompt an installation into your Visual Studio instance.
 - To uninstall this extension from Visual Studio, visit the Visual Studio Extension Manager found under the `Extensions` menu.
 
