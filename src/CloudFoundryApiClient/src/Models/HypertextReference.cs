@@ -6,5 +6,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Models
     {
         [JsonProperty("href")]
         public string Href { get; set; }
+
+        public override string ToString() => Href.ToString();
     }
 }
