@@ -24,12 +24,12 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         internal const string ListBuildpacksPath = "/v3/buildpacks";
         internal const string DeleteAppsPath = "/v3/apps";
         internal const string ListStacksPath = "/v3/stacks";
+        internal const string LoginInfoPath = "/login"; // the /login endpoint should be identical to the /info endpoint (for CF UAA v 75.10.0)
 
         internal const string DefaultAuthClientId = "cf";
         internal const string DefaultAuthClientSecret = "";
         internal const string AuthServerLookupFailureMessage = "Unable to locate authentication server";
         internal const string InvalidTargetUriMessage = "Invalid target URI";
-
         private readonly IUaaClient _uaaClient;
         private readonly HttpClient _httpClient;
 
@@ -338,7 +338,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
 
             var uri = new UriBuilder(loginServerUri)
             {
-                Path = "/login", // the /login endpoint should be identical to the /info endpoint (for CF UAA v 75.10.0)
+                Path = LoginInfoPath,
             };
 
             var request = new HttpRequestMessage(HttpMethod.Get, uri.ToString());
