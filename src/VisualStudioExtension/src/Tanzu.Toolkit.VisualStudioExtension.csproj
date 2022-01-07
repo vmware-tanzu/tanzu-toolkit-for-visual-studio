@@ -94,7 +94,8 @@
     <Compile Include="Services\VsToolWindowService.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\..\..\LICENSE">
+    <Content Include="..\..\..\LICENSE.txt">
+      <Link>LICENSE.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
