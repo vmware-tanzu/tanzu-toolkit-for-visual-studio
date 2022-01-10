@@ -34,6 +34,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         internal const string _startAppCmd = "start";
         internal const string _deleteAppCmd = "delete -f"; // -f avoids confirmation prompt
         internal const string _invalidRefreshTokenError = "The token expired, was revoked, or the token ID is incorrect. Please log back in to re-authenticate.";
+        internal const string _logoutCmd = "logout";
 
         private readonly IFileService _fileService;
         private readonly ILogger _logger;
@@ -395,6 +396,11 @@ namespace Tanzu.Toolkit.Services.CfCli
             return await loginTask;
         }
 
+        public DetailedResult Logout()
+        {
+            return ExecuteCfCliCommand(_logoutCmd);
+        }
+
         /// <summary>
         /// Invoke a CF CLI command using the <see cref="CommandProcessService"/>.
         /// This method is synchronous, meaning it can be used within a lock statement.
@@ -404,7 +410,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         /// <param name="stdErrCallback"></param>
         /// <param name="workingDir"></param>
         /// <returns>A <see cref="DetailedResult"/> containing the results of the CF command.</returns>
-        public DetailedResult ExecuteCfCliCommand(string arguments, string workingDir = null)
+        internal DetailedResult ExecuteCfCliCommand(string arguments, string workingDir = null)
         {
             string pathToCfExe = _fileService.FullPathToCfExe;
             if (string.IsNullOrEmpty(pathToCfExe))

@@ -64,7 +64,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockDataPersistenceService.Setup(m => m.ReadStringData(TasExplorerViewModel.ConnectionNameKey)).Returns((string)null);
             MockDataPersistenceService.Setup(m => m.ReadStringData(TasExplorerViewModel.ConnectionAddressKey)).Returns("junk non-null value");
             MockCloudFoundryService.Setup(m => m.IsValidConnection()).Returns(true);
-            
+
             _sut = new TasExplorerViewModel(Services);
 
             Assert.IsNull(_sut.TasConnection);
@@ -1022,6 +1022,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("LogOutTas")]
+        public void LogOutTas_ClearsCfAccessToken()
+        {
+            _sut.LogOutTas(_sut.TasConnection);
+
+            MockCloudFoundryService.Verify(m => m.LogoutCfUser(), Times.Once);
+        }
+
+        [TestMethod]
         [TestCategory("SetConnection")]
         public void SetConnection_UpdatesTasConnection_WithNewCfInfo_WhenTasConnectionIsNull()
         {
@@ -1080,7 +1089,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsNull(_sut.TasConnection);
 
             _sut.SetConnection(FakeCfInstance);
-            
+
             MockDataPersistenceService.Verify(m => m.WriteStringData(TasExplorerViewModel.ConnectionAddressKey, FakeCfInstance.ApiAddress), Times.Once);
         }
 
