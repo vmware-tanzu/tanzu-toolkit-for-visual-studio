@@ -22,6 +22,8 @@ namespace Tanzu.Toolkit.ViewModels
         private bool _verifyingApiAddress = false;
         private bool _apiAddressIsValid;
         private string _connectionName;
+        private bool _certificateInvalid = false;
+        private bool _proceedWithInvalidCertificate = false;
         private ISsoDialogViewModel _ssoDialog;
 
         internal ITasExplorerViewModel _tasExplorer;
@@ -55,6 +57,9 @@ namespace Tanzu.Toolkit.ViewModels
             set
             {
                 _target = value;
+
+                ResetTargetDependentFields();
+
                 RaisePropertyChangedEvent("Target");
             }
         }
@@ -99,11 +104,7 @@ namespace Tanzu.Toolkit.ViewModels
             set
             {
                 _errorMessage = value;
-                if (!string.IsNullOrEmpty(value))
-                {
-                    HasErrors = true;
-                }
-
+                HasErrors = !string.IsNullOrWhiteSpace(value);
                 RaisePropertyChangedEvent("ErrorMessage");
             }
         }
@@ -163,13 +164,37 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
+        public bool CertificateInvalid
+        {
+            get => _certificateInvalid;
+
+            set
+            {
+                _certificateInvalid = value;
+                RaisePropertyChangedEvent("CertificateInvalid");
+            }
+        }
+
+        public bool ProceedWithInvalidCertificate
+        {
+            get => _proceedWithInvalidCertificate;
+
+            set
+            {
+                _proceedWithInvalidCertificate = value;
+                RaisePropertyChangedEvent("ProceedWithInvalidCertificate");
+            }
+        }
+
         public Func<SecureString> GetPassword { get; set; }
+
+        public Action ClearPassword { get; set; }
 
         public Func<bool> PasswordEmpty { get; set; }
 
         public bool CanLogIn(object arg = null)
         {
-            return !(string.IsNullOrWhiteSpace(Target) || string.IsNullOrWhiteSpace(Username) || PasswordEmpty()) && ValidateApiAddress(Target);
+            return !(string.IsNullOrWhiteSpace(Target) || string.IsNullOrWhiteSpace(Username) || PasswordEmpty()) && ValidateApiAddressFormat(Target);
         }
 
         public bool CanOpenSsoDialog(object arg = null)
@@ -181,22 +206,24 @@ namespace Tanzu.Toolkit.ViewModels
         {
             HasErrors = false;
 
-            if (!ValidateApiAddress(Target))
+            if (!ValidateApiAddressFormat(Target))
             {
                 return;
             }
 
-            var result = await CloudFoundryService.LoginWithCredentials(Target, Username, GetPassword(), SkipSsl);
-            ErrorMessage = result.ErrorMessage;
+            var result = await CloudFoundryService.LoginWithCredentials(Target, Username, GetPassword(), skipSsl: ProceedWithInvalidCertificate);
 
-            if (result.IsLoggedIn)
+            if (result.Succeeded)
             {
+                ErrorMessage = null;
                 SetConnection();
-            }
-
-            if (!HasErrors)
-            {
                 DialogService.CloseDialog(arg, true);
+                PageNum = 1;
+                ClearPassword();
+            }
+            else
+            {
+                ErrorMessage = result.Explanation;
             }
         }
 
@@ -223,28 +250,21 @@ namespace Tanzu.Toolkit.ViewModels
             _tasExplorer.SetConnection(new CloudFoundryInstance(name, Target));
         }
 
-        public bool ValidateApiAddress(string apiAddress)
+        public bool ValidateApiAddressFormat(string apiAddress)
         {
-            if (string.IsNullOrWhiteSpace(apiAddress))
-            {
-                ApiAddressError = TargetEmptyMessage;
-                ApiAddressIsValid = false;
-
-                return false;
-            }
-            else if (!Uri.IsWellFormedUriString(apiAddress, UriKind.Absolute))
-            {
-                ApiAddressError = TargetInvalidFormatMessage;
-                ApiAddressIsValid = false;
-
-                return false;
-            }
-            else
+            if (Uri.IsWellFormedUriString(apiAddress, UriKind.Absolute) || string.IsNullOrWhiteSpace(apiAddress))
             {
                 ApiAddressError = null;
                 ApiAddressIsValid = true;
 
                 return true;
+            }
+            else
+            {
+                ApiAddressError = TargetInvalidFormatMessage;
+                ApiAddressIsValid = false;
+
+                return false;
             }
         }
 
@@ -277,21 +297,45 @@ namespace Tanzu.Toolkit.ViewModels
         {
             VerifyingApiAddress = true;
 
-            var ssoPromptResult = await CloudFoundryService.GetSsoPrompt(Target);
+            var certTestResult = CloudFoundryService.TargetApi(Target, skipSsl: ProceedWithInvalidCertificate);
 
-            if (!ssoPromptResult.Succeeded && ssoPromptResult.FailureType != Toolkit.Services.FailureType.MissingSsoPrompt)
+            if (certTestResult.Succeeded)
             {
-                ApiAddressError = $"Unable to establish a connection with {Target}";
+                var ssoPromptResult = await CloudFoundryService.GetSsoPrompt(Target, skipSsl: ProceedWithInvalidCertificate);
 
-                ApiAddressIsValid = false;
+                if (ssoPromptResult.Succeeded)
+                {
+                    SsoEnabledOnTarget = true;
 
-                // do not navigate to authentication page
+                    PageNum = 2;
+                }
+                else
+                {
+                    switch (ssoPromptResult.FailureType)
+                    {
+                        case Toolkit.Services.FailureType.MissingSsoPrompt:
+                            SsoEnabledOnTarget = false;
+                            PageNum = 2;
+                            break;
+
+                        default:
+                            ApiAddressError = $"Unable to establish a connection with {Target}";
+                            ApiAddressIsValid = false;
+                            break;
+                    }
+                }
             }
-            else // either prompt request suceeded or request failed specifically because SSO not enabled
+            else
             {
-                SsoEnabledOnTarget = ssoPromptResult.Succeeded;
-
-                PageNum = 2; // navigate to auth page even if sso not enabled
+                if (certTestResult.FailureType == Toolkit.Services.FailureType.InvalidCertificate)
+                {
+                    CertificateInvalid = true;
+                }
+                else
+                {
+                    ApiAddressError = $"Unable to establish a connection with {Target}";
+                    ApiAddressIsValid = false;
+                }
             }
 
             VerifyingApiAddress = false;
@@ -300,12 +344,29 @@ namespace Tanzu.Toolkit.ViewModels
         public void NavigateToTargetPage(object arg = null)
         {
             PageNum = 1;
+
+            // clear previous login errors
+            ErrorMessage = null;
         }
 
         public bool CanProceedToAuthentication(object arg = null)
         {
-            return ApiAddressIsValid && !string.IsNullOrWhiteSpace(Target);
+            bool certValidOrBypassed = !CertificateInvalid || (CertificateInvalid && ProceedWithInvalidCertificate);
+            return ApiAddressIsValid && !string.IsNullOrWhiteSpace(Target) && certValidOrBypassed;
         }
 
+        public void ResetTargetDependentFields()
+        {
+            // reset invalid cert warning
+            CertificateInvalid = false;
+            ProceedWithInvalidCertificate = false;
+
+            // clear previous creds
+            Username = null;
+            ClearPassword();
+
+            // clear previous errors
+            ErrorMessage = null;
+        }
     }
 }

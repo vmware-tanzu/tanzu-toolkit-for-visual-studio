@@ -8,7 +8,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 {
     public interface ICloudFoundryService
     {
-        Task<ConnectResult> LoginWithCredentials(string target, string username, SecureString password, bool skipSsl);
+        Task<DetailedResult> LoginWithCredentials(string target, string username, SecureString password, bool skipSsl);
         Task<DetailedResult<List<CloudFoundryOrganization>>> GetOrgsForCfInstanceAsync(CloudFoundryInstance cf, bool skipSsl = true, int retryAmount = 1);
         Task<DetailedResult<List<CloudFoundrySpace>>> GetSpacesForOrgAsync(CloudFoundryOrganization org, bool skipSsl = true, int retryAmount = 1);
         Task<DetailedResult<List<CloudFoundryApp>>> GetAppsForSpaceAsync(CloudFoundrySpace space, bool skipSsl = true, int retryAmount = 1);
@@ -20,7 +20,8 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         DetailedResult CreateManifestFile(string location, AppManifest manifest);
         Task<DetailedResult> DeployAppAsync(AppManifest appManifest, string defaultAppPath, CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback);
         Task<DetailedResult<List<string>>> GetStackNamesAsync(CloudFoundryInstance cf, int retryAmount = 1);
-        Task<DetailedResult<string>> GetSsoPrompt(string cfApiAddress);
+        Task<DetailedResult<string>> GetSsoPrompt(string cfApiAddress, bool skipSsl = false);
         Task<DetailedResult> LoginWithSsoPasscode(string cfApiAddress, string passcode);
+        DetailedResult TargetApi(string targetApiAddress, bool skipSsl);
     }
 }

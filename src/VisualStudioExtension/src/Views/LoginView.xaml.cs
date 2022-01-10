@@ -40,6 +40,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
             viewModel.GetPassword = GetPassword;
             viewModel.PasswordEmpty = PasswordBoxEmpty;
+            viewModel.ClearPassword = ClearPassword;
             DataContext = viewModel;
             _viewModel = viewModel;
             
@@ -55,6 +56,11 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             return pbPassword.SecurePassword;
         }
 
+        public void ClearPassword()
+        {
+            pbPassword.Clear();
+        }
+
         public bool PasswordBoxEmpty()
         {
             return string.IsNullOrWhiteSpace(pbPassword.Password);
@@ -63,6 +69,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         private void Close(object sender, RoutedEventArgs e)
         {
             Hide();
+            _viewModel.NavigateToTargetPage();
         }
 
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
@@ -75,8 +82,12 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         private void TbUrl_LostFocus(object sender, RoutedEventArgs e)
         {
-            _viewModel.ValidateApiAddress(tbUrl.Text);
         }
 
+        private void TbUrl_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            _viewModel.ValidateApiAddressFormat(tbUrl.Text);
+            _viewModel.ResetTargetDependentFields();
+        }
     }
 }
