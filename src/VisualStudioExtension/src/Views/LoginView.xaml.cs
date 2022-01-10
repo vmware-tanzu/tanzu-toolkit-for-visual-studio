@@ -80,12 +80,9 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             }
         }
 
-        private void TbUrl_LostFocus(object sender, RoutedEventArgs e)
-        {
-        }
-
         private void TbUrl_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
+            _viewModel.Target = tbUrl.Text; // update property *before* focus is lost from text box 
             _viewModel.ValidateApiAddressFormat(tbUrl.Text);
             _viewModel.ResetTargetDependentFields();
         }
