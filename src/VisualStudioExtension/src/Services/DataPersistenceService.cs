@@ -85,5 +85,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services
                 return false;
             }
         }
+
+        public bool ClearDataFromProperty(string key)
+        {
+            return _writableSettingsStore.DeleteProperty(tasCollectionPath, key);
+        }
     }
 }

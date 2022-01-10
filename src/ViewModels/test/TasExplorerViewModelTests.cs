@@ -1007,8 +1007,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsFalse(_sut.TasConnection.IsExpanded);
         }
 
+        [TestMethod]
         [TestCategory("LogOutTas")]
-        public void LogOutTas_SetsTasConnectionToNull_AndSetsIsLoggedInToFalse()
+        public void LogOutTas_SetsTasConnectionToNull_AndSetsIsLoggedInToFalse_AndClearsConnectionCache()
         {
             _sut.TasConnection = _fakeTasConnection;
             _sut.IsLoggedIn = true;
@@ -1019,6 +1020,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsNull(_sut.TasConnection);
             Assert.IsFalse(_sut.IsLoggedIn);
+
+            MockDataPersistenceService.Verify(m => m.ClearDataFromProperty(TasExplorerViewModel.ConnectionNameKey), Times.Once);
+            MockDataPersistenceService.Verify(m => m.ClearDataFromProperty(TasExplorerViewModel.ConnectionAddressKey), Times.Once);
         }
 
         [TestMethod]
