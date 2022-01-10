@@ -2,7 +2,7 @@
 {
     public interface IDataPersistenceService
     {
-        bool ClearDataFromProperty(string key);
+        bool ClearData(string key);
         string ReadStringData(string key);
         bool WriteStringData(string key, string value);
     }
