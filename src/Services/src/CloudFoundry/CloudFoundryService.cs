@@ -1008,6 +1008,12 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             return _cfCliService.GetOAuthToken() != null;
         }
 
+        public void LogoutCfUser()
+        {
+            _cfCliService.Logout();
+            _cfCliService.ClearCachedAccessToken();
+        }
+
         private void FormatExceptionMessage(Exception ex, List<string> message)
         {
             if (ex is AggregateException aex)

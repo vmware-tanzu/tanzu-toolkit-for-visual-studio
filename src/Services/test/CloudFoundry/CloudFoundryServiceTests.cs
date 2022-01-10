@@ -2100,5 +2100,15 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             Assert.AreEqual(_fakeFailureDetailedResult, result);
         }
+
+        [TestMethod]
+        [TestCategory("LogoutCfUser")]
+        public void LogoutCfUser_InvokesCfLogout_AndClearsCachedAccessToken()
+        {
+            _sut.LogoutCfUser();
+
+            _mockCfCliService.Verify(m => m.Logout(), Times.Once);
+            _mockCfCliService.Verify(m => m.ClearCachedAccessToken(), Times.Once);
+        }
     }
 }
