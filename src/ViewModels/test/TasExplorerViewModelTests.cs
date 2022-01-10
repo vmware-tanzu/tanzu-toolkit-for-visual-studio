@@ -1021,8 +1021,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsNull(_sut.TasConnection);
             Assert.IsFalse(_sut.IsLoggedIn);
 
-            MockDataPersistenceService.Verify(m => m.ClearDataFromProperty(TasExplorerViewModel.ConnectionNameKey), Times.Once);
-            MockDataPersistenceService.Verify(m => m.ClearDataFromProperty(TasExplorerViewModel.ConnectionAddressKey), Times.Once);
+            MockDataPersistenceService.Verify(m => m.ClearData(TasExplorerViewModel.ConnectionNameKey), Times.Once);
+            MockDataPersistenceService.Verify(m => m.ClearData(TasExplorerViewModel.ConnectionAddressKey), Times.Once);
         }
 
         [TestMethod]
