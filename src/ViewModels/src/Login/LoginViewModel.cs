@@ -57,9 +57,6 @@ namespace Tanzu.Toolkit.ViewModels
             set
             {
                 _target = value;
-
-                ResetTargetDependentFields();
-
                 RaisePropertyChangedEvent("Target");
             }
         }
