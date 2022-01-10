@@ -10,7 +10,6 @@ namespace Tanzu.Toolkit.Services.CfCli
         string GetOAuthToken();
         DetailedResult TargetApi(string apiAddress, bool skipSsl);
         Task<DetailedResult> AuthenticateAsync(string username, SecureString password);
-        DetailedResult ExecuteCfCliCommand(string arguments, string workingDir = null);
         DetailedResult TargetOrg(string orgName);
         DetailedResult TargetSpace(string spaceName);
         Task<DetailedResult> StopAppByNameAsync(string appName);
@@ -21,5 +20,6 @@ namespace Tanzu.Toolkit.Services.CfCli
         void ClearCachedAccessToken();
         Task<DetailedResult> PushAppAsync(string manifestPath, string appDirPath, string orgName, string spaceName, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback);
         Task<DetailedResult> LoginWithSsoPasscode(string apiAddress, string passcode);
+        DetailedResult Logout();
     }
 }

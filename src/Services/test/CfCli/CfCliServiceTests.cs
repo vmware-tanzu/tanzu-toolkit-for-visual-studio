@@ -1341,5 +1341,35 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             Assert.IsFalse(result.Succeeded);
             Assert.AreEqual(_fakeFailureCmdResult.StdErr, result.Explanation);
         }
+
+        [TestMethod]
+        [TestCategory("Logout")]
+        public void Logout_ReturnsSuccessResult_WhenLogoutCommandSucceeds()
+        {
+            string expectedArgs = "logout";
+
+            _mockCommandProcessService.Setup(m => m.RunExecutable(It.IsAny<string>(), expectedArgs, It.IsAny<string>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), It.IsAny<List<string>>()))
+                .Returns(_fakeSuccessCmdResult);
+
+            var result = _sut.Logout();
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+        }
+
+        [TestMethod]
+        [TestCategory("Logout")]
+        public void Logout_ReturnsFailureResult_WhenLogoutCommandFails()
+        {
+            string expectedArgs = "logout";
+
+            _mockCommandProcessService.Setup(m => m.RunExecutable(It.IsAny<string>(), expectedArgs, It.IsAny<string>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), It.IsAny<List<string>>()))
+                .Returns(_fakeFailureCmdResult);
+
+            var result = _sut.Logout();
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual(_fakeFailureCmdResult.StdErr, result.Explanation);
+        }
     }
 }
