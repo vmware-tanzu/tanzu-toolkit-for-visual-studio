@@ -13,7 +13,7 @@ variables:
   - name: minor
     value: 0
   - name: patch
-    value: 4 
+    value: 4
   - name: DOTNET_SKIP_FIRST_TIME_EXPERIENCE
     value: true
   - name: DOTNET_CLI_TELEMETRY_OPTOUT
@@ -38,12 +38,12 @@ steps:
     versionSpec: 5.11.0
 
 # NuGet
-# Restore, pack, or push NuGet packages, or run a NuGet command. 
-# Supports NuGet.org and authenticated feeds like Azure Artifacts and MyGet. 
+# Restore, pack, or push NuGet packages, or run a NuGet command.
+# Supports NuGet.org and authenticated feeds like Azure Artifacts and MyGet.
 # Uses NuGet.exe and works with .NET Framework apps. For .NET Core and .NET Standard apps, use the .NET Core task.
 - task: NuGetCommand@2
   inputs:
-    command: 'restore' 
+    command: 'restore'
     restoreSolution: '**/*.sln'
     restoreDirectory: # If no folder is specified, packages are restored into a packages/ folder alongside the selected solution
 
@@ -51,16 +51,16 @@ steps:
 # Build with MSBuild and set the Visual Studio version property
 - task: VSBuild@1
   inputs:
-    solution: '**/*.sln' 
+    solution: '**/*.sln'
     configuration: $(buildConfiguration)
 
 - task: DotNetCoreCLI@2
   displayName: Test
   inputs:
-    command: test 
+    command: test
     projects: '**/test/*.Tests.csproj'
     arguments: '--no-build --configuration $(buildConfiguration) --collect "XPlat Code Coverage" /p:CoverletOutputFormat=cobertura'
-    
+
 - task: Palmmedia.reportgenerator.reportgenerator-build-release-task.reportgenerator@4
   inputs:
     reports: $(Agent.TempDirectory)/**/coverage.cobertura.xml
@@ -75,6 +75,7 @@ steps:
 
 - task: CmdLine@2
   displayName: Rename vsix file to include version number
+
   inputs:
     script: cd "$(Build.SourcesDirectory)\src\VisualStudioExtension\src\bin\$(buildConfiguration)\" && ren *.vsix *.$(Build.BuildNumber).vsix
 
