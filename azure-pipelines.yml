@@ -79,5 +79,5 @@ steps:
 #   inputs:
 #     script: cd "$(Build.SourcesDirectory)\src\VisualStudioExtension\src\bin\$(buildConfiguration)\" && ren *.vsix *.$(Build.BuildNumber).vsix
 
-- publish: 'src/VisualStudioExtension/src/bin/$(buildConfiguration)/Tanzu.Toolkit.VisualStudio.$(Build.BuildNumber).vsix'
+- publish: 'src/VisualStudioExtension/src/bin/$(buildConfiguration)/Tanzu.Toolkit.VisualStudio.*.vsix'
   artifact: Tanzu.Toolkit
