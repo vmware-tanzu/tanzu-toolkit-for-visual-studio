@@ -73,11 +73,11 @@ steps:
     codeCoverageTool: cobertura
     summaryFileLocation: $(build.artifactstagingdirectory)/TestResults/cobertura.xml
 
-# - task: CmdLine@2
-#   displayName: Rename vsix file to include version number
+- task: CmdLine@2
+  displayName: Rename vsix file to include version number
 
-#   inputs:
-#     script: cd "$(Build.SourcesDirectory)\src\VisualStudioExtension\src\bin\$(buildConfiguration)\" && ren *.vsix *.$(Build.BuildNumber).vsix
+  inputs:
+    script: cd "$(Build.SourcesDirectory)\src\VisualStudioExtension\src\bin\$(buildConfiguration)\" && ren *.vsix *.$(Build.BuildNumber).vsix
 
 - publish: 'src/VisualStudioExtension/src/bin/$(buildConfiguration)/Tanzu.Toolkit.VisualStudio.$(Build.BuildNumber).vsix'
   artifact: Tanzu.Toolkit
