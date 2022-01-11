@@ -23,12 +23,12 @@ name: $(major).$(minor).$(patch)-build$(Rev:.r) # Set the value of $(Build.Build
 
 steps:
   # Run PowerShell script to sync vsix version with build number
-- task: PowerShell@2
-  displayName: Update version in the vsix manifest
-  inputs:
-    filePath: 'build\update-version.ps1'
-    arguments: '$(Build.BuildNumber)'
-    pwsh: true
+# - task: PowerShell@2
+#   displayName: Update version in the vsix manifest
+#   inputs:
+#     filePath: 'build\update-version.ps1'
+#     arguments: '$(Build.BuildNumber)'
+#     pwsh: true
 
 # NuGet tool installer
 # Acquires a specific version of NuGet from the internet or the tools cache and adds it to the PATH. Use this task to change the version of NuGet used in the NuGet tasks.
@@ -73,11 +73,11 @@ steps:
     codeCoverageTool: cobertura
     summaryFileLocation: $(build.artifactstagingdirectory)/TestResults/cobertura.xml
 
-- task: CmdLine@2
-  displayName: Rename vsix file to include version number
+# - task: CmdLine@2
+#   displayName: Rename vsix file to include version number
 
-  inputs:
-    script: cd "$(Build.SourcesDirectory)\src\VisualStudioExtension\src\bin\$(buildConfiguration)\" && ren *.vsix *.$(Build.BuildNumber).vsix
+#   inputs:
+#     script: cd "$(Build.SourcesDirectory)\src\VisualStudioExtension\src\bin\$(buildConfiguration)\" && ren *.vsix *.$(Build.BuildNumber).vsix
 
 - publish: 'src/VisualStudioExtension/src/bin/$(buildConfiguration)/Tanzu.Toolkit.VisualStudio.$(Build.BuildNumber).vsix'
   artifact: Tanzu.Toolkit
