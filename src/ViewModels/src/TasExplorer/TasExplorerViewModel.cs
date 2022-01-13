@@ -461,6 +461,8 @@ namespace Tanzu.Toolkit.ViewModels
             TasConnection = null;
             IsLoggedIn = false;
             CloudFoundryService.LogoutCfUser();
+            _dataPersistenceService.ClearData(ConnectionNameKey);
+            _dataPersistenceService.ClearData(ConnectionAddressKey);
         }
 
         public void ReAuthenticate(object arg)

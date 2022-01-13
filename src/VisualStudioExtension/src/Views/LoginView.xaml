@@ -87,7 +87,6 @@
                     Name="tbUrl"
                     Grid.Row="0"
                     Grid.Column="0"
-                    LostFocus="TbUrl_LostFocus"
                     TextChanged="TbUrl_TextChanged"
                     HorizontalAlignment="Stretch"
                     Width="auto"/>
