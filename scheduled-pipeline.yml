@@ -14,4 +14,3 @@ pool:
 
 steps:
 - bash: curl -v https://environments.toolsmiths.cf-app.com/custom_gcp_environments/338/renew
-- bash: curl -v https://environments.toolsmiths.cf-app.com/custom_gcp_environments/239/renew
