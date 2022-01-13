@@ -4,12 +4,99 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Name="OutputViewElement">
     
+    <UserControl.Resources>
+        <Style x:Key="ToggleButtonStyle" TargetType="{x:Type ToggleButton}">
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Width" Value="32px"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center"                  
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="IsMouseOver" Value="True" />
+                        <Condition Property="IsChecked" Value="True" />
+                    </MultiTrigger.Conditions>
+                    <MultiTrigger.Setters>
+                        <Setter Property="Background" Value="{Binding ElementName=OutputViewElement, Path=WindowPanelBrush}" />
+                        <Setter Property="BorderBrush" Value="{Binding ElementName=OutputViewElement, Path=WindowButtonDownBorderBrush}" />
+                    </MultiTrigger.Setters>
+                </MultiTrigger>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="IsMouseOver" Value="True" />
+                        <Condition Property="IsChecked" Value="False" />
+                    </MultiTrigger.Conditions>
+                    <MultiTrigger.Setters>
+                        <Setter Property="Background" Value="{Binding ElementName=OutputViewElement, Path=ListItemMouseOverBrush}" />
+                        <Setter Property="BorderBrush" Value="Transparent" />
+                    </MultiTrigger.Setters>
+                </MultiTrigger>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="IsMouseOver" Value="False" />
+                        <Condition Property="IsChecked" Value="True" />
+                    </MultiTrigger.Conditions>
+                    <MultiTrigger.Setters>
+                        <Setter Property="Background" Value="{Binding ElementName=OutputViewElement, Path=WindowButtonDownHoverBrush}" />
+                        <Setter Property="BorderBrush" Value="{Binding ElementName=OutputViewElement, Path=WindowButtonDownBorderBrush}" />
+                    </MultiTrigger.Setters>
+                </MultiTrigger>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="IsMouseOver" Value="False" />
+                        <Condition Property="IsChecked" Value="False" />
+                    </MultiTrigger.Conditions>
+                    <MultiTrigger.Setters>
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="BorderBrush" Value="Transparent" />
+                    </MultiTrigger.Setters>
+                </MultiTrigger>
+            </Style.Triggers>
+        </Style>
+        
+        <ControlTemplate x:Key="ToggleButtonTemplate" TargetType="{x:Type ToggleButton}">
+            <ContentPresenter/>
+        </ControlTemplate>
+    </UserControl.Resources>
+    
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="32"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <ScrollViewer x:Name="OutputScrollViewer" VerticalScrollBarVisibility="Auto">
+        <StackPanel
+            Orientation="Horizontal"
+            Grid.Row="0">
+            <ToggleButton x:Name="autoScrollToggleBtn"
+                ToolTip="Auto Scroll"
+                Style="{DynamicResource ToggleButtonStyle}"
+                Click="ToggleButton_Click">
+                <Image
+                    Source="Resources/ScrollBox.png"
+                    Stretch="Uniform"
+                    Width="16px"
+                    Height="16px"
+                    Margin="6"
+                    />
+            </ToggleButton>
+        </StackPanel>
+        
+        <ScrollViewer
+            x:Name="OutputScrollViewer"
+            Grid.Row="1"
+            ScrollChanged="OutputScrollViewer_ScrollChanged"
+            VerticalScrollBarVisibility="Auto">
             <TextBox
                 Text="{Binding OutputContent}"
                 FontFamily="Courier New"

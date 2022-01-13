@@ -1,8 +1,12 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.VisualStudio.Services;
+using Tanzu.Toolkit.VisualStudio.Views.Commands;
 
 namespace Tanzu.Toolkit.VisualStudio.Views
 {
@@ -14,6 +18,16 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         private IServiceProvider _services;
 
         public IViewModel ViewModel { get; private set; }
+
+        public static readonly DependencyProperty ListItemMouseOverBrushProperty = DependencyProperty.Register("ListItemMouseOverBrush", typeof(Brush), typeof(OutputView), new PropertyMetadata(default(Brush)));
+        public static readonly DependencyProperty WindowButtonDownBorderBrushProperty = DependencyProperty.Register("WindowButtonDownBorderBrush", typeof(Brush), typeof(OutputView), new PropertyMetadata(default(Brush)));
+        public static readonly DependencyProperty WindowButtonDownHoverBrushProperty = DependencyProperty.Register("WindowButtonDownHoverBrush", typeof(Brush), typeof(OutputView), new PropertyMetadata(default(Brush)));
+        public static readonly DependencyProperty WindowPanelBrushProperty = DependencyProperty.Register("WindowPanelBrush", typeof(Brush), typeof(OutputView), new PropertyMetadata(default(Brush)));
+
+        public Brush ListItemMouseOverBrush { get { return (Brush)GetValue(ListItemMouseOverBrushProperty); } set { SetValue(ListItemMouseOverBrushProperty, value); } }
+        public Brush WindowButtonDownBorderBrush { get { return (Brush)GetValue(WindowButtonDownBorderBrushProperty); } set { SetValue(WindowButtonDownBorderBrushProperty, value); } }
+        public Brush WindowButtonDownHoverBrush { get { return (Brush)GetValue(WindowButtonDownHoverBrushProperty); } set { SetValue(WindowButtonDownHoverBrushProperty, value); } }
+        public Brush WindowPanelBrush { get { return (Brush)GetValue(WindowPanelBrushProperty); } set { SetValue(WindowPanelBrushProperty, value); } }
 
         public OutputView()
         {
@@ -45,12 +59,22 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         /// <param name="e"></param>
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            var offset = OutputScrollViewer.VerticalOffset;
-
-            if (offset == (OutputScrollViewer.ExtentHeight - OutputScrollViewer.ViewportHeight))
+            bool scrollBarAtBottom = OutputScrollViewer.VerticalOffset == (OutputScrollViewer.ExtentHeight - OutputScrollViewer.ViewportHeight);
+            if (scrollBarAtBottom)
             {
                 OutputScrollViewer.ScrollToBottom();
             }
+        }
+
+        private void ToggleButton_Click(object sender, RoutedEventArgs e)
+        {
+            OutputScrollViewer.ScrollToBottom();
+        }
+
+        private void OutputScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            bool scrollBarAtBottom = OutputScrollViewer.VerticalOffset == (OutputScrollViewer.ExtentHeight - OutputScrollViewer.ViewportHeight);
+            autoScrollToggleBtn.IsChecked = scrollBarAtBottom;
         }
     }
 }
