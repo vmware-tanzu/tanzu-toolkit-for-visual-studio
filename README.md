@@ -1,6 +1,8 @@
 # tanzu-toolkit-for-visual-studio
 
-The `TanzuToolkit` solution provides an extension for Visual Studio that enables management of Tanzu Application Service environments directly within the IDE. This product is still under development; releases are not officially supported. 
+[![Build Status](https://dev.azure.com/TanzuDevX/DevX/_apis/build/status/Build%2C%20Test%20%26%20Package%20VSIX?branchName=main)](https://dev.azure.com/TanzuDevX/DevX/_build/latest?definitionId=3&branchName=main)
+
+The `TanzuToolkit` solution provides an extension for Visual Studio that enables management of Tanzu Application Service environments directly within the IDE. This product is still under development; releases are not officially supported.
 
 **Disclaimer:** SSL certificates are not validated when connecting to Tanzu Application Service using this extension.
 
