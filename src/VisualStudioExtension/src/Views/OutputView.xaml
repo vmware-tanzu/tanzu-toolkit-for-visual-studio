@@ -96,8 +96,9 @@
             x:Name="OutputScrollViewer"
             Grid.Row="1"
             ScrollChanged="OutputScrollViewer_ScrollChanged"
-            VerticalScrollBarVisibility="Auto">
-            <TextBox
+            VerticalScrollBarVisibility="Auto"
+            HorizontalScrollBarVisibility="Auto">
+            <TextBox Name="ContentBox"
                 Text="{Binding OutputContent}"
                 FontFamily="Courier New"
                 Margin="4"

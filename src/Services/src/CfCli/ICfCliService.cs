@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Security;
 using System.Threading.Tasks;
-using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.Services.CfCli
 {
@@ -18,8 +18,9 @@ namespace Tanzu.Toolkit.Services.CfCli
         Task<Version> GetApiVersion();
         Task<DetailedResult<string>> GetRecentAppLogs(string appName, string orgName, string spaceName);
         void ClearCachedAccessToken();
-        Task<DetailedResult> PushAppAsync(string manifestPath, string appDirPath, string orgName, string spaceName, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback);
+        Task<DetailedResult> PushAppAsync(string manifestPath, string appDirPath, string orgName, string spaceName, Action<string> stdOutCallback, Action<string> stdErrCallback);
         Task<DetailedResult> LoginWithSsoPasscode(string apiAddress, string passcode);
         DetailedResult Logout();
+        DetailedResult<Process> StreamAppLogs(string appName, string orgName, string spaceName, Action<string> stdOutCallback, Action<string> stdErrCallback);
     }
 }

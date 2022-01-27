@@ -2,13 +2,13 @@
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Services.CommandProcess;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
-using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.Services.CfCli
 {
@@ -306,7 +306,7 @@ namespace Tanzu.Toolkit.Services.CfCli
             return result;
         }
 
-        public async Task<DetailedResult> PushAppAsync(string manifestPath, string appDirPath, string orgName, string spaceName, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback)
+        public async Task<DetailedResult> PushAppAsync(string manifestPath, string appDirPath, string orgName, string spaceName, Action<string> stdOutCallback, Action<string> stdErrCallback)
         {
             string args = $"push -f \"{manifestPath}\"";
 
@@ -380,7 +380,50 @@ namespace Tanzu.Toolkit.Services.CfCli
 
             return new DetailedResult<string>(content, succeeded, explanation, cmdDetails);
         }
-        
+
+        public DetailedResult<Process> StreamAppLogs(string appName, string orgName, string spaceName, Action<string> stdOutCallback, Action<string> stdErrCallback)
+        {
+            var args = $"logs \"{appName}\"";
+            Process logsProcess = null;
+
+            lock (_cfEnvironmentLock)
+            {
+                var targetOrgResult = TargetOrg(orgName);
+                if (!targetOrgResult.Succeeded)
+                {
+                    return new DetailedResult<Process>
+                    {
+                        Succeeded = false,
+                        Explanation = $"Unable to target org '{orgName}'",
+                    };
+                }
+
+                var targetSpaceResult = TargetSpace(spaceName);
+                if (!targetSpaceResult.Succeeded)
+                {
+                    return new DetailedResult<Process>
+                    {
+                        Succeeded = false,
+                        Explanation = $"Unable to target space '{spaceName}'",
+                    };
+                }
+
+                logsProcess = StartCfProcess(args, stdOutCallback, stdErrCallback);
+            }
+
+            return logsProcess == null
+                ? new DetailedResult<Process>
+                {
+                    Succeeded = false,
+                    Explanation = $"Failed to start logs stream process for app {appName}",
+                }
+                : new DetailedResult<Process>
+                {
+                    Succeeded = true,
+                    Content = logsProcess,
+                };
+        }
+
         public async Task<DetailedResult> LoginWithSsoPasscode(string apiAddress, string passcode)
         {
             string args = $"login -a \"{apiAddress}\" --sso-passcode \"{passcode}\"";
@@ -446,7 +489,7 @@ namespace Tanzu.Toolkit.Services.CfCli
 
             return new DetailedResult(false, reason, cmdResult: result);
         }
-        
+
         /// <summary>
         /// Initiate a CF CLI command process by invoking the <see cref="CommandProcessService"/>.
         /// This method is asynchronous, meaning it cannot be used within a lock statement.
@@ -457,7 +500,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         /// <param name="workingDir"></param>
         /// <param name="cancellationTriggers"></param>
         /// <returns>An awaitable <see cref="Task"/> which will return a <see cref="DetailedResult"/> containing the results of the CF command.</returns>
-        internal async Task<DetailedResult> RunCfCommandAsync(string arguments, StdOutDelegate stdOutCallback = null, StdErrDelegate stdErrCallback = null, string workingDir = null, List<string> cancellationTriggers = null)
+        internal async Task<DetailedResult> RunCfCommandAsync(string arguments, Action<string> stdOutCallback = null, Action<string> stdErrCallback = null, string workingDir = null, List<string> cancellationTriggers = null)
         {
             string pathToCfExe = _fileService.FullPathToCfExe;
             if (string.IsNullOrEmpty(pathToCfExe))
@@ -492,6 +535,31 @@ namespace Tanzu.Toolkit.Services.CfCli
             }
 
             return new DetailedResult(false, reason, cmdResult: result);
+        }
+
+        private Process StartCfProcess(string arguments, Action<string> stdOutCallback = null, Action<string> stdErrCallback = null, string workingDir = null, List<string> cancellationTriggers = null)
+        {
+            string pathToCfExe = _fileService.FullPathToCfExe;
+            if (string.IsNullOrEmpty(pathToCfExe))
+            {
+                _logger.Error($"CfCliService tried to start command 'cf {arguments}' but was unable to locate cf.exe.");
+                return null;
+            }
+
+            var envVars = new Dictionary<string, string>
+            {
+                { "CF_HOME", ConfigFilePath }
+            };
+
+            ICommandProcessService cmdProcessService = Services.GetRequiredService<ICommandProcessService>();
+            return cmdProcessService.StartProcess(
+                pathToCfExe,
+                arguments,
+                workingDir,
+                envVars,
+                stdOutCallback,
+                stdErrCallback,
+                processCancelTriggers: cancellationTriggers);
         }
 
         private string FormatToken(string tokenStr)

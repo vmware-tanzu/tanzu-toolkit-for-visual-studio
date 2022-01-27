@@ -70,7 +70,7 @@ namespace Tanzu.Toolkit.ViewModels
             _errorDialogService = services.GetRequiredService<IErrorDialog>();
             TasExplorerViewModel = services.GetRequiredService<ITasExplorerViewModel>();
 
-            IView outputView = ViewLocatorService.NavigateTo(nameof(ViewModels.OutputViewModel)) as IView;
+            IView outputView = ViewLocatorService.GetViewByViewModelName(nameof(ViewModels.OutputViewModel)) as IView;
             OutputViewModel = outputView?.ViewModel as IOutputViewModel;
 
             DeploymentInProgress = false;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace Tanzu.Toolkit.ViewModels
 {
@@ -20,10 +21,18 @@ namespace Tanzu.Toolkit.ViewModels
                 RaisePropertyChangedEvent("OutputContent");
             }
         }
+        
+        public Process ActiveProcess { get; set; }
 
         public void AppendLine(string newContent)
         {
             OutputContent += $"{newContent}\n";
+        }
+
+        public void CancelActiveProcess()
+        {
+            ActiveProcess?.Kill();
+            ActiveProcess?.Dispose();
         }
     }
 }
