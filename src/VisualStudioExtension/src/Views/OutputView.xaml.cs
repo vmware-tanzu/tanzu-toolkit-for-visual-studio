@@ -1,12 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.VisualStudio.Services;
-using Tanzu.Toolkit.VisualStudio.Views.Commands;
 
 namespace Tanzu.Toolkit.VisualStudio.Views
 {
@@ -16,6 +13,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
     public partial class OutputView : UserControl, IOutputView, IView
     {
         private IServiceProvider _services;
+        private IOutputViewModel _viewModel;
 
         public IViewModel ViewModel { get; private set; }
 
@@ -39,15 +37,22 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             _services = services;
             themeService.SetTheme(this);
             DataContext = viewModel;
+            _viewModel = viewModel;
             ViewModel = viewModel as IViewModel;
+
             InitializeComponent();
         }
 
         public void Show()
         {
-            var viewService = _services.GetRequiredService<IViewService>();
-            viewService.DisplayViewByType(GetType());
+            DisplayView?.Invoke();
         }
+
+        /// <summary>
+        /// This action starts null; the expectation is that VsToolWindowService will provide 
+        /// a method which is able to display the tool window associated with this view.
+        /// </summary>
+        public Action DisplayView { get; set; }
 
         /// <summary>
         /// If scroll viewer is already scrolled all the way down, scroll to

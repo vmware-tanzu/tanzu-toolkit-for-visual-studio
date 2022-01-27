@@ -4,13 +4,14 @@ using Moq;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Security;
 using System.Threading.Tasks;
+using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CommandProcess;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
-using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.Services.Tests.CfCli
 {
@@ -156,7 +157,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             string expectedWorkingDir = null;
 
             _mockCommandProcessService.Setup(mock => mock.
-                RunExecutable(_fakePathToCfExe, _fakeArguments, expectedWorkingDir, _defaultEnvVars, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), null))
+                RunExecutable(_fakePathToCfExe, _fakeArguments, expectedWorkingDir, _defaultEnvVars, It.IsAny<Action<string>>(), It.IsAny<Action<string>>(), null))
                     .Returns(_fakeSuccessResult);
 
             DetailedResult result = await _sut.RunCfCommandAsync(_fakeArguments, null);
@@ -175,7 +176,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var sut = new CfCliService(fakeConfigFilePath, _services);
 
             _mockCommandProcessService.Setup(mock => mock.
-                RunExecutable(_fakePathToCfExe, _fakeArguments, expectedWorkingDir, expectedEnvVars, It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), null))
+                RunExecutable(_fakePathToCfExe, _fakeArguments, expectedWorkingDir, expectedEnvVars, It.IsAny<Action<string>>(), It.IsAny<Action<string>>(), null))
                     .Returns(_fakeSuccessResult);
 
             DetailedResult result = await sut.RunCfCommandAsync(_fakeArguments, null);
@@ -1315,7 +1316,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var expectedProcessCancelTriggers = new List<string> { "OK", "Invalid passcode" };
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedArgs, It.IsAny<string>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), expectedProcessCancelTriggers))
+              RunExecutable(_fakePathToCfExe, expectedArgs, It.IsAny<string>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<Action<string>>(), It.IsAny<Action<string>>(), expectedProcessCancelTriggers))
                 .Returns(_fakeSuccessCmdResult);
 
             var result = await _sut.LoginWithSsoPasscode(_fakeValidTarget, fakePasscode);
@@ -1333,7 +1334,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var expectedProcessCancelTriggers = new List<string> { "OK", "Invalid passcode" };
 
             _mockCommandProcessService.Setup(m => m.
-              RunExecutable(_fakePathToCfExe, expectedArgs, It.IsAny<string>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), expectedProcessCancelTriggers))
+              RunExecutable(_fakePathToCfExe, expectedArgs, It.IsAny<string>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<Action<string>>(), It.IsAny<Action<string>>(), expectedProcessCancelTriggers))
                 .Returns(_fakeFailureCmdResult);
 
             var result = await _sut.LoginWithSsoPasscode(_fakeValidTarget, fakePasscode);
@@ -1348,7 +1349,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         {
             string expectedArgs = "logout";
 
-            _mockCommandProcessService.Setup(m => m.RunExecutable(It.IsAny<string>(), expectedArgs, It.IsAny<string>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), It.IsAny<List<string>>()))
+            _mockCommandProcessService.Setup(m => m.RunExecutable(It.IsAny<string>(), expectedArgs, It.IsAny<string>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<Action<string>>(), It.IsAny<Action<string>>(), It.IsAny<List<string>>()))
                 .Returns(_fakeSuccessCmdResult);
 
             var result = _sut.Logout();
@@ -1363,13 +1364,142 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         {
             string expectedArgs = "logout";
 
-            _mockCommandProcessService.Setup(m => m.RunExecutable(It.IsAny<string>(), expectedArgs, It.IsAny<string>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<StdOutDelegate>(), It.IsAny<StdErrDelegate>(), It.IsAny<List<string>>()))
+            _mockCommandProcessService.Setup(m => m.RunExecutable(It.IsAny<string>(), expectedArgs, It.IsAny<string>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<Action<string>>(), It.IsAny<Action<string>>(), It.IsAny<List<string>>()))
                 .Returns(_fakeFailureCmdResult);
 
             var result = _sut.Logout();
 
             Assert.IsFalse(result.Succeeded);
             Assert.AreEqual(_fakeFailureCmdResult.StdErr, result.Explanation);
+        }
+
+        [TestMethod]
+        [TestCategory("StreamAppLogs")]
+        public void StreamAppLogs_ReturnsSuccessResult_WhenLogStreamProcessIsSuccessfullyStarted()
+        {
+            using (var fakeStartedProcess = new Process())
+            {
+                string expectedPathToExecutable = _fakePathToCfExe;
+                var expectedArgs = $"logs \"{FakeApp.AppName}\"";
+                string expectedWorkingDir = null;
+                Dictionary<string, string> expectedEnvVars = _defaultEnvVars;
+                Action<string> expectedStdOutDel = _fakeOutCallback;
+                Action<string> expectedStdErrDel = _fakeErrCallback;
+                List<string> expectedCancelTriggers = null;
+
+                _mockCommandProcessService.Setup(m => m.StartProcess(
+                    expectedPathToExecutable,
+                    expectedArgs,
+                    expectedWorkingDir,
+                    expectedEnvVars,
+                    expectedStdOutDel,
+                    expectedStdErrDel,
+                    expectedCancelTriggers)).Returns(fakeStartedProcess);
+
+                MockTargetOrgAndTargetSpace(FakeOrg, FakeSpace);
+
+                var result = _sut.StreamAppLogs(FakeApp.AppName, FakeOrg.OrgName, FakeSpace.SpaceName, _fakeOutCallback, _fakeErrCallback);
+
+                Assert.IsTrue(result.Succeeded);
+                Assert.AreEqual(fakeStartedProcess, result.Content);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("StreamAppLogs")]
+        public void StreamAppLogs_ReturnsFailedResult_WhenLogStreamProcessFailsToStart()
+        {
+            string expectedPathToExecutable = _fakePathToCfExe;
+            var expectedArgs = $"logs \"{FakeApp.AppName}\"";
+            string expectedWorkingDir = null;
+            Dictionary<string, string> expectedEnvVars = _defaultEnvVars;
+            Action<string> expectedStdOutDel = _fakeOutCallback;
+            Action<string> expectedStdErrDel = _fakeErrCallback;
+            List<string> expectedCancelTriggers = null;
+
+            _mockCommandProcessService.Setup(m => m.StartProcess(
+                expectedPathToExecutable,
+                expectedArgs,
+                expectedWorkingDir,
+                expectedEnvVars,
+                expectedStdOutDel,
+                expectedStdErrDel,
+                expectedCancelTriggers)).Returns((Process)null);
+
+            MockTargetOrgAndTargetSpace(FakeOrg, FakeSpace);
+
+            var result = _sut.StreamAppLogs(FakeApp.AppName, FakeOrg.OrgName, FakeSpace.SpaceName, _fakeOutCallback, _fakeErrCallback);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual($"Failed to start logs stream process for app {FakeApp.AppName}", result.Explanation);
+        }
+
+        [TestMethod]
+        [TestCategory("StreamAppLogs")]
+        public void StreamAppLogs_ReturnsFailedResult_WhenTargetOrgFails()
+        {
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
+
+            _mockCommandProcessService.Setup(m => m.
+              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null, null))
+                .Returns(_fakeFailureCmdResult);
+
+            var result = _sut.StreamAppLogs(FakeApp.AppName, FakeOrg.OrgName, FakeSpace.SpaceName, _fakeOutCallback, _fakeErrCallback);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual($"Unable to target org '{FakeOrg.OrgName}'", result.Explanation);
+        }
+
+        [TestMethod]
+        [TestCategory("StreamAppLogs")]
+        public void StreamAppLogs_ReturnsFailedResult_WhenTargetSpaceFails()
+        {
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{FakeOrg.OrgName}\""; // ensure org name gets surrounded by quotes
+            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{FakeSpace.SpaceName}\""; // ensure space name gets surrounded by quotes
+
+            _mockCommandProcessService.Setup(m => m.
+              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null, null))
+                .Returns(_fakeSuccessCmdResult);
+
+            _mockCommandProcessService.Setup(m => m.
+              RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null, null))
+                .Returns(_fakeFailureCmdResult);
+
+            var result = _sut.StreamAppLogs(FakeApp.AppName, FakeOrg.OrgName, FakeSpace.SpaceName, _fakeOutCallback, _fakeErrCallback);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual($"Unable to target space '{FakeSpace.SpaceName}'", result.Explanation);
+        }
+        
+        [TestMethod]
+        [TestCategory("StreamAppLogs")]
+        public void StreamAppLogs_ReturnsFailedResult_WhenCfExecutableCannotBeFound()
+        {
+            MockTargetOrgAndTargetSpace(FakeOrg, FakeSpace);
+
+            _mockFileService.SetupSequence(m => m.FullPathToCfExe)
+                .Returns(_fakePathToCfExe) // successfully target org
+                .Returns(_fakePathToCfExe) // successfully target space
+                .Returns((string)null); // fumble on starting logs process
+
+            var result = _sut.StreamAppLogs(FakeApp.AppName, FakeOrg.OrgName, FakeSpace.SpaceName, _fakeOutCallback, _fakeErrCallback);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual($"Failed to start logs stream process for app {FakeApp.AppName}", result.Explanation);
+        }
+
+        private void MockTargetOrgAndTargetSpace(CloudFoundryOrganization org, CloudFoundrySpace space)
+        {
+            var expectedTargetOrgCmdArgs = $"{CfCliService._targetOrgCmd} \"{org.OrgName}\""; // ensure org name gets surrounded by quotes
+            var expectedTargetSpaceCmdArgs = $"{CfCliService._targetSpaceCmd} \"{space.SpaceName}\""; // ensure space name gets surrounded by quotes
+
+            _mockCommandProcessService.Setup(m => m.
+              RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null, null))
+                .Returns(_fakeSuccessCmdResult);
+
+            _mockCommandProcessService.Setup(m => m.
+              RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null, null))
+                .Returns(_fakeSuccessCmdResult);
         }
     }
 }

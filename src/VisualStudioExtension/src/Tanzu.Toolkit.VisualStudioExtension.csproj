@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Services\DataPersistenceService.cs" />
     <Compile Include="Services\IThemeService.cs" />
+    <Compile Include="Services\IToolWindowService.cs" />
     <Compile Include="Services\ThemeService.cs" />
     <Compile Include="Services\ErrorDialogService.cs" />
     <Compile Include="Commands\OpenLogsCommand.cs" />
@@ -63,6 +64,7 @@
     <Compile Include="Views\Converters\ListToStringConverter.cs" />
     <Compile Include="Views\Converters\PageNumberConverter.cs" />
     <Compile Include="Views\Converters\VisibilityConverter.cs" />
+    <Compile Include="Views\IOutputView.cs" />
     <Compile Include="Views\ISsoDialogView.cs" />
     <Compile Include="Views\IAppDeletionConfirmationView.cs" />
     <Compile Include="Views\LoadingSpinnerSmall.cs" />
@@ -82,9 +84,7 @@
     </Compile>
     <Compile Include="Views\IDeploymentDialogView.cs" />
     <Compile Include="Views\ILoginView.cs" />
-    <Compile Include="Views\IOutputView.cs" />
     <Compile Include="Views\ITasExplorerView.cs" />
-    <Compile Include="Services\IViewService.cs" />
     <Compile Include="Views\LoginView.xaml.cs">
       <DependentUpon>LoginView.xaml</DependentUpon>
     </Compile>
