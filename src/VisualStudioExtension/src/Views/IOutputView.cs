@@ -3,5 +3,6 @@
     public interface IOutputView
     {
         void InitializeComponent();
+        void Show();
     }
 }

@@ -8,6 +8,7 @@ using Tanzu.Toolkit.Services.DataPersistence;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.ViewModels.AppDeletionConfirmation;
+using Tanzu.Toolkit.Services.ViewLocator;
 
 namespace Tanzu.Toolkit.ViewModels
 {
@@ -29,20 +30,20 @@ namespace Tanzu.Toolkit.ViewModels
         private bool _authenticationRequired;
         private bool _isLoggedIn;
         private ObservableCollection<TreeViewItemViewModel> treeRoot;
-        private readonly IServiceProvider _services;
         private readonly IThreadingService _threadingService;
-        private readonly IErrorDialog _dialogService;
+        private readonly IErrorDialog _errorDialogService;
         private readonly IDataPersistenceService _dataPersistenceService;
         private readonly IAppDeletionConfirmationViewModel _confirmDelete;
+        private readonly IViewLocatorService _viewLocatorService;
 
         public TasExplorerViewModel(IServiceProvider services)
             : base(services)
         {
-            _services = services;
-            _dialogService = services.GetRequiredService<IErrorDialog>();
+            _errorDialogService = services.GetRequiredService<IErrorDialog>();
             _threadingService = services.GetRequiredService<IThreadingService>();
             _dataPersistenceService = services.GetRequiredService<IDataPersistenceService>();
             _confirmDelete = services.GetRequiredService<IAppDeletionConfirmationViewModel>();
+            _viewLocatorService = services.GetRequiredService<IViewLocatorService>();
 
             string existingSavedConnectionName = _dataPersistenceService.ReadStringData(ConnectionNameKey);
             string existingSavedConnectionAddress = _dataPersistenceService.ReadStringData(ConnectionAddressKey);
@@ -232,7 +233,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 var errorMsg = SingleLoginErrorMessage1 + Environment.NewLine + SingleLoginErrorMessage2;
 
-                _dialogService.DisplayErrorDialog(SingleLoginErrorTitle, errorMsg);
+                _errorDialogService.DisplayErrorDialog(SingleLoginErrorTitle, errorMsg);
             }
             else
             {
@@ -257,7 +258,7 @@ namespace Tanzu.Toolkit.ViewModels
                 if (!stopResult.Succeeded)
                 {
                     Logger.Error(_stopAppErrorMsg + " {AppName}. {StopResult}", cfApp.AppName, stopResult.ToString());
-                    _dialogService.DisplayErrorDialog($"{_stopAppErrorMsg} {cfApp.AppName}.", stopResult.Explanation);
+                    _errorDialogService.DisplayErrorDialog($"{_stopAppErrorMsg} {cfApp.AppName}.", stopResult.Explanation);
                 }
             }
         }
@@ -270,7 +271,7 @@ namespace Tanzu.Toolkit.ViewModels
                 if (!startResult.Succeeded)
                 {
                     Logger.Error(_startAppErrorMsg + " {AppName}. {StartResult}", cfApp.AppName, startResult.ToString());
-                    _dialogService.DisplayErrorDialog($"{_startAppErrorMsg} {cfApp.AppName}.", startResult.Explanation);
+                    _errorDialogService.DisplayErrorDialog($"{_startAppErrorMsg} {cfApp.AppName}.", startResult.Explanation);
                 }
             }
         }
@@ -288,11 +289,11 @@ namespace Tanzu.Toolkit.ViewModels
                     }
 
                     Logger.Error($"Unable to retrieve recent logs for {cfApp.AppName}. {recentLogsResult.Explanation}. {recentLogsResult.CmdResult}");
-                    _dialogService.DisplayErrorDialog($"Unable to retrieve recent logs for {cfApp.AppName}.", recentLogsResult.Explanation);
+                    _errorDialogService.DisplayErrorDialog($"Unable to retrieve recent logs for {cfApp.AppName}.", recentLogsResult.Explanation);
                 }
                 else
                 {
-                    IView outputView = ViewLocatorService.NavigateTo(nameof(OutputViewModel)) as IView;
+                    IView outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel)) as IView;
                     var outputViewModel = outputView?.ViewModel as IOutputViewModel;
 
                     outputView.Show();
@@ -303,6 +304,35 @@ namespace Tanzu.Toolkit.ViewModels
             else
             {
                 Logger.Error($"TasExplorerViewModel.GetRecentAppLogs received expected argument 'app' to be of type '{typeof(CloudFoundryApp)}', but instead received type '{app.GetType()}'.");
+            }
+        }
+
+        public void StreamAppLogs(object app)
+        {
+            if (app is CloudFoundryApp cfApp)
+            {
+                try
+                {
+                    var viewTitle = $"Logs for {cfApp.AppName}";
+                    var outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel), viewTitle) as IView;
+                    var outputViewModel = outputView.ViewModel as IOutputViewModel;
+
+                    outputView?.Show();
+
+                    var logStreamResult = CloudFoundryService.StreamAppLogs(cfApp, stdOutCallback: outputViewModel.AppendLine, stdErrCallback: outputViewModel.AppendLine);
+                    if (logStreamResult.Succeeded)
+                    {
+                        outputViewModel.ActiveProcess = logStreamResult.Content;
+                    }
+                    else
+                    {
+                        _errorDialogService.DisplayErrorDialog("Error displaying app logs", $"Something went wrong while trying to display logs for {cfApp.AppName}, please try again.");
+                    }
+                }
+                catch
+                {
+                    _errorDialogService.DisplayErrorDialog("Error displaying app logs", $"Something went wrong while trying to display logs for {cfApp.AppName}, please try again.");
+                }
             }
         }
 
