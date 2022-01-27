@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Security;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
-using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.Services.CloudFoundry
 {
@@ -18,12 +19,13 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         Task<DetailedResult<string>> GetRecentLogs(CloudFoundryApp app);
         Task<DetailedResult<List<CfBuildpack>>> GetBuildpacksAsync(string apiAddress, int retryAmount = 1);
         DetailedResult CreateManifestFile(string location, AppManifest manifest);
-        Task<DetailedResult> DeployAppAsync(AppManifest appManifest, string defaultAppPath, CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback);
+        Task<DetailedResult> DeployAppAsync(AppManifest appManifest, string defaultAppPath, CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, Action<string> stdOutCallback, Action<string> stdErrCallback);
         Task<DetailedResult<List<string>>> GetStackNamesAsync(CloudFoundryInstance cf, int retryAmount = 1);
         Task<DetailedResult<string>> GetSsoPrompt(string cfApiAddress, bool skipSsl = false);
         Task<DetailedResult> LoginWithSsoPasscode(string cfApiAddress, string passcode);
         DetailedResult TargetApi(string targetApiAddress, bool skipSsl);
         bool IsValidConnection();
         void LogoutCfUser();
+        DetailedResult<Process> StreamAppLogs(CloudFoundryApp app, Action<string> stdOutCallback, Action<string> stdErrCallback);
     }
 }

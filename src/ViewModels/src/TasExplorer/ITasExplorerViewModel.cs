@@ -29,5 +29,6 @@ namespace Tanzu.Toolkit.ViewModels
         void SetConnection(CloudFoundryInstance cf);
         void LogOutTas(object arg);
         bool CanLogOutTas(object arg);
+        void StreamAppLogs(object app);
     }
 }

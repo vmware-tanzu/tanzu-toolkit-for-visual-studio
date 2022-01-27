@@ -1,14 +1,13 @@
-﻿using System;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
-using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.ViewModels.Tests
 {
@@ -36,7 +35,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             // * return fake view/viewmodel for output window
             MockViewLocatorService.Setup(mock =>
-                mock.NavigateTo(nameof(OutputViewModel), null))
+                mock.GetViewByViewModelName(nameof(OutputViewModel), null))
                     .Returns(new FakeOutputView());
 
             MockFileService.Setup(m => m.FileExists(_fakeManifestPath)).Returns(true);
@@ -366,8 +365,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             CloudFoundryInstance expectedCf = _sut.SelectedSpace.ParentOrg.ParentCf;
             CloudFoundryOrganization expectedOrg = _sut.SelectedSpace.ParentOrg;
             CloudFoundrySpace expectedSpace = _sut.SelectedSpace;
-            StdOutDelegate expectedStdOutCallback = _sut.OutputViewModel.AppendLine;
-            StdErrDelegate expectedStdErrCallback = _sut.OutputViewModel.AppendLine;
+            Action<string> expectedStdOutCallback = _sut.OutputViewModel.AppendLine;
+            Action<string> expectedStdErrCallback = _sut.OutputViewModel.AppendLine;
 
             MockCloudFoundryService.Setup(mock => mock.
               DeployAppAsync(expectedManifest, expectedDefaultAppPath, expectedCf, expectedOrg, expectedSpace, expectedStdOutCallback, expectedStdErrCallback))
@@ -395,8 +394,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             CloudFoundryInstance expectedCf = _sut.SelectedSpace.ParentOrg.ParentCf;
             CloudFoundryOrganization expectedOrg = _sut.SelectedSpace.ParentOrg;
             CloudFoundrySpace expectedSpace = _sut.SelectedSpace;
-            StdOutDelegate expectedStdOutCallback = _sut.OutputViewModel.AppendLine;
-            StdErrDelegate expectedStdErrCallback = _sut.OutputViewModel.AppendLine;
+            Action<string> expectedStdOutCallback = _sut.OutputViewModel.AppendLine;
+            Action<string> expectedStdErrCallback = _sut.OutputViewModel.AppendLine;
 
             MockCloudFoundryService.Setup(mock => mock.
               DeployAppAsync(expectedManifest, expectedDefaultAppPath, expectedCf, expectedOrg, expectedSpace, expectedStdOutCallback, expectedStdErrCallback))
@@ -434,8 +433,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             CloudFoundryInstance expectedCf = _sut.SelectedSpace.ParentOrg.ParentCf;
             CloudFoundryOrganization expectedOrg = _sut.SelectedSpace.ParentOrg;
             CloudFoundrySpace expectedSpace = _sut.SelectedSpace;
-            StdOutDelegate expectedStdOutCallback = _sut.OutputViewModel.AppendLine;
-            StdErrDelegate expectedStdErrCallback = _sut.OutputViewModel.AppendLine;
+            Action<string> expectedStdOutCallback = _sut.OutputViewModel.AppendLine;
+            Action<string> expectedStdErrCallback = _sut.OutputViewModel.AppendLine;
 
             string expectedErrorTitle = $"{DeploymentDialogViewModel.DeploymentErrorMsg} {_fakeAppName}.";
             string expectedErrorMsg = $"{FakeFailureDetailedResult.Explanation}";
@@ -465,8 +464,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             CloudFoundryInstance expectedCf = _sut.SelectedSpace.ParentOrg.ParentCf;
             CloudFoundryOrganization expectedOrg = _sut.SelectedSpace.ParentOrg;
             CloudFoundrySpace expectedSpace = _sut.SelectedSpace;
-            StdOutDelegate expectedStdOutCallback = _sut.OutputViewModel.AppendLine;
-            StdErrDelegate expectedStdErrCallback = _sut.OutputViewModel.AppendLine;
+            Action<string> expectedStdOutCallback = _sut.OutputViewModel.AppendLine;
+            Action<string> expectedStdErrCallback = _sut.OutputViewModel.AppendLine;
 
             MockCloudFoundryService.Setup(mock => mock.
               DeployAppAsync(expectedManifest, expectedDefaultAppPath, expectedCf, expectedOrg, expectedSpace, expectedStdOutCallback, expectedStdErrCallback))
@@ -496,8 +495,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             CloudFoundryInstance expectedCf = _sut.SelectedSpace.ParentOrg.ParentCf;
             CloudFoundryOrganization expectedOrg = _sut.SelectedSpace.ParentOrg;
             CloudFoundrySpace expectedSpace = _sut.SelectedSpace;
-            StdOutDelegate expectedStdOutCallback = _sut.OutputViewModel.AppendLine;
-            StdErrDelegate expectedStdErrCallback = _sut.OutputViewModel.AppendLine;
+            Action<string> expectedStdOutCallback = _sut.OutputViewModel.AppendLine;
+            Action<string> expectedStdErrCallback = _sut.OutputViewModel.AppendLine;
 
             MockCloudFoundryService.Setup(mock => mock.
               DeployAppAsync(expectedManifest, expectedDefaultAppPath, expectedCf, expectedOrg, expectedSpace, expectedStdOutCallback, expectedStdErrCallback))
@@ -1912,24 +1911,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.WriteManifestToFile(fakeFilePath);
 
             MockErrorDialogService.Verify(m => m.DisplayErrorDialog("Unable to save manifest file", It.Is<string>(s => s.Contains(fakeExceptionMsg) && s.Contains(fakeFilePath))), Times.Once);
-        }
-    }
-
-    public class FakeOutputView : ViewModelTestSupport, IView
-    {
-        public IViewModel ViewModel { get; }
-
-        public bool ShowMethodWasCalled { get; private set; }
-
-        public FakeOutputView()
-        {
-            ViewModel = new OutputViewModel(Services);
-            ShowMethodWasCalled = false;
-        }
-
-        public void Show()
-        {
-            ShowMethodWasCalled = true;
         }
     }
 

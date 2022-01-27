@@ -1,9 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Serilog;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CloudFoundry;
@@ -16,7 +17,6 @@ using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
 using Tanzu.Toolkit.ViewModels.SsoDialog;
-using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.ViewModels.Tests
 {
@@ -46,10 +46,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         protected const string FakeOrgGuid = "fake-org-guid";
         protected const string FakeSpaceName = "fake space name";
         protected const string FakeSpaceGuid = "fake-space-guid";
+        protected const string FakeAppName = "fake app name";
+        protected const string FakeAppGuid = "fake-app-guid";
 
         protected static readonly CloudFoundryInstance FakeCfInstance = new CloudFoundryInstance(FakeCfName, FakeCfApiAddress);
         protected static readonly CloudFoundryOrganization FakeCfOrg = new CloudFoundryOrganization(FakeOrgName, FakeOrgGuid, FakeCfInstance);
         protected static readonly CloudFoundrySpace FakeCfSpace = new CloudFoundrySpace(FakeSpaceName, FakeSpaceGuid, FakeCfOrg);
+        protected static readonly CloudFoundryApp FakeCfApp = new CloudFoundryApp(FakeAppName, FakeAppGuid, FakeCfSpace, "junk state");
 
         protected static readonly List<CloudFoundryOrganization> EmptyListOfOrgs = new List<CloudFoundryOrganization>();
         protected static readonly List<CloudFoundrySpace> EmptyListOfSpaces = new List<CloudFoundrySpace>();
@@ -63,12 +66,48 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         protected static readonly string _fakeProjectPath = "this\\is\\a\\fake\\path\\to\\a\\project\\directory";
         protected static readonly string _fakeManifestPath = "this\\is\\a\\fake\\path\\to\\a\\manifest";
-        protected static readonly StdOutDelegate _fakeOutCallback = content => { };
-        protected static readonly StdErrDelegate _fakeErrCallback = content => { };
+        protected static readonly Action<string> _fakeOutCallback = content => { };
+        protected static readonly Action<string> _fakeErrCallback = content => { };
 
         internal string[] sampleManifestLines = File.ReadAllLines("TestFakes//fake-manifest.yml");
         internal string[] sampleInvalidManifestLines = File.ReadAllLines("TestFakes//fake-invalid-manifest.yml");
         internal string[] multiBuildpackManifestLines = File.ReadAllLines("TestFakes//fake-multi-buildpack-manifest.yml");
+
+        internal class FakeOutputView : IView
+        {
+            public IViewModel ViewModel { get; }
+
+            public bool ShowMethodWasCalled { get; private set; }
+
+            public Action DisplayView { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+            public FakeOutputView()
+            {
+                ViewModel = new FakeOutputViewModel();
+                ShowMethodWasCalled = false;
+            }
+
+            public void Show()
+            {
+                ShowMethodWasCalled = true;
+            }
+        }
+
+        internal class FakeOutputViewModel : IOutputViewModel, IViewModel
+        {
+            public Process ActiveProcess { get; set; }
+            public object ActiveView { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+            public void AppendLine(string newContent)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void CancelActiveProcess()
+            {
+                throw new NotImplementedException();
+            }
+        }
 
         protected AppManifest _fakeManifestModel = new AppManifest
         {

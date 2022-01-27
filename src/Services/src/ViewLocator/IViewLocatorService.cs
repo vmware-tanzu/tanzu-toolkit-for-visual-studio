@@ -2,8 +2,6 @@
 {
     public interface IViewLocatorService
     {
-        string CurrentView { get; }
-
-        object NavigateTo(string viewModelName, object parameter = null);
+        object GetViewByViewModelName(string viewModelName, object parameter = null);
     }
 }

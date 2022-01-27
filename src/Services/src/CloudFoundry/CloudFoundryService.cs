@@ -2,6 +2,7 @@
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Security;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.CloudFoundryApiClient;
@@ -15,7 +16,6 @@ using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
-using static Tanzu.Toolkit.Services.OutputHandler.OutputHandler;
 
 namespace Tanzu.Toolkit.Services.CloudFoundry
 {
@@ -812,7 +812,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             };
         }
 
-        public async Task<DetailedResult> DeployAppAsync(AppManifest appManifest, string defaultAppPath, CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, StdOutDelegate stdOutCallback, StdErrDelegate stdErrCallback)
+        public async Task<DetailedResult> DeployAppAsync(AppManifest appManifest, string defaultAppPath, CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, Action<string> stdOutCallback, Action<string> stdErrCallback)
         {
             AppConfig app = appManifest.Applications[0];
 
@@ -889,6 +889,22 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
 
             return logsResult;
+        }
+
+        public DetailedResult<Process> StreamAppLogs(CloudFoundryApp app, Action<string> stdOutCallback, Action<string> stdErrCallback)
+        {
+            try
+            {
+                return _cfCliService.StreamAppLogs(app.AppName, app.ParentSpace.ParentOrg.OrgName, app.ParentSpace.SpaceName, stdOutCallback, stdErrCallback);
+            }
+            catch (Exception ex)
+            {
+                return new DetailedResult<Process>
+                {
+                    Succeeded = false,
+                    Explanation = ex.Message,
+                };
+            }
         }
 
         public DetailedResult CreateManifestFile(string location, AppManifest manifest)

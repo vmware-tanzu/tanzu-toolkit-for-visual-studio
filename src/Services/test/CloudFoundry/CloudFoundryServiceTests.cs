@@ -3,7 +3,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Serilog;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.CloudFoundryApiClient;
@@ -2109,6 +2111,74 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             _mockCfCliService.Verify(m => m.Logout(), Times.Once);
             _mockCfCliService.Verify(m => m.ClearCachedAccessToken(), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("StreamAppLogs")]
+        [DynamicData(nameof(GetAppLogStreamArgs), DynamicDataSourceType.Method)]
+        public void StreamAppLogs_ReturnsSuccessfulResult_WhenCfCliServiceSucceeds(CloudFoundryApp app, Action<string> stdOutDel, Action<string> stdErrDel)
+        {
+            var expectedAppName = app.AppName;
+            var expectedSpaceName = app.ParentSpace.SpaceName;
+            var expectedOrgName = app.ParentSpace.ParentOrg.OrgName;
+            var fakeLogStreamProcess = new Process();
+            var fakeSuccessResponse = new DetailedResult<Process>
+            {
+                Succeeded = true,
+                Content = fakeLogStreamProcess,
+            };
+
+            _mockCfCliService.Setup(m => m.StreamAppLogs(expectedAppName, expectedOrgName, expectedSpaceName, stdOutDel, stdErrDel)).Returns(fakeSuccessResponse);
+
+            var result = _sut.StreamAppLogs(app, stdOutDel, stdErrDel);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.AreEqual(fakeLogStreamProcess, result.Content);
+            fakeLogStreamProcess.Dispose();
+        }
+
+        [TestMethod]
+        [TestCategory("StreamAppLogs")]
+        public void StreamAppLogs_ReturnsFailedResult_WhenCfCliServiceFails()
+        {
+            var fakeFailedResponse = new DetailedResult<Process>
+            {
+                Succeeded = false,
+                Explanation = ":(",
+            };
+            _mockCfCliService.Setup(m => m.StreamAppLogs(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Action<string>>(), It.IsAny<Action<string>>())).Returns(fakeFailedResponse);
+
+            var result = _sut.StreamAppLogs(FakeApp, _fakeOutCallback, _fakeErrCallback);
+
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual(result.Explanation, fakeFailedResponse.Explanation);
+        }
+
+        [TestMethod]
+        [TestCategory("StreamAppLogs")]
+        public void StreamAppLogs_ReturnsFailedResult_WhenCfCliServiceThrowsException()
+        {
+            var fakeException = new Exception(":)");
+            _mockCfCliService.Setup(m => m.StreamAppLogs(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Action<string>>(), It.IsAny<Action<string>>())).Throws(fakeException);
+
+            var result = _sut.StreamAppLogs(FakeApp, _fakeOutCallback, _fakeErrCallback);
+            
+            Assert.IsFalse(result.Succeeded);
+            Assert.AreEqual(result.Explanation, fakeException.Message);
+        }
+
+        private static IEnumerable<object[]> GetAppLogStreamArgs()
+        {
+            CloudFoundryOrganization FakeOrg2 = new CloudFoundryOrganization("fake org 2", "fake org guid 2", null);
+            CloudFoundrySpace FakeSpace2 = new CloudFoundrySpace("fake space 2", "fake space guid 2", FakeOrg2);
+            CloudFoundryApp FakeApp2 = new CloudFoundryApp("fake app 2", "fake app guid 2", FakeSpace2, null);
+            Action<string> fakeOutCallback = (string s) => { };
+            Action<string> fakeOutCallback2 = (string s) => { };
+            Action<string> fakeErrCallback = (string s) => { };
+            Action<string> fakeErrCallback2 = (string s) => { };
+
+            yield return new object[] { FakeApp, fakeOutCallback, fakeErrCallback };
+            yield return new object[] { FakeApp2, fakeOutCallback2, fakeErrCallback2 };
         }
     }
 }

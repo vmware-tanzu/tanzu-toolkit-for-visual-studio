@@ -312,6 +312,15 @@
                                             <Image Source="Resources/delete_app.png" ></Image>
                                         </MenuItem.Icon>
                                     </MenuItem>
+                                    <MenuItem Header="Monitor Logs" 
+                                              Command="{Binding PlacementTarget.Tag.StreamAppLogsCommand, 
+                                                                RelativeSource={RelativeSource Mode=FindAncestor, 
+                                                                AncestorType=ContextMenu}}"
+                                              CommandParameter="{Binding App}">
+                                        <MenuItem.Icon>
+                                            <Image Source="Resources/Log.png" ></Image>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
                                     <MenuItem Header="View Recent Logs" 
                                               Command="{Binding PlacementTarget.Tag.DisplayRecentAppLogsCommand, 
                                                                 RelativeSource={RelativeSource Mode=FindAncestor, 
