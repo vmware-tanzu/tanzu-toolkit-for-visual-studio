@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Shell;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Runtime.InteropServices;
@@ -71,10 +72,15 @@ namespace Tanzu.Toolkit.VisualStudio
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
-            await TanzuTasExplorerCommand.InitializeAsync(this);
-            await PushToCloudFoundryCommand.InitializeAsync(this, _serviceProvider);
-            await OutputWindowCommand.InitializeAsync(this);
-            await OpenLogsCommand.InitializeAsync(this, _serviceProvider);
+            List<Task> commandInitializations = new List<Task>
+            {
+                Task.Run(() => TanzuTasExplorerCommand.InitializeAsync(this)),
+                Task.Run(() => PushToCloudFoundryCommand.InitializeAsync(this, _serviceProvider)),
+                Task.Run(() => OutputWindowCommand.InitializeAsync(this)),
+                Task.Run(() => OpenLogsCommand.InitializeAsync(this, _serviceProvider)),
+            };
+
+            await Task.WhenAll(commandInitializations);
         }
 
         protected override object GetService(Type serviceType)
