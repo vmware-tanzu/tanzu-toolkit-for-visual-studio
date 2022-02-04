@@ -12,14 +12,13 @@ namespace Tanzu.Toolkit.ViewModels
         void OpenLoginView(object arg);
         bool CanStopCfApp(object arg);
         bool CanStartCfApp(object arg);
-        bool CanDeleteCfApp(object arg);
+        bool CanOpenDeletionView(object arg);
         bool CanRefreshSpace(object arg);
         bool CanRefreshOrg(object arg);
         bool CanInitiateFullRefresh(object arg);
         bool CanDisplayRecentAppLogs(object arg);
         Task StopCfApp(object arg);
         Task StartCfApp(object arg);
-        Task DeleteCfApp(object arg);
         Task RefreshSpace(object arg);
         Task RefreshOrg(object arg);
         void RefreshAllItems(object arg);
@@ -29,5 +28,6 @@ namespace Tanzu.Toolkit.ViewModels
         void SetConnection(CloudFoundryInstance cf);
         void LogOutTas(object arg);
         bool CanLogOutTas(object arg);
+        void OpenDeletionView(object app);
     }
 }

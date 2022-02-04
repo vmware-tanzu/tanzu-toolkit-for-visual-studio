@@ -3,6 +3,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Security;
+using System.Threading;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.CloudFoundryApiClient;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models;
@@ -26,6 +27,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         internal const string CcApiVersionUndetectableErrMsg = "Failed to detect which version of the Cloud Controller API is being run on the provided instance; some features of this extension may not work properly.";
         internal const string LoginFailureMessage = "Login failed.";
         internal const string CfApiSsoPromptKey = "passcode";
+        internal const string RouteDeletionErrorMsg = "Encountered error deleting certain routes";
         private readonly ICfApiClient _cfApiClient;
         private readonly ICfCliService _cfCliService;
         private readonly IFileService _fileService;
@@ -735,7 +737,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         /// <param name="removeRoutes"></param>
         /// <param name="retryAmount"></param>
         /// <returns></returns>
-        public async Task<DetailedResult> DeleteAppAsync(CloudFoundryApp app, bool skipSsl = true, bool removeRoutes = true, int retryAmount = 1)
+        public async Task<DetailedResult> DeleteAppAsync(CloudFoundryApp app, bool skipSsl = true, bool removeRoutes = false, int retryAmount = 1)
         {
             string apiAddress = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
 
@@ -771,6 +773,19 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             bool appWasDeleted;
             try
             {
+                if (removeRoutes)
+                {
+                    var routeDeletionResult = await DeleteAllRoutesForAppAsync(app);
+                    if (!routeDeletionResult.Succeeded)
+                    {
+                        return new DetailedResult
+                        {
+                            Succeeded = false,
+                            Explanation = $"{routeDeletionResult.Explanation}. Please try deleting '{app.AppName}' again",
+                        };
+                    }
+                }
+
                 appWasDeleted = await _cfApiClient.DeleteAppWithGuid(apiAddress, accessToken, app.AppId);
 
                 if (!appWasDeleted)
@@ -806,6 +821,186 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
 
             app.State = "DELETED";
+            return new DetailedResult
+            {
+                Succeeded = true,
+            };
+        }
+
+        public async Task<DetailedResult<List<CloudFoundryRoute>>> GetRoutesForAppAsync(CloudFoundryApp app, int retryAmount = 1)
+        {
+            string apiAddress = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
+
+            string accessToken;
+            try
+            {
+                accessToken = _cfCliService.GetOAuthToken();
+            }
+            catch (InvalidRefreshTokenException)
+            {
+                var msg = "Unable to retrieve routes for '{AppName}' because the connection to '{CfName}' has expired. Please log back in to re-authenticate.";
+                _logger.Information(msg, app.AppName, app.ParentSpace.ParentOrg.ParentCf.InstanceName);
+
+                return new DetailedResult<List<CloudFoundryRoute>>()
+                {
+                    Succeeded = false,
+                    Explanation = msg.Replace("{AppName}", app.AppName).Replace("CfName", app.ParentSpace.ParentOrg.ParentCf.InstanceName),
+                    FailureType = FailureType.InvalidRefreshToken,
+                };
+            }
+
+            if (accessToken == null)
+            {
+                _logger.Error("CloudFoundryService attempted to get routes for '{appName}' but was unable to look up an access token.", app.AppName);
+
+                return new DetailedResult<List<CloudFoundryRoute>>()
+                {
+                    Succeeded = false,
+                    Explanation = $"CloudFoundryService attempted to get routes for '{app.AppName}' but was unable to look up an access token.",
+                };
+            }
+
+            List<Route> routesFromApi;
+            try
+            {
+                routesFromApi = await _cfApiClient.ListRoutesForApp(apiAddress, accessToken, app.AppId);
+            }
+            catch (Exception originalException)
+            {
+                if (retryAmount > 0)
+                {
+                    _logger.Information("GetRoutesForAppAsync caught an exception when trying to retrieve routes: {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).", originalException.Message, retryAmount);
+                    _cfCliService.ClearCachedAccessToken();
+                    retryAmount -= 1;
+                    return await GetRoutesForAppAsync(app, retryAmount);
+                }
+                else
+                {
+                    _logger.Error("{Error}. See logs for more details: toolkit-diagnostics.log", originalException.Message);
+
+                    return new DetailedResult<List<CloudFoundryRoute>>()
+                    {
+                        Succeeded = false,
+                        Explanation = originalException.Message,
+                    };
+                }
+            }
+
+            var routes = new List<CloudFoundryRoute>();
+
+            foreach (Route route in routesFromApi)
+            {
+                if (string.IsNullOrWhiteSpace(route.Guid))
+                {
+                    _logger.Error("CloudFoundryService.GetRoutesForAppAsync encountered a route without a guid; omitting it from the returned list of routes.");
+                }
+                else
+                {
+                    routes.Add(new CloudFoundryRoute(route.Guid));
+                }
+            }
+
+            return new DetailedResult<List<CloudFoundryRoute>>
+            {
+                Succeeded = true,
+                Content = routes,
+            };
+
+        }
+
+        public async Task<DetailedResult> DeleteAllRoutesForAppAsync(CloudFoundryApp app)
+        {
+            string apiAddress = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
+
+            string accessToken;
+            try
+            {
+                accessToken = _cfCliService.GetOAuthToken();
+            }
+            catch (InvalidRefreshTokenException)
+            {
+                var msg = "Unable to retrieve routes for '{AppName}' because the connection to '{CfName}' has expired. Please log back in to re-authenticate.";
+                _logger.Information(msg, app.AppName, app.ParentSpace.ParentOrg.ParentCf.InstanceName);
+
+                return new DetailedResult()
+                {
+                    Succeeded = false,
+                    Explanation = msg.Replace("{AppName}", app.AppName).Replace("CfName", app.ParentSpace.ParentOrg.ParentCf.InstanceName),
+                    FailureType = FailureType.InvalidRefreshToken,
+                };
+            }
+
+            if (accessToken == null)
+            {
+                _logger.Error("CloudFoundryService attempted to get routes for '{appName}' but was unable to look up an access token.", app.AppName);
+
+                return new DetailedResult()
+                {
+                    Succeeded = false,
+                    Explanation = $"CloudFoundryService attempted to get routes for '{app.AppName}' but was unable to look up an access token.",
+                };
+            }
+
+            var routesResponse = await GetRoutesForAppAsync(app); // this has the potential to refresh an expired access token
+            if (!routesResponse.Succeeded)
+            {
+                return routesResponse;
+            }
+
+            var routes = routesResponse.Content;
+            var routeDeletionTasks = new List<Task>();
+            int failed = 0;
+            foreach (CloudFoundryRoute route in routes)
+            {
+                routeDeletionTasks.Add(Task.Run(async () =>
+                {
+                    var routeWasDeleted = await _cfApiClient.DeleteRouteWithGuid(apiAddress, accessToken, route.RouteGuid);
+                    if (!routeWasDeleted)
+                    {
+                        Interlocked.Increment(ref failed);
+                    }
+                }));
+            }
+
+            Task allRouteDeletions = Task.WhenAll(routeDeletionTasks);
+
+            try
+            {
+                allRouteDeletions.Wait();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("{RouteDeletionMessage}; {RouteDeletionException}", RouteDeletionErrorMsg, ex.Message);
+
+                return new DetailedResult
+                {
+                    Succeeded = false,
+                    Explanation = RouteDeletionErrorMsg,
+                };
+            }
+
+            if (allRouteDeletions.Status != TaskStatus.RanToCompletion)
+            {
+                _logger.Error("Not all route deletion tasks ran to completion. {RouteDeletionMessage}", RouteDeletionErrorMsg);
+
+                return new DetailedResult
+                {
+                    Succeeded = false,
+                    Explanation = RouteDeletionErrorMsg,
+                };
+            }
+
+            if (failed > 0)
+            {
+                _logger.Error("{RouteDeletionMessage}; {NumFailedRouteDeletions} routes were not deleted", RouteDeletionErrorMsg, failed);
+
+                return new DetailedResult
+                {
+                    Succeeded = false,
+                    Explanation = RouteDeletionErrorMsg,
+                };
+            }
+
             return new DetailedResult
             {
                 Succeeded = true,

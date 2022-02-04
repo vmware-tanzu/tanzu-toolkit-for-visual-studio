@@ -7,14 +7,15 @@ using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services.DataPersistence;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.Threading;
+using Tanzu.Toolkit.ViewModels.AppDeletionConfirmation;
 
 namespace Tanzu.Toolkit.ViewModels
 {
     public class TasExplorerViewModel : AbstractViewModel, ITasExplorerViewModel
     {
+        internal const string _deleteAppErrorMsg = "Encountered an error while deleting app";
         internal const string _stopAppErrorMsg = "Encountered an error while stopping app";
         internal const string _startAppErrorMsg = "Encountered an error while starting app";
-        internal const string _deleteAppErrorMsg = "Encountered an error while deleting app";
         internal const string SingleLoginErrorTitle = "Unable to add more TAS connections.";
         internal const string SingleLoginErrorMessage1 = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
         internal const string SingleLoginErrorMessage2 = "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Application Service Explorer & re-connecting to a new one.";
@@ -32,6 +33,7 @@ namespace Tanzu.Toolkit.ViewModels
         private readonly IThreadingService _threadingService;
         private readonly IErrorDialog _dialogService;
         private readonly IDataPersistenceService _dataPersistenceService;
+        private readonly IAppDeletionConfirmationViewModel _confirmDelete;
 
         public TasExplorerViewModel(IServiceProvider services)
             : base(services)
@@ -40,6 +42,7 @@ namespace Tanzu.Toolkit.ViewModels
             _dialogService = services.GetRequiredService<IErrorDialog>();
             _threadingService = services.GetRequiredService<IThreadingService>();
             _dataPersistenceService = services.GetRequiredService<IDataPersistenceService>();
+            _confirmDelete = services.GetRequiredService<IAppDeletionConfirmationViewModel>();
 
             string existingSavedConnectionName = _dataPersistenceService.ReadStringData(ConnectionNameKey);
             string existingSavedConnectionAddress = _dataPersistenceService.ReadStringData(ConnectionAddressKey);
@@ -177,7 +180,7 @@ namespace Tanzu.Toolkit.ViewModels
             return true;
         }
 
-        public bool CanDeleteCfApp(object arg)
+        public bool CanOpenDeletionView(object arg)
         {
             return true;
         }
@@ -238,6 +241,14 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
+        public void OpenDeletionView(object app)
+        {
+            if (app is CloudFoundryApp cfApp)
+            {
+                _confirmDelete.ShowConfirmation(cfApp);
+            }
+        }
+
         public async Task StopCfApp(object app)
         {
             if (app is CloudFoundryApp cfApp)
@@ -260,19 +271,6 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     Logger.Error(_startAppErrorMsg + " {AppName}. {StartResult}", cfApp.AppName, startResult.ToString());
                     _dialogService.DisplayErrorDialog($"{_startAppErrorMsg} {cfApp.AppName}.", startResult.Explanation);
-                }
-            }
-        }
-
-        public async Task DeleteCfApp(object app)
-        {
-            if (app is CloudFoundryApp cfApp)
-            {
-                var deleteResult = await CloudFoundryService.DeleteAppAsync(cfApp);
-                if (!deleteResult.Succeeded)
-                {
-                    Logger.Error(_deleteAppErrorMsg + " {AppName}. {DeleteResult}", cfApp.AppName, deleteResult.ToString());
-                    _dialogService.DisplayErrorDialog($"{_deleteAppErrorMsg} {cfApp.AppName}.", deleteResult.Explanation);
                 }
             }
         }

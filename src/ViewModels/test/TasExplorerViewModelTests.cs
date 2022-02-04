@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
+using Tanzu.Toolkit.ViewModels.AppDeletionConfirmation;
 
 namespace Tanzu.Toolkit.ViewModels.Tests
 {
@@ -40,6 +41,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     });
 
 
+            _sut = new TasExplorerViewModel(Services);
             _receivedEvents = new List<string>();
             _fakeTasConnection = new FakeCfInstanceViewModel(FakeCfInstance, Services);
 
@@ -169,9 +171,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        public void CanDeleteCfApp_ReturnsTrue()
+        public void CanOpenDeletionView_ReturnsTrue()
         {
-            Assert.IsTrue(_sut.CanDeleteCfApp(null));
+            Assert.IsTrue(_sut.CanOpenDeletionView(null));
         }
 
         [TestMethod]
@@ -263,6 +265,26 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsNull(_sut.TasConnection);
             Assert.IsTrue(_sut.AuthenticationRequired); // this prop should not have changed
+        }
+
+        [TestMethod]
+        [TestCategory("OpenDeletionView")]
+        public void OpenDeletionView_DisplaysDeletionDialog_WhenCfAppIsDeleted()
+        {
+            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
+
+            _sut.OpenDeletionView(fakeApp);
+
+            MockAppDeletionConfirmationViewModel.Verify(m => m.ShowConfirmation(fakeApp), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("OpenDeletionView")]
+        public void OpenDeletionView_DoesNotDisplaysDeletionDialog_WhenArgumentIsNotACfApp()
+        {
+            _sut.OpenDeletionView(null);
+
+            MockDialogService.Verify(ds => ds.ShowDialog(typeof(AppDeletionConfirmationViewModel).Name, null), Times.Never);
         }
 
         [TestMethod]
@@ -379,66 +401,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var logPropVal1 = "{AppName}";
             var logPropVal2 = "{StartResult}";
             var expectedLogMsg = $"{TasExplorerViewModel._startAppErrorMsg} {logPropVal1}. {logPropVal2}";
-
-            MockLogger.Verify(m => m.
-                Error(expectedLogMsg, fakeApp.AppName, FakeFailureDetailedResult.ToString()),
-                    Times.Once);
-        }
-
-        [TestMethod]
-        public async Task DeleteCfApp_CallsDeleteAppAsync()
-        {
-            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
-
-            MockCloudFoundryService.Setup(mock => mock.DeleteAppAsync(fakeApp, true, true, It.IsAny<int>())).ReturnsAsync(FakeSuccessDetailedResult);
-
-            Exception shouldStayNull = null;
-            try
-            {
-                await _sut.DeleteCfApp(fakeApp);
-            }
-            catch (Exception e)
-            {
-                shouldStayNull = e;
-            }
-
-            Assert.IsNull(shouldStayNull);
-            MockCloudFoundryService.VerifyAll();
-        }
-
-        [TestMethod]
-        public async Task DeleteCfApp_DisplaysErrorDialog_WhenDeleteAppAsyncFails()
-        {
-            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
-
-            MockCloudFoundryService.Setup(mock => mock.
-                DeleteAppAsync(fakeApp, true, true, It.IsAny<int>()))
-                    .ReturnsAsync(FakeFailureDetailedResult);
-
-            await _sut.DeleteCfApp(fakeApp);
-
-            var expectedErrorTitle = $"{TasExplorerViewModel._deleteAppErrorMsg} {fakeApp.AppName}.";
-            var expectedErrorMsg = FakeFailureDetailedResult.Explanation;
-
-            MockErrorDialogService.Verify(mock => mock.
-              DisplayErrorDialog(expectedErrorTitle, expectedErrorMsg),
-                Times.Once);
-        }
-
-        [TestMethod]
-        public async Task DeleteCfApp_LogsError_WhenDeleteAppAsyncFails()
-        {
-            var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
-
-            MockCloudFoundryService.Setup(mock => mock.
-                DeleteAppAsync(fakeApp, true, true, It.IsAny<int>()))
-                    .ReturnsAsync(FakeFailureDetailedResult);
-
-            await _sut.DeleteCfApp(fakeApp);
-
-            var logPropVal1 = "{AppName}";
-            var logPropVal2 = "{DeleteResult}";
-            var expectedLogMsg = $"{TasExplorerViewModel._deleteAppErrorMsg} {logPropVal1}. {logPropVal2}";
 
             MockLogger.Verify(m => m.
                 Error(expectedLogMsg, fakeApp.AppName, FakeFailureDetailedResult.ToString()),
