@@ -70,8 +70,8 @@ namespace Tanzu.Toolkit.ViewModels
             _errorDialogService = services.GetRequiredService<IErrorDialog>();
             TasExplorerViewModel = services.GetRequiredService<ITasExplorerViewModel>();
 
-            IView outputView = ViewLocatorService.GetViewByViewModelName(nameof(ViewModels.OutputViewModel)) as IView;
-            OutputViewModel = outputView?.ViewModel as IOutputViewModel;
+            OutputView = ViewLocatorService.GetViewByViewModelName(nameof(ViewModels.OutputViewModel)) as IView;
+            OutputViewModel = OutputView?.ViewModel as IOutputViewModel;
 
             DeploymentInProgress = false;
             PathToProjectRootDir = directoryOfProjectToDeploy;
@@ -118,6 +118,8 @@ namespace Tanzu.Toolkit.ViewModels
 
             Expanded = false;
         }
+
+        public IView OutputView { get; internal set; }
 
         public string AppName
         {
