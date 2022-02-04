@@ -51,7 +51,7 @@ namespace Tanzu.Toolkit.VisualStudio
     [Guid(PackageGuidString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [ProvideToolWindow(typeof(TanzuTasExplorerToolWindow))]
-    [ProvideToolWindow(typeof(OutputToolWindow), MultiInstances = true)]
+    [ProvideToolWindow(typeof(OutputToolWindow), MultiInstances = true, Transient = true)]
     public sealed class TanzuToolkitForVisualStudioPackage : ToolkitPackage
     {
         /// <summary>
