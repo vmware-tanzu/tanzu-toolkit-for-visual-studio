@@ -34,12 +34,36 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         internal const string InvalidTargetUriMessage = "Invalid target URI";
         private readonly IUaaClient _uaaClient;
         private readonly HttpClient _httpClient;
+        private bool _skipSsl = false;
+        private System.Net.Security.RemoteCertificateValidationCallback _defaultCertificateValidationCallback = ServicePointManager.ServerCertificateValidationCallback;
 
         public CfApiClient(IUaaClient uaaClient, HttpClient httpClient)
         {
             _uaaClient = uaaClient;
             _httpClient = httpClient;
             AccessToken = null;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            SkipSsl = false;
+        }
+
+        public bool SkipSsl
+        {
+            get => _skipSsl;
+            set
+            {
+                _skipSsl = value;
+                if (_skipSsl)
+                {
+                    // trust any certificate
+                    ServicePointManager.ServerCertificateValidationCallback +=
+                        (sender, cert, chain, sslPolicyErrors) => { return true; };
+                }
+                else
+                {
+                    // reset cert callback to original
+                    ServicePointManager.ServerCertificateValidationCallback = _defaultCertificateValidationCallback;
+                }
+            }
         }
 
         /// <summary>
@@ -88,11 +112,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         /// <returns>List of <see cref="Org"/>s.</returns>
         public async Task<List<Org>> ListOrgs(string cfApiAddress, string accessToken)
         {
-            // trust any certificate
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            ServicePointManager.ServerCertificateValidationCallback +=
-                (sender, cert, chain, sslPolicyErrors) => { return true; };
-
             var uri = new UriBuilder(cfApiAddress)
             {
                 Path = ListOrgsPath,
@@ -120,11 +139,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         /// <returns>List of <see cref="Space"/>s.</returns>
         public async Task<List<Space>> ListSpacesForOrg(string cfApiAddress, string accessToken, string orgGuid)
         {
-            // trust any certificate
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            ServicePointManager.ServerCertificateValidationCallback +=
-                (sender, cert, chain, sslPolicyErrors) => { return true; };
-
             var uri = new UriBuilder(cfApiAddress)
             {
                 Path = ListSpacesPath,
@@ -151,11 +165,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         /// <returns>List of <see cref="App"/>s.</returns>
         public async Task<List<App>> ListAppsForSpace(string cfTarget, string accessToken, string spaceGuid)
         {
-            // trust any certificate
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            ServicePointManager.ServerCertificateValidationCallback +=
-                (sender, cert, chain, sslPolicyErrors) => { return true; };
-
             var uri = new UriBuilder(cfTarget)
             {
                 Path = ListAppsPath,
@@ -169,11 +178,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
 
         public async Task<List<Route>> ListRoutesForApp(string cfTarget, string accessToken, string appGuid)
         {
-            // trust any certificate
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            ServicePointManager.ServerCertificateValidationCallback +=
-                (sender, cert, chain, sslPolicyErrors) => { return true; };
-
             var uri = new UriBuilder(cfTarget)
             {
                 Path = ListRoutesPath,
@@ -187,11 +191,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
 
         public async Task<List<Buildpack>> ListBuildpacks(string cfApiAddress, string accessToken)
         {
-            // trust any certificate
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            ServicePointManager.ServerCertificateValidationCallback +=
-                (sender, cert, chain, sslPolicyErrors) => { return true; };
-
             var uri = new UriBuilder(cfApiAddress)
             {
                 Path = ListBuildpacksPath,
@@ -222,11 +221,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         /// </returns>
         public async Task<bool> StopAppWithGuid(string cfApiAddress, string accessToken, string appGuid)
         {
-            // trust any certificate
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            ServicePointManager.ServerCertificateValidationCallback +=
-                (sender, cert, chain, sslPolicyErrors) => { return true; };
-
             var stopAppPath = ListAppsPath + $"/{appGuid}/actions/stop";
 
             var uri = new UriBuilder(cfApiAddress)
@@ -272,11 +266,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         /// </returns>
         public async Task<bool> StartAppWithGuid(string cfApiAddress, string accessToken, string appGuid)
         {
-            // trust any certificate
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            ServicePointManager.ServerCertificateValidationCallback +=
-                (sender, cert, chain, sslPolicyErrors) => { return true; };
-
             var startAppPath = ListAppsPath + $"/{appGuid}/actions/start";
 
             var uri = new UriBuilder(cfApiAddress)
@@ -306,11 +295,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
 
         public async Task<bool> DeleteAppWithGuid(string cfTarget, string accessToken, string appGuid)
         {
-            // trust any certificate
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            ServicePointManager.ServerCertificateValidationCallback +=
-                (sender, cert, chain, sslPolicyErrors) => { return true; };
-
             var deleteAppPath = DeleteAppsPath + $"/{appGuid}";
 
             var uri = new UriBuilder(cfTarget)
@@ -337,11 +321,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
 
         public async Task<bool> DeleteRouteWithGuid(string cfTarget, string accessToken, string routeGuid)
         {
-            // trust any certificate
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            ServicePointManager.ServerCertificateValidationCallback +=
-                (sender, cert, chain, sslPolicyErrors) => { return true; };
-
             var deleteRoutePath = DeleteRoutesPath + $"/{routeGuid}";
 
             var uri = new UriBuilder(cfTarget)
@@ -368,11 +347,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
 
         public async Task<List<Stack>> ListStacks(string cfTarget, string accessToken)
         {
-            // trust any certificate
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            ServicePointManager.ServerCertificateValidationCallback +=
-                (sender, cert, chain, sslPolicyErrors) => { return true; };
-
             var uri = new UriBuilder(cfTarget)
             {
                 Path = ListStacksPath,
@@ -387,9 +361,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         {
             if (trustAllCerts)
             {
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-                ServicePointManager.ServerCertificateValidationCallback +=
-                    (sender, cert, chain, sslPolicyErrors) => { return true; };
+                SkipSsl = true;
             }
 
             var loginServerUri = await GetAuthServerUriFromCfTarget(cfApiAddress);
@@ -403,6 +375,11 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             request.Headers.Add("Accept", "application/json");
 
             var response = await _httpClient.SendAsync(request);
+
+            if (trustAllCerts)
+            {
+                SkipSsl = false; // reset to default cert validation behavior
+            }
 
             if (response.StatusCode != HttpStatusCode.OK)
             {
