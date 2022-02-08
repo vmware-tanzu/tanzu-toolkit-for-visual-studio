@@ -29,5 +29,6 @@ namespace Tanzu.Toolkit.ViewModels
         void LogOutTas(object arg);
         bool CanLogOutTas(object arg);
         void OpenDeletionView(object app);
+        void StreamAppLogs(object app);
     }
 }

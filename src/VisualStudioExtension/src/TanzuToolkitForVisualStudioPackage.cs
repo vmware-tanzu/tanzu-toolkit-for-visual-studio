@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Community.VisualStudio.Toolkit;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Shell;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Runtime.InteropServices;
@@ -49,8 +51,8 @@ namespace Tanzu.Toolkit.VisualStudio
     [Guid(PackageGuidString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [ProvideToolWindow(typeof(TanzuTasExplorerToolWindow))]
-    [ProvideToolWindow(typeof(OutputToolWindow))]
-    public sealed class TanzuToolkitForVisualStudioPackage : AsyncPackage
+    [ProvideToolWindow(typeof(OutputToolWindow), MultiInstances = true, Transient = true)]
+    public sealed class TanzuToolkitForVisualStudioPackage : ToolkitPackage
     {
         /// <summary>
         /// TanzuToolkitPackage GUID string.
@@ -72,10 +74,15 @@ namespace Tanzu.Toolkit.VisualStudio
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
-            await TanzuTasExplorerCommand.InitializeAsync(this);
-            await PushToCloudFoundryCommand.InitializeAsync(this, _serviceProvider);
-            await OutputWindowCommand.InitializeAsync(this);
-            await OpenLogsCommand.InitializeAsync(this, _serviceProvider);
+            List<Task> commandInitializations = new List<Task>
+            {
+                Task.Run(() => TanzuTasExplorerCommand.InitializeAsync(this)),
+                Task.Run(() => PushToCloudFoundryCommand.InitializeAsync(this, _serviceProvider)),
+                Task.Run(() => OutputWindowCommand.InitializeAsync(this)),
+                Task.Run(() => OpenLogsCommand.InitializeAsync(this, _serviceProvider)),
+            };
+
+            await Task.WhenAll(commandInitializations);
         }
 
         protected override object GetService(Type serviceType)
@@ -121,7 +128,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<ICfCliService>(provider => new CfCliService(assemblyBasePath, provider));
             services.AddSingleton<IFileService>(new FileService(assemblyBasePath));
             services.AddSingleton<ILoggingService, LoggingService>();
-            services.AddSingleton<IViewService, VsToolWindowService>();
+            services.AddSingleton<IToolWindowService, VsToolWindowService>();
             services.AddSingleton<IThreadingService, ThreadingService>();
             services.AddSingleton<IErrorDialog>(new ErrorDialogService(this));
             services.AddSingleton<IUiDispatcherService, UiDispatcherService>();
@@ -135,7 +142,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddTransient<OutputToolWindow>();
 
             /* View Models */
-            services.AddSingleton<IOutputViewModel, OutputViewModel>();
+            services.AddTransient<IOutputViewModel, OutputViewModel>();
             services.AddSingleton<ITasExplorerViewModel, TasExplorerViewModel>();
             services.AddSingleton<ISsoDialogViewModel, SsoDialogViewModel>(); // must be a singleton for the view to properly show prompt
             services.AddSingleton<ILoginViewModel, LoginViewModel>();
@@ -144,7 +151,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<IAppDeletionConfirmationViewModel, AppDeletionConfirmationViewModel>();
 
             /* Views */
-            services.AddSingleton<IOutputView, OutputView>();
+            services.AddTransient<IOutputView, OutputView>();
             services.AddSingleton<ILoginView, LoginView>();
             services.AddTransient<ITasExplorerView, TasExplorerView>();
             services.AddTransient<IDeploymentDialogView, DeploymentDialogView>();

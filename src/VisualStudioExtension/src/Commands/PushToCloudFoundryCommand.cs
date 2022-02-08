@@ -134,7 +134,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                         // * Actions to take after modal closes:
                         if (viewModel.DeploymentInProgress) // don't open tool window if modal was closed via "X" button
                         {
-                            DisplayOutputToolWindow();
+                            viewModel.OutputView.Show();
                         }
                     }
                 }
@@ -145,21 +145,6 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
 
                 _dialogService.DisplayErrorDialog("Unable to push to Tanzu Application Service", ex.Message);
             }
-        }
-
-        private void DisplayOutputToolWindow()
-        {
-            ThreadHelper.ThrowIfNotOnUIThread();
-
-            // The last flag is set to true so that if the tool window does not exists it will be created.
-            ToolWindowPane window = this._package.FindToolWindow(typeof(OutputToolWindow), 0, true);
-            if ((window == null) || (window.Frame == null))
-            {
-                throw new NotSupportedException("Unable to create OutputToolWindow");
-            }
-
-            IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
-            Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
         }
     }
 }
