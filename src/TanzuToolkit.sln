@@ -22,7 +22,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tanzu.Toolkit.CloudFoundryA
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tanzu.Toolkit.CloudFoundryApiClient.Tests", "CloudFoundryApiClient\test\Tanzu.Toolkit.CloudFoundryApiClient.Tests.csproj", "{061321D9-7434-4DC7-81D9-07254772E2DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tanzu.Toolkit.VisualStudioExtension.Tests", "..\test\Tanzu.Toolkit.VisualStudioExtension.Tests\Tanzu.Toolkit.VisualStudioExtension.Tests.csproj", "{0CF59C9F-5C05-4276-92AD-7786E47836EF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tanzu.Toolkit.VisualStudioExtension.Tests", "VisualStudioExtension\test\Tanzu.Toolkit.VisualStudioExtension.Tests\Tanzu.Toolkit.VisualStudioExtension.Tests.csproj", "{0CF59C9F-5C05-4276-92AD-7786E47836EF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
