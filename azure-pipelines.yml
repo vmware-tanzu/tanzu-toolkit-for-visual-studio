@@ -28,19 +28,20 @@ steps:
 - task: PowerShell@2
   displayName: Update version in the vsix manifest
   inputs:
-    filePath: 'build\update-version.ps1'
-    arguments: '$(Build.BuildNumber)'
+    filePath: build\update-version.ps1
+    arguments: $(Build.BuildNumber)
     pwsh: true
 
-# NuGet
-# Restore, pack, or push NuGet packages, or run a NuGet command. 
-# Supports NuGet.org and authenticated feeds like Azure Artifacts and MyGet. 
-# Uses NuGet.exe and works with .NET Framework apps. For .NET Core and .NET Standard apps, use the .NET Core task.
+# Default NuGet version is 4.1.0 so target something newer
+- task: NuGetToolInstaller@1
+  displayName: Update NuGet Tool
+  inputs:
+    versionSpec: 6.x
+
 - task: NuGetCommand@2
   inputs:
-    command: 'restore' 
+    command: restore
     restoreSolution: '**/*.sln'
-    restoreDirectory: # If no folder is specified, packages are restored into a packages/ folder alongside the selected solution
 
 # Visual Studio build
 # Build with MSBuild and set the Visual Studio version property
@@ -57,14 +58,14 @@ steps:
     arguments: '--no-build --configuration $(buildConfiguration) --collect "XPlat Code Coverage" /p:CoverletOutputFormat=cobertura'
     
 - task: Palmmedia.reportgenerator.reportgenerator-build-release-task.reportgenerator@4
-  condition: and(succeeded(), eq(variables['VsTargetVersion'], 'VS2022'))
+  condition: eq(variables['VsTargetVersion'], 'VS2022')
   inputs:
     reports: $(Agent.TempDirectory)/**/coverage.cobertura.xml
     targetdir: $(build.artifactstagingdirectory)/TestResults/
     reporttypes: Cobertura
 
 - task: PublishCodeCoverageResults@1
-  condition: and(succeeded(), eq(variables['VsTargetVersion'], 'VS2022'))
+  condition: eq(variables['VsTargetVersion'], 'VS2022')
   displayName: Publish Code Coverage Results
   inputs:
     codeCoverageTool: cobertura
@@ -73,5 +74,5 @@ steps:
 - pwsh: Rename-Item -Path "$(Build.SourcesDirectory)\src\VisualStudioExtension\src\bin\$(VsTargetVersion)\$(buildConfiguration)\Tanzu.Toolkit.VisualStudio.vsix" -NewName "Tanzu.Toolkit.VisualStudio.$(Build.BuildNumber).vsix"
   displayName: Rename vsix file to include version number
 
-- publish: 'src/VisualStudioExtension/src/bin/$(VsTargetVersion)/$(buildConfiguration)/Tanzu.Toolkit.VisualStudio.$(Build.BuildNumber).vsix'
+- publish: src/VisualStudioExtension/src/bin/$(VsTargetVersion)/$(buildConfiguration)/Tanzu.Toolkit.VisualStudio.$(Build.BuildNumber).vsix
   artifact: Tanzu.Toolkit.$(VsTargetVersion)
