@@ -399,7 +399,3 @@ function Vsix-CreateChocolatyPackage {
         }
     }
 }
-
-# ---------------------------------
-
-Vsix-PublishToGallery  $env:AGENT_RELEASEDIRECTORY/**.vsix
