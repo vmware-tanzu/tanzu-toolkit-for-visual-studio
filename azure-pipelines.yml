@@ -7,10 +7,10 @@ pr:
 strategy:
   matrix:
     VS2019:
-      VsTargetVersion: VS2019
+      VsTargetVersion: '2019'
       imageName: windows-2019
     VS2022:
-      VsTargetVersion: VS2022
+      VsTargetVersion: '2022'
       imageName: windows-2022
 pool:
   vmImage: $(imageName)
@@ -58,21 +58,25 @@ steps:
     arguments: '--no-build --configuration $(buildConfiguration) --collect "XPlat Code Coverage" /p:CoverletOutputFormat=cobertura'
     
 - task: Palmmedia.reportgenerator.reportgenerator-build-release-task.reportgenerator@4
-  condition: eq(variables['VsTargetVersion'], 'VS2022')
+  condition: eq(variables['VsTargetVersion'], '2022')
   inputs:
     reports: $(Agent.TempDirectory)/**/coverage.cobertura.xml
     targetdir: $(build.artifactstagingdirectory)/TestResults/
     reporttypes: Cobertura
 
 - task: PublishCodeCoverageResults@1
-  condition: eq(variables['VsTargetVersion'], 'VS2022')
+  condition: eq(variables['VsTargetVersion'], '2022')
   displayName: Publish Code Coverage Results
   inputs:
     codeCoverageTool: cobertura
     summaryFileLocation: $(build.artifactstagingdirectory)/TestResults/cobertura.xml
 
-- pwsh: Rename-Item -Path "$(Build.SourcesDirectory)\src\VisualStudioExtension\src\bin\$(VsTargetVersion)\$(buildConfiguration)\Tanzu.Toolkit.VisualStudio.vsix" -NewName "Tanzu.Toolkit.VisualStudio.$(Build.BuildNumber).vsix"
+- pwsh: Rename-Item -Path "$(Build.SourcesDirectory)\src\VisualStudioExtension\src\bin\$(VsTargetVersion)\$(buildConfiguration)\Tanzu.Toolkit.VisualStudio.$(VsTargetVersion).vsix" -NewName "Tanzu.Toolkit.VisualStudio.$(VsTargetVersion).$(Build.BuildNumber).vsix"
   displayName: Rename vsix file to include version number
 
-- publish: src/VisualStudioExtension/src/bin/$(VsTargetVersion)/$(buildConfiguration)/Tanzu.Toolkit.VisualStudio.$(Build.BuildNumber).vsix
-  artifact: Tanzu.Toolkit.$(VsTargetVersion)
+- publish: src/VisualStudioExtension/src/bin/$(VsTargetVersion)/$(buildConfiguration)/Tanzu.Toolkit.VisualStudio.$(VsTargetVersion).$(Build.BuildNumber).vsix
+  artifact: Tanzu.Toolkit.VS$(VsTargetVersion)
+
+- publish: build/vsixgalleryupload.ps1
+  condition: eq(variables['VsTargetVersion'], '2022')
+  displayName: Publish gallery upload script
