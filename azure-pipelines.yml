@@ -6,18 +6,18 @@ pr:
 
 pool:
   vmImage: 'windows-2019'
-
+strategy:
+  matrix:
+    VS2019:
+      VsTargetVersion: VS2019
+    VS2022:
+      VsTargetVersion: VS2022
 variables:
-  - name: major
-    value: 0
-  - name: minor
-    value: 0
-  - name: patch
-    value: 4 
-  - name: DOTNET_SKIP_FIRST_TIME_EXPERIENCE
-    value: true
-  - name: DOTNET_CLI_TELEMETRY_OPTOUT
-    value: 1
+  - major: 0
+  - minor: 0
+  - patch: 4 
+  - DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  - DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
 name: $(major).$(minor).$(patch)-build$(Rev:.r) # Set the value of $(Build.BuildNumber)
 
@@ -62,12 +62,14 @@ steps:
     arguments: '--no-build --configuration $(buildConfiguration) --collect "XPlat Code Coverage" /p:CoverletOutputFormat=cobertura'
     
 - task: Palmmedia.reportgenerator.reportgenerator-build-release-task.reportgenerator@4
+  condition: and(succeeded(), eq(variables['VsTargetVersion'], 'VS2022'))
   inputs:
     reports: $(Agent.TempDirectory)/**/coverage.cobertura.xml
     targetdir: $(build.artifactstagingdirectory)/TestResults/
     reporttypes: Cobertura
 
 - task: PublishCodeCoverageResults@1
+  condition: and(succeeded(), eq(variables['VsTargetVersion'], 'VS2022'))
   displayName: Publish Code Coverage Results
   inputs:
     codeCoverageTool: cobertura
@@ -76,7 +78,7 @@ steps:
 - task: CmdLine@2
   displayName: Rename vsix file to include version number
   inputs:
-    script: cd "$(Build.SourcesDirectory)\src\VisualStudioExtension\src\bin\$(buildConfiguration)\" && ren *.vsix *.$(Build.BuildNumber).vsix
+    script: cd "$(Build.SourcesDirectory)\src\VisualStudioExtension\src\bin\$(VsTargetVersion)\$(buildConfiguration)\" && ren *.vsix *.$(Build.BuildNumber).vsix
 
-- publish: 'src/VisualStudioExtension/src/bin/$(buildConfiguration)/Tanzu.Toolkit.VisualStudio.$(Build.BuildNumber).vsix'
-  artifact: Tanzu.Toolkit
+- publish: 'src/VisualStudioExtension/src/bin/$(VsTargetVersion)/$(buildConfiguration)/Tanzu.Toolkit.VisualStudio.$(Build.BuildNumber).vsix'
+  artifact: Tanzu.Toolkit.$(VsTargetVersion)
