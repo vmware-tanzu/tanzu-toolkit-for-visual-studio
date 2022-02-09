@@ -869,7 +869,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     .Callback(() => Assert.Fail("Output view does not need to be retrieved."));
 
             MockCloudFoundryService.Setup(m => m.
-                GetRecentLogs(fakeApp))
+                GetRecentLogsAsync(fakeApp))
                     .ReturnsAsync(fakeLogsResult);
 
             await _sut.DisplayRecentAppLogs(fakeApp);
@@ -896,7 +896,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     .Returns(fakeView);
 
             MockCloudFoundryService.Setup(m => m.
-                GetRecentLogs(fakeApp))
+                GetRecentLogsAsync(fakeApp))
                     .ReturnsAsync(fakeLogsResult);
 
             Assert.IsFalse(fakeView.ShowMethodWasCalled);
@@ -921,7 +921,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     .Callback(() => Assert.Fail("Output view does not need to be retrieved."));
 
             MockCloudFoundryService.Setup(m => m.
-                GetRecentLogs(fakeApp))
+                GetRecentLogsAsync(fakeApp))
                     .ReturnsAsync(invalidRefreshTokenResult);
 
             Assert.IsFalse(_sut.AuthenticationRequired);
@@ -1078,14 +1078,20 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("StreamAppLogs")]
-        public void StreamAppLogs_ConstructsAndDisplaysNewOutputView()
+        public async Task StreamAppLogs_ConstructsAndDisplaysNewOutputView()
         {
             var expectedViewParam = $"Logs for {FakeCfApp.AppName}"; // intended to be title of tool window
             var fakeView = new FakeOutputView();
+            var fakeRecentLogsResult = new DetailedResult<string>
+            {
+                Succeeded = true,
+                Content = "fake historical app logs",
+            };
 
             MockViewLocatorService.Setup(m => m.GetViewByViewModelName(nameof(OutputViewModel), expectedViewParam)).Returns(fakeView);
+            MockCloudFoundryService.Setup(m => m.GetRecentLogsAsync(FakeCfApp)).ReturnsAsync(fakeRecentLogsResult);
 
-            _sut.StreamAppLogs(FakeCfApp);
+            await _sut.StreamAppLogsAsync(FakeCfApp);
 
             Assert.IsTrue(fakeView.ShowMethodWasCalled);
             MockViewLocatorService.VerifyAll();
@@ -1093,13 +1099,96 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("StreamAppLogs")]
-        public void StreamAppLogs_RequestsLogStreamProcessFromCloudFoundryService()
+        public async Task StreamAppLogs_PrintsRecentLogs_BeforeStartingStream()
         {
             var expectedViewParam = $"Logs for {FakeCfApp.AppName}";
             var fakeView = new FakeOutputView();
             var fakeViewModel = fakeView.ViewModel as IOutputViewModel;
             Action<string> expectedStdOutDelegate = fakeViewModel.AppendLine;
             Action<string> expectedStdErrDelegate = fakeViewModel.AppendLine;
+            var fakeRecentLogsResult = new DetailedResult<string>
+            {
+                Succeeded = true,
+                Content = "fake historical app logs",
+            };
+
+            MockViewLocatorService.Setup(m => m.GetViewByViewModelName(nameof(OutputViewModel), expectedViewParam)).Returns(fakeView);
+            MockCloudFoundryService.Setup(m => m.GetRecentLogsAsync(FakeCfApp)).ReturnsAsync(fakeRecentLogsResult);
+
+            await _sut.StreamAppLogsAsync(FakeCfApp);
+
+            var vm = fakeViewModel as FakeOutputViewModel;
+            Assert.IsTrue(vm.AppendLineInvocationArgs.Contains(fakeRecentLogsResult.Content));
+            MockCloudFoundryService.VerifyAll();
+        }
+
+        [TestMethod]
+        [TestCategory("StreamAppLogs")]
+        public async Task StreamAppLogs_LogsError_WhenRecentLogsRequestFails()
+        {
+            var expectedViewParam = $"Logs for {FakeCfApp.AppName}";
+            var fakeView = new FakeOutputView();
+            var fakeViewModel = fakeView.ViewModel as IOutputViewModel;
+            Action<string> expectedStdOutDelegate = fakeViewModel.AppendLine;
+            Action<string> expectedStdErrDelegate = fakeViewModel.AppendLine;
+            var fakeRecentLogsResult = new DetailedResult<string>
+            {
+                Succeeded = false,
+                Explanation = ":(",
+            };
+
+            MockViewLocatorService.Setup(m => m.GetViewByViewModelName(nameof(OutputViewModel), expectedViewParam)).Returns(fakeView);
+            MockCloudFoundryService.Setup(m => m.GetRecentLogsAsync(FakeCfApp)).ReturnsAsync(fakeRecentLogsResult);
+
+            await _sut.StreamAppLogsAsync(FakeCfApp);
+
+            MockLogger.Verify(m => m.Error($"Unable to retrieve recent logs for {FakeCfApp.AppName}. {fakeRecentLogsResult.Explanation}. {fakeRecentLogsResult.CmdResult}"), Times.Once);
+            MockCloudFoundryService.VerifyAll();
+        }
+
+        [TestMethod]
+        [TestCategory("StreamAppLogs")]
+        public async Task StreamAppLogs_SetsAuthenticationRequiredToTrue_WhenRecentLogsRequestReportsInvalidRefreshToken()
+        {
+            var expectedViewParam = $"Logs for {FakeCfApp.AppName}";
+            var fakeView = new FakeOutputView();
+            var fakeViewModel = fakeView.ViewModel as IOutputViewModel;
+            Action<string> expectedStdOutDelegate = fakeViewModel.AppendLine;
+            Action<string> expectedStdErrDelegate = fakeViewModel.AppendLine;
+            var fakeRecentLogsResult = new DetailedResult<string>
+            {
+                Succeeded = false,
+                Explanation = ":(",
+                FailureType = FailureType.InvalidRefreshToken,
+            };
+
+            MockViewLocatorService.Setup(m => m.GetViewByViewModelName(nameof(OutputViewModel), expectedViewParam)).Returns(fakeView);
+            MockCloudFoundryService.Setup(m => m.GetRecentLogsAsync(FakeCfApp)).ReturnsAsync(fakeRecentLogsResult);
+
+            Assert.IsFalse(_sut.AuthenticationRequired);
+
+            await _sut.StreamAppLogsAsync(FakeCfApp);
+
+            Assert.IsTrue(_sut.AuthenticationRequired);
+
+            MockCloudFoundryService.VerifyAll();
+        }
+
+        [TestMethod]
+        [TestCategory("StreamAppLogs")]
+        public async Task StreamAppLogs_RequestsLogStreamProcessFromCloudFoundryService()
+        {
+            var expectedViewParam = $"Logs for {FakeCfApp.AppName}";
+            var fakeView = new FakeOutputView();
+            var fakeViewModel = fakeView.ViewModel as IOutputViewModel;
+            Action<string> expectedStdOutDelegate = fakeViewModel.AppendLine;
+            Action<string> expectedStdErrDelegate = fakeViewModel.AppendLine;
+            var fakeRecentLogsResult = new DetailedResult<string>
+            {
+                Succeeded = false,
+                Explanation = ":(",
+                FailureType = FailureType.InvalidRefreshToken,
+            };
             var fakeLogStreamResult = new DetailedResult<Process>
             {
                 Succeeded = true,
@@ -1107,16 +1196,17 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             };
 
             MockViewLocatorService.Setup(m => m.GetViewByViewModelName(nameof(OutputViewModel), expectedViewParam)).Returns(fakeView);
+            MockCloudFoundryService.Setup(m => m.GetRecentLogsAsync(FakeCfApp)).ReturnsAsync(fakeRecentLogsResult);
             MockCloudFoundryService.Setup(m => m.StreamAppLogs(FakeCfApp, expectedStdOutDelegate, expectedStdErrDelegate)).Returns(fakeLogStreamResult);
 
-            _sut.StreamAppLogs(FakeCfApp);
+            await _sut.StreamAppLogsAsync(FakeCfApp);
 
             MockCloudFoundryService.VerifyAll();
         }
 
         [TestMethod]
         [TestCategory("StreamAppLogs")]
-        public void StreamAppLogs_SavesLogStreamProcessToCorrectOutputViewModel_WhenCloudFoundryServiceSuccessfullyReturnsProcess()
+        public async Task StreamAppLogs_SavesLogStreamProcessToCorrectOutputViewModel_WhenCloudFoundryServiceSuccessfullyReturnsProcess()
         {
             using (var fakeLogsProcess = new Process())
             {
@@ -1125,6 +1215,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 var fakeViewModel = fakeView.ViewModel as IOutputViewModel;
                 Action<string> expectedStdOutDelegate = fakeViewModel.AppendLine;
                 Action<string> expectedStdErrDelegate = fakeViewModel.AppendLine;
+                var fakeRecentLogsResult = new DetailedResult<string>
+                {
+                    Succeeded = false,
+                    Explanation = ":(",
+                    FailureType = FailureType.InvalidRefreshToken,
+                };
                 var fakeLogStreamResult = new DetailedResult<Process>
                 {
                     Succeeded = true,
@@ -1132,9 +1228,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 };
 
                 MockViewLocatorService.Setup(m => m.GetViewByViewModelName(nameof(OutputViewModel), expectedViewParam)).Returns(fakeView);
+                MockCloudFoundryService.Setup(m => m.GetRecentLogsAsync(FakeCfApp)).ReturnsAsync(fakeRecentLogsResult);
                 MockCloudFoundryService.Setup(m => m.StreamAppLogs(FakeCfApp, expectedStdOutDelegate, expectedStdErrDelegate)).Returns(fakeLogStreamResult);
 
-                _sut.StreamAppLogs(FakeCfApp);
+                await _sut.StreamAppLogsAsync(FakeCfApp);
 
                 Assert.AreEqual(fakeLogsProcess, fakeViewModel.ActiveProcess);
             }
@@ -1142,13 +1239,19 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("StreamAppLogs")]
-        public void StreamAppLogs_DisplaysError_WhenCloudFoundryServiceFailsToReturnLogStreamProcess()
+        public async Task StreamAppLogs_DisplaysError_WhenCloudFoundryServiceFailsToReturnLogStreamProcess()
         {
             var expectedViewParam = $"Logs for {FakeCfApp.AppName}"; // intended to be title of tool window
             var fakeView = new FakeOutputView();
             var fakeViewModel = fakeView.ViewModel as IOutputViewModel;
             Action<string> expectedStdOutDelegate = fakeViewModel.AppendLine;
             Action<string> expectedStdErrDelegate = fakeViewModel.AppendLine;
+            var fakeRecentLogsResult = new DetailedResult<string>
+            {
+                Succeeded = false,
+                Explanation = ":(",
+                FailureType = FailureType.InvalidRefreshToken,
+            };
             var fakeLogStreamResult = new DetailedResult<Process>
             {
                 Succeeded = false,
@@ -1156,17 +1259,18 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             };
 
             MockViewLocatorService.Setup(m => m.GetViewByViewModelName(nameof(OutputViewModel), expectedViewParam)).Returns(fakeView);
+            MockCloudFoundryService.Setup(m => m.GetRecentLogsAsync(FakeCfApp)).ReturnsAsync(fakeRecentLogsResult);
             MockCloudFoundryService.Setup(m => m.StreamAppLogs(FakeCfApp, expectedStdOutDelegate, expectedStdErrDelegate)).Returns(fakeLogStreamResult);
             MockErrorDialogService.Setup(m => m.DisplayErrorDialog("Error displaying app logs", $"Something went wrong while trying to display logs for {FakeCfApp.AppName}, please try again."));
 
-            _sut.StreamAppLogs(FakeCfApp);
+            await _sut.StreamAppLogsAsync(FakeCfApp);
 
             MockErrorDialogService.VerifyAll();
         }
 
         [TestMethod]
         [TestCategory("StreamAppLogs")]
-        public void StreamAppLogs_DisplaysError_ViewLocatorServiceThrowsException()
+        public async Task StreamAppLogs_DisplaysError_ViewLocatorServiceThrowsException()
         {
             var expectedViewParam = $"Logs for {FakeCfApp.AppName}"; // intended to be title of tool window
             var fakeView = new FakeOutputView();
@@ -1178,27 +1282,34 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockViewLocatorService.Setup(m => m.GetViewByViewModelName(nameof(OutputViewModel), expectedViewParam)).Throws(fakeViewLocatorException);
             MockErrorDialogService.Setup(m => m.DisplayErrorDialog("Error displaying app logs", $"Something went wrong while trying to display logs for {FakeCfApp.AppName}, please try again."));
 
-            _sut.StreamAppLogs(FakeCfApp);
+            await _sut.StreamAppLogsAsync(FakeCfApp);
 
             MockErrorDialogService.VerifyAll();
         }
 
         [TestMethod]
         [TestCategory("StreamAppLogs")]
-        public void StreamAppLogs_DisplaysError_WhenCloudFoundryServiceThrowsException()
+        public async Task StreamAppLogs_DisplaysError_WhenCloudFoundryServiceThrowsException()
         {
             var expectedViewParam = $"Logs for {FakeCfApp.AppName}"; // intended to be title of tool window
             var fakeView = new FakeOutputView();
             var fakeViewModel = fakeView.ViewModel as IOutputViewModel;
             Action<string> expectedStdOutDelegate = fakeViewModel.AppendLine;
             Action<string> expectedStdErrDelegate = fakeViewModel.AppendLine;
+            var fakeRecentLogsResult = new DetailedResult<string>
+            {
+                Succeeded = false,
+                Explanation = ":(",
+                FailureType = FailureType.InvalidRefreshToken,
+            };
             var fakeLogStreamProcessStartException = new Exception(":(");
 
             MockViewLocatorService.Setup(m => m.GetViewByViewModelName(nameof(OutputViewModel), expectedViewParam)).Returns(fakeView);
+            MockCloudFoundryService.Setup(m => m.GetRecentLogsAsync(FakeCfApp)).ReturnsAsync(fakeRecentLogsResult);
             MockCloudFoundryService.Setup(m => m.StreamAppLogs(FakeCfApp, expectedStdOutDelegate, expectedStdErrDelegate)).Throws(fakeLogStreamProcessStartException);
             MockErrorDialogService.Setup(m => m.DisplayErrorDialog("Error displaying app logs", $"Something went wrong while trying to display logs for {FakeCfApp.AppName}, please try again."));
 
-            _sut.StreamAppLogs(FakeCfApp);
+            await _sut.StreamAppLogsAsync(FakeCfApp);
 
             MockErrorDialogService.VerifyAll();
         }

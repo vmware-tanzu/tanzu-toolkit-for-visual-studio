@@ -1061,7 +1061,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             return new DetailedResult(true, $"App successfully deploying to org '{targetOrg.OrgName}', space '{targetSpace.SpaceName}'...");
         }
 
-        public async Task<DetailedResult<string>> GetRecentLogs(CloudFoundryApp app)
+        public async Task<DetailedResult<string>> GetRecentLogsAsync(CloudFoundryApp app)
         {
             DetailedResult<string> logsResult;
 
