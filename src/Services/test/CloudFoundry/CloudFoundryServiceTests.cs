@@ -1817,7 +1817,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 .GetRecentAppLogs(FakeApp.AppName, FakeOrg.OrgName, FakeSpace.SpaceName))
                     .ReturnsAsync(fakeLogsResult);
 
-            var result = await _sut.GetRecentLogs(FakeApp);
+            var result = await _sut.GetRecentLogsAsync(FakeApp);
 
             Assert.AreEqual(result.Content, logsStub);
             Assert.AreEqual(result.Succeeded, fakeLogsResult.Succeeded);
@@ -1837,7 +1837,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 .GetRecentAppLogs(FakeApp.AppName, FakeOrg.OrgName, FakeSpace.SpaceName))
                     .ReturnsAsync(fakeLogsResult);
 
-            var result = await _sut.GetRecentLogs(FakeApp);
+            var result = await _sut.GetRecentLogsAsync(FakeApp);
 
             Assert.IsNull(result.Content);
             Assert.AreEqual(result.Succeeded, fakeLogsResult.Succeeded);
@@ -1853,7 +1853,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 .GetRecentAppLogs(FakeApp.AppName, FakeOrg.OrgName, FakeSpace.SpaceName))
                     .Throws(new InvalidRefreshTokenException());
 
-            var result = await _sut.GetRecentLogs(FakeApp);
+            var result = await _sut.GetRecentLogsAsync(FakeApp);
 
             Assert.IsNull(result.Content);
             Assert.IsFalse(result.Succeeded);
