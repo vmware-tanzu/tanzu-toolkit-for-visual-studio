@@ -13,11 +13,11 @@ strategy:
     VS2022:
       VsTargetVersion: VS2022
 variables:
-  - major: 0
-  - minor: 0
-  - patch: 4 
-  - DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
-  - DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  major: 0
+  minor: 0
+  patch: 4 
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
 name: $(major).$(minor).$(patch)-build$(Rev:.r) # Set the value of $(Build.BuildNumber)
 
