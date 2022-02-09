@@ -14,7 +14,6 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Tanzu.Toolkit.VisualStudio</RootNamespace>
-    <AssemblyName>Tanzu.Toolkit.VisualStudio</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
     <UseCodebase>true</UseCodebase>
@@ -26,31 +25,25 @@
     <StartAction>Program</StartAction>
     <StartProgram Condition="'$(DevEnvDir)' != ''">$(DevEnvDir)devenv.exe</StartProgram>
     <StartArguments>/rootsuffix Exp</StartArguments>
-  </PropertyGroup>
-
-  <!-- Thanks to cezarypiatek (https://cezarypiatek.github.io/post/migrate-vsix-to-vs2022/) for this multi-targeting solution -->
-  <PropertyGroup>
+    <!-- Thanks to cezarypiatek (https://cezarypiatek.github.io/post/migrate-vsix-to-vs2022/) for this multi-targeting solution -->
     <!-- STEP 1: If VsTargetVersion not specified, assign based on version of VisualStudio that loaded the project -->
-    <VsTargetVersion Condition="'$(VsTargetVersion)' == '' and '$(VisualStudioVersion)' == '17.0' ">VS2022</VsTargetVersion>
-    <VsTargetVersion Condition="'$(VsTargetVersion)' == '' and '$(VisualStudioVersion)' == '16.0' ">VS2019</VsTargetVersion>
+    <VsTargetVersion Condition="'$(VsTargetVersion)' == '' and '$(VisualStudioVersion)' == '17.0' ">2022</VsTargetVersion>
+    <VsTargetVersion Condition="'$(VsTargetVersion)' == '' and '$(VisualStudioVersion)' == '16.0' ">2019</VsTargetVersion>
+    <AssemblyName>Tanzu.Toolkit.VisualStudio.$(VsTargetVersion)</AssemblyName>
     <!-- STEP 2: Separate artifacts & tmp build files by VS version -->
     <OutputPath>bin\$(VsTargetVersion)\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(VsTargetVersion)\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
   <!-- STEP 3:  -->
   <Choose>
-    <When Condition="'$(VsTargetVersion)' == 'VS2022'">
+    <When Condition="'$(VsTargetVersion)' == '2022'">
       <PropertyGroup>
         <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
       </PropertyGroup>
       <ItemGroup>
-        <None Include="..\..\..\build\vs2019\source.extension.vsixmanifest" Link="source.extension.vsixmanifest">
+        <None Include="..\..\..\build\vs2022\source.extension.vsixmanifest" Link="source.extension.vsixmanifest">
           <SubType>Designer</SubType>
         </None>
-        <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.0.5234">
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-          <PrivateAssets>all</PrivateAssets>
-        </PackageReference>
         <PackageReference Include="Community.VisualStudio.Toolkit.17">
           <Version>17.0.394</Version>
         </PackageReference>
@@ -65,18 +58,12 @@
           <SubType>Designer</SubType>
         </None>
         <!-- <PackageReference Include="Microsoft.VisualStudio.SDK" Version="16.0.206" ExcludeAssets="runtime" /> -->
-        <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="16.8.3038">
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-          <PrivateAssets>all</PrivateAssets>
-        </PackageReference>
         <PackageReference Include="Community.VisualStudio.Toolkit.16">
-          <Version>16.0.339</Version>
+          <Version>16.0.394</Version>
         </PackageReference>
       </ItemGroup>
     </Otherwise>
   </Choose>
-
-
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
@@ -180,11 +167,11 @@
   <ItemGroup>
     <ProjectReference Include="..\..\CloudFoundryApiClient\src\Tanzu.Toolkit.CloudFoundryApiClient.csproj">
       <Project>{56A68904-C31A-45E7-8617-FB8FDCFB49CB}</Project>
-      <Name>CloudFoundryApiClient</Name>
+      <Name>Tanzu.Toolkit.CloudFoundryApiClient</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Models\src\Tanzu.Toolkit.Models.csproj">
       <Project>{9486bbee-472d-4d0a-9644-a34151f66f62}</Project>
-      <Name>Models</Name>
+      <Name>Tanzu.Toolkit.Models</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Services\src\Tanzu.Toolkit.Services.csproj">
       <Project>{BCD3DD2E-6220-47A4-9C9D-9F71C2C715C0}</Project>
@@ -224,8 +211,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-	<Resource Include="Views\Resources\StatusWarning64.png" />
-	<Resource Include="Views\Resources\tanzuiconico.ico" />
+    <Resource Include="Views\Resources\StatusWarning64.png" />
+    <Resource Include="Views\Resources\tanzuiconico.ico" />
     <Resource Include="Views\Resources\blue_logout.png" />
     <Resource Include="Views\Resources\tasicon.png" />
     <Resource Include="Views\Resources\tas_16px.png" />
