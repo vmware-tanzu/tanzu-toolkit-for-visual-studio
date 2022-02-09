@@ -87,7 +87,6 @@
     <Compile Include="Services\ThemeService.cs" />
     <Compile Include="Services\ErrorDialogService.cs" />
     <Compile Include="Commands\OpenLogsCommand.cs" />
-    <Compile Include="Commands\OutputWindowCommand.cs" />
     <Compile Include="Commands\PushToCloudFoundryCommand.cs" />
     <Compile Include="Services\UiDispatcherService.cs" />
     <Compile Include="Services\DialogService.cs" />
