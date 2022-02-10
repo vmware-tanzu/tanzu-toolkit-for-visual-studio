@@ -9,6 +9,7 @@ using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.ViewModels.AppDeletionConfirmation;
 using Tanzu.Toolkit.Services.ViewLocator;
+using Tanzu.Toolkit.Services;
 
 namespace Tanzu.Toolkit.ViewModels
 {
@@ -317,7 +318,10 @@ namespace Tanzu.Toolkit.ViewModels
                     var outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel), viewTitle) as IView;
                     var outputViewModel = outputView.ViewModel as IOutputViewModel;
 
-                    var recentLogsResult = await CloudFoundryService.GetRecentLogsAsync(cfApp);
+                    Task<DetailedResult<string>> recentLogsTask = CloudFoundryService.GetRecentLogsAsync(cfApp);
+                    outputView?.Show();
+
+                    var recentLogsResult = await recentLogsTask;
                     if (recentLogsResult.Succeeded)
                     {
                         outputViewModel?.AppendLine(recentLogsResult.Content);
@@ -332,8 +336,6 @@ namespace Tanzu.Toolkit.ViewModels
 
                         Logger.Error($"Unable to retrieve recent logs for {cfApp.AppName}. {recentLogsResult.Explanation}. {recentLogsResult.CmdResult}");
                     }
-
-                    outputView?.Show();
 
                     var logStreamResult = CloudFoundryService.StreamAppLogs(cfApp, stdOutCallback: outputViewModel.AppendLine, stdErrCallback: outputViewModel.AppendLine);
                     if (logStreamResult.Succeeded)
