@@ -4,20 +4,22 @@ trigger:
 pr:
   drafts: false
 
+strategy:
+  matrix:
+    Visual Studio 2019:
+      VsTargetVersion: '2019'
+      imageName: windows-2019
+    Visual Studio 2022:
+      VsTargetVersion: '2022'
+      imageName: windows-2022
 pool:
-  vmImage: 'windows-2019'
-
+  vmImage: $(imageName)
 variables:
-  - name: major
-    value: 0
-  - name: minor
-    value: 0
-  - name: patch
-    value: 4 
-  - name: DOTNET_SKIP_FIRST_TIME_EXPERIENCE
-    value: true
-  - name: DOTNET_CLI_TELEMETRY_OPTOUT
-    value: 1
+  major: 0
+  minor: 0
+  patch: 4 
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
 name: $(major).$(minor).$(patch)-build$(Rev:.r) # Set the value of $(Build.BuildNumber)
 
@@ -26,57 +28,55 @@ steps:
 - task: PowerShell@2
   displayName: Update version in the vsix manifest
   inputs:
-    filePath: 'build\update-version.ps1'
-    arguments: '$(Build.BuildNumber)'
+    filePath: build\update-version.ps1
+    arguments: $(Build.BuildNumber)
     pwsh: true
 
-# NuGet tool installer
-# Acquires a specific version of NuGet from the internet or the tools cache and adds it to the PATH. Use this task to change the version of NuGet used in the NuGet tasks.
+# Default NuGet version is 4.1.0 so target something newer
 - task: NuGetToolInstaller@1
-  displayName: 'Use NuGet 5.11.0'
+  displayName: Specify NuGet version
   inputs:
-    versionSpec: 5.11.0
+    versionSpec: 6.x
 
-# NuGet
-# Restore, pack, or push NuGet packages, or run a NuGet command. 
-# Supports NuGet.org and authenticated feeds like Azure Artifacts and MyGet. 
-# Uses NuGet.exe and works with .NET Framework apps. For .NET Core and .NET Standard apps, use the .NET Core task.
 - task: NuGetCommand@2
+  displayName: Restore NuGet packages
   inputs:
-    command: 'restore' 
+    command: restore
     restoreSolution: '**/*.sln'
-    restoreDirectory: # If no folder is specified, packages are restored into a packages/ folder alongside the selected solution
 
 # Visual Studio build
 # Build with MSBuild and set the Visual Studio version property
 - task: VSBuild@1
+  displayName: Build solution
   inputs:
     solution: '**/*.sln' 
     configuration: $(buildConfiguration)
 
 - task: DotNetCoreCLI@2
-  displayName: Test
+  displayName: Run tests
   inputs:
     command: test 
     projects: '**/test/*.Tests.csproj'
     arguments: '--no-build --configuration $(buildConfiguration) --collect "XPlat Code Coverage" /p:CoverletOutputFormat=cobertura'
     
 - task: Palmmedia.reportgenerator.reportgenerator-build-release-task.reportgenerator@4
+  displayName: Build code coverage report
+  condition: eq(variables['VsTargetVersion'], '2022')
   inputs:
     reports: $(Agent.TempDirectory)/**/coverage.cobertura.xml
     targetdir: $(build.artifactstagingdirectory)/TestResults/
     reporttypes: Cobertura
 
 - task: PublishCodeCoverageResults@1
-  displayName: Publish Code Coverage Results
+  condition: eq(variables['VsTargetVersion'], '2022')
+  displayName: Publish code coverage
   inputs:
     codeCoverageTool: cobertura
     summaryFileLocation: $(build.artifactstagingdirectory)/TestResults/cobertura.xml
 
-- task: CmdLine@2
-  displayName: Rename vsix file to include version number
-  inputs:
-    script: cd "$(Build.SourcesDirectory)\src\VisualStudioExtension\src\bin\$(buildConfiguration)\" && ren *.vsix *.$(Build.BuildNumber).vsix
+- pwsh: Rename-Item -Path "$(Build.SourcesDirectory)\src\VisualStudioExtension\src\bin\$(VsTargetVersion)\$(buildConfiguration)\Tanzu.Toolkit.VisualStudio.$(VsTargetVersion).vsix" -NewName "Tanzu.Toolkit.VisualStudio.$(VsTargetVersion).$(Build.BuildNumber).vsix"
+  displayName: Include version in vsix name
 
-- publish: 'src/VisualStudioExtension/src/bin/$(buildConfiguration)/Tanzu.Toolkit.VisualStudio.$(Build.BuildNumber).vsix'
-  artifact: Tanzu.Toolkit
+- publish: src/VisualStudioExtension/src/bin/$(VsTargetVersion)/$(buildConfiguration)/Tanzu.Toolkit.VisualStudio.$(VsTargetVersion).$(Build.BuildNumber).vsix
+  artifact: Tanzu.Toolkit.VS$(VsTargetVersion)
+  displayName: Publish vsix
