@@ -16,7 +16,7 @@ The `TanzuToolkit` solution provides an extension for Visual Studio that enables
 
 ### Overview
 
-https://user-images.githubusercontent.com/22666145/143893236-b10e3ed8-ad07-4f92-bd3b-640188cee336.mp4
+https://user-images.githubusercontent.com/22666145/153500532-c1c5b322-3a9c-40ad-8d7f-a479fa8a5f36.mp4
 
 ### App Deployment using a Manifest
 
