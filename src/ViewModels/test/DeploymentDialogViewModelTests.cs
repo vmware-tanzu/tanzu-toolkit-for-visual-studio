@@ -156,7 +156,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut = new DeploymentDialogViewModel(Services, null, _fakeProjectPath, FakeTargetFrameworkMoniker);
 
             Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
-            MockThreadingService.Verify(m => m.StartTask(_sut.UpdateCfOrgOptions), Times.Once);
+            MockThreadingService.Verify(m => m.StartBackgroundTask(_sut.UpdateCfOrgOptions), Times.Once);
         }
 
         [TestMethod]
@@ -169,7 +169,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut = new DeploymentDialogViewModel(Services, null, _fakeProjectPath, FakeTargetFrameworkMoniker);
 
             Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
-            MockThreadingService.Verify(m => m.StartTask(_sut.UpdateBuildpackOptions), Times.Once);
+            MockThreadingService.Verify(m => m.StartBackgroundTask(_sut.UpdateBuildpackOptions), Times.Once);
         }
 
         [TestMethod]
@@ -182,7 +182,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut = new DeploymentDialogViewModel(Services, null, _fakeProjectPath, FakeTargetFrameworkMoniker);
 
             Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
-            MockThreadingService.Verify(m => m.StartTask(_sut.UpdateStackOptions), Times.Once);
+            MockThreadingService.Verify(m => m.StartBackgroundTask(_sut.UpdateStackOptions), Times.Once);
         }
 
         [TestMethod]
@@ -329,7 +329,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsTrue(_sut.DeploymentInProgress);
 
             MockDialogService.Verify(mock => mock.CloseDialog(dw, true), Times.Once);
-            MockThreadingService.Verify(mock => mock.StartTask(_sut.StartDeployment), Times.Once);
+            MockThreadingService.Verify(mock => mock.StartBackgroundTask(_sut.StartDeployment), Times.Once);
         }
 
         [TestMethod]
@@ -350,7 +350,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsFalse(_sut.DeploymentInProgress);
 
             MockDialogService.Verify(mock => mock.CloseDialog(dw, true), Times.Never);
-            MockThreadingService.Verify(mock => mock.StartTask(_sut.StartDeployment), Times.Never);
+            MockThreadingService.Verify(mock => mock.StartBackgroundTask(_sut.StartDeployment), Times.Never);
         }
 
         [TestMethod]
@@ -527,7 +527,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 cmdDetails: FakeSuccessCmdResult);
 
             MockCloudFoundryService.Setup(mock => mock.
-                GetOrgsForCfInstanceAsync(fakeCf, true, It.IsAny<int>()))
+                GetOrgsForCfInstanceAsync(fakeCf, false, It.IsAny<int>()))
                     .ReturnsAsync(fakeSuccessfulOrgsResponse);
 
 
@@ -568,7 +568,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 cmdDetails: FakeFailureCmdResult);
 
             MockCloudFoundryService.Setup(mock => mock.
-                GetOrgsForCfInstanceAsync(fakeCf, true, It.IsAny<int>()))
+                GetOrgsForCfInstanceAsync(fakeCf, false, It.IsAny<int>()))
                     .ReturnsAsync(fakeFailedOrgsResponse);
 
             MockErrorDialogService.Setup(mock => mock.
@@ -598,7 +598,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 cmdDetails: FakeFailureCmdResult);
 
             MockCloudFoundryService.Setup(mock => mock.
-                GetOrgsForCfInstanceAsync(fakeCf, true, It.IsAny<int>()))
+                GetOrgsForCfInstanceAsync(fakeCf, false, It.IsAny<int>()))
                     .ReturnsAsync(fakeFailedOrgsResponse);
 
             MockErrorDialogService.Setup(mock => mock.
@@ -627,7 +627,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 cmdDetails: FakeSuccessCmdResult);
 
             MockCloudFoundryService.Setup(mock => mock.
-                GetSpacesForOrgAsync(FakeCfOrg, true, It.IsAny<int>()))
+                GetSpacesForOrgAsync(FakeCfOrg, false, It.IsAny<int>()))
                     .ReturnsAsync(fakeSuccessfulSpacesResponse);
 
             _sut.SelectedOrg = FakeCfOrg;
@@ -678,7 +678,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 cmdDetails: FakeFailureCmdResult);
 
             MockCloudFoundryService.Setup(mock => mock.
-                GetSpacesForOrgAsync(FakeCfOrg, true, It.IsAny<int>()))
+                GetSpacesForOrgAsync(FakeCfOrg, false, It.IsAny<int>()))
                     .ReturnsAsync(fakeFailedSpacesResponse);
 
             MockErrorDialogService.Setup(mock => mock.
@@ -708,7 +708,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 cmdDetails: FakeFailureCmdResult);
 
             MockCloudFoundryService.Setup(mock => mock.
-                GetSpacesForOrgAsync(FakeCfOrg, true, It.IsAny<int>()))
+                GetSpacesForOrgAsync(FakeCfOrg, false, It.IsAny<int>()))
                     .ReturnsAsync(fakeFailedSpacesResponse);
 
             MockErrorDialogService.Setup(mock => mock.
@@ -848,7 +848,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.OpenLoginView(null);
 
             Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
-            MockThreadingService.Verify(m => m.StartTask(_sut.UpdateCfOrgOptions), Times.Once);
+            MockThreadingService.Verify(m => m.StartBackgroundTask(_sut.UpdateCfOrgOptions), Times.Once);
         }
 
         [TestMethod]
@@ -869,7 +869,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.OpenLoginView(null);
 
             Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
-            MockThreadingService.Verify(m => m.StartTask(_sut.UpdateBuildpackOptions), Times.Once);
+            MockThreadingService.Verify(m => m.StartBackgroundTask(_sut.UpdateBuildpackOptions), Times.Once);
         }
 
         [TestMethod]
@@ -890,7 +890,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.OpenLoginView(null);
 
             Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
-            MockThreadingService.Verify(m => m.StartTask(_sut.UpdateStackOptions), Times.Once);
+            MockThreadingService.Verify(m => m.StartBackgroundTask(_sut.UpdateStackOptions), Times.Once);
         }
 
         [TestMethod]

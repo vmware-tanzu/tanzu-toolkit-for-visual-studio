@@ -1,14 +1,16 @@
-﻿using System;
-using System.Windows;
+﻿using Microsoft.VisualStudio.Shell;
+using System;
+using System.Threading.Tasks;
 using Tanzu.Toolkit.Services;
 
 namespace Tanzu.Toolkit.VisualStudio.Services
 {
     public class UiDispatcherService : IUiDispatcherService
     {
-        public void RunOnUiThread(Action method)
+        public async Task RunOnUiThreadAsync(Action method)
         {
-            Application.Current.Dispatcher.Invoke(method);
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            method.Invoke();
         }
     }
 }

@@ -3,6 +3,7 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
@@ -14,8 +15,21 @@ namespace Tanzu.Toolkit.ViewModels.Tests
     {
         private OrgViewModel _sut;
         private List<string> _receivedEvents;
-        TasExplorerViewModel _fakeTasExplorerViewModel;
-        CfInstanceViewModel _fakeCfInstanceViewModel;
+        private TasExplorerViewModel _fakeTasExplorerViewModel;
+        private CfInstanceViewModel _fakeCfInstanceViewModel;
+        private CloudFoundryOrganization _expectedOrg;
+        private bool _expectedSkipSslValue = false;
+        private int _expectedRetryAmount = 1;
+        private readonly DetailedResult<List<CloudFoundrySpace>> _fakeSpacesResponse = new DetailedResult<List<CloudFoundrySpace>>
+        {
+            Succeeded = true,
+            Content = new List<CloudFoundrySpace>
+            {
+                FakeSpaces[0],
+                FakeSpaces[1],
+                FakeSpaces[2],
+            }
+        };
 
         [TestInitialize]
         public void TestInit()
@@ -23,22 +37,49 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             RenewMockServices();
 
             MockUiDispatcherService.Setup(mock => mock.
-                RunOnUiThread(It.IsAny<Action>()))
+                RunOnUiThreadAsync(It.IsAny<Action>()))
                     .Callback<Action>(action =>
                     {
                         // Run whatever method is passed to MockUiDispatcherService.RunOnUiThread; do not delegate to the UI Dispatcher
                         action();
                     });
 
+            MockThreadingService.Setup(m => m
+              .RemoveItemFromCollectionOnUiThreadAsync(It.IsAny<ObservableCollection<TreeViewItemViewModel>>(), It.IsAny<TreeViewItemViewModel>()))
+                .Callback<ObservableCollection<TreeViewItemViewModel>, TreeViewItemViewModel>((collection, item) =>
+                {
+                    collection.Remove(item);
+                });
+
+            MockThreadingService.Setup(m => m
+              .AddItemToCollectionOnUiThreadAsync(It.IsAny<ObservableCollection<TreeViewItemViewModel>>(), It.IsAny<TreeViewItemViewModel>()))
+                .Callback<ObservableCollection<TreeViewItemViewModel>, TreeViewItemViewModel>((collection, item) =>
+                {
+                    collection.Add(item);
+                });
+
+            MockThreadingService.Setup(m => m
+              .ReplaceCollectionOnUiThreadAsync(It.IsAny<ObservableCollection<TreeViewItemViewModel>>(), It.IsAny<ObservableCollection<TreeViewItemViewModel>>()))
+                .Callback<ObservableCollection<TreeViewItemViewModel>, ObservableCollection<TreeViewItemViewModel>>((collectionToReplace, newCollection) =>
+                {
+                    collectionToReplace.Clear();
+                    foreach (var item in newCollection)
+                    {
+                        collectionToReplace.Add(item);
+                    }
+                });
+
             _fakeTasExplorerViewModel = new TasExplorerViewModel(Services);
             _fakeCfInstanceViewModel = new CfInstanceViewModel(FakeCfInstance, _fakeTasExplorerViewModel, Services, expanded: true);
-            _sut = new OrgViewModel(FakeCfOrg, _fakeCfInstanceViewModel, _fakeTasExplorerViewModel, Services);
+            _sut = new OrgViewModel(FakeCfOrg, _fakeCfInstanceViewModel, _fakeTasExplorerViewModel, Services, expanded: true);
 
             _receivedEvents = new List<string>();
             _sut.PropertyChanged += (sender, e) =>
             {
                 _receivedEvents.Add(e.PropertyName);
             };
+
+            _expectedOrg = _sut.Org;
         }
 
         [TestCleanup]
@@ -83,372 +124,265 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("LoadChildren")]
-        public async Task LoadChildren_UpdatesAllSpaces()
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_RemovesStaleChildrenOnUiThread_WhenSpacesRequestSucceeds()
         {
-            var initialSpacesList = new System.Collections.ObjectModel.ObservableCollection<TreeViewItemViewModel>
-            {
-                new SpaceViewModel(new CloudFoundrySpace("initial space 1", "initial space 1 guid", null), null, null, Services),
-                new SpaceViewModel(new CloudFoundrySpace("initial space 2", "initial space 2 guid", null), null, null, Services),
-                new SpaceViewModel(new CloudFoundrySpace("initial space 3", "initial space 3 guid", null), null, null, Services),
-            };
-
-            var newSpacesList = new List<CloudFoundrySpace>
-            {
-                new CloudFoundrySpace("initial space 1", "initial space 1 guid", null),
-                new CloudFoundrySpace("initial space 2", "initial space 2 guid", null),
-            };
-            var fakeSucccessResponse = new DetailedResult<List<CloudFoundrySpace>>(
-                content: newSpacesList,
-                succeeded: true,
-                explanation: null,
-                cmdDetails: FakeSuccessCmdResult);
-
-            _sut.Children = initialSpacesList;
-
-            /* erase record of initial "Children" event */
-            _receivedEvents.Clear();
-
-            MockCloudFoundryService.Setup(mock => mock.
-                GetSpacesForOrgAsync(It.IsAny<CloudFoundryOrganization>(), true, It.IsAny<int>()))
-                    .ReturnsAsync(fakeSucccessResponse);
-
-            Assert.AreEqual(initialSpacesList.Count, _sut.Children.Count);
-
-            await _sut.LoadChildren();
-
-            Assert.AreEqual(newSpacesList.Count, _sut.Children.Count);
-            foreach (TreeViewItemViewModel child in _sut.Children)
-            {
-                Assert.AreEqual(_sut, child.Parent);
-            }
-
-            Assert.AreEqual(1, _receivedEvents.Count);
-            Assert.AreEqual("Children", _receivedEvents[0]);
-
-            Assert.IsFalse(_sut.HasEmptyPlaceholder);
-        }
-
-        [TestMethod]
-        public async Task LoadChildren_AssignsNoSpacesPlaceholder_WhenThereAreNoSpaces()
-        {
-            var fakeNoSpacesResponse = new DetailedResult<List<CloudFoundrySpace>>(
-                content: EmptyListOfSpaces,
-                succeeded: true,
-                explanation: null,
-                cmdDetails: FakeSuccessCmdResult);
-
-            MockCloudFoundryService.Setup(mock => mock.
-                GetSpacesForOrgAsync(It.IsAny<CloudFoundryOrganization>(), true, It.IsAny<int>()))
-                    .ReturnsAsync(fakeNoSpacesResponse);
-
-            await _sut.LoadChildren();
-
-            Assert.AreEqual(1, _sut.Children.Count);
-            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
-            Assert.AreEqual(OrgViewModel._emptySpacesPlaceholderMsg, _sut.Children[0].DisplayText);
-
-            Assert.AreEqual(_sut.EmptyPlaceholder, _sut.Children[0]);
-            Assert.IsTrue(_sut.HasEmptyPlaceholder);
-
-            Assert.AreEqual(1, _receivedEvents.Count);
-            Assert.AreEqual("Children", _receivedEvents[0]);
-        }
-
-        [TestMethod]
-        public async Task LoadChildren_SetsIsLoadingToFalse_WhenComplete()
-        {
-            var fakeNoSpacesResponse = new DetailedResult<List<CloudFoundrySpace>>(
-                content: EmptyListOfSpaces,
-                succeeded: true,
-                explanation: null,
-                cmdDetails: FakeSuccessCmdResult);
-
-            MockCloudFoundryService.Setup(mock => mock.
-                GetSpacesForOrgAsync(_sut.Org, true, It.IsAny<int>()))
-                    .ReturnsAsync(fakeNoSpacesResponse);
-
-            _sut.IsLoading = true;
-
-            await _sut.LoadChildren();
-
-            Assert.IsFalse(_sut.IsLoading);
-        }
-
-        [TestMethod]
-        public async Task LoadChildren_DisplaysErrorDialog_WhenSpacesRequestFails()
-        {
-            var fakeFailedResult = new DetailedResult<List<CloudFoundrySpace>>(
-                succeeded: false,
-                content: null,
-                explanation: "junk",
-                cmdDetails: FakeFailureCmdResult);
-
-            MockCloudFoundryService.Setup(mock => mock.
-              GetSpacesForOrgAsync(_sut.Org, true, It.IsAny<int>()))
-                .ReturnsAsync(fakeFailedResult);
-
-            await _sut.LoadChildren();
-
-            Assert.IsFalse(_sut.IsLoading);
-
-            MockErrorDialogService.Verify(mock => mock.
-              DisplayErrorDialog(OrgViewModel._getSpacesFailureMsg, fakeFailedResult.Explanation),
-                Times.Once);
-        }
-
-        [TestMethod]
-        [TestCategory("FetchChildren")]
-        public async Task FetchChildren_ReturnsListOfSpaces_WithoutUpdatingChildren()
-        {
-            List<CloudFoundrySpace> fakeSpacesList = new List<CloudFoundrySpace>
-            {
-                new CloudFoundrySpace("fake space name 1", "fake space id 1", FakeCfOrg),
-                new CloudFoundrySpace("fake space name 2", "fake space id 2", FakeCfOrg),
-            };
-
-            var fakeSuccessResponse = new DetailedResult<List<CloudFoundrySpace>>(
-                content: fakeSpacesList,
-                succeeded: true,
-                explanation: null,
-                cmdDetails: FakeSuccessCmdResult);
-
-            MockCloudFoundryService.Setup(mock => mock.
-                GetSpacesForOrgAsync(FakeCfOrg, true, It.IsAny<int>()))
-                    .ReturnsAsync(fakeSuccessResponse);
-
-            /* pre-check presence of placeholder */
-            Assert.AreEqual(1, _sut.Children.Count);
-            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
-
-            var spaces = await _sut.FetchChildren();
-
-            Assert.AreEqual(2, spaces.Count);
-            foreach (TreeViewItemViewModel child in spaces)
-            {
-                Assert.AreEqual(_sut, child.Parent);
-            }
-
-            /* confirm presence of placeholder */
-            Assert.AreEqual(1, _sut.Children.Count);
-            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
-
-            // property changed events should not be raised
-            Assert.AreEqual(0, _receivedEvents.Count);
-        }
-
-        [TestMethod]
-        [TestCategory("FetchChildren")]
-        public async Task FetchChildren_DisplaysErrorDialog_WhenSpacesRequestFails()
-        {
-            var fakeFailedResult = new DetailedResult<List<CloudFoundrySpace>>(
-                succeeded: false,
-                content: null,
-                explanation: "junk",
-                cmdDetails: FakeFailureCmdResult);
-
-            MockCloudFoundryService.Setup(mock => mock.
-              GetSpacesForOrgAsync(_sut.Org, true, It.IsAny<int>()))
-                .ReturnsAsync(fakeFailedResult);
-
-            var result = await _sut.FetchChildren();
-
-            CollectionAssert.AreEqual(EmptyListOfSpaces, result);
-
-            MockErrorDialogService.Verify(mock => mock.
-              DisplayErrorDialog(OrgViewModel._getSpacesFailureMsg, fakeFailedResult.Explanation),
-                Times.Once);
-        }
-
-        [TestMethod]
-        [TestCategory("FetchChildren")]
-        public async Task FetchChildren_CollapsesParentCfInstanceViewModel_WhenOrgsRequestFailsBecauseOfInvalidRefreshToken()
-        {
-            _sut = new OrgViewModel(FakeCfOrg, _fakeCfInstanceViewModel, _fakeTasExplorerViewModel, Services, expanded: true);
-
-            var fakeFailedResult =
-                new DetailedResult<List<CloudFoundrySpace>>(succeeded: false, content: null, explanation: "junk", cmdDetails: FakeFailureCmdResult)
-                {
-                    FailureType = FailureType.InvalidRefreshToken,
-                };
-
-            MockCloudFoundryService.Setup(mock => mock.
-              GetSpacesForOrgAsync(_sut.Org, true, It.IsAny<int>()))
-                .ReturnsAsync(fakeFailedResult);
-
-            Assert.IsTrue(_sut.Parent.IsExpanded);
-
-            var result = await _sut.FetchChildren();
-
-            Assert.IsFalse(_sut.Parent.IsExpanded);
-
-            MockErrorDialogService.Verify(mock => mock.
-              DisplayErrorDialog(It.IsAny<string>(), It.IsAny<string>()),
-                Times.Never);
-        }
-
-        [TestMethod]
-        [TestCategory("FetchChildren")]
-        public async Task FetchChildren_SetsAuthenticationRequiredToTrue_WhenOrgsRequestFailsBecauseOfInvalidRefreshToken()
-        {
-            _sut = new OrgViewModel(FakeCfOrg, _fakeCfInstanceViewModel, _fakeTasExplorerViewModel, Services, expanded: true);
-
-            var fakeFailedResult =
-                new DetailedResult<List<CloudFoundrySpace>>(succeeded: false, content: null, explanation: "junk", cmdDetails: FakeFailureCmdResult)
-                {
-                    FailureType = FailureType.InvalidRefreshToken,
-                };
-
-            MockCloudFoundryService.Setup(mock => mock.
-              GetSpacesForOrgAsync(_sut.Org, true, It.IsAny<int>()))
-                .ReturnsAsync(fakeFailedResult);
-
-            Assert.IsFalse(_sut.ParentTasExplorer.AuthenticationRequired);
-
-            var result = await _sut.FetchChildren();
-
-            Assert.IsTrue(_sut.ParentTasExplorer.AuthenticationRequired);
-
-            MockErrorDialogService.Verify(mock => mock.
-              DisplayErrorDialog(It.IsAny<string>(), It.IsAny<string>()),
-                Times.Never);
-        }
-
-        [TestMethod]
-        [TestCategory("RefreshChildren")]
-        public async Task RefreshOrg_UpdatesChildrenOnOrgViewModel()
-        {
-            var fakeSpaceName1 = "fake space 1";
-            var fakeSpaceName2 = "fake space 2";
-            var fakeSpaceName3 = "fake space 3";
-            var fakeSpaceName4 = "fake space 4";
-
-            var fakeSpaceGuid1 = "fake space 1";
-            var fakeSpaceGuid2 = "fake space 2";
-            var fakeSpaceGuid3 = "fake space 3";
-            var fakeSpaceGuid4 = "fake space 4";
-
+            /** mock 4 initial children */
             _sut.Children = new ObservableCollection<TreeViewItemViewModel>
             {
-                // to be removed:
-                new SpaceViewModel(new CloudFoundrySpace(fakeSpaceName1, fakeSpaceGuid1, _sut.Org), null, null, Services), 
-                // to stay:
-                new SpaceViewModel(new CloudFoundrySpace(fakeSpaceName2, fakeSpaceGuid2, _sut.Org), null, null, Services, expanded: true), // should stay expanded after refresh 
-                new SpaceViewModel(new CloudFoundrySpace(fakeSpaceName3, fakeSpaceGuid3, _sut.Org), null, null, Services, expanded: false), // should stay collapsed after refresh 
+                new SpaceViewModel(FakeSpaces[0], _sut, _fakeTasExplorerViewModel, Services),
+                new SpaceViewModel(FakeSpaces[1], _sut, _fakeTasExplorerViewModel, Services),
+                new SpaceViewModel(FakeSpaces[2], _sut, _fakeTasExplorerViewModel, Services),
+                new SpaceViewModel(FakeSpaces[3], _sut, _fakeTasExplorerViewModel, Services),
             };
 
-            var fakeSpacesList = new List<CloudFoundrySpace>
+            /** mock retrieving all initial children except for FakeSpaces[3] */
+            MockCloudFoundryService.Setup(m => m
+              .GetSpacesForOrgAsync(_expectedOrg, _expectedSkipSslValue, _expectedRetryAmount))
+                .ReturnsAsync(_fakeSpacesResponse);
+
+            await _sut.UpdateAllChildren();
+
+            Assert.AreEqual(3, _sut.Children.Count);
+            Assert.IsTrue(_sut.Children.Any(child => child is SpaceViewModel space && space.Space.SpaceName == FakeSpaces[0].SpaceName));
+            Assert.IsTrue(_sut.Children.Any(child => child is SpaceViewModel space && space.Space.SpaceName == FakeSpaces[1].SpaceName));
+            Assert.IsTrue(_sut.Children.Any(child => child is SpaceViewModel space && space.Space.SpaceName == FakeSpaces[2].SpaceName));
+            Assert.IsFalse(_sut.Children.Any(child => child is SpaceViewModel space && space.Space.SpaceName == FakeSpaces[3].SpaceName));
+
+            MockThreadingService.Verify(m => m
+              .RemoveItemFromCollectionOnUiThreadAsync(_sut.Children, It.Is<SpaceViewModel>((ovm) => ovm.Space == FakeSpaces[3])),
+                Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_AddsNewChildrenOnUiThread_WhenSpacesRequestSucceeds()
+        {
+            /** mock 2 initial children */
+            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
             {
-                // original:
-                new CloudFoundrySpace(fakeSpaceName2, fakeSpaceGuid2, _sut.Org),
-                new CloudFoundrySpace(fakeSpaceName3, fakeSpaceGuid3, _sut.Org),
-                // new:
-                new CloudFoundrySpace(fakeSpaceName4, fakeSpaceGuid4, _sut.Org),
+                new SpaceViewModel(FakeSpaces[0], _sut, _fakeTasExplorerViewModel, Services),
+                new SpaceViewModel(FakeSpaces[1], _sut, _fakeTasExplorerViewModel, Services),
             };
 
-            var fakeSuccessResult = new DetailedResult<List<CloudFoundrySpace>>(succeeded: true, content: fakeSpacesList);
+            /** mock retrieving all initial children plus FakeSpaces[2] */
+            MockCloudFoundryService.Setup(m => m
+              .GetSpacesForOrgAsync(_expectedOrg, _expectedSkipSslValue, _expectedRetryAmount))
+                .ReturnsAsync(_fakeSpacesResponse);
+
+            await _sut.UpdateAllChildren();
 
             Assert.AreEqual(3, _sut.Children.Count);
-            SpaceViewModel initialChildSpace1 = (SpaceViewModel)_sut.Children[0];
-            SpaceViewModel initialChildSpace2 = (SpaceViewModel)_sut.Children[1];
-            SpaceViewModel initialChildSpace3 = (SpaceViewModel)_sut.Children[2];
-            Assert.AreEqual(fakeSpaceName1, initialChildSpace1.Space.SpaceName);
-            Assert.AreEqual(fakeSpaceName2, initialChildSpace2.Space.SpaceName);
-            Assert.AreEqual(fakeSpaceName3, initialChildSpace3.Space.SpaceName);
-            Assert.IsFalse(initialChildSpace1.IsExpanded);
-            Assert.IsTrue(initialChildSpace2.IsExpanded);
-            Assert.IsFalse(initialChildSpace3.IsExpanded);
+            Assert.IsTrue(_sut.Children.Any(child => child is SpaceViewModel space && space.Space.SpaceName == FakeSpaces[0].SpaceName));
+            Assert.IsTrue(_sut.Children.Any(child => child is SpaceViewModel space && space.Space.SpaceName == FakeSpaces[1].SpaceName));
+            Assert.IsTrue(_sut.Children.Any(child => child is SpaceViewModel space && space.Space.SpaceName == FakeSpaces[2].SpaceName));
 
-            MockCloudFoundryService.Setup(mock => mock.
-                GetSpacesForOrgAsync(_sut.Org, true, It.IsAny<int>()))
-                    .ReturnsAsync(fakeSuccessResult);
-
-            _receivedEvents.Clear();
-
-            await _sut.RefreshChildren();
-
-            Assert.AreEqual(3, _sut.Children.Count);
-            SpaceViewModel refreshedChildSpace1 = (SpaceViewModel)_sut.Children[0];
-            SpaceViewModel refreshedChildSpace2 = (SpaceViewModel)_sut.Children[1];
-            SpaceViewModel refreshedChildSpace3 = (SpaceViewModel)_sut.Children[2];
-            Assert.AreEqual(fakeSpaceName2, refreshedChildSpace1.Space.SpaceName);
-            Assert.AreEqual(fakeSpaceName3, refreshedChildSpace2.Space.SpaceName);
-            Assert.AreEqual(fakeSpaceName4, refreshedChildSpace3.Space.SpaceName);
-            Assert.IsTrue(refreshedChildSpace1.IsExpanded); // children that aren't new shouldn't change expansion
-            Assert.IsFalse(refreshedChildSpace2.IsExpanded); // children that aren't new shouldn't change expansion
-            Assert.IsFalse(refreshedChildSpace2.IsExpanded); // new children should start collapsed
-
-            // property changed events should only be raised for "IsRefreshing" (1 to set as true, 1 to set as false)
-            Assert.AreEqual(2, _receivedEvents.Count);
-            Assert.AreEqual("IsRefreshing", _receivedEvents[0]);
-            Assert.AreEqual("IsRefreshing", _receivedEvents[1]);
-
-            MockCloudFoundryService.VerifyAll();
+            MockThreadingService.Verify(m => m
+              .AddItemToCollectionOnUiThreadAsync(_sut.Children, It.Is<SpaceViewModel>((ovm) => ovm.Space == FakeSpaces[2])),
+                Times.Once);
         }
 
         [TestMethod]
-        [TestCategory("RefreshChildren")]
-        public async Task RefreshChildren_AddsPlaceholder_WhenAllSpacesAreRemoved()
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_CallsUpdateOnAllChildren_WhenSpacesRequestSucceeds()
         {
-            var fakeInitialSpace = new CloudFoundrySpace("fake space name", "fake space id", _sut.Org);
-            var svm = new SpaceViewModel(fakeInitialSpace, null, null, Services);
+            MockCloudFoundryService.Setup(m => m
+              .GetSpacesForOrgAsync(_expectedOrg, _expectedSkipSslValue, _expectedRetryAmount))
+                .ReturnsAsync(_fakeSpacesResponse);
 
-            var fakeNoSpacesResult = new DetailedResult<List<CloudFoundrySpace>>(
-                succeeded: true,
-                content: new List<CloudFoundrySpace>(), // simulate org having lost all spaces before refresh
-                explanation: null,
-                cmdDetails: FakeSuccessCmdResult);
+            MockThreadingService.Setup(m => m
+              .StartBackgroundTask(It.IsAny<Func<Task>>()))
+                .Verifiable();
 
-            MockCloudFoundryService.Setup(mock => mock.
-                GetSpacesForOrgAsync(_sut.Org, true, It.IsAny<int>()))
-                    .ReturnsAsync(fakeNoSpacesResult);
+            await _sut.UpdateAllChildren();
 
-            _sut.Children = new ObservableCollection<TreeViewItemViewModel> { svm }; // simulate org initially having 1 space child
-
-            Assert.AreEqual(1, _sut.Children.Count);
-            Assert.AreEqual(typeof(SpaceViewModel), _sut.Children[0].GetType());
-
-            await _sut.RefreshChildren();
-
-            Assert.AreEqual(1, _sut.Children.Count);
-            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
-            Assert.AreEqual(OrgViewModel._emptySpacesPlaceholderMsg, _sut.Children[0].DisplayText);
-        }
-
-        [TestMethod]
-        [TestCategory("RefreshChildren")]
-        public async Task RefreshChildren_RemovesPlaceholder_WhenEmptyOrgGainsChildren()
-        {
-            // simulate org initially having no space children
-            _sut.Children = new ObservableCollection<TreeViewItemViewModel> { _sut.EmptyPlaceholder };
-            _sut.HasEmptyPlaceholder = true;
-
-            var fakeNewSpace = new CloudFoundrySpace("fake space name", "fake space id", _sut.Org);
-
-            var fakeSuccessfulSpacesResult = new DetailedResult<List<CloudFoundrySpace>>(
-                succeeded: true,
-                content: new List<CloudFoundrySpace>
+            foreach (var child in _sut.Children)
+            {
+                if (child is SpaceViewModel space)
                 {
-                    fakeNewSpace, // simulate org having gained a space child before refresh
-                },
-                explanation: null,
-                cmdDetails: FakeSuccessCmdResult);
-
-            MockCloudFoundryService.Setup(mock => mock.
-                GetSpacesForOrgAsync(_sut.Org, true, It.IsAny<int>()))
-                    .ReturnsAsync(fakeSuccessfulSpacesResult);
-
-            _sut.Children = new ObservableCollection<TreeViewItemViewModel> { _sut.EmptyPlaceholder }; // simulate org initially having no space children
-
-            Assert.AreEqual(1, _sut.Children.Count);
-            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
-            Assert.AreEqual(OrgViewModel._emptySpacesPlaceholderMsg, _sut.Children[0].DisplayText);
-
-            await _sut.RefreshChildren();
-
-            Assert.AreEqual(1, _sut.Children.Count);
-            Assert.AreEqual(typeof(SpaceViewModel), _sut.Children[0].GetType());
+                    MockThreadingService.Verify(m => m
+                      .StartBackgroundTask(space.UpdateAllChildren), Times.Once);
+                }
+                else
+                {
+                    Assert.Fail("All children should be SpaceViewModels at this point");
+                }
+            }
         }
 
+        [TestMethod]
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_AssignsEmptyPlaceholder_WhenSpacesRequestReturnsNoSpaces()
+        {
+            var fakeNoSpacesResponse = _fakeSpacesResponse;
+            fakeNoSpacesResponse.Content.Clear();
+
+            /** mock 2 initial children */
+            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
+            {
+                new SpaceViewModel(FakeSpaces[0], _sut, _fakeTasExplorerViewModel, Services),
+                new SpaceViewModel(FakeSpaces[1], _sut, _fakeTasExplorerViewModel, Services),
+            };
+
+            MockCloudFoundryService.Setup(m => m
+              .GetSpacesForOrgAsync(_expectedOrg, _expectedSkipSslValue, _expectedRetryAmount))
+                .ReturnsAsync(fakeNoSpacesResponse);
+
+            Assert.IsFalse(_sut.Children.Any(child => child is PlaceholderViewModel));
+
+            await _sut.UpdateAllChildren();
+
+            Assert.AreEqual(1, _sut.Children.Count);
+            Assert.IsTrue(_sut.Children[0].Equals(_sut.EmptyPlaceholder));
+        }
+
+        [TestMethod]
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_SetsIsLoadingTrueAtStart_AndSetsIsLoadingFalseAtEnd()
+        {
+            MockCloudFoundryService.Setup(m => m.GetSpacesForOrgAsync(_expectedOrg, _expectedSkipSslValue, _expectedRetryAmount))
+                .Callback(() =>
+                {
+                    // ensure IsLoading was set to true by the time spaces were queried
+                    Assert.IsTrue(_sut.IsLoading);
+                }).ReturnsAsync(_fakeSpacesResponse);
+
+            Assert.IsFalse(_sut.IsLoading);
+            Assert.IsTrue(_sut.IsExpanded);
+
+            await _sut.UpdateAllChildren();
+
+            Assert.IsFalse(_sut.IsLoading);
+        }
+
+        [TestMethod]
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_RemovesEmptyPlaceholder_WhenSpacesRequestReturnsSpaces()
+        {
+            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
+            {
+                _sut.EmptyPlaceholder,
+            };
+
+            /** mock 3 new children */
+            MockCloudFoundryService.Setup(m => m
+              .GetSpacesForOrgAsync(_expectedOrg, _expectedSkipSslValue, _expectedRetryAmount))
+                .ReturnsAsync(_fakeSpacesResponse);
+
+            Assert.AreEqual(1, _sut.Children.Count);
+            Assert.IsTrue(_sut.Children[0].Equals(_sut.EmptyPlaceholder));
+
+            await _sut.UpdateAllChildren();
+
+            Assert.AreEqual(3, _sut.Children.Count);
+            Assert.IsFalse(_sut.Children.Any(child => child is PlaceholderViewModel));
+        }
+
+        [TestMethod]
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_RemovesLoadingPlaceholder_WhenSpacesRequestReturnsSpaces()
+        {
+            var fakeNoSpacesResponse = _fakeSpacesResponse;
+            fakeNoSpacesResponse.Content.Clear();
+
+            /** mock 2 initial children */
+            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
+            {
+                new SpaceViewModel(FakeSpaces[0], _sut, _fakeTasExplorerViewModel, Services),
+                new SpaceViewModel(FakeSpaces[1], _sut, _fakeTasExplorerViewModel, Services),
+            };
+
+            MockCloudFoundryService.Setup(m => m
+              .GetSpacesForOrgAsync(_expectedOrg, _expectedSkipSslValue, _expectedRetryAmount))
+                .Callback(() =>
+                {
+                    // ensure loading placeholder present at time of loading fresh children
+                    Assert.IsTrue(_sut.IsLoading);
+                    Assert.IsTrue(_sut.Children.Contains(_sut.LoadingPlaceholder));
+
+                }).ReturnsAsync(fakeNoSpacesResponse);
+
+            await _sut.UpdateAllChildren();
+
+            Assert.IsFalse(_sut.Children.Contains(_sut.LoadingPlaceholder));
+        }
+
+        [TestMethod]
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_CollapsesSelf_AndSetsAuthRequiredTrue_WhenSpacesRequestFailsWithInvalidRefreshToken()
+        {
+            var fakeInvalidTokenResponse = new DetailedResult<List<CloudFoundrySpace>>
+            {
+                Succeeded = false,
+                Explanation = "junk",
+                FailureType = FailureType.InvalidRefreshToken,
+            };
+
+            MockCloudFoundryService.Setup(m => m
+              .GetSpacesForOrgAsync(_expectedOrg, _expectedSkipSslValue, _expectedRetryAmount))
+                .ReturnsAsync(fakeInvalidTokenResponse);
+
+            Assert.IsTrue(_sut.IsExpanded);
+            Assert.IsFalse(_sut.ParentTasExplorer.AuthenticationRequired);
+
+            await _sut.UpdateAllChildren();
+
+            Assert.IsFalse(_sut.IsLoading);
+            Assert.IsFalse(_sut.IsExpanded);
+            Assert.IsTrue(_sut.ParentTasExplorer.AuthenticationRequired);
+        }
+
+        [TestMethod]
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_CollapsesSelf_AndLogsError_WhenSpacesRequestFails()
+        {
+            var fakeFailedSpacesResponse = new DetailedResult<List<CloudFoundrySpace>>
+            {
+                Succeeded = false,
+                Explanation = "junk",
+            };
+
+            MockCloudFoundryService.Setup(m => m
+              .GetSpacesForOrgAsync(_expectedOrg, _expectedSkipSslValue, _expectedRetryAmount))
+                .ReturnsAsync(fakeFailedSpacesResponse);
+
+            MockLogger.Setup(m => m
+              .Error(It.Is<string>(s => s.Contains("OrgViewModel failed to load spaces")), fakeFailedSpacesResponse.Explanation))
+                .Verifiable();
+
+            Assert.IsTrue(_sut.IsExpanded);
+
+            await _sut.UpdateAllChildren();
+
+            Assert.IsFalse(_sut.IsLoading);
+            Assert.IsFalse(_sut.IsExpanded);
+            MockLogger.VerifyAll();
+        }
+
+        [TestMethod]
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_DisplaysAndLogsErrors_ForAllCaughtExceptions()
+        {
+            var fakeException = new Exception(":(");
+
+            MockCloudFoundryService.Setup(m => m
+              .GetSpacesForOrgAsync(_expectedOrg, _expectedSkipSslValue, _expectedRetryAmount))
+                .Throws(fakeException);
+
+            MockLogger.Setup(m => m
+              .Error(It.Is<string>(s => s.Contains("Caught exception trying to load spaces in OrgViewModel")), fakeException))
+                .Verifiable();
+
+            MockErrorDialogService.Setup(m => m
+              .DisplayErrorDialog(
+                OrgViewModel._getSpacesFailureMsg,
+                It.Is<string>(s => s.Contains("try disconnecting & logging in again") && s.Contains("If this issue persists, please contact dotnetdevx@groups.vmware.com"))))
+                .Verifiable();
+
+            await _sut.UpdateAllChildren();
+
+            MockLogger.VerifyAll();
+            MockErrorDialogService.VerifyAll();
+        }
     }
 }

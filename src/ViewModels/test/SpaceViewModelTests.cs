@@ -3,6 +3,7 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
@@ -17,6 +18,19 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         TasExplorerViewModel _fakeTasExplorerViewModel;
         CfInstanceViewModel _fakeCfInstanceViewModel;
         OrgViewModel _fakeOrgViewModel;
+        private CloudFoundrySpace _expectedSpace;
+        private bool _expectedSkipSslValue = false;
+        private int _expectedRetryAmount = 1;
+        private readonly DetailedResult<List<CloudFoundryApp>> _fakeAppsResponse = new DetailedResult<List<CloudFoundryApp>>
+        {
+            Succeeded = true,
+            Content = new List<CloudFoundryApp>
+            {
+                FakeApps[0],
+                FakeApps[1],
+                FakeApps[2],
+            }
+        };
 
         [TestInitialize]
         public void TestInit()
@@ -24,23 +38,50 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             RenewMockServices();
 
             MockUiDispatcherService.Setup(mock => mock.
-                RunOnUiThread(It.IsAny<Action>()))
+                RunOnUiThreadAsync(It.IsAny<Action>()))
                     .Callback<Action>(action =>
                     {
                         // Run whatever method is passed to MockUiDispatcherService.RunOnUiThread; do not delegate to the UI Dispatcher
                         action();
                     });
 
+            MockThreadingService.Setup(m => m
+              .RemoveItemFromCollectionOnUiThreadAsync(It.IsAny<ObservableCollection<TreeViewItemViewModel>>(), It.IsAny<TreeViewItemViewModel>()))
+                .Callback<ObservableCollection<TreeViewItemViewModel>, TreeViewItemViewModel>((collection, item) =>
+                {
+                    collection.Remove(item);
+                });
+
+            MockThreadingService.Setup(m => m
+              .AddItemToCollectionOnUiThreadAsync(It.IsAny<ObservableCollection<TreeViewItemViewModel>>(), It.IsAny<TreeViewItemViewModel>()))
+                .Callback<ObservableCollection<TreeViewItemViewModel>, TreeViewItemViewModel>((collection, item) =>
+                {
+                    collection.Add(item);
+                });
+
+            MockThreadingService.Setup(m => m
+              .ReplaceCollectionOnUiThreadAsync(It.IsAny<ObservableCollection<TreeViewItemViewModel>>(), It.IsAny<ObservableCollection<TreeViewItemViewModel>>()))
+                .Callback<ObservableCollection<TreeViewItemViewModel>, ObservableCollection<TreeViewItemViewModel>>((collectionToReplace, newCollection) =>
+                {
+                    collectionToReplace.Clear();
+                    foreach (var item in newCollection)
+                    {
+                        collectionToReplace.Add(item);
+                    }
+                });
+
             _fakeTasExplorerViewModel = new TasExplorerViewModel(Services);
             _fakeCfInstanceViewModel = new CfInstanceViewModel(FakeCfInstance, _fakeTasExplorerViewModel, Services, expanded: true);
             _fakeOrgViewModel = new OrgViewModel(FakeCfOrg, _fakeCfInstanceViewModel, _fakeTasExplorerViewModel, Services);
-            _sut = new SpaceViewModel(FakeCfSpace, _fakeOrgViewModel, _fakeTasExplorerViewModel, Services);
+            _sut = new SpaceViewModel(FakeCfSpace, _fakeOrgViewModel, _fakeTasExplorerViewModel, Services, expanded: true);
 
             _receivedEvents = new List<string>();
             _sut.PropertyChanged += (sender, e) =>
             {
                 _receivedEvents.Add(e.PropertyName);
             };
+
+            _expectedSpace = _sut.Space;
         }
 
         [TestCleanup]
@@ -85,414 +126,296 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("LoadChildren")]
-        public async Task LoadChildren_UpdatesAllApps()
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_RemovesStaleChildrenOnUiThread_WhenAppsRequestSucceeds()
         {
-            var initialAppsList = new System.Collections.ObjectModel.ObservableCollection<TreeViewItemViewModel>
+            /** mock 4 initial children */
+            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
             {
-                new AppViewModel(new CloudFoundryApp("initial app 1", null, null, null), Services),
-                new AppViewModel(new CloudFoundryApp("initial app 2", null, null, null), Services),
-                new AppViewModel(new CloudFoundryApp("initial app 3", null, null, null), Services),
+                new AppViewModel(FakeApps[0], Services),
+                new AppViewModel(FakeApps[1], Services),
+                new AppViewModel(FakeApps[2], Services),
+                new AppViewModel(FakeApps[3], Services),
             };
 
-            var newAppsList = new List<CloudFoundryApp>
-            {
-                new CloudFoundryApp("initial app 1", null, null, null),
-                new CloudFoundryApp("initial app 2", null, null, null),
-            };
-            var fakeAppsResult = new DetailedResult<List<CloudFoundryApp>>(
-                succeeded: true,
-                content: newAppsList,
-                explanation: null,
-                cmdDetails: FakeSuccessCmdResult);
+            /** mock retrieving all initial children except for FakeApps[3] */
+            MockCloudFoundryService.Setup(m => m
+              .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
+                .ReturnsAsync(_fakeAppsResponse);
 
-            _sut.Children = initialAppsList;
+            await _sut.UpdateAllChildren();
 
-            /* erase record of initial "Children" event */
-            _receivedEvents.Clear();
+            Assert.AreEqual(3, _sut.Children.Count);
+            Assert.IsTrue(_sut.Children.Any(child => child is AppViewModel app && app.App.AppName == FakeApps[0].AppName));
+            Assert.IsTrue(_sut.Children.Any(child => child is AppViewModel app && app.App.AppName == FakeApps[1].AppName));
+            Assert.IsTrue(_sut.Children.Any(child => child is AppViewModel app && app.App.AppName == FakeApps[2].AppName));
+            Assert.IsFalse(_sut.Children.Any(child => child is AppViewModel app && app.App.AppName == FakeApps[3].AppName));
 
-            MockCloudFoundryService.Setup(mock => mock.
-                GetAppsForSpaceAsync(_sut.Space, true, It.IsAny<int>()))
-                    .ReturnsAsync(fakeAppsResult);
-
-            Assert.AreEqual(initialAppsList.Count, _sut.Children.Count);
-
-            await _sut.LoadChildren();
-
-            Assert.AreEqual(newAppsList.Count, _sut.Children.Count);
-
-            Assert.AreEqual(1, _receivedEvents.Count);
-            Assert.AreEqual("Children", _receivedEvents[0]);
-
-            Assert.IsFalse(_sut.HasEmptyPlaceholder);
+            MockThreadingService.Verify(m => m
+              .RemoveItemFromCollectionOnUiThreadAsync(_sut.Children, It.Is<AppViewModel>((ovm) => ovm.App == FakeApps[3])),
+                Times.Once);
         }
 
         [TestMethod]
-        [TestCategory("LoadChildren")]
-        public async Task LoadChildren_AssignsNoAppsPlaceholder_WhenThereAreNoApps()
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_AddsNewChildrenOnUiThread_WhenAppsRequestSucceeds()
         {
-            var fakeAppsResult = new DetailedResult<List<CloudFoundryApp>>(
-                succeeded: true,
-                content: EmptyListOfApps,
-                explanation: null,
-                cmdDetails: FakeSuccessCmdResult);
+            /** mock 2 initial children */
+            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
+            {
+                new AppViewModel(FakeApps[0], Services),
+                new AppViewModel(FakeApps[1], Services),
+            };
 
-            MockCloudFoundryService.Setup(mock => mock.
-                GetAppsForSpaceAsync(_sut.Space, true, It.IsAny<int>()))
-                    .ReturnsAsync(fakeAppsResult);
+            /** mock retrieving all initial children plus FakeApps[2] */
+            MockCloudFoundryService.Setup(m => m
+              .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
+                .ReturnsAsync(_fakeAppsResponse);
 
-            await _sut.LoadChildren();
+            await _sut.UpdateAllChildren();
+
+            Assert.AreEqual(3, _sut.Children.Count);
+            Assert.IsTrue(_sut.Children.Any(child => child is AppViewModel app && app.App.AppName == FakeApps[0].AppName));
+            Assert.IsTrue(_sut.Children.Any(child => child is AppViewModel app && app.App.AppName == FakeApps[1].AppName));
+            Assert.IsTrue(_sut.Children.Any(child => child is AppViewModel app && app.App.AppName == FakeApps[2].AppName));
+
+            MockThreadingService.Verify(m => m
+              .AddItemToCollectionOnUiThreadAsync(_sut.Children, It.Is<AppViewModel>((ovm) => ovm.App == FakeApps[2])),
+                Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_RefreshesAppStateOnAllChildren_WhenAppsRequestSucceeds()
+        {
+            const string oldStateExpectedToChange = "an old state which should get updated";
+
+            /** mock 4 initial children */
+            var initialChildren = new ObservableCollection<TreeViewItemViewModel>
+            {
+                new AppViewModel(FakeApps[0], Services),
+                new AppViewModel(new CloudFoundryApp(FakeApps[1].AppName, FakeApps[1].AppId, FakeApps[1].ParentSpace, oldStateExpectedToChange), Services),
+                new AppViewModel(FakeApps[3], Services),
+                new AppViewModel(FakeApps[4], Services),
+            };
+            _sut.Children = new ObservableCollection<TreeViewItemViewModel>(initialChildren);
+
+            /** mock 3 children in response:
+             * first (FakeApps[0]) is idential to initial: FakeApps[0]
+             * second (FakeApps[1]) is same as initial, just with a different state than it had initially
+             * third (FakeApps[2]) is new
+             * initial children FakeApps[3] & FakeApps[4] have been lost
+             */
+            MockCloudFoundryService.Setup(m => m
+              .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
+                .ReturnsAsync(_fakeAppsResponse);
+
+            MockThreadingService.Setup(m => m
+              .StartBackgroundTask(It.IsAny<Func<Task>>()))
+                .Verifiable();
+
+            await _sut.UpdateAllChildren();
+
+            Assert.AreEqual(3, _sut.Children.Count);
+
+            // ensure app didn't change
+            var firstOldApp = initialChildren[0] as AppViewModel;
+            var firstFreshApp = _sut.Children[0] as AppViewModel;
+            Assert.AreEqual(firstFreshApp.App.AppId, firstOldApp.App.AppId);
+            Assert.AreEqual(firstFreshApp.App.State, firstOldApp.App.State);
+
+            // ensure app state was updated
+            var secondFreshApp = _sut.Children[1] as AppViewModel;
+            var secondOldApp = initialChildren[1] as AppViewModel;
+            Assert.AreEqual(secondFreshApp.App.AppId, secondOldApp.App.AppId);
+            Assert.AreNotEqual(secondFreshApp.App.State, oldStateExpectedToChange);
+
+            // ensure app was added
+            var thirdFreshApp = _sut.Children[2] as AppViewModel;
+            Assert.IsFalse(initialChildren.Any(a => a is AppViewModel avm && avm.App.AppId == thirdFreshApp.App.AppId));
+
+            // ensure app was removed
+            var thirdOldApp = initialChildren[2] as AppViewModel;
+            Assert.IsFalse(_sut.Children.Any(a => a is AppViewModel avm && avm.App.AppId == thirdOldApp.App.AppId)); 
+
+            // ensure app was removed
+            var fourthOldApp = initialChildren[3] as AppViewModel;
+            Assert.IsFalse(_sut.Children.Any(a => a is AppViewModel avm && avm.App.AppId == fourthOldApp.App.AppId));
+        }
+
+        [TestMethod]
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_AssignsEmptyPlaceholder_WhenAppsRequestReturnsNoApps()
+        {
+            var fakeNoAppsResponse = _fakeAppsResponse;
+            fakeNoAppsResponse.Content.Clear();
+
+            /** mock 2 initial children */
+            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
+            {
+                new AppViewModel(FakeApps[0], Services),
+                new AppViewModel(FakeApps[1], Services),
+            };
+
+            MockCloudFoundryService.Setup(m => m
+              .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
+                .ReturnsAsync(fakeNoAppsResponse);
+
+            Assert.IsFalse(_sut.Children.Any(child => child is PlaceholderViewModel));
+
+            await _sut.UpdateAllChildren();
 
             Assert.AreEqual(1, _sut.Children.Count);
-            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
-            Assert.AreEqual(SpaceViewModel.EmptyAppsPlaceholderMsg, _sut.Children[0].DisplayText);
-
-            Assert.AreEqual(_sut.EmptyPlaceholder, _sut.Children[0]);
-            Assert.IsTrue(_sut.HasEmptyPlaceholder);
-
-            Assert.AreEqual(1, _receivedEvents.Count);
-            Assert.AreEqual("Children", _receivedEvents[0]);
+            Assert.IsTrue(_sut.Children[0].Equals(_sut.EmptyPlaceholder));
         }
 
         [TestMethod]
-        [TestCategory("LoadChildren")]
-        public async Task LoadChildren_SetsIsLoadingToFalse_WhenComplete()
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_SetsIsLoadingTrueAtStart_AndSetsIsLoadingFalseAtEnd()
         {
-            var fakeAppsResult = new DetailedResult<List<CloudFoundryApp>>(
-                succeeded: true,
-                content: EmptyListOfApps,
-                explanation: null,
-                cmdDetails: FakeSuccessCmdResult);
+            MockCloudFoundryService.Setup(m => m.GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
+                .Callback(() =>
+                {
+                    // ensure IsLoading was set to true by the time apps were queried
+                    Assert.IsTrue(_sut.IsLoading);
+                }).ReturnsAsync(_fakeAppsResponse);
 
-            MockCloudFoundryService.Setup(mock => mock.
-                GetAppsForSpaceAsync(_sut.Space, true, It.IsAny<int>()))
-                    .ReturnsAsync(fakeAppsResult);
+            Assert.IsFalse(_sut.IsLoading);
+            Assert.IsTrue(_sut.IsExpanded);
 
-            _sut.IsLoading = true;
-
-            await _sut.LoadChildren();
+            await _sut.UpdateAllChildren();
 
             Assert.IsFalse(_sut.IsLoading);
         }
 
         [TestMethod]
-        [TestCategory("LoadChildren")]
-        public async Task LoadChildren_DisplaysErrorDialog_WhenAppsRequestFails()
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_RemovesEmptyPlaceholder_WhenAppsRequestReturnsApps()
         {
-            var fakeFailedResult = new DetailedResult<List<CloudFoundryApp>>(
-                succeeded: false,
-                content: null,
-                explanation: "junk",
-                cmdDetails: FakeFailureCmdResult);
-
-            MockCloudFoundryService.Setup(mock => mock.
-              GetAppsForSpaceAsync(_sut.Space, true, It.IsAny<int>()))
-                .ReturnsAsync(fakeFailedResult);
-
-            await _sut.LoadChildren();
-
-            Assert.IsFalse(_sut.IsLoading);
-
-            MockErrorDialogService.Verify(mock => mock.
-              DisplayErrorDialog(SpaceViewModel._getAppsFailureMsg, fakeFailedResult.Explanation),
-                Times.Once);
-        }
-
-        [TestMethod]
-        [TestCategory("FetchChildren")]
-        public async Task FetchChildren_ReturnsListOfApps_WithoutUpdatingChildren()
-        {
-            var fakeAppsList = new List<CloudFoundryApp>
+            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
             {
-                new CloudFoundryApp("fake app name 1", "fake app id 1", FakeCfSpace, null),
-                new CloudFoundryApp("fake app name 2", "fake app id 2", FakeCfSpace, null),
+                _sut.EmptyPlaceholder,
             };
 
-            var fakeAppsResult = new DetailedResult<List<CloudFoundryApp>>(
-                succeeded: true,
-                content: fakeAppsList,
-                explanation: null,
-                cmdDetails: FakeSuccessCmdResult);
+            /** mock 3 new children */
+            MockCloudFoundryService.Setup(m => m
+              .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
+                .ReturnsAsync(_fakeAppsResponse);
 
-            MockCloudFoundryService.Setup(mock => mock.
-                GetAppsForSpaceAsync(_sut.Space, true, It.IsAny<int>()))
-                    .ReturnsAsync(fakeAppsResult);
-
-            /* pre-check presence of placeholder */
             Assert.AreEqual(1, _sut.Children.Count);
-            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
+            Assert.IsTrue(_sut.Children[0].Equals(_sut.EmptyPlaceholder));
 
-            var apps = await _sut.FetchChildren();
+            await _sut.UpdateAllChildren();
 
-            Assert.AreEqual(2, apps.Count);
-
-            /* confirm presence of placeholder */
-            Assert.AreEqual(1, _sut.Children.Count);
-            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
-
-            // property changed events should not be raised
-            Assert.AreEqual(0, _receivedEvents.Count);
+            Assert.AreEqual(3, _sut.Children.Count);
+            Assert.IsFalse(_sut.Children.Any(child => child is PlaceholderViewModel));
         }
 
         [TestMethod]
-        [TestCategory("FetchChildren")]
-        public async Task FetchChildren_DisplaysErrorDialog_WhenAppsRequestFails()
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_RemovesLoadingPlaceholder_WhenAppsRequestReturnsApps()
         {
-            var fakeFailedResult = new DetailedResult<List<CloudFoundryApp>>(
-                succeeded: false,
-                content: null,
-                explanation: "junk",
-                cmdDetails: FakeFailureCmdResult);
+            var fakeNoAppsResponse = _fakeAppsResponse;
+            fakeNoAppsResponse.Content.Clear();
 
-            MockCloudFoundryService.Setup(mock => mock.
-              GetAppsForSpaceAsync(_sut.Space, true, It.IsAny<int>()))
-                .ReturnsAsync(fakeFailedResult);
+            /** mock 2 initial children */
+            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
+            {
+                new AppViewModel(FakeApps[0], Services),
+                new AppViewModel(FakeApps[1], Services),
+            };
 
-            var result = await _sut.FetchChildren();
-
-            CollectionAssert.AreEqual(EmptyListOfApps, result);
-
-            MockErrorDialogService.Verify(mock => mock.
-              DisplayErrorDialog(SpaceViewModel._getAppsFailureMsg, fakeFailedResult.Explanation),
-                Times.Once);
-        }
-
-        [TestMethod]
-        [TestCategory("FetchChildren")]
-        public async Task FetchChildren_CollapsesParentCfInstanceViewModel_WhenSpacesRequestFailsBecauseOfInvalidRefreshToken()
-        {
-            _sut = new SpaceViewModel(FakeCfSpace, _fakeOrgViewModel, _fakeTasExplorerViewModel, Services, expanded: true);
-
-            var fakeFailedResult =
-                new DetailedResult<List<CloudFoundryApp>>(succeeded: false, content: null, explanation: "junk", cmdDetails: FakeFailureCmdResult)
+            MockCloudFoundryService.Setup(m => m
+              .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
+                .Callback(() =>
                 {
-                    FailureType = FailureType.InvalidRefreshToken,
-                };
+                    // ensure loading placeholder present at time of loading fresh children
+                    Assert.IsTrue(_sut.IsLoading);
+                    Assert.IsTrue(_sut.Children.Contains(_sut.LoadingPlaceholder));
 
-            MockCloudFoundryService.Setup(mock => mock.
-              GetAppsForSpaceAsync(_sut.Space, true, It.IsAny<int>()))
-                .ReturnsAsync(fakeFailedResult);
+                }).ReturnsAsync(fakeNoAppsResponse);
 
-            Assert.IsTrue(_sut.Parent.Parent.IsExpanded);
+            await _sut.UpdateAllChildren();
 
-            var result = await _sut.FetchChildren();
-
-            Assert.IsFalse(_sut.Parent.Parent.IsExpanded);
-
-            MockErrorDialogService.Verify(mock => mock.
-              DisplayErrorDialog(It.IsAny<string>(), It.IsAny<string>()),
-                Times.Never);
+            Assert.IsFalse(_sut.Children.Contains(_sut.LoadingPlaceholder));
         }
 
         [TestMethod]
-        [TestCategory("FetchChildren")]
-        public async Task FetchChildren_SetsAuthenticationRequiredToTrue_WhenSpacesRequestFailsBecauseOfInvalidRefreshToken()
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_CollapsesSelf_AndSetsAuthRequiredTrue_WhenAppsRequestFailsWithInvalidRefreshToken()
         {
-            _sut = new SpaceViewModel(FakeCfSpace, _fakeOrgViewModel, _fakeTasExplorerViewModel, Services, expanded: true);
+            var fakeInvalidTokenResponse = new DetailedResult<List<CloudFoundryApp>>
+            {
+                Succeeded = false,
+                Explanation = "junk",
+                FailureType = FailureType.InvalidRefreshToken,
+            };
 
-            var fakeFailedResult =
-                new DetailedResult<List<CloudFoundryApp>>(succeeded: false, content: null, explanation: "junk", cmdDetails: FakeFailureCmdResult)
-                {
-                    FailureType = FailureType.InvalidRefreshToken,
-                };
+            MockCloudFoundryService.Setup(m => m
+              .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
+                .ReturnsAsync(fakeInvalidTokenResponse);
 
-            MockCloudFoundryService.Setup(mock => mock.
-              GetAppsForSpaceAsync(_sut.Space, true, It.IsAny<int>()))
-                .ReturnsAsync(fakeFailedResult);
-
+            Assert.IsTrue(_sut.IsExpanded);
             Assert.IsFalse(_sut.ParentTasExplorer.AuthenticationRequired);
 
-            var result = await _sut.FetchChildren();
+            await _sut.UpdateAllChildren();
 
+            Assert.IsFalse(_sut.IsLoading);
+            Assert.IsFalse(_sut.IsExpanded);
             Assert.IsTrue(_sut.ParentTasExplorer.AuthenticationRequired);
-
-            MockErrorDialogService.Verify(mock => mock.
-              DisplayErrorDialog(It.IsAny<string>(), It.IsAny<string>()),
-                Times.Never);
         }
 
         [TestMethod]
-        [TestCategory("RefreshChildren")]
-        public async Task RefreshSpace_UpdatesChildrenOnSpaceViewModel()
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_CollapsesSelf_AndLogsError_WhenAppsRequestFails()
         {
-            var fakeAppName1 = "fake app 1";
-            var fakeAppName2 = "fake app 2";
-            var fakeAppName3 = "fake app 3";
-            var fakeAppName4 = "fake app 4";
-
-            var fakeAppGuid1 = "fake app 1";
-            var fakeAppGuid2 = "fake app 2";
-            var fakeAppGuid3 = "fake app 3";
-            var fakeAppGuid4 = "fake app 4";
-
-            var initialState1 = "junk";
-            var initialState2 = "asdf";
-            var initialState3 = "xkcd";
-
-            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
+            var fakeFailedAppsResponse = new DetailedResult<List<CloudFoundryApp>>
             {
-                // to be removed:
-                new AppViewModel(new CloudFoundryApp(fakeAppName1, fakeAppGuid1, _sut.Space, initialState1), Services), 
-                // to stay:
-                new AppViewModel(new CloudFoundryApp(fakeAppName2, fakeAppGuid2, _sut.Space, state: initialState2), Services), // should keep state after refresh 
-                new AppViewModel(new CloudFoundryApp(fakeAppName3, fakeAppGuid3, _sut.Space, state: initialState3), Services), // should change state after refresh 
+                Succeeded = false,
+                Explanation = "junk",
             };
 
-            var fakeAppsList = new List<CloudFoundryApp>
-            {
-                // original:
-                new CloudFoundryApp(fakeAppName2, fakeAppGuid2, _sut.Space, initialState2),
-                new CloudFoundryApp(fakeAppName3, fakeAppGuid3, _sut.Space, "new state"),
-                // new:
-                new CloudFoundryApp(fakeAppName4, fakeAppGuid4, _sut.Space, "new app, new state"),
-            };
+            MockCloudFoundryService.Setup(m => m
+              .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
+                .ReturnsAsync(fakeFailedAppsResponse);
 
-            var fakeSuccessResult = new DetailedResult<List<CloudFoundryApp>>(succeeded: true, content: fakeAppsList);
+            MockLogger.Setup(m => m
+              .Error(It.Is<string>(s => s.Contains("SpaceViewModel failed to load apps")), fakeFailedAppsResponse.Explanation))
+                .Verifiable();
 
-            Assert.AreEqual(3, _sut.Children.Count);
-            AppViewModel initialChildApp1 = (AppViewModel)_sut.Children[0];
-            AppViewModel initialChildApp2 = (AppViewModel)_sut.Children[1];
-            AppViewModel initialChildApp3 = (AppViewModel)_sut.Children[2];
-            Assert.AreEqual(fakeAppName1, initialChildApp1.App.AppName);
-            Assert.AreEqual(fakeAppName2, initialChildApp2.App.AppName);
-            Assert.AreEqual(fakeAppName3, initialChildApp3.App.AppName);
-            Assert.AreEqual(initialState2, initialChildApp2.App.State);
-            Assert.AreEqual(initialState3, initialChildApp3.App.State);
+            Assert.IsTrue(_sut.IsExpanded);
 
-            MockCloudFoundryService.Setup(mock => mock.
-                GetAppsForSpaceAsync(_sut.Space, true, It.IsAny<int>()))
-                    .ReturnsAsync(fakeSuccessResult);
+            await _sut.UpdateAllChildren();
 
-            _receivedEvents.Clear();
-
-            await _sut.RefreshChildren();
-
-            Assert.AreEqual(3, _sut.Children.Count);
-            AppViewModel refreshedChildApp1 = (AppViewModel)_sut.Children[0];
-            AppViewModel refreshedChildApp2 = (AppViewModel)_sut.Children[1];
-            AppViewModel refreshedChildApp3 = (AppViewModel)_sut.Children[2];
-            Assert.AreEqual(fakeAppName2, refreshedChildApp1.App.AppName);
-            Assert.AreEqual(fakeAppName3, refreshedChildApp2.App.AppName);
-            Assert.AreEqual(fakeAppName4, refreshedChildApp3.App.AppName);
-            Assert.AreEqual(initialState2, refreshedChildApp1.App.State); // previous state shouldn't have changed
-            Assert.AreNotEqual(initialState3, refreshedChildApp2.App.State); // previous state should have changed
-
-            // property changed event should be raised twice for IsRefreshing (set true when starting, false when done)
-            Assert.AreEqual(2, _receivedEvents.Count);
-            Assert.AreEqual("IsRefreshing", _receivedEvents[0]);
-            Assert.AreEqual("IsRefreshing", _receivedEvents[1]);
-
-            MockCloudFoundryService.VerifyAll();
+            Assert.IsFalse(_sut.IsLoading);
+            Assert.IsFalse(_sut.IsExpanded);
+            MockLogger.VerifyAll();
         }
 
         [TestMethod]
-        [TestCategory("RefreshChildren")]
-        public async Task RefreshChildren_AddsPlaceholder_WhenAllAppsAreRemoved()
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_DisplaysAndLogsErrors_ForAllCaughtExceptions()
         {
-            var fakeInitialApp = new CloudFoundryApp("fake app name", "fake app id", _sut.Space, null);
-            var avm = new AppViewModel(fakeInitialApp, Services);
+            var fakeException = new Exception(":(");
 
-            var fakeNoAppsResult = new DetailedResult<List<CloudFoundryApp>>(
-                succeeded: true,
-                content: new List<CloudFoundryApp>(), // simulate space having lost all apps before refresh
-                explanation: null,
-                cmdDetails: FakeSuccessCmdResult);
+            MockCloudFoundryService.Setup(m => m
+              .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
+                .Throws(fakeException);
 
-            MockCloudFoundryService.Setup(mock => mock.
-                GetAppsForSpaceAsync(_sut.Space, true, It.IsAny<int>()))
-                    .ReturnsAsync(fakeNoAppsResult);
+            MockLogger.Setup(m => m
+              .Error(It.Is<string>(s => s.Contains("Caught exception trying to load apps in SpaceViewModel")), fakeException))
+                .Verifiable();
 
-            _sut.Children = new ObservableCollection<TreeViewItemViewModel> { avm }; // simulate space initially having 1 app child
+            MockErrorDialogService.Setup(m => m
+              .DisplayErrorDialog(
+                SpaceViewModel._getAppsFailureMsg,
+                It.Is<string>(s => s.Contains("try disconnecting & logging in again") && s.Contains("If this issue persists, please contact dotnetdevx@groups.vmware.com"))))
+                .Verifiable();
 
-            Assert.AreEqual(1, _sut.Children.Count);
-            Assert.AreEqual(typeof(AppViewModel), _sut.Children[0].GetType());
+            await _sut.UpdateAllChildren();
 
-            await _sut.RefreshChildren();
-
-            Assert.AreEqual(1, _sut.Children.Count);
-            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
-            Assert.AreEqual(SpaceViewModel.EmptyAppsPlaceholderMsg, _sut.Children[0].DisplayText);
-        }
-
-        [TestMethod]
-        [TestCategory("RefreshChildren")]
-        public async Task RefreshChildren_RemovesPlaceholder_WhenEmptySpaceGainsChildren()
-        {
-            // simulate space initially having no app children
-            _sut.Children = new ObservableCollection<TreeViewItemViewModel> { _sut.EmptyPlaceholder };
-            _sut.HasEmptyPlaceholder = true;
-
-            var fakeNewApp = new CloudFoundryApp("fake app name", "fake app id", _sut.Space, null);
-            var avm = new AppViewModel(fakeNewApp, Services);
-
-            var fakeSuccessfulAppsResult = new DetailedResult<List<CloudFoundryApp>>(
-                succeeded: true,
-                content: new List<CloudFoundryApp>
-                {
-                    fakeNewApp, // simulate space having gained an app child before refresh
-                },
-                explanation: null,
-                cmdDetails: FakeSuccessCmdResult);
-
-            MockCloudFoundryService.Setup(mock => mock.
-                GetAppsForSpaceAsync(_sut.Space, true, It.IsAny<int>()))
-                    .ReturnsAsync(fakeSuccessfulAppsResult);
-
-            _sut.Children = new ObservableCollection<TreeViewItemViewModel> { _sut.EmptyPlaceholder }; // simulate space initially having no app children
-
-            Assert.AreEqual(1, _sut.Children.Count);
-            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
-            Assert.AreEqual(SpaceViewModel.EmptyAppsPlaceholderMsg, _sut.Children[0].DisplayText);
-
-            await _sut.RefreshChildren();
-
-            Assert.AreEqual(1, _sut.Children.Count);
-            Assert.AreEqual(typeof(AppViewModel), _sut.Children[0].GetType());
-        }
-
-        [TestMethod]
-        [TestCategory("RefreshChildren")]
-        public async Task RefreshChildren_UpdatesAppState_ForAllChildren()
-        {
-            var initialState1 = "INITIAL_FAKE_STATE";
-            var initialState2 = "INITIAL_JUNK_STATE";
-            var initialState3 = "INITIAL_BOGUS_STATE";
-
-            var fakeInitialApp1 = new CloudFoundryApp("fakeApp1", "junk", _sut.Space, initialState1);
-            var fakeInitialApp2 = new CloudFoundryApp("fakeApp2", "junk", _sut.Space, initialState2);
-            var fakeInitialApp3 = new CloudFoundryApp("fakeApp3", "junk", _sut.Space, initialState3);
-
-            var fakeFreshApp1 = new CloudFoundryApp("fakeApp1", "junk", _sut.Space, initialState1);
-            var fakeFreshApp2 = new CloudFoundryApp("fakeApp2", "junk", _sut.Space, "NEW_FRESH_STATE"); // simulate state change
-            var fakeFreshApp3 = new CloudFoundryApp("fakeApp3", "junk", _sut.Space, "NEW_COOL_STATE"); // simulate state change
-
-            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
-            {
-                new AppViewModel(fakeInitialApp1, Services),
-                new AppViewModel(fakeInitialApp2, Services),
-                new AppViewModel(fakeInitialApp3, Services),
-            };
-
-            var fakeSuccessfulAppsResult = new DetailedResult<List<CloudFoundryApp>>(
-                succeeded: true,
-                content: new List<CloudFoundryApp>
-                {
-                    fakeFreshApp1,
-                    fakeFreshApp2,
-                    fakeFreshApp3,
-                },
-                explanation: null,
-                cmdDetails: FakeSuccessCmdResult);
-
-            MockCloudFoundryService.Setup(mock => mock.
-                GetAppsForSpaceAsync(_sut.Space, true, It.IsAny<int>()))
-                    .ReturnsAsync(fakeSuccessfulAppsResult);
-
-            await _sut.RefreshChildren();
-
-            Assert.AreEqual(fakeInitialApp1.State, fakeFreshApp1.State);
-            Assert.AreNotEqual(fakeInitialApp2.State, fakeFreshApp2.State);
-            Assert.AreNotEqual(fakeInitialApp3.State, fakeFreshApp3.State);
+            MockLogger.VerifyAll();
+            MockErrorDialogService.VerifyAll();
         }
     }
 }
