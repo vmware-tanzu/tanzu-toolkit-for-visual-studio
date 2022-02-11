@@ -20,7 +20,6 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         public ICommand StopCfAppCommand { get; }
         public ICommand StartCfAppCommand { get; }
         public ICommand OpenDeletionViewCommand { get; }
-        public ICommand DisplayRecentAppLogsCommand { get; }
         public ICommand RefreshSpaceCommand { get; }
         public ICommand RefreshOrgCommand { get; }
         public ICommand RefreshAllCommand { get; }
@@ -53,13 +52,12 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             StopCfAppCommand = new AsyncDelegatingCommand(viewModel.StopCfApp, viewModel.CanStopCfApp);
             StartCfAppCommand = new AsyncDelegatingCommand(viewModel.StartCfApp, viewModel.CanStartCfApp);
             OpenDeletionViewCommand = new DelegatingCommand(viewModel.OpenDeletionView, viewModel.CanOpenDeletionView);
-            DisplayRecentAppLogsCommand = new AsyncDelegatingCommand(viewModel.DisplayRecentAppLogs, viewModel.CanDisplayRecentAppLogs);
             RefreshSpaceCommand = new AsyncDelegatingCommand(viewModel.RefreshSpace, viewModel.CanRefreshSpace);
             RefreshOrgCommand = new AsyncDelegatingCommand(viewModel.RefreshOrg, viewModel.CanRefreshOrg);
             RefreshAllCommand = new DelegatingCommand(viewModel.RefreshAllItems, viewModel.CanInitiateFullRefresh);
             DeleteConnectionCommand = new DelegatingCommand(viewModel.LogOutTas, viewModel.CanLogOutTas);
             ReAuthenticateCommand = new DelegatingCommand(viewModel.ReAuthenticate, viewModel.CanReAuthenticate);
-            StreamAppLogsCommand = new DelegatingCommand(viewModel.StreamAppLogs, alwaysTrue);
+            StreamAppLogsCommand = new AsyncDelegatingCommand(viewModel.StreamAppLogsAsync, alwaysTrue);
 
             themeService.SetTheme(this);
 

@@ -100,9 +100,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             public Process ActiveProcess { get; set; }
             public object ActiveView { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            public List<string> AppendLineInvocationArgs { get; set; }
 
             public void AppendLine(string newContent)
             {
+                AppendLineInvocationArgs ??= new List<string>();
+                AppendLineInvocationArgs.Add(newContent);
             }
 
             public void CancelActiveProcess()

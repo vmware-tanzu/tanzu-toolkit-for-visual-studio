@@ -4,11 +4,12 @@ using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
+using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.DataPersistence;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.Threading;
-using Tanzu.Toolkit.ViewModels.AppDeletionConfirmation;
 using Tanzu.Toolkit.Services.ViewLocator;
+using Tanzu.Toolkit.ViewModels.AppDeletionConfirmation;
 
 namespace Tanzu.Toolkit.ViewModels
 {
@@ -280,7 +281,7 @@ namespace Tanzu.Toolkit.ViewModels
         {
             if (app is CloudFoundryApp cfApp)
             {
-                var recentLogsResult = await CloudFoundryService.GetRecentLogs(cfApp);
+                var recentLogsResult = await CloudFoundryService.GetRecentLogsAsync(cfApp);
                 if (!recentLogsResult.Succeeded)
                 {
                     if (recentLogsResult.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
@@ -307,7 +308,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public void StreamAppLogs(object app)
+        public async Task StreamAppLogsAsync(object app)
         {
             if (app is CloudFoundryApp cfApp)
             {
@@ -317,7 +318,24 @@ namespace Tanzu.Toolkit.ViewModels
                     var outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel), viewTitle) as IView;
                     var outputViewModel = outputView.ViewModel as IOutputViewModel;
 
-                    outputView?.Show();
+                    Task<DetailedResult<string>> recentLogsTask = CloudFoundryService.GetRecentLogsAsync(cfApp);
+                    outputView.Show();
+
+                    var recentLogsResult = await recentLogsTask;
+                    if (recentLogsResult.Succeeded)
+                    {
+                        outputViewModel.AppendLine(recentLogsResult.Content);
+                        outputViewModel.AppendLine("\n*** End of recent logs, beginning live log stream ***\n");
+                    }
+                    else
+                    {
+                        if (recentLogsResult.FailureType == FailureType.InvalidRefreshToken)
+                        {
+                            AuthenticationRequired = true;
+                        }
+
+                        Logger.Error($"Unable to retrieve recent logs for {cfApp.AppName}. {recentLogsResult.Explanation}. {recentLogsResult.CmdResult}");
+                    }
 
                     var logStreamResult = CloudFoundryService.StreamAppLogs(cfApp, stdOutCallback: outputViewModel.AppendLine, stdErrCallback: outputViewModel.AppendLine);
                     if (logStreamResult.Succeeded)
@@ -326,6 +344,11 @@ namespace Tanzu.Toolkit.ViewModels
                     }
                     else
                     {
+                        if (logStreamResult.FailureType == FailureType.InvalidRefreshToken)
+                        {
+                            AuthenticationRequired = true;
+                        }
+
                         _errorDialogService.DisplayErrorDialog("Error displaying app logs", $"Something went wrong while trying to display logs for {cfApp.AppName}, please try again.");
                     }
                 }

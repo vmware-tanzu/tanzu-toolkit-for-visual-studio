@@ -78,7 +78,6 @@ namespace Tanzu.Toolkit.VisualStudio
             {
                 Task.Run(() => TanzuTasExplorerCommand.InitializeAsync(this)),
                 Task.Run(() => PushToCloudFoundryCommand.InitializeAsync(this, _serviceProvider)),
-                Task.Run(() => OutputWindowCommand.InitializeAsync(this)),
                 Task.Run(() => OpenLogsCommand.InitializeAsync(this, _serviceProvider)),
             };
 
