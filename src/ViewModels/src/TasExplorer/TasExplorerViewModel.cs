@@ -4,12 +4,12 @@ using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
+using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.DataPersistence;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.Threading;
-using Tanzu.Toolkit.ViewModels.AppDeletionConfirmation;
 using Tanzu.Toolkit.Services.ViewLocator;
-using Tanzu.Toolkit.Services;
+using Tanzu.Toolkit.ViewModels.AppDeletionConfirmation;
 
 namespace Tanzu.Toolkit.ViewModels
 {
@@ -319,17 +319,17 @@ namespace Tanzu.Toolkit.ViewModels
                     var outputViewModel = outputView.ViewModel as IOutputViewModel;
 
                     Task<DetailedResult<string>> recentLogsTask = CloudFoundryService.GetRecentLogsAsync(cfApp);
-                    outputView?.Show();
+                    outputView.Show();
 
                     var recentLogsResult = await recentLogsTask;
                     if (recentLogsResult.Succeeded)
                     {
-                        outputViewModel?.AppendLine(recentLogsResult.Content);
-                        outputViewModel?.AppendLine("\n*** End of recent logs, beginning live log stream ***\n");
+                        outputViewModel.AppendLine(recentLogsResult.Content);
+                        outputViewModel.AppendLine("\n*** End of recent logs, beginning live log stream ***\n");
                     }
                     else
                     {
-                        if (recentLogsResult.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
+                        if (recentLogsResult.FailureType == FailureType.InvalidRefreshToken)
                         {
                             AuthenticationRequired = true;
                         }
@@ -344,6 +344,11 @@ namespace Tanzu.Toolkit.ViewModels
                     }
                     else
                     {
+                        if (logStreamResult.FailureType == FailureType.InvalidRefreshToken)
+                        {
+                            AuthenticationRequired = true;
+                        }
+
                         _errorDialogService.DisplayErrorDialog("Error displaying app logs", $"Something went wrong while trying to display logs for {cfApp.AppName}, please try again.");
                     }
                 }
