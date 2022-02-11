@@ -1092,22 +1092,21 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 return _cfCliService.StreamAppLogs(app.AppName, app.ParentSpace.ParentOrg.OrgName, app.ParentSpace.SpaceName, stdOutCallback, stdErrCallback);
             }
+            catch (InvalidRefreshTokenException)
+            {
+                var msg = "Unable to stream app logs from '{AppName}' because the connection has expired. Please log back in to re-authenticate.";
+                _logger.Information(msg, app.AppName);
+
+                return new DetailedResult<Process>
+                {
+                    Succeeded = false,
+                    Explanation = msg.Replace("{AppName}", app.AppName),
+                    Content = null,
+                    FailureType = FailureType.InvalidRefreshToken,
+                };
+            }
             catch (Exception ex)
             {
-                if (ex is InvalidRefreshTokenException)
-                {
-                    var msg = "Unable to stream app logs from '{AppName}' because the connection has expired. Please log back in to re-authenticate.";
-                    _logger.Information(msg, app.AppName);
-
-                    return new DetailedResult<Process>
-                    {
-                        Succeeded = false,
-                        Explanation = msg.Replace("{AppName}", app.AppName),
-                        Content = null,
-                        FailureType = FailureType.InvalidRefreshToken,
-                    };
-                }
-
                 return new DetailedResult<Process>
                 {
                     Succeeded = false,
