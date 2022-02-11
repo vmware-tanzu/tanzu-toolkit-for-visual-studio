@@ -1313,6 +1313,43 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             MockErrorDialogService.VerifyAll();
         }
+
+        [TestMethod]
+        [TestCategory("StreamAppLogs")]
+        public async Task StreamAppLogs_SetsAuthenticationRequiredToTrue_WhenLogsRequestFailsDueToInvalidRefreshToken()
+        {
+            var expectedViewParam = $"Logs for {FakeCfApp.AppName}";
+            var fakeView = new FakeOutputView();
+            var fakeViewModel = fakeView.ViewModel as IOutputViewModel;
+            Action<string> expectedStdOutDelegate = fakeViewModel.AppendLine;
+            Action<string> expectedStdErrDelegate = fakeViewModel.AppendLine;
+            var fakeRecentLogsResult = new DetailedResult<string>
+            {
+                Succeeded = true,
+                Content = "junk",
+            };
+            var fakeLogStreamResult = new DetailedResult<Process>
+            {
+                Succeeded = false,
+                Content = null,
+                FailureType = FailureType.InvalidRefreshToken,
+            };
+
+            MockViewLocatorService.Setup(m => m.GetViewByViewModelName(nameof(OutputViewModel), expectedViewParam)).Returns(fakeView);
+            MockCloudFoundryService.Setup(m => m.GetRecentLogsAsync(FakeCfApp)).ReturnsAsync(fakeRecentLogsResult);
+            MockCloudFoundryService.Setup(m => m.StreamAppLogs(FakeCfApp, expectedStdOutDelegate, expectedStdErrDelegate)).Returns(fakeLogStreamResult);
+            MockErrorDialogService.Setup(m => m.DisplayErrorDialog(
+                It.Is<string>(s => s.Contains("Error displaying app logs")),
+                It.Is<string>(s => s.Contains(FakeCfApp.AppName))))
+                .Verifiable();
+
+            Assert.IsFalse(_sut.AuthenticationRequired);
+            
+            await _sut.StreamAppLogsAsync(FakeCfApp);
+
+            Assert.IsTrue(_sut.AuthenticationRequired);
+            MockErrorDialogService.VerifyAll();
+        }
     }
 
     internal class FakeCfInstanceViewModel : CfInstanceViewModel
