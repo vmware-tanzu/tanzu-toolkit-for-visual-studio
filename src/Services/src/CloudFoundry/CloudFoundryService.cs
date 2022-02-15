@@ -89,6 +89,8 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                     return authResult;
                 }
 
+                _cfApiClient.SetCloudFoundryApi(targetApiAddress);
+
                 await MatchCliVersionToApiVersion();
 
                 return new DetailedResult

@@ -60,7 +60,7 @@ namespace Tanzu.Toolkit.VisualStudio
         public const string PackageGuidString = "9419e55b-9e82-4d87-8ee5-70871b01b7cc";
 
         private IServiceProvider _serviceProvider;
-       
+
         /// <summary>
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
         /// where you can put all the initialization code that rely on services provided by VisualStudio.
@@ -115,10 +115,16 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<AsyncPackage>(this);
 
             /* Cloud Foundry API */
-            HttpClient httpClient = new HttpClient();
-            IUaaClient uaaClient = new UaaClient(httpClient);
-            services.AddSingleton(_ => uaaClient);
-            services.AddSingleton<ICfApiClient>(_ => new CfApiClient(uaaClient, httpClient));
+            services.AddHttpClient();
+            services.AddHttpClient("SslCertTruster", c => { }).ConfigurePrimaryHttpMessageHandler(() =>
+            {
+                return new HttpClientHandler
+                {
+                    // trust all certs
+                    ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => { return true; }
+                };
+            });
+            services.AddSingleton<ICfApiClient, CfApiClient>();
 
             /* Services */
             services.AddSingleton<ICloudFoundryService, CloudFoundryService>();
