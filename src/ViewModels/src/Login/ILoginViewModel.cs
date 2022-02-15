@@ -24,7 +24,7 @@ namespace Tanzu.Toolkit.ViewModels
         void CloseDialog();
         void SetConnection();
         void NavigateToTargetPage(object arg = null);
-        Task NavigateToAuthPage(object arg = null);
+        Task VerifyApiAddress(object arg = null);
         bool CanProceedToAuthentication(object arg = null);
         void ResetTargetDependentFields();
     }

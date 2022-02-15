@@ -290,12 +290,10 @@ namespace Tanzu.Toolkit.ViewModels
             DialogService.CloseDialogByName(nameof(LoginViewModel));
         }
 
-        public async Task NavigateToAuthPage(object arg = null)
+        public async Task VerifyApiAddress(object arg = null)
         {
             VerifyingApiAddress = true;
-
-            var certTestResult = CloudFoundryService.TargetApi(Target, skipSsl: ProceedWithInvalidCertificate);
-
+            var certTestResult = CloudFoundryService.ValidateNewApiConnection(Target, skipSsl: ProceedWithInvalidCertificate);
             if (certTestResult.Succeeded)
             {
                 var ssoPromptResult = await CloudFoundryService.GetSsoPrompt(Target, skipSsl: ProceedWithInvalidCertificate);
