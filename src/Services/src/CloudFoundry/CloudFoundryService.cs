@@ -47,6 +47,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             _logger = logSvc.Logger;
         }
 
+        public DetailedResult ValidateNewApiConnection(string targetApiAddress, bool skipSsl)
+        {
+            return _cfCliService.TargetApi(targetApiAddress, skipSsl);
+        }
+
         public async Task<DetailedResult> LoginWithCredentials(string targetApiAddress, string username, SecureString password, bool skipSsl)
         {
             if (string.IsNullOrEmpty(targetApiAddress))
@@ -66,7 +71,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
             try
             {
-                var targetResult = TargetApi(targetApiAddress, skipSsl);
+                var targetResult = ValidateNewApiConnection(targetApiAddress, skipSsl);
 
                 if (!targetResult.Succeeded)
                 {
@@ -111,11 +116,6 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                     Explanation = errorMessage
                 };
             }
-        }
-
-        public DetailedResult TargetApi(string targetApiAddress, bool skipSsl)
-        {
-            return _cfCliService.TargetApi(targetApiAddress, skipSsl);
         }
 
         public async Task<DetailedResult<string>> GetSsoPrompt(string cfApiAddress, bool skipSsl = false)

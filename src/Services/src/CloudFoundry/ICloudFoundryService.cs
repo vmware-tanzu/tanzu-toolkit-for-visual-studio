@@ -23,7 +23,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         Task<DetailedResult<List<string>>> GetStackNamesAsync(CloudFoundryInstance cf, int retryAmount = 1);
         Task<DetailedResult<string>> GetSsoPrompt(string cfApiAddress, bool skipSsl = false);
         Task<DetailedResult> LoginWithSsoPasscode(string cfApiAddress, string passcode);
-        DetailedResult TargetApi(string targetApiAddress, bool skipSsl);
+        DetailedResult ValidateNewApiConnection(string targetApiAddress, bool skipSsl);
         bool IsValidConnection();
         void LogoutCfUser();
         Task<DetailedResult> DeleteAllRoutesForAppAsync(CloudFoundryApp app);
