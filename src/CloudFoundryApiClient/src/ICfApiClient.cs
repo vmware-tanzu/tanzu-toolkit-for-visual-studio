@@ -11,7 +11,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
     public interface ICfApiClient
     {
         string AccessToken { get; }
-        Task<string> LoginAsync(string cfTarget, string cfUsername, string cfPassword);
         Task<List<Org>> ListOrgs(string cfTarget, string accessToken);
         Task<List<Space>> ListSpacesForOrg(string cfTarget, string accessToken, string orgGuid);
         Task<List<App>> ListAppsForSpace(string cfTarget, string accessToken, string spaceGuid);
@@ -23,5 +22,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         Task<LoginInfoResponse> GetLoginServerInformation(string cfApiAddress, bool trustAllCerts = false);
         Task<List<Route>> ListRoutesForApp(string cfTarget, string accessToken, string appGuid);
         Task<bool> DeleteRouteWithGuid(string cfTarget, string accessToken, string routeGuid);
+        void SetCloudFoundryApi(string targetApiAddress, bool skipSslValidation = false);
     }
 }
