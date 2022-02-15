@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.BasicInfoResponse;
@@ -32,53 +32,35 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         internal const string DefaultAuthClientSecret = "";
         internal const string AuthServerLookupFailureMessage = "Unable to locate authentication server";
         internal const string InvalidTargetUriMessage = "Invalid target URI";
-        private readonly IUaaClient _uaaClient;
-        private readonly HttpClient _defaultHttpClient;
-        private readonly HttpClient _unsafeHttpClient;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private HttpClient _httpClient;
 
-        public CfApiClient(IUaaClient uaaClient, HttpClient httpClient)
+        public CfApiClient(IHttpClientFactory httpClientFactory)
         {
-            _uaaClient = uaaClient;
-            _defaultHttpClient = httpClient;
-            _unsafeHttpClient = new HttpClient(new HttpClientHandler
-            {
-                // trust all certs
-                ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => { return true; }
-            });
+            _httpClientFactory = httpClientFactory;
             AccessToken = null;
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
         }
 
-        /// <summary>
-        /// LoginAsync contacts the auth server for the specified cfTarget.
-        /// </summary>
-        /// <param name="cfTarget"></param>
-        /// <param name="cfUsername"></param>
-        /// <param name="cfPassword"></param>
-        /// <returns>
-        /// Access Token from the auth server as a string,
-        /// or null if auth request responded with a status code other than 200.
-        /// </returns>
-        public async Task<string> LoginAsync(string cfTarget, string cfUsername, string cfPassword)
+        internal HttpClient HttpClient
         {
-            ValidateUriStringOrThrow(cfTarget, InvalidTargetUriMessage);
-            var authServerUri = await GetAuthServerUriFromCfTarget(cfTarget);
-
-            var result = await _uaaClient.RequestAccessTokenAsync(authServerUri,
-                                                                  DefaultAuthClientId,
-                                                                  DefaultAuthClientSecret,
-                                                                  cfUsername,
-                                                                  cfPassword);
-
-            if (result == HttpStatusCode.OK)
+            get
             {
-                AccessToken = _uaaClient.Token.Access_token;
-                return AccessToken;
+                if (_httpClient == null) throw new InvalidOperationException($"HttpClient has not yet been set for this instance of {nameof(CfApiClient)}; to set it, first call {nameof(SetCloudFoundryApi)}");
+                return _httpClient;
             }
-            else
+
+            private set
             {
-                return null;
+                if (_httpClient != null) throw new InvalidOperationException($"HttpClient has already been set for this instance; to target a different API address, create a new instance of {nameof(CfApiClient)}");
+                _httpClient = value;
             }
+        }
+
+        public void SetCloudFoundryApi(string targetApiAddress, bool skipSslValidation = false)
+        {
+            HttpClient = skipSslValidation ? _httpClientFactory.CreateClient("SslCertTruster") : _httpClientFactory.CreateClient();
+            HttpClient.BaseAddress = new Uri(targetApiAddress);
         }
 
         /// <summary>
@@ -214,7 +196,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString());
             request.Headers.Add("Authorization", "Bearer " + accessToken);
 
-            var response = await _defaultHttpClient.SendAsync(request);
+            var response = await HttpClient.SendAsync(request);
             if (!response.IsSuccessStatusCode)
             {
                 throw new Exception($"Response from POST `{stopAppPath}` was {response.StatusCode}");
@@ -259,7 +241,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString());
             request.Headers.Add("Authorization", "Bearer " + accessToken);
 
-            var response = await _defaultHttpClient.SendAsync(request);
+            var response = await HttpClient.SendAsync(request);
             if (!response.IsSuccessStatusCode)
             {
                 throw new Exception($"Response from POST `{startAppPath}` was {response.StatusCode}");
@@ -288,7 +270,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             var request = new HttpRequestMessage(HttpMethod.Delete, uri.ToString());
             request.Headers.Add("Authorization", "Bearer " + accessToken);
 
-            var response = await _defaultHttpClient.SendAsync(request);
+            var response = await HttpClient.SendAsync(request);
             if (response.StatusCode != HttpStatusCode.Accepted)
             {
                 throw new Exception($"Response from DELETE `{deleteAppPath}` was {response.StatusCode}");
@@ -314,7 +296,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             var request = new HttpRequestMessage(HttpMethod.Delete, uri.ToString());
             request.Headers.Add("Authorization", "Bearer " + accessToken);
 
-            var response = await _defaultHttpClient.SendAsync(request);
+            var response = await HttpClient.SendAsync(request);
             if (response.StatusCode != HttpStatusCode.Accepted)
             {
                 throw new Exception($"Response from DELETE `{deleteRoutePath}` was {response.StatusCode}");
@@ -342,8 +324,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
 
         public async Task<LoginInfoResponse> GetLoginServerInformation(string cfApiAddress, bool trustAllCerts = false)
         {
-            var httpClient = GetHttpClientForSslValidationPolicy(trustAllCerts);
-
             var loginServerUri = await GetAuthServerUriFromCfTarget(cfApiAddress);
             var uri = new UriBuilder(loginServerUri)
             {
@@ -352,7 +332,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             var request = new HttpRequestMessage(HttpMethod.Get, uri.ToString());
             request.Headers.Add("Accept", "application/json");
 
-            var response = await httpClient.SendAsync(request);
+            var response = await HttpClient.SendAsync(request);
             if (response.StatusCode != HttpStatusCode.OK)
             {
                 throw new Exception($"Request for login server information was unsuccessful; request to {request.Method} {request.RequestUri} received {response.StatusCode}");
@@ -361,11 +341,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             var deserializedResponse = JsonConvert.DeserializeObject<LoginInfoResponse>(jsonContent);
 
             return deserializedResponse;
-        }
-
-        private HttpClient GetHttpClientForSslValidationPolicy(bool trustAllCerts)
-        {
-            return trustAllCerts ? _unsafeHttpClient : _defaultHttpClient;
         }
 
         private async Task<Uri> GetAuthServerUriFromCfTarget(string cfApiAddress)
@@ -382,7 +357,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
 
                 var request = new HttpRequestMessage(HttpMethod.Get, uri.ToString());
 
-                var response = await _defaultHttpClient.SendAsync(request);
+                var response = await HttpClient.SendAsync(request);
 
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
@@ -423,7 +398,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             var request = new HttpRequestMessage(HttpMethod.Get, pageAddress.Href);
             request.Headers.Add("Authorization", "Bearer " + accessToken);
 
-            var response = await _defaultHttpClient.SendAsync(request);
+            var response = await HttpClient.SendAsync(request);
             if (!response.IsSuccessStatusCode)
             {
                 throw new Exception($"Response from GET `{pageAddress}` was {response.StatusCode}");
