@@ -55,7 +55,7 @@ namespace Tanzu.Toolkit.ViewModels
                     IsLoading = true;
                     try
                     {
-                        var spacesResponse = await CloudFoundryService.GetSpacesForOrgAsync(Org);
+                        var spacesResponse = await ParentTasExplorer.TasConnection.CfClient.GetSpacesForOrgAsync(Org);
                         if (spacesResponse.Succeeded)
                         {
                             // make a working copy of children to avoid System.InvalidOperationException:

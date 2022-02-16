@@ -505,7 +505,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
-                var orgsResponse = await CloudFoundryService.GetOrgsForCfInstanceAsync(TasExplorerViewModel.TasConnection.CloudFoundryInstance);
+                var orgsResponse = await TasExplorerViewModel.TasConnection.CfClient.GetOrgsForCfInstanceAsync(TasExplorerViewModel.TasConnection.CloudFoundryInstance);
 
                 if (orgsResponse.Succeeded)
                 {
@@ -527,7 +527,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
-                var spacesResponse = await CloudFoundryService.GetSpacesForOrgAsync(SelectedOrg);
+                var spacesResponse = await TasExplorerViewModel.TasConnection.CfClient.GetSpacesForOrgAsync(SelectedOrg);
 
                 if (spacesResponse.Succeeded)
                 {
@@ -550,7 +550,7 @@ namespace Tanzu.Toolkit.ViewModels
             else
             {
                 BuildpacksLoading = true;
-                var buildpacksRespsonse = await CloudFoundryService.GetBuildpacksAsync(TasExplorerViewModel.TasConnection.CloudFoundryInstance.ApiAddress);
+                var buildpacksRespsonse = await TasExplorerViewModel.TasConnection.CfClient.GetBuildpacksAsync(TasExplorerViewModel.TasConnection.CloudFoundryInstance.ApiAddress);
 
                 if (buildpacksRespsonse.Succeeded)
                 {
@@ -609,7 +609,7 @@ namespace Tanzu.Toolkit.ViewModels
             else
             {
                 StacksLoading = true;
-                var stacksRespsonse = await CloudFoundryService.GetStackNamesAsync(TasExplorerViewModel.TasConnection.CloudFoundryInstance);
+                var stacksRespsonse = await TasExplorerViewModel.TasConnection.CfClient.GetStackNamesAsync(TasExplorerViewModel.TasConnection.CloudFoundryInstance);
 
                 if (stacksRespsonse.Succeeded)
                 {
@@ -686,7 +686,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         internal async Task StartDeployment()
         {
-            var deploymentResult = await CloudFoundryService.DeployAppAsync(
+            var deploymentResult = await TasExplorerViewModel.TasConnection.CfClient.DeployAppAsync(
                 ManifestModel,
                 PathToProjectRootDir,
                 SelectedSpace.ParentOrg.ParentCf,

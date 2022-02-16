@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Settings;
 using Serilog;
 using System;
+using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.DataPersistence;
 using Tanzu.Toolkit.Services.Logging;
 
@@ -16,14 +17,15 @@ namespace Tanzu.Toolkit.VisualStudio.Services
         private SettingsStore _readOnlySettingsStore;
         private WritableSettingsStore _writableSettingsStore;
         private ILogger _logger;
+        private ICfCliService _cfCliService;
 
         public DataPersistenceService(IServiceProvider VsPackage, IServiceProvider services)
         {
             var settingsManager = new ShellSettingsManager(VsPackage);
-
             _readOnlySettingsStore = settingsManager.GetReadOnlySettingsStore(SettingsScope.UserSettings);
             _writableSettingsStore = settingsManager.GetWritableSettingsStore(SettingsScope.UserSettings);
 
+            _cfCliService = services.GetRequiredService<ICfCliService>();
             var logSvc = services.GetRequiredService<ILoggingService>();
             _logger = logSvc.Logger;
         }
@@ -89,6 +91,11 @@ namespace Tanzu.Toolkit.VisualStudio.Services
         public bool ClearData(string propertyName)
         {
             return _writableSettingsStore.DeleteProperty(tasCollectionPath, propertyName);
+        }
+
+        public bool SavedCfCredsExist()
+        {
+            return _cfCliService.GetOAuthToken() != null;
         }
     }
 }

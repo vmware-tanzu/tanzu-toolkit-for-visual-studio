@@ -3,6 +3,7 @@ using System;
 using System.Security;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
+using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.ViewModels.SsoDialog;
 
 namespace Tanzu.Toolkit.ViewModels
@@ -21,7 +22,6 @@ namespace Tanzu.Toolkit.ViewModels
         private bool _ssoEnabled = false;
         private bool _verifyingApiAddress = false;
         private bool _apiAddressIsValid = true;
-        private string _connectionName;
         private bool _certificateInvalid = false;
         private bool _proceedWithInvalidCertificate = false;
         private ISsoDialogViewModel _ssoDialog;
@@ -35,14 +35,7 @@ namespace Tanzu.Toolkit.ViewModels
             _ssoDialog = services.GetRequiredService<ISsoDialogViewModel>();
         }
 
-        public string ConnectionName
-        {
-            get
-            {
-                var targetAddressValidUri = Uri.TryCreate(Target, UriKind.Absolute, out Uri uri);
-                return targetAddressValidUri ? uri.Host : "Tanzu Application Service";
-            }
-        }
+        public string ConnectionName { get; set; }
 
         public string Target
         {
@@ -183,6 +176,8 @@ namespace Tanzu.Toolkit.ViewModels
 
         public Func<bool> PasswordEmpty { get; set; }
 
+        internal ICloudFoundryService CfClient { get; private set; }
+
         public bool CanLogIn(object arg = null)
         {
             return !(string.IsNullOrWhiteSpace(Target) || string.IsNullOrWhiteSpace(Username) || PasswordEmpty()) && ValidateApiAddressFormat(Target);
@@ -197,12 +192,14 @@ namespace Tanzu.Toolkit.ViewModels
         {
             VerifyingApiAddress = true;
 
-            var candidateCf = new CfInstanceViewModel(new CloudFoundryInstance(ConnectionName, Target, SkipSsl), (TasExplorerViewModel)_tasExplorer, Services);
+            var candidateCf = new CloudFoundryInstance(GetTargetDisplayName(), Target, SkipSsl);
+            CfClient = Services.GetRequiredService<ICloudFoundryService>();
+            CfClient.ConfigureForCf(candidateCf);
 
-            var certTestResult = CloudFoundryService.VerfiyNewApiConnection(Target, SkipSsl);
+            var certTestResult = CfClient.VerfiyNewApiConnection(Target, SkipSsl);
             if (certTestResult.Succeeded)
             {
-                var ssoPromptResult = await CloudFoundryService.GetSsoPrompt(Target, SkipSsl);
+                var ssoPromptResult = await CfClient.GetSsoPrompt(Target, SkipSsl);
                 if (ssoPromptResult.Succeeded)
                 {
                     SsoEnabledOnTarget = true;
@@ -249,7 +246,7 @@ namespace Tanzu.Toolkit.ViewModels
                 return;
             }
 
-            var result = await CloudFoundryService.LoginWithCredentials(Target, Username, GetPassword(), skipSsl: ProceedWithInvalidCertificate);
+            var result = await CfClient.LoginWithCredentials(Target, Username, GetPassword(), skipSsl: ProceedWithInvalidCertificate);
 
             if (result.Succeeded)
             {
@@ -267,7 +264,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public void SetConnection()
         {
-            _tasExplorer.SetConnection(new CloudFoundryInstance(ConnectionName, Target, SkipSsl));
+            _tasExplorer.SetConnection(new CloudFoundryInstance(GetTargetDisplayName(), Target, SkipSsl));
         }
 
         public bool ValidateApiAddressFormat(string apiAddress)
@@ -296,7 +293,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
-                var ssoPromptResult = await CloudFoundryService.GetSsoPrompt(Target);
+                var ssoPromptResult = await CfClient.GetSsoPrompt(Target);
 
                 if (ssoPromptResult.Succeeded)
                 {
@@ -339,6 +336,14 @@ namespace Tanzu.Toolkit.ViewModels
 
             // clear previous errors
             ErrorMessage = null;
+        }
+        
+        private string GetTargetDisplayName()
+        {
+            if (ConnectionName != null) return ConnectionName;
+
+            var targetAddressValidUri = Uri.TryCreate(Target, UriKind.Absolute, out Uri uri);
+            return targetAddressValidUri ? uri.Host : "Tanzu Application Service";
         }
     }
 }

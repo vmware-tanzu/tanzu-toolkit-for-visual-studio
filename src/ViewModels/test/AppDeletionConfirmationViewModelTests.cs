@@ -21,7 +21,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             RenewMockServices();
 
-            _sut = new AppDeletionConfirmationViewModel(Services) { CfApp = _fakeCfApp };
+            _sut = new AppDeletionConfirmationViewModel(TODO, Services) { CfApp = _fakeCfApp };
             _receivedEvents = new List<string>();
 
             _sut.PropertyChanged += (sender, e) =>

@@ -12,10 +12,12 @@ namespace Tanzu.Toolkit.ViewModels.SsoDialog
         private string _apiAddress;
 
         internal ILoginViewModel _loginViewModel;
+        private readonly ITasExplorerViewModel _tasExplorer;
 
-        public SsoDialogViewModel(IServiceProvider services) : base(services)
+        public SsoDialogViewModel(ITasExplorerViewModel tasExplorerViewModel, IServiceProvider services) : base(services)
         {
             HasErrors = false;
+            _tasExplorer = tasExplorerViewModel;
         }
 
         public string ApiAddress
@@ -105,7 +107,7 @@ namespace Tanzu.Toolkit.ViewModels.SsoDialog
             }
             else
             {
-                var loginResult = await CloudFoundryService.LoginWithSsoPasscode(ApiAddress, Passcode);
+                var loginResult = await _tasExplorer.TasConnection.CfClient.LoginWithSsoPasscode(ApiAddress, Passcode);
 
                 if (loginResult.Succeeded)
                 {
