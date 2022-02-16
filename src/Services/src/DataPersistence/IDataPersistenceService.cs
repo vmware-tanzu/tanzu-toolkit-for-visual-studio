@@ -4,6 +4,7 @@
     {
         bool ClearData(string key);
         string ReadStringData(string key);
+        bool SavedCfCredsExist();
         bool WriteStringData(string key, string value);
     }
 }

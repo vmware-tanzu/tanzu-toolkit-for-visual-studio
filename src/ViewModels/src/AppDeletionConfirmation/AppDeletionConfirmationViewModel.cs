@@ -2,7 +2,6 @@
 using System;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
-using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.ErrorDialog;
 
 namespace Tanzu.Toolkit.ViewModels.AppDeletionConfirmation
@@ -14,10 +13,12 @@ namespace Tanzu.Toolkit.ViewModels.AppDeletionConfirmation
         internal CloudFoundryApp CfApp { get; set; }
 
         private readonly IErrorDialog _errorDialogService;
+        private readonly ITasExplorerViewModel _tasExplorer;
 
-        public AppDeletionConfirmationViewModel(IServiceProvider services) : base(services)
+        public AppDeletionConfirmationViewModel(ITasExplorerViewModel tasExplorerViewModel, IServiceProvider services) : base(services)
         {
             _errorDialogService = services.GetRequiredService<IErrorDialog>();
+            _tasExplorer = tasExplorerViewModel;
         }
 
         public bool CanDeleteApp(object arg)
@@ -46,7 +47,7 @@ namespace Tanzu.Toolkit.ViewModels.AppDeletionConfirmation
         {
             try
             {
-                var deleteResult = await CloudFoundryService.DeleteAppAsync(CfApp, removeRoutes: DeleteRoutes);
+                var deleteResult = await _tasExplorer.TasConnection.CfClient.DeleteAppAsync(CfApp, removeRoutes: DeleteRoutes);
                 if (!deleteResult.Succeeded)
                 {
                     Logger.Error(_deleteAppErrorMsg + " {AppName}. {DeleteResult}", CfApp.AppName, deleteResult.ToString());

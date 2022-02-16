@@ -1,9 +1,8 @@
-﻿using System;
-using System.ComponentModel;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using System;
+using System.ComponentModel;
 using Tanzu.Toolkit.Services;
-using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
@@ -21,7 +20,6 @@ namespace Tanzu.Toolkit.ViewModels
         public AbstractViewModel(IServiceProvider services)
         {
             Services = services;
-            CloudFoundryService = services.GetRequiredService<ICloudFoundryService>();
             DialogService = services.GetRequiredService<IDialogService>();
             ViewLocatorService = services.GetRequiredService<IViewLocatorService>();
             ThreadingService = services.GetRequiredService<IThreadingService>();
@@ -33,8 +31,6 @@ namespace Tanzu.Toolkit.ViewModels
         }
 
         public IServiceProvider Services { get; }
-
-        public ICloudFoundryService CloudFoundryService { get; }
 
         public IViewLocatorService ViewLocatorService { get; }
 

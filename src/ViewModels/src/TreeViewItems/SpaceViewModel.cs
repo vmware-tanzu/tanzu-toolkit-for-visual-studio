@@ -53,7 +53,7 @@ namespace Tanzu.Toolkit.ViewModels
                     IsLoading = true;
                     try
                     {
-                        var appsResponse = await CloudFoundryService.GetAppsForSpaceAsync(Space);
+                        var appsResponse = await ParentTasExplorer.TasConnection.CfClient.GetAppsForSpaceAsync(Space);
                         if (appsResponse.Succeeded)
                         {
                             // make a working copy of children to avoid System.InvalidOperationException:

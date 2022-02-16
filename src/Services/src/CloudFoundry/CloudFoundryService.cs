@@ -112,8 +112,6 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                     return authResult;
                 }
 
-                _cfApiClient.SetCfApiAddress(targetApiAddress);
-
                 await MatchCliVersionToApiVersion();
 
                 return new DetailedResult
@@ -1236,20 +1234,6 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 Succeeded = true,
                 Content = stackNamesToReturn,
             };
-        }
-
-        /// <summary>
-        /// Attempts to retrieve cached access token
-        /// </summary>
-        /// <returns>
-        /// True if token is accessible and appears valid.
-        /// <para>
-        /// False otherwise.
-        /// </para>
-        /// </returns>
-        public bool IsValidConnection()
-        {
-            return _cfCliService.GetOAuthToken() != null;
         }
 
         public void LogoutCfUser()
