@@ -32,7 +32,6 @@ namespace Tanzu.Toolkit.ViewModels
         private readonly IThreadingService _threadingService;
         private readonly IErrorDialog _errorDialogService;
         private readonly IDataPersistenceService _dataPersistenceService;
-        private readonly IAppDeletionConfirmationViewModel _confirmDelete;
         private readonly IViewLocatorService _viewLocatorService;
 
         public TasExplorerViewModel(IServiceProvider services)
@@ -41,12 +40,11 @@ namespace Tanzu.Toolkit.ViewModels
             _errorDialogService = services.GetRequiredService<IErrorDialog>();
             _threadingService = services.GetRequiredService<IThreadingService>();
             _dataPersistenceService = services.GetRequiredService<IDataPersistenceService>();
-            _confirmDelete = services.GetRequiredService<IAppDeletionConfirmationViewModel>();
             _viewLocatorService = services.GetRequiredService<IViewLocatorService>();
 
             string existingSavedConnectionName = _dataPersistenceService.ReadStringData(ConnectionNameKey);
             string existingSavedConnectionAddress = _dataPersistenceService.ReadStringData(ConnectionAddressKey);
-            bool savedConnectionCredsExist = CloudFoundryService.IsValidConnection();
+            bool savedConnectionCredsExist = _dataPersistenceService.SavedCfCredsExist();
 
             if (existingSavedConnectionName == null || existingSavedConnectionAddress == null || !savedConnectionCredsExist)
             {
@@ -243,7 +241,8 @@ namespace Tanzu.Toolkit.ViewModels
         {
             if (app is CloudFoundryApp cfApp)
             {
-                _confirmDelete.ShowConfirmation(cfApp);
+                var appDeletionConfirmationViewModel = Services.GetRequiredService<IAppDeletionConfirmationViewModel>();
+                appDeletionConfirmationViewModel.ShowConfirmation(cfApp);
             }
         }
 
@@ -251,7 +250,7 @@ namespace Tanzu.Toolkit.ViewModels
         {
             if (app is CloudFoundryApp cfApp)
             {
-                var stopResult = await CloudFoundryService.StopAppAsync(cfApp);
+                var stopResult = await TasConnection.CfClient.StopAppAsync(cfApp);
                 if (!stopResult.Succeeded)
                 {
                     Logger.Error(_stopAppErrorMsg + " {AppName}. {StopResult}", cfApp.AppName, stopResult.ToString());
@@ -264,7 +263,7 @@ namespace Tanzu.Toolkit.ViewModels
         {
             if (app is CloudFoundryApp cfApp)
             {
-                var startResult = await CloudFoundryService.StartAppAsync(cfApp);
+                var startResult = await TasConnection.CfClient.StartAppAsync(cfApp);
                 if (!startResult.Succeeded)
                 {
                     Logger.Error(_startAppErrorMsg + " {AppName}. {StartResult}", cfApp.AppName, startResult.ToString());
@@ -277,7 +276,7 @@ namespace Tanzu.Toolkit.ViewModels
         {
             if (app is CloudFoundryApp cfApp)
             {
-                var recentLogsResult = await CloudFoundryService.GetRecentLogsAsync(cfApp);
+                var recentLogsResult = await TasConnection.CfClient.GetRecentLogsAsync(cfApp);
                 if (!recentLogsResult.Succeeded)
                 {
                     if (recentLogsResult.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
@@ -314,7 +313,7 @@ namespace Tanzu.Toolkit.ViewModels
                     var outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel), viewTitle) as IView;
                     var outputViewModel = outputView.ViewModel as IOutputViewModel;
 
-                    Task<DetailedResult<string>> recentLogsTask = CloudFoundryService.GetRecentLogsAsync(cfApp);
+                    Task<DetailedResult<string>> recentLogsTask = TasConnection.CfClient.GetRecentLogsAsync(cfApp);
                     outputView.Show();
 
                     var recentLogsResult = await recentLogsTask;
@@ -333,7 +332,7 @@ namespace Tanzu.Toolkit.ViewModels
                         Logger.Error($"Unable to retrieve recent logs for {cfApp.AppName}. {recentLogsResult.Explanation}. {recentLogsResult.CmdResult}");
                     }
 
-                    var logStreamResult = CloudFoundryService.StreamAppLogs(cfApp, stdOutCallback: outputViewModel.AppendLine, stdErrCallback: outputViewModel.AppendLine);
+                    var logStreamResult = TasConnection.CfClient.StreamAppLogs(cfApp, stdOutCallback: outputViewModel.AppendLine, stdErrCallback: outputViewModel.AppendLine);
                     if (logStreamResult.Succeeded)
                     {
                         outputViewModel.ActiveProcess = logStreamResult.Content;
@@ -420,13 +419,13 @@ namespace Tanzu.Toolkit.ViewModels
 
         public void LogOutTas(object arg)
         {
-            TasConnection = null;
-            IsLoggedIn = false;
             IsRefreshingAll = false;
-            ThreadingService.IsPolling = false;
-            CloudFoundryService.LogoutCfUser();
+            ThreadingService.IsPolling = false; 
+            TasConnection.CfClient.LogoutCfUser();
             _dataPersistenceService.ClearData(ConnectionNameKey);
             _dataPersistenceService.ClearData(ConnectionAddressKey);
+            IsLoggedIn = false;
+            TasConnection = null;
         }
 
         public void ReAuthenticate(object arg)

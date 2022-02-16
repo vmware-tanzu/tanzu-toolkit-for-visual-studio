@@ -17,7 +17,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             RenewMockServices();
 
-            _sut = new SsoDialogViewModel(Services)
+            _sut = new SsoDialogViewModel(TODO, Services)
             {
                 ApiAddress = FakeCfApiAddress,
             };

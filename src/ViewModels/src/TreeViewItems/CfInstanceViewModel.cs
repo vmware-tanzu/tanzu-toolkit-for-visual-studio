@@ -25,11 +25,11 @@ namespace Tanzu.Toolkit.ViewModels
             : base(null, parentTasExplorer, services, expanded: expanded)
         {
             _dialogService = services.GetRequiredService<IErrorDialog>();
-            CfService = services.GetRequiredService<ICloudFoundryService>();
+            CfClient = services.GetRequiredService<ICloudFoundryService>();
 
             CloudFoundryInstance = cf;
             DisplayText = cf.InstanceName;
-            CfService.ConfigureForCf(cf);
+            CfClient.ConfigureForCf(cf);
 
             LoadingPlaceholder = new PlaceholderViewModel(parent: this, services)
             {
@@ -44,9 +44,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public CloudFoundryInstance CloudFoundryInstance { get; }
 
-        public ICloudFoundryService CfService { get; private set; }
-
-        public CloudFoundryInstance CloudFoundryInstance { get; }
+        public ICloudFoundryService CfClient { get; private set; }
 
         protected internal override async Task UpdateAllChildren()
         {
@@ -62,7 +60,7 @@ namespace Tanzu.Toolkit.ViewModels
                     IsLoading = true;
                     try
                     {
-                        var orgsResponse = await CloudFoundryService.GetOrgsForCfInstanceAsync(CloudFoundryInstance);
+                        var orgsResponse = await CfClient.GetOrgsForCfInstanceAsync(CloudFoundryInstance);
                         if (orgsResponse.Succeeded)
                         {
                             // make a working copy of children to avoid System.InvalidOperationException:
