@@ -333,7 +333,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 Content = fakeSsoPrompt,
             };
 
-            MockCloudFoundryService.Setup(m => m.ValidateNewApiConnection(_sut.Target, _sut.ProceedWithInvalidCertificate))
+            MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.Target, _sut.ProceedWithInvalidCertificate))
                 .Returns(FakeSuccessDetailedResult);
 
             MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.Target, false))
@@ -357,7 +357,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 FailureType = FailureType.InvalidCertificate,
             };
 
-            MockCloudFoundryService.Setup(m => m.ValidateNewApiConnection(_sut.Target, _sut.ProceedWithInvalidCertificate))
+            MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.Target, _sut.ProceedWithInvalidCertificate))
                 .Returns(fakeCertValidationResult);
 
             Assert.AreEqual(1, _sut.PageNum);
@@ -383,7 +383,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 FailureType = FailureType.MissingSsoPrompt,
             };
 
-            MockCloudFoundryService.Setup(m => m.ValidateNewApiConnection(_sut.Target, _sut.ProceedWithInvalidCertificate))
+            MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.Target, _sut.ProceedWithInvalidCertificate))
                 .Returns(fakeCertValidationResult);
 
             MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.Target, false))
@@ -412,7 +412,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 FailureType = FailureType.None,
             };
 
-            MockCloudFoundryService.Setup(m => m.ValidateNewApiConnection(_sut.Target, _sut.ProceedWithInvalidCertificate))
+            MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.Target, _sut.ProceedWithInvalidCertificate))
                 .Returns(fakeCertValidationResult);
 
             MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.Target, false))

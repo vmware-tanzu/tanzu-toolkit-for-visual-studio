@@ -54,7 +54,8 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
-                var restoredConnection = new CloudFoundryInstance(name: existingSavedConnectionName, apiAddress: existingSavedConnectionAddress);
+                // TODO: also restore value of SkipSsl
+                var restoredConnection = new CloudFoundryInstance(name: existingSavedConnectionName, apiAddress: existingSavedConnectionAddress, skipSslCertValidation: false);
 
                 SetConnection(restoredConnection);
             }
@@ -412,6 +413,8 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     _dataPersistenceService.WriteStringData(ConnectionAddressKey, TasConnection.CloudFoundryInstance.ApiAddress);
                 }
+
+                // TODO: also save value of SkipSsl
             }
         }
 

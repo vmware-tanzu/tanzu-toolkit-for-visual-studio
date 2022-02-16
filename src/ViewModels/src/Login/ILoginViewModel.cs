@@ -6,7 +6,7 @@ namespace Tanzu.Toolkit.ViewModels
 {
     public interface ILoginViewModel : IViewModel
     {
-        string ConnectionName { get; set; }
+        string ConnectionName { get; }
         string Target { get; set; }
         string Username { get; set; }
         bool SkipSsl { get; set; }

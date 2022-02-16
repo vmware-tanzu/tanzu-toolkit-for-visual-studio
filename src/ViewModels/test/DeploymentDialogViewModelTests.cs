@@ -22,7 +22,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         private const string _fakeBuildpackName3 = "bp3";
         private ObservableCollection<string> _fakeSelectedBuildpacks;
         private const string FakeTargetFrameworkMoniker = "junk";
-        private static readonly CloudFoundryInstance _fakeCfInstance = new CloudFoundryInstance("", "");
+        private static readonly CloudFoundryInstance _fakeCfInstance = new CloudFoundryInstance("", "", false);
         private static readonly CloudFoundryOrganization _fakeOrg = new CloudFoundryOrganization("", "", _fakeCfInstance);
         private readonly CloudFoundrySpace _fakeSpace = new CloudFoundrySpace("", "", _fakeOrg);
         private DeploymentDialogViewModel _sut;
@@ -112,7 +112,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [DataRow("asdf")]
         public void Constructor_SetsTargetNameToTasConnectionDisplayText_WhenTasConnectionIsNotNull(string connectionName)
         {
-            var fakeCf = new CloudFoundryInstance(connectionName, FakeCfApiAddress);
+            var fakeCf = new CloudFoundryInstance(connectionName, FakeCfApiAddress, false);
             var fakeTasConnection = new FakeCfInstanceViewModel(fakeCf, Services);
             MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(fakeTasConnection);
 
@@ -514,7 +514,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         public async Task UpdateCfOrgOptions_RaisesPropertyChangedEvent_WhenOrgsRequestSucceeds()
         {
-            var fakeCf = new CloudFoundryInstance("junk name", FakeCfApiAddress);
+            var fakeCf = new CloudFoundryInstance("junk name", FakeCfApiAddress, false);
             var fakeTasConnection = new FakeCfInstanceViewModel(fakeCf, Services);
             MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(fakeTasConnection);
 
@@ -555,7 +555,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         public async Task UpdateCfOrgOptions_DisplaysErrorDialog_WhenOrgsResponseReportsFailure()
         {
-            var fakeCf = new CloudFoundryInstance("fake junk name", FakeCfApiAddress);
+            var fakeCf = new CloudFoundryInstance("fake junk name", FakeCfApiAddress, false);
             var fakeTasConnection = new FakeCfInstanceViewModel(fakeCf, Services);
             MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(fakeTasConnection);
 
@@ -585,7 +585,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         public async Task UpdateCfOrgOptions_LogsError_WhenOrgsResponseReportsFailure()
         {
-            var fakeCf = new CloudFoundryInstance("fake junk name", FakeCfApiAddress);
+            var fakeCf = new CloudFoundryInstance("fake junk name", FakeCfApiAddress, false);
             var fakeTasConnection = new FakeCfInstanceViewModel(fakeCf, Services);
             MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(fakeTasConnection);
 
