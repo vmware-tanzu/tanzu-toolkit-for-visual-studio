@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
+using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.ErrorDialog;
 
 namespace Tanzu.Toolkit.ViewModels
@@ -20,12 +21,15 @@ namespace Tanzu.Toolkit.ViewModels
         private volatile int _updatesInProgress = 0;
         private readonly object _loadingLock = new object();
 
-        public CfInstanceViewModel(CloudFoundryInstance cloudFoundryInstance, TasExplorerViewModel parentTasExplorer, IServiceProvider services, bool expanded = false)
+        public CfInstanceViewModel(CloudFoundryInstance cf, TasExplorerViewModel parentTasExplorer, IServiceProvider services, bool expanded = false)
             : base(null, parentTasExplorer, services, expanded: expanded)
         {
             _dialogService = services.GetRequiredService<IErrorDialog>();
-            CloudFoundryInstance = cloudFoundryInstance;
-            DisplayText = CloudFoundryInstance.InstanceName;
+            CfService = services.GetRequiredService<ICloudFoundryService>();
+
+            CloudFoundryInstance = cf;
+            DisplayText = cf.InstanceName;
+            CfService.ConfigureForCf(cf);
 
             LoadingPlaceholder = new PlaceholderViewModel(parent: this, services)
             {
@@ -37,6 +41,10 @@ namespace Tanzu.Toolkit.ViewModels
                 DisplayText = _emptyOrgsPlaceholderMsg,
             };
         }
+
+        public CloudFoundryInstance CloudFoundryInstance { get; }
+
+        public ICloudFoundryService CfService { get; private set; }
 
         public CloudFoundryInstance CloudFoundryInstance { get; }
 

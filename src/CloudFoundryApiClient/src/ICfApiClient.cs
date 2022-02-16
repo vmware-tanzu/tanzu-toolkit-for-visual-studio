@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
@@ -22,6 +23,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         Task<LoginInfoResponse> GetLoginServerInformation(string cfApiAddress, bool trustAllCerts = false);
         Task<List<Route>> ListRoutesForApp(string cfTarget, string accessToken, string appGuid);
         Task<bool> DeleteRouteWithGuid(string cfTarget, string accessToken, string routeGuid);
-        void SetCloudFoundryApi(string targetApiAddress, bool skipSslValidation = false);
+        void Configure(Uri cfApiAddress, bool skipSslCertValidation);
     }
 }
