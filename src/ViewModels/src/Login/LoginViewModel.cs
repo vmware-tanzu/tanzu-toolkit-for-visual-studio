@@ -13,14 +13,14 @@ namespace Tanzu.Toolkit.ViewModels
         public const string TargetInvalidFormatMessage = "Invalid URI: The format of the URI could not be determined.";
         private string _target;
         private string _username;
-        private bool _skipSsl;
+        private bool _skipSsl = false;
         private bool _hasErrors;
         private string _errorMessage;
         private string _apiAddressError;
         private int _currentPageNum = 1;
         private bool _ssoEnabled = false;
         private bool _verifyingApiAddress = false;
-        private bool _apiAddressIsValid;
+        private bool _apiAddressIsValid = true;
         private string _connectionName;
         private bool _certificateInvalid = false;
         private bool _proceedWithInvalidCertificate = false;
@@ -31,22 +31,16 @@ namespace Tanzu.Toolkit.ViewModels
         public LoginViewModel(IServiceProvider services)
             : base(services)
         {
-            SkipSsl = true;
-
-            ApiAddressIsValid = true;
-
             _tasExplorer = services.GetRequiredService<ITasExplorerViewModel>();
             _ssoDialog = services.GetRequiredService<ISsoDialogViewModel>();
         }
 
         public string ConnectionName
         {
-            get => _connectionName;
-
-            set
+            get
             {
-                _connectionName = value;
-                RaisePropertyChangedEvent("ConnectionName");
+                var targetAddressValidUri = Uri.TryCreate(Target, UriKind.Absolute, out Uri uri);
+                return targetAddressValidUri ? uri.Host : "Tanzu Application Service";
             }
         }
 
@@ -199,6 +193,53 @@ namespace Tanzu.Toolkit.ViewModels
             return !string.IsNullOrWhiteSpace(Target) && ApiAddressIsValid;
         }
 
+        public async Task VerifyApiAddress(object arg = null)
+        {
+            VerifyingApiAddress = true;
+
+            var candidateCf = new CfInstanceViewModel(new CloudFoundryInstance(ConnectionName, Target, SkipSsl), (TasExplorerViewModel)_tasExplorer, Services);
+
+            var certTestResult = CloudFoundryService.VerfiyNewApiConnection(Target, SkipSsl);
+            if (certTestResult.Succeeded)
+            {
+                var ssoPromptResult = await CloudFoundryService.GetSsoPrompt(Target, SkipSsl);
+                if (ssoPromptResult.Succeeded)
+                {
+                    SsoEnabledOnTarget = true;
+                    PageNum = 2;
+                }
+                else
+                {
+                    switch (ssoPromptResult.FailureType)
+                    {
+                        case Toolkit.Services.FailureType.MissingSsoPrompt:
+                            SsoEnabledOnTarget = false;
+                            PageNum = 2;
+                            break;
+
+                        default:
+                            ApiAddressError = $"Unable to establish a connection with {Target}";
+                            ApiAddressIsValid = false;
+                            break;
+                    }
+                }
+            }
+            else
+            {
+                if (certTestResult.FailureType == Toolkit.Services.FailureType.InvalidCertificate)
+                {
+                    CertificateInvalid = true;
+                }
+                else
+                {
+                    ApiAddressError = $"Unable to establish a connection with {Target}";
+                    ApiAddressIsValid = false;
+                }
+            }
+
+            VerifyingApiAddress = false;
+        }
+
         public async Task LogIn(object arg)
         {
             HasErrors = false;
@@ -226,25 +267,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public void SetConnection()
         {
-            string name;
-
-            if (string.IsNullOrWhiteSpace(ConnectionName))
-            {
-                try
-                {
-                    name = new Uri(Target).Host;
-                }
-                catch
-                {
-                    name = "Tanzu Application Service";
-                }
-            }
-            else
-            {
-                name = ConnectionName;
-            }
-
-            _tasExplorer.SetConnection(new CloudFoundryInstance(name, Target));
+            _tasExplorer.SetConnection(new CloudFoundryInstance(ConnectionName, Target, SkipSsl));
         }
 
         public bool ValidateApiAddressFormat(string apiAddress)
@@ -288,52 +311,6 @@ namespace Tanzu.Toolkit.ViewModels
         public void CloseDialog()
         {
             DialogService.CloseDialogByName(nameof(LoginViewModel));
-        }
-
-        public async Task VerifyApiAddress(object arg = null)
-        {
-            VerifyingApiAddress = true;
-            var certTestResult = CloudFoundryService.ValidateNewApiConnection(Target, skipSsl: ProceedWithInvalidCertificate);
-            if (certTestResult.Succeeded)
-            {
-                var ssoPromptResult = await CloudFoundryService.GetSsoPrompt(Target, skipSsl: ProceedWithInvalidCertificate);
-
-                if (ssoPromptResult.Succeeded)
-                {
-                    SsoEnabledOnTarget = true;
-
-                    PageNum = 2;
-                }
-                else
-                {
-                    switch (ssoPromptResult.FailureType)
-                    {
-                        case Toolkit.Services.FailureType.MissingSsoPrompt:
-                            SsoEnabledOnTarget = false;
-                            PageNum = 2;
-                            break;
-
-                        default:
-                            ApiAddressError = $"Unable to establish a connection with {Target}";
-                            ApiAddressIsValid = false;
-                            break;
-                    }
-                }
-            }
-            else
-            {
-                if (certTestResult.FailureType == Toolkit.Services.FailureType.InvalidCertificate)
-                {
-                    CertificateInvalid = true;
-                }
-                else
-                {
-                    ApiAddressError = $"Unable to establish a connection with {Target}";
-                    ApiAddressIsValid = false;
-                }
-            }
-
-            VerifyingApiAddress = false;
         }
 
         public void NavigateToTargetPage(object arg = null)

@@ -34,6 +34,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         internal const string InvalidTargetUriMessage = "Invalid target URI";
         private readonly IHttpClientFactory _httpClientFactory;
         private HttpClient _httpClient;
+        private Uri _cfApiAddress;
+        private bool _skipSslCertValidation;
 
         public CfApiClient(IHttpClientFactory httpClientFactory)
         {
@@ -46,7 +48,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         {
             get
             {
-                if (_httpClient == null) throw new InvalidOperationException($"HttpClient has not yet been set for this instance of {nameof(CfApiClient)}; to set it, first call {nameof(SetCloudFoundryApi)}");
+                if (_httpClient == null) throw new InvalidOperationException($"HttpClient has not yet been set for this instance of {nameof(CfApiClient)}; to set it, first call {nameof(Configure)}");
                 return _httpClient;
             }
 
@@ -57,10 +59,35 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             }
         }
 
-        public void SetCloudFoundryApi(string targetApiAddress, bool skipSslValidation = false)
+        public Uri CfApiAddress
         {
-            HttpClient = skipSslValidation ? _httpClientFactory.CreateClient("SslCertTruster") : _httpClientFactory.CreateClient();
-            HttpClient.BaseAddress = new Uri(targetApiAddress);
+            get
+            {
+                if (_cfApiAddress == null) throw new ArgumentNullException(nameof(CfApiAddress));
+                return _cfApiAddress;
+            }
+            internal set
+            {
+                if (_cfApiAddress != null) throw new InvalidOperationException($"{nameof(CfApiAddress)} has already been set for this instance; to target a different API address, create a new instance of {nameof(CfApiClient)}");
+                _cfApiAddress = value;
+                HttpClient.BaseAddress = _cfApiAddress;
+            }
+        }
+
+        public bool SkipSslCertValidation
+        {
+            get => _skipSslCertValidation;
+            internal set
+            {
+                _skipSslCertValidation = value;
+                HttpClient = _skipSslCertValidation ? _httpClientFactory.CreateClient("SslCertTruster") : _httpClientFactory.CreateClient();
+            }
+        }
+
+        public void Configure(Uri cfApiAddress, bool skipSslCertValidation)
+        {
+            SkipSslCertValidation = skipSslCertValidation;
+            CfApiAddress = cfApiAddress;
         }
 
         /// <summary>

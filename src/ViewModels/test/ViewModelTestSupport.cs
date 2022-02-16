@@ -53,7 +53,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         protected const string FakeAppName = "fake app name";
         protected const string FakeAppGuid = "fake-app-guid";
 
-        protected static readonly CloudFoundryInstance FakeCfInstance = new CloudFoundryInstance(FakeCfName, FakeCfApiAddress);
+        protected static readonly CloudFoundryInstance FakeCfInstance = new CloudFoundryInstance(FakeCfName, FakeCfApiAddress, false);
         protected static readonly CloudFoundryOrganization FakeCfOrg = new CloudFoundryOrganization(FakeOrgName, FakeOrgGuid, FakeCfInstance);
         protected static readonly CloudFoundrySpace FakeCfSpace = new CloudFoundrySpace(FakeSpaceName, FakeSpaceGuid, FakeCfOrg);
         protected static readonly CloudFoundryApp FakeCfApp = new CloudFoundryApp(FakeAppName, FakeAppGuid, FakeCfSpace, "junk state");

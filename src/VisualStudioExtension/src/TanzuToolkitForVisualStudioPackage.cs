@@ -124,10 +124,10 @@ namespace Tanzu.Toolkit.VisualStudio
                     ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => { return true; }
                 };
             });
-            services.AddSingleton<ICfApiClient, CfApiClient>();
+            services.AddTransient<ICfApiClient, CfApiClient>();
 
             /* Services */
-            services.AddSingleton<ICloudFoundryService, CloudFoundryService>();
+            services.AddTransient<ICloudFoundryService, CloudFoundryService>();
             services.AddSingleton<IViewLocatorService, VsViewLocatorService>();
             services.AddSingleton<IDialogService, DialogService>();
             services.AddSingleton<ICfCliService>(provider => new CfCliService(assemblyBasePath, provider));

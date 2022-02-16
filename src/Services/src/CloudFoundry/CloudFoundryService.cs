@@ -47,7 +47,25 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             _logger = logSvc.Logger;
         }
 
-        public DetailedResult ValidateNewApiConnection(string targetApiAddress, bool skipSsl)
+        public DetailedResult ConfigureForCf(CloudFoundryInstance cf)
+        {
+            try
+            {
+                var uri = new Uri(cf.ApiAddress, UriKind.Absolute);
+                _cfApiClient.Configure(uri, cf.SkipSslCertValidation);
+                return new DetailedResult { Succeeded = true };
+            }
+            catch (Exception ex)
+            {
+                return new DetailedResult
+                {
+                    Succeeded = false,
+                    Explanation = ex.Message
+                };
+            }
+        }
+
+        public DetailedResult VerfiyNewApiConnection(string targetApiAddress, bool skipSsl)
         {
             return _cfCliService.TargetApi(targetApiAddress, skipSsl);
         }
@@ -71,7 +89,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
             try
             {
-                var targetResult = ValidateNewApiConnection(targetApiAddress, skipSsl);
+                var targetResult = VerfiyNewApiConnection(targetApiAddress, skipSsl);
 
                 if (!targetResult.Succeeded)
                 {
@@ -94,7 +112,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                     return authResult;
                 }
 
-                _cfApiClient.SetCloudFoundryApi(targetApiAddress);
+                _cfApiClient.SetCfApiAddress(targetApiAddress);
 
                 await MatchCliVersionToApiVersion();
 
