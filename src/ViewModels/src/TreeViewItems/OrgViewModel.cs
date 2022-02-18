@@ -58,19 +58,26 @@ namespace Tanzu.Toolkit.ViewModels
                         var spacesResponse = await CloudFoundryService.GetSpacesForOrgAsync(Org);
                         if (spacesResponse.Succeeded)
                         {
+                            // make a working copy of children to avoid System.InvalidOperationException:
+                            // "Collection was modified; enumeration operation may not execute."
+                            var originalChildren = Children.ToList();
+
+                            var removalTasks = new List<Task>();
+                            var additionTasks = new List<Task>();
+                            var updateChildrenTasks = new List<Task>();
+
                             var freshSpaces = new ObservableCollection<CloudFoundrySpace>(spacesResponse.Content);
                             if (freshSpaces.Count < 1)
                             {
-                                var replacementTask = ThreadingService.ReplaceCollectionOnUiThreadAsync(Children, new ObservableCollection<TreeViewItemViewModel> { EmptyPlaceholder });
+                                foreach (var child in originalChildren)
+                                {
+                                    removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, child));
+                                }
+                                additionTasks.Add(ThreadingService.AddItemToCollectionOnUiThreadAsync(Children, EmptyPlaceholder));
                             }
                             else
                             {
-                                // make a working copy of children to avoid System.InvalidOperationException:
-                                // "Collection was modified; enumeration operation may not execute."
-                                var originalChildren = Children.ToList();
-
-                                // remove stale spaces
-                                var removalTasks = new List<Task>();
+                                // identify stale spaces to remove
                                 foreach (TreeViewItemViewModel priorChild in originalChildren)
                                 {
                                     if (priorChild is PlaceholderViewModel)
@@ -83,10 +90,8 @@ namespace Tanzu.Toolkit.ViewModels
                                         if (!spaceStillExists) removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, priorSpace));
                                     }
                                 }
-                                await Task.WhenAll(removalTasks);
 
-                                // add new spaces
-                                var additionTasks = new List<Task>();
+                                // identify new spaces to add
                                 foreach (CloudFoundrySpace freshSpace in freshSpaces)
                                 {
                                     bool spaceAlreadyExists = originalChildren.Any(child => child is SpaceViewModel extantSpace && extantSpace.Space.SpaceId == freshSpace.SpaceId);
@@ -96,16 +101,17 @@ namespace Tanzu.Toolkit.ViewModels
                                         additionTasks.Add(ThreadingService.AddItemToCollectionOnUiThreadAsync(Children, newSpace));
                                     }
                                 }
-                                await Task.WhenAll(additionTasks);
-
-                                // update children
-                                var updateChildrenTasks = new List<Task>();
-                                foreach (TreeViewItemViewModel updatedChild in Children)
-                                {
-                                    if (updatedChild is SpaceViewModel space) updateChildrenTasks.Add(ThreadingService.StartBackgroundTask(space.UpdateAllChildren));
-                                }
-                                await Task.WhenAll(updateChildrenTasks);
                             }
+
+                            await Task.WhenAll(removalTasks);
+                            await Task.WhenAll(additionTasks);
+
+                            // update children
+                            foreach (TreeViewItemViewModel updatedChild in Children)
+                            {
+                                if (updatedChild is SpaceViewModel space) updateChildrenTasks.Add(ThreadingService.StartBackgroundTask(space.UpdateAllChildren));
+                            }
+                            await Task.WhenAll(updateChildrenTasks);
                         }
                         else if (spacesResponse.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
                         {
