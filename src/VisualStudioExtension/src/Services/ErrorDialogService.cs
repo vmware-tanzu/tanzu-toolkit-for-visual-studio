@@ -28,6 +28,21 @@ namespace Tanzu.Toolkit.VisualStudio.Services
              );
 
         }
+
+        public void DisplayWarningDialog(string warningTitle, string warningMsg)
+        {
+            /* Ensure dialog is displayed in UI thread */
+
+            VsShellUtilities.ShowMessageBox(
+                  _asyncServiceProvider,
+                  warningMsg,
+                  warningTitle,
+                  OLEMSGICON.OLEMSGICON_WARNING,
+                  OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                  OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST
+             );
+
+        }
     }
 }
 
