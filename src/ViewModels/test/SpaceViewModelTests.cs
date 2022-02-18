@@ -59,17 +59,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     collection.Add(item);
                 });
 
-            MockThreadingService.Setup(m => m
-              .ReplaceCollectionOnUiThreadAsync(It.IsAny<ObservableCollection<TreeViewItemViewModel>>(), It.IsAny<ObservableCollection<TreeViewItemViewModel>>()))
-                .Callback<ObservableCollection<TreeViewItemViewModel>, ObservableCollection<TreeViewItemViewModel>>((collectionToReplace, newCollection) =>
-                {
-                    collectionToReplace.Clear();
-                    foreach (var item in newCollection)
-                    {
-                        collectionToReplace.Add(item);
-                    }
-                });
-
             _fakeTasExplorerViewModel = new TasExplorerViewModel(Services);
             _fakeCfInstanceViewModel = new CfInstanceViewModel(FakeCfInstance, _fakeTasExplorerViewModel, Services, expanded: true);
             _fakeOrgViewModel = new OrgViewModel(FakeCfOrg, _fakeCfInstanceViewModel, _fakeTasExplorerViewModel, Services);

@@ -68,22 +68,5 @@ namespace Tanzu.Toolkit.Services.Threading
         {
             await _dispatcherService.RunOnUiThreadAsync(() => list.Remove(item));
         }
-
-        public async Task ReplaceCollectionOnUiThreadAsync<T>(ObservableCollection<T> collectionToReplace, ObservableCollection<T> newCollection)
-        {
-            var removalTasks = new List<Task>();
-            foreach (var item in collectionToReplace)
-            {
-                removalTasks.Add(RemoveItemFromCollectionOnUiThreadAsync(collectionToReplace, item));
-            }
-            await Task.WhenAll(removalTasks);
-
-            var additionTasks = new List<Task>();
-            foreach (var item in newCollection)
-            {
-                additionTasks.Add(AddItemToCollectionOnUiThreadAsync(collectionToReplace, item));
-            }
-            await Task.WhenAll(additionTasks);
-        }
     }
 }

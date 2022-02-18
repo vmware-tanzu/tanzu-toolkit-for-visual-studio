@@ -12,7 +12,6 @@ namespace Tanzu.Toolkit.Services.Threading
         void ExecuteInUIThread(Action method);
         Task ExecuteInUIThreadAsync(Action method);
         Task RemoveItemFromCollectionOnUiThreadAsync<T>(ObservableCollection<T> list, T item);
-        Task ReplaceCollectionOnUiThreadAsync<T>(ObservableCollection<T> collectionToReplace, ObservableCollection<T> newCollection);
         Task StartBackgroundTask(Func<Task> method);
         void StartRecurrentUiTaskInBackground(Action<object> pollingMethod, object methodParam, int intervalInSeconds);
     }
