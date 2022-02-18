@@ -56,19 +56,25 @@ namespace Tanzu.Toolkit.ViewModels
                         var appsResponse = await CloudFoundryService.GetAppsForSpaceAsync(Space);
                         if (appsResponse.Succeeded)
                         {
+                            // make a working copy of children to avoid System.InvalidOperationException:
+                            // "Collection was modified; enumeration operation may not execute."
+                            var originalChildren = Children.ToList();
+
+                            var removalTasks = new List<Task>();
+                            var additionTasks = new List<Task>();
+
                             var freshApps = new ObservableCollection<CloudFoundryApp>(appsResponse.Content);
                             if (freshApps.Count < 1)
                             {
-                                var replacementTask = ThreadingService.ReplaceCollectionOnUiThreadAsync(Children, new ObservableCollection<TreeViewItemViewModel> { EmptyPlaceholder });
+                                foreach (var child in originalChildren)
+                                {
+                                    removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, child));
+                                }
+                                additionTasks.Add(ThreadingService.AddItemToCollectionOnUiThreadAsync(Children, EmptyPlaceholder));
                             }
                             else
                             {
-                                // make a working copy of children to avoid System.InvalidOperationException:
-                                // "Collection was modified; enumeration operation may not execute."
-                                var originalChildren = Children.ToList();
-
-                                // remove stale apps
-                                var removalTasks = new List<Task>();
+                                // identify stale apps to remove
                                 foreach (TreeViewItemViewModel priorChild in originalChildren)
                                 {
                                     if (priorChild is PlaceholderViewModel)
@@ -81,10 +87,8 @@ namespace Tanzu.Toolkit.ViewModels
                                         if (!appStillExists) removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, priorApp));
                                     }
                                 }
-                                await Task.WhenAll(removalTasks);
 
-                                // add new apps
-                                var additionTasks = new List<Task>();
+                                // identify new apps to add
                                 foreach (CloudFoundryApp freshApp in freshApps)
                                 {
                                     var appsWithSameId = originalChildren.Where(child => child is AppViewModel extantApp && extantApp.App.AppId == freshApp.AppId);
@@ -104,9 +108,13 @@ namespace Tanzu.Toolkit.ViewModels
                                             break;
                                     }
                                 }
-                                await Task.WhenAll(additionTasks);
+                            }
 
-                                foreach (AppViewModel app in Children) app.RefreshAppState();
+                            await Task.WhenAll(removalTasks);
+                            await Task.WhenAll(additionTasks);
+                            foreach (TreeViewItemViewModel child in Children)
+                            {
+                                if (child is AppViewModel app) app.RefreshAppState();
                             }
                         }
                         else if (appsResponse.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
