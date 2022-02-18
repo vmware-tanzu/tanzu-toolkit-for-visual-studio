@@ -128,7 +128,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 IsLoading = false;
 
-                _dialogService.DisplayErrorDialog(_getSpacesFailureMsg, spacesResponse.Explanation);
+                _dialogService.DisplayWarningDialog(_getSpacesFailureMsg, spacesResponse.Explanation);
 
                 IsExpanded = false;
             }

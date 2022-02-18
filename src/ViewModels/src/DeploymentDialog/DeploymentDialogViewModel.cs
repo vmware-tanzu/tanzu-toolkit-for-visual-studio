@@ -194,7 +194,7 @@ namespace Tanzu.Toolkit.ViewModels
                 }
                 else
                 {
-                    _errorDialogService.DisplayErrorDialog(ManifestNotFoundTitle, $"'{value}' does not appear to be a valid path to a manifest.");
+                    _errorDialogService.DisplayWarningDialog(ManifestNotFoundTitle, $"'{value}' does not appear to be a valid path to a manifest.");
                 }
             }
         }
@@ -227,7 +227,7 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     if (value != null)
                     {
-                        _errorDialogService.DisplayErrorDialog(DirectoryNotFoundTitle, $"'{value}' does not appear to be a valid path to a directory.");
+                        _errorDialogService.DisplayWarningDialog(DirectoryNotFoundTitle, $"'{value}' does not appear to be a valid path to a directory.");
 
                         ManifestModel.Applications[0].Path = null;
                     }
