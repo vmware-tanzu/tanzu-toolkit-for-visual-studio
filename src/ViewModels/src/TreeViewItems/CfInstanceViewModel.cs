@@ -57,19 +57,26 @@ namespace Tanzu.Toolkit.ViewModels
                         var orgsResponse = await CloudFoundryService.GetOrgsForCfInstanceAsync(CloudFoundryInstance);
                         if (orgsResponse.Succeeded)
                         {
+                            // make a working copy of children to avoid System.InvalidOperationException:
+                            // "Collection was modified; enumeration operation may not execute."
+                            var originalChildren = Children.ToList();
+
+                            var removalTasks = new List<Task>();
+                            var additionTasks = new List<Task>();
+                            var updateTasks = new List<Task>();
+
                             var freshOrgs = new ObservableCollection<CloudFoundryOrganization>(orgsResponse.Content);
                             if (freshOrgs.Count < 1)
                             {
-                                var replacementTask = ThreadingService.ReplaceCollectionOnUiThreadAsync(Children, new ObservableCollection<TreeViewItemViewModel> { EmptyPlaceholder });
+                                foreach (var child in originalChildren)
+                                {
+                                    removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, child));
+                                }
+                                additionTasks.Add(ThreadingService.AddItemToCollectionOnUiThreadAsync(Children, EmptyPlaceholder));
                             }
                             else
                             {
-                                // make a working copy of children to avoid System.InvalidOperationException:
-                                // "Collection was modified; enumeration operation may not execute."
-                                var originalChildren = Children.ToList();
-
                                 // remove stale orgs
-                                var removalTasks = new List<Task>();
                                 foreach (TreeViewItemViewModel priorChild in originalChildren)
                                 {
                                     if (priorChild is PlaceholderViewModel)
@@ -82,10 +89,8 @@ namespace Tanzu.Toolkit.ViewModels
                                         if (!orgStillExists) removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, priorOrg));
                                     }
                                 }
-                                await Task.WhenAll(removalTasks);
 
                                 // add new orgs
-                                var additionTasks = new List<Task>();
                                 foreach (CloudFoundryOrganization freshOrg in freshOrgs)
                                 {
                                     bool orgAlreadyExists = originalChildren.Any(child => child is OrgViewModel extantOrg && extantOrg.Org.OrgId == freshOrg.OrgId);
@@ -95,16 +100,17 @@ namespace Tanzu.Toolkit.ViewModels
                                         additionTasks.Add(ThreadingService.AddItemToCollectionOnUiThreadAsync(Children, newOrg));
                                     }
                                 }
-                                await Task.WhenAll(additionTasks);
-
-                                // update children
-                                var updateTasks = new List<Task>();
-                                foreach (TreeViewItemViewModel child in Children)
-                                {
-                                    if (child is OrgViewModel org) updateTasks.Add(ThreadingService.StartBackgroundTask(org.UpdateAllChildren));
-                                }
-                                await Task.WhenAll(updateTasks);
                             }
+
+                            await Task.WhenAll(removalTasks);
+                            await Task.WhenAll(additionTasks);
+
+                            // update children
+                            foreach (TreeViewItemViewModel child in Children)
+                            {
+                                if (child is OrgViewModel org) updateTasks.Add(ThreadingService.StartBackgroundTask(org.UpdateAllChildren));
+                            }
+                            await Task.WhenAll(updateTasks);
                         }
                         else if (orgsResponse.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
                         {

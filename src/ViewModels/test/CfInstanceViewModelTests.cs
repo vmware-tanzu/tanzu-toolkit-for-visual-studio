@@ -210,11 +210,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             fakeNoOrgsResponse.Content.Clear();
 
             /** mock 2 initial children */
-            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
+            var initialChildren = new ObservableCollection<TreeViewItemViewModel>
             {
                 new OrgViewModel(FakeOrgs[0], _sut, _fakeTasExplorerViewModel, Services),
                 new OrgViewModel(FakeOrgs[1], _sut, _fakeTasExplorerViewModel, Services),
             };
+            _sut.Children = new ObservableCollection<TreeViewItemViewModel>(initialChildren);
 
             MockCloudFoundryService.Setup(m => m
               .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
@@ -226,6 +227,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.AreEqual(1, _sut.Children.Count);
             Assert.IsTrue(_sut.Children[0].Equals(_sut.EmptyPlaceholder));
+            foreach (var child in initialChildren)
+            {
+                MockThreadingService.Verify(m => m.RemoveItemFromCollectionOnUiThreadAsync(_sut.Children, child), Times.Once);
+            }
+            MockThreadingService.Verify(m => m.AddItemToCollectionOnUiThreadAsync(_sut.Children, _sut.EmptyPlaceholder), Times.Once);
         }
 
         [TestMethod]
