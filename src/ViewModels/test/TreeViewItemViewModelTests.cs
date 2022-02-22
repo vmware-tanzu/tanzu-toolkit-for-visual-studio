@@ -33,8 +33,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var sut = new TestTreeViewItemViewModel(Services);
 
             Assert.AreSame(Services, sut.Services);
-            Assert.IsNotNull(sut.CloudFoundryService);
-
             Assert.IsFalse(sut.IsLoading);
 
             /* loading placeholder gets instantiated */
