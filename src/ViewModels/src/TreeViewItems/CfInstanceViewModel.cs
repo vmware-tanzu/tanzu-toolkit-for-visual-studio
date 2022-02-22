@@ -127,7 +127,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 IsLoading = false;
 
-                _dialogService.DisplayErrorDialog(_getOrgsFailureMsg, orgsResponse.Explanation);
+                _dialogService.DisplayWarningDialog(_getOrgsFailureMsg, orgsResponse.Explanation);
 
                 IsExpanded = false;
             }

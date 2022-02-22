@@ -122,7 +122,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 IsLoading = false;
 
-                _dialogService.DisplayErrorDialog(_getAppsFailureMsg, appsResult.Explanation);
+                _dialogService.DisplayWarningDialog(_getAppsFailureMsg, appsResult.Explanation);
 
                 IsExpanded = false;
             }

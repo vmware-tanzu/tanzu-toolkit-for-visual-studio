@@ -14,15 +14,30 @@ namespace Tanzu.Toolkit.VisualStudio.Services
             _asyncServiceProvider = services;
         }
 
-        public void DisplayErrorDialog(string errorTitle, string errorMsg)
+        public void DisplayErrorDialog(string title, string msg)
         {
             /* Ensure dialog is displayed in UI thread */
 
             VsShellUtilities.ShowMessageBox(
                   _asyncServiceProvider,
-                  errorMsg,
-                  errorTitle,
+                  msg,
+                  title,
                   OLEMSGICON.OLEMSGICON_CRITICAL,
+                  OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                  OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST
+             );
+
+        }
+
+        public void DisplayWarningDialog(string title, string msg)
+        {
+            /* Ensure dialog is displayed in UI thread */
+
+            VsShellUtilities.ShowMessageBox(
+                  _asyncServiceProvider,
+                  msg,
+                  title,
+                  OLEMSGICON.OLEMSGICON_WARNING,
                   OLEMSGBUTTON.OLEMSGBUTTON_OK,
                   OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST
              );

@@ -879,7 +879,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     Times.Once);
 
             MockErrorDialogService.Verify(m => m.
-                DisplayErrorDialog(It.Is<string>(s => s.Contains(fakeApp.AppName)), It.Is<string>(s => s.Contains(fakeLogsResult.Explanation))),
+                DisplayWarningDialog(It.Is<string>(s => s.Contains(fakeApp.AppName)), It.Is<string>(s => s.Contains(fakeLogsResult.Explanation))),
                     Times.Once);
         }
 
@@ -931,7 +931,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsTrue(_sut.AuthenticationRequired);
 
             MockErrorDialogService.Verify(m => m.
-                DisplayErrorDialog(It.Is<string>(s => s.Contains(fakeApp.AppName)), It.Is<string>(s => s.Contains(invalidRefreshTokenResult.Explanation))),
+                DisplayWarningDialog(It.Is<string>(s => s.Contains(fakeApp.AppName)), It.Is<string>(s => s.Contains(invalidRefreshTokenResult.Explanation))),
                     Times.Once);
         }
 
