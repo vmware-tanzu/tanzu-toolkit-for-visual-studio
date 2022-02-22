@@ -1,4 +1,7 @@
 ﻿using Newtonsoft.Json;
+using RichardSzalay.MockHttp;
+using System;
+using System.Net.Http;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.BasicInfoResponse;
@@ -17,6 +20,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         internal static readonly string _fakeCfUsername = "user";
         internal static readonly string _fakeCfPassword = "pass";
         internal static readonly string _fakeAccessToken = "fakeToken";
+
+        internal static IHttpClientFactory _fakeHttpClientFactory = new FakeHttpClientFactory();
 
         internal static readonly string _fakeBasicInfoJsonResponse = JsonConvert.SerializeObject(new FakeBasicInfoResponse(
                 loginHref: _fakeLoginAddress,
@@ -527,4 +532,22 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         }
     }
 
+    public interface IFakeHttpClientFactory
+    {
+        MockHttpMessageHandler MockHttpMessageHandler { get; }
+
+        HttpClient CreateClient(string name);
+    }
+
+    public class FakeHttpClientFactory : IHttpClientFactory, IFakeHttpClientFactory
+    {
+        public MockHttpMessageHandler MockHttpMessageHandler { get; private set; }
+
+        public HttpClient CreateClient(string name)
+        {
+            MockHttpMessageHandler = new MockHttpMessageHandler();
+            MockHttpMessageHandler.Fallback.Throw(new InvalidOperationException("No matching mock handler"));
+            return MockHttpMessageHandler.ToHttpClient();
+        }
+    }
 }

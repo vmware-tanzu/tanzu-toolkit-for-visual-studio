@@ -15,150 +15,21 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
     public class CfApiClientTests : CfApiClientTestSupport
     {
         private CfApiClient _sut;
-        private readonly Mock<IUaaClient> _mockUaaClient = new Mock<IUaaClient>();
         private MockHttpMessageHandler _mockHttp;
 
         [TestInitialize]
         public void TestInit()
         {
-            _mockHttp = new MockHttpMessageHandler();
-            _mockHttp.Fallback.Throw(new InvalidOperationException("No matching mock handler"));
-
-            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+            var fakeHttpClientFactory = (IFakeHttpClientFactory)_fakeHttpClientFactory;
+            _mockHttp = fakeHttpClientFactory.MockHttpMessageHandler;
+            
+            _sut = new CfApiClient(_fakeHttpClientFactory);
         }
 
         [TestCleanup]
         public void TestCleanup()
         {
             _mockHttp.VerifyNoOutstandingExpectation();
-        }
-
-        [TestMethod]
-        public async Task LoginAsync_UpdatesAndReturnsAccessToken_WhenLoginSucceeds()
-        {
-            var expectedUri = new Uri(_fakeLoginAddress);
-            var fakeAccessTokenContent = "fake access token";
-
-            MockedRequest cfBasicInfoRequest = _mockHttp.Expect("https://api." + _fakeTargetDomain + "/")
-               .Respond("application/json", _fakeBasicInfoJsonResponse);
-
-            _mockUaaClient.Setup(mock => mock.RequestAccessTokenAsync(
-                expectedUri,
-                CfApiClient.DefaultAuthClientId,
-                CfApiClient.DefaultAuthClientSecret,
-                _fakeCfUsername,
-                _fakeCfPassword))
-                .ReturnsAsync(HttpStatusCode.OK);
-
-            _mockUaaClient.SetupGet(mock => mock.Token)
-                .Returns(new Token() { Access_token = fakeAccessTokenContent });
-
-            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
-
-            Assert.AreNotEqual(fakeAccessTokenContent, _sut.AccessToken);
-
-            var result = await _sut.LoginAsync(_fakeCfApiAddress, _fakeCfUsername, _fakeCfPassword);
-
-            Assert.AreEqual(fakeAccessTokenContent, _sut.AccessToken);
-            Assert.AreEqual(fakeAccessTokenContent, result);
-            _mockUaaClient.VerifyAll();
-            Assert.AreEqual(1, _mockHttp.GetMatchCount(cfBasicInfoRequest));
-        }
-
-        [TestMethod]
-        public async Task LoginAsync_ReturnsNull_AndDoesNotUpdateAccessToken_WhenLoginFails()
-        {
-            var expectedUri = new Uri(_fakeLoginAddress);
-
-            MockedRequest cfBasicInfoRequest = _mockHttp.Expect("https://api." + _fakeTargetDomain + "/")
-               .Respond("application/json", _fakeBasicInfoJsonResponse);
-
-            _mockUaaClient.Setup(mock => mock.RequestAccessTokenAsync(
-                expectedUri,
-                CfApiClient.DefaultAuthClientId,
-                CfApiClient.DefaultAuthClientSecret,
-                _fakeCfUsername,
-                _fakeCfPassword))
-                .ReturnsAsync(HttpStatusCode.Unauthorized);
-
-            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
-
-            var initialAccessToken = _sut.AccessToken;
-
-            var result = await _sut.LoginAsync(_fakeCfApiAddress, _fakeCfUsername, _fakeCfPassword);
-
-            Assert.IsNull(result);
-            Assert.AreEqual(initialAccessToken, _sut.AccessToken);
-            _mockUaaClient.VerifyAll();
-            Assert.AreEqual(1, _mockHttp.GetMatchCount(cfBasicInfoRequest));
-        }
-
-        [TestMethod]
-        public async Task LoginAsync_ThrowsException_WhenCfTargetIsMalformed()
-        {
-            Exception expectedException = null;
-
-            MockedRequest catchallRequest = _mockHttp.When("*")
-               .Throw(new Exception("Malformed uri exception should be thrown before httpClient is used"));
-
-            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
-
-            try
-            {
-                var malformedCfTargetString = "what-a-mess";
-                await _sut.LoginAsync(malformedCfTargetString, _fakeCfUsername, _fakeCfPassword);
-            }
-            catch (Exception e)
-            {
-                expectedException = e;
-            }
-
-            Assert.IsNotNull(expectedException);
-            _mockUaaClient.Verify(mock =>
-                mock.RequestAccessTokenAsync(
-                    It.IsAny<Uri>(),
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<string>()), Times.Never);
-            Assert.AreEqual(0, _mockHttp.GetMatchCount(catchallRequest));
-        }
-
-        [TestMethod]
-        public async Task LoginAsync_ThrowsException_WhenBasicInfoRequestErrors()
-        {
-            Exception resultException = null;
-            var fakeHttpExceptionMessage = "(fake) http request failed";
-
-            MockedRequest cfBasicInfoRequest = _mockHttp.Expect(_fakeCfApiAddress + "/")
-               .Throw(new Exception(fakeHttpExceptionMessage));
-
-            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
-
-            try
-            {
-                await _sut.LoginAsync(_fakeCfApiAddress, _fakeCfUsername, _fakeCfPassword);
-            }
-            catch (Exception e)
-            {
-                resultException = e;
-            }
-
-            Assert.AreEqual(1, _mockHttp.GetMatchCount(cfBasicInfoRequest));
-            Assert.IsNotNull(resultException);
-            Assert.IsTrue(resultException.Message.Contains(fakeHttpExceptionMessage));
-            Assert.IsTrue(
-                resultException.Message.Contains(CfApiClient.AuthServerLookupFailureMessage)
-                || (resultException.Data.Contains("MessageToDisplay")
-                    && resultException.Data["MessageToDisplay"].ToString().Contains(CfApiClient.AuthServerLookupFailureMessage)));
-
-            _mockUaaClient.Verify(mock =>
-                mock.RequestAccessTokenAsync(
-                    It.IsAny<Uri>(),
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<string>()), Times.Never);
         }
 
         [TestMethod]
@@ -169,8 +40,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             MockedRequest orgsRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
                 .Respond(HttpStatusCode.Unauthorized);
-
-            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
             Exception thrownException = null;
             try
@@ -211,8 +80,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
                 .Respond("application/json", _fakeOrgsJsonResponsePage4);
 
-            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
-
             var result = await _sut.ListOrgs(_fakeCfApiAddress, _fakeAccessToken);
 
             Assert.IsNotNull(result);
@@ -231,8 +98,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             MockedRequest spacesRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
                 .Respond(HttpStatusCode.Unauthorized);
-
-            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
             Exception thrownException = null;
             try
@@ -268,8 +133,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
                 .Respond("application/json", _fakeSpacesJsonResponsePage3);
 
-            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
-
             var result = await _sut.ListSpacesForOrg(_fakeCfApiAddress, _fakeAccessToken, "fake guid");
 
             Assert.IsNotNull(result);
@@ -287,8 +150,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             MockedRequest appsRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
                 .Respond(HttpStatusCode.Unauthorized);
-
-            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
             Exception thrownException = null;
             try
@@ -324,8 +185,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
                 .Respond("application/json", _fakeAppsJsonResponsePage3);
 
-            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
-
             var result = await _sut.ListAppsForSpace(_fakeCfApiAddress, _fakeAccessToken, "fake guid");
 
             Assert.IsNotNull(result);
@@ -343,8 +202,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             MockedRequest routesRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
                 .Respond(HttpStatusCode.Unauthorized);
-
-            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
             Exception expectedException = null;
             try
@@ -379,8 +236,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
                 .Respond("application/json", _fakeRoutesJsonResponsePage3);
 
-            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
-
             var result = await _sut.ListRoutesForApp(_fakeCfApiAddress, _fakeAccessToken, "fake guid");
 
             Assert.IsNotNull(result);
@@ -400,8 +255,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             MockedRequest appsRequest = _mockHttp.Expect(expectedPath)
                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
                .Respond(HttpStatusCode.Unauthorized);
-
-            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
             try
             {
@@ -426,8 +279,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 
             MockedRequest cfStopAppRequest = _mockHttp.Expect(expectedPath)
                .Respond("application/json", JsonConvert.SerializeObject(new App { State = "STOPPED" }));
-
-            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
             bool stopResult = false;
             try
@@ -454,8 +305,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             MockedRequest cfStopAppRequest = _mockHttp.Expect(expectedPath)
                .Respond("application/json", JsonConvert.SerializeObject(new App { State = "fake state != STOPPED" }));
 
-            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
-
             bool stopResult = true;
             try
             {
@@ -479,11 +328,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Exception resultException = null;
 
             MockedRequest cfStartAppRequest = _mockHttp.Expect(expectedPath)
-               .Respond("application/json", JsonConvert.SerializeObject(new App { State = "STARTED" }));
-
-            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
-
-            bool startResult = false;
+               .Respond("application/json", JsonConvert.SerializeObject(new App { State = "STARTED" }));            bool startResult = false;
             try
             {
                 startResult = await _sut.StartAppWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
@@ -507,8 +352,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 
             MockedRequest cfStartAppRequest = _mockHttp.Expect(expectedPath)
                .Respond("application/json", JsonConvert.SerializeObject(new App { State = "fake state != STARTED" }));
-
-            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
             bool startResult = true;
             try
@@ -536,8 +379,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
                .Respond(HttpStatusCode.Unauthorized);
 
-            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
-
             try
             {
                 await _sut.StartAppWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
@@ -560,8 +401,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 
             MockedRequest cfDeleteAppRequest = _mockHttp.Expect(expectedPath)
                .Respond(HttpStatusCode.Accepted);
-
-            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
             Exception resultException = null;
             bool appWasDeleted = false;
@@ -589,8 +428,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             MockedRequest cfDeleteAppRequest = _mockHttp.Expect(expectedPath)
                .Respond(HttpStatusCode.BadRequest);
 
-            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
-
             try
             {
                 await _sut.DeleteAppWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
@@ -613,8 +450,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             MockedRequest stacksRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
                 .Respond(HttpStatusCode.Unauthorized);
-
-            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
             Exception thrownException = null;
             try
@@ -655,8 +490,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
                 .Respond("application/json", _fakeStacksJsonResponsePage4);
 
-            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
-
             var result = await _sut.ListStacks(_fakeCfApiAddress, _fakeAccessToken);
 
             Assert.IsNotNull(result);
@@ -687,8 +520,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
                 .Respond("application/json", _fakeBuildpacksJsonResponsePage3);
 
-            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
-
             var result = await _sut.ListBuildpacks(_fakeCfApiAddress, _fakeAccessToken);
 
             Assert.IsNotNull(result);
@@ -707,8 +538,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             MockedRequest buildpacksRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
                 .Respond(HttpStatusCode.Unauthorized);
-
-            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
             Exception thrownException = null;
             try
@@ -853,8 +682,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             MockedRequest cfDeleteRouteRequest = _mockHttp.Expect(expectedPath)
                .Respond(HttpStatusCode.Accepted);
 
-            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
-
             Exception resultException = null;
             bool routeWasDeleted = false;
             try
@@ -881,8 +708,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 
             MockedRequest cfDeleteRouteRequest = _mockHttp.Expect(expectedPath)
                .Respond(HttpStatusCode.BadRequest);
-
-            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
             try
             {
