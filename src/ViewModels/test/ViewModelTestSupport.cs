@@ -42,7 +42,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         protected Mock<ILoginViewModel> MockLoginViewModel { get; set; }
         protected Mock<IAppDeletionConfirmationViewModel> MockAppDeletionConfirmationViewModel { get; set; }
 
-
         protected const string FakeCfName = "fake cf name";
         protected const string FakeCfApiAddress = "http://fake.api.address";
         protected const string FakeAccessToken = "fake.access.token";

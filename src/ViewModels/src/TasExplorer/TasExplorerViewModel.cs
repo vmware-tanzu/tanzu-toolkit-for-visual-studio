@@ -22,6 +22,9 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string SingleLoginErrorMessage2 = "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Application Service Explorer & re-connecting to a new one.";
         internal const string ConnectionNameKey = "connection-name";
         internal const string ConnectionAddressKey = "connection-api-address";
+        internal const string ConnectionSslPolicyKey = "connection-should-skip-ssl-cert-validation";
+        internal const string SkipCertValidationValue = "skip-ssl-cert-validation";
+        internal const string ValidateSslCertsValue = "validate-ssl-certificates";
 
         private CfInstanceViewModel _tas;
         private volatile bool _isRefreshingAll = false;
@@ -42,18 +45,21 @@ namespace Tanzu.Toolkit.ViewModels
             _dataPersistenceService = services.GetRequiredService<IDataPersistenceService>();
             _viewLocatorService = services.GetRequiredService<IViewLocatorService>();
 
+            bool savedConnectionCredsExist = _dataPersistenceService.SavedCfCredsExist();
             string existingSavedConnectionName = _dataPersistenceService.ReadStringData(ConnectionNameKey);
             string existingSavedConnectionAddress = _dataPersistenceService.ReadStringData(ConnectionAddressKey);
-            bool savedConnectionCredsExist = _dataPersistenceService.SavedCfCredsExist();
+            string existingSavedConnectionSslPolicy = _dataPersistenceService.ReadStringData(ConnectionSslPolicyKey);
 
-            if (existingSavedConnectionName == null || existingSavedConnectionAddress == null || !savedConnectionCredsExist)
+            if (!savedConnectionCredsExist || existingSavedConnectionName == null || existingSavedConnectionAddress == null)
             {
                 TasConnection = null;
             }
             else
             {
-                // TODO: also restore value of SkipSsl
-                var restoredConnection = new CloudFoundryInstance(name: existingSavedConnectionName, apiAddress: existingSavedConnectionAddress, skipSslCertValidation: false);
+                var restoredConnection = new CloudFoundryInstance(
+                    name: existingSavedConnectionName,
+                    apiAddress: existingSavedConnectionAddress,
+                    skipSslCertValidation: existingSavedConnectionSslPolicy != null && existingSavedConnectionSslPolicy == SkipCertValidationValue);
 
                 SetConnection(restoredConnection);
             }
@@ -399,21 +405,10 @@ namespace Tanzu.Toolkit.ViewModels
                     ThreadingService.StartRecurrentUiTaskInBackground(RefreshAllItems, null, 10);
                 }
 
-                string existingSavedConnectionName = _dataPersistenceService.ReadStringData(ConnectionNameKey);
-
-                if (existingSavedConnectionName != cf.InstanceName)
-                {
-                    _dataPersistenceService.WriteStringData(ConnectionNameKey, TasConnection.CloudFoundryInstance.InstanceName);
-                }
-
-                string existingSavedConnectionAddress = _dataPersistenceService.ReadStringData(ConnectionAddressKey);
-
-                if (existingSavedConnectionAddress != cf.ApiAddress)
-                {
-                    _dataPersistenceService.WriteStringData(ConnectionAddressKey, TasConnection.CloudFoundryInstance.ApiAddress);
-                }
-
-                // TODO: also save value of SkipSsl
+                _dataPersistenceService.WriteStringData(ConnectionNameKey, TasConnection.CloudFoundryInstance.InstanceName);
+                _dataPersistenceService.WriteStringData(ConnectionAddressKey, TasConnection.CloudFoundryInstance.ApiAddress);
+                _dataPersistenceService.WriteStringData(ConnectionSslPolicyKey,
+                    TasConnection.CloudFoundryInstance.SkipSslCertValidation ? SkipCertValidationValue : ValidateSslCertsValue);
             }
         }
 
@@ -424,6 +419,7 @@ namespace Tanzu.Toolkit.ViewModels
             TasConnection.CfClient.LogoutCfUser();
             _dataPersistenceService.ClearData(ConnectionNameKey);
             _dataPersistenceService.ClearData(ConnectionAddressKey);
+            _dataPersistenceService.ClearData(ConnectionSslPolicyKey);
             IsLoggedIn = false;
             TasConnection = null;
         }
