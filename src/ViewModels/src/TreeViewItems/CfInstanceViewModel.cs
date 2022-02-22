@@ -21,7 +21,7 @@ namespace Tanzu.Toolkit.ViewModels
         private volatile int _updatesInProgress = 0;
         private readonly object _loadingLock = new object();
 
-        public CfInstanceViewModel(CloudFoundryInstance cf, TasExplorerViewModel parentTasExplorer, IServiceProvider services, bool expanded = false)
+        public CfInstanceViewModel(CloudFoundryInstance cf, ITasExplorerViewModel parentTasExplorer, IServiceProvider services, bool expanded = false)
             : base(null, parentTasExplorer, services, expanded: expanded)
         {
             _dialogService = services.GetRequiredService<IErrorDialog>();

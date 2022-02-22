@@ -16,6 +16,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
     {
         private CfApiClient _sut;
         private MockHttpMessageHandler _mockHttp;
+        private readonly Uri _defaultApiAddressConfigValue = new Uri(_fakeCfApiAddress);
+        private readonly bool _defaultSkipCertValidationConfigValue = false;
 
         [TestInitialize]
         public void TestInit()
@@ -24,6 +26,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             _mockHttp = fakeHttpClientFactory.MockHttpMessageHandler;
             
             _sut = new CfApiClient(_fakeHttpClientFactory);
+            _sut.Configure(_defaultApiAddressConfigValue, _defaultSkipCertValidationConfigValue);
         }
 
         [TestCleanup]
@@ -721,6 +724,5 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Assert.AreEqual(1, _mockHttp.GetMatchCount(cfDeleteRouteRequest));
             Assert.IsNotNull(expectedException);
         }
-
     }
 }

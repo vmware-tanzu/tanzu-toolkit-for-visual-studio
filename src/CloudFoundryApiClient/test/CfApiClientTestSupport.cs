@@ -541,12 +541,16 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 
     public class FakeHttpClientFactory : IHttpClientFactory, IFakeHttpClientFactory
     {
+        public FakeHttpClientFactory()
+        {
+            MockHttpMessageHandler = new MockHttpMessageHandler();
+            MockHttpMessageHandler.Fallback.Throw(new InvalidOperationException("No matching mock handler"));
+        }
+
         public MockHttpMessageHandler MockHttpMessageHandler { get; private set; }
 
         public HttpClient CreateClient(string name)
         {
-            MockHttpMessageHandler = new MockHttpMessageHandler();
-            MockHttpMessageHandler.Fallback.Throw(new InvalidOperationException("No matching mock handler"));
             return MockHttpMessageHandler.ToHttpClient();
         }
     }
