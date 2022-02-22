@@ -33,6 +33,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             RenewMockServices();
 
+            _receivedEvents = new List<string>();
+            _fakeSelectedBuildpacks = new ObservableCollection<string> { _fakeBuildpackName1, _fakeBuildpackName2, _fakeBuildpackName3 };
+            var fakeTasConnection = new FakeCfInstanceViewModel(_fakeCfInstance, Services);
+
             // * return fake view/viewmodel for output window
             MockViewLocatorService.Setup(mock =>
                 mock.GetViewByViewModelName(nameof(OutputViewModel), null))
@@ -41,8 +45,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockFileService.Setup(m => m.FileExists(_fakeManifestPath)).Returns(true);
             MockFileService.Setup(m => m.DirectoryExists(_fakeProjectPath)).Returns(true);
             MockFileService.Setup(m => m.DirContainsFiles(_fakeProjectPath)).Returns(true);
-
-            _fakeSelectedBuildpacks = new ObservableCollection<string> { _fakeBuildpackName1, _fakeBuildpackName2, _fakeBuildpackName3 };
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(fakeTasConnection);
 
             _sut = new DeploymentDialogViewModel(Services, _fakeProjName, _fakeProjectPath, FakeTargetFrameworkMoniker)
             {
@@ -50,7 +53,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 SelectedBuildpacks = _fakeSelectedBuildpacks,
             };
 
-            _receivedEvents = new List<string>();
             _sut.PropertyChanged += (sender, e) =>
             {
                 _receivedEvents.Add(e.PropertyName);
@@ -141,9 +143,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ctor")]
         public void Constructor_SetsTargetNameToNull_WhenTasConnectionIsNull()
         {
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns((CfInstanceViewModel)null);
+
+            _sut = new DeploymentDialogViewModel(Services, _fakeProjName, _fakeProjectPath, FakeTargetFrameworkMoniker);
+
             // sanity check
             Assert.IsNull(_sut.TasExplorerViewModel.TasConnection);
-
             Assert.IsNull(_sut.TargetName);
         }
 
@@ -542,8 +547,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        public async Task UpdateCfOrgOptions_SetsCfOrgOptionsToEmptyList_WhenSelectedCfIsNull()
+        public async Task UpdateCfOrgOptions_SetsCfOrgOptionsToEmptyList_WhenTasConnectionIsNull()
         {
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns((CfInstanceViewModel)null);
+
+            _sut = new DeploymentDialogViewModel(Services, _fakeProjName, _fakeProjectPath, FakeTargetFrameworkMoniker);
+            _sut.PropertyChanged += (sender, e) =>
+            {
+                _receivedEvents.Add(e.PropertyName);
+            };
 
             await _sut.UpdateCfOrgOptions();
 
@@ -788,11 +800,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("OpenLoginView")]
         public void OpenLoginView_SetsIsLoggedInPropertyToTrue_WhenTasConnectionGetsSet()
         {
-            // pre-check
-            Assert.IsNull(_sut.TasExplorerViewModel.TasConnection);
-            Assert.IsFalse(_sut.IsLoggedIn);
-
-            //arrange
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns((CfInstanceViewModel)null);
             MockTasExplorerViewModel.Setup(m => m.
                 OpenLoginView(null))
                     .Callback(() =>
@@ -801,10 +809,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                             .Returns(new CfInstanceViewModel(FakeCfInstance, null, Services));
                     });
 
-            //act
+            _sut = new DeploymentDialogViewModel(Services, _fakeProjName, _fakeProjectPath, FakeTargetFrameworkMoniker);
+
+            Assert.IsNull(_sut.TasExplorerViewModel.TasConnection);
+            Assert.IsFalse(_sut.IsLoggedIn);
+
             _sut.OpenLoginView(null);
 
-            //assert
             Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
             Assert.IsTrue(_sut.IsLoggedIn);
         }
@@ -813,9 +824,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("OpenLoginView")]
         public void OpenLoginView_SetsTargetName_WhenTasConnectionIsNotNull()
         {
-            var initialTargetName = _sut.TargetName;
-            Assert.IsNull(_sut.TasExplorerViewModel.TasConnection);
-
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns((CfInstanceViewModel)null);
             MockTasExplorerViewModel.Setup(m => m.
                 OpenLoginView(null))
                     .Callback(() =>
@@ -823,6 +832,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                         MockTasExplorerViewModel.SetupGet(m => m.TasConnection)
                             .Returns(new CfInstanceViewModel(FakeCfInstance, null, Services));
                     });
+
+            _sut = new DeploymentDialogViewModel(Services, _fakeProjName, _fakeProjectPath, FakeTargetFrameworkMoniker);
+
+            var initialTargetName = _sut.TargetName;
+
+            Assert.IsNull(_sut.TasExplorerViewModel.TasConnection);
 
             _sut.OpenLoginView(null);
 
@@ -835,6 +850,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("OpenLoginView")]
         public void OpenLoginView_UpdatesCfOrgOptions_WhenTasConnectionGetsSet()
         {
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns((CfInstanceViewModel)null);
             MockTasExplorerViewModel.Setup(m => m.
                 OpenLoginView(null))
                     .Callback(() =>
@@ -842,6 +858,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                         MockTasExplorerViewModel.SetupGet(m => m.TasConnection)
                             .Returns(new CfInstanceViewModel(FakeCfInstance, null, Services));
                     });
+
+            _sut = new DeploymentDialogViewModel(Services, _fakeProjName, _fakeProjectPath, FakeTargetFrameworkMoniker);
 
             Assert.IsNull(_sut.TasExplorerViewModel.TasConnection);
 
@@ -856,6 +874,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("BuildpackOptions")]
         public void OpenLoginView_UpdatesBuildpackOptions_WhenTasConnectionGetsSet()
         {
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns((CfInstanceViewModel)null);
             MockTasExplorerViewModel.Setup(m => m.
                 OpenLoginView(null))
                     .Callback(() =>
@@ -863,6 +882,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                         MockTasExplorerViewModel.SetupGet(m => m.TasConnection)
                             .Returns(new CfInstanceViewModel(FakeCfInstance, null, Services));
                     });
+
+            _sut = new DeploymentDialogViewModel(Services, _fakeProjName, _fakeProjectPath, FakeTargetFrameworkMoniker);
 
             Assert.IsNull(_sut.TasExplorerViewModel.TasConnection);
 
@@ -877,6 +898,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("StackOptions")]
         public void OpenLoginView_UpdatesStackOptions_WhenTasConnectionGetsSet()
         {
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns((CfInstanceViewModel)null);
             MockTasExplorerViewModel.Setup(m => m.
                 OpenLoginView(null))
                     .Callback(() =>
@@ -884,6 +906,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                         MockTasExplorerViewModel.SetupGet(m => m.TasConnection)
                             .Returns(new CfInstanceViewModel(FakeCfInstance, null, Services));
                     });
+
+            _sut = new DeploymentDialogViewModel(Services, _fakeProjName, _fakeProjectPath, FakeTargetFrameworkMoniker);
 
             Assert.IsNull(_sut.TasExplorerViewModel.TasConnection);
 
@@ -909,6 +933,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("IsLoggedIn")]
         public void IsLoggedIn_ReturnsFalse_WhenTasConnectionIsNull()
         {
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns((CfInstanceViewModel)null);
+
+            _sut = new DeploymentDialogViewModel(Services, _fakeProjName, _fakeProjectPath, FakeTargetFrameworkMoniker);
+
             Assert.IsNull(_sut.TasExplorerViewModel.TasConnection);
             Assert.IsFalse(_sut.IsLoggedIn);
         }
@@ -917,6 +945,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("IsLoggedIn")]
         public void IsLoggedIn_SetterRaisesPropChangedEvent()
         {
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns((CfInstanceViewModel)null);
+
+            _sut = new DeploymentDialogViewModel(Services, _fakeProjName, _fakeProjectPath, FakeTargetFrameworkMoniker);
+            _sut.PropertyChanged += (sender, e) =>
+            {
+                _receivedEvents.Add(e.PropertyName);
+            };
+
             Assert.AreEqual(0, _receivedEvents.Count);
             Assert.IsFalse(_sut.IsLoggedIn);
 
@@ -1301,7 +1337,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsNotNull(_sut.DeploymentDirectoryPath);
             Assert.AreEqual(pathValInNewManifest, _sut.DeploymentDirectoryPath);
-            
+
             Assert.IsNotNull(_sut.DirectoryPathLabel);
             Assert.AreEqual(pathValInNewManifest, _sut.DirectoryPathLabel);
         }
@@ -1532,8 +1568,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("UpdateBuildpackOptions")]
         public async Task UpdateBuildpackOptions_SetsBuildpackOptionsToEmptyList_WhenNotLoggedIn()
         {
-            Assert.IsNull(_sut.TasExplorerViewModel.TasConnection);
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns((CfInstanceViewModel)null);
 
+            _sut = new DeploymentDialogViewModel(Services, _fakeProjName, _fakeProjectPath, FakeTargetFrameworkMoniker);
+            _sut.PropertyChanged += (sender, e) =>
+            {
+                _receivedEvents.Add(e.PropertyName);
+            };
+
+            Assert.IsNull(_sut.TasExplorerViewModel.TasConnection);
             CollectionAssert.DoesNotContain(_receivedEvents, "BuildpackOptions");
 
             await _sut.UpdateBuildpackOptions();
@@ -1828,8 +1871,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("UpdateStackOptions")]
         public async Task UpdateStackOptions_SetsStackOptionsToEmptyList_WhenNotLoggedIn()
         {
-            Assert.IsNull(_sut.TasExplorerViewModel.TasConnection);
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns((CfInstanceViewModel)null);
 
+            _sut = new DeploymentDialogViewModel(Services, _fakeProjName, _fakeProjectPath, FakeTargetFrameworkMoniker);
+            _sut.PropertyChanged += (sender, e) =>
+            {
+                _receivedEvents.Add(e.PropertyName);
+            };
+
+            Assert.IsNull(_sut.TasExplorerViewModel.TasConnection);
             CollectionAssert.DoesNotContain(_receivedEvents, "StackOptions");
 
             await _sut.UpdateStackOptions();

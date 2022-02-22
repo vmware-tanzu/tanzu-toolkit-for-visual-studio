@@ -1,10 +1,13 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Runtime.CompilerServices;
 using System.Security;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.ViewModels.SsoDialog;
+
+[assembly: InternalsVisibleTo("Tanzu.Toolkit.ViewModels.Tests")]
 
 namespace Tanzu.Toolkit.ViewModels
 {
@@ -176,7 +179,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public Func<bool> PasswordEmpty { get; set; }
 
-        internal ICloudFoundryService CfClient { get; private set; }
+        internal ICloudFoundryService CfClient { get; set; }
 
         public bool CanLogIn(object arg = null)
         {
@@ -340,7 +343,7 @@ namespace Tanzu.Toolkit.ViewModels
         
         private string GetTargetDisplayName()
         {
-            if (ConnectionName != null) return ConnectionName;
+            if (!string.IsNullOrWhiteSpace(ConnectionName)) return ConnectionName;
 
             var targetAddressValidUri = Uri.TryCreate(Target, UriKind.Absolute, out Uri uri);
             return targetAddressValidUri ? uri.Host : "Tanzu Application Service";

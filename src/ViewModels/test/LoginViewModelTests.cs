@@ -38,6 +38,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 GetPassword = () => { return FakeSecurePw; },
                 PasswordEmpty = () => { return false; },
                 SkipSsl = SkipSsl,
+                CfClient = MockCloudFoundryService.Object,
             };
 
             _receivedEvents = new List<string>();
@@ -322,8 +323,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("NavigateToAuthPage")]
-        public async Task NavigateToAuthPage_SetsPageNumberTo2_AndSetsSsoEnabledOnTargetToTrue_WhenSsoPromptSuccessfullyRetrieved()
+        [TestCategory("VerifyApiAddress")]
+        public async Task VerifyApiAddress_SetsPageNumberTo2_AndSetsSsoEnabledOnTargetToTrue_WhenSsoPromptSuccessfullyRetrieved()
         {
             var fakeSsoPrompt = "junk";
 
@@ -333,10 +334,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 Content = fakeSsoPrompt,
             };
 
-            MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.Target, _sut.ProceedWithInvalidCertificate))
+            MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.Target, _sut.SkipSsl))
                 .Returns(FakeSuccessDetailedResult);
 
-            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.Target, false))
+            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.Target, _sut.SkipSsl))
                 .ReturnsAsync(fakeSsoPromptResult);
 
             Assert.AreEqual(1, _sut.PageNum);
@@ -348,8 +349,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
         
         [TestMethod]
-        [TestCategory("NavigateToAuthPage")]
-        public async Task NavigateToAuthPage_SetsCertificateInvalidToTrue_WhenCertValidationFails()
+        [TestCategory("VerifyApiAddress")]
+        public async Task VerifyApiAddress_SetsCertificateInvalidToTrue_WhenCertValidationFails()
         {
             var fakeCertValidationResult = new DetailedResult
             {
@@ -357,7 +358,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 FailureType = FailureType.InvalidCertificate,
             };
 
-            MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.Target, _sut.ProceedWithInvalidCertificate))
+            MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.Target, _sut.SkipSsl))
                 .Returns(fakeCertValidationResult);
 
             Assert.AreEqual(1, _sut.PageNum);
@@ -369,8 +370,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("NavigateToAuthPage")]
-        public async Task NavigateToAuthPage_SetsPageNumberTo2_AndSetsSsoEnabledOnTargetToFalse_WhenSsoPromptAbsentFromResponse()
+        [TestCategory("VerifyApiAddress")]
+        public async Task VerifyApiAddress_SetsPageNumberTo2_AndSetsSsoEnabledOnTargetToFalse_WhenSsoPromptAbsentFromResponse()
         {
             var fakeCertValidationResult = new DetailedResult
             {
@@ -383,10 +384,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 FailureType = FailureType.MissingSsoPrompt,
             };
 
-            MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.Target, _sut.ProceedWithInvalidCertificate))
+            MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.Target, _sut.SkipSsl))
                 .Returns(fakeCertValidationResult);
 
-            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.Target, false))
+            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.Target, _sut.SkipSsl))
                 .ReturnsAsync(fakeSsoPromptResult);
 
             Assert.AreEqual(1, _sut.PageNum);
@@ -398,8 +399,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("NavigateToAuthPage")]
-        public async Task NavigateToAuthPage_DoesNotChangePageNumber_AndSetsApiAddressError_WhenSsoPromptRequestFails()
+        [TestCategory("VerifyApiAddress")]
+        public async Task VerifyApiAddress_DoesNotChangePageNumber_AndSetsApiAddressError_WhenSsoPromptRequestFails()
         {
             var fakeCertValidationResult = new DetailedResult
             {
@@ -412,10 +413,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 FailureType = FailureType.None,
             };
 
-            MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.Target, _sut.ProceedWithInvalidCertificate))
+            MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.Target, _sut.SkipSsl))
                 .Returns(fakeCertValidationResult);
 
-            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.Target, false))
+            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.Target, _sut.SkipSsl))
                 .ReturnsAsync(fakeSsoPromptResult);
 
             Assert.AreEqual(1, _sut.PageNum);

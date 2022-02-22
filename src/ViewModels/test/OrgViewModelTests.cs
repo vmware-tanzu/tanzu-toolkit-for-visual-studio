@@ -15,7 +15,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
     {
         private OrgViewModel _sut;
         private List<string> _receivedEvents;
-        private TasExplorerViewModel _fakeTasExplorerViewModel;
         private CfInstanceViewModel _fakeCfInstanceViewModel;
         private CloudFoundryOrganization _expectedOrg;
         private bool _expectedSkipSslValue = false;
@@ -35,6 +34,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public void TestInit()
         {
             RenewMockServices();
+
+            _fakeCfInstanceViewModel = new CfInstanceViewModel(FakeCfInstance, MockTasExplorerViewModel.Object, Services, expanded: true);
+            _receivedEvents = new List<string>();
 
             MockUiDispatcherService.Setup(mock => mock.
                 RunOnUiThreadAsync(It.IsAny<Action>()))
@@ -58,11 +60,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     collection.Add(item);
                 });
 
-            _fakeTasExplorerViewModel = new TasExplorerViewModel(Services);
-            _fakeCfInstanceViewModel = new CfInstanceViewModel(FakeCfInstance, _fakeTasExplorerViewModel, Services, expanded: true);
-            _sut = new OrgViewModel(FakeCfOrg, _fakeCfInstanceViewModel, _fakeTasExplorerViewModel, Services, expanded: true);
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(_fakeCfInstanceViewModel);
 
-            _receivedEvents = new List<string>();
+            _sut = new OrgViewModel(FakeCfOrg, _fakeCfInstanceViewModel, MockTasExplorerViewModel.Object, Services, expanded: true);
+
             _sut.PropertyChanged += (sender, e) =>
             {
                 _receivedEvents.Add(e.PropertyName);
@@ -109,7 +110,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ctor")]
         public void Constructor_SetsParentTasExplorer()
         {
-            Assert.AreEqual(_fakeTasExplorerViewModel, _sut.ParentTasExplorer);
+            Assert.AreEqual(MockTasExplorerViewModel.Object, _sut.ParentTasExplorer);
         }
 
         [TestMethod]
@@ -119,10 +120,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             /** mock 4 initial children */
             _sut.Children = new ObservableCollection<TreeViewItemViewModel>
             {
-                new SpaceViewModel(FakeSpaces[0], _sut, _fakeTasExplorerViewModel, Services),
-                new SpaceViewModel(FakeSpaces[1], _sut, _fakeTasExplorerViewModel, Services),
-                new SpaceViewModel(FakeSpaces[2], _sut, _fakeTasExplorerViewModel, Services),
-                new SpaceViewModel(FakeSpaces[3], _sut, _fakeTasExplorerViewModel, Services),
+                new SpaceViewModel(FakeSpaces[0], _sut, MockTasExplorerViewModel.Object, Services),
+                new SpaceViewModel(FakeSpaces[1], _sut, MockTasExplorerViewModel.Object, Services),
+                new SpaceViewModel(FakeSpaces[2], _sut, MockTasExplorerViewModel.Object, Services),
+                new SpaceViewModel(FakeSpaces[3], _sut, MockTasExplorerViewModel.Object, Services),
             };
 
             /** mock retrieving all initial children except for FakeSpaces[3] */
@@ -150,8 +151,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             /** mock 2 initial children */
             _sut.Children = new ObservableCollection<TreeViewItemViewModel>
             {
-                new SpaceViewModel(FakeSpaces[0], _sut, _fakeTasExplorerViewModel, Services),
-                new SpaceViewModel(FakeSpaces[1], _sut, _fakeTasExplorerViewModel, Services),
+                new SpaceViewModel(FakeSpaces[0], _sut, MockTasExplorerViewModel.Object, Services),
+                new SpaceViewModel(FakeSpaces[1], _sut, MockTasExplorerViewModel.Object, Services),
             };
 
             /** mock retrieving all initial children plus FakeSpaces[2] */
@@ -209,8 +210,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             /** mock 2 initial children */
             var initialChildren = new ObservableCollection<TreeViewItemViewModel>
             {
-                new SpaceViewModel(FakeSpaces[0], _sut, _fakeTasExplorerViewModel, Services),
-                new SpaceViewModel(FakeSpaces[1], _sut, _fakeTasExplorerViewModel, Services),
+                new SpaceViewModel(FakeSpaces[0], _sut, MockTasExplorerViewModel.Object, Services),
+                new SpaceViewModel(FakeSpaces[1], _sut, MockTasExplorerViewModel.Object, Services),
             };
             _sut.Children = new ObservableCollection<TreeViewItemViewModel>(initialChildren);
 
@@ -254,9 +255,17 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("UpdateAllChildren")]
         public async Task UpdateAllChildren_RemovesEmptyPlaceholder_WhenSpacesRequestReturnsSpaces()
         {
-            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
+            _sut = new OrgViewModel(FakeCfOrg, _fakeCfInstanceViewModel, MockTasExplorerViewModel.Object, Services, expanded: true)
             {
-                _sut.EmptyPlaceholder,
+                Children = new ObservableCollection<TreeViewItemViewModel>
+                {
+                    _sut.EmptyPlaceholder,
+                },
+            };
+
+            var fakeFailedResult = new DetailedResult<List<CloudFoundrySpace>>(succeeded: false, content: null, explanation: "junk", cmdDetails: FakeFailureCmdResult)
+            {
+                FailureType = FailureType.InvalidRefreshToken,
             };
 
             /** mock 3 new children */
@@ -265,7 +274,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 .ReturnsAsync(_fakeSpacesResponse);
 
             Assert.AreEqual(1, _sut.Children.Count);
-            Assert.IsTrue(_sut.Children[0].Equals(_sut.EmptyPlaceholder));
+            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
+            Assert.AreEqual(_sut.EmptyPlaceholder.GetType(), _sut.Children[0].GetType());
+            Assert.AreEqual(_sut.EmptyPlaceholder.DisplayText, _sut.Children[0].DisplayText);
 
             await _sut.UpdateAllChildren();
 
@@ -283,8 +294,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             /** mock 2 initial children */
             _sut.Children = new ObservableCollection<TreeViewItemViewModel>
             {
-                new SpaceViewModel(FakeSpaces[0], _sut, _fakeTasExplorerViewModel, Services),
-                new SpaceViewModel(FakeSpaces[1], _sut, _fakeTasExplorerViewModel, Services),
+                new SpaceViewModel(FakeSpaces[0], _sut, MockTasExplorerViewModel.Object, Services),
+                new SpaceViewModel(FakeSpaces[1], _sut, MockTasExplorerViewModel.Object, Services),
             };
 
             MockCloudFoundryService.Setup(m => m
@@ -316,6 +327,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockCloudFoundryService.Setup(m => m
               .GetSpacesForOrgAsync(_expectedOrg, _expectedSkipSslValue, _expectedRetryAmount))
                 .ReturnsAsync(fakeInvalidTokenResponse);
+            MockTasExplorerViewModel.SetupSet(m => m.AuthenticationRequired = true).Verifiable();
 
             Assert.IsTrue(_sut.IsExpanded);
             Assert.IsFalse(_sut.ParentTasExplorer.AuthenticationRequired);
@@ -324,7 +336,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsFalse(_sut.IsLoading);
             Assert.IsFalse(_sut.IsExpanded);
-            Assert.IsTrue(_sut.ParentTasExplorer.AuthenticationRequired);
+            MockTasExplorerViewModel.VerifyAll();
         }
 
         [TestMethod]

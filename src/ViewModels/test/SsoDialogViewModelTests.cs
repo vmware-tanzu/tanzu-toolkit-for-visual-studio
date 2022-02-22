@@ -1,8 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using System;
 using System.Threading.Tasks;
-using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.ViewModels.SsoDialog;
 
 namespace Tanzu.Toolkit.ViewModels.Tests
@@ -11,13 +9,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
     public class SsoDialogViewModelTests : ViewModelTestSupport
     {
         private SsoDialogViewModel _sut;
+        private FakeCfInstanceViewModel _fakeCfInstanceViewModel;
 
         [TestInitialize]
         public void TestInit()
         {
             RenewMockServices();
 
-            _sut = new SsoDialogViewModel(TODO, Services)
+            _fakeCfInstanceViewModel = new FakeCfInstanceViewModel(FakeCfInstance, Services);
+            _sut = new SsoDialogViewModel(MockTasExplorerViewModel.Object, Services)
             {
                 ApiAddress = FakeCfApiAddress,
             };
@@ -66,6 +66,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             const string fakePasscode = "fake sso passcode!";
 
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(_fakeCfInstanceViewModel);
+
             MockCloudFoundryService.Setup(m => m.LoginWithSsoPasscode(_sut.ApiAddress, fakePasscode))
                 .ReturnsAsync(FakeFailureDetailedResult);
 
@@ -88,6 +90,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             const string fakePasscode = "fake sso passcode!";
             object fakeSsoDialogWindow = new object();
             var fakeParentViewModel = MockLoginViewModel.Object;
+
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(_fakeCfInstanceViewModel);
 
             MockCloudFoundryService.Setup(m => m.LoginWithSsoPasscode(_sut.ApiAddress, fakePasscode))
                 .ReturnsAsync(FakeSuccessDetailedResult);

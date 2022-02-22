@@ -500,13 +500,11 @@ namespace Tanzu.Toolkit.ViewModels
         {
             if (TasExplorerViewModel.TasConnection == null)
             {
-
                 CfOrgOptions = new List<CloudFoundryOrganization>();
             }
             else
             {
                 var orgsResponse = await TasExplorerViewModel.TasConnection.CfClient.GetOrgsForCfInstanceAsync(TasExplorerViewModel.TasConnection.CloudFoundryInstance);
-
                 if (orgsResponse.Succeeded)
                 {
                     CfOrgOptions = orgsResponse.Content;

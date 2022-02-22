@@ -32,11 +32,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                         action();
                     });
 
-            _sut = new TasExplorerViewModel(Services);
             _receivedEvents = new List<string>();
             _fakeTasConnection = new FakeCfInstanceViewModel(FakeCfInstance, Services);
 
-            _sut = new TasExplorerViewModel(Services);
+            _sut = new TasExplorerViewModel(Services)
+            {
+                TasConnection = _fakeTasConnection,
+            };
             _sut.PropertyChanged += (sender, e) =>
             {
                 _receivedEvents.Add(e.PropertyName);
@@ -80,9 +82,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("Ctor")]
         public void Ctor_SetsTasConnectionToNull_WhenAccessTokenIrretrievable()
         {
+            MockDataPersistenceService.Setup(m => m.SavedCfCredsExist()).Returns(false);
             MockDataPersistenceService.Setup(m => m.ReadStringData(TasExplorerViewModel.ConnectionNameKey)).Returns("junk non-null value");
             MockDataPersistenceService.Setup(m => m.ReadStringData(TasExplorerViewModel.ConnectionAddressKey)).Returns("junk non-null value");
-            MockDataPersistenceService.Setup(m => m.SavedCfCredsExist()).Returns(true);
+            MockDataPersistenceService.Setup(m => m.ReadStringData(TasExplorerViewModel.ConnectionSslPolicyKey)).Returns("junk non-null value");
 
             _sut = new TasExplorerViewModel(Services);
 
@@ -215,6 +218,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("OpenLoginView")]
         public void OpenLoginView_DisplaysLoginDialog_WhenTasConnectionIsNull()
         {
+            _sut = new TasExplorerViewModel(Services);
+
             Assert.IsNull(_sut.TasConnection);
 
             _sut.OpenLoginView(null);
@@ -444,7 +449,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("RefreshAllItems")]
         public void RefreshAllItems_SetsIsRefreshingAllFalse_WhenTasConnectionNull()
         {
-            _sut.IsRefreshingAll = true;
+            _sut = new TasExplorerViewModel(Services)
+            {
+                IsRefreshingAll = true
+            };
 
             Assert.IsNull(_sut.TasConnection);
             Assert.IsTrue(_sut.IsRefreshingAll);
@@ -453,11 +461,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsFalse(_sut.IsRefreshingAll);
         }
-        
+
         [TestMethod]
         [TestCategory("RefreshAllItems")]
         public void RefreshAllItems_SetsThreadServiceIsPollingFalse_WhenTasConnectionNull()
         {
+            _sut = new TasExplorerViewModel(Services);
+
             MockThreadingService.SetupSet(mock => mock.IsPolling = false).Verifiable();
 
             Assert.IsNull(_sut.TasConnection);
@@ -466,7 +476,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             MockThreadingService.VerifyAll();
         }
-        
+
         [TestMethod]
         [TestCategory("RefreshAllItems")]
         public void RefreshAllItems_SetsIsRefreshingAllTrue_WhenNotPreviouslyRefreshingAll_AndTasConnectionNotNull()
@@ -475,12 +485,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsNotNull(_sut.TasConnection);
             Assert.IsFalse(_sut.IsRefreshingAll);
-            
+
             _sut.RefreshAllItems();
-            
+
             Assert.IsTrue(_sut.IsRefreshingAll);
         }
-        
+
         [TestMethod]
         [TestCategory("RefreshAllItems")]
         public void RefreshAllItems_StartsBackgroundTaskToRefreshAllItems_WhenNotPreviouslyRefreshingAll_AndTasConnectionNotNull()
@@ -651,7 +661,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public void LogOutTas_ClearsConnectionCache()
         {
             _sut.TasConnection = _fakeTasConnection;
-         
+
             _sut.LogOutTas(_sut.TasConnection);
 
             MockDataPersistenceService.Verify(m => m.ClearData(TasExplorerViewModel.ConnectionNameKey), Times.Once);
@@ -674,6 +684,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("SetConnection")]
         public void SetConnection_UpdatesTasConnection_WithNewCfInfo_WhenTasConnectionIsNull()
         {
+            _sut = new TasExplorerViewModel(Services);
+
             Assert.IsNull(_sut.TasConnection);
 
             _sut.SetConnection(FakeCfInstance);
@@ -686,7 +698,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("SetConnection")]
         public void SetConnection_SetsAuthenticationRequiredToFalse_WhenTasConnectionIsNull()
         {
-            _sut.AuthenticationRequired = true;
+            _sut = new TasExplorerViewModel(Services)
+            {
+                AuthenticationRequired = true
+            };
+            _sut.PropertyChanged += (sender, e) =>
+            {
+                _receivedEvents.Add(e.PropertyName);
+            };
             _receivedEvents.Clear();
 
             Assert.IsNull(_sut.TasConnection);
@@ -704,6 +723,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("SetConnection")]
         public void SetConnection_StartsBackgroundRefreshTask_WhenTasConnectionIsNull()
         {
+            _sut = new TasExplorerViewModel(Services);
+
             Assert.IsNull(_sut.TasConnection);
 
             _sut.SetConnection(FakeCfInstance);
@@ -715,6 +736,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("SetConnection")]
         public void SetConnection_SavesConnectionName_WhenTasConnectionIsNull()
         {
+            _sut = new TasExplorerViewModel(Services);
+
             Assert.IsNull(_sut.TasConnection);
 
             _sut.SetConnection(FakeCfInstance);
@@ -726,19 +749,23 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("SetConnection")]
         public void SetConnection_SavesConnectionApiAddress_WhenTasConnectionIsNull()
         {
+            _sut = new TasExplorerViewModel(Services);
+
             Assert.IsNull(_sut.TasConnection);
 
             _sut.SetConnection(FakeCfInstance);
 
             MockDataPersistenceService.Verify(m => m.WriteStringData(TasExplorerViewModel.ConnectionAddressKey, FakeCfInstance.ApiAddress), Times.Once);
         }
-        
+
         [TestMethod]
         [TestCategory("SetConnection")]
         [DataRow(true, TasExplorerViewModel.SkipCertValidationValue)]
         [DataRow(false, TasExplorerViewModel.ValidateSslCertsValue)]
         public void SetConnection_SavesConnectionSslCertValidationPolicy_WhenTasConnectionIsNull(bool skipSslValue, string expectedSavedSslPolicyValue)
         {
+            _sut = new TasExplorerViewModel(Services);
+
             Assert.IsNull(_sut.TasConnection);
 
             FakeCfInstance.SkipSslCertValidation = skipSslValue;
@@ -746,7 +773,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             MockDataPersistenceService.Verify(m => m.WriteStringData(TasExplorerViewModel.ConnectionSslPolicyKey, expectedSavedSslPolicyValue), Times.Once);
         }
-        
+
         [TestMethod]
         [TestCategory("SetConnection")]
         public void SetConnection_DoesNotChangeTasConnection_WhenTasConnectionIsNotNull()
@@ -1031,7 +1058,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 .Verifiable();
 
             Assert.IsFalse(_sut.AuthenticationRequired);
-            
+
             await _sut.StreamAppLogsAsync(FakeCfApp);
 
             Assert.IsTrue(_sut.AuthenticationRequired);

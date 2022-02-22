@@ -19,7 +19,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.AreSame(Services, vm.Services);
             Assert.IsNotNull(vm.DialogService);
             Assert.IsNotNull(vm.ViewLocatorService);
-            Assert.IsNotNull(vm.CloudFoundryService);
             Assert.IsNull(vm.ActiveView);
         }
     }
