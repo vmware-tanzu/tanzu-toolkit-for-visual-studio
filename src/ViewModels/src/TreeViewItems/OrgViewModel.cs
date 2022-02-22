@@ -22,7 +22,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public CloudFoundryOrganization Org { get; }
 
-        public OrgViewModel(CloudFoundryOrganization org, CfInstanceViewModel parentCfInstanceViewModel, TasExplorerViewModel parentTasExplorer, IServiceProvider services, bool expanded = false)
+        public OrgViewModel(CloudFoundryOrganization org, CfInstanceViewModel parentCfInstanceViewModel, ITasExplorerViewModel parentTasExplorer, IServiceProvider services, bool expanded = false)
             : base(parentCfInstanceViewModel, parentTasExplorer, services, expanded: expanded)
         {
             _dialogService = services.GetRequiredService<IErrorDialog>();

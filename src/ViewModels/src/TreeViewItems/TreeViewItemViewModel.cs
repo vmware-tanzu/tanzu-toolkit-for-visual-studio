@@ -17,7 +17,7 @@ namespace Tanzu.Toolkit.ViewModels
         private bool _isLoading;
         private IThreadingService _threadingService;
 
-        protected TreeViewItemViewModel(TreeViewItemViewModel parent, TasExplorerViewModel parentTasExplorer, IServiceProvider services, bool childless = false, bool expanded = false)
+        protected TreeViewItemViewModel(TreeViewItemViewModel parent, ITasExplorerViewModel parentTasExplorer, IServiceProvider services, bool childless = false, bool expanded = false)
             : base(services)
         {
             _parent = parent;
@@ -128,7 +128,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public TasExplorerViewModel ParentTasExplorer { get; set; }
+        public ITasExplorerViewModel ParentTasExplorer { get; set; }
 
         public TreeViewItemViewModel Parent
         {

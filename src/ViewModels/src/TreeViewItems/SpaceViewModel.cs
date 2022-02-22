@@ -21,7 +21,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public CloudFoundrySpace Space { get; }
 
-        public SpaceViewModel(CloudFoundrySpace space, OrgViewModel parentOrgViewModel, TasExplorerViewModel parentTasExplorer, IServiceProvider services, bool expanded = false)
+        public SpaceViewModel(CloudFoundrySpace space, OrgViewModel parentOrgViewModel, ITasExplorerViewModel parentTasExplorer, IServiceProvider services, bool expanded = false)
             : base(parentOrgViewModel, parentTasExplorer, services, expanded: expanded)
         {
             _dialogService = services.GetRequiredService<IErrorDialog>();
