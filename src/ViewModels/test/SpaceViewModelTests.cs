@@ -194,7 +194,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsFalse(_sut.IsLoading);
 
             MockErrorDialogService.Verify(mock => mock.
-              DisplayErrorDialog(SpaceViewModel._getAppsFailureMsg, fakeFailedResult.Explanation),
+              DisplayWarningDialog(SpaceViewModel._getAppsFailureMsg, fakeFailedResult.Explanation),
                 Times.Once);
         }
 

@@ -56,7 +56,7 @@ namespace Tanzu.Toolkit.ViewModels.AppDeletionConfirmation
             catch (Exception ex)
             {
                 Logger.Error(_deleteAppErrorMsg + " {AppName}. {AppDeletionException}", CfApp.AppName, ex.Message);
-                _errorDialogService.DisplayErrorDialog($"{_deleteAppErrorMsg} {CfApp.AppName}.", $"Something unexpected happened while deleting {CfApp.AppName}");
+                _errorDialogService.DisplayWarningDialog($"{_deleteAppErrorMsg} {CfApp.AppName}.", $"Something unexpected happened while deleting {CfApp.AppName}");
             }
 
             CfApp = null;
