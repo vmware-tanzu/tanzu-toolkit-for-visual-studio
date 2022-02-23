@@ -36,6 +36,7 @@ namespace Tanzu.Toolkit.ViewModels
         {
             _tasExplorer = services.GetRequiredService<ITasExplorerViewModel>();
             _ssoDialog = services.GetRequiredService<ISsoDialogViewModel>();
+            CfClient = Services.GetRequiredService<ICloudFoundryService>();
         }
 
         public string ConnectionName { get; set; }
@@ -196,7 +197,6 @@ namespace Tanzu.Toolkit.ViewModels
             VerifyingApiAddress = true;
 
             var candidateCf = new CloudFoundryInstance(GetTargetDisplayName(), Target, SkipSsl);
-            CfClient = Services.GetRequiredService<ICloudFoundryService>();
             CfClient.ConfigureForCf(candidateCf);
 
             var certTestResult = CfClient.VerfiyNewApiConnection(Target, SkipSsl);
