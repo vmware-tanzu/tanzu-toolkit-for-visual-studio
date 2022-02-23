@@ -27,6 +27,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             RenewMockServices();
 
+            _receivedEvents = new List<string>();
             FakeSecurePw = new NetworkCredential("", FakePwStr).SecurePassword;
 
             _sut = new LoginViewModel(Services)
@@ -41,11 +42,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 CfClient = MockCloudFoundryService.Object,
             };
 
-            _receivedEvents = new List<string>();
             _sut.PropertyChanged += (sender, e) =>
             {
                 _receivedEvents.Add(e.PropertyName);
             };
+
+            _sut.CfClient.ConfigureForCf(FakeCfInstance);
         }
 
         [TestCleanup]
