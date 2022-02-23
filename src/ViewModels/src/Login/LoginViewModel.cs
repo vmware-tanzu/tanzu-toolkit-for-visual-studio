@@ -164,17 +164,6 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public bool ProceedWithInvalidCertificate
-        {
-            get => _proceedWithInvalidCertificate;
-
-            set
-            {
-                _proceedWithInvalidCertificate = value;
-                RaisePropertyChangedEvent("ProceedWithInvalidCertificate");
-            }
-        }
-
         public Func<SecureString> GetPassword { get; set; }
 
         public Action ClearPassword { get; set; }
@@ -255,7 +244,7 @@ namespace Tanzu.Toolkit.ViewModels
                 return;
             }
 
-            var result = await CfClient.LoginWithCredentials(Target, Username, GetPassword(), skipSsl: ProceedWithInvalidCertificate);
+            var result = await CfClient.LoginWithCredentials(Target, Username, GetPassword(), SkipSsl);
 
             if (result.Succeeded)
             {
@@ -329,7 +318,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool CanProceedToAuthentication(object arg = null)
         {
-            bool certValidOrBypassed = !CertificateInvalid || (CertificateInvalid && ProceedWithInvalidCertificate);
+            bool certValidOrBypassed = !CertificateInvalid || (CertificateInvalid && SkipSsl);
             return ApiAddressIsValid && !string.IsNullOrWhiteSpace(Target) && certValidOrBypassed;
         }
 
@@ -337,7 +326,6 @@ namespace Tanzu.Toolkit.ViewModels
         {
             // reset invalid cert warning
             CertificateInvalid = false;
-            ProceedWithInvalidCertificate = false;
 
             // clear previous creds
             Username = null;
