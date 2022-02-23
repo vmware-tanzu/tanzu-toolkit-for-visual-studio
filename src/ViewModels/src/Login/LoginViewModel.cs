@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Security;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
+using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.ViewModels.SsoDialog;
 
@@ -194,49 +195,54 @@ namespace Tanzu.Toolkit.ViewModels
 
         public async Task VerifyApiAddress(object arg = null)
         {
+            void Fail(FailureType failureType = FailureType.None)
+            {
+                switch (failureType)
+                {
+                    case FailureType.InvalidCertificate:
+                        CertificateInvalid = true;
+                        break;
+                    case FailureType.MissingSsoPrompt:
+                        SsoEnabledOnTarget = false;
+                        PageNum = 2;
+                        break;
+                    default:
+                        ApiAddressError = $"Unable to establish a connection with {Target}";
+                        ApiAddressIsValid = false;
+                        break;
+                }
+
+                VerifyingApiAddress = false;
+            }
+
             VerifyingApiAddress = true;
 
             var candidateCf = new CloudFoundryInstance(GetTargetDisplayName(), Target, SkipSsl);
-            CfClient.ConfigureForCf(candidateCf);
+            var newCfClient = Services.GetRequiredService<ICloudFoundryService>();
+            var successfullyTargetedCf = newCfClient.ConfigureForCf(candidateCf).Succeeded;
+            if (!successfullyTargetedCf)
+            {
+                Fail();
+                return;
+            }
 
+            CfClient = newCfClient;
             var certTestResult = CfClient.VerfiyNewApiConnection(Target, SkipSsl);
-            if (certTestResult.Succeeded)
+            if (!certTestResult.Succeeded)
             {
-                var ssoPromptResult = await CfClient.GetSsoPrompt(Target, SkipSsl);
-                if (ssoPromptResult.Succeeded)
-                {
-                    SsoEnabledOnTarget = true;
-                    PageNum = 2;
-                }
-                else
-                {
-                    switch (ssoPromptResult.FailureType)
-                    {
-                        case Toolkit.Services.FailureType.MissingSsoPrompt:
-                            SsoEnabledOnTarget = false;
-                            PageNum = 2;
-                            break;
-
-                        default:
-                            ApiAddressError = $"Unable to establish a connection with {Target}";
-                            ApiAddressIsValid = false;
-                            break;
-                    }
-                }
-            }
-            else
-            {
-                if (certTestResult.FailureType == Toolkit.Services.FailureType.InvalidCertificate)
-                {
-                    CertificateInvalid = true;
-                }
-                else
-                {
-                    ApiAddressError = $"Unable to establish a connection with {Target}";
-                    ApiAddressIsValid = false;
-                }
+                Fail(certTestResult.FailureType);
+                return;
             }
 
+            var ssoPromptResult = await CfClient.GetSsoPrompt(Target, SkipSsl);
+            if (!ssoPromptResult.Succeeded && ssoPromptResult.FailureType != FailureType.MissingSsoPrompt)
+            {
+                Fail(ssoPromptResult.FailureType);
+                return;
+            }
+
+            SsoEnabledOnTarget = ssoPromptResult.Succeeded;
+            PageNum = 2;
             VerifyingApiAddress = false;
         }
 
@@ -340,7 +346,7 @@ namespace Tanzu.Toolkit.ViewModels
             // clear previous errors
             ErrorMessage = null;
         }
-        
+
         private string GetTargetDisplayName()
         {
             if (!string.IsNullOrWhiteSpace(ConnectionName)) return ConnectionName;
