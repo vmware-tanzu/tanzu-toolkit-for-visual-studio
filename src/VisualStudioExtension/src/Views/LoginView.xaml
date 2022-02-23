@@ -79,7 +79,6 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
                 <TextBox
@@ -168,15 +167,13 @@
                         Text="Valid certificate not detected"/>
                 </StackPanel>
 
-                <StackPanel Name="CertBypassCheckbox"
-                            Grid.Row="5"
-                            Visibility="{Binding CertificateInvalid, Converter={StaticResource CollapsedVisibility}}"
-                            Orientation="Horizontal">
-                    <CheckBox
-                        Margin="4,0"
-                        IsChecked="{Binding Path=ProceedWithInvalidCertificate, Mode=TwoWay}"
-                        Content="Continue without valid certificate"/>
-                </StackPanel>
+                <CheckBox
+                    Name="SkipSslCertValidation"
+                    Grid.Row="5"
+                    HorizontalAlignment="Right"
+                    Margin="8"
+                    IsChecked="{Binding Path=SkipSsl, Mode=TwoWay}"
+                    Content="Skip ssl certificate validation"/>
 
             </Grid>
 
