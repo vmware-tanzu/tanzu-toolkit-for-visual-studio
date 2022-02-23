@@ -127,7 +127,7 @@ namespace Tanzu.Toolkit.ViewModels
                     catch (Exception ex)
                     {
                         Logger.Error("Caught exception trying to load spaces in OrgViewModel: {OrgViewModelLoadingException}", ex);
-                        _dialogService.DisplayErrorDialog(_getSpacesFailureMsg, "Something went wrong while loading spaces; try disconnecting & logging in again.\nIf this issue persists, please contact dotnetdevx@groups.vmware.com");
+                        _dialogService.DisplayWarningDialog(_getSpacesFailureMsg, "Something went wrong while loading spaces; try disconnecting & logging in again.\nIf this issue persists, please contact dotnetdevx@groups.vmware.com");
                     }
                     finally
                     {

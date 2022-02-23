@@ -1014,7 +1014,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var initialAppName = _sut.AppName;
 
             MockErrorDialogService.Setup(m => m.
-                DisplayErrorDialog(DeploymentDialogViewModel.ManifestNotFoundTitle, It.Is<string>(s => s.Contains(pathToNonexistentManifest) && s.Contains("does not appear to be a valid path to a manifest"))))
+                DisplayWarningDialog(DeploymentDialogViewModel.ManifestNotFoundTitle, It.Is<string>(s => s.Contains(pathToNonexistentManifest) && s.Contains("does not appear to be a valid path to a manifest"))))
                     .Verifiable();
 
             _sut.ManifestPath = pathToNonexistentManifest;
@@ -1211,7 +1211,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.ManifestPath = pathToNonexistentManifest;
 
             Assert.AreEqual(initialBuildpack, _sut.SelectedBuildpacks);
-            MockErrorDialogService.Verify(m => m.DisplayErrorDialog(DeploymentDialogViewModel.ManifestNotFoundTitle, It.Is<string>(s => s.Contains(pathToNonexistentManifest) && s.Contains("does not appear to be a valid path to a manifest"))), Times.Once);
+            MockErrorDialogService.Verify(m => m.DisplayWarningDialog(DeploymentDialogViewModel.ManifestNotFoundTitle, It.Is<string>(s => s.Contains(pathToNonexistentManifest) && s.Contains("does not appear to be a valid path to a manifest"))), Times.Once);
         }
 
         [TestMethod]
@@ -1496,7 +1496,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsNull(_sut.ManifestModel.Applications[0].Path);
 
             MockErrorDialogService.Verify(
-                m => m.DisplayErrorDialog(DeploymentDialogViewModel.DirectoryNotFoundTitle, It.Is<string>(s => s.Contains(fakePath) && s.Contains("does not appear to be a valid path"))),
+                m => m.DisplayWarningDialog(DeploymentDialogViewModel.DirectoryNotFoundTitle, It.Is<string>(s => s.Contains(fakePath) && s.Contains("does not appear to be a valid path"))),
                 Times.Once);
         }
 

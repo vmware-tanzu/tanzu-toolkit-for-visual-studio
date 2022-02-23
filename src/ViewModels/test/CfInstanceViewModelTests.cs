@@ -348,7 +348,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("UpdateAllChildren")]
-        public async Task UpdateAllChildren_DisplaysAndLogsErrors_ForAllCaughtExceptions()
+        public async Task UpdateAllChildren_DisplaysWarning_AndLogsError_ForAllCaughtExceptions()
         {
             var fakeException = new Exception(":(");
 
@@ -361,7 +361,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 .Verifiable();
 
             MockErrorDialogService.Setup(m => m
-              .DisplayErrorDialog(
+              .DisplayWarningDialog(
                 CfInstanceViewModel._getOrgsFailureMsg,
                 It.Is<string>(s => s.Contains("try disconnecting & logging in again")&& s.Contains("If this issue persists, please contact dotnetdevx@groups.vmware.com"))))
                 .Verifiable();

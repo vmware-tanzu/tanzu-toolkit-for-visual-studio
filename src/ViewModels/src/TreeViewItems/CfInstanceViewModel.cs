@@ -126,7 +126,7 @@ namespace Tanzu.Toolkit.ViewModels
                     catch (Exception ex)
                     {
                         Logger.Error("Caught exception trying to load orgs in CfInstanceViewModel: {CfInstanceViewModelLoadingException}", ex);
-                        _dialogService.DisplayErrorDialog(_getOrgsFailureMsg, "Something went wrong while loading organizations; try disconnecting & logging in again.\nIf this issue persists, please contact dotnetdevx@groups.vmware.com");
+                        _dialogService.DisplayWarningDialog(_getOrgsFailureMsg, "Something went wrong while loading organizations; try disconnecting & logging in again.\nIf this issue persists, please contact dotnetdevx@groups.vmware.com");
                     }
                     finally
                     {

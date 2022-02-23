@@ -131,7 +131,7 @@ namespace Tanzu.Toolkit.ViewModels
                     catch (Exception ex)
                     {
                         Logger.Error("Caught exception trying to load apps in SpaceViewModel: {SpaceViewModelLoadingException}", ex);
-                        _dialogService.DisplayErrorDialog(_getAppsFailureMsg, "Something went wrong while loading apps; try disconnecting & logging in again.\nIf this issue persists, please contact dotnetdevx@groups.vmware.com");
+                        _dialogService.DisplayWarningDialog(_getAppsFailureMsg, "Something went wrong while loading apps; try disconnecting & logging in again.\nIf this issue persists, please contact dotnetdevx@groups.vmware.com");
                     }
                     finally
                     {

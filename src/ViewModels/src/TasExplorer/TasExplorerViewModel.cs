@@ -285,7 +285,7 @@ namespace Tanzu.Toolkit.ViewModels
                     }
 
                     Logger.Error($"Unable to retrieve recent logs for {cfApp.AppName}. {recentLogsResult.Explanation}. {recentLogsResult.CmdResult}");
-                    _errorDialogService.DisplayErrorDialog($"Unable to retrieve recent logs for {cfApp.AppName}.", recentLogsResult.Explanation);
+                    _errorDialogService.DisplayWarningDialog($"Unable to retrieve recent logs for {cfApp.AppName}.", recentLogsResult.Explanation);
                 }
                 else
                 {
