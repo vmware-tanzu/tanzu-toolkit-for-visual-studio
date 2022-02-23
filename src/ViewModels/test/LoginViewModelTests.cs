@@ -338,9 +338,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.Target, _sut.SkipSsl))
                 .Returns(FakeSuccessDetailedResult);
-
             MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.Target, _sut.SkipSsl))
                 .ReturnsAsync(fakeSsoPromptResult);
+            MockCloudFoundryService.Setup(m => m.ConfigureForCf(It.IsAny<CloudFoundryInstance>())).Returns(FakeSuccessDetailedResult);
 
             Assert.AreEqual(1, _sut.PageNum);
 
@@ -362,6 +362,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.Target, _sut.SkipSsl))
                 .Returns(fakeCertValidationResult);
+            MockCloudFoundryService.Setup(m => m.ConfigureForCf(It.IsAny<CloudFoundryInstance>())).Returns(FakeSuccessDetailedResult);
 
             Assert.AreEqual(1, _sut.PageNum);
 
@@ -388,9 +389,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.Target, _sut.SkipSsl))
                 .Returns(fakeCertValidationResult);
-
             MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.Target, _sut.SkipSsl))
                 .ReturnsAsync(fakeSsoPromptResult);
+            MockCloudFoundryService.Setup(m => m.ConfigureForCf(It.IsAny<CloudFoundryInstance>())).Returns(FakeSuccessDetailedResult);
 
             Assert.AreEqual(1, _sut.PageNum);
 
@@ -417,9 +418,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.Target, _sut.SkipSsl))
                 .Returns(fakeCertValidationResult);
-
             MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.Target, _sut.SkipSsl))
                 .ReturnsAsync(fakeSsoPromptResult);
+            MockCloudFoundryService.Setup(m => m.ConfigureForCf(It.IsAny<CloudFoundryInstance>())).Returns(FakeSuccessDetailedResult);
 
             Assert.AreEqual(1, _sut.PageNum);
 
