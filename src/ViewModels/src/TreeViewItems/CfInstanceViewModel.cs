@@ -86,7 +86,10 @@ namespace Tanzu.Toolkit.ViewModels
                                     else if (priorChild is OrgViewModel priorOrg)
                                     {
                                         bool orgStillExists = freshOrgs.Any(o => o is CloudFoundryOrganization freshOrg && freshOrg != null && freshOrg.OrgId == priorOrg.Org.OrgId);
-                                        if (!orgStillExists) removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, priorOrg));
+                                        if (!orgStillExists)
+                                        {
+                                            removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, priorOrg));
+                                        }
                                     }
                                 }
 
@@ -108,7 +111,10 @@ namespace Tanzu.Toolkit.ViewModels
                             // update children
                             foreach (TreeViewItemViewModel child in Children)
                             {
-                                if (child is OrgViewModel org) updateTasks.Add(ThreadingService.StartBackgroundTask(org.UpdateAllChildren));
+                                if (child is OrgViewModel org)
+                                {
+                                    updateTasks.Add(ThreadingService.StartBackgroundTask(org.UpdateAllChildren));
+                                }
                             }
                             await Task.WhenAll(updateTasks);
                         }

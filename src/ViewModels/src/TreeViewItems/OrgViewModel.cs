@@ -87,7 +87,10 @@ namespace Tanzu.Toolkit.ViewModels
                                     else if (priorChild is SpaceViewModel priorSpace)
                                     {
                                         bool spaceStillExists = freshSpaces.Any(o => o is CloudFoundrySpace freshSpace && freshSpace != null && freshSpace.SpaceId == priorSpace.Space.SpaceId);
-                                        if (!spaceStillExists) removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, priorSpace));
+                                        if (!spaceStillExists)
+                                        {
+                                            removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, priorSpace));
+                                        }
                                     }
                                 }
 
@@ -109,7 +112,10 @@ namespace Tanzu.Toolkit.ViewModels
                             // update children
                             foreach (TreeViewItemViewModel updatedChild in Children)
                             {
-                                if (updatedChild is SpaceViewModel space) updateChildrenTasks.Add(ThreadingService.StartBackgroundTask(space.UpdateAllChildren));
+                                if (updatedChild is SpaceViewModel space)
+                                {
+                                    updateChildrenTasks.Add(ThreadingService.StartBackgroundTask(space.UpdateAllChildren));
+                                }
                             }
                             await Task.WhenAll(updateChildrenTasks);
                         }

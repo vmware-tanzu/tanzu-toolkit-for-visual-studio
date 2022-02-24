@@ -435,8 +435,14 @@ namespace Tanzu.Toolkit.ViewModels
         internal async Task UpdateAllTreeItems()
         {
             await TreeRoot[0].UpdateAllChildren();
-            if (TreeRoot.Count < 1) IsRefreshingAll = false;
-            else if (TreeRoot[0] is CfInstanceViewModel cf) IsRefreshingAll = cf.IsLoading;
+            if (TreeRoot.Count < 1)
+            {
+                IsRefreshingAll = false;
+            }
+            else if (TreeRoot[0] is CfInstanceViewModel cf)
+            {
+                IsRefreshingAll = cf.IsLoading;
+            }
         }
     }
 }

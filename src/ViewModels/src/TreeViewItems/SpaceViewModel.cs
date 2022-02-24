@@ -84,7 +84,10 @@ namespace Tanzu.Toolkit.ViewModels
                                     else if (priorChild is AppViewModel priorApp)
                                     {
                                         bool appStillExists = freshApps.Any(o => o is CloudFoundryApp freshApp && freshApp != null && freshApp.AppId == priorApp.App.AppId);
-                                        if (!appStillExists) removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, priorApp));
+                                        if (!appStillExists)
+                                        {
+                                            removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, priorApp));
+                                        }
                                     }
                                 }
 
@@ -114,7 +117,10 @@ namespace Tanzu.Toolkit.ViewModels
                             await Task.WhenAll(additionTasks);
                             foreach (TreeViewItemViewModel child in Children)
                             {
-                                if (child is AppViewModel app) app.RefreshAppState();
+                                if (child is AppViewModel app)
+                                {
+                                    app.RefreshAppState();
+                                }
                             }
                         }
                         else if (appsResponse.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
