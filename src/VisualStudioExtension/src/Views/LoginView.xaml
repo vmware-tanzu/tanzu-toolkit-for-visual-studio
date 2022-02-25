@@ -28,11 +28,11 @@
 
         <Style x:Key="ApiAddressFieldStyle" TargetType="{x:Type TextBox}">
             <Style.Triggers>
-                <DataTrigger Binding="{Binding ApiAddressIsValid}" Value="False">
+                <DataTrigger Binding="{Binding IsApiAddressFormatValid}" Value="False">
                     <Setter Property="BorderBrush" Value="Red" />
                     <Setter Property="BorderThickness" Value="1" />
                 </DataTrigger>
-                <DataTrigger Binding="{Binding ApiAddressIsValid}" Value="True">
+                <DataTrigger Binding="{Binding IsApiAddressFormatValid}" Value="True">
                     <Setter Property="BorderThickness" Value="1" />
                 </DataTrigger>
             </Style.Triggers>
@@ -115,8 +115,7 @@
                     Text="{Binding ApiAddressError}"
                     Foreground="Red"
                     TextWrapping="Wrap"
-                    Grid.Row="1"
-                    Visibility="{Binding Path=ApiAddressIsValid, Converter={StaticResource InverseCollapsedVisibility}}"/>
+                    Grid.Row="1" />
 
                 <Label Content="Connection Name" Grid.Row="2"/>
 
@@ -185,7 +184,6 @@
 
                     <Button
                         Content="Next"
-                        IsEnabled="{Binding ApiAddressIsValid}"
                         Margin="4"
                         Padding="4,0"
                         HorizontalAlignment="Right"
@@ -295,7 +293,7 @@
                     
                     <Button
                         Content="Log In"
-                        IsEnabled="{Binding ApiAddressIsValid}"
+                        IsEnabled="{Binding IsApiAddressFormatValid}"
                         Margin="4"
                         Padding="4,0"
                         HorizontalAlignment="Right"
