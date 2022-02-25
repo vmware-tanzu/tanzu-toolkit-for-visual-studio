@@ -25,7 +25,7 @@ namespace Tanzu.Toolkit.ViewModels
         private int _currentPageNum = 1;
         private bool _ssoEnabled = false;
         private bool _connectingToCf = false;
-        private bool _apiAddressIsValid = true;
+        private bool _isApiAddressFormatValid;
         private bool _certificateInvalid = false;
         private ISsoDialogViewModel _ssoDialog;
 
@@ -34,6 +34,7 @@ namespace Tanzu.Toolkit.ViewModels
         public LoginViewModel(IServiceProvider services)
             : base(services)
         {
+            IsApiAddressFormatValid = false;
             _tasExplorer = services.GetRequiredService<ITasExplorerViewModel>();
             _ssoDialog = services.GetRequiredService<ISsoDialogViewModel>();
             CfClient = Services.GetRequiredService<ICloudFoundryService>();
@@ -99,14 +100,14 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public bool ApiAddressIsValid
+        public bool IsApiAddressFormatValid
         {
-            get { return _apiAddressIsValid; }
+            get { return _isApiAddressFormatValid; }
 
             set
             {
-                _apiAddressIsValid = value;
-                RaisePropertyChangedEvent("ApiAddressIsValid");
+                _isApiAddressFormatValid = value;
+                RaisePropertyChangedEvent("IsApiAddressFormatValid");
             }
         }
 
@@ -180,7 +181,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool CanOpenSsoDialog(object arg = null)
         {
-            return !string.IsNullOrWhiteSpace(TargetApiAddress) && ApiAddressIsValid;
+            return !string.IsNullOrWhiteSpace(TargetApiAddress) && IsApiAddressFormatValid;
         }
 
         public async Task ConnectToCf(object arg = null)
@@ -230,7 +231,6 @@ namespace Tanzu.Toolkit.ViewModels
                         break;
                     default:
                         ApiAddressError = $"Unable to establish a connection with {TargetApiAddress}";
-                        ApiAddressIsValid = false;
                         break;
                 }
 
@@ -271,17 +271,24 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool ValidateApiAddressFormat(string apiAddress)
         {
-            if (Uri.IsWellFormedUriString(apiAddress, UriKind.Absolute) || string.IsNullOrWhiteSpace(apiAddress))
+            if (Uri.IsWellFormedUriString(apiAddress, UriKind.Absolute))
             {
                 ApiAddressError = null;
-                ApiAddressIsValid = true;
+                IsApiAddressFormatValid = true;
 
                 return true;
+            }
+            else if (string.IsNullOrWhiteSpace(apiAddress))
+            {
+                ApiAddressError = null;
+                IsApiAddressFormatValid = false;
+
+                return false;
             }
             else
             {
                 ApiAddressError = TargetInvalidFormatMessage;
-                ApiAddressIsValid = false;
+                IsApiAddressFormatValid = false;
 
                 return false;
             }
@@ -323,7 +330,7 @@ namespace Tanzu.Toolkit.ViewModels
         public bool CanProceedToAuthentication(object arg = null)
         {
             var certValidOrBypassed = !CertificateInvalid || (CertificateInvalid && SkipSsl);
-            return ApiAddressIsValid && !string.IsNullOrWhiteSpace(TargetApiAddress) && certValidOrBypassed;
+            return IsApiAddressFormatValid && certValidOrBypassed;
         }
 
         public void ResetTargetDependentFields()
