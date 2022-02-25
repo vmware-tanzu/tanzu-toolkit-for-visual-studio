@@ -116,8 +116,7 @@
                     Text="{Binding ApiAddressError}"
                     Foreground="Red"
                     TextWrapping="Wrap"
-                    Grid.Row="1"
-                    Visibility="{Binding Path=ApiAddressIsValid, Converter={StaticResource InverseCollapsedVisibility}}"/>
+                    Grid.Row="1" />
 
                 <Label Content="Connection Name" Grid.Row="2"/>
 
@@ -189,7 +188,6 @@
 
                     <Button
                         Content="Next"
-                        IsEnabled="{Binding ApiAddressIsValid}"
                         Margin="4"
                         Padding="4,0"
                         HorizontalAlignment="Right"
