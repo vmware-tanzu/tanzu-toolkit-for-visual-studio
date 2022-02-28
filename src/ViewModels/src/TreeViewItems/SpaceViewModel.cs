@@ -11,7 +11,7 @@ namespace Tanzu.Toolkit.ViewModels
 {
     public class SpaceViewModel : TreeViewItemViewModel
     {
-        internal const string EmptyAppsPlaceholderMsg = "No apps";
+        internal const string EmptyAppsPlaceholderMsg = "No apps found";
         internal const string LoadingMsg = "Loading apps...";
         internal static readonly string _getAppsFailureMsg = "Unable to load apps.";
         private readonly IErrorDialog _dialogService;
