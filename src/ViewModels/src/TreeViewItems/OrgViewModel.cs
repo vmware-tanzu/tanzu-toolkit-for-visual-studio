@@ -11,7 +11,7 @@ namespace Tanzu.Toolkit.ViewModels
     public class OrgViewModel : TreeViewItemViewModel
     {
         /* ERROR MESSAGE CONSTANTS */
-        internal static readonly string _emptySpacesPlaceholderMsg = "No spaces";
+        internal static readonly string _emptySpacesPlaceholderMsg = "No spaces found";
         internal static readonly string _loadingMsg = "Loading spaces...";
         internal static readonly string _getSpacesFailureMsg = "Unable to load spaces.";
         private readonly IErrorDialog _dialogService;
