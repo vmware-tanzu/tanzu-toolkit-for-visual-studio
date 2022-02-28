@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace Tanzu.Toolkit.Services
 {
     public interface IUiDispatcherService
     {
-        void RunOnUiThread(Action method);
+        Task RunOnUiThreadAsync(Action method);
     }
 }

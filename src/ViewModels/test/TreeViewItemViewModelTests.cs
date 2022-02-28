@@ -56,74 +56,35 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        public void Expansion_SetsIsLoadingToTrue_WhenNotAlreadyExpanded_AndWhenNotLoading()
+        public void Expansion_BeginsUpdatingChildrenOnBackgroundThread_WhenNotAlreadyLoading()
         {
             var sut = _collpasedTvivm;
+            MockThreadingService.Setup(m => m.StartBackgroundTask(It.IsAny<Func<Task>>())).Verifiable();
 
             Assert.IsFalse(sut.IsExpanded);
             Assert.IsFalse(sut.IsLoading);
-
+            
             sut.IsExpanded = true;
-
-            Assert.IsTrue(sut.IsLoading);
-        }
-
-        [TestMethod]
-        public void Expansion_LoadsChildren_WhenNotAlreadyExpanded_AndWhenNotLoading()
-        {
-            var sut = _collpasedTvivm;
-
-            Assert.IsFalse(sut.IsExpanded);
-            Assert.IsFalse(sut.IsLoading);
-
-            sut.IsExpanded = true;
-
-            MockThreadingService.Verify(m => m.StartTask(It.IsAny<Func<Task>>()), Times.Once);
-        }
-
-        [TestMethod]
-        public void Expansion_DoesNotLoadChildren_WhenAlreadyExpanded()
-        {
-            var sut = _expandedTvivm;
-
+            
             Assert.IsTrue(sut.IsExpanded);
-
-            sut.IsExpanded = true;
-
-            MockThreadingService.Verify(m => m.StartTask(It.IsAny<Func<Task>>()), Times.Never);
+            MockThreadingService.Verify(m => m.StartBackgroundTask(sut.UpdateAllChildren), Times.Once);
         }
 
         [TestMethod]
-        public void Expansion_DoesNotLoadChildren_WhenAlreadyLoading()
+        public void Expansion_DoesNotInvokeUpdateAllChildren_WhenAlreadyLoading()
         {
             var sut = _collpasedTvivm;
-
             sut.IsLoading = true;
 
-            sut.IsExpanded = true;
+            MockThreadingService.Setup(m => m.StartBackgroundTask(It.IsAny<Func<Task>>())).Verifiable();
 
-            MockThreadingService.Verify(m => m.StartTask(It.IsAny<Func<Task>>()), Times.Never);
-        }
-
-        [TestMethod]
-        public void Expansion_ReplacesChildrenWithLoadingPlaceholder_WhileChildrenLoad()
-        {
-            var sut = _collpasedTvivm;
-            sut.Children = new ObservableCollection<TreeViewItemViewModel>()
-            {
-                null,
-                null,
-                null,
-            };
-
-            Assert.AreEqual(3, sut.Children.Count);
+            Assert.IsFalse(sut.IsExpanded);
+            Assert.IsTrue(sut.IsLoading);
 
             sut.IsExpanded = true;
 
-            Assert.AreEqual(1, sut.Children.Count);
-            Assert.AreEqual(typeof(PlaceholderViewModel), sut.Children[0].GetType());
-            Assert.AreEqual(sut.LoadingPlaceholder, sut.Children[0]);
-            Assert.AreEqual(TreeViewItemViewModel._defaultLoadingMsg, sut.Children[0].DisplayText);
+            Assert.IsTrue(sut.IsExpanded);
+            MockThreadingService.Verify(m => m.StartBackgroundTask(It.IsAny<Func<Task>>()), Times.Never);
         }
     }
 
@@ -136,11 +97,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         public TestTreeViewItemViewModel(IServiceProvider services, bool childless) : base(null, null, services, childless)
         {
-        }
-
-        internal protected override async Task LoadChildren()
-        {
-            await Task.Run(() => { });
         }
     }
 }

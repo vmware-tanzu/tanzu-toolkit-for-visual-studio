@@ -109,9 +109,9 @@ namespace Tanzu.Toolkit.ViewModels
                 TargetName = TasExplorerViewModel.TasConnection.DisplayText;
                 IsLoggedIn = true;
 
-                ThreadingService.StartTask(UpdateCfOrgOptions);
-                ThreadingService.StartTask(UpdateBuildpackOptions);
-                ThreadingService.StartTask(UpdateStackOptions);
+                ThreadingService.StartBackgroundTask(UpdateCfOrgOptions);
+                ThreadingService.StartBackgroundTask(UpdateBuildpackOptions);
+                ThreadingService.StartBackgroundTask(UpdateStackOptions);
             }
 
             _projectName = projectName;
@@ -460,7 +460,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 DeploymentInProgress = true;
 
-                ThreadingService.StartTask(StartDeployment);
+                ThreadingService.StartBackgroundTask(StartDeployment);
 
                 DialogService.CloseDialog(dialogWindow, true);
             }
@@ -490,9 +490,9 @@ namespace Tanzu.Toolkit.ViewModels
                 TargetName = TasExplorerViewModel.TasConnection.DisplayText;
                 IsLoggedIn = true;
 
-                ThreadingService.StartTask(UpdateCfOrgOptions);
-                ThreadingService.StartTask(UpdateBuildpackOptions);
-                ThreadingService.StartTask(UpdateStackOptions);
+                ThreadingService.StartBackgroundTask(UpdateCfOrgOptions);
+                ThreadingService.StartBackgroundTask(UpdateBuildpackOptions);
+                ThreadingService.StartBackgroundTask(UpdateStackOptions);
             }
         }
 

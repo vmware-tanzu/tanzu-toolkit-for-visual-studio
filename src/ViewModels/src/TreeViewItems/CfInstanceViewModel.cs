@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,34 +17,8 @@ namespace Tanzu.Toolkit.ViewModels
         internal static readonly string _getOrgsFailureMsg = "Unable to load orgs";
         private readonly IErrorDialog _dialogService;
 
-        private volatile bool _isRefreshing = false;
-        private readonly object _threadLock = new object();
-
-        /// <summary>
-        /// A thread-safe indicator of whether or not this <see cref="CfInstanceViewModel"/> is in the process of updating its children.
-        /// </summary>
-        public bool IsRefreshing
-        {
-            get
-            {
-                lock (_threadLock)
-                {
-                    return _isRefreshing;
-                }
-            }
-
-            private set
-            {
-                lock (_threadLock)
-                {
-                    _isRefreshing = value;
-                }
-
-                RaisePropertyChangedEvent("IsRefreshing");
-            }
-        }
-
-        public CloudFoundryInstance CloudFoundryInstance { get; }
+        private volatile int _updatesInProgress = 0;
+        private readonly object _loadingLock = new object();
 
         public CfInstanceViewModel(CloudFoundryInstance cloudFoundryInstance, TasExplorerViewModel parentTasExplorer, IServiceProvider services, bool expanded = false)
             : base(null, parentTasExplorer, services, expanded: expanded)
@@ -63,152 +38,112 @@ namespace Tanzu.Toolkit.ViewModels
             };
         }
 
-        public async Task<ObservableCollection<OrgViewModel>> FetchChildren()
+        public CloudFoundryInstance CloudFoundryInstance { get; }
+
+        protected internal override async Task UpdateAllChildren()
         {
-            var newOrgsList = new ObservableCollection<OrgViewModel>();
-
-            var orgsResponse = await CloudFoundryService.GetOrgsForCfInstanceAsync(CloudFoundryInstance);
-
-            if (orgsResponse.Succeeded)
+            if (IsExpanded && !IsLoading)
             {
-                var orgs = new ObservableCollection<CloudFoundryOrganization>(orgsResponse.Content);
-
-                foreach (CloudFoundryOrganization org in orgs)
+                lock (_loadingLock)
                 {
-                    var newOrg = new OrgViewModel(org, this, ParentTasExplorer, Services);
-                    newOrgsList.Add(newOrg);
+                    _updatesInProgress += 1;
                 }
-            }
-            else if (orgsResponse.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
-            {
-                IsExpanded = false;
-                ParentTasExplorer.AuthenticationRequired = true;
-            }
-            else
-            {
-                _dialogService.DisplayErrorDialog(_getOrgsFailureMsg, orgsResponse.Explanation);
-            }
 
-            return newOrgsList;
-        }
-
-        protected internal override async Task LoadChildren()
-        {
-            var orgsResponse = await CloudFoundryService.GetOrgsForCfInstanceAsync(CloudFoundryInstance);
-
-            if (orgsResponse.Succeeded)
-            {
-                if (orgsResponse.Content.Count == 0)
+                if (_updatesInProgress == 1)
                 {
-                    var noChildrenList = new ObservableCollection<TreeViewItemViewModel>
+                    IsLoading = true;
+                    try
                     {
-                        EmptyPlaceholder,
-                    };
+                        var orgsResponse = await CloudFoundryService.GetOrgsForCfInstanceAsync(CloudFoundryInstance);
+                        if (orgsResponse.Succeeded)
+                        {
+                            // make a working copy of children to avoid System.InvalidOperationException:
+                            // "Collection was modified; enumeration operation may not execute."
+                            var originalChildren = Children.ToList();
 
-                    Children = noChildrenList;
-                    HasEmptyPlaceholder = true;
-                }
-                else
-                {
-                    var updatedOrgsList = new ObservableCollection<TreeViewItemViewModel>();
-                    foreach (CloudFoundryOrganization org in orgsResponse.Content)
-                    {
-                        var newOrg = new OrgViewModel(org, this, ParentTasExplorer, Services);
-                        updatedOrgsList.Add(newOrg);
+                            var removalTasks = new List<Task>();
+                            var additionTasks = new List<Task>();
+                            var updateTasks = new List<Task>();
+
+                            var freshOrgs = new ObservableCollection<CloudFoundryOrganization>(orgsResponse.Content);
+                            if (freshOrgs.Count < 1)
+                            {
+                                foreach (var child in originalChildren)
+                                {
+                                    removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, child));
+                                }
+                                additionTasks.Add(ThreadingService.AddItemToCollectionOnUiThreadAsync(Children, EmptyPlaceholder));
+                            }
+                            else
+                            {
+                                // remove stale orgs
+                                foreach (TreeViewItemViewModel priorChild in originalChildren)
+                                {
+                                    if (priorChild is PlaceholderViewModel)
+                                    {
+                                        removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, priorChild));
+                                    }
+                                    else if (priorChild is OrgViewModel priorOrg)
+                                    {
+                                        bool orgStillExists = freshOrgs.Any(o => o is CloudFoundryOrganization freshOrg && freshOrg != null && freshOrg.OrgId == priorOrg.Org.OrgId);
+                                        if (!orgStillExists)
+                                        {
+                                            removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, priorOrg));
+                                        }
+                                    }
+                                }
+
+                                // add new orgs
+                                foreach (CloudFoundryOrganization freshOrg in freshOrgs)
+                                {
+                                    bool orgAlreadyExists = originalChildren.Any(child => child is OrgViewModel extantOrg && extantOrg.Org.OrgId == freshOrg.OrgId);
+                                    if (!orgAlreadyExists)
+                                    {
+                                        var newOrg = new OrgViewModel(freshOrg, this, ParentTasExplorer, Services, expanded: false);
+                                        additionTasks.Add(ThreadingService.AddItemToCollectionOnUiThreadAsync(Children, newOrg));
+                                    }
+                                }
+                            }
+
+                            await Task.WhenAll(removalTasks);
+                            await Task.WhenAll(additionTasks);
+
+                            // update children
+                            foreach (TreeViewItemViewModel child in Children)
+                            {
+                                if (child is OrgViewModel org)
+                                {
+                                    updateTasks.Add(ThreadingService.StartBackgroundTask(org.UpdateAllChildren));
+                                }
+                            }
+                            await Task.WhenAll(updateTasks);
+                        }
+                        else if (orgsResponse.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
+                        {
+                            IsExpanded = false;
+                            ParentTasExplorer.AuthenticationRequired = true;
+                        }
+                        else
+                        {
+                            Logger.Error("CfInstanceViewModel failed to load orgs: {CfInstanceViewModelLoadingException}", orgsResponse.Explanation);
+                            IsExpanded = false;
+                        }
                     }
-
-                    Children = updatedOrgsList;
-                    HasEmptyPlaceholder = false;
-                }
-
-                IsLoading = false;
-            }
-            else
-            {
-                IsLoading = false;
-
-                _dialogService.DisplayWarningDialog(_getOrgsFailureMsg, orgsResponse.Explanation);
-
-                IsExpanded = false;
-            }
-        }
-
-        public override async Task RefreshChildren()
-        {
-            if (!IsRefreshing)
-            {
-                IsRefreshing = true;
-
-                var freshOrgs = await FetchChildren();
-
-                RemoveNonexistentOrgs(freshOrgs);
-                AddNewOrgs(freshOrgs);
-
-                if (Children.Count == 0)
-                {
-                    UiDispatcherService.RunOnUiThread(() => Children.Add(EmptyPlaceholder));
-                }
-                else if (Children.Count > 1 && HasEmptyPlaceholder)
-                {
-                    UiDispatcherService.RunOnUiThread(() => Children.Remove(EmptyPlaceholder));
-                }
-
-                IsRefreshing = false;
-            }
-        }
-
-        /// <summary>
-        /// add any ovms to cfivm.Children which are in currentOrgs but not in cfivm.Children.
-        /// </summary>
-        /// <param name="cfivm"></param>
-        /// <param name="freshOrgs"></param>
-        private void AddNewOrgs(ObservableCollection<OrgViewModel> freshOrgs)
-        {
-            foreach (OrgViewModel newOVM in freshOrgs)
-            {
-                if (newOVM != null)
-                {
-                    bool orgInChildren = Children.Any(ovm =>
+                    catch (Exception ex)
                     {
-                        var oldOVM = ovm as OrgViewModel;
-                        return oldOVM != null && oldOVM.Org.OrgId == newOVM.Org.OrgId;
-                    });
-
-                    if (!orgInChildren)
+                        Logger.Error("Caught exception trying to load orgs in CfInstanceViewModel: {CfInstanceViewModelLoadingException}", ex);
+                        _dialogService.DisplayWarningDialog(_getOrgsFailureMsg, "Something went wrong while loading organizations; try disconnecting & logging in again.\nIf this issue persists, please contact dotnetdevx@groups.vmware.com");
+                    }
+                    finally
                     {
-                        UiDispatcherService.RunOnUiThread(() => Children.Add(newOVM));
+                        IsLoading = false;
+                        lock (_loadingLock)
+                        {
+                            _updatesInProgress = 0;
+                        }
                     }
                 }
             }
         }
-
-        /// <summary>
-        /// remove all ovms from cfivm.Children which don't appear in currentOrgs.
-        /// </summary>
-        /// <param name="cfivm"></param>
-        /// <param name="freshOrgs"></param>
-        private void RemoveNonexistentOrgs(ObservableCollection<OrgViewModel> freshOrgs)
-        {
-            var orgsToRemove = new ObservableCollection<OrgViewModel>();
-
-            foreach (TreeViewItemViewModel priorChild in Children)
-            {
-                if (priorChild is OrgViewModel oldOVM)
-                {
-                    bool orgStillExists = freshOrgs.Any(ovm => ovm != null && ovm.Org.OrgId == oldOVM.Org.OrgId);
-
-                    if (!orgStillExists)
-                    {
-                        orgsToRemove.Add(oldOVM);
-                    }
-                }
-            }
-
-            foreach (OrgViewModel ovm in orgsToRemove)
-            {
-                UiDispatcherService.RunOnUiThread(() => Children.Remove(ovm));
-            }
-        }
-
     }
 }

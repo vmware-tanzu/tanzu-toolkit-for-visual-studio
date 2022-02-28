@@ -60,9 +60,30 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public bool IsLoading { get => _isLoading; set => _isLoading = value; }
+        public bool IsLoading
+        {
+            get => _isLoading;
 
-        public bool HasEmptyPlaceholder { get; set; }
+            set
+            {
+                _isLoading = value;
+                if (_isLoading)
+                {
+                    if (Children.Count == 0)
+                    {
+                        Children = new ObservableCollection<TreeViewItemViewModel>
+                        {
+                            LoadingPlaceholder,
+                        };
+                    }
+                }
+                else
+                {
+                    ThreadingService.ExecuteInUIThread(() => Children.Remove(LoadingPlaceholder));
+                }
+                RaisePropertyChangedEvent("IsLoading");
+            }
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether the TreeViewItem
@@ -80,20 +101,11 @@ namespace Tanzu.Toolkit.ViewModels
                 if (value != _isExpanded)
                 {
                     _isExpanded = value;
-
-                    if (value == true && !IsLoading)
+                    if (_isExpanded & !IsLoading)
                     {
-                        IsLoading = true;
-
-                        Children = new ObservableCollection<TreeViewItemViewModel>
-                        {
-                            LoadingPlaceholder,
-                        };
-
-                        // Lazily load the child items @ expansion time in a separate thread
-                        _threadingService.StartTask(LoadChildren);
+                        // Lazily load child items in a separate thread @ expansion time
+                        _threadingService.StartBackgroundTask(UpdateAllChildren);
                     }
-
                     RaisePropertyChangedEvent("IsExpanded");
                 }
             }
@@ -146,21 +158,10 @@ namespace Tanzu.Toolkit.ViewModels
 
         public virtual PlaceholderViewModel EmptyPlaceholder { get; protected set; }
 
-        /// <summary>
-        /// Invoked when the child items need to be loaded on demand.
-        /// Subclasses can override this to populate the Children collection.
-        /// </summary>
-        protected internal virtual async Task LoadChildren()
+        protected internal virtual async Task UpdateAllChildren()
         {
-            await Task.Run(() => Logger.Error("TreeViewItemViewModel.LoadChildren was called; this method should only ever be run by classes that inherit from TreeViewItemViewModel."));
-        }
-
-        /// <summary>
-        /// Implemented by inheriting classes to update children with fresh data.
-        /// </summary>
-        public virtual async Task RefreshChildren()
-        {
-            await Task.Run(() => Logger.Error("TreeViewItemViewModel.RefreshChildren was called; this method should only ever be run by classes that inherit from TreeViewItemViewModel."));
+            // await to suppress aync warning
+            await Task.Run(() => Logger.Error("TreeViewItemViewModel.UpdateChildrenRecursive was called; this method should only ever be run by classes that inherit from TreeViewItemViewModel."));
         }
     }
 }
