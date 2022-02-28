@@ -12,7 +12,7 @@ namespace Tanzu.Toolkit.ViewModels
     public class CfInstanceViewModel : TreeViewItemViewModel
     {
         /* ERROR MESSAGE CONSTANTS */
-        internal static readonly string _emptyOrgsPlaceholderMsg = "No orgs";
+        internal static readonly string _emptyOrgsPlaceholderMsg = "No orgs found";
         internal static readonly string _loadingMsg = "Loading orgs...";
         internal static readonly string _getOrgsFailureMsg = "Unable to load orgs";
         private readonly IErrorDialog _dialogService;
