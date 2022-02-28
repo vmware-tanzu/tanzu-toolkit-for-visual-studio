@@ -16,15 +16,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool IsStopped
         {
-            get
-            {
-                if (App.State == "STOPPED")
-                {
-                    return true;
-                }
-
-                return false;
-            }
+            get => App.State == "STOPPED";
         }
 
         public void RefreshAppState()

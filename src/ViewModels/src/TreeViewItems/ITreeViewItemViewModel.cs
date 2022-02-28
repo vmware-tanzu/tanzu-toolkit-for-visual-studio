@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Threading.Tasks;
 
 namespace Tanzu.Toolkit.ViewModels
 {
@@ -13,7 +12,5 @@ namespace Tanzu.Toolkit.ViewModels
         PlaceholderViewModel LoadingPlaceholder { get; }
         PlaceholderViewModel EmptyPlaceholder { get; }
         TasExplorerViewModel ParentTasExplorer { get; set; }
-
-        Task RefreshChildren();
     }
 }

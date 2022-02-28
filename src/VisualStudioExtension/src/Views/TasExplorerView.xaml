@@ -54,7 +54,7 @@
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
-    
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"></RowDefinition>
@@ -109,7 +109,7 @@
                            Stretch="Uniform" 
                            Width="16px" 
                            Height="16px"
-                           ToolTip="Refresh All Cloud Connections" 
+                           ToolTip="Refresh All" 
                            RenderTransformOrigin="0.5 0.5"
                            Visibility="{Binding IsRefreshingAll, Converter={StaticResource ExpansionConverter}}">
                             <Image.RenderTransform>
@@ -188,9 +188,15 @@
                 <HierarchicalDataTemplate DataType="{x:Type ViewModels:CfInstanceViewModel}" 
                                           ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                        <Image Source="Resources/tas_16px.png" Stretch="Uniform" Height="16px" Width="16px" Margin="0,2,4,0"/>
+                        <Image
+                            Source="Resources/tas_16px.png"
+                            Stretch="Uniform"
+                            Height="16px"
+                            Width="16px"
+                            Visibility="{Binding Path=IsLoading, Converter={StaticResource InverseVisibility}}"
+                            Margin="4"/>
+                        <local:Spinner Visibility="{Binding Path=IsLoading, Converter={StaticResource Visibility}}"/>
                         <Button Content="{Binding DisplayText}"
-                                Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
                                 Style="{StaticResource RowItemStyle}">
                             <Button.ContextMenu>
                                 <ContextMenu
@@ -204,7 +210,6 @@
                                 </ContextMenu>
                             </Button.ContextMenu>
                         </Button>
-                        <local:LoadingSpinnerSmall Grid.Row="0" Grid.Column="2" IsLoading="{Binding IsRefreshing}" />
                     </StackPanel>
                 </HierarchicalDataTemplate>
 
@@ -212,7 +217,14 @@
                 <HierarchicalDataTemplate DataType="{x:Type ViewModels:OrgViewModel}"
                                           ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                        <Image Source="Resources/cf_org_16x.png" Stretch="Uniform" Height="16px" Width="16px" Margin="0,2,4,0"/>
+                        <Image
+                            Source="Resources/cf_org_16x.png"
+                            Stretch="Uniform"
+                            Height="16px"
+                            Width="16px"
+                            Visibility="{Binding Path=IsLoading, Converter={StaticResource InverseVisibility}}"
+                            Margin="4"/>
+                        <local:Spinner Visibility="{Binding Path=IsLoading, Converter={StaticResource Visibility}}"/>
                         <Button Content="{Binding DisplayText}" 
                                 Style="{StaticResource RowItemStyle}"
                                 Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
@@ -228,7 +240,6 @@
                                 </ContextMenu>
                             </Button.ContextMenu>
                         </Button>
-                        <local:LoadingSpinnerSmall Grid.Row="0" Grid.Column="2" IsLoading="{Binding IsRefreshing}"/>
                     </StackPanel>
                 </HierarchicalDataTemplate>
 
@@ -236,7 +247,14 @@
                 <HierarchicalDataTemplate DataType="{x:Type ViewModels:SpaceViewModel}"
                                           ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                        <Image Source="Resources/cf_space_16x.png" Stretch="Uniform" Height="16px" Width="16px" Margin="0,2,4,0"/>
+                        <Image
+                            Source="Resources/cf_space_16x.png"
+                            Stretch="Uniform"
+                            Height="16px"
+                            Width="16px"
+                            Visibility="{Binding Path=IsLoading, Converter={StaticResource InverseVisibility}}"
+                            Margin="4"/>
+                        <local:Spinner Visibility="{Binding Path=IsLoading, Converter={StaticResource Visibility}}"/>
                         <Button Content="{Binding DisplayText}" 
                                 Style="{StaticResource RowItemStyle}"
                                 Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
@@ -252,7 +270,6 @@
                                 </ContextMenu>
                             </Button.ContextMenu>
                         </Button>
-                        <local:LoadingSpinnerSmall Grid.Row="0" Grid.Column="2" IsLoading="{Binding IsRefreshing}"/>
                     </StackPanel>
                 </HierarchicalDataTemplate>
 
@@ -342,7 +359,7 @@
                 <DataTemplate DataType="{x:Type ViewModels:LoginPromptViewModel}">
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                         <Button Command="{Binding ElementName=TasExplorerViewElement, Path=OpenLoginFormCommand}">
-                             <local:LoginPromptButton/>
+                            <local:LoginPromptButton/>
                         </Button>
                     </StackPanel>
                 </DataTemplate>

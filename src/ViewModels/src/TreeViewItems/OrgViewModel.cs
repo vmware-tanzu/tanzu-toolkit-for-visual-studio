@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,32 +17,8 @@ namespace Tanzu.Toolkit.ViewModels
         internal static readonly string _getSpacesFailureMsg = "Unable to load spaces.";
         private readonly IErrorDialog _dialogService;
 
-        private volatile bool _isRefreshing = false;
-        private readonly object _threadLock = new object();
-
-        /// <summary>
-        /// A thread-safe indicator of whether or not this <see cref="OrgViewModel"/> is in the process of updating its children.
-        /// </summary>
-        public bool IsRefreshing
-        {
-            get
-            {
-                lock (_threadLock)
-                {
-                    return _isRefreshing;
-                }
-            }
-
-            private set
-            {
-                lock (_threadLock)
-                {
-                    _isRefreshing = value;
-                }
-
-                RaisePropertyChangedEvent("IsRefreshing");
-            }
-        }
+        private volatile int _updatesInProgress = 0;
+        private readonly object _loadingLock = new object();
 
         public CloudFoundryOrganization Org { get; }
 
@@ -64,152 +41,110 @@ namespace Tanzu.Toolkit.ViewModels
             };
         }
 
-        public async Task<ObservableCollection<SpaceViewModel>> FetchChildren()
+        protected internal override async Task UpdateAllChildren()
         {
-            var newSpacesList = new ObservableCollection<SpaceViewModel>();
-
-            var spacesResponse = await CloudFoundryService.GetSpacesForOrgAsync(Org);
-
-            if (spacesResponse.Succeeded)
+            if (IsExpanded && !IsLoading)
             {
-                var spaces = new ObservableCollection<CloudFoundrySpace>(spacesResponse.Content);
-
-                foreach (CloudFoundrySpace space in spaces)
+                lock (_loadingLock)
                 {
-                    var newSpace = new SpaceViewModel(space, this, ParentTasExplorer, Services);
-                    newSpacesList.Add(newSpace);
+                    _updatesInProgress += 1;
                 }
-            }
-            else if (spacesResponse.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
-            {
-                Parent.IsExpanded = false;
-                ParentTasExplorer.AuthenticationRequired = true;
-            }
-            else
-            {
-                _dialogService.DisplayErrorDialog(_getSpacesFailureMsg, spacesResponse.Explanation);
-            }
 
-            return newSpacesList;
-        }
-
-        protected internal override async Task LoadChildren()
-        {
-            var spacesResponse = await CloudFoundryService.GetSpacesForOrgAsync(Org);
-
-            if (spacesResponse.Succeeded)
-            {
-                if (spacesResponse.Content.Count == 0)
+                if (_updatesInProgress == 1)
                 {
-                    var noChildrenList = new ObservableCollection<TreeViewItemViewModel>
+                    IsLoading = true;
+                    try
                     {
-                        EmptyPlaceholder,
-                    };
+                        var spacesResponse = await CloudFoundryService.GetSpacesForOrgAsync(Org);
+                        if (spacesResponse.Succeeded)
+                        {
+                            // make a working copy of children to avoid System.InvalidOperationException:
+                            // "Collection was modified; enumeration operation may not execute."
+                            var originalChildren = Children.ToList();
 
-                    Children = noChildrenList;
-                    HasEmptyPlaceholder = true;
-                }
-                else
-                {
-                    var updatedSpacesList = new ObservableCollection<TreeViewItemViewModel>();
-                    foreach (CloudFoundrySpace space in spacesResponse.Content)
-                    {
-                        var newSpace = new SpaceViewModel(space, this, ParentTasExplorer, Services);
-                        updatedSpacesList.Add(newSpace);
+                            var removalTasks = new List<Task>();
+                            var additionTasks = new List<Task>();
+                            var updateChildrenTasks = new List<Task>();
+
+                            var freshSpaces = new ObservableCollection<CloudFoundrySpace>(spacesResponse.Content);
+                            if (freshSpaces.Count < 1)
+                            {
+                                foreach (var child in originalChildren)
+                                {
+                                    removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, child));
+                                }
+                                additionTasks.Add(ThreadingService.AddItemToCollectionOnUiThreadAsync(Children, EmptyPlaceholder));
+                            }
+                            else
+                            {
+                                // identify stale spaces to remove
+                                foreach (TreeViewItemViewModel priorChild in originalChildren)
+                                {
+                                    if (priorChild is PlaceholderViewModel)
+                                    {
+                                        removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, priorChild));
+                                    }
+                                    else if (priorChild is SpaceViewModel priorSpace)
+                                    {
+                                        bool spaceStillExists = freshSpaces.Any(o => o is CloudFoundrySpace freshSpace && freshSpace != null && freshSpace.SpaceId == priorSpace.Space.SpaceId);
+                                        if (!spaceStillExists)
+                                        {
+                                            removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, priorSpace));
+                                        }
+                                    }
+                                }
+
+                                // identify new spaces to add
+                                foreach (CloudFoundrySpace freshSpace in freshSpaces)
+                                {
+                                    bool spaceAlreadyExists = originalChildren.Any(child => child is SpaceViewModel extantSpace && extantSpace.Space.SpaceId == freshSpace.SpaceId);
+                                    if (!spaceAlreadyExists)
+                                    {
+                                        var newSpace = new SpaceViewModel(freshSpace, this, ParentTasExplorer, Services, expanded: false);
+                                        additionTasks.Add(ThreadingService.AddItemToCollectionOnUiThreadAsync(Children, newSpace));
+                                    }
+                                }
+                            }
+
+                            await Task.WhenAll(removalTasks);
+                            await Task.WhenAll(additionTasks);
+
+                            // update children
+                            foreach (TreeViewItemViewModel updatedChild in Children)
+                            {
+                                if (updatedChild is SpaceViewModel space)
+                                {
+                                    updateChildrenTasks.Add(ThreadingService.StartBackgroundTask(space.UpdateAllChildren));
+                                }
+                            }
+                            await Task.WhenAll(updateChildrenTasks);
+                        }
+                        else if (spacesResponse.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
+                        {
+                            IsExpanded = false;
+                            ParentTasExplorer.AuthenticationRequired = true;
+                        }
+                        else
+                        {
+                            Logger.Error("OrgViewModel failed to load spaces: {OrgViewModelLoadingException}", spacesResponse.Explanation);
+                            IsExpanded = false;
+                        }
                     }
-
-                    Children = updatedSpacesList;
-                    HasEmptyPlaceholder = false;
-                }
-
-                IsLoading = false;
-            }
-            else
-            {
-                IsLoading = false;
-
-                _dialogService.DisplayWarningDialog(_getSpacesFailureMsg, spacesResponse.Explanation);
-
-                IsExpanded = false;
-            }
-        }
-
-        public override async Task RefreshChildren()
-        {
-            if (!IsRefreshing)
-            {
-                IsRefreshing = true;
-
-                var freshSpaces = await FetchChildren();
-
-                RemoveNonexistentSpaces(freshSpaces);
-                AddNewSpaces(freshSpaces);
-
-                if (Children.Count == 0)
-                {
-                    UiDispatcherService.RunOnUiThread(() => Children.Add(EmptyPlaceholder));
-                }
-                else if (Children.Count > 1 && HasEmptyPlaceholder)
-                {
-                    UiDispatcherService.RunOnUiThread(() => Children.Remove(EmptyPlaceholder));
-                }
-             
-                IsRefreshing = false;
-            }
-        }
-
-        /// <summary>
-        /// Add any svms to Children which are in freshSpaces but not in Children.
-        /// </summary>
-        /// <param name="ovm"></param>
-        /// <param name="freshSpaces"></param>
-        private void AddNewSpaces(ObservableCollection<SpaceViewModel> freshSpaces)
-        {
-            foreach (SpaceViewModel newSVM in freshSpaces)
-            {
-                if (newSVM != null)
-                {
-                    bool spaceInChildren = Children.Any(svm =>
+                    catch (Exception ex)
                     {
-                        var oldSVM = svm as SpaceViewModel;
-                        return oldSVM != null && oldSVM.Space.SpaceId == newSVM.Space.SpaceId;
-                    });
-
-                    if (!spaceInChildren)
+                        Logger.Error("Caught exception trying to load spaces in OrgViewModel: {OrgViewModelLoadingException}", ex);
+                        _dialogService.DisplayWarningDialog(_getSpacesFailureMsg, "Something went wrong while loading spaces; try disconnecting & logging in again.\nIf this issue persists, please contact dotnetdevx@groups.vmware.com");
+                    }
+                    finally
                     {
-                        UiDispatcherService.RunOnUiThread(() => Children.Add(newSVM));
+                        IsLoading = false;
+                        lock (_loadingLock)
+                        {
+                            _updatesInProgress = 0;
+                        }
                     }
                 }
             }
         }
-
-        /// <summary>
-        /// Remove all svms from Children which don't appear in freshSpaces.
-        /// </summary>
-        /// <param name="ovm"></param>
-        /// <param name="freshSpaces"></param>
-        private void RemoveNonexistentSpaces(ObservableCollection<SpaceViewModel> freshSpaces)
-        {
-            var spacesToRemove = new ObservableCollection<SpaceViewModel>();
-
-            foreach (TreeViewItemViewModel priorChild in Children)
-            {
-                if (priorChild is SpaceViewModel oldSVM)
-                {
-                    bool spaceStillExists = freshSpaces.Any(svm => svm != null && svm.Space.SpaceId == oldSVM.Space.SpaceId);
-
-                    if (!spaceStillExists)
-                    {
-                        spacesToRemove.Add(oldSVM);
-                    }
-                }
-            }
-
-            foreach (SpaceViewModel svm in spacesToRemove)
-            {
-                UiDispatcherService.RunOnUiThread(() => Children.Remove(svm));
-            }
-        }
-
     }
 }

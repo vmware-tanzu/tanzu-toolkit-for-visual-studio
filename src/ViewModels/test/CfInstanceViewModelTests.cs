@@ -3,6 +3,7 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
@@ -14,7 +15,20 @@ namespace Tanzu.Toolkit.ViewModels.Tests
     {
         private CfInstanceViewModel _sut;
         private List<string> _receivedEvents;
-        TasExplorerViewModel _fakeTasExplorerViewModel;
+        private TasExplorerViewModel _fakeTasExplorerViewModel;
+        private CloudFoundryInstance _expectedCf;
+        private bool _expectedSkipSslValue = false;
+        private int _expectedRetryAmount = 1;
+        private readonly DetailedResult<List<CloudFoundryOrganization>> _fakeOrgsResponse = new DetailedResult<List<CloudFoundryOrganization>>
+        {
+            Succeeded = true,
+            Content = new List<CloudFoundryOrganization>
+            {
+                FakeOrgs[0],
+                FakeOrgs[1],
+                FakeOrgs[2],
+            }
+        };
 
         [TestInitialize]
         public void TestInit()
@@ -22,21 +36,38 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             RenewMockServices();
 
             MockUiDispatcherService.Setup(mock => mock.
-                RunOnUiThread(It.IsAny<Action>()))
+                RunOnUiThreadAsync(It.IsAny<Action>()))
                     .Callback<Action>(action =>
                     {
                         // Run whatever method is passed to MockUiDispatcherService.RunOnUiThread; do not delegate to the UI Dispatcher
                         action();
                     });
 
+            MockThreadingService.Setup(m => m
+              .RemoveItemFromCollectionOnUiThreadAsync(It.IsAny<ObservableCollection<TreeViewItemViewModel>>(), It.IsAny<TreeViewItemViewModel>()))
+                .Callback<ObservableCollection<TreeViewItemViewModel>, TreeViewItemViewModel>((collection, item) =>
+                {
+                    collection.Remove(item);
+                });
+
+            MockThreadingService.Setup(m => m
+              .AddItemToCollectionOnUiThreadAsync(It.IsAny<ObservableCollection<TreeViewItemViewModel>>(), It.IsAny<TreeViewItemViewModel>()))
+                .Callback<ObservableCollection<TreeViewItemViewModel>, TreeViewItemViewModel>((collection, item) =>
+                {
+                    collection.Add(item);
+                });
+
             _fakeTasExplorerViewModel = new TasExplorerViewModel(Services);
             _sut = new CfInstanceViewModel(FakeCfInstance, _fakeTasExplorerViewModel, Services);
+            _sut = new CfInstanceViewModel(FakeCfInstance, _fakeTasExplorerViewModel, Services, expanded: true);
 
             _receivedEvents = new List<string>();
             _sut.PropertyChanged += (sender, e) =>
             {
                 _receivedEvents.Add(e.PropertyName);
             };
+
+            _expectedCf = _sut.CloudFoundryInstance;
         }
 
         [TestCleanup]
@@ -60,12 +91,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("ctor")]
+        [TestCategory("ctor")]  
         public void Constructor_SetsEmptyPlaceholder()
         {
             Assert.AreEqual(CfInstanceViewModel._emptyOrgsPlaceholderMsg, _sut.EmptyPlaceholder.DisplayText);
         }
-        
+
         [TestMethod]
         [TestCategory("ctor")]
         public void Constructor_SetsParentTasExplorer()
@@ -74,411 +105,271 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("LoadChildren")]
-        public async Task LoadChildren_UpdatesAllOrgs()
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_RemovesStaleChildrenOnUiThread_WhenOrgsRequestSucceeds()
         {
-            var initialOrgsList = new System.Collections.ObjectModel.ObservableCollection<TreeViewItemViewModel>
+            /** mock 4 initial children */
+            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
             {
-                new OrgViewModel(new CloudFoundryOrganization("initial org 1", "initial org 1 guid", null), null, null, Services),
-                new OrgViewModel(new CloudFoundryOrganization("initial org 2", "initial org 2 guid", null), null, null, Services),
-                new OrgViewModel(new CloudFoundryOrganization("initial org 3", "initial org 3 guid", null), null, null, Services),
+                new OrgViewModel(FakeOrgs[0], _sut, _fakeTasExplorerViewModel, Services),
+                new OrgViewModel(FakeOrgs[1], _sut, _fakeTasExplorerViewModel, Services),
+                new OrgViewModel(FakeOrgs[2], _sut, _fakeTasExplorerViewModel, Services),
+                new OrgViewModel(FakeOrgs[3], _sut, _fakeTasExplorerViewModel, Services),
             };
 
-            var newOrgsList = new List<CloudFoundryOrganization>
-            {
-                new CloudFoundryOrganization("initial org 1", "initial org 1 guid", null),
-                new CloudFoundryOrganization("initial org 2", "initial org 2 guid", null),
-            };
+            /** mock retrieving all initial children except for FakeOrgs[3] */
+            MockCloudFoundryService.Setup(m => m
+              .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
+                .ReturnsAsync(_fakeOrgsResponse);
 
-            var fakeSuccessResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: true, content: newOrgsList);
+            await _sut.UpdateAllChildren();
 
-            _sut.Children = initialOrgsList;
+            Assert.AreEqual(3, _sut.Children.Count);
+            Assert.IsTrue(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == FakeOrgs[0].OrgName));
+            Assert.IsTrue(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == FakeOrgs[1].OrgName));
+            Assert.IsTrue(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == FakeOrgs[2].OrgName));
+            Assert.IsFalse(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == FakeOrgs[3].OrgName));
 
-            /* erase record of initial "Children" event */
-            _receivedEvents.Clear();
-
-            MockCloudFoundryService.Setup(mock => mock.
-              GetOrgsForCfInstanceAsync(_sut.CloudFoundryInstance, true, It.IsAny<int>()))
-                .ReturnsAsync(fakeSuccessResult);
-
-            Assert.AreEqual(initialOrgsList.Count, _sut.Children.Count);
-
-            await _sut.LoadChildren();
-
-            Assert.AreEqual(newOrgsList.Count, _sut.Children.Count);
-
-            foreach (TreeViewItemViewModel child in _sut.Children)
-            {
-                Assert.AreEqual(_sut, child.Parent);
-            }
-
-            Assert.AreEqual(1, _receivedEvents.Count);
-            Assert.AreEqual("Children", _receivedEvents[0]);
-
-            Assert.IsFalse(_sut.HasEmptyPlaceholder);
-        }
-
-        [TestMethod]
-        [TestCategory("LoadChildren")]
-        public async Task LoadChildren_AssignsNoOrgsPlaceholder_WhenThereAreNoOrgs()
-        {
-            var fakeNoOrgsResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: true, content: EmptyListOfOrgs);
-
-            MockCloudFoundryService.Setup(mock => mock.
-              GetOrgsForCfInstanceAsync(_sut.CloudFoundryInstance, true, It.IsAny<int>()))
-                .ReturnsAsync(fakeNoOrgsResult);
-
-            await _sut.LoadChildren();
-
-            Assert.AreEqual(1, _sut.Children.Count);
-            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
-            Assert.AreEqual(CfInstanceViewModel._emptyOrgsPlaceholderMsg, _sut.Children[0].DisplayText);
-
-            Assert.AreEqual(_sut.EmptyPlaceholder, _sut.Children[0]);
-            Assert.IsTrue(_sut.HasEmptyPlaceholder);
-
-            Assert.AreEqual(1, _receivedEvents.Count);
-            Assert.AreEqual("Children", _receivedEvents[0]);
-        }
-
-        [TestMethod]
-        [TestCategory("LoadChildren")]
-        public async Task LoadChildren_SetsIsLoadingToFalse_WhenOrgsRequestSucceeds()
-        {
-            var fakeOrgsResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: true, content: EmptyListOfOrgs);
-
-            MockCloudFoundryService.Setup(mock => mock.
-              GetOrgsForCfInstanceAsync(_sut.CloudFoundryInstance, true, It.IsAny<int>()))
-                .ReturnsAsync(fakeOrgsResult);
-
-            _sut.IsLoading = true;
-
-            await _sut.LoadChildren();
-
-            Assert.IsFalse(_sut.IsLoading);
-        }
-
-        [TestMethod]
-        [TestCategory("LoadChildren")]
-        public async Task LoadChildren_SetsIsLoadingToFalse_WhenOrgsRequestFails()
-        {
-            var fakeFailedResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: false, content: null);
-
-            MockCloudFoundryService.Setup(mock => mock.
-              GetOrgsForCfInstanceAsync(_sut.CloudFoundryInstance, true, It.IsAny<int>()))
-                .ReturnsAsync(fakeFailedResult);
-
-            _sut.IsLoading = true;
-
-            await _sut.LoadChildren();
-
-            Assert.IsFalse(_sut.IsLoading);
-        }
-
-        [TestMethod]
-        [TestCategory("LoadChildren")]
-        public async Task LoadChildren_DisplaysErrorDialog_WhenOrgsRequestFails()
-        {
-            var fakeFailedResult = new DetailedResult<List<CloudFoundryOrganization>>(
-                succeeded: false,
-                content: null,
-                explanation: "junk",
-                cmdDetails: FakeFailureCmdResult);
-
-            MockCloudFoundryService.Setup(mock => mock.
-              GetOrgsForCfInstanceAsync(_sut.CloudFoundryInstance, true, It.IsAny<int>()))
-                .ReturnsAsync(fakeFailedResult);
-
-            await _sut.LoadChildren();
-
-            Assert.IsFalse(_sut.IsLoading);
-
-            MockErrorDialogService.Verify(mock => mock.
-              DisplayWarningDialog(CfInstanceViewModel._getOrgsFailureMsg, fakeFailedResult.Explanation),
+            MockThreadingService.Verify(m => m
+              .RemoveItemFromCollectionOnUiThreadAsync(_sut.Children, It.Is<OrgViewModel>((ovm) => ovm.Org == FakeOrgs[3])),
                 Times.Once);
         }
 
         [TestMethod]
-        [TestCategory("LoadChildren")]
-        public async Task LoadChildren_CollapsesTreeViewItem_WhenOrgsRequestFails()
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_AddsNewChildrenOnUiThread_WhenOrgsRequestSucceeds()
         {
-            var expandedViewModel = new CfInstanceViewModel(FakeCfInstance, null, Services)
+            /** mock 2 initial children */
+            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
             {
-                IsExpanded = true,
+                new OrgViewModel(FakeOrgs[0], _sut, _fakeTasExplorerViewModel, Services),
+                new OrgViewModel(FakeOrgs[1], _sut, _fakeTasExplorerViewModel, Services),
             };
 
-            expandedViewModel.PropertyChanged += (sender, e) =>
-            {
-                _receivedEvents.Add(e.PropertyName);
-            };
+            /** mock retrieving all initial children plus FakeOrgs[2] */
+            MockCloudFoundryService.Setup(m => m
+              .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
+                .ReturnsAsync(_fakeOrgsResponse);
 
-            var fakeFailedResult = new DetailedResult<List<CloudFoundryOrganization>>(
-                succeeded: false,
-                content: null,
-                explanation: "junk",
-                cmdDetails: FakeFailureCmdResult);
+            await _sut.UpdateAllChildren();
 
-            MockCloudFoundryService.Setup(mock => mock.
-              GetOrgsForCfInstanceAsync(expandedViewModel.CloudFoundryInstance, true, 1))
-                .ReturnsAsync(fakeFailedResult);
+            Assert.AreEqual(3, _sut.Children.Count);
+            Assert.IsTrue(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == FakeOrgs[0].OrgName));
+            Assert.IsTrue(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == FakeOrgs[1].OrgName));
+            Assert.IsTrue(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == FakeOrgs[2].OrgName));
 
-            Assert.IsTrue(expandedViewModel.IsExpanded);
-
-            await expandedViewModel.LoadChildren();
-
-            Assert.IsFalse(expandedViewModel.IsLoading);
-            Assert.IsFalse(expandedViewModel.IsExpanded);
-            Assert.IsTrue(_receivedEvents.Contains("IsExpanded"));
-
-            MockErrorDialogService.Verify(mock => mock.
-              DisplayWarningDialog(CfInstanceViewModel._getOrgsFailureMsg, fakeFailedResult.Explanation),
+            MockThreadingService.Verify(m => m
+              .AddItemToCollectionOnUiThreadAsync(_sut.Children, It.Is<OrgViewModel>((ovm) => ovm.Org == FakeOrgs[2])),
                 Times.Once);
         }
 
         [TestMethod]
-        [TestCategory("FetchChildren")]
-        public async Task FetchChildren_ReturnsListOfOrgs_WithoutUpdatingChildren()
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_CallsUpdateOnAllChildren_WhenOrgsRequestSucceeds()
         {
-            var fakeOrgsList = new List<CloudFoundryOrganization>
+            MockCloudFoundryService.Setup(m => m
+              .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
+                .ReturnsAsync(_fakeOrgsResponse);
+
+            MockThreadingService.Setup(m => m
+              .StartBackgroundTask(It.IsAny<Func<Task>>()))
+                .Verifiable();
+
+            await _sut.UpdateAllChildren();
+
+            foreach (var child in _sut.Children)
             {
-                new CloudFoundryOrganization("fake org name 1", "fake org id 1", FakeCfInstance),
-                new CloudFoundryOrganization("fake org name 2", "fake org id 2", FakeCfInstance),
-            };
-
-            var fakeSuccessResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: true, content: fakeOrgsList);
-
-            MockCloudFoundryService.Setup(mock => mock.
-              GetOrgsForCfInstanceAsync(_sut.CloudFoundryInstance, true, It.IsAny<int>()))
-                .ReturnsAsync(fakeSuccessResult);
-
-            /* pre-check presence of placeholder */
-            Assert.AreEqual(1, _sut.Children.Count);
-            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
-
-            var orgs = await _sut.FetchChildren();
-
-            Assert.AreEqual(2, orgs.Count);
-            foreach (TreeViewItemViewModel child in orgs)
-            {
-                Assert.AreEqual(_sut, child.Parent);
-            }
-
-            /* confirm presence of placeholder */
-            Assert.AreEqual(1, _sut.Children.Count);
-            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
-
-            // property changed events should not be raised
-            Assert.AreEqual(0, _receivedEvents.Count);
-        }
-
-        [TestMethod]
-        [TestCategory("FetchChildren")]
-        public async Task FetchChildren_DisplaysErrorDialog_WhenOrgsRequestFails()
-        {
-            var fakeFailedResult = new DetailedResult<List<CloudFoundryOrganization>>(
-                succeeded: false,
-                content: null,
-                explanation: "junk",
-                cmdDetails: FakeFailureCmdResult);
-
-            MockCloudFoundryService.Setup(mock => mock.
-              GetOrgsForCfInstanceAsync(_sut.CloudFoundryInstance, true, It.IsAny<int>()))
-                .ReturnsAsync(fakeFailedResult);
-
-            var result = await _sut.FetchChildren();
-
-            CollectionAssert.AreEqual(EmptyListOfOrgs, result);
-
-            MockErrorDialogService.Verify(mock => mock.
-              DisplayErrorDialog(CfInstanceViewModel._getOrgsFailureMsg, fakeFailedResult.Explanation),
-                Times.Once);
-        }
-
-        [TestMethod]
-        [TestCategory("FetchChildren")]
-        public async Task FetchChildren_CollapsesViewModel_WhenOrgsRequestFailsBecauseOfInvalidRefreshToken()
-        {
-            _sut = new CfInstanceViewModel(FakeCfInstance, _fakeTasExplorerViewModel, Services, expanded: true);
-
-            var fakeFailedResult =
-                new DetailedResult<List<CloudFoundryOrganization>>(succeeded: false, content: null, explanation: "junk", cmdDetails: FakeFailureCmdResult)
+                if (child is OrgViewModel org)
                 {
-                    FailureType = FailureType.InvalidRefreshToken,
-                };
+                    MockThreadingService.Verify(m => m
+                      .StartBackgroundTask(org.UpdateAllChildren), Times.Once);
+                }
+                else
+                {
+                    Assert.Fail("All children should be OrgViewModels at this point");
+                }
+            }
+        }
 
-            MockCloudFoundryService.Setup(mock => mock.
-              GetOrgsForCfInstanceAsync(_sut.CloudFoundryInstance, true, It.IsAny<int>()))
-                .ReturnsAsync(fakeFailedResult);
+        [TestMethod]
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_AssignsEmptyPlaceholder_WhenOrgsRequestReturnsNoOrgs()
+        {
+            var fakeNoOrgsResponse = _fakeOrgsResponse;
+            fakeNoOrgsResponse.Content.Clear();
+
+            /** mock 2 initial children */
+            var initialChildren = new ObservableCollection<TreeViewItemViewModel>
+            {
+                new OrgViewModel(FakeOrgs[0], _sut, _fakeTasExplorerViewModel, Services),
+                new OrgViewModel(FakeOrgs[1], _sut, _fakeTasExplorerViewModel, Services),
+            };
+            _sut.Children = new ObservableCollection<TreeViewItemViewModel>(initialChildren);
+
+            MockCloudFoundryService.Setup(m => m
+              .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
+                .ReturnsAsync(fakeNoOrgsResponse);
+
+            Assert.IsFalse(_sut.Children.Any(child => child is PlaceholderViewModel));
+
+            await _sut.UpdateAllChildren();
+
+            Assert.AreEqual(1, _sut.Children.Count);
+            Assert.IsTrue(_sut.Children[0].Equals(_sut.EmptyPlaceholder));
+            foreach (var child in initialChildren)
+            {
+                MockThreadingService.Verify(m => m.RemoveItemFromCollectionOnUiThreadAsync(_sut.Children, child), Times.Once);
+            }
+            MockThreadingService.Verify(m => m.AddItemToCollectionOnUiThreadAsync(_sut.Children, _sut.EmptyPlaceholder), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_SetsIsLoadingTrueAtStart_AndSetsIsLoadingFalseAtEnd()
+        {
+            MockCloudFoundryService.Setup(m => m.GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
+                .Callback(() =>
+                {
+                    // ensure IsLoading was set to true by the time orgs were queried
+                    Assert.IsTrue(_sut.IsLoading);
+                }).ReturnsAsync(_fakeOrgsResponse);
+
+            Assert.IsFalse(_sut.IsLoading);
+            Assert.IsTrue(_sut.IsExpanded);
+
+            await _sut.UpdateAllChildren();
+
+            Assert.IsFalse(_sut.IsLoading);
+        }
+
+        [TestMethod]
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_RemovesEmptyPlaceholder_WhenOrgsRequestReturnsOrgs()
+        {
+            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
+            {
+                _sut.EmptyPlaceholder,
+            };
+
+            /** mock 3 new children */
+            MockCloudFoundryService.Setup(m => m
+              .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
+                .ReturnsAsync(_fakeOrgsResponse);
+
+            Assert.AreEqual(1, _sut.Children.Count);
+            Assert.IsTrue(_sut.Children[0].Equals(_sut.EmptyPlaceholder));
+
+            await _sut.UpdateAllChildren();
+
+            Assert.AreEqual(3, _sut.Children.Count);
+            Assert.IsFalse(_sut.Children.Any(child => child is PlaceholderViewModel));
+        }
+
+        [TestMethod]
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_RemovesLoadingPlaceholder_WhenOrgsRequestReturnsOrgs()
+        {
+            var fakeNoOrgsResponse = _fakeOrgsResponse;
+            fakeNoOrgsResponse.Content.Clear();
+
+            /** mock 2 initial children */
+            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
+            {
+                new OrgViewModel(FakeOrgs[0], _sut, _fakeTasExplorerViewModel, Services),
+                new OrgViewModel(FakeOrgs[1], _sut, _fakeTasExplorerViewModel, Services),
+            };
+
+            MockCloudFoundryService.Setup(m => m
+              .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
+                .Callback(() =>
+                {
+                    // ensure loading placeholder present at time of loading fresh children
+                    Assert.IsTrue(_sut.IsLoading);
+                    Assert.IsTrue(_sut.Children.Contains(_sut.LoadingPlaceholder));
+
+                }).ReturnsAsync(fakeNoOrgsResponse);
+
+            await _sut.UpdateAllChildren();
+
+            Assert.IsFalse(_sut.Children.Contains(_sut.LoadingPlaceholder));
+        }
+
+        [TestMethod]
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_CollapsesSelf_AndSetsAuthRequiredTrue_WhenOrgsRequestFailsWithInvalidRefreshToken()
+        {
+            var fakeInvalidTokenResponse = new DetailedResult<List<CloudFoundryOrganization>>
+            {
+                Succeeded = false,
+                Explanation = "junk",
+                FailureType = FailureType.InvalidRefreshToken,
+            };
+
+            MockCloudFoundryService.Setup(m => m
+              .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
+                .ReturnsAsync(fakeInvalidTokenResponse);
+
+            Assert.IsTrue(_sut.IsExpanded);
+            Assert.IsFalse(_sut.ParentTasExplorer.AuthenticationRequired);
+
+            await _sut.UpdateAllChildren();
+
+            Assert.IsFalse(_sut.IsLoading);
+            Assert.IsFalse(_sut.IsExpanded);
+            Assert.IsTrue(_sut.ParentTasExplorer.AuthenticationRequired);
+        }
+
+        [TestMethod]
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_CollapsesSelf_AndLogsError_WhenOrgsRequestFails()
+        {
+            var fakeFailedOrgsResponse = new DetailedResult<List<CloudFoundryOrganization>>
+            {
+                Succeeded = false,
+                Explanation = "junk",
+            };
+
+            MockCloudFoundryService.Setup(m => m
+              .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
+                .ReturnsAsync(fakeFailedOrgsResponse);
+
+            MockLogger.Setup(m => m
+              .Error(It.Is<string>(s => s.Contains("CfInstanceViewModel failed to load orgs")), fakeFailedOrgsResponse.Explanation))
+                .Verifiable();
 
             Assert.IsTrue(_sut.IsExpanded);
 
-            var result = await _sut.FetchChildren();
+            await _sut.UpdateAllChildren();
 
+            Assert.IsFalse(_sut.IsLoading);
             Assert.IsFalse(_sut.IsExpanded);
-
-            MockErrorDialogService.Verify(mock => mock.
-              DisplayErrorDialog(It.IsAny<string>(), It.IsAny<string>()),
-                Times.Never);
-        }
-        
-        [TestMethod]
-        [TestCategory("FetchChildren")]
-        public async Task FetchChildren_SetsAuthenticationRequiredToTrue_WhenOrgsRequestFailsBecauseOfInvalidRefreshToken()
-        {
-            _sut = new CfInstanceViewModel(FakeCfInstance, _fakeTasExplorerViewModel, Services, expanded: true);
-
-            var fakeFailedResult =
-                new DetailedResult<List<CloudFoundryOrganization>>(succeeded: false, content: null, explanation: "junk", cmdDetails: FakeFailureCmdResult)
-                {
-                    FailureType = FailureType.InvalidRefreshToken,
-                };
-
-            MockCloudFoundryService.Setup(mock => mock.
-              GetOrgsForCfInstanceAsync(_sut.CloudFoundryInstance, true, It.IsAny<int>()))
-                .ReturnsAsync(fakeFailedResult);
-
-            Assert.IsFalse(_sut.ParentTasExplorer.AuthenticationRequired);
-
-            var result = await _sut.FetchChildren();
-
-            Assert.IsTrue(_sut.ParentTasExplorer.AuthenticationRequired);
-
-            MockErrorDialogService.Verify(mock => mock.
-              DisplayErrorDialog(It.IsAny<string>(), It.IsAny<string>()),
-                Times.Never);
+            MockLogger.VerifyAll();
         }
 
         [TestMethod]
-        [TestCategory("RefreshChildren")]
-        public async Task RefreshCfInstance_UpdatesChildrenOnCfInstanceViewModel()
+        [TestCategory("UpdateAllChildren")]
+        public async Task UpdateAllChildren_DisplaysWarning_AndLogsError_ForAllCaughtExceptions()
         {
-            var fakeOrgName1 = "fake org 1";
-            var fakeOrgName2 = "fake org 2";
-            var fakeOrgName3 = "fake org 3";
-            var fakeOrgName4 = "fake org 4";
+            var fakeException = new Exception(":(");
 
-            var fakeOrgGuid1 = "fake org 1";
-            var fakeOrgGuid2 = "fake org 2";
-            var fakeOrgGuid3 = "fake org 3";
-            var fakeOrgGuid4 = "fake org 4";
+            MockCloudFoundryService.Setup(m => m
+              .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
+                .Throws(fakeException);
 
-            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
-            {
-                // to be removed:
-                new OrgViewModel(new CloudFoundryOrganization(fakeOrgName1, fakeOrgGuid1, _sut.CloudFoundryInstance), null, null, Services), 
-                // to stay:
-                new OrgViewModel(new CloudFoundryOrganization(fakeOrgName2, fakeOrgGuid2, _sut.CloudFoundryInstance), null, null, Services, expanded: true), // should stay expanded after refresh 
-                new OrgViewModel(new CloudFoundryOrganization(fakeOrgName3, fakeOrgGuid3, _sut.CloudFoundryInstance), null, null, Services, expanded: false), // should stay collapsed after refresh 
-            };
+            MockLogger.Setup(m => m
+              .Error(It.Is<string>(s => s.Contains("Caught exception trying to load orgs in CfInstanceViewModel")), fakeException))
+                .Verifiable();
 
-            var fakeOrgsList = new List<CloudFoundryOrganization>
-            {
-                // original:
-                new CloudFoundryOrganization(fakeOrgName2, fakeOrgGuid2, _sut.CloudFoundryInstance),
-                new CloudFoundryOrganization(fakeOrgName3, fakeOrgGuid3, _sut.CloudFoundryInstance),
-                // new:
-                new CloudFoundryOrganization(fakeOrgName4, fakeOrgGuid4, _sut.CloudFoundryInstance),
-            };
+            MockErrorDialogService.Setup(m => m
+              .DisplayWarningDialog(
+                CfInstanceViewModel._getOrgsFailureMsg,
+                It.Is<string>(s => s.Contains("try disconnecting & logging in again")&& s.Contains("If this issue persists, please contact dotnetdevx@groups.vmware.com"))))
+                .Verifiable();
 
-            var fakeSuccessResult = new DetailedResult<List<CloudFoundryOrganization>>(succeeded: true, content: fakeOrgsList);
+            await _sut.UpdateAllChildren();
 
-            Assert.AreEqual(3, _sut.Children.Count);
-            OrgViewModel initialChildOrg1 = (OrgViewModel)_sut.Children[0];
-            OrgViewModel initialChildOrg2 = (OrgViewModel)_sut.Children[1];
-            OrgViewModel initialChildOrg3 = (OrgViewModel)_sut.Children[2];
-            Assert.AreEqual(fakeOrgName1, initialChildOrg1.Org.OrgName);
-            Assert.AreEqual(fakeOrgName2, initialChildOrg2.Org.OrgName);
-            Assert.AreEqual(fakeOrgName3, initialChildOrg3.Org.OrgName);
-            Assert.IsFalse(initialChildOrg1.IsExpanded);
-            Assert.IsTrue(initialChildOrg2.IsExpanded);
-            Assert.IsFalse(initialChildOrg3.IsExpanded);
-
-            MockCloudFoundryService.Setup(mock => mock.
-                GetOrgsForCfInstanceAsync(_sut.CloudFoundryInstance, true, It.IsAny<int>()))
-                    .ReturnsAsync(fakeSuccessResult);
-
-            _receivedEvents.Clear();
-
-            await _sut.RefreshChildren();
-
-            Assert.AreEqual(3, _sut.Children.Count);
-            OrgViewModel refreshedChildOrg1 = (OrgViewModel)_sut.Children[0];
-            OrgViewModel refreshedChildOrg2 = (OrgViewModel)_sut.Children[1];
-            OrgViewModel refreshedChildOrg3 = (OrgViewModel)_sut.Children[2];
-            Assert.AreEqual(fakeOrgName2, refreshedChildOrg1.Org.OrgName);
-            Assert.AreEqual(fakeOrgName3, refreshedChildOrg2.Org.OrgName);
-            Assert.AreEqual(fakeOrgName4, refreshedChildOrg3.Org.OrgName);
-            Assert.IsTrue(refreshedChildOrg1.IsExpanded); // children that aren't new shouldn't change expansion
-            Assert.IsFalse(refreshedChildOrg2.IsExpanded); // children that aren't new shouldn't change expansion
-            Assert.IsFalse(refreshedChildOrg2.IsExpanded); // new children should start collapsed
-
-            // property changed events should only be raised for "IsRefreshing" (1 to set as true, 1 to set as false)
-            Assert.AreEqual(2, _receivedEvents.Count);
-            Assert.AreEqual("IsRefreshing", _receivedEvents[0]);
-
-            MockCloudFoundryService.VerifyAll();
-        }
-
-        [TestMethod]
-        [TestCategory("RefreshChildren")]
-        public async Task RefreshChildren_AddsPlaceholder_WhenAllOrgsAreRemoved()
-        {
-            var fakeInitialOrg = new CloudFoundryOrganization("fake org name", "fake org id", parentCf: _sut.CloudFoundryInstance);
-            var ovm = new OrgViewModel(fakeInitialOrg, null, null, Services);
-
-            var fakeEmptyOrgsResult = new DetailedResult<List<CloudFoundryOrganization>>(
-                succeeded: true,
-                content: new List<CloudFoundryOrganization>(), // simulate cf having lost all orgs before refresh
-                explanation: null,
-                cmdDetails: FakeSuccessCmdResult);
-
-            MockCloudFoundryService.Setup(mock => mock.
-                GetOrgsForCfInstanceAsync(_sut.CloudFoundryInstance, true, It.IsAny<int>()))
-                    .ReturnsAsync(fakeEmptyOrgsResult);
-
-            _sut.Children = new ObservableCollection<TreeViewItemViewModel> { ovm }; // simulate cf initially having 1 org child
-
-            Assert.AreEqual(1, _sut.Children.Count);
-            Assert.AreEqual(typeof(OrgViewModel), _sut.Children[0].GetType());
-
-            await _sut.RefreshChildren();
-
-            Assert.AreEqual(1, _sut.Children.Count);
-            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
-            Assert.AreEqual(CfInstanceViewModel._emptyOrgsPlaceholderMsg, _sut.Children[0].DisplayText);
-        }
-
-        [TestMethod]
-        [TestCategory("RefreshChildren")]
-        public async Task RefreshChildren_RemovesPlaceholder_WhenEmptyCfGainsChildren()
-        {
-            // simulate cf initially having no org children
-            _sut.Children = new ObservableCollection<TreeViewItemViewModel> { _sut.EmptyPlaceholder };
-            _sut.HasEmptyPlaceholder = true;
-
-            var fakeNewOrg = new CloudFoundryOrganization("fake org name", "fake org id", _sut.CloudFoundryInstance);
-
-            var fakeSuccessfulOrgsResult = new DetailedResult<List<CloudFoundryOrganization>>(
-                succeeded: true,
-                content: new List<CloudFoundryOrganization>
-                {
-                    fakeNewOrg, // simulate cf having gained an org child before refresh
-                },
-                explanation: null,
-                cmdDetails: FakeSuccessCmdResult);
-
-            MockCloudFoundryService.Setup(mock => mock.
-                GetOrgsForCfInstanceAsync(_sut.CloudFoundryInstance, true, It.IsAny<int>()))
-                    .ReturnsAsync(fakeSuccessfulOrgsResult);
-
-            Assert.AreEqual(1, _sut.Children.Count);
-            Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
-            Assert.AreEqual(CfInstanceViewModel._emptyOrgsPlaceholderMsg, _sut.Children[0].DisplayText);
-
-            await _sut.RefreshChildren();
-
-            Assert.AreEqual(1, _sut.Children.Count);
-            Assert.AreEqual(typeof(OrgViewModel), _sut.Children[0].GetType());
+            MockLogger.VerifyAll();
+            MockErrorDialogService.VerifyAll();
         }
     }
 }
