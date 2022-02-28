@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services.ErrorDialog;
@@ -14,32 +16,8 @@ namespace Tanzu.Toolkit.ViewModels
         internal static readonly string _getAppsFailureMsg = "Unable to load apps.";
         private readonly IErrorDialog _dialogService;
 
-        private volatile bool _isRefreshing = false;
-        private readonly object _threadLock = new object();
-
-        /// <summary>
-        /// A thread-safe indicator of whether or not this <see cref="SpaceViewModel"/> is in the process of updating its children.
-        /// </summary>
-        public bool IsRefreshing
-        {
-            get
-            {
-                lock (_threadLock)
-                {
-                    return _isRefreshing;
-                }
-            }
-
-            private set
-            {
-                lock (_threadLock)
-                {
-                    _isRefreshing = value;
-                }
-
-                RaisePropertyChangedEvent("IsRefreshing");
-            }
-        }
+        private volatile int _updatesInProgress = 0;
+        private readonly object _loadingLock = new object();
 
         public CloudFoundrySpace Space { get; }
 
@@ -61,101 +39,115 @@ namespace Tanzu.Toolkit.ViewModels
             };
         }
 
-        public async Task<ObservableCollection<AppViewModel>> FetchChildren()
+        protected internal override async Task UpdateAllChildren()
         {
-            var newAppsList = new ObservableCollection<AppViewModel>();
-
-            var appsResult = await CloudFoundryService.GetAppsForSpaceAsync(Space);
-
-            if (appsResult.Succeeded)
+            if (IsExpanded && !IsLoading)
             {
-                foreach (CloudFoundryApp app in appsResult.Content)
+                lock (_loadingLock)
                 {
-                    var newOrg = new AppViewModel(app, Services);
-                    newAppsList.Add(newOrg);
+                    _updatesInProgress += 1;
                 }
-            }
-            else if (appsResult.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
-            {
-                Parent.Parent.IsExpanded = false;
-                ParentTasExplorer.AuthenticationRequired = true;
-            }
-            else
-            {
-                _dialogService.DisplayErrorDialog(_getAppsFailureMsg, appsResult.Explanation);
-            }
 
-            return newAppsList;
-        }
-
-        protected internal override async Task LoadChildren()
-        {
-            var appsResult = await CloudFoundryService.GetAppsForSpaceAsync(Space);
-
-            if (appsResult.Succeeded)
-            {
-                if (appsResult.Content.Count == 0)
+                if (_updatesInProgress == 1)
                 {
-                    var noChildrenList = new ObservableCollection<TreeViewItemViewModel>
+                    IsLoading = true;
+                    try
                     {
-                        EmptyPlaceholder,
-                    };
+                        var appsResponse = await CloudFoundryService.GetAppsForSpaceAsync(Space);
+                        if (appsResponse.Succeeded)
+                        {
+                            // make a working copy of children to avoid System.InvalidOperationException:
+                            // "Collection was modified; enumeration operation may not execute."
+                            var originalChildren = Children.ToList();
 
-                    Children = noChildrenList;
-                    HasEmptyPlaceholder = true;
-                }
-                else
-                {
-                    var updatedAppsList = new ObservableCollection<TreeViewItemViewModel>();
-                    foreach (CloudFoundryApp app in appsResult.Content)
-                    {
-                        updatedAppsList.Add(new AppViewModel(app, Services));
+                            var removalTasks = new List<Task>();
+                            var additionTasks = new List<Task>();
+
+                            var freshApps = new ObservableCollection<CloudFoundryApp>(appsResponse.Content);
+                            if (freshApps.Count < 1)
+                            {
+                                foreach (var child in originalChildren)
+                                {
+                                    removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, child));
+                                }
+                                additionTasks.Add(ThreadingService.AddItemToCollectionOnUiThreadAsync(Children, EmptyPlaceholder));
+                            }
+                            else
+                            {
+                                // identify stale apps to remove
+                                foreach (TreeViewItemViewModel priorChild in originalChildren)
+                                {
+                                    if (priorChild is PlaceholderViewModel)
+                                    {
+                                        removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, priorChild));
+                                    }
+                                    else if (priorChild is AppViewModel priorApp)
+                                    {
+                                        bool appStillExists = freshApps.Any(o => o is CloudFoundryApp freshApp && freshApp != null && freshApp.AppId == priorApp.App.AppId);
+                                        if (!appStillExists)
+                                        {
+                                            removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, priorApp));
+                                        }
+                                    }
+                                }
+
+                                // identify new apps to add
+                                foreach (CloudFoundryApp freshApp in freshApps)
+                                {
+                                    var appsWithSameId = originalChildren.Where(child => child is AppViewModel extantApp && extantApp.App.AppId == freshApp.AppId);
+                                    var numMatchingApps = appsWithSameId.Count();
+                                    switch (appsWithSameId.Count())
+                                    {
+                                        case 0: // no existing apps match fresh app's id; add it
+                                            var newApp = new AppViewModel(freshApp, Services);
+                                            additionTasks.Add(ThreadingService.AddItemToCollectionOnUiThreadAsync(Children, newApp));
+                                            break;
+                                        case 1: // found matching app; keep it but update state with fresh info
+                                            var extantApp = (AppViewModel)appsWithSameId.First();
+                                            extantApp.App.State = freshApp.State;
+                                            break;
+                                        default: // n < 0 should be impossible & n > 1 means there are n extant apps with the same id
+                                            Logger.Error("Space {SpaceName} has {NumMatchingApps} app with id {AppId}", Space.SpaceName, numMatchingApps, freshApp.AppId);
+                                            break;
+                                    }
+                                }
+                            }
+
+                            await Task.WhenAll(removalTasks);
+                            await Task.WhenAll(additionTasks);
+                            foreach (TreeViewItemViewModel child in Children)
+                            {
+                                if (child is AppViewModel app)
+                                {
+                                    app.RefreshAppState();
+                                }
+                            }
+                        }
+                        else if (appsResponse.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
+                        {
+                            IsExpanded = false;
+                            ParentTasExplorer.AuthenticationRequired = true;
+                        }
+                        else
+                        {
+                            Logger.Error("SpaceViewModel failed to load apps: {SpaceViewModelLoadingException}", appsResponse.Explanation);
+                            IsExpanded = false;
+                        }
                     }
-
-                    Children = updatedAppsList;
-                    HasEmptyPlaceholder = false;
+                    catch (Exception ex)
+                    {
+                        Logger.Error("Caught exception trying to load apps in SpaceViewModel: {SpaceViewModelLoadingException}", ex);
+                        _dialogService.DisplayWarningDialog(_getAppsFailureMsg, "Something went wrong while loading apps; try disconnecting & logging in again.\nIf this issue persists, please contact dotnetdevx@groups.vmware.com");
+                    }
+                    finally
+                    {
+                        IsLoading = false;
+                        lock (_loadingLock)
+                        {
+                            _updatesInProgress = 0;
+                        }
+                    }
                 }
-
-                IsLoading = false;
-            }
-            else
-            {
-                IsLoading = false;
-
-                _dialogService.DisplayWarningDialog(_getAppsFailureMsg, appsResult.Explanation);
-
-                IsExpanded = false;
-            }
-        }
-
-        public override async Task RefreshChildren()
-        {
-            if (!IsRefreshing)
-            {
-                IsRefreshing = true;
-
-                var freshApps = await FetchChildren();
-                ReplaceChildren(freshApps);
-
-                IsRefreshing = false;
-            }
-        }
-
-        private void ReplaceChildren(ObservableCollection<AppViewModel> freshApps)
-        {
-            UiDispatcherService.RunOnUiThread(() => Children.Clear());
-            foreach (TreeViewItemViewModel avm in freshApps)
-            {
-                UiDispatcherService.RunOnUiThread(() => Children.Add(avm));
-            }
-
-            if (Children.Count == 0)
-            {
-                UiDispatcherService.RunOnUiThread(() => Children.Add(EmptyPlaceholder));
-            }
-            else if (Children.Count > 1 && HasEmptyPlaceholder)
-            {
-                UiDispatcherService.RunOnUiThread(() => Children.Remove(EmptyPlaceholder));
             }
         }
     }

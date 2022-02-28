@@ -12,9 +12,15 @@ namespace Tanzu.Toolkit.VisualStudio.Views.Converters
         {
             var valueList = value as ObservableCollection<string>;
 
-            if (valueList == null) return string.Empty;
+            if (valueList == null)
+            {
+                return string.Empty;
+            }
 
-            if (valueList.Count == 0) return EmptyListMessage;
+            if (valueList.Count == 0)
+            {
+                return EmptyListMessage;
+            }
 
             return string.Join(", ", valueList);
         }

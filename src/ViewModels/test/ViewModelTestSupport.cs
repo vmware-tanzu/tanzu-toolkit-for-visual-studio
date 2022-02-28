@@ -18,6 +18,7 @@ using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
 using Tanzu.Toolkit.ViewModels.SsoDialog;
 using Tanzu.Toolkit.ViewModels.AppDeletionConfirmation;
+using System.Threading.Tasks;
 
 namespace Tanzu.Toolkit.ViewModels.Tests
 {
@@ -76,6 +77,33 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         internal string[] sampleInvalidManifestLines = File.ReadAllLines("TestFakes//fake-invalid-manifest.yml");
         internal string[] multiBuildpackManifestLines = File.ReadAllLines("TestFakes//fake-multi-buildpack-manifest.yml");
 
+        protected static readonly List<CloudFoundryOrganization> FakeOrgs = new List<CloudFoundryOrganization>
+        {
+            new CloudFoundryOrganization("fakeOrg1", "fake-org-guid-1", FakeCfInstance),
+            new CloudFoundryOrganization("fakeOrg2", "fake-org-guid-2", FakeCfInstance),
+            new CloudFoundryOrganization("fakeOrg3", "fake-org-guid-3", FakeCfInstance),
+            new CloudFoundryOrganization("fakeOrg4", "fake-org-guid-4", FakeCfInstance),
+            new CloudFoundryOrganization("fakeOrg5", "fake-org-guid-5", FakeCfInstance),
+        };
+
+        protected static readonly List<CloudFoundrySpace> FakeSpaces = new List<CloudFoundrySpace>
+        {
+            new CloudFoundrySpace("fakeSpace1", "fake-space-guid-1", FakeCfOrg),
+            new CloudFoundrySpace("fakeSpace2", "fake-space-guid-2", FakeCfOrg),
+            new CloudFoundrySpace("fakeSpace3", "fake-space-guid-3", FakeCfOrg),
+            new CloudFoundrySpace("fakeSpace4", "fake-space-guid-4", FakeCfOrg),
+            new CloudFoundrySpace("fakeSpace5", "fake-space-guid-5", FakeCfOrg),
+        };
+
+        protected static readonly List<CloudFoundryApp> FakeApps = new List<CloudFoundryApp>
+        {
+            new CloudFoundryApp("fakeApp1", "fake-app-guid-1", FakeCfSpace, "junk state"),
+            new CloudFoundryApp("fakeApp2", "fake-app-guid-2", FakeCfSpace, "junk state"),
+            new CloudFoundryApp("fakeApp3", "fake-app-guid-3", FakeCfSpace, "junk state"),
+            new CloudFoundryApp("fakeApp4", "fake-app-guid-4", FakeCfSpace, "junk state"),
+            new CloudFoundryApp("fakeApp5", "fake-app-guid-5", FakeCfSpace, "junk state"),
+        };
+
         internal class FakeOutputView : IView
         {
             public IViewModel ViewModel { get; }
@@ -111,6 +139,58 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             public void CancelActiveProcess()
             {
                 throw new NotImplementedException();
+            }
+        }
+
+
+        internal class FakeCfInstanceViewModel : CfInstanceViewModel
+        {
+            private int _numUpdates = 0;
+
+            internal FakeCfInstanceViewModel(CloudFoundryInstance cloudFoundryInstance, IServiceProvider services, bool expanded = false)
+                : base(cloudFoundryInstance, null, services, expanded)
+            {
+            }
+
+            internal int NumUpdates { get => _numUpdates; private set => _numUpdates = value; }
+
+            protected internal override async Task UpdateAllChildren()
+            {
+                await Task.Run(() => _numUpdates += 1); // await task to suppress CS1998
+            }
+        }
+
+        internal class FakeOrgViewModel : OrgViewModel
+        {
+            private int _numUpdates = 0;
+
+            internal FakeOrgViewModel(CloudFoundryOrganization org, IServiceProvider services, bool expanded = false)
+                : base(org, null, null, services, expanded)
+            {
+            }
+
+            internal int NumUpdates { get => _numUpdates; private set => _numUpdates = value; }
+
+            protected internal override async Task UpdateAllChildren()
+            {
+                await Task.Run(() => _numUpdates += 1); // await task to suppress CS1998
+            }
+        }
+
+        internal class FakeSpaceViewModel : SpaceViewModel
+        {
+            private int _numUpdates = 0;
+
+            internal FakeSpaceViewModel(CloudFoundrySpace space, IServiceProvider services, bool expanded = false)
+                : base(space, null, null, services, expanded)
+            {
+            }
+
+            internal int NumUpdates { get => _numUpdates; private set => _numUpdates = value; }
+
+            protected internal override async Task UpdateAllChildren()
+            {
+                await Task.Run(() => _numUpdates += 1); // await task to suppress CS1998
             }
         }
 

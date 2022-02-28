@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.ObjectModel;
-using System.Threading;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
@@ -26,7 +25,6 @@ namespace Tanzu.Toolkit.ViewModels
 
         private CfInstanceViewModel _tas;
         private volatile bool _isRefreshingAll = false;
-        private volatile int _numRefreshThreads = 0;
         private object _refreshLock = new object();
         private bool _authenticationRequired;
         private bool _isLoggedIn;
@@ -117,12 +115,10 @@ namespace Tanzu.Toolkit.ViewModels
 
             internal set
             {
-
                 lock (_refreshLock)
                 {
                     _isRefreshingAll = value;
                 }
-
                 RaisePropertyChangedEvent("IsRefreshingAll");
             }
         }
@@ -165,7 +161,6 @@ namespace Tanzu.Toolkit.ViewModels
                 RaisePropertyChangedEvent("IsLoggedIn");
             }
         }
-
 
         public bool CanOpenLoginView(object arg)
         {
@@ -363,7 +358,7 @@ namespace Tanzu.Toolkit.ViewModels
         {
             if (arg is SpaceViewModel spaceViewModel)
             {
-                await spaceViewModel.RefreshChildren();
+                await spaceViewModel.UpdateAllChildren();
             }
         }
 
@@ -371,109 +366,22 @@ namespace Tanzu.Toolkit.ViewModels
         {
             if (arg is OrgViewModel orgViewModel)
             {
-                await orgViewModel.RefreshChildren();
+                await orgViewModel.UpdateAllChildren();
             }
         }
 
-        public void RefreshAllItems(object arg)
+        public void RefreshAllItems(object arg = null)
         {
-            if (!IsRefreshingAll)
+            if (TasConnection == null)
             {
-                _threadingService.StartTask(InitiateFullRefresh);
+                IsRefreshingAll = false;
+                ThreadingService.IsPolling = false;
             }
-        }
-
-        internal async Task InitiateFullRefresh()
-        {
-            await Task.Run(() =>
+            else if (!IsRefreshingAll)
             {
                 IsRefreshingAll = true;
-
-                object threadLock = new object();
-
-                if (TasConnection != null && TasConnection.IsExpanded && !TasConnection.IsLoading)
-                {
-                    var refreshCfTask = new Task(async () =>
-                    {
-                        await TasConnection.RefreshChildren();
-
-                        foreach (TreeViewItemViewModel cfChild in TasConnection.Children)
-                        {
-                            if (cfChild is OrgViewModel ovm && cfChild.IsExpanded && !cfChild.IsLoading)
-                            {
-                                var refreshOrgTask = new Task(async () =>
-                                {
-                                    await ovm.RefreshChildren();
-
-                                    foreach (TreeViewItemViewModel orgChild in ovm.Children)
-                                    {
-                                        if (orgChild is SpaceViewModel svm && orgChild.IsExpanded && !orgChild.IsLoading)
-                                        {
-                                            var refreshSpaceTask = new Task(async () =>
-                                            {
-                                                await svm.RefreshChildren();
-
-                                                lock (threadLock)
-                                                {
-                                                    if (_numRefreshThreads < 1) throw new ArgumentOutOfRangeException();
-                                                    _numRefreshThreads -= 1;
-                                                }
-                                            });
-
-                                            lock (threadLock)
-                                            {
-                                                _numRefreshThreads += 1;
-                                            }
-
-                                            _threadingService.StartTask(() => Task.Run(() => refreshSpaceTask.Start())); // wrapped in extra task runner for ease of unit testing
-                                        }
-                                    }
-
-                                    lock (threadLock)
-                                    {
-                                        if (_numRefreshThreads < 1) throw new ArgumentOutOfRangeException();
-                                        _numRefreshThreads -= 1;
-                                    }
-                                });
-
-                                lock (threadLock)
-                                {
-                                    _numRefreshThreads += 1;
-                                }
-
-                                _threadingService.StartTask(() => Task.Run(() => refreshOrgTask.Start())); // wrapped in extra task runner for ease of unit testing
-                            }
-                        }
-
-                        lock (threadLock)
-                        {
-                            if (_numRefreshThreads < 1) throw new ArgumentOutOfRangeException();
-                            _numRefreshThreads -= 1;
-                        }
-                    });
-
-                    lock (threadLock)
-                    {
-                        _numRefreshThreads += 1;
-                    }
-
-                    _threadingService.StartTask(() => Task.Run(() => refreshCfTask.Start())); // wrapped in extra task runner for ease of unit testing
-                }
-
-                int threadsStillRunning = 1;
-                int waitTime = 100;
-                while (threadsStillRunning > 0)
-                {
-                    lock (threadLock)
-                    {
-                        threadsStillRunning = _numRefreshThreads;
-                    }
-
-                    Thread.Sleep(waitTime);
-                }
-
-                IsRefreshingAll = false;
-            });
+                _threadingService.StartBackgroundTask(UpdateAllTreeItems);
+            }
         }
 
         public void SetConnection(CloudFoundryInstance cf)
@@ -488,7 +396,7 @@ namespace Tanzu.Toolkit.ViewModels
 
                 if (!ThreadingService.IsPolling)
                 {
-                    ThreadingService.StartUiBackgroundPoller(RefreshAllItems, null, 10);
+                    ThreadingService.StartRecurrentUiTaskInBackground(RefreshAllItems, null, 10);
                 }
 
                 string existingSavedConnectionName = _dataPersistenceService.ReadStringData(ConnectionNameKey);
@@ -511,6 +419,8 @@ namespace Tanzu.Toolkit.ViewModels
         {
             TasConnection = null;
             IsLoggedIn = false;
+            IsRefreshingAll = false;
+            ThreadingService.IsPolling = false;
             CloudFoundryService.LogoutCfUser();
             _dataPersistenceService.ClearData(ConnectionNameKey);
             _dataPersistenceService.ClearData(ConnectionAddressKey);
@@ -520,6 +430,19 @@ namespace Tanzu.Toolkit.ViewModels
         {
             LogOutTas(TasConnection);
             OpenLoginView(null);
+        }
+
+        internal async Task UpdateAllTreeItems()
+        {
+            await TreeRoot[0].UpdateAllChildren();
+            if (TreeRoot.Count < 1)
+            {
+                IsRefreshingAll = false;
+            }
+            else if (TreeRoot[0] is CfInstanceViewModel cf)
+            {
+                IsRefreshingAll = cf.IsLoading;
+            }
         }
     }
 }

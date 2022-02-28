@@ -101,9 +101,11 @@
     <Compile Include="Views\IOutputView.cs" />
     <Compile Include="Views\ISsoDialogView.cs" />
     <Compile Include="Views\IAppDeletionConfirmationView.cs" />
-    <Compile Include="Views\LoadingSpinnerSmall.cs" />
     <Compile Include="Views\LoginPromptButton.xaml.cs">
       <DependentUpon>LoginPromptButton.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Spinner.xaml.cs">
+      <DependentUpon>Spinner.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SsoDialogView.xaml.cs">
       <DependentUpon>SsoDialogView.xaml</DependentUpon>
@@ -267,13 +269,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\SsoDialogView.xaml">
+    <Page Include="Views\Spinner.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\Styles\Styles.xaml">
-      <Generator>MSBuild:Compile</Generator>
+    <Page Include="Views\SsoDialogView.xaml">
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\TasExplorerView.xaml">
       <Generator>MSBuild:Compile</Generator>
