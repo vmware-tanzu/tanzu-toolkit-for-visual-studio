@@ -57,7 +57,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ctor")]
         public void Constructor_SetsApiAddressIsValid_ToFalse()
         {
-            Assert.IsFalse(_sut.ApiAddressIsValidFormat);
+            Assert.IsFalse(_sut.IsApiAddressFormatValid);
         }
 
         [TestMethod]
@@ -195,9 +195,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public void VerifyApiAddress_SetsApiAddressIsValid_AndSetsApiAddressError(string apiAddr, bool expectedValidity, string expectedError)
         {
             _sut.ValidateApiAddressFormat(apiAddr);
-            Assert.AreEqual(expectedValidity, _sut.ApiAddressIsValidFormat);
+            Assert.AreEqual(expectedValidity, _sut.IsApiAddressFormatValid);
             Assert.AreEqual(expectedError, _sut.ApiAddressError);
-            Assert.IsTrue(_receivedEvents.Contains("ApiAddressIsValidFormat"));
+            Assert.IsTrue(_receivedEvents.Contains("IsApiAddressFormatValid"));
         }
 
         [TestMethod]
@@ -239,7 +239,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             _sut.Target = targetApiAddress;
 
-            _sut.ApiAddressIsValidFormat = true;
+            _sut.IsApiAddressFormatValid = true;
 
             Assert.IsTrue(_sut.CanOpenSsoDialog());
         }
@@ -253,7 +253,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             _sut.Target = targetApiAddress;
 
-            _sut.ApiAddressIsValidFormat = true;
+            _sut.IsApiAddressFormatValid = true;
 
             Assert.IsFalse(_sut.CanOpenSsoDialog());
         }
@@ -264,7 +264,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             _sut.Target = "junk";
 
-            _sut.ApiAddressIsValidFormat = false;
+            _sut.IsApiAddressFormatValid = false;
 
             Assert.IsFalse(_sut.CanOpenSsoDialog());
         }
@@ -423,7 +423,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             await _sut.NavigateToAuthPage();
 
             Assert.AreEqual(1, _sut.PageNum);
-            Assert.IsFalse(_sut.ApiAddressIsValidFormat);
+            Assert.IsFalse(_sut.IsApiAddressFormatValid);
             Assert.AreEqual($"Unable to establish a connection with {_sut.Target}", _sut.ApiAddressError);
         }
 
@@ -442,24 +442,30 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("CanProceedToAuthentication")]
-        [DataRow("")]
-        [DataRow(" ")]
-        [DataRow(null)]
-        public void CanProceedToAuthentication_ReturnsFalse(string targetApiAddress)
+        [DataRow("https://some.legit.address")]
+        [DataRow("http://my.cool.api")]
+        public void CanProceedToAuthentication_ReturnsTrue(string targetApiAddress)
         {
             _sut.Target = targetApiAddress;
 
-            Assert.IsFalse(_sut.CanProceedToAuthentication());
+            Assert.IsTrue(_sut.ValidateApiAddressFormat(_sut.Target));
+
+            Assert.IsTrue(_sut.CanProceedToAuthentication());
         }
 
         [TestMethod]
         [TestCategory("CanProceedToAuthentication")]
-        public void CanProceedToAuthentication_ReturnsFalse_WhenApiAddressIsValidMarkedAsFalse()
+        [DataRow(true, false, true)]
+        [DataRow(true, false, false)]
+        [DataRow(true, true, false)]
+        public void CanProceedToAuthentication_ReturnsFalse(bool certInvalidValue,bool proceedWithInvalidCertValue, bool isApiAddressValidFormatValue)
         {
-            _sut.Target = "https://some.legit.address";
-            _sut.ApiAddressIsValidFormat = false;
+            _sut.CertificateInvalid = certInvalidValue;
+            _sut.ProceedWithInvalidCertificate = proceedWithInvalidCertValue;
+            _sut.IsApiAddressFormatValid = isApiAddressValidFormatValue;
 
             Assert.IsFalse(_sut.CanProceedToAuthentication());
         }
+
     }
 }
