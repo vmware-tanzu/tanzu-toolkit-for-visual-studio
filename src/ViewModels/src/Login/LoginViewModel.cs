@@ -197,7 +197,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
 
             CfClient = newCfClient;
-            var certTestResult = CfClient.VerfiyNewApiConnection(TargetApiAddress, SkipSsl);
+            var certTestResult = CfClient.TargetCfApi(TargetApiAddress, SkipSsl);
             if (!certTestResult.Succeeded)
             {
                 Fail(certTestResult.FailureType);

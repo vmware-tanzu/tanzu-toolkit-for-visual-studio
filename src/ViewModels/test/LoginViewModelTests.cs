@@ -292,7 +292,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 Content = fakeSsoPrompt,
             };
 
-            MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.TargetApiAddress, _sut.SkipSsl))
+            MockCloudFoundryService.Setup(m => m.TargetCfApi(_sut.TargetApiAddress, _sut.SkipSsl))
                 .Returns(FakeSuccessDetailedResult);
             MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.TargetApiAddress, _sut.SkipSsl))
                 .ReturnsAsync(fakeSsoPromptResult);
@@ -316,7 +316,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 FailureType = FailureType.InvalidCertificate,
             };
 
-            MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.TargetApiAddress, _sut.SkipSsl))
+            MockCloudFoundryService.Setup(m => m.TargetCfApi(_sut.TargetApiAddress, _sut.SkipSsl))
                 .Returns(fakeCertValidationResult);
             MockCloudFoundryService.Setup(m => m.ConfigureForCf(It.IsAny<CloudFoundryInstance>())).Returns(FakeSuccessDetailedResult);
 
@@ -343,7 +343,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 FailureType = FailureType.MissingSsoPrompt,
             };
 
-            MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.TargetApiAddress, _sut.SkipSsl))
+            MockCloudFoundryService.Setup(m => m.TargetCfApi(_sut.TargetApiAddress, _sut.SkipSsl))
                 .Returns(fakeCertValidationResult);
             MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.TargetApiAddress, _sut.SkipSsl))
                 .ReturnsAsync(fakeSsoPromptResult);
@@ -372,7 +372,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 FailureType = FailureType.None,
             };
 
-            MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.TargetApiAddress, _sut.SkipSsl))
+            MockCloudFoundryService.Setup(m => m.TargetCfApi(_sut.TargetApiAddress, _sut.SkipSsl))
                 .Returns(fakeCertValidationResult);
             MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.TargetApiAddress, _sut.SkipSsl))
                 .ReturnsAsync(fakeSsoPromptResult);
@@ -433,7 +433,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 Content = fakeSsoPrompt,
             };
 
-            MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.TargetApiAddress, _sut.SkipSsl))
+            MockCloudFoundryService.Setup(m => m.TargetCfApi(_sut.TargetApiAddress, _sut.SkipSsl))
                 .Returns(FakeSuccessDetailedResult);
             MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.TargetApiAddress, _sut.SkipSsl))
                 .ReturnsAsync(fakeSsoPromptResult);
@@ -462,7 +462,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 Content = fakeSsoPrompt,
             };
 
-            MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.TargetApiAddress, _sut.SkipSsl))
+            MockCloudFoundryService.Setup(m => m.TargetCfApi(_sut.TargetApiAddress, _sut.SkipSsl))
                 .Returns(FakeSuccessDetailedResult);
             MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.TargetApiAddress, _sut.SkipSsl))
                 .ReturnsAsync(fakeSsoPromptResult);
