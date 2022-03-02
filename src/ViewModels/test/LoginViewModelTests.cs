@@ -34,7 +34,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
                 ClearPassword = () => { },
                 ConnectionName = FakeConnectionName,
-                Target = FakeTarget,
+                TargetApiAddress = FakeTarget,
                 Username = FakeUsername,
                 GetPassword = () => { return FakeSecurePw; },
                 PasswordEmpty = () => { return false; },
@@ -72,7 +72,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockCloudFoundryService.Setup(mock => mock.LoginWithCredentials(FakeUsername, FakeSecurePw))
                 .ReturnsAsync(new DetailedResult(false, expectedErrorMessage));
 
-            await _sut.LogIn(null);
+            await _sut.LogIn();
 
             Assert.IsTrue(_sut.HasErrors);
             Assert.AreEqual(expectedErrorMessage, _sut.ErrorMessage);
@@ -83,19 +83,21 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("LogIn")]
         public async Task LogIn_SetsConnectionOnTasExplorer_WhenLoginRequestSucceeds()
         {
+            _sut.TargetCf = FakeCfInstance;
+
             MockCloudFoundryService.Setup(mock => mock.
               LoginWithCredentials(FakeUsername, FakeSecurePw))
                 .ReturnsAsync(new DetailedResult(true, null));
 
-            MockTasExplorerViewModel.Setup(m => m.SetConnection(It.IsAny<CloudFoundryInstance>())).Verifiable();
+            MockTasExplorerViewModel.Setup(m => m.SetConnection(_sut.TargetCf)).Verifiable();
 
-            await _sut.LogIn(null);
+            await _sut.LogIn();
 
             Assert.IsFalse(_sut.HasErrors);
             MockDialogService.Verify(mock => mock.CloseDialog(It.IsAny<object>(), It.IsAny<bool>()), Times.Once);
             MockDialogService.Verify(ds => ds.CloseDialog(It.IsAny<object>(), true), Times.Once);
 
-            MockTasExplorerViewModel.Verify(m => m.SetConnection(It.Is<CloudFoundryInstance>(cf => cf.ApiAddress == FakeTarget)), Times.Once);
+            MockTasExplorerViewModel.VerifyAll();
         }
 
         [TestMethod]
@@ -117,10 +119,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public void CanLogIn_ReturnsTrue_WhenAllFieldsFilled()
         {
             Assert.IsNotNull(_sut.ConnectionName);
-            Assert.IsNotNull(_sut.Target);
+            Assert.IsNotNull(_sut.TargetApiAddress);
             Assert.IsNotNull(_sut.Username);
             Assert.IsFalse(_sut.PasswordEmpty());
-            Assert.IsTrue(_sut.ValidateApiAddressFormat(_sut.Target));
+            Assert.IsTrue(_sut.ValidateApiAddressFormat(_sut.TargetApiAddress));
 
             Assert.IsTrue(_sut.CanLogIn());
         }
@@ -133,9 +135,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [DataRow(null)]
         public void CanLogIn_ReturnsFalse_WhenTargetEmpty(string invalidTargetApiAddress)
         {
-            _sut.Target = invalidTargetApiAddress;
+            _sut.TargetApiAddress = invalidTargetApiAddress;
 
-            Assert.IsTrue(string.IsNullOrWhiteSpace(_sut.Target));
+            Assert.IsTrue(string.IsNullOrWhiteSpace(_sut.TargetApiAddress));
 
             Assert.IsFalse(_sut.CanLogIn());
         }
@@ -147,9 +149,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [DataRow("a.bad.url")]
         public void CanLogIn_ReturnsFalse_WhenTargetFailsVerification(string invalidTargetApiAddress)
         {
-            _sut.Target = invalidTargetApiAddress;
+            _sut.TargetApiAddress = invalidTargetApiAddress;
 
-            Assert.IsFalse(_sut.ValidateApiAddressFormat(_sut.Target));
+            Assert.IsFalse(_sut.ValidateApiAddressFormat(_sut.TargetApiAddress));
 
             Assert.IsFalse(_sut.CanLogIn());
         }
@@ -165,10 +167,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.Username = invalidUsername;
 
             Assert.IsNotNull(_sut.ConnectionName);
-            Assert.IsNotNull(_sut.Target);
+            Assert.IsNotNull(_sut.TargetApiAddress);
             Assert.IsTrue(string.IsNullOrWhiteSpace(_sut.Username));
             Assert.IsFalse(_sut.PasswordEmpty());
-            Assert.IsTrue(_sut.ValidateApiAddressFormat(_sut.Target));
+            Assert.IsTrue(_sut.ValidateApiAddressFormat(_sut.TargetApiAddress));
 
             Assert.IsFalse(_sut.CanLogIn());
         }
@@ -181,57 +183,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.PasswordEmpty = () => { return true; };
 
             Assert.IsNotNull(_sut.ConnectionName);
-            Assert.IsNotNull(_sut.Target);
+            Assert.IsNotNull(_sut.TargetApiAddress);
             Assert.IsNotNull(_sut.Username);
             Assert.IsTrue(_sut.PasswordEmpty());
-            Assert.IsTrue(_sut.ValidateApiAddressFormat(_sut.Target));
+            Assert.IsTrue(_sut.ValidateApiAddressFormat(_sut.TargetApiAddress));
 
             Assert.IsFalse(_sut.CanLogIn());
-        }
-
-        [TestMethod]
-        [TestCategory("VerifyApiAddress")]
-        [DataRow("_", false, LoginViewModel.TargetInvalidFormatMessage)]
-        [DataRow("www.api.com", false, LoginViewModel.TargetInvalidFormatMessage)]
-        [DataRow("http://www.api.com", true, null)]
-        [DataRow("https://my.cool.url", true, null)]
-        public void VerifyApiAddress_SetsApiAddressIsValid_AndSetsApiAddressError(string apiAddr, bool expectedValidity, string expectedError)
-        {
-            _sut.ValidateApiAddressFormat(apiAddr);
-            Assert.AreEqual(expectedValidity, _sut.ApiAddressIsValid);
-            Assert.AreEqual(expectedError, _sut.ApiAddressError);
-            Assert.IsTrue(_receivedEvents.Contains("ApiAddressIsValid"));
-        }
-
-        [TestMethod]
-        [DataRow("https://www.api.com", "My Cool TAS", "My Cool TAS")]
-        [DataRow("https://www.api.com", "asdf1234", "asdf1234")]
-        [DataRow("https://www.api.com", "", "www.api.com")]
-        [DataRow("https://www.api.com", " ", "www.api.com")]
-        [DataRow("https://www.api.com", null, "www.api.com")]
-        [DataRow("www.api.com", "My Cool TAS", "My Cool TAS")]
-        [DataRow("http://www.api.com", "My Cool TAS", "My Cool TAS")]
-        [DataRow("http://www.api.com", null, "www.api.com")]
-        [DataRow("https://www.api.com/some/endpoint", "My Cool TAS", "My Cool TAS")]
-        [DataRow("https://www.api.com/some/endpoint", null, "www.api.com")]
-        [DataRow("https://www.api.com:80", "My Cool TAS", "My Cool TAS")]
-        [DataRow("https://www.api.com:80", null, "www.api.com")]
-        [DataRow("non-parseable address", "", "Tanzu Application Service")]
-        [DataRow("non-parseable address", " ", "Tanzu Application Service")]
-        [DataRow("non-parseable address", null, "Tanzu Application Service")]
-        [DataRow("www.api.com", "", "Tanzu Application Service")]
-        [DataRow("www.api.com", " ", "Tanzu Application Service")]
-        [DataRow("www.api.com", null, "Tanzu Application Service")]
-        public void SetConnection_SetsConnectionOnTasExplorer(string apiAddressFromDialog, string connectionNameFromDialog, string expectedTasConnectionName)
-        {
-            _sut.Target = apiAddressFromDialog;
-            _sut.ConnectionName = connectionNameFromDialog;
-
-            MockTasExplorerViewModel.Setup(m => m.SetConnection(It.IsAny<CloudFoundryInstance>()));
-
-            _sut.SetConnection();
-
-            MockTasExplorerViewModel.Verify(m => m.SetConnection(It.Is<CloudFoundryInstance>(cf => cf.InstanceName == expectedTasConnectionName && cf.ApiAddress == apiAddressFromDialog)), Times.Once);
         }
 
         [TestMethod]
@@ -240,7 +197,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [DataRow("https://some.api.address")]
         public void CanOpenSsoDialog_ReturnsTrue_WhenTargetApiAddressIsValid(string targetApiAddress)
         {
-            _sut.Target = targetApiAddress;
+            _sut.TargetApiAddress = targetApiAddress;
 
             _sut.ApiAddressIsValid = true;
 
@@ -254,7 +211,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [DataRow(" ")]
         public void CanOpenSsoDialog_ReturnsFalse_WhenTargetApiAddressIsNullOrWhitespace(string targetApiAddress)
         {
-            _sut.Target = targetApiAddress;
+            _sut.TargetApiAddress = targetApiAddress;
 
             _sut.ApiAddressIsValid = true;
 
@@ -265,7 +222,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("CanOpenSsoDialog")]
         public void CanOpenSsoDialog_ReturnsFalse_WhenTargetApiAddressIsInvalid()
         {
-            _sut.Target = "junk";
+            _sut.TargetApiAddress = "junk";
 
             _sut.ApiAddressIsValid = false;
 
@@ -279,7 +236,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [DataRow(" ")]
         public async Task OpenSsoDialog_SetsErrorMessage_WhenTargetApiAddressIsNullOrWhitespace(string targetApiAddress)
         {
-            _sut.Target = targetApiAddress;
+            _sut.TargetApiAddress = targetApiAddress;
 
             Assert.IsFalse(_sut.HasErrors);
             Assert.IsNull(_sut.ErrorMessage);
@@ -304,7 +261,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 Content = fakeSsoPrompt,
             };
 
-            _sut.Target = fakeTargetApiAddress;
+            _sut.TargetApiAddress = fakeTargetApiAddress;
 
             MockCloudFoundryService.Setup(m => m.GetSsoPrompt(fakeTargetApiAddress, false))
                 .ReturnsAsync(fakeSsoPromptResponse);
@@ -329,16 +286,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task VerifyApiAddress_SetsPageNumberTo2_AndSetsSsoEnabledOnTargetToTrue_WhenSsoPromptSuccessfullyRetrieved()
         {
             var fakeSsoPrompt = "junk";
-
             var fakeSsoPromptResult = new DetailedResult<string>
             {
                 Succeeded = true,
                 Content = fakeSsoPrompt,
             };
 
-            MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.Target, _sut.SkipSsl))
+            MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.TargetApiAddress, _sut.SkipSsl))
                 .Returns(FakeSuccessDetailedResult);
-            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.Target, _sut.SkipSsl))
+            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.TargetApiAddress, _sut.SkipSsl))
                 .ReturnsAsync(fakeSsoPromptResult);
             MockCloudFoundryService.Setup(m => m.ConfigureForCf(It.IsAny<CloudFoundryInstance>())).Returns(FakeSuccessDetailedResult);
 
@@ -349,7 +305,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.AreEqual(2, _sut.PageNum);
             Assert.IsTrue(_sut.SsoEnabledOnTarget);
         }
-        
+
         [TestMethod]
         [TestCategory("VerifyApiAddress")]
         public async Task VerifyApiAddress_SetsCertificateInvalidToTrue_WhenCertValidationFails()
@@ -360,7 +316,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 FailureType = FailureType.InvalidCertificate,
             };
 
-            MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.Target, _sut.SkipSsl))
+            MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.TargetApiAddress, _sut.SkipSsl))
                 .Returns(fakeCertValidationResult);
             MockCloudFoundryService.Setup(m => m.ConfigureForCf(It.IsAny<CloudFoundryInstance>())).Returns(FakeSuccessDetailedResult);
 
@@ -387,9 +343,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 FailureType = FailureType.MissingSsoPrompt,
             };
 
-            MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.Target, _sut.SkipSsl))
+            MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.TargetApiAddress, _sut.SkipSsl))
                 .Returns(fakeCertValidationResult);
-            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.Target, _sut.SkipSsl))
+            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.TargetApiAddress, _sut.SkipSsl))
                 .ReturnsAsync(fakeSsoPromptResult);
             MockCloudFoundryService.Setup(m => m.ConfigureForCf(It.IsAny<CloudFoundryInstance>())).Returns(FakeSuccessDetailedResult);
 
@@ -416,9 +372,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 FailureType = FailureType.None,
             };
 
-            MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.Target, _sut.SkipSsl))
+            MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.TargetApiAddress, _sut.SkipSsl))
                 .Returns(fakeCertValidationResult);
-            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.Target, _sut.SkipSsl))
+            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.TargetApiAddress, _sut.SkipSsl))
                 .ReturnsAsync(fakeSsoPromptResult);
             MockCloudFoundryService.Setup(m => m.ConfigureForCf(It.IsAny<CloudFoundryInstance>())).Returns(FakeSuccessDetailedResult);
 
@@ -428,7 +384,97 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.AreEqual(1, _sut.PageNum);
             Assert.IsFalse(_sut.ApiAddressIsValid);
-            Assert.AreEqual($"Unable to establish a connection with {_sut.Target}", _sut.ApiAddressError);
+            Assert.AreEqual($"Unable to establish a connection with {_sut.TargetApiAddress}", _sut.ApiAddressError);
+        }
+
+
+        [TestMethod]
+        [TestCategory("VerifyApiAddress")]
+        [DataRow("_", false, LoginViewModel.TargetInvalidFormatMessage)]
+        [DataRow("www.api.com", false, LoginViewModel.TargetInvalidFormatMessage)]
+        [DataRow("http://www.api.com", true, null)]
+        [DataRow("https://my.cool.url", true, null)]
+        public void VerifyApiAddress_SetsApiAddressIsValid_AndSetsApiAddressError(string apiAddr, bool expectedValidity, string expectedError)
+        {
+            _sut.ValidateApiAddressFormat(apiAddr);
+            Assert.AreEqual(expectedValidity, _sut.ApiAddressIsValid);
+            Assert.AreEqual(expectedError, _sut.ApiAddressError);
+            Assert.IsTrue(_receivedEvents.Contains("ApiAddressIsValid"));
+        }
+
+        [TestMethod]
+        [TestCategory("VerifyApiAddress")]
+        [DataRow("https://www.api.com", "My Cool TAS", "My Cool TAS")]
+        [DataRow("https://www.api.com", "asdf1234", "asdf1234")]
+        [DataRow("https://www.api.com", "", "www.api.com")]
+        [DataRow("https://www.api.com", " ", "www.api.com")]
+        [DataRow("https://www.api.com", null, "www.api.com")]
+        [DataRow("www.api.com", "My Cool TAS", "My Cool TAS")]
+        [DataRow("http://www.api.com", "My Cool TAS", "My Cool TAS")]
+        [DataRow("http://www.api.com", null, "www.api.com")]
+        [DataRow("https://www.api.com/some/endpoint", "My Cool TAS", "My Cool TAS")]
+        [DataRow("https://www.api.com/some/endpoint", null, "www.api.com")]
+        [DataRow("https://www.api.com:80", "My Cool TAS", "My Cool TAS")]
+        [DataRow("https://www.api.com:80", null, "www.api.com")]
+        [DataRow("non-parseable address", "", "Tanzu Application Service")]
+        [DataRow("non-parseable address", " ", "Tanzu Application Service")]
+        [DataRow("non-parseable address", null, "Tanzu Application Service")]
+        [DataRow("www.api.com", "", "Tanzu Application Service")]
+        [DataRow("www.api.com", " ", "Tanzu Application Service")]
+        [DataRow("www.api.com", null, "Tanzu Application Service")]
+        public async Task VerifyApiAddress_SetsTargetCfName_WhenVerificationSucceeds(string apiAddressFromDialog, string connectionNameFromDialog, string expectedCfName)
+        {
+            _sut.TargetApiAddress = apiAddressFromDialog;
+            _sut.ConnectionName = connectionNameFromDialog;
+            var fakeSsoPrompt = "junk";
+            var fakeSsoPromptResult = new DetailedResult<string>
+            {
+                Succeeded = true,
+                Content = fakeSsoPrompt,
+            };
+
+            MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.TargetApiAddress, _sut.SkipSsl))
+                .Returns(FakeSuccessDetailedResult);
+            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.TargetApiAddress, _sut.SkipSsl))
+                .ReturnsAsync(fakeSsoPromptResult);
+            MockCloudFoundryService.Setup(m => m.ConfigureForCf(It.IsAny<CloudFoundryInstance>()))
+                .Returns(FakeSuccessDetailedResult);
+
+            Assert.IsNull(_sut.TargetCf);
+
+            await _sut.VerifyApiAddress();
+
+            Assert.IsNotNull(_sut.TargetCf);
+            Assert.AreEqual(expectedCfName, _sut.TargetCf.InstanceName);
+        }
+
+        [TestMethod]
+        [TestCategory("VerifyApiAddress")]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task VerifyApiAddress_SetsTargetCfSkipCertValidationValue(bool skipSsl)
+        {
+            _sut.SkipSsl = skipSsl;
+            var fakeSsoPrompt = "junk";
+            var fakeSsoPromptResult = new DetailedResult<string>
+            {
+                Succeeded = true,
+                Content = fakeSsoPrompt,
+            };
+
+            MockCloudFoundryService.Setup(m => m.VerfiyNewApiConnection(_sut.TargetApiAddress, _sut.SkipSsl))
+                .Returns(FakeSuccessDetailedResult);
+            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.TargetApiAddress, _sut.SkipSsl))
+                .ReturnsAsync(fakeSsoPromptResult);
+            MockCloudFoundryService.Setup(m => m.ConfigureForCf(It.IsAny<CloudFoundryInstance>()))
+                .Returns(FakeSuccessDetailedResult);
+
+            Assert.IsNull(_sut.TargetCf);
+
+            await _sut.VerifyApiAddress();
+
+            Assert.IsNotNull(_sut.TargetCf);
+            Assert.AreEqual(skipSsl, _sut.TargetCf.SkipSslCertValidation);
         }
 
         [TestMethod]
@@ -450,7 +496,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [DataRow("http://my.cool.api")]
         public void CanProceedToAuthentication_ReturnsTrue(string targetApiAddress)
         {
-            _sut.Target = targetApiAddress;
+            _sut.TargetApiAddress = targetApiAddress;
 
             Assert.IsTrue(_sut.CanProceedToAuthentication());
         }
@@ -462,7 +508,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [DataRow(null)]
         public void CanProceedToAuthentication_ReturnsFalse(string targetApiAddress)
         {
-            _sut.Target = targetApiAddress;
+            _sut.TargetApiAddress = targetApiAddress;
 
             Assert.IsFalse(_sut.CanProceedToAuthentication());
         }
@@ -471,7 +517,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("CanProceedToAuthentication")]
         public void CanProceedToAuthentication_ReturnsFalse_WhenApiAddressIsValidMarkedAsFalse()
         {
-            _sut.Target = "https://some.legit.address";
+            _sut.TargetApiAddress = "https://some.legit.address";
             _sut.ApiAddressIsValid = false;
 
             Assert.IsFalse(_sut.CanProceedToAuthentication());

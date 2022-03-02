@@ -108,7 +108,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsNull(_sut.ErrorMessage);
 
             MockDialogService.Verify(m => m.CloseDialog(fakeSsoDialogWindow, true), Times.Once);
-            MockLoginViewModel.Verify(m => m.SetConnection(), Times.Once);
+            MockTasExplorerViewModel.Verify(m => m.SetConnection(MockLoginViewModel.Object.TargetCf), Times.Once);
             MockLoginViewModel.Verify(m => m.CloseDialog(), Times.Once);
         }
     }
