@@ -24,7 +24,7 @@ namespace Tanzu.Toolkit.ViewModels
         private string _apiAddressError;
         private int _currentPageNum = 1;
         private bool _ssoEnabled = false;
-        private bool _verifyingApiAddress = false;
+        private bool _connectingToCf = false;
         private bool _apiAddressIsValid = true;
         private bool _certificateInvalid = false;
         private ISsoDialogViewModel _ssoDialog;
@@ -143,14 +143,14 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public bool VerifyingApiAddress
+        public bool ConnectingToCf
         {
-            get => _verifyingApiAddress;
+            get => _connectingToCf;
 
             private set
             {
-                _verifyingApiAddress = value;
-                RaisePropertyChangedEvent("VerifyingApiAddress");
+                _connectingToCf = value;
+                RaisePropertyChangedEvent("ConnectingToCf");
             }
         }
 
@@ -183,9 +183,9 @@ namespace Tanzu.Toolkit.ViewModels
             return !string.IsNullOrWhiteSpace(TargetApiAddress) && ApiAddressIsValid;
         }
 
-        public async Task VerifyApiAddress(object arg = null)
+        public async Task ConnectToCf(object arg = null)
         {
-            VerifyingApiAddress = true;
+            ConnectingToCf = true;
 
             var candidateCf = new CloudFoundryInstance(GetTargetDisplayName(), TargetApiAddress, SkipSsl);
             var newCfClient = Services.GetRequiredService<ICloudFoundryService>();
@@ -214,7 +214,7 @@ namespace Tanzu.Toolkit.ViewModels
             SsoEnabledOnTarget = ssoPromptResult.Succeeded;
             TargetCf = candidateCf;
             PageNum = 2;
-            VerifyingApiAddress = false;
+            ConnectingToCf = false;
 
             // local helper
             void Fail(FailureType failureType = FailureType.None)
@@ -235,7 +235,7 @@ namespace Tanzu.Toolkit.ViewModels
                 }
 
                 TargetCf = null;
-                VerifyingApiAddress = false;
+                ConnectingToCf = false;
             }
         }
 

@@ -282,8 +282,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("VerifyApiAddress")]
-        public async Task VerifyApiAddress_SetsPageNumberTo2_AndSetsSsoEnabledOnTargetToTrue_WhenSsoPromptSuccessfullyRetrieved()
+        [TestCategory("ConnectToCf")]
+        public async Task ConnectToCf_SetsPageNumberTo2_AndSetsSsoEnabledOnTargetToTrue_WhenSsoPromptSuccessfullyRetrieved()
         {
             var fakeSsoPrompt = "junk";
             var fakeSsoPromptResult = new DetailedResult<string>
@@ -300,15 +300,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.AreEqual(1, _sut.PageNum);
 
-            await _sut.VerifyApiAddress();
+            await _sut.ConnectToCf();
 
             Assert.AreEqual(2, _sut.PageNum);
             Assert.IsTrue(_sut.SsoEnabledOnTarget);
         }
 
         [TestMethod]
-        [TestCategory("VerifyApiAddress")]
-        public async Task VerifyApiAddress_SetsCertificateInvalidToTrue_WhenCertValidationFails()
+        [TestCategory("ConnectToCf")]
+        public async Task ConnectToCf_SetsCertificateInvalidToTrue_WhenCertValidationFails()
         {
             var fakeCertValidationResult = new DetailedResult
             {
@@ -322,15 +322,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.AreEqual(1, _sut.PageNum);
 
-            await _sut.VerifyApiAddress();
+            await _sut.ConnectToCf();
 
             Assert.AreEqual(1, _sut.PageNum);
             Assert.IsTrue(_sut.CertificateInvalid);
         }
 
         [TestMethod]
-        [TestCategory("VerifyApiAddress")]
-        public async Task VerifyApiAddress_SetsPageNumberTo2_AndSetsSsoEnabledOnTargetToFalse_WhenSsoPromptAbsentFromResponse()
+        [TestCategory("ConnectToCf")]
+        public async Task ConnectToCf_SetsPageNumberTo2_AndSetsSsoEnabledOnTargetToFalse_WhenSsoPromptAbsentFromResponse()
         {
             var fakeCertValidationResult = new DetailedResult
             {
@@ -351,15 +351,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.AreEqual(1, _sut.PageNum);
 
-            await _sut.VerifyApiAddress();
+            await _sut.ConnectToCf();
 
             Assert.AreEqual(2, _sut.PageNum);
             Assert.IsFalse(_sut.SsoEnabledOnTarget);
         }
 
         [TestMethod]
-        [TestCategory("VerifyApiAddress")]
-        public async Task VerifyApiAddress_DoesNotChangePageNumber_AndSetsApiAddressError_WhenSsoPromptRequestFails()
+        [TestCategory("ConnectToCf")]
+        public async Task ConnectToCf_DoesNotChangePageNumber_AndSetsApiAddressError_WhenSsoPromptRequestFails()
         {
             var fakeCertValidationResult = new DetailedResult
             {
@@ -380,7 +380,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.AreEqual(1, _sut.PageNum);
 
-            await _sut.VerifyApiAddress();
+            await _sut.ConnectToCf();
 
             Assert.AreEqual(1, _sut.PageNum);
             Assert.IsFalse(_sut.ApiAddressIsValid);
@@ -389,12 +389,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
 
         [TestMethod]
-        [TestCategory("VerifyApiAddress")]
+        [TestCategory("ConnectToCf")]
         [DataRow("_", false, LoginViewModel.TargetInvalidFormatMessage)]
         [DataRow("www.api.com", false, LoginViewModel.TargetInvalidFormatMessage)]
         [DataRow("http://www.api.com", true, null)]
         [DataRow("https://my.cool.url", true, null)]
-        public void VerifyApiAddress_SetsApiAddressIsValid_AndSetsApiAddressError(string apiAddr, bool expectedValidity, string expectedError)
+        public void ConnectToCf_SetsApiAddressIsValid_AndSetsApiAddressError(string apiAddr, bool expectedValidity, string expectedError)
         {
             _sut.ValidateApiAddressFormat(apiAddr);
             Assert.AreEqual(expectedValidity, _sut.ApiAddressIsValid);
@@ -403,7 +403,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("VerifyApiAddress")]
+        [TestCategory("ConnectToCf")]
         [DataRow("https://www.api.com", "My Cool TAS", "My Cool TAS")]
         [DataRow("https://www.api.com", "asdf1234", "asdf1234")]
         [DataRow("https://www.api.com", "", "www.api.com")]
@@ -422,7 +422,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [DataRow("www.api.com", "", "Tanzu Application Service")]
         [DataRow("www.api.com", " ", "Tanzu Application Service")]
         [DataRow("www.api.com", null, "Tanzu Application Service")]
-        public async Task VerifyApiAddress_SetsTargetCfName_WhenVerificationSucceeds(string apiAddressFromDialog, string connectionNameFromDialog, string expectedCfName)
+        public async Task ConnectToCf_SetsTargetCfName_WhenVerificationSucceeds(string apiAddressFromDialog, string connectionNameFromDialog, string expectedCfName)
         {
             _sut.TargetApiAddress = apiAddressFromDialog;
             _sut.ConnectionName = connectionNameFromDialog;
@@ -442,17 +442,17 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsNull(_sut.TargetCf);
 
-            await _sut.VerifyApiAddress();
+            await _sut.ConnectToCf();
 
             Assert.IsNotNull(_sut.TargetCf);
             Assert.AreEqual(expectedCfName, _sut.TargetCf.InstanceName);
         }
 
         [TestMethod]
-        [TestCategory("VerifyApiAddress")]
+        [TestCategory("ConnectToCf")]
         [DataRow(true)]
         [DataRow(false)]
-        public async Task VerifyApiAddress_SetsTargetCfSkipCertValidationValue(bool skipSsl)
+        public async Task ConnectToCf_SetsTargetCfSkipCertValidationValue(bool skipSsl)
         {
             _sut.SkipSsl = skipSsl;
             var fakeSsoPrompt = "junk";
@@ -471,7 +471,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsNull(_sut.TargetCf);
 
-            await _sut.VerifyApiAddress();
+            await _sut.ConnectToCf();
 
             Assert.IsNotNull(_sut.TargetCf);
             Assert.AreEqual(skipSsl, _sut.TargetCf.SkipSslCertValidation);
