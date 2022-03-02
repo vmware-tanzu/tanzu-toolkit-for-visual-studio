@@ -27,7 +27,6 @@ namespace Tanzu.Toolkit.ViewModels
         private bool _verifyingApiAddress = false;
         private bool _apiAddressIsValid = true;
         private bool _certificateInvalid = false;
-        private bool _proceedWithInvalidCertificate = false;
         private ISsoDialogViewModel _ssoDialog;
 
         internal ITasExplorerViewModel _tasExplorer;

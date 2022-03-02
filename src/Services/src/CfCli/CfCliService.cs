@@ -35,6 +35,12 @@ namespace Tanzu.Toolkit.Services.CfCli
         internal const string _deleteAppCmd = "delete -f"; // -f avoids confirmation prompt
         internal const string _invalidRefreshTokenError = "The token expired, was revoked, or the token ID is incorrect. Please log back in to re-authenticate.";
         internal const string _logoutCmd = "logout";
+        internal readonly List<string> _invalidSslCertCues = new List<string>
+        {
+            "Invalid SSL Cert",
+            "Use 'cf api --skip-ssl-validation' to continue with an insecure API endpoint",
+            "certificate has expired or is not yet valid",
+        };
 
         private readonly IFileService _fileService;
         private readonly ILogger _logger;
@@ -181,7 +187,7 @@ namespace Tanzu.Toolkit.Services.CfCli
             {
                 _logger.Error($"TargetApi({apiAddress}, {skipSsl}) failed: {result}");
 
-                if (result.CmdResult.StdErr != null && result.CmdResult.StdErr.Contains("certificate has expired or is not yet valid"))
+                if (result.CmdResult.StdErr != null && _invalidSslCertCues.Exists(cue => result.CmdResult.StdErr.Contains(cue)))
                 {
                     result.FailureType = FailureType.InvalidCertificate;
                 }
