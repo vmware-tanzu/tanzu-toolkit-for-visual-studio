@@ -25,7 +25,7 @@ namespace Tanzu.Toolkit.ViewModels
         Task OpenSsoDialog(object apiAddress = null);
         void CloseDialog();
         void NavigateToTargetPage(object arg = null);
-        Task VerifyApiAddress(object arg = null);
+        Task ConnectToCf(object arg = null);
         bool CanProceedToAuthentication(object arg = null);
         void ResetTargetDependentFields();
     }

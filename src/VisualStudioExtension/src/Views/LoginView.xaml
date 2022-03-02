@@ -189,7 +189,7 @@
                         Margin="4"
                         Padding="4,0"
                         HorizontalAlignment="Right"
-                        Visibility="{Binding VerifyingApiAddress, Converter={StaticResource InverseCollapsedVisibility}}"
+                        Visibility="{Binding ConnectingToCf, Converter={StaticResource InverseCollapsedVisibility}}"
                         Command="{Binding ElementName=LoginViewElement, Path=IncrementPageCommand}"/>
                     
                     <Button
@@ -198,7 +198,7 @@
                         Margin="4"
                         Padding="4,0"
                         HorizontalAlignment="Right"
-                        Visibility="{Binding VerifyingApiAddress, Converter={StaticResource CollapsedVisibility}}"/>
+                        Visibility="{Binding ConnectingToCf, Converter={StaticResource CollapsedVisibility}}"/>
                 </StackPanel>
 
                 <StackPanel
