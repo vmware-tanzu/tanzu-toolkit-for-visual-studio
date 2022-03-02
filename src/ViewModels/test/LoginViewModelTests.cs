@@ -69,7 +69,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             const string expectedErrorMessage = "my fake error message";
 
-            MockCloudFoundryService.Setup(mock => mock.LoginWithCredentials(FakeTarget, FakeUsername, FakeSecurePw, _sut.SkipSsl))
+            MockCloudFoundryService.Setup(mock => mock.LoginWithCredentials(FakeUsername, FakeSecurePw))
                 .ReturnsAsync(new DetailedResult(false, expectedErrorMessage));
 
             await _sut.LogIn(null);
@@ -84,7 +84,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task LogIn_SetsConnectionOnTasExplorer_WhenLoginRequestSucceeds()
         {
             MockCloudFoundryService.Setup(mock => mock.
-              LoginWithCredentials(FakeTarget, FakeUsername, FakeSecurePw, _sut.SkipSsl))
+              LoginWithCredentials(FakeUsername, FakeSecurePw))
                 .ReturnsAsync(new DetailedResult(true, null));
 
             MockTasExplorerViewModel.Setup(m => m.SetConnection(It.IsAny<CloudFoundryInstance>())).Verifiable();
@@ -102,7 +102,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("LogIn")]
         public async Task LogIn_ClosesDialog_WhenLoginRequestSucceeds()
         {
-            MockCloudFoundryService.Setup(mock => mock.LoginWithCredentials(FakeTarget, FakeUsername, FakeSecurePw, _sut.SkipSsl))
+            MockCloudFoundryService.Setup(mock => mock.LoginWithCredentials(FakeUsername, FakeSecurePw))
                .ReturnsAsync(new DetailedResult(true, null));
 
             await _sut.LogIn(null);

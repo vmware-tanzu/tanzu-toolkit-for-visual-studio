@@ -73,68 +73,51 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
-        [TestCategory("ConnectToCfAsync")]
-        public async Task ConnectToCFAsync_ThrowsExceptions_WhenParametersAreInvalid()
+        [TestCategory("LoginWithCredentials")]
+        [DataRow(null)]
+        [DataRow("")]
+        public async Task LoginWithCredentials_ThrowsArgumentException_WhenUsernameIsInvalid(string username)
         {
-            await Assert.ThrowsExceptionAsync<ArgumentException>(() => _sut.LoginWithCredentials(null, null, null, false));
-            await Assert.ThrowsExceptionAsync<ArgumentException>(() => _sut.LoginWithCredentials(string.Empty, null, null, false));
-            await Assert.ThrowsExceptionAsync<ArgumentException>(() => _sut.LoginWithCredentials("Junk", null, null, false));
-            await Assert.ThrowsExceptionAsync<ArgumentException>(() => _sut.LoginWithCredentials("Junk", string.Empty, null, false));
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => _sut.LoginWithCredentials("Junk", "Junk", null, false));
+            await Assert.ThrowsExceptionAsync<ArgumentException>(() => _sut.LoginWithCredentials(username, _fakeValidPassword));
         }
 
         [TestMethod]
-        [TestCategory("ConnectToCfAsync")]
-        public async Task ConnectToCFAsync_ReturnsSuccessfulResult_WhenLoginSucceeds()
+        [TestCategory("LoginWithCredentials")]
+        public async Task LoginWithCredentials_ThrowsArgumentNullException_WhenPasswordIsNull()
         {
-            _mockCfCliService.Setup(mock => mock.
-                TargetApi(_fakeValidTarget, true))
-                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => _sut.LoginWithCredentials("junk", null));
+        }
 
+        [TestMethod]
+        [TestCategory("LoginWithCredentials")]
+        public async Task LoginWithCredentials_ReturnsSuccessfulResult_WhenLoginSucceeds()
+        {
             _mockCfCliService.Setup(mock => mock.
                 AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
                     .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
 
-            var result = await _sut.LoginWithCredentials(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
+            var result = await _sut.LoginWithCredentials(_fakeValidUsername, _fakeValidPassword);
 
             Assert.IsTrue(result.Succeeded);
             Assert.IsNull(result.Explanation);
-            _mockCfCliService.VerifyAll();
         }
 
         [TestMethod]
-        [TestCategory("ConnectToCfAsync")]
-        public async Task ConnectToCFAsync_ReturnsFailedResult_WhenLoginFails_BecauseTargetApiFails()
+        [TestCategory("LoginWithCredentials")]
+        public async Task LoginWithCredentials_ReturnsFailedResult_WhenAuthenticationFails()
         {
-            _mockCfCliService.Setup(mock => mock.TargetApi(_fakeValidTarget, true))
-                .Returns(new DetailedResult(false, "fake failure message", _fakeFailureCmdResult));
-
-            var result = await _sut.LoginWithCredentials(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
-
-            Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.Explanation.Contains(CloudFoundryService.LoginFailureMessage));
-            _mockCfCliService.VerifyAll();
-        }
-
-        [TestMethod]
-        [TestCategory("ConnectToCfAsync")]
-        public async Task ConnectToCFAsync_ReturnsFailedResult_WhenLoginFails_BecauseAuthenticateFails()
-        {
-            _mockCfCliService.Setup(mock => mock.TargetApi(_fakeValidTarget, true))
-                .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
             _mockCfCliService.Setup(mock => mock.AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
                 .ReturnsAsync(new DetailedResult(false, "fake failure message", _fakeFailureCmdResult));
 
-            var result = await _sut.LoginWithCredentials(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
+            var result = await _sut.LoginWithCredentials(_fakeValidUsername, _fakeValidPassword);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains(CloudFoundryService.LoginFailureMessage));
-            _mockCfCliService.VerifyAll();
         }
 
         [TestMethod]
-        [TestCategory("ConnectToCfAsync")]
-        public async Task ConnectToCfAsync_IncludesNestedExceptionMessages_WhenExceptionIsThrown()
+        [TestCategory("LoginWithCredentials")]
+        public async Task LoginWithCredentials_IncludesNestedExceptionMessages_WhenExceptionIsThrown()
         {
             string baseMessage = "base exception message";
             string innerMessage = "inner exception message";
@@ -142,40 +125,27 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Exception multilayeredException = new Exception(outerMessage, new Exception(innerMessage, new Exception(baseMessage)));
 
             _mockCfCliService.Setup(mock => mock.
-                TargetApi(_fakeValidTarget, true))
-                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
-
-            _mockCfCliService.Setup(mock => mock.
                 AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
                     .Throws(multilayeredException);
 
-            var result = await _sut.LoginWithCredentials(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
+            var result = await _sut.LoginWithCredentials(_fakeValidUsername, _fakeValidPassword);
 
             Assert.IsTrue(result.Explanation.Contains(baseMessage));
             Assert.IsTrue(result.Explanation.Contains(innerMessage));
             Assert.IsTrue(result.Explanation.Contains(outerMessage));
-            _mockCfCliService.VerifyAll();
         }
 
         [TestMethod]
-        [TestCategory("ConnectToCfAsync")]
-        public async Task ConnectToCfAsync_InvokesCfApiAndCfAuthCommands()
+        [TestCategory("LoginWithCredentials")]
+        public async Task LoginWithCredentials_InvokesCfCliAuthenticateAsync()
         {
-            var cfApiArgs = $"api {_fakeValidTarget}{(_skipSsl ? " --skip-ssl-validation" : string.Empty)}";
-            var fakeCfApiResponse = new DetailedResult(true, null, new CommandResult(null, null, 0));
-            var fakePasswordStr = new System.Net.NetworkCredential(string.Empty, _fakeValidPassword).Password;
-            var cfAuthArgs = $"auth {_fakeValidUsername} {fakePasswordStr}";
             var fakeCfAuthResponse = new DetailedResult(true, null, new CommandResult(null, null, 0));
-
-            _mockCfCliService.Setup(mock => mock.
-              TargetApi(_fakeValidTarget, It.IsAny<bool>()))
-                .Returns(fakeCfApiResponse);
 
             _mockCfCliService.Setup(mock => mock.
               AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
                 .ReturnsAsync(fakeCfAuthResponse);
 
-            var result = await _sut.LoginWithCredentials(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
+            var result = await _sut.LoginWithCredentials(_fakeValidUsername, _fakeValidPassword);
 
             _mockCfCliService.VerifyAll();
         }
@@ -184,10 +154,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("MatchCliVersionToApiVersion")]
         public async Task MatchCliVersionToApiVersion_SetsCliVersionTo7_AndRaisesErrorDialog_WhenApiVersionCouldNotBeDetected()
         {
-            _mockCfCliService.Setup(mock => mock.
-                TargetApi(_fakeValidTarget, true))
-                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
-
             _mockCfCliService.Setup(mock => mock.
                 AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
                     .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
@@ -200,7 +166,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             _mockFileService.SetupSet(m => m.
                 CliVersion = expectedCliVersion).Verifiable();
 
-            var result = await _sut.LoginWithCredentials(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
+            var result = await _sut.LoginWithCredentials(_fakeValidUsername, _fakeValidPassword);
 
             _mockFileService.VerifyAll();
             _mockCfCliService.VerifyAll();
@@ -213,10 +179,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("MatchCliVersionToApiVersion")]
         public async Task MatchCliVersionToApiVersion_SetsCliVersionTo6_WhenApiMajorVersionIs2_AndBetweenMinors_128_149()
         {
-            _mockCfCliService.Setup(mock => mock.
-                TargetApi(_fakeValidTarget, true))
-                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
-
             _mockCfCliService.Setup(mock => mock.
                 AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
                     .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
@@ -237,7 +199,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 _mockFileService.SetupSet(m => m.
                     CliVersion = expectedCliVersion).Verifiable();
 
-                var result = await _sut.LoginWithCredentials(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
+                var result = await _sut.LoginWithCredentials(_fakeValidUsername, _fakeValidPassword);
 
                 _mockFileService.VerifyAll();
                 _mockCfCliService.VerifyAll();
@@ -248,10 +210,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("MatchCliVersionToApiVersion")]
         public async Task MatchCliVersionToApiVersion_SetsCliVersionTo6_WhenApiMajorVersionIs3_AndBetweenMinors_63_84()
         {
-            _mockCfCliService.Setup(mock => mock.
-                TargetApi(_fakeValidTarget, true))
-                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
-
             _mockCfCliService.Setup(mock => mock.
                 AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
                     .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
@@ -272,7 +230,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 _mockFileService.SetupSet(m => m.
                     CliVersion = expectedCliVersion).Verifiable();
 
-                var result = await _sut.LoginWithCredentials(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
+                var result = await _sut.LoginWithCredentials(_fakeValidUsername, _fakeValidPassword);
 
                 _mockFileService.VerifyAll();
                 _mockCfCliService.VerifyAll();
@@ -283,10 +241,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("MatchCliVersionToApiVersion")]
         public async Task MatchCliVersionToApiVersion_SetsCliVersionTo7_WhenApiMajorVersionIs2_AndAtOrAboveMinorVersion_150()
         {
-            _mockCfCliService.Setup(mock => mock.
-                TargetApi(_fakeValidTarget, true))
-                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
-
             _mockCfCliService.Setup(mock => mock.
                 AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
                     .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
@@ -307,7 +261,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 _mockFileService.SetupSet(m => m.
                     CliVersion = expectedCliVersion).Verifiable();
 
-                var result = await _sut.LoginWithCredentials(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
+                var result = await _sut.LoginWithCredentials(_fakeValidUsername, _fakeValidPassword);
 
                 _mockFileService.VerifyAll();
                 _mockCfCliService.VerifyAll();
@@ -318,10 +272,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("MatchCliVersionToApiVersion")]
         public async Task MatchCliVersionToApiVersion_SetsCliVersionTo7_WhenApiMajorVersionIs3_AndAtOrAboveMinorVersion_85()
         {
-            _mockCfCliService.Setup(mock => mock.
-                TargetApi(_fakeValidTarget, true))
-                    .Returns(new DetailedResult(true, null, _fakeSuccessCmdResult));
-
             _mockCfCliService.Setup(mock => mock.
                 AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
                     .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
@@ -342,7 +292,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 _mockFileService.SetupSet(m => m.
                     CliVersion = expectedCliVersion).Verifiable();
 
-                var result = await _sut.LoginWithCredentials(_fakeValidTarget, _fakeValidUsername, _fakeValidPassword, _skipSsl);
+                var result = await _sut.LoginWithCredentials(_fakeValidUsername, _fakeValidPassword);
 
                 _mockFileService.VerifyAll();
                 _mockCfCliService.VerifyAll();
@@ -2627,7 +2577,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             _mockCfCliService.Setup(m => m.StreamAppLogs(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Action<string>>(), It.IsAny<Action<string>>())).Throws(fakeException);
 
             var result = _sut.StreamAppLogs(FakeApp, _fakeOutCallback, _fakeErrCallback);
-            
+
             Assert.IsFalse(result.Succeeded);
             Assert.AreEqual(result.Explanation, fakeException.Message);
         }
