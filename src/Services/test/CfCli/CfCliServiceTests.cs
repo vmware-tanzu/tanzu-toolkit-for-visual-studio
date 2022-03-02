@@ -418,17 +418,22 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
 
         [TestMethod]
         [TestCategory("TargetApi")]
-        public void TargetApi_ReturnsTrue_WhenCmdExitCodeIsZero()
+        [DataRow(true)]
+        [DataRow(false)]
+        public void TargetApi_ReturnsTrue_WhenCmdExitCodeIsZero(bool fakeSkipSslCertValue)
         {
             var fakeApiAddress = "my.api.addr";
-            bool skipSsl = true;
-            string expectedArgs = $"{CfCliService._targetApiCmd} {fakeApiAddress} --skip-ssl-validation";
+            string expectedArgs = $"{CfCliService._targetApiCmd} {fakeApiAddress}";
+            if (fakeSkipSslCertValue)
+            {
+                expectedArgs += " --skip-ssl-validation";
+            }
 
             _mockCommandProcessService.Setup(mock => mock.
               RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(new CommandResult(_fakeStdOut, _fakeStdErr, 0));
 
-            DetailedResult result = _sut.TargetApi(fakeApiAddress, skipSsl);
+            DetailedResult result = _sut.TargetApi(fakeApiAddress, fakeSkipSslCertValue);
 
             Assert.IsTrue(result.Succeeded);
             Assert.IsTrue(result.CmdResult.ExitCode == 0);
@@ -439,23 +444,49 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
 
         [TestMethod]
         [TestCategory("TargetApi")]
-        public void TargetApi_ReturnsFalse_WhenCmdExitCodeIsNotZero()
+        [DataRow(true)]
+        [DataRow(false)]
+        public void TargetApi_ReturnsFalse_WhenCmdExitCodeIsNotZero(bool fakeSkipSslCertValue)
         {
             var fakeApiAddress = "my.api.addr";
-            bool skipSsl = true;
-            string expectedArgs = $"{CfCliService._targetApiCmd} {fakeApiAddress} --skip-ssl-validation";
+            string expectedArgs = $"{CfCliService._targetApiCmd} {fakeApiAddress}";
+            if (fakeSkipSslCertValue)
+            {
+                expectedArgs += " --skip-ssl-validation";
+            }
 
             _mockCommandProcessService.Setup(mock => mock.
               RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(new CommandResult(_fakeStdOut, _fakeStdErr, 1));
 
-            DetailedResult result = _sut.TargetApi(fakeApiAddress, skipSsl);
+            DetailedResult result = _sut.TargetApi(fakeApiAddress, fakeSkipSslCertValue);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.CmdResult.ExitCode == 1);
             Assert.IsNotNull(result.Explanation);
             Assert.AreEqual(_fakeStdOut, result.CmdResult.StdOut);
             Assert.AreEqual(_fakeStdErr, result.CmdResult.StdErr);
+        }
+
+        [TestMethod]
+        [TestCategory("TargetApi")]
+        public void TargetApi_ReturnsInvalidCertificateFailureType_WhenCmdStdErrContainsInvalidCertCue()
+        {
+            foreach (string invalidCertCue in _sut._invalidSslCertCues)
+            {
+                var fakeApiAddress = "my.api.addr";
+                string expectedArgs = $"{CfCliService._targetApiCmd} {fakeApiAddress}";
+                string fakeStdErr = _fakeStdErr + invalidCertCue;
+
+                _mockCommandProcessService.Setup(mock => mock.
+                  RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null, null))
+                    .Returns(new CommandResult(_fakeStdOut, fakeStdErr, 1));
+
+                DetailedResult result = _sut.TargetApi(fakeApiAddress, false);
+
+                Assert.IsFalse(result.Succeeded);
+                Assert.AreEqual(FailureType.InvalidCertificate, result.FailureType);
+            }
         }
 
         [TestMethod]
@@ -1470,7 +1501,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             Assert.IsFalse(result.Succeeded);
             Assert.AreEqual($"Unable to target space '{FakeSpace.SpaceName}'", result.Explanation);
         }
-        
+
         [TestMethod]
         [TestCategory("StreamAppLogs")]
         public void StreamAppLogs_ReturnsFailedResult_WhenCfExecutableCannotBeFound()
