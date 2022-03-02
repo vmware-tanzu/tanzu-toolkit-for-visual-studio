@@ -39,9 +39,11 @@ namespace Tanzu.Toolkit.ViewModels
             CfClient = Services.GetRequiredService<ICloudFoundryService>();
         }
 
+        public CloudFoundryInstance TargetCf { get; set; }
+
         public string ConnectionName { get; set; }
 
-        public string Target
+        public string TargetApiAddress
         {
             get => _target;
 
@@ -173,16 +175,48 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool CanLogIn(object arg = null)
         {
-            return !(string.IsNullOrWhiteSpace(Target) || string.IsNullOrWhiteSpace(Username) || PasswordEmpty()) && ValidateApiAddressFormat(Target);
+            return !(string.IsNullOrWhiteSpace(TargetApiAddress) || string.IsNullOrWhiteSpace(Username) || PasswordEmpty()) && ValidateApiAddressFormat(TargetApiAddress);
         }
 
         public bool CanOpenSsoDialog(object arg = null)
         {
-            return !string.IsNullOrWhiteSpace(Target) && ApiAddressIsValid;
+            return !string.IsNullOrWhiteSpace(TargetApiAddress) && ApiAddressIsValid;
         }
 
         public async Task VerifyApiAddress(object arg = null)
         {
+            VerifyingApiAddress = true;
+
+            var candidateCf = new CloudFoundryInstance(GetTargetDisplayName(), TargetApiAddress, SkipSsl);
+            var newCfClient = Services.GetRequiredService<ICloudFoundryService>();
+            var successfullyTargetedCf = newCfClient.ConfigureForCf(candidateCf).Succeeded;
+            if (!successfullyTargetedCf)
+            {
+                Fail();
+                return;
+            }
+
+            CfClient = newCfClient;
+            var certTestResult = CfClient.VerfiyNewApiConnection(TargetApiAddress, SkipSsl);
+            if (!certTestResult.Succeeded)
+            {
+                Fail(certTestResult.FailureType);
+                return;
+            }
+
+            var ssoPromptResult = await CfClient.GetSsoPrompt(TargetApiAddress, SkipSsl);
+            if (!ssoPromptResult.Succeeded && ssoPromptResult.FailureType != FailureType.MissingSsoPrompt)
+            {
+                Fail(ssoPromptResult.FailureType);
+                return;
+            }
+
+            SsoEnabledOnTarget = ssoPromptResult.Succeeded;
+            TargetCf = candidateCf;
+            PageNum = 2;
+            VerifyingApiAddress = false;
+
+            // local helper
             void Fail(FailureType failureType = FailureType.None)
             {
                 switch (failureType)
@@ -195,50 +229,26 @@ namespace Tanzu.Toolkit.ViewModels
                         PageNum = 2;
                         break;
                     default:
-                        ApiAddressError = $"Unable to establish a connection with {Target}";
+                        ApiAddressError = $"Unable to establish a connection with {TargetApiAddress}";
                         ApiAddressIsValid = false;
                         break;
                 }
 
+                TargetCf = null;
                 VerifyingApiAddress = false;
             }
-
-            VerifyingApiAddress = true;
-
-            var candidateCf = new CloudFoundryInstance(GetTargetDisplayName(), Target, SkipSsl);
-            var newCfClient = Services.GetRequiredService<ICloudFoundryService>();
-            var successfullyTargetedCf = newCfClient.ConfigureForCf(candidateCf).Succeeded;
-            if (!successfullyTargetedCf)
-            {
-                Fail();
-                return;
-            }
-
-            CfClient = newCfClient;
-            var certTestResult = CfClient.VerfiyNewApiConnection(Target, SkipSsl);
-            if (!certTestResult.Succeeded)
-            {
-                Fail(certTestResult.FailureType);
-                return;
-            }
-
-            var ssoPromptResult = await CfClient.GetSsoPrompt(Target, SkipSsl);
-            if (!ssoPromptResult.Succeeded && ssoPromptResult.FailureType != FailureType.MissingSsoPrompt)
-            {
-                Fail(ssoPromptResult.FailureType);
-                return;
-            }
-
-            SsoEnabledOnTarget = ssoPromptResult.Succeeded;
-            PageNum = 2;
-            VerifyingApiAddress = false;
         }
 
-        public async Task LogIn(object arg)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
+        public async Task LogIn(object arg = null)
         {
             HasErrors = false;
 
-            if (!ValidateApiAddressFormat(Target))
+            if (!ValidateApiAddressFormat(TargetApiAddress))
             {
                 return;
             }
@@ -248,7 +258,7 @@ namespace Tanzu.Toolkit.ViewModels
             if (result.Succeeded)
             {
                 ErrorMessage = null;
-                SetConnection();
+                _tasExplorer.SetConnection(TargetCf);
                 DialogService.CloseDialog(arg, true);
                 PageNum = 1;
                 ClearPassword();
@@ -257,11 +267,6 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 ErrorMessage = result.Explanation;
             }
-        }
-
-        public void SetConnection()
-        {
-            _tasExplorer.SetConnection(new CloudFoundryInstance(GetTargetDisplayName(), Target, SkipSsl));
         }
 
         public bool ValidateApiAddressFormat(string apiAddress)
@@ -284,19 +289,19 @@ namespace Tanzu.Toolkit.ViewModels
 
         public async Task OpenSsoDialog(object arg = null)
         {
-            if (string.IsNullOrWhiteSpace(Target))
+            if (string.IsNullOrWhiteSpace(TargetApiAddress))
             {
                 ErrorMessage = "Must specify an API address to log in via SSO.";
             }
             else
             {
-                var ssoPromptResult = await CfClient.GetSsoPrompt(Target);
+                var ssoPromptResult = await CfClient.GetSsoPrompt(TargetApiAddress);
 
                 if (ssoPromptResult.Succeeded)
                 {
                     var ssoUrlPrompt = ssoPromptResult.Content;
 
-                    _ssoDialog.ApiAddress = Target;
+                    _ssoDialog.ApiAddress = TargetApiAddress;
                     _ssoDialog.ShowWithPrompt(ssoUrlPrompt, this);
                 }
             }
@@ -318,7 +323,7 @@ namespace Tanzu.Toolkit.ViewModels
         public bool CanProceedToAuthentication(object arg = null)
         {
             bool certValidOrBypassed = !CertificateInvalid || (CertificateInvalid && SkipSsl);
-            return ApiAddressIsValid && !string.IsNullOrWhiteSpace(Target) && certValidOrBypassed;
+            return ApiAddressIsValid && !string.IsNullOrWhiteSpace(TargetApiAddress) && certValidOrBypassed;
         }
 
         public void ResetTargetDependentFields()
@@ -338,7 +343,7 @@ namespace Tanzu.Toolkit.ViewModels
         {
             if (!string.IsNullOrWhiteSpace(ConnectionName)) return ConnectionName;
 
-            var targetAddressValidUri = Uri.TryCreate(Target, UriKind.Absolute, out Uri uri);
+            var targetAddressValidUri = Uri.TryCreate(TargetApiAddress, UriKind.Absolute, out Uri uri);
             return targetAddressValidUri ? uri.Host : "Tanzu Application Service";
         }
     }

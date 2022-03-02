@@ -113,7 +113,7 @@ namespace Tanzu.Toolkit.ViewModels.SsoDialog
                 {
                     DialogService.CloseDialog(arg, true);
 
-                    _loginViewModel.SetConnection();
+                    _tasExplorer.SetConnection(_loginViewModel.TargetCf);
                     _loginViewModel.CloseDialog();
                 }
                 else

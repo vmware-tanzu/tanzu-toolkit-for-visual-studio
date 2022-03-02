@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Security;
 using System.Threading.Tasks;
+using Tanzu.Toolkit.Models;
 
 namespace Tanzu.Toolkit.ViewModels
 {
     public interface ILoginViewModel : IViewModel
     {
         string ConnectionName { get; }
-        string Target { get; set; }
+        string TargetApiAddress { get; set; }
         string Username { get; set; }
         bool SkipSsl { get; set; }
         bool HasErrors { get; set; }
@@ -15,6 +16,7 @@ namespace Tanzu.Toolkit.ViewModels
         Func<SecureString> GetPassword { get; set; }
         Func<bool> PasswordEmpty { get; set; }
         Action ClearPassword { get; set; }
+        CloudFoundryInstance TargetCf { get; set; }
 
         Task LogIn(object arg);
         bool CanLogIn(object arg);
@@ -22,7 +24,6 @@ namespace Tanzu.Toolkit.ViewModels
         bool CanOpenSsoDialog(object arg = null);
         Task OpenSsoDialog(object apiAddress = null);
         void CloseDialog();
-        void SetConnection();
         void NavigateToTargetPage(object arg = null);
         Task VerifyApiAddress(object arg = null);
         bool CanProceedToAuthentication(object arg = null);
