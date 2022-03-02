@@ -150,7 +150,6 @@
 
                 <StackPanel Name="LoginWarning"
                             Grid.Row="4"
-                            Margin="4"
                             Visibility="{Binding CertificateInvalid, Converter={StaticResource CollapsedVisibility}}"
                             Orientation="Horizontal">
                     <Image
@@ -159,21 +158,21 @@
                         RenderOptions.BitmapScalingMode="Fant"
                         SnapsToDevicePixels="True"
                         UseLayoutRounding="True"
-                        Margin="0,8,8,8"
+                        Margin="8"
                         Width="16"/>
 
                     <TextBlock
                         VerticalAlignment="Center"
-                        Text="Valid certificate not detected"/>
+                        Text="Certificate not trusted"/>
                 </StackPanel>
 
                 <CheckBox
                     Name="SkipSslCertValidation"
                     Grid.Row="5"
-                    HorizontalAlignment="Right"
-                    Margin="8"
+                    HorizontalAlignment="Left"
+                    Margin="8,8,0,0"
                     IsChecked="{Binding Path=SkipSsl, Mode=TwoWay}"
-                    Content="Skip ssl certificate validation"/>
+                    Content="Skip certificate validation"/>
 
             </Grid>
 
