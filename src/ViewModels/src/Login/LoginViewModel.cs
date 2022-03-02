@@ -243,7 +243,7 @@ namespace Tanzu.Toolkit.ViewModels
                 return;
             }
 
-            var result = await CfClient.LoginWithCredentials(Target, Username, GetPassword(), SkipSsl);
+            var result = await CfClient.LoginWithCredentials(Username, GetPassword());
 
             if (result.Succeeded)
             {

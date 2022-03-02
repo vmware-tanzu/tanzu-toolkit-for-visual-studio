@@ -70,13 +70,17 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             return _cfCliService.TargetApi(targetApiAddress, skipSsl);
         }
 
-        public async Task<DetailedResult> LoginWithCredentials(string targetApiAddress, string username, SecureString password, bool skipSsl)
+        /// <summary>
+        /// Performs authentication with Cloud Foundry API via CF CLI `cf auth` command.
+        /// Expects api address to already have been targeted
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="ArgumentNullException"></exception>
+        public async Task<DetailedResult> LoginWithCredentials(string username, SecureString password)
         {
-            if (string.IsNullOrEmpty(targetApiAddress))
-            {
-                throw new ArgumentException(nameof(targetApiAddress));
-            }
-
             if (string.IsNullOrEmpty(username))
             {
                 throw new ArgumentException(nameof(username));
@@ -89,17 +93,6 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
             try
             {
-                var targetResult = VerfiyNewApiConnection(targetApiAddress, skipSsl);
-
-                if (!targetResult.Succeeded)
-                {
-                    var newErrMsg = LoginFailureMessage + Environment.NewLine + targetResult.Explanation;
-
-                    targetResult.Explanation = newErrMsg;
-
-                    return targetResult;
-                }
-
                 DetailedResult authResult = await _cfCliService.AuthenticateAsync(username, password);
 
                 if (!authResult.Succeeded)
