@@ -65,7 +65,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
         }
 
-        public DetailedResult VerfiyNewApiConnection(string targetApiAddress, bool skipSsl)
+        public DetailedResult TargetCfApi(string targetApiAddress, bool skipSsl)
         {
             return _cfCliService.TargetApi(targetApiAddress, skipSsl);
         }
