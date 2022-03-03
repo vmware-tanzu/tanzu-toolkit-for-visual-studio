@@ -34,7 +34,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             System.Predicate<object> alwaysTrue = (object arg) => { return true; };
 
             AddCloudCommand = new AsyncDelegatingCommand(viewModel.LogIn, viewModel.CanLogIn);
-            SsoCommand = new AsyncDelegatingCommand(viewModel.OpenSsoDialog, viewModel.CanOpenSsoDialog);
+            SsoCommand = new DelegatingCommand(viewModel.OpenSsoDialog, viewModel.CanOpenSsoDialog);
             IncrementPageCommand = new AsyncDelegatingCommand(viewModel.ConnectToCf, viewModel.CanProceedToAuthentication);
             DecrementPageCommand = new DelegatingCommand(viewModel.NavigateToTargetPage, alwaysTrue);
 

@@ -22,7 +22,7 @@ namespace Tanzu.Toolkit.ViewModels
         bool CanLogIn(object arg);
         bool ValidateApiAddressFormat(string apiAddress);
         bool CanOpenSsoDialog(object arg = null);
-        Task OpenSsoDialog(object apiAddress = null);
+        void OpenSsoDialog(object apiAddress = null);
         void CloseDialog();
         void NavigateToTargetPage(object arg = null);
         Task ConnectToCf(object arg = null);

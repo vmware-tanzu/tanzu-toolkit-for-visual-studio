@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security;
 using System.Threading.Tasks;
@@ -144,6 +145,8 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
+        public string SsoLink { get; set; }
+
         public bool ConnectingToCf
         {
             get => _connectingToCf;
@@ -187,6 +190,7 @@ namespace Tanzu.Toolkit.ViewModels
         public async Task ConnectToCf(object arg = null)
         {
             ConnectingToCf = true;
+            SsoEnabledOnTarget = false;
 
             var candidateCf = new CloudFoundryInstance(GetTargetDisplayName(), TargetApiAddress, SkipSsl);
             var newCfClient = Services.GetRequiredService<ICloudFoundryService>();
@@ -206,13 +210,27 @@ namespace Tanzu.Toolkit.ViewModels
             }
 
             var ssoPromptResult = await CfClient.GetSsoPrompt(TargetApiAddress, SkipSsl);
-            if (!ssoPromptResult.Succeeded && ssoPromptResult.FailureType != FailureType.MissingSsoPrompt)
+            if (ssoPromptResult.Succeeded)
+            {
+                try
+                {
+                    var prompt = ssoPromptResult.Content;
+                    var promptComponents = prompt.Split(' ');
+                    var linkStr = promptComponents.First(item => item.StartsWith("http"));
+                    SsoEnabledOnTarget = Uri.IsWellFormedUriString(linkStr, UriKind.Absolute);
+                    SsoLink = linkStr;
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error("Unable to extract sso link from prompt \"{SsoPrompt}\". {SsoPromptException}", ssoPromptResult.Content, ex);
+                }
+            }
+            else if (ssoPromptResult.FailureType != FailureType.MissingSsoPrompt)
             {
                 Fail(ssoPromptResult.FailureType);
                 return;
             }
 
-            SsoEnabledOnTarget = ssoPromptResult.Succeeded;
             TargetCf = candidateCf;
             PageNum = 2;
             ConnectingToCf = false;
@@ -294,23 +312,16 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public async Task OpenSsoDialog(object arg = null)
+        public void OpenSsoDialog(object arg = null)
         {
             if (string.IsNullOrWhiteSpace(TargetApiAddress))
             {
                 ErrorMessage = "Must specify an API address to log in via SSO.";
             }
-            else
+            else if (SsoLink != null)
             {
-                var ssoPromptResult = await CfClient.GetSsoPrompt(TargetApiAddress);
-
-                if (ssoPromptResult.Succeeded)
-                {
-                    var ssoUrlPrompt = ssoPromptResult.Content;
-
-                    _ssoDialog.ApiAddress = TargetApiAddress;
-                    _ssoDialog.ShowWithPrompt(ssoUrlPrompt, this);
-                }
+                _ssoDialog.ApiAddress = TargetApiAddress;
+                _ssoDialog.ShowWithLink(SsoLink, this);
             }
         }
 
@@ -335,8 +346,9 @@ namespace Tanzu.Toolkit.ViewModels
 
         public void ResetTargetDependentFields()
         {
-            // reset invalid cert warning
+            // reset target-specific values
             CertificateInvalid = false;
+            SsoEnabledOnTarget = false;
 
             // clear previous creds
             Username = null;

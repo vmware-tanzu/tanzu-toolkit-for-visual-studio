@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.PlatformUI;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
 using Tanzu.Toolkit.ViewModels.SsoDialog;
@@ -35,6 +36,14 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             {
                 DragMove();
             }
+        }
+
+        private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+        {
+            // for .NET Core you need to add UseShellExecute = true
+            // see https://docs.microsoft.com/dotnet/api/system.diagnostics.processstartinfo.useshellexecute#property-value
+            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
+            e.Handled = true;
         }
     }
 }
