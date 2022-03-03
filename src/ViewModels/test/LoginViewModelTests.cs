@@ -231,17 +231,33 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("OpenSsoDialog")]
+        public void OpenSsoDialog_ShowsSsoDialog_WhenTargetApiAddressNotNull_AndSsoLinkNotNull()
+        {
+            var fakeTargetApiAddress = "not null";
+            var fakeSsoLink = "not null";
+
+            _sut.TargetApiAddress = fakeTargetApiAddress;
+            _sut.SsoLink = fakeSsoLink;
+
+            _sut.OpenSsoDialog();
+
+            MockSsoViewModel.VerifySet(m => m.ApiAddress = fakeTargetApiAddress);
+            MockSsoViewModel.Verify(m => m.ShowWithLink(fakeSsoLink, _sut), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("OpenSsoDialog")]
         [DataRow(null)]
         [DataRow("")]
         [DataRow(" ")]
-        public async Task OpenSsoDialog_SetsErrorMessage_WhenTargetApiAddressIsNullOrWhitespace(string targetApiAddress)
+        public void OpenSsoDialog_SetsErrorMessage_WhenTargetApiAddressIsNullOrWhitespace(string targetApiAddress)
         {
             _sut.TargetApiAddress = targetApiAddress;
 
             Assert.IsFalse(_sut.HasErrors);
             Assert.IsNull(_sut.ErrorMessage);
 
-            await _sut.OpenSsoDialog();
+            _sut.OpenSsoDialog();
 
             Assert.IsTrue(_sut.HasErrors);
             Assert.IsNotNull(_sut.ErrorMessage);
@@ -250,26 +266,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("OpenSsoDialog")]
-        public async Task OpenSsoDialog_ShowsSsoDialog_WhenSsoPromptRequestSucceeds()
+        public void OpenSsoDialog_DoesNothing_WhenSsoLinkIsNull()
         {
-            var fakeTargetApiAddress = "junk";
-            var fakeSsoPrompt = "some prompt that shows sso url";
+            _sut.TargetApiAddress = "not null";
+            _sut.SsoLink = null;
 
-            var fakeSsoPromptResponse = new DetailedResult<string>
-            {
-                Succeeded = true,
-                Content = fakeSsoPrompt,
-            };
+            _sut.OpenSsoDialog();
 
-            _sut.TargetApiAddress = fakeTargetApiAddress;
-
-            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(fakeTargetApiAddress, false))
-                .ReturnsAsync(fakeSsoPromptResponse);
-
-            await _sut.OpenSsoDialog();
-
-            MockSsoViewModel.VerifySet(m => m.ApiAddress = fakeTargetApiAddress);
-            MockSsoViewModel.Verify(m => m.ShowWithPrompt(fakeSsoPrompt, _sut), Times.Once);
+            MockSsoViewModel.Verify(m => m.ShowWithLink(It.IsAny<string>(), _sut), Times.Never);
         }
 
         [TestMethod]
@@ -285,7 +289,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ConnectToCf")]
         public async Task ConnectToCf_SetsPageNumberTo2_AndSetsSsoEnabledOnTargetToTrue_WhenSsoPromptSuccessfullyRetrieved()
         {
-            var fakeSsoPrompt = "junk";
+            var fakeSsoPrompt = "some fake string that contains a properly-formatted uri like this: https://some.fake.address :) :) :)";
             var fakeSsoPromptResult = new DetailedResult<string>
             {
                 Succeeded = true,
