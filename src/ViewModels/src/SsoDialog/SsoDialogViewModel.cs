@@ -5,7 +5,7 @@ namespace Tanzu.Toolkit.ViewModels.SsoDialog
 {
     public class SsoDialogViewModel : AbstractViewModel, ISsoDialogViewModel
     {
-        private string _prompt;
+        private string _ssoLink;
         private string _passcode;
         private bool _hasErrors;
         private string _errorMessage;
@@ -38,13 +38,13 @@ namespace Tanzu.Toolkit.ViewModels.SsoDialog
             }
         }
 
-        public string Prompt
+        public string SsoLink
         {
-            get => _prompt;
+            get => _ssoLink;
 
             set
             {
-                _prompt = value;
+                _ssoLink = value;
                 RaisePropertyChangedEvent("Prompt");
             }
         }
@@ -83,12 +83,10 @@ namespace Tanzu.Toolkit.ViewModels.SsoDialog
             }
         }
 
-        public void ShowWithPrompt(string prompt, ILoginViewModel parentWindow)
+        public void ShowWithLink(string link, ILoginViewModel parentWindow)
         {
-            Prompt = prompt;
-
+            SsoLink = link;
             _loginViewModel = parentWindow;
-
             DialogService.ShowDialog(nameof(SsoDialogViewModel));
         }
 
