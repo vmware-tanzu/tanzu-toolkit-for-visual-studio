@@ -55,7 +55,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("ctor")]
-        public void Constructor_SetsApiAddressIsValid_ToFalse()
+        public void Constructor_SetsIsApiAddressFormatValid_ToFalse()
         {
             Assert.IsFalse(_sut.IsApiAddressFormatValid);
         }
@@ -192,7 +192,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [DataRow("www.api.com", false, LoginViewModel.TargetInvalidFormatMessage)]
         [DataRow("http://www.api.com", true, null)]
         [DataRow("https://my.cool.url", true, null)]
-        public void VerifyApiAddress_SetsApiAddressIsValid_AndSetsApiAddressError(string apiAddr, bool expectedValidity, string expectedError)
+        public void VerifyApiAddress_SetsIsApiAddressFormatValid_AndSetsApiAddressError(string apiAddr, bool expectedValidity, string expectedError)
         {
             _sut.ValidateApiAddressFormat(apiAddr);
             Assert.AreEqual(expectedValidity, _sut.IsApiAddressFormatValid);
