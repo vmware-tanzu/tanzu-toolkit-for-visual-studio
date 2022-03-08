@@ -98,6 +98,13 @@
           <ButtonText>Send Feedback</ButtonText>
         </Strings>
       </Button>
+
+      <Button guid="guidTanzuToolkitPackageCmdSet" id="RemoteDebugId" priority="0x0100" type="Button">
+        <Parent guid="guidTanzuToolkitPackageCmdSet" id="ProjContextMenuGroup" />
+        <Strings>
+          <ButtonText>Remote debug</ButtonText>
+        </Strings>
+      </Button>
     </Buttons>
 
     <!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
@@ -121,8 +128,9 @@
 
       <IDSymbol name="TasExplorerCommandId" value="256" />
       <IDSymbol name="PushToCloudFoundryCommandId" value="257" />
-      <IDSymbol name="OpenLogsCommandId" value="259" />
       <IDSymbol name="RequestFeedbackCommandId" value="258" />
+      <IDSymbol name="OpenLogsCommandId" value="259" />
+      <IDSymbol name="RemoteDebugId" value="260" />
 
       <IDSymbol name="ProjContextMenuGroup" value="1001" />
       <IDSymbol name="ViewMenuGroup" value="1002" />
