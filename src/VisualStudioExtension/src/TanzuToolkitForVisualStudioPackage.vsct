@@ -1,31 +1,31 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
-	<!--  This is the file that defines the actual layout and type of the commands.
+  <!--  This is the file that defines the actual layout and type of the commands.
         It is divided in different sections (e.g. command definition, command
         placement, ...), with each defining a specific set of properties.
         See the comment before each section for more details about how to
         use it. -->
 
-	<!--  The VSCT compiler (the tool that translates this file into the binary
+  <!--  The VSCT compiler (the tool that translates this file into the binary
         format that VisualStudio will consume) has the ability to run a preprocessor
         on the vsct file; this preprocessor is (usually) the C++ preprocessor, so
         it is possible to define includes and macros with the same syntax used
         in C++ files. Using this ability of the compiler here, we include some files
         defining some of the constants that we will use inside the file. -->
 
-	<!--This is the file that defines the IDs for all the commands exposed by VisualStudio. -->
-	<Extern href="stdidcmd.h" />
+  <!--This is the file that defines the IDs for all the commands exposed by VisualStudio. -->
+  <Extern href="stdidcmd.h" />
 
-	<!--This header contains the command ids for the menus provided by the shell. -->
-	<Extern href="vsshlids.h" />
-  
+  <!--This header contains the command ids for the menus provided by the shell. -->
+  <Extern href="vsshlids.h" />
+
   <Include href="KnownImageIds.vsct" />
 
-	<!--The Commands section is where commands, menus, and menu groups are defined.
+  <!--The Commands section is where commands, menus, and menu groups are defined.
       This section uses a Guid to identify the package that provides the command defined inside it. -->
-	<Commands package="guidTanzuToolkitPackage">
-		<!-- Inside this section we have different sub-sections: one for the menus, another
+  <Commands package="guidTanzuToolkitPackage">
+    <!-- Inside this section we have different sub-sections: one for the menus, another
     for the menu groups, one for the buttons (the actual commands), one for the combos
     and the last one for the bitmaps used. Each element is identified by a command id that
     is a unique pair of guid and numeric identifier; the guid part of the identifier is usually
@@ -56,34 +56,34 @@
         </Strings>
       </Menu>
     </Menus>
-    
-		<!--Buttons section. -->
-		<!--This section defines the elements the user can interact with, like a menu command or a button
+
+    <!--Buttons section. -->
+    <!--This section defines the elements the user can interact with, like a menu command or a button
         or combo box in a toolbar. -->
-		<Buttons>
-			<!--To define a menu group you have to specify its ID, the parent menu and its display priority.
+    <Buttons>
+      <!--To define a menu group you have to specify its ID, the parent menu and its display priority.
           The command is visible and enabled by default. If you need to change the visibility, status, etc, you can use
           the CommandFlag node.
           You can add more than one CommandFlag node e.g.:
               <CommandFlag>DefaultInvisible</CommandFlag>
               <CommandFlag>DynamicVisibility</CommandFlag>
           If you do not want an image next to your command, remove the Icon node /> -->
-			<Button guid="guidTanzuToolkitPackageCmdSet" id="TasExplorerCommandId" priority="0x0100" type="Button">
-				<Parent guid="guidTanzuToolkitPackageCmdSet" id="ViewMenuGroup" />
-				<Icon guid="guidImages" id="bmpPic1" />
-				<Strings>
-					<ButtonText>Tanzu Application Service Explorer</ButtonText>
-				</Strings>
-			</Button>
-      
-			<Button guid="guidTanzuToolkitPackageCmdSet" id="PushToCloudFoundryCommandId" priority="0x0100" type="Button">
+      <Button guid="guidTanzuToolkitPackageCmdSet" id="TasExplorerCommandId" priority="0x0100" type="Button">
+        <Parent guid="guidTanzuToolkitPackageCmdSet" id="ViewMenuGroup" />
+        <Icon guid="guidImages" id="bmpPic1" />
+        <Strings>
+          <ButtonText>Tanzu Application Service Explorer</ButtonText>
+        </Strings>
+      </Button>
+
+      <Button guid="guidTanzuToolkitPackageCmdSet" id="PushToCloudFoundryCommandId" priority="0x0100" type="Button">
         <Parent guid="guidTanzuToolkitPackageCmdSet" id="ProjContextMenuGroup" />
         <Icon guid="guidImages1" id="bmpPic1" />
-				<Strings>
+        <Strings>
           <ButtonText>Push To Tanzu Application Service</ButtonText>
         </Strings>
-			</Button>
-      
+      </Button>
+
       <Button guid="guidTanzuToolkitPackageCmdSet" id="OpenLogsCommandId" priority="0x0100" type="Button">
         <Parent guid="guidTanzuToolkitPackageCmdSet" id="ToolkitExtSubmenuGroup" />
         <Icon guid="ImageCatalogGuid" id="Log" />
@@ -100,34 +100,34 @@
       </Button>
     </Buttons>
 
-		<!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
-		<Bitmaps>
-			<!--  The bitmap id is defined in a way that is a little bit different from the others:
+    <!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
+    <Bitmaps>
+      <!--  The bitmap id is defined in a way that is a little bit different from the others:
             the declaration starts with a guid for the bitmap strip, then there is the resource id of the
             bitmap strip containing the bitmaps and then there are the numeric ids of the elements used
             inside a button definition. An important aspect of this declaration is that the element id
             must be the actual index (1-based) of the bitmap inside the bitmap strip. -->
-			<Bitmap guid="guidImages" href="Resources\tanzu16.png" usedList="bmpPic1" />
-			<Bitmap guid="guidImages1" href="Resources\tanzu_deploy_16x.png" usedList="bmpPic1" />
+      <Bitmap guid="guidImages" href="Resources\tanzu16.png" usedList="bmpPic1" />
+      <Bitmap guid="guidImages1" href="Resources\tanzu_deploy_16x.png" usedList="bmpPic1" />
     </Bitmaps>
   </Commands>
 
-	<Symbols>
-		<!-- This is the package guid. -->
-		<GuidSymbol name="guidTanzuToolkitPackage" value="{9419e55b-9e82-4d87-8ee5-70871b01b7cc}" />
+  <Symbols>
+    <!-- This is the package guid. -->
+    <GuidSymbol name="guidTanzuToolkitPackage" value="{9419e55b-9e82-4d87-8ee5-70871b01b7cc}" />
 
-		<!-- This is the guid used to group the menu commands together -->
-		<GuidSymbol name="guidTanzuToolkitPackageCmdSet" value="{f91c88fb-6e17-42a6-878d-f4d16ead7625}">
-      
-			<IDSymbol name="TasExplorerCommandId" value="256" />
-			<IDSymbol name="PushToCloudFoundryCommandId" value="257" />
-            <IDSymbol name="OpenLogsCommandId" value="259" />
-			<IDSymbol name="RequestFeedbackCommandId" value="258" />
+    <!-- This is the guid used to group the menu commands together -->
+    <GuidSymbol name="guidTanzuToolkitPackageCmdSet" value="{f91c88fb-6e17-42a6-878d-f4d16ead7625}">
+
+      <IDSymbol name="TasExplorerCommandId" value="256" />
+      <IDSymbol name="PushToCloudFoundryCommandId" value="257" />
+      <IDSymbol name="OpenLogsCommandId" value="259" />
+      <IDSymbol name="RequestFeedbackCommandId" value="258" />
 
       <IDSymbol name="ProjContextMenuGroup" value="1001" />
       <IDSymbol name="ViewMenuGroup" value="1002" />
       <IDSymbol name="ExtensionsMenuGroup" value="4128" />
-      
+
       <IDSymbol name="TanzuToolkitMenu" value="0x1022" />
       <IDSymbol name="ToolkitExtSubmenuGroup" value="0x1023" />
     </GuidSymbol>
@@ -137,12 +137,12 @@
     </GuidSymbol>
 
     <!-- Images -->
-		<GuidSymbol name="guidImages" value="{99936759-85d4-4db9-8ac2-ca1402b12ad4}">
-			<IDSymbol name="bmpPic1" value="1" />
-		</GuidSymbol>
-		<GuidSymbol name="guidImages1" value="{1e401806-768f-42f2-af53-6e1281da6f5e}">
-			<IDSymbol name="bmpPic1" value="1" />
-		</GuidSymbol>
+    <GuidSymbol name="guidImages" value="{99936759-85d4-4db9-8ac2-ca1402b12ad4}">
+      <IDSymbol name="bmpPic1" value="1" />
+    </GuidSymbol>
+    <GuidSymbol name="guidImages1" value="{1e401806-768f-42f2-af53-6e1281da6f5e}">
+      <IDSymbol name="bmpPic1" value="1" />
+    </GuidSymbol>
     <GuidSymbol name="guidImages2" value="{2251cfc3-e92f-40ce-b730-98cf8bd7042d}">
       <IDSymbol name="bmpPic1" value="1" />
     </GuidSymbol>
