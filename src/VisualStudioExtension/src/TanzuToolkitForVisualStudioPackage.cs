@@ -81,6 +81,7 @@ namespace Tanzu.Toolkit.VisualStudio
                 Task.Run(() => RequestFeedbackCommand.InitializeAsync(this)),
             };
 
+            await this.RegisterCommandsAsync(); // convenient command registration method provided by vsix community toolkit
             await Task.WhenAll(commandInitializations);
         }
 
