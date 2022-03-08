@@ -92,6 +92,11 @@
     <Compile Include="Commands\PushToCloudFoundryCommand.cs" />
     <Compile Include="Services\UiDispatcherService.cs" />
     <Compile Include="Services\DialogService.cs" />
+    <Compile Include="TanzuToolkitForVisualStudioPackage1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TanzuToolkitForVisualStudioPackage.vsct</DependentUpon>
+    </Compile>
     <Compile Include="Views\Commands\AsyncDelegatingCommand.cs" />
     <Compile Include="Views\Commands\DelegatingCommand.cs" />
     <Compile Include="Views\AppDeletionConfirmationView.xaml.cs">
@@ -191,6 +196,8 @@
   <ItemGroup>
     <VSCTCompile Include="TanzuToolkitForVisualStudioPackage.vsct">
       <ResourceName>Menus.ctmenu</ResourceName>
+      <Generator>VsctGenerator</Generator>
+      <LastGenOutput>TanzuToolkitForVisualStudioPackage1.cs</LastGenOutput>
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
