@@ -21,11 +21,11 @@
 
     <StackPanel Margin="12">
         <TextBlock Margin="0,0,0,12">
-            Please visit
+            Temporary Authentication Code ( Get one at 
             <Hyperlink NavigateUri="{Binding SsoLink}" RequestNavigate="Hyperlink_RequestNavigate">
-                this site
+                <TextBlock Text="{Binding SsoLink}"/>
             </Hyperlink>
-            for an authenication code and paste it here
+            ):
         </TextBlock>
 
         <TextBox Text="{Binding Passcode}"/>
