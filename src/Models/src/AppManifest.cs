@@ -27,6 +27,7 @@ namespace Tanzu.Toolkit.Models
 
     public class AppConfig : ICloneable
     {
+        public string Buildpack { get; set; }
         public List<string> Buildpacks { get; set; }
         public string Command { get; set; }
         public string DiskQuota { get; set; }
