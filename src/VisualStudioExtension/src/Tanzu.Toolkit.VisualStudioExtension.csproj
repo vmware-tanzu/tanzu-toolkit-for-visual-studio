@@ -82,6 +82,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Commands\RequestFeedbackCommand.cs" />
+    <Compile Include="Commands\RemoteDebugCommand.cs" />
     <Compile Include="Services\DataPersistenceService.cs" />
     <Compile Include="Services\IThemeService.cs" />
     <Compile Include="Services\IToolWindowService.cs" />
