@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using YamlDotNet.Serialization;
 
 namespace Tanzu.Toolkit.Models
 {
     public class AppManifest
     {
         public int Version { get; set; }
+
         public List<AppConfig> Applications { get; set; }
 
         public AppManifest DeepClone()
@@ -22,6 +25,30 @@ namespace Tanzu.Toolkit.Models
                 Version = Version,
                 Applications = appsList,
             };
+        }
+
+        [YamlIgnore]
+        public BuildpackScheme OriginalBuildpackScheme { get; set; }
+
+        [YamlIgnore]
+        public AppConfig App
+        {
+            get
+            {
+                var manifestApp = Applications.FirstOrDefault();
+                if (manifestApp == null)
+                {
+                    throw new ArgumentException("No app specification detected in manifest");
+                }
+
+                return manifestApp;
+            }
+        }
+
+        public enum BuildpackScheme
+        {
+            Singular = 0,
+            List = 1,
         }
     }
 
