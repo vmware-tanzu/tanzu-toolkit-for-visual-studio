@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Tanzu.Toolkit.VisualStudio
 {
-    [Command("f91c88fb-6e17-42a6-878d-f4d16ead7625", 260)]
+    [Command(PackageGuids.guidTanzuToolkitPackageCmdSetString, PackageIds.RemoteDebugId)]
     internal sealed class RemoteDebugCommand : BaseCommand<RemoteDebugCommand>
     {
         protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
