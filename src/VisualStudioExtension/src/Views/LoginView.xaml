@@ -25,6 +25,7 @@
         <converters:VisibilityConverter x:Key="InverseCollapsedVisibility" ReserveSpace="False" Reversed="True"/>
         <converters:PageNumberConverter x:Key="Page1Displayer" ShowValue="1" ReserveSpace="False"/>
         <converters:PageNumberConverter x:Key="Page2Displayer" ShowValue="2" ReserveSpace="False"/>
+        <converters:PageNumberConverter x:Key="Page3Displayer" ShowValue="3" ReserveSpace="False"/>
 
         <Style x:Key="ApiAddressFieldStyle" TargetType="{x:Type TextBox}">
             <Style.Triggers>
@@ -189,7 +190,7 @@
                         HorizontalAlignment="Right"
                         Visibility="{Binding ConnectingToCf, Converter={StaticResource InverseCollapsedVisibility}}"
                         Command="{Binding ElementName=LoginViewElement, Path=IncrementPageCommand}"/>
-                    
+
                     <Button
                         Content="Verifying..."
                         IsEnabled="False"
@@ -211,7 +212,6 @@
                         Click="Close"
                         Content="Cancel"/>
                 </StackPanel>
-
             </Grid>
         </StackPanel>
 
@@ -247,7 +247,7 @@
 
             <Grid x:Name="SsoOption"
                   Visibility="{Binding SsoEnabledOnTarget, Converter={StaticResource CollapsedVisibility}}">
-                
+
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="5*"/>
                     <ColumnDefinition Width="*"/>
@@ -290,7 +290,7 @@
                         Padding="4,0"
                         Command="{Binding ElementName=LoginViewElement, Path=DecrementPageCommand}"
                         Content="Back"/>
-                    
+
                     <Button
                         Content="Log In"
                         IsEnabled="{Binding IsApiAddressFormatValid}"
@@ -299,7 +299,6 @@
                         HorizontalAlignment="Right"
                         Command="{ Binding ElementName=LoginViewElement, Path=AddCloudCommand }" 
                         CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
-
                 </StackPanel>
 
                 <StackPanel
@@ -314,9 +313,61 @@
                         Click="Close"
                         Content="Cancel"/>
                 </StackPanel>
-
             </Grid>
+        </StackPanel>
 
+        <StackPanel Name="Page3"
+                    Visibility="{Binding PageNum, Converter={StaticResource Page3Displayer}}"
+                    Margin="16,0">
+            <TextBlock TextWrapping="Wrap">
+                Temporary Authentication Code ( Get one at 
+                <Hyperlink NavigateUri="{Binding SsoLink}" RequestNavigate="Hyperlink_RequestNavigate">
+                    <TextBlock Text="{Binding SsoLink}"/>
+                </Hyperlink>
+                ):
+            </TextBlock>
+
+            <TextBox
+                Text="{Binding SsoPasscode}"
+                Margin="0,8"/>
+
+            <TextBlock
+                Text="{Binding ErrorMessage}"
+                Visibility="{Binding Path=HasErrors, Converter={StaticResource CollapsedVisibility}}"
+                Foreground="Red"/>
+
+            <Grid Name="Page3Buttons"
+              Visibility="{Binding PageNum, Converter={StaticResource Page3Displayer}}">
+
+                <StackPanel
+                    Orientation="Horizontal"
+                    Margin="0,12"
+                    Height="auto"
+                    HorizontalAlignment="Right">
+
+                    <Button
+                        Content="Back"
+                        Margin="0,0,8,0"
+                        Command="{Binding ElementName=LoginViewElement, Path=DecrementPageCommand}"/>
+
+                    <Button
+                        Content="Log In"
+                        HorizontalAlignment="Right"
+                        Command="{ Binding ElementName=LoginViewElement, Path=LogInWithPasscodeCommand }" 
+                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
+                </StackPanel>
+
+                <StackPanel
+                    Orientation="Horizontal"
+                    Margin="0,12"
+                    Height="auto"
+                    HorizontalAlignment="Left">
+
+                    <Button
+                        Click="Close"
+                        Content="Cancel"/>
+                </StackPanel>
+            </Grid>
         </StackPanel>
     </StackPanel>
 </ui:DialogWindow>

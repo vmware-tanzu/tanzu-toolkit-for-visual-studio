@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CloudFoundry;
@@ -16,9 +17,7 @@ using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
-using Tanzu.Toolkit.ViewModels.SsoDialog;
 using Tanzu.Toolkit.ViewModels.AppDeletionConfirmation;
-using System.Threading.Tasks;
 
 namespace Tanzu.Toolkit.ViewModels.Tests
 {
@@ -38,7 +37,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         protected Mock<ITasExplorerViewModel> MockTasExplorerViewModel { get; set; }
         protected Mock<ISerializationService> MockSerializationService { get; set; }
         protected Mock<IDataPersistenceService> MockDataPersistenceService { get; set; }
-        protected Mock<ISsoDialogViewModel> MockSsoViewModel { get; set; }
         protected Mock<ILoginViewModel> MockLoginViewModel { get; set; }
         protected Mock<IAppDeletionConfirmationViewModel> MockAppDeletionConfirmationViewModel { get; set; }
 
@@ -331,7 +329,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockTasExplorerViewModel = new Mock<ITasExplorerViewModel>();
             MockSerializationService = new Mock<ISerializationService>();
             MockDataPersistenceService = new Mock<IDataPersistenceService>();
-            MockSsoViewModel = new Mock<ISsoDialogViewModel>();
             MockLoginViewModel = new Mock<ILoginViewModel>();
             MockAppDeletionConfirmationViewModel = new Mock<IAppDeletionConfirmationViewModel>();
 
@@ -349,7 +346,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             services.AddSingleton(MockFileService.Object);
             services.AddSingleton(MockSerializationService.Object);
             services.AddSingleton(MockDataPersistenceService.Object);
-            services.AddSingleton(MockSsoViewModel.Object);
             services.AddSingleton(MockLoginViewModel.Object);
             services.AddSingleton(MockAppDeletionConfirmationViewModel.Object);
 

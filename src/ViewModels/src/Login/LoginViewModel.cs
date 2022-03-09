@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CloudFoundry;
-using Tanzu.Toolkit.ViewModels.SsoDialog;
 
 [assembly: InternalsVisibleTo("Tanzu.Toolkit.ViewModels.Tests")]
 
@@ -28,18 +27,18 @@ namespace Tanzu.Toolkit.ViewModels
         private bool _connectingToCf = false;
         private bool _isApiAddressFormatValid;
         private bool _certificateInvalid = false;
-        private ISsoDialogViewModel _ssoDialog;
-
         internal ITasExplorerViewModel _tasExplorer;
+        private string _ssoLink;
 
         public LoginViewModel(IServiceProvider services)
             : base(services)
         {
             IsApiAddressFormatValid = false;
             _tasExplorer = services.GetRequiredService<ITasExplorerViewModel>();
-            _ssoDialog = services.GetRequiredService<ISsoDialogViewModel>();
             CfClient = Services.GetRequiredService<ICloudFoundryService>();
         }
+
+        // Properties //
 
         public CloudFoundryInstance TargetCf { get; set; }
 
@@ -145,7 +144,16 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public string SsoLink { get; set; }
+        public string SsoLink
+        {
+            get => _ssoLink;
+
+            set
+            {
+                _ssoLink = value;
+                RaisePropertyChangedEvent("SsoLink");
+            }
+        }
 
         public bool ConnectingToCf
         {
@@ -175,17 +183,11 @@ namespace Tanzu.Toolkit.ViewModels
 
         public Func<bool> PasswordEmpty { get; set; }
 
+        public string SsoPasscode { get; set; }
+
         internal ICloudFoundryService CfClient { get; set; }
 
-        public bool CanLogIn(object arg = null)
-        {
-            return !(string.IsNullOrWhiteSpace(TargetApiAddress) || string.IsNullOrWhiteSpace(Username) || PasswordEmpty()) && ValidateApiAddressFormat(TargetApiAddress);
-        }
-
-        public bool CanOpenSsoDialog(object arg = null)
-        {
-            return !string.IsNullOrWhiteSpace(TargetApiAddress) && IsApiAddressFormatValid;
-        }
+        // Methods //
 
         public async Task ConnectToCf(object arg = null)
         {
@@ -216,8 +218,8 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     var prompt = ssoPromptResult.Content;
                     var promptComponents = prompt.Split(' ');
-                    var linkStr = promptComponents.First(item => item.StartsWith("http"));
-                    SsoEnabledOnTarget = Uri.IsWellFormedUriString(linkStr, UriKind.Absolute);
+                    var linkStr = promptComponents.First(item => Uri.IsWellFormedUriString(item, UriKind.Absolute));
+                    SsoEnabledOnTarget = true;
                     SsoLink = linkStr;
                 }
                 catch (Exception ex)
@@ -257,6 +259,45 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
+        public bool ValidateApiAddressFormat(string apiAddress)
+        {
+            if (Uri.IsWellFormedUriString(apiAddress, UriKind.Absolute) || string.IsNullOrWhiteSpace(apiAddress))
+            {
+                ApiAddressError = null;
+                IsApiAddressFormatValid = true;
+
+                return true;
+            }
+            else if (string.IsNullOrWhiteSpace(apiAddress))
+            {
+                ApiAddressError = null;
+                IsApiAddressFormatValid = false;
+
+                return false;
+            }
+            else
+            {
+                ApiAddressError = TargetInvalidFormatMessage;
+                IsApiAddressFormatValid = false;
+
+                return false;
+            }
+        }
+
+        public void NavigateToTargetPage(object arg = null)
+        {
+            PageNum = 1;
+
+            // clear previous login errors
+            ErrorMessage = null;
+        }
+
+        public void ShowSsoLogin(object arg = null)
+        {
+            SsoPasscode = null; // clear previous entry
+            PageNum = 3;
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -287,41 +328,31 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public bool ValidateApiAddressFormat(string apiAddress)
+        public async Task LoginWithSsoPasscodeAsync(object arg = null)
         {
-            if (Uri.IsWellFormedUriString(apiAddress, UriKind.Absolute))
-            {
-                ApiAddressError = null;
-                IsApiAddressFormatValid = true;
+            HasErrors = false;
 
-                return true;
+            if (string.IsNullOrWhiteSpace(SsoPasscode))
+            {
+                ErrorMessage = "Passcode cannot be empty.";
             }
-            else if (string.IsNullOrWhiteSpace(apiAddress))
+            else if (TargetCf == null)
             {
-                ApiAddressError = null;
-                IsApiAddressFormatValid = false;
-
-                return false;
+                ErrorMessage = "Unable to contact specified api address; please close this window and try again.\nIf this issue persists, please email tas-vs-extension@vmware.com";
             }
             else
             {
-                ApiAddressError = TargetInvalidFormatMessage;
-                IsApiAddressFormatValid = false;
+                var loginResult = await CfClient.LoginWithSsoPasscode(TargetCf.ApiAddress, SsoPasscode);
 
-                return false;
-            }
-        }
-
-        public void OpenSsoDialog(object arg = null)
-        {
-            if (string.IsNullOrWhiteSpace(TargetApiAddress))
-            {
-                ErrorMessage = "Must specify an API address to log in via SSO.";
-            }
-            else if (SsoLink != null)
-            {
-                _ssoDialog.ApiAddress = TargetApiAddress;
-                _ssoDialog.ShowWithLink(SsoLink, this);
+                if (loginResult.Succeeded)
+                {
+                    _tasExplorer.SetConnection(TargetCf);
+                    CloseDialog();
+                }
+                else
+                {
+                    ErrorMessage = loginResult.Explanation;
+                }
             }
         }
 
@@ -330,29 +361,17 @@ namespace Tanzu.Toolkit.ViewModels
             DialogService.CloseDialogByName(nameof(LoginViewModel));
         }
 
-        public void NavigateToTargetPage(object arg = null)
-        {
-            PageNum = 1;
-
-            // clear previous login errors
-            ErrorMessage = null;
-        }
-
-        public bool CanProceedToAuthentication(object arg = null)
-        {
-            var certValidOrBypassed = !CertificateInvalid || (CertificateInvalid && SkipSsl);
-            return IsApiAddressFormatValid && certValidOrBypassed;
-        }
-
         public void ResetTargetDependentFields()
         {
             // reset target-specific values
             CertificateInvalid = false;
             SsoEnabledOnTarget = false;
+            SsoLink = null;
 
             // clear previous creds
             Username = null;
             ClearPassword();
+            SsoPasscode = null;
 
             // clear previous errors
             ErrorMessage = null;
@@ -364,6 +383,18 @@ namespace Tanzu.Toolkit.ViewModels
 
             var targetAddressValidUri = Uri.TryCreate(TargetApiAddress, UriKind.Absolute, out var uri);
             return targetAddressValidUri ? uri.Host : "Tanzu Application Service";
+        }
+
+        // Predicates //
+        public bool CanLogIn(object arg = null)
+        {
+            return !(string.IsNullOrWhiteSpace(TargetApiAddress) || string.IsNullOrWhiteSpace(Username) || PasswordEmpty()) && ValidateApiAddressFormat(TargetApiAddress);
+        }
+
+        public bool CanProceedToAuthentication(object arg = null)
+        {
+            bool certValidOrBypassed = !CertificateInvalid || (CertificateInvalid && SkipSsl);
+            return IsApiAddressFormatValid && certValidOrBypassed;
         }
     }
 }
