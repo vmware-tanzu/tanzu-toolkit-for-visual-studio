@@ -21,12 +21,12 @@ namespace Tanzu.Toolkit.ViewModels
         Task LogIn(object arg);
         bool CanLogIn(object arg);
         bool ValidateApiAddressFormat(string apiAddress);
-        bool CanOpenSsoDialog(object arg = null);
-        void OpenSsoDialog(object apiAddress = null);
+        void ShowSsoLogin(object apiAddress = null);
         void CloseDialog();
         void NavigateToTargetPage(object arg = null);
         Task ConnectToCf(object arg = null);
         bool CanProceedToAuthentication(object arg = null);
         void ResetTargetDependentFields();
+        Task LoginWithSsoPasscodeAsync(object arg = null);
     }
 }

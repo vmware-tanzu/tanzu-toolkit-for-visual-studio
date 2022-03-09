@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.PlatformUI;
+using System.Diagnostics;
 using System.Security;
 using System.Windows;
 using System.Windows.Input;
@@ -19,6 +20,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         public ICommand SsoCommand { get; }
         public ICommand IncrementPageCommand { get; }
         public ICommand DecrementPageCommand { get; }
+        public ICommand LogInWithPasscodeCommand { get; }
 
         public Brush HyperlinkBrush { get { return (Brush)GetValue(HyperlinkBrushProperty); } set { SetValue(HyperlinkBrushProperty, value); } }
 
@@ -31,19 +33,20 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         public LoginView(ILoginViewModel viewModel, IThemeService themeService)
         {
-            System.Predicate<object> alwaysTrue = (object arg) => { return true; };
+            bool alwaysTrue(object arg) { return true; }
 
             AddCloudCommand = new AsyncDelegatingCommand(viewModel.LogIn, viewModel.CanLogIn);
-            SsoCommand = new DelegatingCommand(viewModel.OpenSsoDialog, viewModel.CanOpenSsoDialog);
+            SsoCommand = new DelegatingCommand(viewModel.ShowSsoLogin, alwaysTrue);
             IncrementPageCommand = new AsyncDelegatingCommand(viewModel.ConnectToCf, viewModel.CanProceedToAuthentication);
             DecrementPageCommand = new DelegatingCommand(viewModel.NavigateToTargetPage, alwaysTrue);
+            LogInWithPasscodeCommand = new AsyncDelegatingCommand(viewModel.LoginWithSsoPasscodeAsync, alwaysTrue);
 
             viewModel.GetPassword = GetPassword;
             viewModel.PasswordEmpty = PasswordBoxEmpty;
             viewModel.ClearPassword = ClearPassword;
             DataContext = viewModel;
             _viewModel = viewModel;
-            
+
             themeService.SetTheme(this);
 
             InitializeComponent();
@@ -85,6 +88,12 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             _viewModel.TargetApiAddress = tbUrl.Text; // update property *before* focus is lost from text box 
             _viewModel.ValidateApiAddressFormat(tbUrl.Text);
             _viewModel.ResetTargetDependentFields();
+        }
+
+        private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
+            e.Handled = true;
         }
     }
 }
