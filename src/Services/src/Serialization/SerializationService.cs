@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using Tanzu.Toolkit.Models;
 using YamlDotNet.Serialization;
 
@@ -40,7 +38,9 @@ namespace Tanzu.Toolkit.Services
         public string SerializeCfAppManifest(AppManifest manifest)
         {
             var manifestApp = manifest.App;
-            if (manifestApp.Buildpacks != null && manifestApp.Buildpacks.Count == 1 && manifest.OriginalBuildpackScheme == AppManifest.BuildpackScheme.Singular)
+            if (manifestApp.Buildpacks != null
+                && manifestApp.Buildpacks.Count == 1
+                && manifest.OriginalBuildpackScheme == AppManifest.BuildpackScheme.Singular)
             {
                 ReformatBuildpacksListAsSingularBuildpack(manifest, manifestApp.Buildpacks[0]);
             }
