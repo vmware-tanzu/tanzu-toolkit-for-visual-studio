@@ -192,88 +192,84 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("CanOpenSsoDialog")]
-        [DataRow("http://some.api.address")]
-        [DataRow("https://some.api.address")]
-        public void CanOpenSsoDialog_ReturnsTrue_WhenTargetApiAddressIsValid(string targetApiAddress)
+        [TestCategory("ShowSsoLogin")]
+        public void ShowSsoLogin_ClearsPreviousPasscode_AndSetsPageNumTo3()
         {
-            _sut.TargetApiAddress = targetApiAddress;
+            _sut.SsoPasscode = "junk";
+            Assert.IsNotNull(_sut.SsoPasscode);
+            Assert.AreNotEqual(3, _sut.PageNum);
 
-            _sut.IsApiAddressFormatValid = true;
+            _sut.ShowSsoLogin();
 
-            Assert.IsTrue(_sut.CanOpenSsoDialog());
+            Assert.IsNull(_sut.SsoPasscode);
+            Assert.AreEqual(3, _sut.PageNum);
         }
 
+
         [TestMethod]
-        [TestCategory("CanOpenSsoDialog")]
-        [DataRow(null)]
+        [TestCategory("LoginWithSsoPasscodeAsync")]
         [DataRow("")]
         [DataRow(" ")]
-        public void CanOpenSsoDialog_ReturnsFalse_WhenTargetApiAddressIsNullOrWhitespace(string targetApiAddress)
-        {
-            _sut.TargetApiAddress = targetApiAddress;
-
-            _sut.IsApiAddressFormatValid = true;
-
-            Assert.IsFalse(_sut.CanOpenSsoDialog());
-        }
-
-        [TestMethod]
-        [TestCategory("CanOpenSsoDialog")]
-        public void CanOpenSsoDialog_ReturnsFalse_WhenTargetApiAddressIsInvalid()
-        {
-            _sut.TargetApiAddress = "junk";
-
-            _sut.IsApiAddressFormatValid = false;
-
-            Assert.IsFalse(_sut.CanOpenSsoDialog());
-        }
-
-        [TestMethod]
-        [TestCategory("OpenSsoDialog")]
-        public void OpenSsoDialog_ShowsSsoDialog_WhenTargetApiAddressNotNull_AndSsoLinkNotNull()
-        {
-            var fakeTargetApiAddress = "not null";
-            var fakeSsoLink = "not null";
-
-            _sut.TargetApiAddress = fakeTargetApiAddress;
-            _sut.SsoLink = fakeSsoLink;
-
-            _sut.OpenSsoDialog();
-
-            MockSsoViewModel.VerifySet(m => m.ApiAddress = fakeTargetApiAddress);
-            MockSsoViewModel.Verify(m => m.ShowWithLink(fakeSsoLink, _sut), Times.Once);
-        }
-
-        [TestMethod]
-        [TestCategory("OpenSsoDialog")]
+        [DataRow("  ")]
         [DataRow(null)]
-        [DataRow("")]
-        [DataRow(" ")]
-        public void OpenSsoDialog_SetsErrorMessage_WhenTargetApiAddressIsNullOrWhitespace(string targetApiAddress)
+        public async Task LoginWithSsoPasscodeAsync_SetsErrorMessage_WhenPasscodeEmpty(string passcode)
         {
-            _sut.TargetApiAddress = targetApiAddress;
+            _sut.SsoPasscode = passcode;
 
             Assert.IsFalse(_sut.HasErrors);
             Assert.IsNull(_sut.ErrorMessage);
 
-            _sut.OpenSsoDialog();
+            await _sut.LoginWithSsoPasscodeAsync();
 
             Assert.IsTrue(_sut.HasErrors);
             Assert.IsNotNull(_sut.ErrorMessage);
-            Assert.IsTrue(_sut.ErrorMessage.Contains("Must specify an API address to log in via SSO"));
         }
 
         [TestMethod]
-        [TestCategory("OpenSsoDialog")]
-        public void OpenSsoDialog_DoesNothing_WhenSsoLinkIsNull()
+        [TestCategory("LoginWithSsoPasscodeAsync")]
+        public async Task LoginWithSsoPasscodeAsync_SetsErrorMessage_WhenLoginAttemptFails()
         {
-            _sut.TargetApiAddress = "not null";
-            _sut.SsoLink = null;
+            const string fakePasscode = "fake sso passcode!";
 
-            _sut.OpenSsoDialog();
+            _sut.TargetCf = FakeCfInstance;
+            _sut.SsoPasscode = fakePasscode;
 
-            MockSsoViewModel.Verify(m => m.ShowWithLink(It.IsAny<string>(), _sut), Times.Never);
+            MockCloudFoundryService.Setup(m => m.LoginWithSsoPasscode(_sut.TargetCf.ApiAddress, fakePasscode))
+                .ReturnsAsync(FakeFailureDetailedResult);
+
+            Assert.IsFalse(_sut.HasErrors);
+            Assert.IsNull(_sut.ErrorMessage);
+
+            await _sut.LoginWithSsoPasscodeAsync();
+
+            Assert.IsTrue(_sut.HasErrors);
+            Assert.IsNotNull(_sut.ErrorMessage);
+            Assert.AreEqual(FakeFailureDetailedResult.Explanation, _sut.ErrorMessage);
+        }
+
+        [TestMethod]
+        [TestCategory("LoginWithSsoPasscodeAsync")]
+        public async Task LoginWithSsoPasscodeAsync_SetsConnection_AndClosesLoginDialog_WhenLoginAttemptSucceeds()
+        {
+            const string fakePasscode = "fake sso passcode!";
+            var fakeParentViewModel = MockLoginViewModel.Object;
+
+            _sut.TargetCf = FakeCfInstance;
+            _sut.SsoPasscode = fakePasscode;
+
+            MockCloudFoundryService.Setup(m => m.LoginWithSsoPasscode(_sut.TargetCf.ApiAddress, fakePasscode))
+                .ReturnsAsync(FakeSuccessDetailedResult);
+
+            Assert.IsFalse(_sut.HasErrors);
+            Assert.IsNull(_sut.ErrorMessage);
+
+            await _sut.LoginWithSsoPasscodeAsync();
+
+            Assert.IsFalse(_sut.HasErrors);
+            Assert.IsNull(_sut.ErrorMessage);
+
+            MockTasExplorerViewModel.Verify(m => m.SetConnection(_sut.TargetCf), Times.Once);
+            MockDialogService.Verify(m => m.CloseDialogByName(nameof(LoginViewModel), null), Times.Once);
         }
 
         [TestMethod]

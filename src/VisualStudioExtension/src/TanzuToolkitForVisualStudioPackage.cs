@@ -21,7 +21,6 @@ using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.ViewModels.AppDeletionConfirmation;
-using Tanzu.Toolkit.ViewModels.SsoDialog;
 using Tanzu.Toolkit.VisualStudio.Commands;
 using Tanzu.Toolkit.VisualStudio.Services;
 using Tanzu.Toolkit.VisualStudio.Views;
@@ -150,7 +149,6 @@ namespace Tanzu.Toolkit.VisualStudio
             /* View Models */
             services.AddTransient<IOutputViewModel, OutputViewModel>();
             services.AddSingleton<ITasExplorerViewModel, TasExplorerViewModel>();
-            services.AddSingleton<ISsoDialogViewModel, SsoDialogViewModel>(); // must be a singleton for the view to properly show prompt
             services.AddSingleton<ILoginViewModel, LoginViewModel>();
             services.AddTransient<IDeploymentDialogViewModel, DeploymentDialogViewModel>();
             services.AddTransient<ILoginViewModel, LoginViewModel>();
@@ -161,7 +159,6 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<ILoginView, LoginView>();
             services.AddTransient<ITasExplorerView, TasExplorerView>();
             services.AddTransient<IDeploymentDialogView, DeploymentDialogView>();
-            services.AddTransient<ISsoDialogView, SsoDialogView>();
             services.AddTransient<IAppDeletionConfirmationView, AppDeletionConfirmationView>();
         }
     }
