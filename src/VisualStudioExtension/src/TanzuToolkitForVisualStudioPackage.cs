@@ -14,6 +14,7 @@ using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.CommandProcess;
 using Tanzu.Toolkit.Services.DataPersistence;
 using Tanzu.Toolkit.Services.Dialog;
+using Tanzu.Toolkit.Services.DotnetCli;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
@@ -79,9 +80,9 @@ namespace Tanzu.Toolkit.VisualStudio
                 Task.Run(() => PushToCloudFoundryCommand.InitializeAsync(this, _serviceProvider)),
                 Task.Run(() => OpenLogsCommand.InitializeAsync(this, _serviceProvider)),
                 Task.Run(() => RequestFeedbackCommand.InitializeAsync(this)),
+                Task.Run(() => RemoteDebugCommand.InitializeAsync(this, _serviceProvider)),
             };
 
-            await this.RegisterCommandsAsync(); // convenient command registration method provided by vsix community toolkit
             await Task.WhenAll(commandInitializations);
         }
 
@@ -142,6 +143,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddTransient<ICommandProcessService, CommandProcessService>();
             services.AddSingleton<ISerializationService, SerializationService>();
             services.AddSingleton<IDataPersistenceService>(provider => new DataPersistenceService(this, provider));
+            services.AddSingleton<IDotnetCliService, DotnetCliService>();
 
             /* Tool Windows */
             services.AddTransient<TanzuTasExplorerToolWindow>();

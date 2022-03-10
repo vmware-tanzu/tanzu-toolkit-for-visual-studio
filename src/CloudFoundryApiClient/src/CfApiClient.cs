@@ -172,6 +172,18 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             return await GetRemainingPagesForType(firstPageHref, accessToken, new List<App>());
         }
 
+        public async Task<List<App>> ListAppsAsync(string accessToken)
+        {
+            var uri = new UriBuilder(CfApiAddress)
+            {
+                Path = ListAppsPath,
+            };
+
+            var firstPageHref = new HypertextReference() { Href = uri.ToString() };
+
+            return await GetRemainingPagesForType(firstPageHref, accessToken, new List<App>());
+        }
+
         public async Task<List<Route>> ListRoutesForApp(string cfTarget, string accessToken, string appGuid)
         {
             var uri = new UriBuilder(cfTarget)
@@ -184,7 +196,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
 
             return await GetRemainingPagesForType(firstPageHref, accessToken, new List<Route>());
         }
-
+        
         public async Task<List<Buildpack>> ListBuildpacks(string cfApiAddress, string accessToken)
         {
             var uri = new UriBuilder(cfApiAddress)
