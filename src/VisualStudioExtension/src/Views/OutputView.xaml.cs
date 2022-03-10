@@ -64,7 +64,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         /// <param name="e"></param>
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            bool scrollBarAtBottom = OutputScrollViewer.VerticalOffset == (OutputScrollViewer.ExtentHeight - OutputScrollViewer.ViewportHeight);
+            var scrollBarAtBottom = OutputScrollViewer.VerticalOffset == (OutputScrollViewer.ExtentHeight - OutputScrollViewer.ViewportHeight);
             if (scrollBarAtBottom)
             {
                 OutputScrollViewer.ScrollToBottom();
@@ -78,7 +78,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         private void OutputScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            bool scrollBarAtBottom = OutputScrollViewer.VerticalOffset == (OutputScrollViewer.ExtentHeight - OutputScrollViewer.ViewportHeight);
+            var scrollBarAtBottom = OutputScrollViewer.VerticalOffset == (OutputScrollViewer.ExtentHeight - OutputScrollViewer.ViewportHeight);
             autoScrollToggleBtn.IsChecked = scrollBarAtBottom;
         }
     }

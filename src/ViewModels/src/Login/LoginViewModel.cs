@@ -322,7 +322,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool CanProceedToAuthentication(object arg = null)
         {
-            bool certValidOrBypassed = !CertificateInvalid || (CertificateInvalid && SkipSsl);
+            var certValidOrBypassed = !CertificateInvalid || (CertificateInvalid && SkipSsl);
             return ApiAddressIsValid && !string.IsNullOrWhiteSpace(TargetApiAddress) && certValidOrBypassed;
         }
 
@@ -343,7 +343,7 @@ namespace Tanzu.Toolkit.ViewModels
         {
             if (!string.IsNullOrWhiteSpace(ConnectionName)) return ConnectionName;
 
-            var targetAddressValidUri = Uri.TryCreate(TargetApiAddress, UriKind.Absolute, out Uri uri);
+            var targetAddressValidUri = Uri.TryCreate(TargetApiAddress, UriKind.Absolute, out var uri);
             return targetAddressValidUri ? uri.Host : "Tanzu Application Service";
         }
     }

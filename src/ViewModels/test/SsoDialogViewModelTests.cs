@@ -88,7 +88,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task LoginWithPasscodeAsync_SetsConnection_AndClosesSsoDialog_AndClosesLoginDialog_WhenLoginAttemptSucceeds()
         {
             const string fakePasscode = "fake sso passcode!";
-            object fakeSsoDialogWindow = new object();
+            var fakeSsoDialogWindow = new object();
             var fakeParentViewModel = MockLoginViewModel.Object;
 
             MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(_fakeCfInstanceViewModel);

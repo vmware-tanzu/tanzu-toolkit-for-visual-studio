@@ -365,11 +365,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.AppName = _fakeAppName;
             _sut.SelectedSpace = _fakeSpace; // space must be set to faciliate lookup of parent org & grandparent cf
 
-            AppManifest expectedManifest = _sut.ManifestModel;
-            string expectedDefaultAppPath = _sut.PathToProjectRootDir;
-            CloudFoundryInstance expectedCf = _sut.SelectedSpace.ParentOrg.ParentCf;
-            CloudFoundryOrganization expectedOrg = _sut.SelectedSpace.ParentOrg;
-            CloudFoundrySpace expectedSpace = _sut.SelectedSpace;
+            var expectedManifest = _sut.ManifestModel;
+            var expectedDefaultAppPath = _sut.PathToProjectRootDir;
+            var expectedCf = _sut.SelectedSpace.ParentOrg.ParentCf;
+            var expectedOrg = _sut.SelectedSpace.ParentOrg;
+            var expectedSpace = _sut.SelectedSpace;
             Action<string> expectedStdOutCallback = _sut.OutputViewModel.AppendLine;
             Action<string> expectedStdErrCallback = _sut.OutputViewModel.AppendLine;
 
@@ -394,11 +394,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.AppName = _fakeAppName;
             _sut.SelectedSpace = _fakeSpace; // space must be set to faciliate lookup of parent org & grandparent cf
 
-            AppManifest expectedManifest = _sut.ManifestModel;
-            string expectedDefaultAppPath = _sut.PathToProjectRootDir;
-            CloudFoundryInstance expectedCf = _sut.SelectedSpace.ParentOrg.ParentCf;
-            CloudFoundryOrganization expectedOrg = _sut.SelectedSpace.ParentOrg;
-            CloudFoundrySpace expectedSpace = _sut.SelectedSpace;
+            var expectedManifest = _sut.ManifestModel;
+            var expectedDefaultAppPath = _sut.PathToProjectRootDir;
+            var expectedCf = _sut.SelectedSpace.ParentOrg.ParentCf;
+            var expectedOrg = _sut.SelectedSpace.ParentOrg;
+            var expectedSpace = _sut.SelectedSpace;
             Action<string> expectedStdOutCallback = _sut.OutputViewModel.AppendLine;
             Action<string> expectedStdErrCallback = _sut.OutputViewModel.AppendLine;
 
@@ -433,16 +433,16 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.AppName = _fakeAppName;
             _sut.SelectedSpace = _fakeSpace; // space must be set to faciliate lookup of parent org & grandparent cf
 
-            AppManifest expectedManifest = _sut.ManifestModel;
-            string expectedDefaultAppPath = _sut.PathToProjectRootDir;
-            CloudFoundryInstance expectedCf = _sut.SelectedSpace.ParentOrg.ParentCf;
-            CloudFoundryOrganization expectedOrg = _sut.SelectedSpace.ParentOrg;
-            CloudFoundrySpace expectedSpace = _sut.SelectedSpace;
+            var expectedManifest = _sut.ManifestModel;
+            var expectedDefaultAppPath = _sut.PathToProjectRootDir;
+            var expectedCf = _sut.SelectedSpace.ParentOrg.ParentCf;
+            var expectedOrg = _sut.SelectedSpace.ParentOrg;
+            var expectedSpace = _sut.SelectedSpace;
             Action<string> expectedStdOutCallback = _sut.OutputViewModel.AppendLine;
             Action<string> expectedStdErrCallback = _sut.OutputViewModel.AppendLine;
 
-            string expectedErrorTitle = $"{DeploymentDialogViewModel.DeploymentErrorMsg} {_fakeAppName}.";
-            string expectedErrorMsg = $"{FakeFailureDetailedResult.Explanation}";
+            var expectedErrorTitle = $"{DeploymentDialogViewModel.DeploymentErrorMsg} {_fakeAppName}.";
+            var expectedErrorMsg = $"{FakeFailureDetailedResult.Explanation}";
 
             MockCloudFoundryService.Setup(mock => mock.
               DeployAppAsync(expectedManifest, expectedDefaultAppPath, expectedCf, expectedOrg, expectedSpace, expectedStdOutCallback, expectedStdErrCallback))
@@ -464,11 +464,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             _sut.SelectedSpace = _fakeSpace; // space must be set to faciliate lookup of parent org & grandparent cf
 
-            AppManifest expectedManifest = _sut.ManifestModel;
-            string expectedDefaultAppPath = _sut.PathToProjectRootDir;
-            CloudFoundryInstance expectedCf = _sut.SelectedSpace.ParentOrg.ParentCf;
-            CloudFoundryOrganization expectedOrg = _sut.SelectedSpace.ParentOrg;
-            CloudFoundrySpace expectedSpace = _sut.SelectedSpace;
+            var expectedManifest = _sut.ManifestModel;
+            var expectedDefaultAppPath = _sut.PathToProjectRootDir;
+            var expectedCf = _sut.SelectedSpace.ParentOrg.ParentCf;
+            var expectedOrg = _sut.SelectedSpace.ParentOrg;
+            var expectedSpace = _sut.SelectedSpace;
             Action<string> expectedStdOutCallback = _sut.OutputViewModel.AppendLine;
             Action<string> expectedStdErrCallback = _sut.OutputViewModel.AppendLine;
 
@@ -495,11 +495,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.AppName = _fakeAppName;
             _sut.SelectedSpace = _fakeSpace; // space must be set to faciliate lookup of parent org & grandparent cf
 
-            AppManifest expectedManifest = _sut.ManifestModel;
-            string expectedDefaultAppPath = _sut.PathToProjectRootDir;
-            CloudFoundryInstance expectedCf = _sut.SelectedSpace.ParentOrg.ParentCf;
-            CloudFoundryOrganization expectedOrg = _sut.SelectedSpace.ParentOrg;
-            CloudFoundrySpace expectedSpace = _sut.SelectedSpace;
+            var expectedManifest = _sut.ManifestModel;
+            var expectedDefaultAppPath = _sut.PathToProjectRootDir;
+            var expectedCf = _sut.SelectedSpace.ParentOrg.ParentCf;
+            var expectedOrg = _sut.SelectedSpace.ParentOrg;
+            var expectedSpace = _sut.SelectedSpace;
             Action<string> expectedStdOutCallback = _sut.OutputViewModel.AppendLine;
             Action<string> expectedStdErrCallback = _sut.OutputViewModel.AppendLine;
 
@@ -746,7 +746,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("OpenLoginView")]
         public void OpenLoginView_InvokesOpenLoginViewOnTasExplorerViewModel()
         {
-            object fakeArg = new object();
+            var fakeArg = new object();
 
             _sut.OpenLoginView(fakeArg);
 
@@ -757,7 +757,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("OpenLoginView")]
         public void OpenLoginView_SetsCfInstanceOptions_WhenTasConnectionGetsSet()
         {
-            object fakeArg = new object();
+            var fakeArg = new object();
 
             MockTasExplorerViewModel.Setup(m => m.
                 OpenLoginView(fakeArg))
@@ -779,7 +779,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("OpenLoginView")]
         public void OpenLoginView_DoesNotChangeCfInstanceOptions_WhenTasConnectionDoesNotGetSet()
         {
-            object fakeArg = new object();
+            var fakeArg = new object();
 
             MockTasExplorerViewModel.Setup(m => m.
                 OpenLoginView(fakeArg))
@@ -1690,8 +1690,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ManifestModel")]
         public void AddToSelectedBuildpacks_AddsToSelectedBuildpacks_AndAddsToManifestModelBuildpacks_AndRaisesPropChangedEvent_WhenArgIsString()
         {
-            string item = "new entry";
-            List<string> initialSelectedBps = _sut.SelectedBuildpacks.ToList();
+            var item = "new entry";
+            var initialSelectedBps = _sut.SelectedBuildpacks.ToList();
             var initialBpsInManifestModel = _sut.ManifestModel.Applications[0].Buildpacks;
 
             CollectionAssert.DoesNotContain(initialSelectedBps, item);
@@ -1718,8 +1718,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ManifestModel")]
         public void AddToSelectedBuildpacks_DoesNothing_WhenArgIsNotString()
         {
-            object nonStringItem = new object();
-            List<string> initialSelectedBps = _sut.SelectedBuildpacks.ToList();
+            var nonStringItem = new object();
+            var initialSelectedBps = _sut.SelectedBuildpacks.ToList();
             var initialBpsInManifestModel = _sut.ManifestModel.Applications[0].Buildpacks;
 
             CollectionAssert.DoesNotContain(initialSelectedBps, nonStringItem);
@@ -1741,11 +1741,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ManifestModel")]
         public void AddToSelectedBuildpacks_DoesNothing_WhenStringAlreadyExistsInSelectedBuildpacks()
         {
-            string item = _sut.ManifestModel.Applications[0].Buildpacks[0];
+            var item = _sut.ManifestModel.Applications[0].Buildpacks[0];
 
             _sut.SelectedBuildpacks = new ObservableCollection<string>(_sut.ManifestModel.Applications[0].Buildpacks);
 
-            List<string> initialSelectedBps = _sut.SelectedBuildpacks.ToList();
+            var initialSelectedBps = _sut.SelectedBuildpacks.ToList();
             var initialBpsInManifestModel = _sut.ManifestModel.Applications[0].Buildpacks;
 
             CollectionAssert.AreEquivalent(initialSelectedBps, initialBpsInManifestModel);
@@ -1771,11 +1771,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ManifestModel")]
         public void RemoveFromSelectedBuildpacks_RemovesFromSelectedBuildpacks_AndRemovesFromManifestModelBuildpacks_AndRaisesPropChangedEvent_WhenArgIsString()
         {
-            string item = _sut.ManifestModel.Applications[0].Buildpacks[0];
+            var item = _sut.ManifestModel.Applications[0].Buildpacks[0];
 
             _sut.SelectedBuildpacks = new ObservableCollection<string>(_sut.ManifestModel.Applications[0].Buildpacks);
 
-            List<string> initialSelectedBps = _sut.SelectedBuildpacks.ToList();
+            var initialSelectedBps = _sut.SelectedBuildpacks.ToList();
             var initialBpsInManifestModel = _sut.ManifestModel.Applications[0].Buildpacks;
 
             CollectionAssert.Contains(initialSelectedBps, item);
@@ -1805,9 +1805,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ManifestModel")]
         public void RemoveFromSelectedBuildpacks_DoesNothing_WhenArgIsNotString()
         {
-            object nonStringItem = new object();
+            var nonStringItem = new object();
 
-            List<string> initialSelectedBps = _sut.SelectedBuildpacks.ToList();
+            var initialSelectedBps = _sut.SelectedBuildpacks.ToList();
             var initialBpsInManifestModel = _sut.ManifestModel.Applications[0].Buildpacks;
 
             _sut.RemoveFromSelectedBuildpacks(nonStringItem);

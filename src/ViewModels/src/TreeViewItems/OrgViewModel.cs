@@ -78,7 +78,7 @@ namespace Tanzu.Toolkit.ViewModels
                             else
                             {
                                 // identify stale spaces to remove
-                                foreach (TreeViewItemViewModel priorChild in originalChildren)
+                                foreach (var priorChild in originalChildren)
                                 {
                                     if (priorChild is PlaceholderViewModel)
                                     {
@@ -86,7 +86,7 @@ namespace Tanzu.Toolkit.ViewModels
                                     }
                                     else if (priorChild is SpaceViewModel priorSpace)
                                     {
-                                        bool spaceStillExists = freshSpaces.Any(o => o is CloudFoundrySpace freshSpace && freshSpace != null && freshSpace.SpaceId == priorSpace.Space.SpaceId);
+                                        var spaceStillExists = freshSpaces.Any(o => o is CloudFoundrySpace freshSpace && freshSpace != null && freshSpace.SpaceId == priorSpace.Space.SpaceId);
                                         if (!spaceStillExists)
                                         {
                                             removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, priorSpace));
@@ -95,9 +95,9 @@ namespace Tanzu.Toolkit.ViewModels
                                 }
 
                                 // identify new spaces to add
-                                foreach (CloudFoundrySpace freshSpace in freshSpaces)
+                                foreach (var freshSpace in freshSpaces)
                                 {
-                                    bool spaceAlreadyExists = originalChildren.Any(child => child is SpaceViewModel extantSpace && extantSpace.Space.SpaceId == freshSpace.SpaceId);
+                                    var spaceAlreadyExists = originalChildren.Any(child => child is SpaceViewModel extantSpace && extantSpace.Space.SpaceId == freshSpace.SpaceId);
                                     if (!spaceAlreadyExists)
                                     {
                                         var newSpace = new SpaceViewModel(freshSpace, this, ParentTasExplorer, Services, expanded: false);
@@ -110,7 +110,7 @@ namespace Tanzu.Toolkit.ViewModels
                             await Task.WhenAll(additionTasks);
 
                             // update children
-                            foreach (TreeViewItemViewModel updatedChild in Children)
+                            foreach (var updatedChild in Children)
                             {
                                 if (updatedChild is SpaceViewModel space)
                                 {

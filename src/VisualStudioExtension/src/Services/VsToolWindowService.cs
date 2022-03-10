@@ -36,7 +36,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services
                     toolWindowType = typeof(OutputToolWindow);
                 }
 
-                ToolWindowPane window = _package.FindToolWindow(toolWindowType, id, create: true);
+                var window = _package.FindToolWindow(toolWindowType, id, create: true);
                 if (window == null || window.Frame == null)
                 {
                     throw new NotSupportedException("Cannot create tool window");
@@ -48,7 +48,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services
                 view.DisplayView = () =>
                 {
                     ThreadHelper.ThrowIfNotOnUIThread();
-                    IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
+                    var windowFrame = (IVsWindowFrame)window.Frame;
                     Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
                 };
 
