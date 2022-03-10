@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Security;
 using System.Threading.Tasks;
@@ -22,5 +23,6 @@ namespace Tanzu.Toolkit.Services.CfCli
         Task<DetailedResult> LoginWithSsoPasscode(string apiAddress, string passcode);
         DetailedResult Logout();
         DetailedResult<Process> StreamAppLogs(string appName, string orgName, string spaceName, Action<string> stdOutCallback, Action<string> stdErrCallback);
+        Task<DetailedResult> RunCfCommandAsync(string arguments, Action<string> stdOutCallback = null, Action<string> stdErrCallback = null, string workingDir = null, List<string> cancellationTriggers = null);
     }
 }
