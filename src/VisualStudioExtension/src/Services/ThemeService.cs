@@ -49,7 +49,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services
 
         private static void MergeStyles(FrameworkElement element)
         {
-            Collection<ResourceDictionary> dictionaries = element.Resources.MergedDictionaries;
+            var dictionaries = element.Resources.MergedDictionaries;
             if (!dictionaries.Contains(ThemeResources))
             {
                 dictionaries.Add(ThemeResources);

@@ -93,7 +93,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
             try
             {
-                DetailedResult authResult = await _cfCliService.AuthenticateAsync(username, password);
+                var authResult = await _cfCliService.AuthenticateAsync(username, password);
 
                 if (!authResult.Succeeded)
                 {
@@ -135,7 +135,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 if (loginServerInfo.Prompts.ContainsKey(CfApiSsoPromptKey))
                 {
-                    string ssoPasscodePrompt = loginServerInfo.Prompts[CfApiSsoPromptKey][1];
+                    var ssoPasscodePrompt = loginServerInfo.Prompts[CfApiSsoPromptKey][1];
 
                     return new DetailedResult<string>
                     {
@@ -183,7 +183,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         /// <param name="skipSsl"></param>
         public async Task<DetailedResult<List<CloudFoundryOrganization>>> GetOrgsForCfInstanceAsync(CloudFoundryInstance cf, bool skipSsl = false, int retryAmount = 1)
         {
-            string apiAddress = cf.ApiAddress;
+            var apiAddress = cf.ApiAddress;
 
             string accessToken;
             try
@@ -242,7 +242,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
 
             var orgsToReturn = new List<CloudFoundryOrganization>();
-            foreach (Org org in orgsFromApi)
+            foreach (var org in orgsFromApi)
             {
                 if (org.Name == null)
                 {
@@ -282,7 +282,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         /// <param name="skipSsl"></param>
         public async Task<DetailedResult<List<CloudFoundrySpace>>> GetSpacesForOrgAsync(CloudFoundryOrganization org, bool skipSsl = false, int retryAmount = 1)
         {
-            string apiAddress = org.ParentCf.ApiAddress;
+            var apiAddress = org.ParentCf.ApiAddress;
 
             string accessToken;
             try
@@ -341,7 +341,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
 
             var spacesToReturn = new List<CloudFoundrySpace>();
-            foreach (Space space in spacesFromApi)
+            foreach (var space in spacesFromApi)
             {
                 if (space.Name == null)
                 {
@@ -381,7 +381,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         /// <param name="skipSsl"></param>
         public async Task<DetailedResult<List<CloudFoundryApp>>> GetAppsForSpaceAsync(CloudFoundrySpace space, bool skipSsl = false, int retryAmount = 1)
         {
-            string apiAddress = space.ParentOrg.ParentCf.ApiAddress;
+            var apiAddress = space.ParentOrg.ParentCf.ApiAddress;
 
             string accessToken;
             try
@@ -440,7 +440,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
 
             var appsToReturn = new List<CloudFoundryApp>();
-            foreach (App app in appsFromApi)
+            foreach (var app in appsFromApi)
             {
                 if (app.Name == null)
                 {
@@ -523,7 +523,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
             var buildpacks = new List<CfBuildpack>();
 
-            foreach (Buildpack buildpack in buildpacksFromApi)
+            foreach (var buildpack in buildpacksFromApi)
             {
                 if (string.IsNullOrWhiteSpace(buildpack.Name))
                 {
@@ -563,7 +563,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         /// <param name="skipSsl"></param>
         public async Task<DetailedResult> StopAppAsync(CloudFoundryApp app, bool skipSsl = false, int retryAmount = 1)
         {
-            string apiAddress = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
+            var apiAddress = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
 
             string accessToken;
             try
@@ -655,7 +655,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         /// <param name="skipSsl"></param>
         public async Task<DetailedResult> StartAppAsync(CloudFoundryApp app, bool skipSsl = false, int retryAmount = 1)
         {
-            string apiAddress = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
+            var apiAddress = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
 
             string accessToken;
             try
@@ -750,7 +750,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         /// <returns></returns>
         public async Task<DetailedResult> DeleteAppAsync(CloudFoundryApp app, bool skipSsl = false, bool removeRoutes = false, int retryAmount = 1)
         {
-            string apiAddress = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
+            var apiAddress = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
 
             string accessToken;
             try
@@ -840,7 +840,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
         public async Task<DetailedResult<List<CloudFoundryRoute>>> GetRoutesForAppAsync(CloudFoundryApp app, int retryAmount = 1)
         {
-            string apiAddress = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
+            var apiAddress = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
 
             string accessToken;
             try
@@ -899,7 +899,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
             var routes = new List<CloudFoundryRoute>();
 
-            foreach (Route route in routesFromApi)
+            foreach (var route in routesFromApi)
             {
                 if (string.IsNullOrWhiteSpace(route.Guid))
                 {
@@ -921,7 +921,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
         public async Task<DetailedResult> DeleteAllRoutesForAppAsync(CloudFoundryApp app)
         {
-            string apiAddress = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
+            var apiAddress = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
 
             string accessToken;
             try
@@ -960,8 +960,8 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
             var routes = routesResponse.Content;
             var routeDeletionTasks = new List<Task>();
-            int failed = 0;
-            foreach (CloudFoundryRoute route in routes)
+            var failed = 0;
+            foreach (var route in routes)
             {
                 routeDeletionTasks.Add(Task.Run(async () =>
                 {
@@ -973,7 +973,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }));
             }
 
-            Task allRouteDeletions = Task.WhenAll(routeDeletionTasks);
+            var allRouteDeletions = Task.WhenAll(routeDeletionTasks);
 
             try
             {
@@ -1020,17 +1020,17 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
         public async Task<DetailedResult> DeployAppAsync(AppManifest appManifest, string defaultAppPath, CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, Action<string> stdOutCallback, Action<string> stdErrCallback)
         {
-            AppConfig app = appManifest.Applications[0];
+            var app = appManifest.Applications[0];
 
-            string pathToDeploymentDirectory = app.Path ?? defaultAppPath;
-            string appName = app.Name;
+            var pathToDeploymentDirectory = app.Path ?? defaultAppPath;
+            var appName = app.Name;
 
             if (!_fileService.DirContainsFiles(pathToDeploymentDirectory))
             {
                 return new DetailedResult(false, EmptyOutputDirMessage);
             }
 
-            string newManifestPath = _fileService.GetUniquePathForTempFile($"temp_manifest_{appName}");
+            var newManifestPath = _fileService.GetUniquePathForTempFile($"temp_manifest_{appName}");
             var manifestCreationResult = CreateManifestFile(newManifestPath, appManifest);
 
             if (!manifestCreationResult.Succeeded)
@@ -1151,7 +1151,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
         public async Task<DetailedResult<List<string>>> GetStackNamesAsync(CloudFoundryInstance cf, int retryAmount = 1)
         {
-            string apiAddress = cf.ApiAddress;
+            var apiAddress = cf.ApiAddress;
 
             string accessToken;
             try
@@ -1210,7 +1210,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
 
             var stackNamesToReturn = new List<string>();
-            foreach (Stack stack in stacksFromApi)
+            foreach (var stack in stacksFromApi)
             {
                 if (stack.Name == null)
                 {
@@ -1239,7 +1239,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         {
             if (ex is AggregateException aex)
             {
-                foreach (Exception iex in aex.InnerExceptions)
+                foreach (var iex in aex.InnerExceptions)
                 {
                     FormatExceptionMessage(iex, message);
                 }
@@ -1257,7 +1257,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
         private async Task MatchCliVersionToApiVersion()
         {
-            Version apiVersion = await _cfCliService.GetApiVersion();
+            var apiVersion = await _cfCliService.GetApiVersion();
             if (apiVersion == null)
             {
                 _fileService.CliVersion = 7;
@@ -1272,8 +1272,8 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                         {
                             _fileService.CliVersion = 6;
 
-                            string errorTitle = "API version not supported";
-                            string errorMsg = "Detected a Cloud Controller API version lower than the minimum supported version (2.128.0); some features of this extension may not work as expected for the given instance.";
+                            var errorTitle = "API version not supported";
+                            var errorMsg = "Detected a Cloud Controller API version lower than the minimum supported version (2.128.0); some features of this extension may not work as expected for the given instance.";
 
                             _logger.Information(errorMsg);
                             _dialogService.DisplayErrorDialog(errorTitle, errorMsg);
@@ -1294,8 +1294,8 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                         {
                             _fileService.CliVersion = 6;
 
-                            string errorTitle = "API version not supported";
-                            string errorMsg = "Detected a Cloud Controller API version lower than the minimum supported version (3.63.0); some features of this extension may not work as expected for the given instance.";
+                            var errorTitle = "API version not supported";
+                            var errorMsg = "Detected a Cloud Controller API version lower than the minimum supported version (3.63.0); some features of this extension may not work as expected for the given instance.";
 
                             _logger.Information(errorMsg);
                             _dialogService.DisplayErrorDialog(errorTitle, errorMsg);

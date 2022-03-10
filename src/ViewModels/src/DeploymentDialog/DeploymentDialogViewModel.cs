@@ -167,9 +167,9 @@ namespace Tanzu.Toolkit.ViewModels
 
                     try
                     {
-                        string manifestContents = FileService.ReadFileContents(value);
+                        var manifestContents = FileService.ReadFileContents(value);
 
-                        AppManifest parsedManifest = SerializationService.ParseCfAppManifest(manifestContents);
+                        var parsedManifest = SerializationService.ParseCfAppManifest(manifestContents);
 
                         /** Create 2 AppManifest instances with the same initial data;
                          * the props in this view model should change so that the UI
@@ -182,7 +182,7 @@ namespace Tanzu.Toolkit.ViewModels
                          * ManifestModel data & unchanged despite any state changes to
                          * the view model.
                          */
-                        AppManifest modelInstance = parsedManifest.DeepClone();
+                        var modelInstance = parsedManifest.DeepClone();
 
                         ManifestModel = modelInstance;
                         SetViewModelValuesFromManifest(parsedManifest);
@@ -285,7 +285,7 @@ namespace Tanzu.Toolkit.ViewModels
 
                 ManifestModel.Applications[0].Stack = value;
 
-                foreach (BuildpackListItem b in BuildpackOptions)
+                foreach (var b in BuildpackOptions)
                 {
                     b.EvalutateStackCompatibility(value);
                     if (!b.CompatibleWithStack && b.IsSelected)
@@ -554,11 +554,11 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     var bpOtps = new List<BuildpackListItem>();
 
-                    foreach (CfBuildpack bp in buildpacksRespsonse.Content)
+                    foreach (var bp in buildpacksRespsonse.Content)
                     {
-                        bool nameSpecifiedInManifest = ManifestModel.Applications[0].Buildpacks.Contains(bp.Name);
-                        bool bpCompatibleWithSelectedStack = SelectedStack == null || SelectedStack == bp.Stack;
-                        bool nameAlreadyExistsInOptions = bpOtps.Any(b => b.Name == bp.Name);
+                        var nameSpecifiedInManifest = ManifestModel.Applications[0].Buildpacks.Contains(bp.Name);
+                        var bpCompatibleWithSelectedStack = SelectedStack == null || SelectedStack == bp.Stack;
+                        var nameAlreadyExistsInOptions = bpOtps.Any(b => b.Name == bp.Name);
 
                         if (nameAlreadyExistsInOptions) // don't add duplicate bp names, just add to list of viable stacks
                         {
@@ -656,7 +656,7 @@ namespace Tanzu.Toolkit.ViewModels
         {
             SelectedBuildpacks.Clear();
 
-            foreach (BuildpackListItem bpItem in BuildpackOptions)
+            foreach (var bpItem in BuildpackOptions)
             {
                 bpItem.IsSelected = false;
             }
@@ -761,7 +761,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         private void SetBuildpacksFromManifest(AppManifest appManifest)
         {
-            AppConfig appConfig = appManifest.Applications[0];
+            var appConfig = appManifest.Applications[0];
 
             var bps = appConfig.Buildpacks;
             var stack = appConfig.Stack;
@@ -770,7 +770,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 ClearSelectedBuildpacks();
 
-                foreach (string bpName in bps)
+                foreach (var bpName in bps)
                 {
                     AddToSelectedBuildpacks(bpName);
 

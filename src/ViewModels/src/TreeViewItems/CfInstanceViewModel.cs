@@ -83,7 +83,7 @@ namespace Tanzu.Toolkit.ViewModels
                             else
                             {
                                 // remove stale orgs
-                                foreach (TreeViewItemViewModel priorChild in originalChildren)
+                                foreach (var priorChild in originalChildren)
                                 {
                                     if (priorChild is PlaceholderViewModel)
                                     {
@@ -91,7 +91,7 @@ namespace Tanzu.Toolkit.ViewModels
                                     }
                                     else if (priorChild is OrgViewModel priorOrg)
                                     {
-                                        bool orgStillExists = freshOrgs.Any(o => o is CloudFoundryOrganization freshOrg && freshOrg != null && freshOrg.OrgId == priorOrg.Org.OrgId);
+                                        var orgStillExists = freshOrgs.Any(o => o is CloudFoundryOrganization freshOrg && freshOrg != null && freshOrg.OrgId == priorOrg.Org.OrgId);
                                         if (!orgStillExists)
                                         {
                                             removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, priorOrg));
@@ -100,9 +100,9 @@ namespace Tanzu.Toolkit.ViewModels
                                 }
 
                                 // add new orgs
-                                foreach (CloudFoundryOrganization freshOrg in freshOrgs)
+                                foreach (var freshOrg in freshOrgs)
                                 {
-                                    bool orgAlreadyExists = originalChildren.Any(child => child is OrgViewModel extantOrg && extantOrg.Org.OrgId == freshOrg.OrgId);
+                                    var orgAlreadyExists = originalChildren.Any(child => child is OrgViewModel extantOrg && extantOrg.Org.OrgId == freshOrg.OrgId);
                                     if (!orgAlreadyExists)
                                     {
                                         var newOrg = new OrgViewModel(freshOrg, this, ParentTasExplorer, Services, expanded: false);
@@ -115,7 +115,7 @@ namespace Tanzu.Toolkit.ViewModels
                             await Task.WhenAll(additionTasks);
 
                             // update children
-                            foreach (TreeViewItemViewModel child in Children)
+                            foreach (var child in Children)
                             {
                                 if (child is OrgViewModel org)
                                 {

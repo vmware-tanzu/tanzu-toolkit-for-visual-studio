@@ -119,10 +119,10 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("LoginWithCredentials")]
         public async Task LoginWithCredentials_IncludesNestedExceptionMessages_WhenExceptionIsThrown()
         {
-            string baseMessage = "base exception message";
-            string innerMessage = "inner exception message";
-            string outerMessage = "outer exception message";
-            Exception multilayeredException = new Exception(outerMessage, new Exception(innerMessage, new Exception(baseMessage)));
+            var baseMessage = "base exception message";
+            var innerMessage = "inner exception message";
+            var outerMessage = "outer exception message";
+            var multilayeredException = new Exception(outerMessage, new Exception(innerMessage, new Exception(baseMessage)));
 
             _mockCfCliService.Setup(mock => mock.
                 AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
@@ -158,7 +158,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
                     .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
 
-            int expectedCliVersion = 7;
+            var expectedCliVersion = 7;
 
             _mockCfCliService.Setup(m => m.
                 GetApiVersion()).ReturnsAsync((Version)null);
@@ -183,15 +183,15 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
                     .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
 
-            int expectedCliVersion = 6;
-            Version[] versionInputs = new Version[]
+            var expectedCliVersion = 6;
+            var versionInputs = new Version[]
             {
                 new Version(major: 2, minor: 149, build: 0),
                 new Version(major: 2, minor: 138, build: 0),
                 new Version(major: 2, minor: 128, build: 0),
             };
 
-            foreach (Version mockApiVersion in versionInputs)
+            foreach (var mockApiVersion in versionInputs)
             {
                 _mockCfCliService.Setup(m => m.
                     GetApiVersion()).ReturnsAsync(mockApiVersion);
@@ -214,15 +214,15 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
                     .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
 
-            int expectedCliVersion = 6;
-            Version[] versionInputs = new Version[]
+            var expectedCliVersion = 6;
+            var versionInputs = new Version[]
             {
                 new Version(major: 3, minor: 84, build: 0),
                 new Version(major: 3, minor: 73, build: 0),
                 new Version(major: 3, minor: 63, build: 0),
             };
 
-            foreach (Version mockApiVersion in versionInputs)
+            foreach (var mockApiVersion in versionInputs)
             {
                 _mockCfCliService.Setup(m => m.
                     GetApiVersion()).ReturnsAsync(mockApiVersion);
@@ -245,15 +245,15 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
                     .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
 
-            int expectedCliVersion = 7;
-            Version[] versionInputs = new Version[]
+            var expectedCliVersion = 7;
+            var versionInputs = new Version[]
             {
                 new Version(major: 2, minor: 150, build: 0),
                 new Version(major: 2, minor: 189, build: 0),
                 new Version(major: 2, minor: 150, build: 1),
             };
 
-            foreach (Version mockApiVersion in versionInputs)
+            foreach (var mockApiVersion in versionInputs)
             {
                 _mockCfCliService.Setup(m => m.
                     GetApiVersion()).ReturnsAsync(mockApiVersion);
@@ -276,15 +276,15 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
                     .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
 
-            int expectedCliVersion = 7;
-            Version[] versionInputs = new Version[]
+            var expectedCliVersion = 7;
+            var versionInputs = new Version[]
             {
                 new Version(major: 3, minor: 85, build: 0),
                 new Version(major: 3, minor: 178, build: 0),
                 new Version(major: 3, minor: 85, build: 1),
             };
 
-            foreach (Version mockApiVersion in versionInputs)
+            foreach (var mockApiVersion in versionInputs)
             {
                 _mockCfCliService.Setup(m => m.
                     GetApiVersion()).ReturnsAsync(mockApiVersion);
@@ -440,7 +440,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 ListOrgs(FakeCfInstance.ApiAddress, _fakeValidAccessToken))
                     .ReturnsAsync(fakeOrgsResponse);
 
-            DetailedResult<List<CloudFoundryOrganization>> result = await _sut.GetOrgsForCfInstanceAsync(FakeCfInstance);
+            var result = await _sut.GetOrgsForCfInstanceAsync(FakeCfInstance);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Succeeded);
@@ -448,7 +448,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.AreEqual(null, result.CmdResult);
             Assert.AreEqual(expectedResultContent.Count, result.Content.Count);
 
-            for (int i = 0; i < expectedResultContent.Count; i++)
+            for (var i = 0; i < expectedResultContent.Count; i++)
             {
                 Assert.AreEqual(expectedResultContent[i].OrgId, result.Content[i].OrgId);
                 Assert.AreEqual(expectedResultContent[i].OrgName, result.Content[i].OrgName);
@@ -464,7 +464,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 GetOAuthToken())
                     .Throws(new InvalidRefreshTokenException());
 
-            DetailedResult<List<CloudFoundryOrganization>> result = await _sut.GetOrgsForCfInstanceAsync(FakeCfInstance);
+            var result = await _sut.GetOrgsForCfInstanceAsync(FakeCfInstance);
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
@@ -641,7 +641,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 ListSpacesForOrg(FakeOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeOrg.OrgId))
                     .ReturnsAsync(fakeSpacesResponse);
 
-            DetailedResult<List<CloudFoundrySpace>> result = await _sut.GetSpacesForOrgAsync(FakeOrg);
+            var result = await _sut.GetSpacesForOrgAsync(FakeOrg);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Succeeded);
@@ -649,7 +649,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.AreEqual(null, result.CmdResult);
             Assert.AreEqual(expectedResultContent.Count, result.Content.Count);
 
-            for (int i = 0; i < expectedResultContent.Count; i++)
+            for (var i = 0; i < expectedResultContent.Count; i++)
             {
                 Assert.AreEqual(expectedResultContent[i].SpaceId, result.Content[i].SpaceId);
                 Assert.AreEqual(expectedResultContent[i].SpaceName, result.Content[i].SpaceName);
@@ -665,7 +665,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 GetOAuthToken())
                     .Throws(new InvalidRefreshTokenException());
 
-            DetailedResult<List<CloudFoundrySpace>> result = await _sut.GetSpacesForOrgAsync(FakeOrg);
+            var result = await _sut.GetSpacesForOrgAsync(FakeOrg);
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
@@ -848,7 +848,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 ListAppsForSpace(FakeSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeSpace.SpaceId))
                     .ReturnsAsync(fakeAppsResponse);
 
-            DetailedResult<List<CloudFoundryApp>> result = await _sut.GetAppsForSpaceAsync(FakeSpace);
+            var result = await _sut.GetAppsForSpaceAsync(FakeSpace);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Succeeded);
@@ -856,7 +856,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.AreEqual(null, result.CmdResult);
             Assert.AreEqual(expectedResultContent.Count, result.Content.Count);
 
-            for (int i = 0; i < expectedResultContent.Count; i++)
+            for (var i = 0; i < expectedResultContent.Count; i++)
             {
                 Assert.AreEqual(expectedResultContent[i].AppId, result.Content[i].AppId);
                 Assert.AreEqual(expectedResultContent[i].AppName, result.Content[i].AppName);
@@ -872,7 +872,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 GetOAuthToken())
                     .Throws(new InvalidRefreshTokenException());
 
-            DetailedResult<List<CloudFoundryApp>> result = await _sut.GetAppsForSpaceAsync(FakeSpace);
+            var result = await _sut.GetAppsForSpaceAsync(FakeSpace);
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
@@ -886,17 +886,17 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("GetBuildpacks")]
         public async Task GetBuildpacksAsync_ReturnsSuccessfulResult_WhenListBuildpacksSucceeds()
         {
-            Buildpack fakeBp1 = new Buildpack
+            var fakeBp1 = new Buildpack
             {
                 Name = "Bp1",
                 Stack = "StackA",
             };
-            Buildpack fakeBp2 = new Buildpack
+            var fakeBp2 = new Buildpack
             {
                 Name = "Bp2",
                 Stack = "StackA",
             };
-            Buildpack fakeBp3 = new Buildpack
+            var fakeBp3 = new Buildpack
             {
                 Name = "Bp3",
                 Stack = "StackZ",
@@ -931,7 +931,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             Assert.IsTrue(result.Succeeded);
             Assert.AreEqual(expectedResultContent.Count, result.Content.Count);
-            foreach (CfBuildpack bp in result.Content)
+            foreach (var bp in result.Content)
             {
                 Assert.IsTrue(expectedResultContent.Any(originalBuildpack => originalBuildpack.Name == bp.Name && originalBuildpack.Stack == bp.Stack));
             }
@@ -946,7 +946,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 GetOAuthToken())
                     .Throws(new InvalidRefreshTokenException());
 
-            DetailedResult<List<CfBuildpack>> result = await _sut.GetBuildpacksAsync(_fakeValidTarget);
+            var result = await _sut.GetBuildpacksAsync(_fakeValidTarget);
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
@@ -987,17 +987,17 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         public async Task GetBuildpacksAsync_RetriesWithFreshToken_WhenListBuildpacksThrowsException()
         {
             var fakeExceptionMsg = "junk";
-            Buildpack fakeBp1 = new Buildpack
+            var fakeBp1 = new Buildpack
             {
                 Name = "Bp1",
                 Stack = "StackA",
             };
-            Buildpack fakeBp2 = new Buildpack
+            var fakeBp2 = new Buildpack
             {
                 Name = "Bp2",
                 Stack = "StackA",
             };
-            Buildpack fakeBp3 = new Buildpack
+            var fakeBp3 = new Buildpack
             {
                 Name = "Bp3",
                 Stack = "StackZ",
@@ -1111,7 +1111,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 StopAppWithGuid(FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
                     .ReturnsAsync(true);
 
-            DetailedResult result = await _sut.StopAppAsync(FakeApp);
+            var result = await _sut.StopAppAsync(FakeApp);
 
             Assert.AreEqual("STOPPED", FakeApp.State);
             Assert.IsTrue(result.Succeeded);
@@ -1131,7 +1131,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 StopAppWithGuid(FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
                     .ReturnsAsync(false);
 
-            DetailedResult result = await _sut.StopAppAsync(FakeApp);
+            var result = await _sut.StopAppAsync(FakeApp);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
@@ -1155,7 +1155,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 StopAppWithGuid(FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
                     .Throws(new Exception(fakeExceptionMsg));
 
-            DetailedResult result = await _sut.StopAppAsync(FakeApp);
+            var result = await _sut.StopAppAsync(FakeApp);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
@@ -1210,7 +1210,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 StopAppWithGuid(FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
                     .Throws(new Exception(fakeExceptionMsg));
 
-            DetailedResult result = await _sut.StopAppAsync(FakeApp, retryAmount: 0);
+            var result = await _sut.StopAppAsync(FakeApp, retryAmount: 0);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
@@ -1228,7 +1228,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 GetOAuthToken())
                     .Throws(new InvalidRefreshTokenException());
 
-            DetailedResult result = await _sut.StopAppAsync(FakeApp, retryAmount: 0);
+            var result = await _sut.StopAppAsync(FakeApp, retryAmount: 0);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
@@ -1250,7 +1250,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 StartAppWithGuid(FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
                     .ReturnsAsync(true);
 
-            DetailedResult result = await _sut.StartAppAsync(FakeApp);
+            var result = await _sut.StartAppAsync(FakeApp);
 
             Assert.AreEqual("STARTED", FakeApp.State);
             Assert.IsTrue(result.Succeeded);
@@ -1270,7 +1270,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 StartAppWithGuid(FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
                     .ReturnsAsync(false);
 
-            DetailedResult result = await _sut.StartAppAsync(FakeApp);
+            var result = await _sut.StartAppAsync(FakeApp);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
@@ -1293,7 +1293,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 StartAppWithGuid(FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
                     .Throws(new Exception(fakeExceptionMsg));
 
-            DetailedResult result = await _sut.StartAppAsync(FakeApp);
+            var result = await _sut.StartAppAsync(FakeApp);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
@@ -1348,7 +1348,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 StartAppWithGuid(FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
                     .Throws(new Exception(fakeExceptionMsg));
 
-            DetailedResult result = await _sut.StartAppAsync(FakeApp, retryAmount: 0);
+            var result = await _sut.StartAppAsync(FakeApp, retryAmount: 0);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
@@ -1366,7 +1366,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 GetOAuthToken())
                     .Throws(new InvalidRefreshTokenException());
 
-            DetailedResult result = await _sut.StartAppAsync(FakeApp, retryAmount: 0);
+            var result = await _sut.StartAppAsync(FakeApp, retryAmount: 0);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
@@ -1388,7 +1388,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 DeleteAppWithGuid(FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
                     .ReturnsAsync(true);
 
-            DetailedResult result = await _sut.DeleteAppAsync(FakeApp);
+            var result = await _sut.DeleteAppAsync(FakeApp);
 
             Assert.AreEqual("DELETED", FakeApp.State);
             Assert.IsTrue(result.Succeeded);
@@ -1408,7 +1408,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 DeleteAppWithGuid(FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
                     .ReturnsAsync(false);
 
-            DetailedResult result = await _sut.DeleteAppAsync(FakeApp);
+            var result = await _sut.DeleteAppAsync(FakeApp);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
@@ -1462,7 +1462,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 DeleteAppWithGuid(FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
                     .Throws(new Exception(fakeExceptionMsg));
 
-            DetailedResult result = await _sut.DeleteAppAsync(FakeApp, retryAmount: 0);
+            var result = await _sut.DeleteAppAsync(FakeApp, retryAmount: 0);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
@@ -1480,7 +1480,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 GetOAuthToken())
                     .Throws(new InvalidRefreshTokenException());
 
-            DetailedResult result = await _sut.DeleteAppAsync(FakeApp, retryAmount: 0);
+            var result = await _sut.DeleteAppAsync(FakeApp, retryAmount: 0);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
@@ -1595,7 +1595,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 mock.PushAppAsync(_fakeManifestPath, expectedProjPath, FakeApp.ParentSpace.ParentOrg.OrgName, FakeApp.ParentSpace.SpaceName, _fakeOutCallback, _fakeErrCallback))
                     .ReturnsAsync(fakeCfPushResponse);
 
-            DetailedResult result = await _sut.DeployAppAsync(exampleManifest, null, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
+            var result = await _sut.DeployAppAsync(exampleManifest, null, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains(fakeFailureExplanation));
@@ -1618,7 +1618,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             _mockFileService.Setup(mock => mock.WriteTextToFile(_fakeManifestPath, It.IsAny<string>())).Throws(fakeManifestCreationException);
 
-            DetailedResult result = await _sut.DeployAppAsync(exampleManifest, null, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
+            var result = await _sut.DeployAppAsync(exampleManifest, null, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains(fakeManifestCreationException.Message));
@@ -1642,7 +1642,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 mock.PushAppAsync(_fakeManifestPath, expectedProjPath, FakeApp.ParentSpace.ParentOrg.OrgName, FakeApp.ParentSpace.SpaceName, _fakeOutCallback, _fakeErrCallback))
                     .ReturnsAsync(_fakeSuccessDetailedResult);
 
-            DetailedResult result = await _sut.DeployAppAsync(exampleManifest, null, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
+            var result = await _sut.DeployAppAsync(exampleManifest, null, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
 
             Assert.IsTrue(result.Succeeded);
 
@@ -1655,7 +1655,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         {
             _mockFileService.Setup(mock => mock.DirContainsFiles(It.IsAny<string>())).Returns(false);
 
-            DetailedResult result = await _sut.DeployAppAsync(exampleManifest, null, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
+            var result = await _sut.DeployAppAsync(exampleManifest, null, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsTrue(result.Explanation.Contains(CloudFoundryService.EmptyOutputDirMessage));
@@ -1683,7 +1683,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 PushAppAsync(_fakeManifestPath, expectedProjPath, FakeOrg.OrgName, FakeSpace.SpaceName, _fakeOutCallback, _fakeErrCallback))
                     .Throws(new InvalidRefreshTokenException());
 
-            DetailedResult result = await _sut.DeployAppAsync(exampleManifest, null, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
+            var result = await _sut.DeployAppAsync(exampleManifest, null, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
@@ -1716,7 +1716,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 mock.PushAppAsync(_fakeManifestPath, defaultAppPath, FakeApp.ParentSpace.ParentOrg.OrgName, FakeApp.ParentSpace.SpaceName, _fakeOutCallback, _fakeErrCallback))
                     .ReturnsAsync(_fakeSuccessDetailedResult);
 
-            DetailedResult result = await _sut.DeployAppAsync(exampleManifest, defaultAppPath, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
+            var result = await _sut.DeployAppAsync(exampleManifest, defaultAppPath, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
 
             _mockCfCliService.Verify(mock =>
                mock.PushAppAsync(_fakeManifestPath, defaultAppPath, FakeApp.ParentSpace.ParentOrg.OrgName, FakeApp.ParentSpace.SpaceName, _fakeOutCallback, _fakeErrCallback));
@@ -1750,7 +1750,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 mock.PushAppAsync(_fakeManifestPath, manifestAppPath, FakeApp.ParentSpace.ParentOrg.OrgName, FakeApp.ParentSpace.SpaceName, _fakeOutCallback, _fakeErrCallback))
                     .ReturnsAsync(_fakeSuccessDetailedResult);
 
-            DetailedResult result = await _sut.DeployAppAsync(appManifest, defaultAppPath, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
+            var result = await _sut.DeployAppAsync(appManifest, defaultAppPath, FakeCfInstance, FakeOrg, FakeSpace, _fakeOutCallback, _fakeErrCallback);
 
             _mockCfCliService.Verify(mock =>
                mock.PushAppAsync(_fakeManifestPath, manifestAppPath, FakeApp.ParentSpace.ParentOrg.OrgName, FakeApp.ParentSpace.SpaceName, _fakeOutCallback, _fakeErrCallback));
@@ -1817,9 +1817,9 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("CreateManifestFile")]
         public void CreateManifestFile_ReturnsSuccessfulResult_WhenFileCreatedAtGivenPath()
         {
-            string pathToFileCreation = "some//junk//path";
-            string fakeManifestContent = "some yaml";
-            string expectedWriteStr = $"---\n{fakeManifestContent}";
+            var pathToFileCreation = "some//junk//path";
+            var fakeManifestContent = "some yaml";
+            var expectedWriteStr = $"---\n{fakeManifestContent}";
 
             _mockSerializationService.Setup(m => m.SerializeCfAppManifest(exampleManifest))
                 .Returns(fakeManifestContent);
@@ -1841,8 +1841,8 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("CreateManifestFile")]
         public void CreateManifestFile_ReturnsFailedResult_WhenFileCreationThrowsException()
         {
-            string pathToFileCreation = "some//junk//path";
-            string fakeExceptionMsg = "Couldn't create file because... we want to simulate an exception :)";
+            var pathToFileCreation = "some//junk//path";
+            var fakeExceptionMsg = "Couldn't create file because... we want to simulate an exception :)";
             var fileCreationException = new Exception(fakeExceptionMsg);
 
             _mockFileService.Setup(m => m.WriteTextToFile(pathToFileCreation, It.IsAny<string>())).Throws(fileCreationException);
@@ -1997,7 +1997,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 ListStacks(FakeCfInstance.ApiAddress, _fakeValidAccessToken))
                     .ReturnsAsync(fakeStacksResponse);
 
-            DetailedResult<List<string>> result = await _sut.GetStackNamesAsync(FakeCfInstance);
+            var result = await _sut.GetStackNamesAsync(FakeCfInstance);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Succeeded);
@@ -2005,7 +2005,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.AreEqual(null, result.CmdResult);
             Assert.AreEqual(expectedResultContent.Count, result.Content.Count);
 
-            for (int i = 0; i < expectedResultContent.Count; i++)
+            for (var i = 0; i < expectedResultContent.Count; i++)
             {
                 Assert.AreEqual(expectedResultContent[i], result.Content[i]);
             }
@@ -2019,7 +2019,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                 GetOAuthToken())
                     .Throws(new InvalidRefreshTokenException());
 
-            DetailedResult<List<string>> result = await _sut.GetStackNamesAsync(FakeCfInstance);
+            var result = await _sut.GetStackNamesAsync(FakeCfInstance);
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
@@ -2195,7 +2195,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNull(result.CmdResult);
             Assert.AreEqual(expectedResultContent.Count, result.Content.Count);
 
-            for (int i = 0; i < expectedResultContent.Count; i++)
+            for (var i = 0; i < expectedResultContent.Count; i++)
             {
                 Assert.AreEqual(expectedResultContent[i].RouteGuid, result.Content[i].RouteGuid);
             }
@@ -2277,7 +2277,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNull(result.CmdResult);
             Assert.AreEqual(expectedResultContent.Count, result.Content.Count);
 
-            for (int i = 0; i < expectedResultContent.Count; i++)
+            for (var i = 0; i < expectedResultContent.Count; i++)
             {
                 Assert.AreEqual(expectedResultContent[i].RouteGuid, result.Content[i].RouteGuid);
             }
@@ -2329,7 +2329,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             Assert.IsTrue(result.Succeeded);
 
-            foreach (Route route in fakeRoutesResponse)
+            foreach (var route in fakeRoutesResponse)
             {
                 _mockCfApiClient.Verify(m => m.DeleteRouteWithGuid(expectedAddress, _fakeValidAccessToken, route.Guid), Times.Once);
             }
@@ -2584,9 +2584,9 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
         private static IEnumerable<object[]> GetAppLogStreamArgs()
         {
-            CloudFoundryOrganization FakeOrg2 = new CloudFoundryOrganization("fake org 2", "fake org guid 2", null);
-            CloudFoundrySpace FakeSpace2 = new CloudFoundrySpace("fake space 2", "fake space guid 2", FakeOrg2);
-            CloudFoundryApp FakeApp2 = new CloudFoundryApp("fake app 2", "fake app guid 2", FakeSpace2, null);
+            var FakeOrg2 = new CloudFoundryOrganization("fake org 2", "fake org guid 2", null);
+            var FakeSpace2 = new CloudFoundrySpace("fake space 2", "fake space guid 2", FakeOrg2);
+            var FakeApp2 = new CloudFoundryApp("fake app 2", "fake app guid 2", FakeSpace2, null);
             Action<string> fakeOutCallback = (string s) => { };
             Action<string> fakeOutCallback2 = (string s) => { };
             Action<string> fakeErrCallback = (string s) => { };

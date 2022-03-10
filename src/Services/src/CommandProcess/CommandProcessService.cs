@@ -130,7 +130,7 @@ namespace Tanzu.Toolkit.Services.CommandProcess
 
         private void OutputRecorder(object sendingProcess, DataReceivedEventArgs outLine)
         {
-            string outContent = outLine.Data;
+            var outContent = outLine.Data;
             if (outContent != null)
             {
                 _stdOutAggregator += $"{outContent}\n";
@@ -146,7 +146,7 @@ namespace Tanzu.Toolkit.Services.CommandProcess
 
         private void ErrorRecorder(object sendingProcess, DataReceivedEventArgs errLine)
         {
-            string errContent = errLine.Data;
+            var errContent = errLine.Data;
             if (errContent != null)
             {
                 _stdErrAggregator += $"{errContent}\n";

@@ -127,14 +127,14 @@ namespace Tanzu.Toolkit.Services.File
 
         public string GetUniquePathForTempFile(string fileName = "")
         {
-            string tmpDirPath = Path.Combine(VsixPackageBaseDir, "tmp");
+            var tmpDirPath = Path.Combine(VsixPackageBaseDir, "tmp");
 
             if (!Directory.Exists(tmpDirPath))
             {
                 Directory.CreateDirectory(tmpDirPath);
             }
 
-            string uniqueFileName = fileName + DateTimeOffset.Now.ToUnixTimeSeconds().ToString();
+            var uniqueFileName = fileName + DateTimeOffset.Now.ToUnixTimeSeconds().ToString();
             return Path.Combine(tmpDirPath, uniqueFileName);
         }
 
