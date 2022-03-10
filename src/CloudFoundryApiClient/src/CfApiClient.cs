@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -11,6 +10,7 @@ using Tanzu.Toolkit.CloudFoundryApiClient.Models.BasicInfoResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.OrgsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.SpacesResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.StacksResponse;
+using System.Text.Json;
 
 namespace Tanzu.Toolkit.CloudFoundryApiClient
 {
@@ -230,7 +230,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             }
 
             string resultContent = await response.Content.ReadAsStringAsync();
-            var result = JsonConvert.DeserializeObject<App>(resultContent);
+            var result = JsonSerializer.Deserialize<App>(resultContent);
 
             if (result.State == "STOPPED")
             {
@@ -275,7 +275,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             }
 
             string resultContent = await response.Content.ReadAsStringAsync();
-            var result = JsonConvert.DeserializeObject<App>(resultContent);
+            var result = JsonSerializer.Deserialize<App>(resultContent);
 
             if (result.State == "STARTED")
             {
@@ -365,7 +365,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
                 throw new Exception($"Request for login server information was unsuccessful; request to {request.Method} {request.RequestUri} received {response.StatusCode}");
             }
             var jsonContent = await response.Content.ReadAsStringAsync();
-            var deserializedResponse = JsonConvert.DeserializeObject<LoginInfoResponse>(jsonContent);
+            var deserializedResponse = JsonSerializer.Deserialize<LoginInfoResponse>(jsonContent);
 
             return deserializedResponse;
         }
@@ -389,7 +389,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
                     var content = await response.Content.ReadAsStringAsync();
-                    var basicInfo = JsonConvert.DeserializeObject<BasicInfoResponse>(content);
+                    var basicInfo = JsonSerializer.Deserialize<BasicInfoResponse>(content);
                     authServerUri = new Uri(basicInfo.Links.Login.Href);
                 }
 
@@ -437,42 +437,42 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
 
             if (typeof(TResourceType) == typeof(Org))
             {
-                var results = JsonConvert.DeserializeObject<OrgsResponse>(resultContent);
+                var results = JsonSerializer.Deserialize<OrgsResponse>(resultContent);
                 resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Orgs.ToList());
 
                 nextPageHref = results.Pagination.Next;
             }
             else if (typeof(TResourceType) == typeof(Space))
             {
-                var results = JsonConvert.DeserializeObject<SpacesResponse>(resultContent);
+                var results = JsonSerializer.Deserialize<SpacesResponse>(resultContent);
                 resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Spaces.ToList());
 
                 nextPageHref = results.Pagination.Next;
             }
             else if (typeof(TResourceType) == typeof(App))
             {
-                var results = JsonConvert.DeserializeObject<AppsResponse>(resultContent);
+                var results = JsonSerializer.Deserialize<AppsResponse>(resultContent);
                 resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Apps.ToList());
 
                 nextPageHref = results.Pagination.Next;
             }
             else if (typeof(TResourceType) == typeof(Buildpack))
             {
-                var results = JsonConvert.DeserializeObject<BuildpacksResponse>(resultContent);
+                var results = JsonSerializer.Deserialize<BuildpacksResponse>(resultContent);
                 resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Buildpacks.ToList());
 
                 nextPageHref = results.Pagination.Next;
             }
             else if (typeof(TResourceType) == typeof(Stack))
             {
-                var results = JsonConvert.DeserializeObject<StacksResponse>(resultContent);
+                var results = JsonSerializer.Deserialize<StacksResponse>(resultContent);
                 resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Stacks.ToList());
 
                 nextPageHref = results.Pagination.Next;
             }
             else if (typeof(TResourceType) == typeof(Route))
             {
-                var results = JsonConvert.DeserializeObject<RoutesResponse>(resultContent);
+                var results = JsonSerializer.Deserialize<RoutesResponse>(resultContent);
                 resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Routes.ToList());
 
                 nextPageHref = results.Pagination.Next;

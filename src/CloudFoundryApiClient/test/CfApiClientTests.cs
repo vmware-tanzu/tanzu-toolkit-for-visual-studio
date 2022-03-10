@@ -1,13 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
-using Newtonsoft.Json;
 using RichardSzalay.MockHttp;
 using System;
 using System.Net;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
-using Tanzu.Toolkit.CloudFoundryApiClient.Models.Token;
 
 namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 {
@@ -281,7 +279,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Exception resultException = null;
 
             MockedRequest cfStopAppRequest = _mockHttp.Expect(expectedPath)
-               .Respond("application/json", JsonConvert.SerializeObject(new App { State = "STOPPED" }));
+               .Respond("application/json", JsonSerializer.Serialize(new App { State = "STOPPED" }));
 
             bool stopResult = false;
             try
@@ -306,7 +304,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Exception resultException = null;
 
             MockedRequest cfStopAppRequest = _mockHttp.Expect(expectedPath)
-               .Respond("application/json", JsonConvert.SerializeObject(new App { State = "fake state != STOPPED" }));
+               .Respond("application/json", JsonSerializer.Serialize(new App { State = "fake state != STOPPED" }));
 
             bool stopResult = true;
             try
@@ -331,7 +329,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Exception resultException = null;
 
             MockedRequest cfStartAppRequest = _mockHttp.Expect(expectedPath)
-               .Respond("application/json", JsonConvert.SerializeObject(new App { State = "STARTED" }));            bool startResult = false;
+               .Respond("application/json", JsonSerializer.Serialize(new App { State = "STARTED" }));            var startResult = false;
             try
             {
                 startResult = await _sut.StartAppWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
@@ -354,7 +352,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Exception resultException = null;
 
             MockedRequest cfStartAppRequest = _mockHttp.Expect(expectedPath)
-               .Respond("application/json", JsonConvert.SerializeObject(new App { State = "fake state != STARTED" }));
+               .Respond("application/json", JsonSerializer.Serialize(new App { State = "fake state != STARTED" }));
 
             bool startResult = true;
             try
@@ -578,7 +576,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                .Respond("application/json", _fakeBasicInfoJsonResponse);
 
             MockedRequest loginServerInfoRequest = _mockHttp.Expect(_fakeLoginAddress + "/login")
-               .Respond("application/json", JsonConvert.SerializeObject(fakeLoginServerInfo));
+               .Respond("application/json", JsonSerializer.Serialize(fakeLoginServerInfo));
 
             try
             {

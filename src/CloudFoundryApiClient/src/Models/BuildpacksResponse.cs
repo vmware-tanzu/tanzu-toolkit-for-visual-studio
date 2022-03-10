@@ -1,22 +1,22 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System.Text.Json.Serialization;
 
 namespace Tanzu.Toolkit.CloudFoundryApiClient.Models
 {
     public class BuildpacksResponse
     {
-        [JsonProperty("pagination")]
+        [JsonPropertyName("pagination")]
         public Pagination Pagination { get; set; }
 
-        [JsonProperty("resources")]
+        [JsonPropertyName("resources")]
         public Buildpack[] Buildpacks { get; set; }
     }
 
     public class Buildpack
     {
-        [JsonProperty("name")]
+        [JsonPropertyName("name")]
         public string Name { get; set; }
-        [JsonProperty("stack")]
+
+        [JsonPropertyName("stack")]
         public string Stack { get; set; }
     }
 }

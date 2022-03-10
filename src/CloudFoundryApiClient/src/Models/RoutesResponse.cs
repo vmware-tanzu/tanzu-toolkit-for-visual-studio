@@ -1,22 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace Tanzu.Toolkit.CloudFoundryApiClient.Models
 {
     public class RoutesResponse
     {
-        [JsonProperty("pagination")]
+        [JsonPropertyName("pagination")]
         public Pagination Pagination { get; set; }
 
-        [JsonProperty("resources")]
+        [JsonPropertyName("resources")]
         public Route[] Routes { get; set; }
     }
 
     public class Route
     {
-        [JsonProperty("guid")]
+        [JsonPropertyName("guid")]
         public string Guid { get; set; }
     }
 }
