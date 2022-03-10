@@ -52,7 +52,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         private void SelectManifest(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog
+            var openFileDialog = new OpenFileDialog
             {
                 InitialDirectory = _viewModel.PathToProjectRootDir,
                 Filter = "YAML files (*.yaml, *.yml)|*.yaml;*.yml",
@@ -68,7 +68,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         private void SelectPublishDirectory(object sender, RoutedEventArgs e)
         {
-            FolderBrowserDialog openFolderDialog = new FolderBrowserDialog
+            var openFolderDialog = new FolderBrowserDialog
             {
                 SelectedPath = _viewModel.PathToProjectRootDir,
             };
@@ -111,7 +111,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         private void SaveManifestButton_Click(object sender, RoutedEventArgs e)
         {
-            SaveFileDialog saveFileDialog = new SaveFileDialog()
+            var saveFileDialog = new SaveFileDialog()
             {
                 DefaultExt = "yml",
                 InitialDirectory = _viewModel.PathToProjectRootDir,

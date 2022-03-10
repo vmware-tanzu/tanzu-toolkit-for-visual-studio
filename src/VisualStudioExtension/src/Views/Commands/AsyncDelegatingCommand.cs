@@ -50,7 +50,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views.Commands
                 return false;
             }
 
-            return _canExecute == null ? true : _canExecute(parameter);
+            return _canExecute == null || _canExecute(parameter);
         }
 
         public async void Execute(object parameter)

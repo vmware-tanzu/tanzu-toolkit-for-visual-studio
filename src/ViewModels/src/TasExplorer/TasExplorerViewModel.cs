@@ -45,10 +45,10 @@ namespace Tanzu.Toolkit.ViewModels
             _dataPersistenceService = services.GetRequiredService<IDataPersistenceService>();
             _viewLocatorService = services.GetRequiredService<IViewLocatorService>();
 
-            bool savedConnectionCredsExist = _dataPersistenceService.SavedCfCredsExist();
-            string existingSavedConnectionName = _dataPersistenceService.ReadStringData(ConnectionNameKey);
-            string existingSavedConnectionAddress = _dataPersistenceService.ReadStringData(ConnectionAddressKey);
-            string existingSavedConnectionSslPolicy = _dataPersistenceService.ReadStringData(ConnectionSslPolicyKey);
+            var savedConnectionCredsExist = _dataPersistenceService.SavedCfCredsExist();
+            var existingSavedConnectionName = _dataPersistenceService.ReadStringData(ConnectionNameKey);
+            var existingSavedConnectionAddress = _dataPersistenceService.ReadStringData(ConnectionAddressKey);
+            var existingSavedConnectionSslPolicy = _dataPersistenceService.ReadStringData(ConnectionSslPolicyKey);
 
             if (!savedConnectionCredsExist || existingSavedConnectionName == null || existingSavedConnectionAddress == null)
             {
@@ -295,7 +295,7 @@ namespace Tanzu.Toolkit.ViewModels
                 }
                 else
                 {
-                    IView outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel)) as IView;
+                    var outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel)) as IView;
                     var outputViewModel = outputView?.ViewModel as IOutputViewModel;
 
                     outputView.Show();
@@ -319,7 +319,7 @@ namespace Tanzu.Toolkit.ViewModels
                     var outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel), viewTitle) as IView;
                     var outputViewModel = outputView.ViewModel as IOutputViewModel;
 
-                    Task<DetailedResult<string>> recentLogsTask = TasConnection.CfClient.GetRecentLogsAsync(cfApp);
+                    var recentLogsTask = TasConnection.CfClient.GetRecentLogsAsync(cfApp);
                     outputView.Show();
 
                     var recentLogsResult = await recentLogsTask;

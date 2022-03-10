@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -109,9 +109,9 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
                 Path = ListOrgsPath,
             };
 
-            HypertextReference firstPageHref = new HypertextReference() { Href = uri.ToString() };
+            var firstPageHref = new HypertextReference() { Href = uri.ToString() };
 
-            List<Org> visibleOrgs = await GetRemainingPagesForType(firstPageHref, accessToken, new List<Org>());
+            var visibleOrgs = await GetRemainingPagesForType(firstPageHref, accessToken, new List<Org>());
 
             return visibleOrgs;
         }
@@ -137,7 +137,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
                 Query = $"organization_guids={orgGuid}",
             };
 
-            HypertextReference firstPageHref = new HypertextReference() { Href = uri.ToString() };
+            var firstPageHref = new HypertextReference() { Href = uri.ToString() };
 
             return await GetRemainingPagesForType(firstPageHref, accessToken, new List<Space>());
         }
@@ -163,7 +163,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
                 Query = $"space_guids={spaceGuid}",
             };
 
-            HypertextReference firstPageHref = new HypertextReference() { Href = uri.ToString() };
+            var firstPageHref = new HypertextReference() { Href = uri.ToString() };
 
             return await GetRemainingPagesForType(firstPageHref, accessToken, new List<App>());
         }
@@ -176,7 +176,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
                 Query = $"app_guids={appGuid}",
             };
 
-            HypertextReference firstPageHref = new HypertextReference() { Href = uri.ToString() };
+            var firstPageHref = new HypertextReference() { Href = uri.ToString() };
 
             return await GetRemainingPagesForType(firstPageHref, accessToken, new List<Route>());
         }
@@ -188,9 +188,9 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
                 Path = ListBuildpacksPath,
             };
 
-            HypertextReference firstPageHref = new HypertextReference() { Href = uri.ToString() };
+            var firstPageHref = new HypertextReference() { Href = uri.ToString() };
 
-            List<Buildpack> visibleBuildpacks = await GetRemainingPagesForType(firstPageHref, accessToken, new List<Buildpack>());
+            var visibleBuildpacks = await GetRemainingPagesForType(firstPageHref, accessToken, new List<Buildpack>());
 
             return visibleBuildpacks;
         }
@@ -229,7 +229,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
                 throw new Exception($"Response from POST `{stopAppPath}` was {response.StatusCode}");
             }
 
-            string resultContent = await response.Content.ReadAsStringAsync();
+            var resultContent = await response.Content.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<App>(resultContent);
 
             if (result.State == "STOPPED")
@@ -274,7 +274,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
                 throw new Exception($"Response from POST `{startAppPath}` was {response.StatusCode}");
             }
 
-            string resultContent = await response.Content.ReadAsStringAsync();
+            var resultContent = await response.Content.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<App>(resultContent);
 
             if (result.State == "STARTED")
@@ -344,7 +344,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
                 Path = ListStacksPath,
             };
 
-            HypertextReference firstPageHref = new HypertextReference() { Href = uri.ToString() };
+            var firstPageHref = new HypertextReference() { Href = uri.ToString() };
 
             return await GetRemainingPagesForType(firstPageHref, accessToken, new List<Stack>());
         }
@@ -431,7 +431,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
                 throw new Exception($"Response from GET `{pageAddress}` was {response.StatusCode}");
             }
 
-            string resultContent = await response.Content.ReadAsStringAsync();
+            var resultContent = await response.Content.ReadAsStringAsync();
 
             HypertextReference nextPageHref;
 

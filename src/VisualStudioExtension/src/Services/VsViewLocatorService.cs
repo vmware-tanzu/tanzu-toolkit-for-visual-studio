@@ -29,7 +29,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services
             try
             {
                 var viewTypeName = GetViewName(viewModelName);
-                Type type = LookupViewType(viewTypeName);
+                var type = LookupViewType(viewTypeName);
 
                 if (type == typeof(IOutputView))
                 {

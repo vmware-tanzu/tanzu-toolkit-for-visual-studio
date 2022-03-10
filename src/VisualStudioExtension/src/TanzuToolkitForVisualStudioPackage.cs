@@ -74,7 +74,7 @@ namespace Tanzu.Toolkit.VisualStudio
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
-            List<Task> commandInitializations = new List<Task>
+            var commandInitializations = new List<Task>
             {
                 Task.Run(() => TanzuTasExplorerCommand.InitializeAsync(this)),
                 Task.Run(() => PushToCloudFoundryCommand.InitializeAsync(this, _serviceProvider)),
@@ -109,7 +109,7 @@ namespace Tanzu.Toolkit.VisualStudio
 
         private void ConfigureServices(IServiceCollection services)
         {
-            string assemblyBasePath = Path.GetDirectoryName(GetType().Assembly.Location);
+            var assemblyBasePath = Path.GetDirectoryName(GetType().Assembly.Location);
 
             /* VSIX package */
             services.AddSingleton<AsyncPackage>(this);
