@@ -506,7 +506,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         /// <param name="workingDir"></param>
         /// <param name="cancellationTriggers"></param>
         /// <returns>An awaitable <see cref="Task"/> which will return a <see cref="DetailedResult"/> containing the results of the CF command.</returns>
-        internal async Task<DetailedResult> RunCfCommandAsync(string arguments, Action<string> stdOutCallback = null, Action<string> stdErrCallback = null, string workingDir = null, List<string> cancellationTriggers = null)
+        public async Task<DetailedResult> RunCfCommandAsync(string arguments, Action<string> stdOutCallback = null, Action<string> stdErrCallback = null, string workingDir = null, List<string> cancellationTriggers = null)
         {
             var pathToCfExe = _fileService.FullPathToCfExe;
             if (string.IsNullOrEmpty(pathToCfExe))

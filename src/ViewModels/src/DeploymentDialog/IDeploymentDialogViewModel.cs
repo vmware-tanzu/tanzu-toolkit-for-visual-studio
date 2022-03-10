@@ -11,6 +11,7 @@ namespace Tanzu.Toolkit.ViewModels
         string DeploymentDirectoryPath { get; set; }
         bool Expanded { get; set; }
         ObservableCollection<string> SelectedBuildpacks { get; set; }
+        Task DeploymentTask { get; }
 
         bool CanDeployApp(object arg);
         bool CanToggleAdvancedOptions(object arg);

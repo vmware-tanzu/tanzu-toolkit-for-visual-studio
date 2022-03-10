@@ -47,12 +47,15 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             _logger = logSvc.Logger;
         }
 
+        internal string CfApiAddress { get; set; }
+
         public DetailedResult ConfigureForCf(CloudFoundryInstance cf)
         {
             try
             {
                 var uri = new Uri(cf.ApiAddress, UriKind.Absolute);
                 _cfApiClient.Configure(uri, cf.SkipSslCertValidation);
+                CfApiAddress = uri.ToString();
                 return new DetailedResult { Succeeded = true };
             }
             catch (Exception ex)
@@ -453,6 +456,89 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 else
                 {
                     appsToReturn.Add(new CloudFoundryApp(app.Name, app.Guid, space, app.State.ToUpper()));
+                }
+            }
+
+            return new DetailedResult<List<CloudFoundryApp>>()
+            {
+                Succeeded = true,
+                Content = appsToReturn,
+            };
+        }
+
+        public async Task<DetailedResult<List<CloudFoundryApp>>> ListAllAppsAsync(int retryAmount = 1)
+        {
+            string accessToken;
+            try
+            {
+                accessToken = _cfCliService.GetOAuthToken();
+            }
+            catch (InvalidRefreshTokenException)
+            {
+                var msg = "Unable to retrieve apps because the connection has expired. Please log back in to re-authenticate.";
+                _logger.Information(msg);
+
+                return new DetailedResult<List<CloudFoundryApp>>
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                    Content = null,
+                    FailureType = FailureType.InvalidRefreshToken,
+                };
+            }
+
+            if (accessToken == null)
+            {
+                const string msg = "CloudFoundryService attempted to list apps but was unable to look up an access token.";
+                _logger.Error(msg);
+
+                return new DetailedResult<List<CloudFoundryApp>>()
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                };
+            }
+
+            List<App> appsFromApi;
+            try
+            {
+                appsFromApi = await _cfApiClient.ListAppsAsync(accessToken);
+            }
+            catch (Exception originalException)
+            {
+                if (retryAmount > 0)
+                {
+                    _logger.Information("ListAllAppsAsync caught an exception when trying to retrieve apps: {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).", originalException.Message, retryAmount);
+                    _cfCliService.ClearCachedAccessToken();
+                    retryAmount -= 1;
+                    return await ListAllAppsAsync(retryAmount);
+                }
+                else
+                {
+                    _logger.Error("{Error}. See logs for more details: toolkit-diagnostics.log", originalException.Message);
+
+                    return new DetailedResult<List<CloudFoundryApp>>()
+                    {
+                        Succeeded = false,
+                        Explanation = originalException.Message,
+                    };
+                }
+            }
+
+            var appsToReturn = new List<CloudFoundryApp>();
+            foreach (var app in appsFromApi)
+            {
+                if (app.Name == null)
+                {
+                    _logger.Error("CloudFoundryService.ListAllAppsAsync encountered an app without a name; omitting it from the returned list of apps.");
+                }
+                else if (app.Guid == null)
+                {
+                    _logger.Error("CloudFoundryService.ListAllAppsAsync encountered an app without a guid; omitting it from the returned list of apps.");
+                }
+                else
+                {
+                    appsToReturn.Add(new CloudFoundryApp(app.Name, app.Guid, null, app.State.ToUpper()));
                 }
             }
 

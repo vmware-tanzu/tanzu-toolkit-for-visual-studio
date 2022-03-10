@@ -9,6 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
+using Tanzu.Toolkit.Services.DotnetCli;
 using Tanzu.Toolkit.Services.ErrorDialog;
 
 [assembly: InternalsVisibleTo("Tanzu.Toolkit.ViewModels.Tests")]
@@ -34,10 +35,11 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string ManifestNotFoundTitle = "Unable to set manifest path";
         internal const string ManifestParsingErrorTitle = "Unable to parse app manifest";
         internal const string DirectoryNotFoundTitle = "Unable to set push directory path";
-
+        internal const string PublishDirName = "publish";
         private string _appName;
         internal readonly bool _fullFrameworkDeployment = false;
         private readonly IErrorDialog _errorDialogService;
+        private readonly IDotnetCliService _dotnetCliService;
         internal IOutputViewModel OutputViewModel;
         internal ITasExplorerViewModel TasExplorerViewModel;
 
@@ -63,11 +65,14 @@ namespace Tanzu.Toolkit.ViewModels
         private AppManifest _appManifest;
         private bool _buildpacksLoading = false;
         private bool _stacksLoading = false;
+        private bool _publishBeforePushing;
+        private bool _configureForRemoteDebugging;
 
         public DeploymentDialogViewModel(IServiceProvider services, string projectName, string directoryOfProjectToDeploy, string targetFrameworkMoniker)
             : base(services)
         {
             _errorDialogService = services.GetRequiredService<IErrorDialog>();
+            _dotnetCliService = services.GetRequiredService<IDotnetCliService>();
             TasExplorerViewModel = services.GetRequiredService<ITasExplorerViewModel>();
 
             OutputView = ViewLocatorService.GetViewByViewModelName(nameof(ViewModels.OutputViewModel)) as IView;
@@ -77,7 +82,8 @@ namespace Tanzu.Toolkit.ViewModels
             PathToProjectRootDir = directoryOfProjectToDeploy;
             SelectedBuildpacks = new ObservableCollection<string>();
 
-            if (targetFrameworkMoniker.StartsWith(FullFrameworkTFM))
+            _targetFrameworkMoniker = targetFrameworkMoniker;
+            if (_targetFrameworkMoniker.StartsWith(FullFrameworkTFM))
             {
                 _fullFrameworkDeployment = true;
             }
@@ -216,7 +222,7 @@ namespace Tanzu.Toolkit.ViewModels
 
             set
             {
-                if (FileService.DirectoryExists(value))
+                if (FileService.DirectoryExists(value) || (value != null && value.EndsWith(PublishDirName)))
                 {
                     _directoryPath = value;
                     DirectoryPathLabel = value;
@@ -307,6 +313,8 @@ namespace Tanzu.Toolkit.ViewModels
                 RaisePropertyChangedEvent("SelectedBuildpacks");
             }
         }
+
+        private readonly string _targetFrameworkMoniker;
 
         public CloudFoundryOrganization SelectedOrg
         {
@@ -399,6 +407,8 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool DeploymentInProgress { get; internal set; }
 
+        public Task DeploymentTask { get; private set; }
+
         public string TargetName
         {
             get => _targetName;
@@ -449,6 +459,41 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
+        public bool PublishBeforePushing
+        {
+            get => _publishBeforePushing;
+
+            set
+            {
+                _publishBeforePushing = value;
+                if (_publishBeforePushing)
+                {
+                    DeploymentDirectoryPath = Path.Combine(PathToProjectRootDir, PublishDirName);
+                }
+                else
+                {
+                    ConfigureForRemoteDebugging = false;
+                    DeploymentDirectoryPath = null;
+                }
+                RaisePropertyChangedEvent("PublishBeforePushing");
+            }
+        }
+
+        public bool ConfigureForRemoteDebugging
+        {
+            get => _configureForRemoteDebugging;
+
+            set
+            {
+                _configureForRemoteDebugging = value;
+                if (_configureForRemoteDebugging)
+                {
+                    PublishBeforePushing = true;
+                }
+                RaisePropertyChangedEvent("ConfigureForRemoteDebugging");
+            }
+        }
+
         public bool CanDeployApp(object arg)
         {
             return !string.IsNullOrEmpty(AppName) && IsLoggedIn && SelectedOrg != null && SelectedSpace != null;
@@ -460,7 +505,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 DeploymentInProgress = true;
 
-                ThreadingService.StartBackgroundTask(StartDeployment);
+                DeploymentTask = ThreadingService.StartBackgroundTask(StartDeployment);
 
                 DialogService.CloseDialog(dialogWindow, true);
             }
@@ -684,6 +729,18 @@ namespace Tanzu.Toolkit.ViewModels
 
         internal async Task StartDeployment()
         {
+            if (PublishBeforePushing)
+            {
+                var runtimeIdentifier = "linux-x64";
+                var publishConfiguration = "Debug";
+                var publishSucceeded = await _dotnetCliService.PublishProjectForRemoteDebuggingAsync(PathToProjectRootDir, _targetFrameworkMoniker, runtimeIdentifier, publishConfiguration, PublishDirName);
+                if (!publishSucceeded)
+                {
+                    _errorDialogService.DisplayErrorDialog("Unable to intitate remote debugging", "Project failed to publish");
+                    return;
+                }
+            }
+
             var deploymentResult = await TasExplorerViewModel.TasConnection.CfClient.DeployAppAsync(
                 ManifestModel,
                 PathToProjectRootDir,
@@ -695,7 +752,7 @@ namespace Tanzu.Toolkit.ViewModels
 
             if (!deploymentResult.Succeeded)
             {
-                if (deploymentResult.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
+                if (deploymentResult.FailureType == FailureType.InvalidRefreshToken)
                 {
                     TasExplorerViewModel.AuthenticationRequired = true;
                 }
