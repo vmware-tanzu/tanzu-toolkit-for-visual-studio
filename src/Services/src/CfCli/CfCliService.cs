@@ -71,7 +71,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         /// </returns>
         public async Task<Version> GetApiVersion()
         {
-            DetailedResult result = await RunCfCommandAsync(_getApiVersionCmd);
+            var result = await RunCfCommandAsync(_getApiVersionCmd);
             if (!result.Succeeded)
             {
                 return null;
@@ -125,7 +125,7 @@ namespace Tanzu.Toolkit.Services.CfCli
                     {
                         try
                         {
-                            DetailedResult result = ExecuteCfCliCommand(_getOAuthTokenCmd);
+                            var result = ExecuteCfCliCommand(_getOAuthTokenCmd);
 
                             if (result == null)
                             {
@@ -179,7 +179,7 @@ namespace Tanzu.Toolkit.Services.CfCli
 
             lock (_cfEnvironmentLock)
             {
-                string args = $"{_targetApiCmd} {apiAddress}{(skipSsl ? " --skip-ssl-validation" : string.Empty)}";
+                var args = $"{_targetApiCmd} {apiAddress}{(skipSsl ? " --skip-ssl-validation" : string.Empty)}";
                 result = ExecuteCfCliCommand(args);
             }
 
@@ -199,10 +199,10 @@ namespace Tanzu.Toolkit.Services.CfCli
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0059:Unnecessary assignment of a value", Justification = "Null assigment is meant to clear plain text password from memory")]
         public async Task<DetailedResult> AuthenticateAsync(string username, SecureString password)
         {
-            string passwordStr = new System.Net.NetworkCredential(string.Empty, password).Password;
+            var passwordStr = new System.Net.NetworkCredential(string.Empty, password).Password;
 
-            string args = $"{_authenticateCmd} {username} {passwordStr}";
-            DetailedResult result = await RunCfCommandAsync(args);
+            var args = $"{_authenticateCmd} {username} {passwordStr}";
+            var result = await RunCfCommandAsync(args);
 
             /* Erase pw from memory */
             passwordStr = null;
@@ -232,8 +232,8 @@ namespace Tanzu.Toolkit.Services.CfCli
         /// <returns></returns>
         public DetailedResult TargetOrg(string orgName)
         {
-            string args = $"{_targetOrgCmd} \"{orgName}\"";
-            DetailedResult result = ExecuteCfCliCommand(args);
+            var args = $"{_targetOrgCmd} \"{orgName}\"";
+            var result = ExecuteCfCliCommand(args);
 
             ThrowIfResultIndicatesInvalidRefreshToken(result);
 
@@ -260,8 +260,8 @@ namespace Tanzu.Toolkit.Services.CfCli
         /// <returns></returns>
         public DetailedResult TargetSpace(string spaceName)
         {
-            string args = $"{_targetSpaceCmd} \"{spaceName}\"";
-            DetailedResult result = ExecuteCfCliCommand(args);
+            var args = $"{_targetSpaceCmd} \"{spaceName}\"";
+            var result = ExecuteCfCliCommand(args);
 
             ThrowIfResultIndicatesInvalidRefreshToken(result);
 
@@ -275,8 +275,8 @@ namespace Tanzu.Toolkit.Services.CfCli
 
         public async Task<DetailedResult> StopAppByNameAsync(string appName)
         {
-            string args = $"{_stopAppCmd} \"{appName}\"";
-            DetailedResult result = await RunCfCommandAsync(args);
+            var args = $"{_stopAppCmd} \"{appName}\"";
+            var result = await RunCfCommandAsync(args);
 
             if (!result.Succeeded)
             {
@@ -288,8 +288,8 @@ namespace Tanzu.Toolkit.Services.CfCli
 
         public async Task<DetailedResult> StartAppByNameAsync(string appName)
         {
-            string args = $"{_startAppCmd} \"{appName}\"";
-            DetailedResult result = await RunCfCommandAsync(args);
+            var args = $"{_startAppCmd} \"{appName}\"";
+            var result = await RunCfCommandAsync(args);
 
             if (!result.Succeeded)
             {
@@ -301,8 +301,8 @@ namespace Tanzu.Toolkit.Services.CfCli
 
         public async Task<DetailedResult> DeleteAppByNameAsync(string appName, bool removeMappedRoutes = true)
         {
-            string args = $"{_deleteAppCmd} \"{appName}\"{(removeMappedRoutes ? " -r" : string.Empty)}";
-            DetailedResult result = await RunCfCommandAsync(args);
+            var args = $"{_deleteAppCmd} \"{appName}\"{(removeMappedRoutes ? " -r" : string.Empty)}";
+            var result = await RunCfCommandAsync(args);
 
             if (!result.Succeeded)
             {
@@ -314,11 +314,11 @@ namespace Tanzu.Toolkit.Services.CfCli
 
         public async Task<DetailedResult> PushAppAsync(string manifestPath, string appDirPath, string orgName, string spaceName, Action<string> stdOutCallback, Action<string> stdErrCallback)
         {
-            string args = $"push -f \"{manifestPath}\"";
+            var args = $"push -f \"{manifestPath}\"";
 
             if (!_fileService.FileExists(manifestPath))
             {
-                string msg = $"Unable to deploy app; no manifest file found at '{manifestPath}'";
+                var msg = $"Unable to deploy app; no manifest file found at '{manifestPath}'";
                 _logger.Error(msg);
                 return new DetailedResult(false, explanation: msg);
             }
@@ -329,7 +329,7 @@ namespace Tanzu.Toolkit.Services.CfCli
                 var targetOrgResult = TargetOrg(orgName);
                 if (!targetOrgResult.Succeeded)
                 {
-                    string msg = $"Unable to deploy app from '{manifestPath}'; failed to target org '{orgName}'.\n{targetOrgResult.Explanation}";
+                    var msg = $"Unable to deploy app from '{manifestPath}'; failed to target org '{orgName}'.\n{targetOrgResult.Explanation}";
                     _logger.Error(msg);
                     return new DetailedResult(false, explanation: msg, targetOrgResult.CmdResult);
                 }
@@ -337,7 +337,7 @@ namespace Tanzu.Toolkit.Services.CfCli
                 var targetSpaceResult = TargetSpace(spaceName);
                 if (!targetSpaceResult.Succeeded)
                 {
-                    string msg = $"Unable to deploy app from '{manifestPath}'; failed to target space '{spaceName}'.\n{targetSpaceResult.Explanation}";
+                    var msg = $"Unable to deploy app from '{manifestPath}'; failed to target space '{spaceName}'.\n{targetSpaceResult.Explanation}";
                     _logger.Error(msg);
                     return new DetailedResult(false, explanation: msg, targetSpaceResult.CmdResult);
                 }
@@ -382,7 +382,7 @@ namespace Tanzu.Toolkit.Services.CfCli
             var content = recentLogsResult.CmdResult.StdOut;
             var cmdDetails = recentLogsResult.CmdResult;
             var explanation = recentLogsResult.Explanation;
-            bool succeeded = recentLogsResult.Succeeded;
+            var succeeded = recentLogsResult.Succeeded;
 
             return new DetailedResult<string>(content, succeeded, explanation, cmdDetails);
         }
@@ -432,7 +432,7 @@ namespace Tanzu.Toolkit.Services.CfCli
 
         public async Task<DetailedResult> LoginWithSsoPasscode(string apiAddress, string passcode)
         {
-            string args = $"login -a \"{apiAddress}\" --sso-passcode \"{passcode}\"";
+            var args = $"login -a \"{apiAddress}\" --sso-passcode \"{passcode}\"";
 
             var processCancellationTriggers = new List<string> { "OK", "Invalid passcode" };
 
@@ -461,7 +461,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         /// <returns>A <see cref="DetailedResult"/> containing the results of the CF command.</returns>
         internal DetailedResult ExecuteCfCliCommand(string arguments, string workingDir = null)
         {
-            string pathToCfExe = _fileService.FullPathToCfExe;
+            var pathToCfExe = _fileService.FullPathToCfExe;
             if (string.IsNullOrEmpty(pathToCfExe))
             {
                 return new DetailedResult(false, _cfExePathErrorMsg);
@@ -472,15 +472,15 @@ namespace Tanzu.Toolkit.Services.CfCli
                 { "CF_HOME", ConfigFilePath }
             };
 
-            ICommandProcessService cmdProcessService = Services.GetRequiredService<ICommandProcessService>();
-            CommandResult result = cmdProcessService.RunExecutable(pathToCfExe, arguments, workingDir, envVars);
+            var cmdProcessService = Services.GetRequiredService<ICommandProcessService>();
+            var result = cmdProcessService.RunExecutable(pathToCfExe, arguments, workingDir, envVars);
 
             if (result.ExitCode == 0)
             {
                 return new DetailedResult(succeeded: true, cmdResult: result);
             }
 
-            string reason = result.StdErr;
+            var reason = result.StdErr;
             if (string.IsNullOrEmpty(result.StdErr))
             {
                 if (result.StdOut.Contains("FAILED"))
@@ -508,7 +508,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         /// <returns>An awaitable <see cref="Task"/> which will return a <see cref="DetailedResult"/> containing the results of the CF command.</returns>
         internal async Task<DetailedResult> RunCfCommandAsync(string arguments, Action<string> stdOutCallback = null, Action<string> stdErrCallback = null, string workingDir = null, List<string> cancellationTriggers = null)
         {
-            string pathToCfExe = _fileService.FullPathToCfExe;
+            var pathToCfExe = _fileService.FullPathToCfExe;
             if (string.IsNullOrEmpty(pathToCfExe))
             {
                 return new DetailedResult(false, $"Unable to locate cf.exe.");
@@ -519,15 +519,15 @@ namespace Tanzu.Toolkit.Services.CfCli
                 { "CF_HOME", ConfigFilePath }
             };
 
-            ICommandProcessService cmdProcessService = Services.GetRequiredService<ICommandProcessService>();
-            CommandResult result = await Task.Run(() => cmdProcessService.RunExecutable(pathToCfExe, arguments, workingDir, envVars, stdOutCallback, stdErrCallback, processCancelTriggers: cancellationTriggers));
+            var cmdProcessService = Services.GetRequiredService<ICommandProcessService>();
+            var result = await Task.Run(() => cmdProcessService.RunExecutable(pathToCfExe, arguments, workingDir, envVars, stdOutCallback, stdErrCallback, processCancelTriggers: cancellationTriggers));
 
             if (result.ExitCode == 0)
             {
                 return new DetailedResult(succeeded: true, cmdResult: result);
             }
 
-            string reason = result.StdErr;
+            var reason = result.StdErr;
             if (string.IsNullOrEmpty(result.StdErr))
             {
                 if (result.StdOut.Contains("FAILED"))
@@ -545,7 +545,7 @@ namespace Tanzu.Toolkit.Services.CfCli
 
         private Process StartCfProcess(string arguments, Action<string> stdOutCallback = null, Action<string> stdErrCallback = null, string workingDir = null, List<string> cancellationTriggers = null)
         {
-            string pathToCfExe = _fileService.FullPathToCfExe;
+            var pathToCfExe = _fileService.FullPathToCfExe;
             if (string.IsNullOrEmpty(pathToCfExe))
             {
                 _logger.Error($"CfCliService tried to start command 'cf {arguments}' but was unable to locate cf.exe.");
@@ -557,7 +557,7 @@ namespace Tanzu.Toolkit.Services.CfCli
                 { "CF_HOME", ConfigFilePath }
             };
 
-            ICommandProcessService cmdProcessService = Services.GetRequiredService<ICommandProcessService>();
+            var cmdProcessService = Services.GetRequiredService<ICommandProcessService>();
             return cmdProcessService.StartProcess(
                 pathToCfExe,
                 arguments,

@@ -20,7 +20,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         public void Constructor_SetsDisplayTextToAppName()
         {
-            string appName = "junk";
+            var appName = "junk";
             var fakeApp = new CloudFoundryApp(appName, null, null, null);
 
             _sut = new AppViewModel(fakeApp, Services);
@@ -57,7 +57,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         public void RefreshApp_RaisesPropertyChangedEventForIsStopped()
         {
-            CloudFoundryApp fakeApp = new CloudFoundryApp("fake app name", "fake app guid", null, null);
+            var fakeApp = new CloudFoundryApp("fake app name", "fake app guid", null, null);
             _sut = new AppViewModel(fakeApp, Services);
 
             _sut.PropertyChanged += (sender, e) =>

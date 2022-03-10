@@ -88,7 +88,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             // the UI thread.
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
 
-            OleMenuCommandService commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
+            var commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
             Instance = new OpenLogsCommand(package, commandService);
 
             Dte = await package.GetServiceAsync(typeof(DTE)) as DTE2;
@@ -140,10 +140,10 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
 
                 if (tmpFilePath != null)
                 {
-                    Window logsWindow = Dte.ItemOperations.OpenFile(tmpFilePath);
+                    var logsWindow = Dte.ItemOperations.OpenFile(tmpFilePath);
                     logsWindow.Document.ReadOnly = true;
 
-                    WindowEvents windowEvents = Dte.Events.get_WindowEvents(logsWindow);
+                    var windowEvents = Dte.Events.get_WindowEvents(logsWindow);
                     windowEvents.WindowClosing += OnWindowClosing;
 
                     void OnWindowClosing(Window window)
@@ -154,7 +154,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                         }
                         catch (Exception ex)
                         {
-                            string errorMsg = $"Unable to delete tmp log file '${tmpFilePath}'.{Environment.NewLine}{ex.Message}";
+                            var errorMsg = $"Unable to delete tmp log file '${tmpFilePath}'.{Environment.NewLine}{ex.Message}";
 
                             _logger.Error(errorMsg);
                         }
@@ -175,9 +175,9 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             // conflicting with the logger's lock on the log file.
             File.Copy(originalFilePath, tempFilePath, overwrite: true);
 
-            string[] logContents = File.ReadAllLines(tempFilePath);
+            var logContents = File.ReadAllLines(tempFilePath);
 
-            List<string> extraInfo = new List<string>
+            var extraInfo = new List<string>
             {
                 "==========================",
                 "This is a temporary copy of the log file located at:",
@@ -188,8 +188,8 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             };
 
             // add explanation to the BEGINNING of the temp file
-            List<string> newContents = extraInfo;
-            foreach (string s in logContents)
+            var newContents = extraInfo;
+            foreach (var s in logContents)
             {
                 newContents.Add(s);
             }

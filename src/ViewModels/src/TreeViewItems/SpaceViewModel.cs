@@ -75,7 +75,7 @@ namespace Tanzu.Toolkit.ViewModels
                             else
                             {
                                 // identify stale apps to remove
-                                foreach (TreeViewItemViewModel priorChild in originalChildren)
+                                foreach (var priorChild in originalChildren)
                                 {
                                     if (priorChild is PlaceholderViewModel)
                                     {
@@ -83,7 +83,7 @@ namespace Tanzu.Toolkit.ViewModels
                                     }
                                     else if (priorChild is AppViewModel priorApp)
                                     {
-                                        bool appStillExists = freshApps.Any(o => o is CloudFoundryApp freshApp && freshApp != null && freshApp.AppId == priorApp.App.AppId);
+                                        var appStillExists = freshApps.Any(o => o is CloudFoundryApp freshApp && freshApp != null && freshApp.AppId == priorApp.App.AppId);
                                         if (!appStillExists)
                                         {
                                             removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, priorApp));
@@ -92,7 +92,7 @@ namespace Tanzu.Toolkit.ViewModels
                                 }
 
                                 // identify new apps to add
-                                foreach (CloudFoundryApp freshApp in freshApps)
+                                foreach (var freshApp in freshApps)
                                 {
                                     var appsWithSameId = originalChildren.Where(child => child is AppViewModel extantApp && extantApp.App.AppId == freshApp.AppId);
                                     var numMatchingApps = appsWithSameId.Count();
@@ -115,7 +115,7 @@ namespace Tanzu.Toolkit.ViewModels
 
                             await Task.WhenAll(removalTasks);
                             await Task.WhenAll(additionTasks);
-                            foreach (TreeViewItemViewModel child in Children)
+                            foreach (var child in Children)
                             {
                                 if (child is AppViewModel app)
                                 {

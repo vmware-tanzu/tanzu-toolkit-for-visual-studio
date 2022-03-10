@@ -65,8 +65,8 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
         public void GetViewByViewModelName_CreatesToolWindow_AndReturnsView_WhenInterpretedViewTypeIsIOutputView()
         {
             var expectedViewType = typeof(IOutputView);
-            object fakeViewFromToolWindow = new object();
-            string fakeCaptionParam = "some caption";
+            var fakeViewFromToolWindow = new object();
+            var fakeCaptionParam = "some caption";
 
             _sut.TypeLookupOverrides = new Dictionary<string, Type>
             {
@@ -99,7 +99,7 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
 
         protected override Type LookupViewType(string viewTypeName)
         {
-            Type overriddenType = TypeLookupOverrides[viewTypeName];
+            var overriddenType = TypeLookupOverrides[viewTypeName];
             return overriddenType ?? base.LookupViewType(viewTypeName);
         }
     }

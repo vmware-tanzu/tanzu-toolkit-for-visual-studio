@@ -12,7 +12,7 @@ namespace Tanzu.Toolkit.Models
         {
             var appsList = new List<AppConfig>();
 
-            foreach (AppConfig app in Applications)
+            foreach (var app in Applications)
             {
                 appsList.Add((AppConfig)app.Clone());
             }
@@ -51,7 +51,7 @@ namespace Tanzu.Toolkit.Models
         public object Clone()
         {
             // shallow copy first to replicate all value types
-            AppConfig newApp = (AppConfig)MemberwiseClone();
+            var newApp = (AppConfig)MemberwiseClone();
 
             // complete deep copy by replicating all reference types
 
@@ -59,7 +59,7 @@ namespace Tanzu.Toolkit.Models
             {
                 var clonedBps = new List<string>();
 
-                foreach (string bpName in Buildpacks)
+                foreach (var bpName in Buildpacks)
                 {
                     clonedBps.Add(bpName);
                 }
@@ -82,7 +82,7 @@ namespace Tanzu.Toolkit.Models
             {
                 var clonedEnv = new Dictionary<string, string>();
 
-                foreach (string key in Env.Keys)
+                foreach (var key in Env.Keys)
                 {
                     clonedEnv.Add(key, Env[key]);
                 }
@@ -97,7 +97,7 @@ namespace Tanzu.Toolkit.Models
                 {
                     var clonedAnnotations = new Dictionary<string, string>();
 
-                    foreach (string key in Metadata.Annotations.Keys)
+                    foreach (var key in Metadata.Annotations.Keys)
                     {
                         clonedAnnotations.Add(key, Metadata.Annotations[key]);
                     }
@@ -109,7 +109,7 @@ namespace Tanzu.Toolkit.Models
                 {
                     var clonedAnnotations = new Dictionary<string, string>();
 
-                    foreach (string key in Metadata.Labels.Keys)
+                    foreach (var key in Metadata.Labels.Keys)
                     {
                         clonedAnnotations.Add(key, Metadata.Labels[key]);
                     }
@@ -122,7 +122,7 @@ namespace Tanzu.Toolkit.Models
             {
                 var newProcessList = new List<ProcessConfig>();
 
-                foreach (ProcessConfig process in Processes)
+                foreach (var process in Processes)
                 {
                     newProcessList.Add(new ProcessConfig
                     {
@@ -145,7 +145,7 @@ namespace Tanzu.Toolkit.Models
             {
                 var newRoutesList = new List<RouteConfig>();
 
-                foreach (RouteConfig route in Routes)
+                foreach (var route in Routes)
                 {
                     newRoutesList.Add(new RouteConfig
                     {
@@ -161,7 +161,7 @@ namespace Tanzu.Toolkit.Models
             {
                 var newSidecarList = new List<SidecarConfig>();
 
-                foreach (SidecarConfig sidecar in Sidecars)
+                foreach (var sidecar in Sidecars)
                 {
                     var newSidecar = new SidecarConfig
                     {
@@ -174,7 +174,7 @@ namespace Tanzu.Toolkit.Models
                     {
                         var processTypeList = new List<string>();
 
-                        foreach (string procType in sidecar.ProcessTypes)
+                        foreach (var procType in sidecar.ProcessTypes)
                         {
                             processTypeList.Add(procType);
                         }

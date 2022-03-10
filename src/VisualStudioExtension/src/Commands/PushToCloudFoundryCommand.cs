@@ -90,7 +90,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             // the UI thread.
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
 
-            OleMenuCommandService commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
+            var commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
             Instance = new PushToCloudFoundryCommand(package, commandService, services);
         }
 
@@ -116,12 +116,12 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
 
                 foreach (Project proj in activeProjects)
                 {
-                    string projectDirectory = Path.GetDirectoryName(proj.FullName);
+                    var projectDirectory = Path.GetDirectoryName(proj.FullName);
 
-                    string tfm = proj.Properties.Item("TargetFrameworkMoniker").Value.ToString();
+                    var tfm = proj.Properties.Item("TargetFrameworkMoniker").Value.ToString();
                     if (tfm.StartsWith(".NETFramework") && !File.Exists(Path.Combine(projectDirectory, "Web.config")))
                     {
-                        string msg = $"This project appears to target .NET Framework; pushing it to Tanzu Application Service requires a 'Web.config' file at it's base directory, but none was found in {projectDirectory}";
+                        var msg = $"This project appears to target .NET Framework; pushing it to Tanzu Application Service requires a 'Web.config' file at it's base directory, but none was found in {projectDirectory}";
                         _dialogService.DisplayErrorDialog("Unable to push to Tanzu Application Service", msg);
                     }
                     else

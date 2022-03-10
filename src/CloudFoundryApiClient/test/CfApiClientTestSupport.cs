@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using RichardSzalay.MockHttp;
 using System;
 using System.Net.Http;
@@ -190,8 +190,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
     {
         public FakeOrgsResponse(string apiAddress, int pageNum, int totalResults, int totalPages, int resultsPerPage) : base()
         {
-            bool isFirstPage = pageNum == 1;
-            bool isLastPage = pageNum == totalPages;
+            var isFirstPage = pageNum == 1;
+            var isLastPage = pageNum == totalPages;
 
             var firstHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListOrgsPath}?page=1&per_page={resultsPerPage}" };
             var lastHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListOrgsPath}?page={totalPages}&per_page={resultsPerPage}" };
@@ -211,10 +211,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Org[] orgs;
             if (isLastPage)
             {
-                int numResourcesInLastPage = totalResults % resultsPerPage;
+                var numResourcesInLastPage = totalResults % resultsPerPage;
                 orgs = new Org[numResourcesInLastPage];
 
-                for (int i = 0; i < numResourcesInLastPage; i++)
+                for (var i = 0; i < numResourcesInLastPage; i++)
                 {
                     orgs[i] = new Org
                     {
@@ -227,7 +227,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             {
                 orgs = new Org[resultsPerPage];
 
-                for (int i = 0; i < resultsPerPage; i++)
+                for (var i = 0; i < resultsPerPage; i++)
                 {
                     orgs[i] = new Org
                     {
@@ -245,8 +245,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
     {
         public FakeSpacesResponse(string apiAddress, int pageNum, int totalResults, int totalPages, int resultsPerPage) : base()
         {
-            bool isFirstPage = pageNum == 1;
-            bool isLastPage = pageNum == totalPages;
+            var isFirstPage = pageNum == 1;
+            var isLastPage = pageNum == totalPages;
 
             var firstHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListSpacesPath}?page=1&per_page={resultsPerPage}" };
             var lastHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListSpacesPath}?page={totalPages}&per_page={resultsPerPage}" };
@@ -266,10 +266,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Space[] spaces;
             if (isLastPage)
             {
-                int numResourcesInLastPage = totalResults % resultsPerPage;
+                var numResourcesInLastPage = totalResults % resultsPerPage;
                 spaces = new Space[numResourcesInLastPage];
 
-                for (int i = 0; i < numResourcesInLastPage; i++)
+                for (var i = 0; i < numResourcesInLastPage; i++)
                 {
                     spaces[i] = new Space
                     {
@@ -282,7 +282,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             {
                 spaces = new Space[resultsPerPage];
 
-                for (int i = 0; i < resultsPerPage; i++)
+                for (var i = 0; i < resultsPerPage; i++)
                 {
                     spaces[i] = new Space
                     {
@@ -300,8 +300,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
     {
         public FakeAppsResponse(string apiAddress, int pageNum, int totalResults, int totalPages, int resultsPerPage) : base()
         {
-            bool isFirstPage = pageNum == 1;
-            bool isLastPage = pageNum == totalPages;
+            var isFirstPage = pageNum == 1;
+            var isLastPage = pageNum == totalPages;
 
             var firstHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListAppsPath}?page=1&per_page={resultsPerPage}" };
             var lastHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListAppsPath}?page={totalPages}&per_page={resultsPerPage}" };
@@ -321,10 +321,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             App[] apps;
             if (isLastPage)
             {
-                int numResourcesInLastPage = totalResults % resultsPerPage;
+                var numResourcesInLastPage = totalResults % resultsPerPage;
                 apps = new App[numResourcesInLastPage];
 
-                for (int i = 0; i < numResourcesInLastPage; i++)
+                for (var i = 0; i < numResourcesInLastPage; i++)
                 {
                     apps[i] = new App
                     {
@@ -336,7 +336,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             {
                 apps = new App[resultsPerPage];
 
-                for (int i = 0; i < resultsPerPage; i++)
+                for (var i = 0; i < resultsPerPage; i++)
                 {
                     apps[i] = new App
                     {
@@ -353,8 +353,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
     {
         public FakeBuildpacksResponse(string apiAddress, int pageNum, int totalResults, int totalPages, int resultsPerPage)
         {
-            bool isFirstPage = pageNum == 1;
-            bool isLastPage = pageNum == totalPages;
+            var isFirstPage = pageNum == 1;
+            var isLastPage = pageNum == totalPages;
 
             var firstHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListBuildpacksPath}?page=1&per_page={resultsPerPage}" };
             var lastHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListBuildpacksPath}?page={totalPages}&per_page={resultsPerPage}" };
@@ -374,7 +374,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Buildpack[] buildpacks;
 
             var numPreviousResults = (pageNum - 1) * resultsPerPage;
-            int numStackTypesPerBuildpack = 3;
+            var numStackTypesPerBuildpack = 3;
             /* INTENTION: assign Buildpacks prop to contain a list like this:
              * bp.Name = fakeBuildpack1, bp.Stack = fakeStack1
              * bp.Name = fakeBuildpack1, bp.Stack = fakeStack2
@@ -388,13 +388,13 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 
             if (isLastPage)
             {
-                int numResourcesInLastPage = totalResults % resultsPerPage;
+                var numResourcesInLastPage = totalResults % resultsPerPage;
                 buildpacks = new Buildpack[numResourcesInLastPage];
 
-                for (int i = 0; i < numResourcesInLastPage; i++)
+                for (var i = 0; i < numResourcesInLastPage; i++)
                 {
-                    int buildpackId = i / numStackTypesPerBuildpack + 1 + numPreviousResults;
-                    int stackTypeId = i % numStackTypesPerBuildpack + 1 + numPreviousResults;
+                    var buildpackId = i / numStackTypesPerBuildpack + 1 + numPreviousResults;
+                    var stackTypeId = i % numStackTypesPerBuildpack + 1 + numPreviousResults;
 
                     buildpacks[i] = new Buildpack
                     {
@@ -407,10 +407,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             {
                 buildpacks = new Buildpack[resultsPerPage];
 
-                for (int i = 0; i < resultsPerPage; i++)
+                for (var i = 0; i < resultsPerPage; i++)
                 {
-                    int buildpackId = i / numStackTypesPerBuildpack + 1 + numPreviousResults;
-                    int stackTypeId = i % numStackTypesPerBuildpack + 1 + numPreviousResults;
+                    var buildpackId = i / numStackTypesPerBuildpack + 1 + numPreviousResults;
+                    var stackTypeId = i % numStackTypesPerBuildpack + 1 + numPreviousResults;
 
                     buildpacks[i] = new Buildpack
                     {
@@ -428,8 +428,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
     {
         public FakeStacksResponse(string apiAddress, int pageNum, int totalResults, int totalPages, int resultsPerPage) : base()
         {
-            bool isFirstPage = pageNum == 1;
-            bool isLastPage = pageNum == totalPages;
+            var isFirstPage = pageNum == 1;
+            var isLastPage = pageNum == totalPages;
 
             var firstHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListStacksPath}?page=1&per_page={resultsPerPage}" };
             var lastHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListStacksPath}?page={totalPages}&per_page={resultsPerPage}" };
@@ -449,10 +449,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Stack[] stacks;
             if (isLastPage)
             {
-                int numResourcesInLastPage = totalResults % resultsPerPage;
+                var numResourcesInLastPage = totalResults % resultsPerPage;
                 stacks = new Stack[numResourcesInLastPage];
 
-                for (int i = 0; i < numResourcesInLastPage; i++)
+                for (var i = 0; i < numResourcesInLastPage; i++)
                 {
                     stacks[i] = new Stack
                     {
@@ -465,7 +465,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             {
                 stacks = new Stack[resultsPerPage];
 
-                for (int i = 0; i < resultsPerPage; i++)
+                for (var i = 0; i < resultsPerPage; i++)
                 {
                     stacks[i] = new Stack
                     {
@@ -483,8 +483,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
     {
         public FakeRoutesResponse(string apiAddress, int pageNum, int totalResults, int totalPages, int resultsPerPage) : base()
         {
-            bool isFirstPage = pageNum == 1;
-            bool isLastPage = pageNum == totalPages;
+            var isFirstPage = pageNum == 1;
+            var isLastPage = pageNum == totalPages;
 
             var firstHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListRoutesPath}?page=1&per_page={resultsPerPage}" };
             var lastHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListRoutesPath}?page={totalPages}&per_page={resultsPerPage}" };
@@ -504,10 +504,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Route[] routes;
             if (isLastPage)
             {
-                int numResourcesInLastPage = totalResults % resultsPerPage;
+                var numResourcesInLastPage = totalResults % resultsPerPage;
                 routes = new Route[numResourcesInLastPage];
 
-                for (int i = 0; i < numResourcesInLastPage; i++)
+                for (var i = 0; i < numResourcesInLastPage; i++)
                 {
                     routes[i] = new Route
                     {
@@ -519,7 +519,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             {
                 routes = new Route[resultsPerPage];
 
-                for (int i = 0; i < resultsPerPage; i++)
+                for (var i = 0; i < resultsPerPage; i++)
                 {
                     routes[i] = new Route
                     {
