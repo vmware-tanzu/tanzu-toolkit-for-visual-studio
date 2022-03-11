@@ -1,7 +1,7 @@
-using Newtonsoft.Json;
 using RichardSzalay.MockHttp;
 using System;
 using System.Net.Http;
+using System.Text.Json;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.BasicInfoResponse;
@@ -23,144 +23,144 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 
         internal static IHttpClientFactory _fakeHttpClientFactory = new FakeHttpClientFactory();
 
-        internal static readonly string _fakeBasicInfoJsonResponse = JsonConvert.SerializeObject(new FakeBasicInfoResponse(
+        internal static readonly string _fakeBasicInfoJsonResponse = JsonSerializer.Serialize(new FakeBasicInfoResponse(
                 loginHref: _fakeLoginAddress,
                 uaaHref: _fakeUaaAddress));
 
-        internal static readonly string _fakeOrgsJsonResponsePage1 = JsonConvert.SerializeObject(new FakeOrgsResponse(
+        internal static readonly string _fakeOrgsJsonResponsePage1 = JsonSerializer.Serialize(new FakeOrgsResponse(
             apiAddress: _fakeCfApiAddress,
             pageNum: 1,
             totalResults: 10,
             totalPages: 4,
             resultsPerPage: 3));
 
-        internal static readonly string _fakeOrgsJsonResponsePage2 = JsonConvert.SerializeObject(new FakeOrgsResponse(
+        internal static readonly string _fakeOrgsJsonResponsePage2 = JsonSerializer.Serialize(new FakeOrgsResponse(
             apiAddress: _fakeCfApiAddress,
             pageNum: 2,
             totalResults: 10,
             totalPages: 4,
             resultsPerPage: 3));
 
-        internal static readonly string _fakeOrgsJsonResponsePage3 = JsonConvert.SerializeObject(new FakeOrgsResponse(
+        internal static readonly string _fakeOrgsJsonResponsePage3 = JsonSerializer.Serialize(new FakeOrgsResponse(
             apiAddress: _fakeCfApiAddress,
             pageNum: 3,
             totalResults: 10,
             totalPages: 4,
             resultsPerPage: 3));
 
-        internal static readonly string _fakeOrgsJsonResponsePage4 = JsonConvert.SerializeObject(new FakeOrgsResponse(
+        internal static readonly string _fakeOrgsJsonResponsePage4 = JsonSerializer.Serialize(new FakeOrgsResponse(
             apiAddress: _fakeCfApiAddress,
             pageNum: 4,
             totalResults: 10,
             totalPages: 4,
             resultsPerPage: 3));
 
-        internal static readonly string _fakeSpacesJsonResponsePage1 = JsonConvert.SerializeObject(new FakeSpacesResponse(
+        internal static readonly string _fakeSpacesJsonResponsePage1 = JsonSerializer.Serialize(new FakeSpacesResponse(
             apiAddress: _fakeCfApiAddress,
             pageNum: 1,
             totalResults: 7,
             totalPages: 3,
             resultsPerPage: 3));
 
-        internal static readonly string _fakeSpacesJsonResponsePage2 = JsonConvert.SerializeObject(new FakeSpacesResponse(
+        internal static readonly string _fakeSpacesJsonResponsePage2 = JsonSerializer.Serialize(new FakeSpacesResponse(
             apiAddress: _fakeCfApiAddress,
             pageNum: 2,
             totalResults: 7,
             totalPages: 3,
             resultsPerPage: 3));
 
-        internal static readonly string _fakeSpacesJsonResponsePage3 = JsonConvert.SerializeObject(new FakeSpacesResponse(
+        internal static readonly string _fakeSpacesJsonResponsePage3 = JsonSerializer.Serialize(new FakeSpacesResponse(
             apiAddress: _fakeCfApiAddress,
             pageNum: 3,
             totalResults: 7,
             totalPages: 3,
             resultsPerPage: 3));
 
-        internal static readonly string _fakeAppsJsonResponsePage1 = JsonConvert.SerializeObject(new FakeAppsResponse(
+        internal static readonly string _fakeAppsJsonResponsePage1 = JsonSerializer.Serialize(new FakeAppsResponse(
             apiAddress: _fakeCfApiAddress,
             pageNum: 1,
             totalResults: 125,
             totalPages: 3,
             resultsPerPage: 50));
 
-        internal static readonly string _fakeAppsJsonResponsePage2 = JsonConvert.SerializeObject(new FakeAppsResponse(
+        internal static readonly string _fakeAppsJsonResponsePage2 = JsonSerializer.Serialize(new FakeAppsResponse(
             apiAddress: _fakeCfApiAddress,
             pageNum: 2,
             totalResults: 125,
             totalPages: 3,
             resultsPerPage: 50));
 
-        internal static readonly string _fakeAppsJsonResponsePage3 = JsonConvert.SerializeObject(new FakeAppsResponse(
+        internal static readonly string _fakeAppsJsonResponsePage3 = JsonSerializer.Serialize(new FakeAppsResponse(
             apiAddress: _fakeCfApiAddress,
             pageNum: 3,
             totalResults: 125,
             totalPages: 3,
             resultsPerPage: 50));
 
-        internal static readonly string _fakeBuildpacksJsonResponsePage1 = JsonConvert.SerializeObject(new FakeBuildpacksResponse(
+        internal static readonly string _fakeBuildpacksJsonResponsePage1 = JsonSerializer.Serialize(new FakeBuildpacksResponse(
             apiAddress: _fakeCfApiAddress,
             pageNum: 1,
             totalResults: 125,
             totalPages: 3,
             resultsPerPage: 50));
 
-        internal static readonly string _fakeBuildpacksJsonResponsePage2 = JsonConvert.SerializeObject(new FakeBuildpacksResponse(
+        internal static readonly string _fakeBuildpacksJsonResponsePage2 = JsonSerializer.Serialize(new FakeBuildpacksResponse(
             apiAddress: _fakeCfApiAddress,
             pageNum: 2,
             totalResults: 125,
             totalPages: 3,
             resultsPerPage: 50));
 
-        internal static readonly string _fakeBuildpacksJsonResponsePage3 = JsonConvert.SerializeObject(new FakeBuildpacksResponse(
+        internal static readonly string _fakeBuildpacksJsonResponsePage3 = JsonSerializer.Serialize(new FakeBuildpacksResponse(
             apiAddress: _fakeCfApiAddress,
             pageNum: 3,
             totalResults: 125,
             totalPages: 3,
             resultsPerPage: 50));
 
-        internal static readonly string _fakeStacksJsonResponsePage1 = JsonConvert.SerializeObject(new FakeStacksResponse(
+        internal static readonly string _fakeStacksJsonResponsePage1 = JsonSerializer.Serialize(new FakeStacksResponse(
             apiAddress: _fakeCfApiAddress,
             pageNum: 1,
             totalResults: 10,
             totalPages: 4,
             resultsPerPage: 3));
 
-        internal static readonly string _fakeStacksJsonResponsePage2 = JsonConvert.SerializeObject(new FakeStacksResponse(
+        internal static readonly string _fakeStacksJsonResponsePage2 = JsonSerializer.Serialize(new FakeStacksResponse(
             apiAddress: _fakeCfApiAddress,
             pageNum: 2,
             totalResults: 10,
             totalPages: 4,
             resultsPerPage: 3));
 
-        internal static readonly string _fakeStacksJsonResponsePage3 = JsonConvert.SerializeObject(new FakeStacksResponse(
+        internal static readonly string _fakeStacksJsonResponsePage3 = JsonSerializer.Serialize(new FakeStacksResponse(
             apiAddress: _fakeCfApiAddress,
             pageNum: 3,
             totalResults: 10,
             totalPages: 4,
             resultsPerPage: 3));
 
-        internal static readonly string _fakeStacksJsonResponsePage4 = JsonConvert.SerializeObject(new FakeStacksResponse(
+        internal static readonly string _fakeStacksJsonResponsePage4 = JsonSerializer.Serialize(new FakeStacksResponse(
             apiAddress: _fakeCfApiAddress,
             pageNum: 4,
             totalResults: 10,
             totalPages: 4,
             resultsPerPage: 3));
 
-        internal static readonly string _fakeRoutesJsonResponsePage1 = JsonConvert.SerializeObject(new FakeRoutesResponse(
+        internal static readonly string _fakeRoutesJsonResponsePage1 = JsonSerializer.Serialize(new FakeRoutesResponse(
             apiAddress: _fakeCfApiAddress,
             pageNum: 1,
             totalResults: 125,
             totalPages: 3,
             resultsPerPage: 50));
 
-        internal static readonly string _fakeRoutesJsonResponsePage2 = JsonConvert.SerializeObject(new FakeRoutesResponse(
+        internal static readonly string _fakeRoutesJsonResponsePage2 = JsonSerializer.Serialize(new FakeRoutesResponse(
             apiAddress: _fakeCfApiAddress,
             pageNum: 2,
             totalResults: 125,
             totalPages: 3,
             resultsPerPage: 50));
 
-        internal static readonly string _fakeRoutesJsonResponsePage3 = JsonConvert.SerializeObject(new FakeRoutesResponse(
+        internal static readonly string _fakeRoutesJsonResponsePage3 = JsonSerializer.Serialize(new FakeRoutesResponse(
             apiAddress: _fakeCfApiAddress,
             pageNum: 3,
             totalResults: 125,

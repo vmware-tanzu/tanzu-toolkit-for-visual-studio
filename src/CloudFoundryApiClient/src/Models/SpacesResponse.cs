@@ -1,22 +1,22 @@
-﻿using System;
-using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace Tanzu.Toolkit.CloudFoundryApiClient.Models.SpacesResponse
 {
     public class SpacesResponse
     {
-        [JsonProperty("pagination")]
+        [JsonPropertyName("pagination")]
         public Pagination Pagination { get; set; }
 
-        [JsonProperty("resources")]
+        [JsonPropertyName("resources")]
         public Space[] Spaces { get; set; }
     }
 
     public class Space
     {
-        [JsonProperty("guid")]
+        [JsonPropertyName("guid")]
         public string Guid { get; set; }
-        [JsonProperty("name")]
+
+        [JsonPropertyName("name")]
         public string Name { get; set; }
     }
 }
