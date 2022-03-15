@@ -20,7 +20,7 @@
 	<!--This header contains the command ids for the menus provided by the shell. -->
 	<Extern href="vsshlids.h" />
   
-  <Include href="KnownImageIds.vsct"/>
+  <Include href="KnownImageIds.vsct" />
 
 	<!--The Commands section is where commands, menus, and menu groups are defined.
       This section uses a Guid to identify the package that provides the command defined inside it. -->
@@ -44,7 +44,7 @@
         <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_EXTENSIONS" />
       </Group>
       <Group guid="guidTanzuToolkitPackageCmdSet" id="ToolkitExtSubmenuGroup" priority="0x0600">
-        <Parent guid="guidTanzuToolkitPackageCmdSet" id="TanzuToolkitMenu"/>
+        <Parent guid="guidTanzuToolkitPackageCmdSet" id="TanzuToolkitMenu" />
       </Group>
     </Groups>
 
@@ -92,6 +92,12 @@
           <ButtonText>Diagnostic Logs</ButtonText>
         </Strings>
       </Button>
+      <Button guid="guidTanzuToolkitPackageCmdSet" id="RequestFeedbackCommandId" priority="0x0100" type="Button">
+        <Parent guid="guidTanzuToolkitPackageCmdSet" id="ToolkitExtSubmenuGroup" />
+        <Strings>
+          <ButtonText>Send Feedback</ButtonText>
+        </Strings>
+      </Button>
     </Buttons>
 
 		<!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
@@ -103,6 +109,7 @@
             must be the actual index (1-based) of the bitmap inside the bitmap strip. -->
 			<Bitmap guid="guidImages" href="Resources\tanzu16.png" usedList="bmpPic1" />
 			<Bitmap guid="guidImages1" href="Resources\tanzu_deploy_16x.png" usedList="bmpPic1" />
+      <Bitmap guid="guidImages3" href="Resources\RequestFeedbackCommand.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough" />
     </Bitmaps>
   </Commands>
 
@@ -115,14 +122,15 @@
       
 			<IDSymbol name="TasExplorerCommandId" value="256" />
 			<IDSymbol name="PushToCloudFoundryCommandId" value="257" />
-      <IDSymbol name="OpenLogsCommandId" value="259"/>
+            <IDSymbol name="OpenLogsCommandId" value="259" />
+			<IDSymbol name="RequestFeedbackCommandId" value="258" />
 
       <IDSymbol name="ProjContextMenuGroup" value="1001" />
       <IDSymbol name="ViewMenuGroup" value="1002" />
-      <IDSymbol name="ExtensionsMenuGroup" value="4128"/>
+      <IDSymbol name="ExtensionsMenuGroup" value="4128" />
       
-      <IDSymbol name="TanzuToolkitMenu" value="0x1022"/>
-      <IDSymbol name="ToolkitExtSubmenuGroup" value="0x1023"/>
+      <IDSymbol name="TanzuToolkitMenu" value="0x1022" />
+      <IDSymbol name="ToolkitExtSubmenuGroup" value="0x1023" />
     </GuidSymbol>
 
     <GuidSymbol name="guidSHLMainMenu" value="{d309f791-903f-11d0-9efc-00a0c911004f}">
@@ -138,6 +146,15 @@
 		</GuidSymbol>
     <GuidSymbol name="guidImages2" value="{2251cfc3-e92f-40ce-b730-98cf8bd7042d}">
       <IDSymbol name="bmpPic1" value="1" />
+    </GuidSymbol>
+  
+    <GuidSymbol value="{f85a3fef-01b9-4ece-8668-16d0af1a59ae}" name="guidImages3">
+      <IDSymbol name="bmpPic1" value="1" />
+      <IDSymbol name="bmpPic2" value="2" />
+      <IDSymbol name="bmpPicSearch" value="3" />
+      <IDSymbol name="bmpPicX" value="4" />
+      <IDSymbol name="bmpPicArrows" value="5" />
+      <IDSymbol name="bmpPicStrikethrough" value="6" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>
