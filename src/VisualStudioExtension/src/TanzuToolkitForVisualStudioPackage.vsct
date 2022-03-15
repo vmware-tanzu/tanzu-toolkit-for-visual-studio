@@ -109,7 +109,6 @@
             must be the actual index (1-based) of the bitmap inside the bitmap strip. -->
 			<Bitmap guid="guidImages" href="Resources\tanzu16.png" usedList="bmpPic1" />
 			<Bitmap guid="guidImages1" href="Resources\tanzu_deploy_16x.png" usedList="bmpPic1" />
-      <Bitmap guid="guidImages3" href="Resources\RequestFeedbackCommand.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough" />
     </Bitmaps>
   </Commands>
 
@@ -146,15 +145,6 @@
 		</GuidSymbol>
     <GuidSymbol name="guidImages2" value="{2251cfc3-e92f-40ce-b730-98cf8bd7042d}">
       <IDSymbol name="bmpPic1" value="1" />
-    </GuidSymbol>
-  
-    <GuidSymbol value="{f85a3fef-01b9-4ece-8668-16d0af1a59ae}" name="guidImages3">
-      <IDSymbol name="bmpPic1" value="1" />
-      <IDSymbol name="bmpPic2" value="2" />
-      <IDSymbol name="bmpPicSearch" value="3" />
-      <IDSymbol name="bmpPicX" value="4" />
-      <IDSymbol name="bmpPicArrows" value="5" />
-      <IDSymbol name="bmpPicStrikethrough" value="6" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>
