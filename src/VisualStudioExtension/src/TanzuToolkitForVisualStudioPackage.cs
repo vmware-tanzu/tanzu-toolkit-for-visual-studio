@@ -20,8 +20,8 @@ using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
 using Tanzu.Toolkit.ViewModels;
-using Tanzu.Toolkit.ViewModels.SsoDialog;
 using Tanzu.Toolkit.ViewModels.AppDeletionConfirmation;
+using Tanzu.Toolkit.ViewModels.SsoDialog;
 using Tanzu.Toolkit.VisualStudio.Commands;
 using Tanzu.Toolkit.VisualStudio.Services;
 using Tanzu.Toolkit.VisualStudio.Views;
@@ -79,10 +79,10 @@ namespace Tanzu.Toolkit.VisualStudio
                 Task.Run(() => TanzuTasExplorerCommand.InitializeAsync(this)),
                 Task.Run(() => PushToCloudFoundryCommand.InitializeAsync(this, _serviceProvider)),
                 Task.Run(() => OpenLogsCommand.InitializeAsync(this, _serviceProvider)),
+                Task.Run(() => RequestFeedbackCommand.InitializeAsync(this)),
             };
 
             await Task.WhenAll(commandInitializations);
-            await Tanzu.Toolkit.VisualStudio.RequestFeedbackCommand.InitializeAsync(this);
         }
 
         protected override object GetService(Type serviceType)
