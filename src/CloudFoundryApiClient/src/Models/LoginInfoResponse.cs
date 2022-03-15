@@ -32,8 +32,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Models
          * A list of name/value pairs of configured prompts that the UAA will login a user.
          * Format for each prompt is [type, display name] where type can be 'text' or 'password'
          */
-        [DataMember(Name = "prompts")]
         public Dictionary<string, string[]> Prompts { get; set; }
-        
     }
 }
