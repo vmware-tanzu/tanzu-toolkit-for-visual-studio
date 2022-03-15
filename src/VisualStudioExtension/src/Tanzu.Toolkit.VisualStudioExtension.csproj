@@ -81,6 +81,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Commands\RequestFeedbackCommand.cs" />
     <Compile Include="Services\DataPersistenceService.cs" />
     <Compile Include="Services\IThemeService.cs" />
     <Compile Include="Services\IToolWindowService.cs" />
@@ -199,6 +200,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
+    <Content Include="Resources\RequestFeedbackCommand.png" />
     <Content Include="Resources\tanzu_deploy_16x.png" />
     <Content Include="Resources\DeployApp.png" />
     <Content Include="Resources\tanzu16.png" />

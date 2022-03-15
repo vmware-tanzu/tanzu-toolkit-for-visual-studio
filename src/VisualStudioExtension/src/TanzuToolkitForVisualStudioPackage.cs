@@ -82,6 +82,7 @@ namespace Tanzu.Toolkit.VisualStudio
             };
 
             await Task.WhenAll(commandInitializations);
+            await Tanzu.Toolkit.VisualStudio.RequestFeedbackCommand.InitializeAsync(this);
         }
 
         protected override object GetService(Type serviceType)
