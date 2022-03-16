@@ -20,6 +20,7 @@ using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.ViewModels;
+using Tanzu.Toolkit.ViewModels.RemoteDebug;
 using Tanzu.Toolkit.VisualStudio.Services;
 using Tanzu.Toolkit.VisualStudio.Views;
 using BuildEvents = EnvDTE.BuildEvents;
@@ -146,166 +147,171 @@ namespace Tanzu.Toolkit.VisualStudio
                 var solutionDirectory = Path.GetDirectoryName(dte.Solution.FullName);
                 var targetFrameworkMoniker = project.Properties.Item("TargetFrameworkMoniker").Value.ToString();
 
-                // try looking for existing app
-                var loggedIn = _tasExplorer.TasConnection != null;
-                if (!loggedIn)
-                {
-                    _dialogService.ShowDialog(typeof(LoginViewModel).Name);
-                }
-                if (_tasExplorer.TasConnection == null)
-                {
-                    VsShellUtilities.ShowMessageBox(
-                        package,
-                        "Must be logged in to remotely debug apps on Tanzu Application Service.",
-                        title,
-                        OLEMSGICON.OLEMSGICON_CRITICAL,
-                        OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                        OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
-                    return;
-                }
-                _cfClient.ConfigureForCf(_tasExplorer.TasConnection.CloudFoundryInstance);
+                var remoteDebugViewModel = new RemoteDebugViewModel(projectName, _services) as IRemoteDebugViewModel;
+                var view = new RemoteDebugView(remoteDebugViewModel, new ThemeService());
+                var _ = remoteDebugViewModel.InitiateRemoteDebuggingAsync();
+                view.ShowDialog();
 
-                var appsResult = await _cfClient.ListAllAppsAsync();
-                if (!appsResult.Succeeded)
-                {
-                    var msg = $"Unable to initiate remote debugging; something went wrong while querying apps on {_tasExplorer.TasConnection.CloudFoundryInstance.InstanceName}.\nIt may help to try disconnecting & signing into TAS again; if this issue persists, please contact tas-vs-extension@vmware.com";
-                    _logger.Error(msg);
-                    VsShellUtilities.ShowMessageBox(
-                        package,
-                        msg,
-                        title,
-                        OLEMSGICON.OLEMSGICON_CRITICAL,
-                        OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                        OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
-                    return;
-                }
+                //// try looking for existing app
+                //var loggedIn = _tasExplorer.TasConnection != null;
+                //if (!loggedIn)
+                //{
+                //    _dialogService.ShowDialog(typeof(LoginViewModel).Name);
+                //}
+                //if (_tasExplorer.TasConnection == null)
+                //{
+                //    VsShellUtilities.ShowMessageBox(
+                //        package,
+                //        "Must be logged in to remotely debug apps on Tanzu Application Service.",
+                //        title,
+                //        OLEMSGICON.OLEMSGICON_CRITICAL,
+                //        OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                //        OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                //    return;
+                //}
+                //_cfClient.ConfigureForCf(_tasExplorer.TasConnection.CloudFoundryInstance);
 
-                var matchingApp = appsResult.Content.FirstOrDefault(app => app.AppName == project.Name);
-                if (matchingApp == null)
-                {
-                    var msg = $"No app found with a name matching \"{project.Name}\"";
-                    _logger.Information(msg);
-                    var proceedWithRemoteDebugging = VsShellUtilities.PromptYesNo(
-                        $"Would you like to publish a remotely-debuggable version of {projectName}?",
-                        title: msg,
-                        OLEMSGICON.OLEMSGICON_QUERY,
-                        VsUiShell);
+                //var appsResult = await _cfClient.ListAllAppsAsync();
+                //if (!appsResult.Succeeded)
+                //{
+                //    var msg = $"Unable to initiate remote debugging; something went wrong while querying apps on {_tasExplorer.TasConnection.CloudFoundryInstance.InstanceName}.\nIt may help to try disconnecting & signing into TAS again; if this issue persists, please contact tas-vs-extension@vmware.com";
+                //    _logger.Error(msg);
+                //    VsShellUtilities.ShowMessageBox(
+                //        package,
+                //        msg,
+                //        title,
+                //        OLEMSGICON.OLEMSGICON_CRITICAL,
+                //        OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                //        OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                //    return;
+                //}
 
-                    if (!proceedWithRemoteDebugging)
-                    {
-                        return;
-                    }
+                //var matchingApp = appsResult.Content.FirstOrDefault(app => app.AppName == project.Name);
+                //if (matchingApp == null)
+                //{
+                //    var msg = $"No app found with a name matching \"{project.Name}\"";
+                //    _logger.Information(msg);
+                //    var proceedWithRemoteDebugging = VsShellUtilities.PromptYesNo(
+                //        $"Would you like to publish a remotely-debuggable version of {projectName}?",
+                //        title: msg,
+                //        OLEMSGICON.OLEMSGICON_QUERY,
+                //        VsUiShell);
 
-                    var deploymentDialog = new DeploymentDialogViewModel(_services, projectName, projectDirectory, targetFrameworkMoniker)
-                    {
-                        AppName = projectName,
-                        PublishBeforePushing = true,
-                        ConfigureForRemoteDebugging = true,
-                        Expanded = true,
-                    };
-                    var view = new DeploymentDialogView(deploymentDialog, new ThemeService());
-                    view.ShowDialog();
+                //    if (!proceedWithRemoteDebugging)
+                //    {
+                //        return;
+                //    }
 
-                    // * Actions to take after modal closes:
-                    if (deploymentDialog.DeploymentInProgress) // don't open tool window if modal was closed via "X" button
-                    {
-                        //    deploymentDialog.OutputView.Show();
+                //    var deploymentDialog = new DeploymentDialogViewModel(_services, projectName, projectDirectory, targetFrameworkMoniker)
+                //    {
+                //        AppName = projectName,
+                //        PublishBeforePushing = true,
+                //        ConfigureForRemoteDebugging = true,
+                //        Expanded = true,
+                //    };
+                //    var view = new DeploymentDialogView(deploymentDialog, new ThemeService());
+                //    view.ShowDialog();
 
-                        //    var startTime = DateTime.Now;
-                        //    while (deploymentDialog.DeploymentInProgress)
-                        //    {
-                        //        var elapsedMinutes = (int)DateTime.Now.Subtract(startTime).TotalMinutes;
-                        //        if (elapsedMinutes > 10)
-                        //        {
-                        //            return;
-                        //        }
-                        //    }
-                        await deploymentDialog.DeploymentTask;
-                    }
-                }
+                //    // * Actions to take after modal closes:
+                //    if (deploymentDialog.DeploymentInProgress) // don't open tool window if modal was closed via "X" button
+                //    {
+                //        //    deploymentDialog.OutputView.Show();
 
-                // check to see if vsdbg is installed in app container
-                var sshOutput = string.Empty;
-                var sshOutputCallback = new Action<string>((string output) => { sshOutput += output; });
-                var sshResult = await _cfCliService.RunCfCommandAsync($"ssh {matchingApp.AppName} -c \"ls /home/vcap/app | grep vsdbg\"");
-                var debugAgentInstalled = sshResult.Succeeded && sshOutput != null && sshOutput.Contains("vsdbg");
-                if (!debugAgentInstalled)
-                {
-                    var vsdbgVersion = "latest";
-                    var vsdbgLocation = "/home/vcap/app/vsdbg";
-                    var vsdbgInstallationResult = await _cfCliService.RunCfCommandAsync($"ssh {matchingApp.AppName} -c \"curl - sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v {vsdbgVersion} -l {vsdbgLocation}\"");
-                    if (!vsdbgInstallationResult.Succeeded)
-                    {
-                        var msg = $"Failed to install debugging agent into remote app \"{matchingApp.AppName}\"";
-                        _logger.Error(msg);
-                        VsShellUtilities.ShowMessageBox(
-                            package,
-                            msg,
-                            title,
-                            OLEMSGICON.OLEMSGICON_CRITICAL,
-                            OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                            OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
-                        return;
-                    }
-                }
+                //        //    var startTime = DateTime.Now;
+                //        //    while (deploymentDialog.DeploymentInProgress)
+                //        //    {
+                //        //        var elapsedMinutes = (int)DateTime.Now.Subtract(startTime).TotalMinutes;
+                //        //        if (elapsedMinutes > 10)
+                //        //        {
+                //        //            return;
+                //        //        }
+                //        //    }
+                //        await deploymentDialog.DeploymentTask;
+                //    }
+                //}
 
-                // look for launch.json file
-                var searchPaths = new string[] { solutionDirectory, projectDirectory };
-                ProjectLaunchFilePath = null;
-                foreach (var path in searchPaths)
-                {
-                    var dir = Path.GetDirectoryName(path);
-                    var fullPath = Path.Combine(dir, LaunchFileName);
-                    if (File.Exists(fullPath))
-                    {
-                        ProjectLaunchFilePath = fullPath;
-                        break;
-                    }
-                }
+                //// check to see if vsdbg is installed in app container
+                //var sshOutput = string.Empty;
+                //var sshOutputCallback = new Action<string>((string output) => { sshOutput += output; });
+                //var sshResult = await _cfCliService.RunCfCommandAsync($"ssh {matchingApp.AppName} -c \"ls /home/vcap/app | grep vsdbg\"");
+                //var debugAgentInstalled = sshResult.Succeeded && sshOutput != null && sshOutput.Contains("vsdbg");
+                //if (!debugAgentInstalled)
+                //{
+                //    var vsdbgVersion = "latest";
+                //    var vsdbgLocation = "/home/vcap/app/vsdbg";
+                //    var vsdbgInstallationResult = await _cfCliService.RunCfCommandAsync($"ssh {matchingApp.AppName} -c \"curl - sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v {vsdbgVersion} -l {vsdbgLocation}\"");
+                //    if (!vsdbgInstallationResult.Succeeded)
+                //    {
+                //        var msg = $"Failed to install debugging agent into remote app \"{matchingApp.AppName}\"";
+                //        _logger.Error(msg);
+                //        VsShellUtilities.ShowMessageBox(
+                //            package,
+                //            msg,
+                //            title,
+                //            OLEMSGICON.OLEMSGICON_CRITICAL,
+                //            OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                //            OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                //        return;
+                //    }
+                //}
 
-                if (ProjectLaunchFilePath == null)
-                {
-                    var launchFileConfig = new RemoteDebugLaunchConfig
-                    {
-                        version = "0.2.0",
-                        adapter = "cf",
-                        adapterArgs = "ssh remote-debug -c \"/tmp/lifecycle/shell /home/vcap/app 'bash -c \\\"/home/vcap/app/vsdbg/vsdbg --interpreter=vscode\\\"'\"",
-                        languageMappings = new Languagemappings
-                        {
-                            CSharp = new CSharp
-                            {
-                                languageId = "3F5162F8-07C6-11D3-9053-00C04FA302A1",
-                                extensions = new string[] { "*" },
-                            },
-                        },
-                        exceptionCategoryMappings = new Exceptioncategorymappings
-                        {
-                            CLR = "449EC4CC-30D2-4032-9256-EE18EB41B62B",
-                            MDA = "6ECE07A9-0EDE-45C4-8296-818D8FC401D4",
-                        },
-                        configurations = new Configuration[]
-                        {
-                            new Configuration
-                            {
-                                name = ".NET Core Launch",
-                                type = "coreclr",
-                                processName = projectName,
-                                request = "attach",
-                                justMyCode = false,
-                                cwd = "/home/vcap/app",
-                                logging = new Logging
-                                {
-                                    engineLogging = true,
-                                },
-                            },
-                        }
-                    };
-                    var newLaunchFileContents = JsonSerializer.Serialize(launchFileConfig);
-                    ProjectLaunchFilePath = Path.Combine(projectDirectory, LaunchFileName);
-                    _fileService.WriteTextToFile(ProjectLaunchFilePath, newLaunchFileContents);
-                }
+                //// look for launch.json file
+                //var searchPaths = new string[] { solutionDirectory, projectDirectory };
+                //ProjectLaunchFilePath = null;
+                //foreach (var path in searchPaths)
+                //{
+                //    var dir = Path.GetDirectoryName(path);
+                //    var fullPath = Path.Combine(dir, LaunchFileName);
+                //    if (File.Exists(fullPath))
+                //    {
+                //        ProjectLaunchFilePath = fullPath;
+                //        break;
+                //    }
+                //}
 
-                dte.ExecuteCommand("DebugAdapterHost.Launch", $"/LaunchJson:\"{ProjectLaunchFilePath}\"");
+                //if (ProjectLaunchFilePath == null)
+                //{
+                //    var launchFileConfig = new RemoteDebugLaunchConfig
+                //    {
+                //        version = "0.2.0",
+                //        adapter = "cf",
+                //        adapterArgs = "ssh remote-debug -c \"/tmp/lifecycle/shell /home/vcap/app 'bash -c \\\"/home/vcap/app/vsdbg/vsdbg --interpreter=vscode\\\"'\"",
+                //        languageMappings = new Languagemappings
+                //        {
+                //            CSharp = new CSharp
+                //            {
+                //                languageId = "3F5162F8-07C6-11D3-9053-00C04FA302A1",
+                //                extensions = new string[] { "*" },
+                //            },
+                //        },
+                //        exceptionCategoryMappings = new Exceptioncategorymappings
+                //        {
+                //            CLR = "449EC4CC-30D2-4032-9256-EE18EB41B62B",
+                //            MDA = "6ECE07A9-0EDE-45C4-8296-818D8FC401D4",
+                //        },
+                //        configurations = new Configuration[]
+                //        {
+                //            new Configuration
+                //            {
+                //                name = ".NET Core Launch",
+                //                type = "coreclr",
+                //                processName = projectName,
+                //                request = "attach",
+                //                justMyCode = false,
+                //                cwd = "/home/vcap/app",
+                //                logging = new Logging
+                //                {
+                //                    engineLogging = true,
+                //                },
+                //            },
+                //        }
+                //    };
+                //    var newLaunchFileContents = JsonSerializer.Serialize(launchFileConfig);
+                //    ProjectLaunchFilePath = Path.Combine(projectDirectory, LaunchFileName);
+                //    _fileService.WriteTextToFile(ProjectLaunchFilePath, newLaunchFileContents);
+                //}
+
+                //dte.ExecuteCommand("DebugAdapterHost.Launch", $"/LaunchJson:\"{ProjectLaunchFilePath}\"");
             }
             catch (Exception ex)
             {

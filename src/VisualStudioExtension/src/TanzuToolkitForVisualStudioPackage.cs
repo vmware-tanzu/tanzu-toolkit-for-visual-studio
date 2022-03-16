@@ -22,6 +22,7 @@ using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.ViewModels.AppDeletionConfirmation;
+using Tanzu.Toolkit.ViewModels.RemoteDebug;
 using Tanzu.Toolkit.VisualStudio.Commands;
 using Tanzu.Toolkit.VisualStudio.Services;
 using Tanzu.Toolkit.VisualStudio.Views;
@@ -154,6 +155,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<ITasExplorerViewModel, TasExplorerViewModel>();
             services.AddSingleton<ILoginViewModel, LoginViewModel>();
             services.AddTransient<IDeploymentDialogViewModel, DeploymentDialogViewModel>();
+            services.AddTransient<IRemoteDebugViewModel, RemoteDebugViewModel>();
             services.AddTransient<ILoginViewModel, LoginViewModel>();
             services.AddSingleton<IAppDeletionConfirmationViewModel, AppDeletionConfirmationViewModel>();
 
@@ -162,6 +164,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<ILoginView, LoginView>();
             services.AddTransient<ITasExplorerView, TasExplorerView>();
             services.AddTransient<IDeploymentDialogView, DeploymentDialogView>();
+            services.AddTransient<IRemoteDebugView, RemoteDebugView>();
             services.AddTransient<IAppDeletionConfirmationView, AppDeletionConfirmationView>();
         }
     }
