@@ -4,6 +4,7 @@ using System;
 using System.ComponentModel;
 using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.Dialog;
+using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.Threading;
@@ -26,6 +27,7 @@ namespace Tanzu.Toolkit.ViewModels
             UiDispatcherService = services.GetRequiredService<IUiDispatcherService>();
             FileService = services.GetRequiredService<IFileService>();
             SerializationService = services.GetRequiredService<ISerializationService>();
+            ErrorService = services.GetRequiredService<IErrorDialog>();
             var logSvc = services.GetRequiredService<ILoggingService>();
             Logger = logSvc.Logger;
         }
@@ -41,6 +43,8 @@ namespace Tanzu.Toolkit.ViewModels
         public IDialogService DialogService { get; }
 
         public IFileService FileService { get; }
+
+        public IErrorDialog ErrorService { get; }
 
         public ILogger Logger { get; }
         
