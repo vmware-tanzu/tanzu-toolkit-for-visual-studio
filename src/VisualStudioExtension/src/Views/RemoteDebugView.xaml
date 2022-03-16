@@ -1,0 +1,59 @@
+﻿<ui:DialogWindow
+    x:Class="Tanzu.Toolkit.VisualStudio.RemoteDebugView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:toolkit="clr-namespace:Community.VisualStudio.Toolkit;assembly=Community.VisualStudio.Toolkit"
+    xmlns:ui="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
+    xmlns:converters="clr-namespace:Tanzu.Toolkit.VisualStudio.Views.Converters"
+    mc:Ignorable="d"
+    d:DesignHeight="450" d:DesignWidth="800"
+    Title="Remote Debug"
+    Name="RemoteDebugViewElement"
+    Icon="Resources/tas_16px.png"
+    BorderThickness="0"
+    ResizeMode="NoResize"
+    WindowStyle="ToolWindow"
+    WindowStartupLocation="CenterScreen"
+    SizeToContent="WidthAndHeight"
+    MinHeight="200"
+    MinWidth="400"
+    toolkit:Themes.UseVsTheme="True"
+    HasDialogFrame="False">
+
+    <ui:DialogWindow.Resources>
+        <converters:StringNullVisibilityConverter x:Key="StringVisibilityConverter" ReserveSpace="False"/>
+    </ui:DialogWindow.Resources>
+
+    <DockPanel Margin="16">
+
+        <StackPanel DockPanel.Dock="Top">
+            <TextBlock
+                Text="{Binding LoadingMessage}"
+                Visibility="{Binding LoadingMessage, Converter={StaticResource StringVisibilityConverter}}"/>
+            <TextBlock Text="{Binding DialogMessage}" TextWrapping="Wrap" MaxWidth="500" HorizontalAlignment="Left"/>
+            <Separator Margin="8" Visibility="Hidden"/>
+            <ListView
+                ItemsSource="{Binding AccessibleApps}"
+                SelectedItem="{Binding AppToDebug}"
+                MaxHeight="150"
+                VerticalContentAlignment="Top"  
+                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                ScrollViewer.CanContentScroll="True"
+                Visibility="{Binding ShowAppList}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding AppName}"/>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <Separator Margin="4" Visibility="Hidden"/>
+        </StackPanel>
+
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Right">
+            <Button Content="Confirm App to Debug" Margin="4" Command="{Binding ElementName=RemoteDebugViewElement, Path=ConfirmAppToDebugCommand}"/>
+            <Button Content="Push New App" Margin="4"/>
+        </StackPanel>
+    </DockPanel>
+</ui:DialogWindow>
