@@ -25,12 +25,18 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private bool _showAppList;
         private string _loadingMessage;
         private CloudFoundryApp _appToDebug;
+        private bool _debugExistingApp;
+        private bool _pushNewAppToDebug;
+        private string _option1Text;
+        private string _option2Text;
 
         public RemoteDebugViewModel(string expectedAppName, IServiceProvider services) : base(services)
         {
             _expectedAppName = expectedAppName;
             _tasExplorer = services.GetRequiredService<ITasExplorerViewModel>();
             _cfCliService = services.GetRequiredService<ICfCliService>();
+            Option1Text = $"Push new version of \"{_expectedAppName}\" to debug";
+            Option2Text = $"Select existing app to debug";
         }
 
         public List<CloudFoundryApp> AccessibleApps
@@ -54,6 +60,42 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             }
         }
 
+        public bool DebugExistingApp
+        {
+            get => _debugExistingApp;
+            set
+            {
+                if (value)
+                {
+                    _debugExistingApp = true;
+                    PushNewAppToDebug = false;
+                }
+                else if (PushNewAppToDebug)
+                {
+                    _debugExistingApp = false;
+                }
+                RaisePropertyChangedEvent("DebugExistingApp");
+            }
+        }
+
+        public bool PushNewAppToDebug
+        {
+            get => _pushNewAppToDebug;
+            set
+            {
+                if (value)
+                {
+                    _pushNewAppToDebug = true;
+                    DebugExistingApp = false;
+                }
+                else if (DebugExistingApp)
+                {
+                    _pushNewAppToDebug = false;
+                }
+                RaisePropertyChangedEvent("PushNewAppToDebug");
+            }
+        }
+
         public string DialogMessage
         {
             get => _dialogMessage;
@@ -62,6 +104,26 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             {
                 _dialogMessage = value;
                 RaisePropertyChangedEvent("DialogMessage");
+            }
+        }
+
+        public string Option1Text
+        {
+            get => _option1Text;
+            set
+            {
+                _option1Text = value;
+                RaisePropertyChangedEvent("Option1Text");
+            }
+        }
+
+        public string Option2Text
+        {
+            get => _option2Text;
+            set
+            {
+                _option2Text = value;
+                RaisePropertyChangedEvent("Option2Text");
             }
         }
 
@@ -89,6 +151,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         public async Task InitiateRemoteDebuggingAsync()
         {
+            AppToDebug = null;
             EnsureIsLoggedIn();
             _cfClient = _tasExplorer.TasConnection.CfClient;
 
@@ -109,8 +172,8 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 Close();
                 return;
             }
-            var matchingApp = AccessibleApps.FirstOrDefault(app => app.AppName == _expectedAppName);
-            if (matchingApp == null)
+            AppToDebug = AccessibleApps.FirstOrDefault(app => app.AppName == _expectedAppName);
+            if (AppToDebug == null)
             {
                 PromptAppSelection();
             }
@@ -132,20 +195,25 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         public void PromptAppSelection()
         {
-            DialogMessage = $"No app found with a name matching \"{_expectedAppName}\"\n" +
-                $"If this app exists under a different name, please select it from the list below.\n" +
-                $"Alternatively, you can choose push a new version of \"{_expectedAppName}\" with remote debugging configured.";
+            DialogMessage = $"No app found with a name matching \"{_expectedAppName}\"";
             ShowAppList = true;
         }
 
         public void ConfirmAppToDebug(object arg = null)
         {
-            throw new NotImplementedException();
+            if (arg is CloudFoundryApp selectedApp)
+            {
+                AppToDebug = selectedApp;
+            }
+            else if (arg == null)
+            {
+
+            }
         }
 
         public bool CanConfirmAppToDebug(object arg = null)
         {
-            return AppToDebug != null;
+            return PushNewAppToDebug || DebugExistingApp;
         }
 
         public void PushNewAppWithDebugConfiguration()
