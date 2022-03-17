@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using System;
 using System.Threading.Tasks;
+using Tanzu.Toolkit.Services.CommandProcess;
 using Tanzu.Toolkit.Services.Logging;
 
 namespace Tanzu.Toolkit.Services.DotnetCli
@@ -8,11 +9,13 @@ namespace Tanzu.Toolkit.Services.DotnetCli
     public class DotnetCliService : IDotnetCliService
     {
         private const string _dotnetCliExecutable = "C:\\Program Files\\dotnet\\dotnet.exe";
+        private readonly ICommandProcessService _commandProcessService;
         private ILogger _logger;
 
-        public DotnetCliService(ILoggingService loggingService)
+        public DotnetCliService(ICommandProcessService commandProcessService, ILoggingService loggingService)
         {
             _logger = loggingService.Logger;
+            _commandProcessService = commandProcessService;
         }
 
         /// <summary>
@@ -25,21 +28,14 @@ namespace Tanzu.Toolkit.Services.DotnetCli
         /// <param name="outputDirName"></param>
         /// 
         /// <returns></returns>
-        public async Task<bool> PublishProjectForRemoteDebuggingAsync(string projectDir, string targetFrameworkMoniker, string runtimeIdentifier, string configuration, string outputDirName)
+        public async Task<bool> PublishProjectForRemoteDebuggingAsync(string projectDir, string targetFrameworkMoniker, string runtimeIdentifier, string configuration, string outputDirName, Action<string> StdOutCallback = null, Action<string> StdErrCallback = null)
         {
             try
             {
-                using (var publishProcess = new System.Diagnostics.Process())
-                {
-                    publishProcess.StartInfo.WorkingDirectory = projectDir;
-                    publishProcess.StartInfo.FileName = _dotnetCliExecutable;
-                    publishProcess.StartInfo.Arguments = $"publish -f {targetFrameworkMoniker} -r {runtimeIdentifier} -c {configuration} -o {outputDirName} --self-contained";
-                    publishProcess.StartInfo.UseShellExecute = false;
-                    publishProcess.StartInfo.CreateNoWindow = true;
-                    publishProcess.Start();
-                    await Task.Run(() => publishProcess.WaitForExit());
-                }
-                return true;
+                var publishArgs = $"publish -f {targetFrameworkMoniker} -r {runtimeIdentifier} -c {configuration} -o {outputDirName} --self-contained";
+                var publishProcess = _commandProcessService.StartProcess(_dotnetCliExecutable, publishArgs, projectDir, stdOutDelegate: StdOutCallback, stdErrDelegate: StdErrCallback);
+                await Task.Run(() => publishProcess.WaitForExit());
+                return publishProcess.ExitCode == 0;
             }
             catch (Exception ex)
             {
