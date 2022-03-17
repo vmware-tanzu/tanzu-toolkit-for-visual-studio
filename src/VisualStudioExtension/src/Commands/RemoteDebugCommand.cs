@@ -149,86 +149,17 @@ namespace Tanzu.Toolkit.VisualStudio
 
                 var remoteDebugViewModel = new RemoteDebugViewModel(projectName, projectDirectory, targetFrameworkMoniker, _services) as IRemoteDebugViewModel;
                 var view = new RemoteDebugView(remoteDebugViewModel, new ThemeService());
-                var _ = remoteDebugViewModel.InitiateRemoteDebuggingAsync();
-                view.ShowDialog();
 
-                //// try looking for existing app
-                //var loggedIn = _tasExplorer.TasConnection != null;
-                //if (!loggedIn)
-                //{
-                //    _dialogService.ShowDialog(typeof(LoginViewModel).Name);
-                //}
-                //if (_tasExplorer.TasConnection == null)
-                //{
-                //    VsShellUtilities.ShowMessageBox(
-                //        package,
-                //        "Must be logged in to remotely debug apps on Tanzu Application Service.",
-                //        title,
-                //        OLEMSGICON.OLEMSGICON_CRITICAL,
-                //        OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                //        OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
-                //    return;
-                //}
-                //_cfClient.ConfigureForCf(_tasExplorer.TasConnection.CloudFoundryInstance);
+                if (_tasExplorer == null || _tasExplorer.TasConnection == null)
+                {
+                    _dialogService.ShowDialog(typeof(LoginViewModel).Name);
+                }
 
-                //var appsResult = await _cfClient.ListAllAppsAsync();
-                //if (!appsResult.Succeeded)
-                //{
-                //    var msg = $"Unable to initiate remote debugging; something went wrong while querying apps on {_tasExplorer.TasConnection.CloudFoundryInstance.InstanceName}.\nIt may help to try disconnecting & signing into TAS again; if this issue persists, please contact tas-vs-extension@vmware.com";
-                //    _logger.Error(msg);
-                //    VsShellUtilities.ShowMessageBox(
-                //        package,
-                //        msg,
-                //        title,
-                //        OLEMSGICON.OLEMSGICON_CRITICAL,
-                //        OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                //        OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
-                //    return;
-                //}
-
-                //var matchingApp = appsResult.Content.FirstOrDefault(app => app.AppName == project.Name);
-                //if (matchingApp == null)
-                //{
-                //    var msg = $"No app found with a name matching \"{project.Name}\"";
-                //    _logger.Information(msg);
-                //    var proceedWithRemoteDebugging = VsShellUtilities.PromptYesNo(
-                //        $"Would you like to publish a remotely-debuggable version of {projectName}?",
-                //        title: msg,
-                //        OLEMSGICON.OLEMSGICON_QUERY,
-                //        VsUiShell);
-
-                //    if (!proceedWithRemoteDebugging)
-                //    {
-                //        return;
-                //    }
-
-                //    var deploymentDialog = new DeploymentDialogViewModel(_services, projectName, projectDirectory, targetFrameworkMoniker)
-                //    {
-                //        AppName = projectName,
-                //        PublishBeforePushing = true,
-                //        ConfigureForRemoteDebugging = true,
-                //        Expanded = true,
-                //    };
-                //    var view = new DeploymentDialogView(deploymentDialog, new ThemeService());
-                //    view.ShowDialog();
-
-                //    // * Actions to take after modal closes:
-                //    if (deploymentDialog.DeploymentInProgress) // don't open tool window if modal was closed via "X" button
-                //    {
-                //        //    deploymentDialog.OutputView.Show();
-
-                //        //    var startTime = DateTime.Now;
-                //        //    while (deploymentDialog.DeploymentInProgress)
-                //        //    {
-                //        //        var elapsedMinutes = (int)DateTime.Now.Subtract(startTime).TotalMinutes;
-                //        //        if (elapsedMinutes > 10)
-                //        //        {
-                //        //            return;
-                //        //        }
-                //        //    }
-                //        await deploymentDialog.DeploymentTask;
-                //    }
-                //}
+                if (_tasExplorer != null && _tasExplorer.TasConnection != null)
+                {
+                    var _ = remoteDebugViewModel.InitiateRemoteDebuggingAsync();
+                    view.Show();
+                }
 
                 //// check to see if vsdbg is installed in app container
                 //var sshOutput = string.Empty;
