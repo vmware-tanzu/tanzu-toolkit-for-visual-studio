@@ -32,6 +32,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private List<CloudFoundrySpace> _spaceOptions;
         private CloudFoundryOrganization _selectedOrg;
         private CloudFoundrySpace _selectedSpace;
+        private CloudFoundryApp _selectedApp;
 
         public RemoteDebugViewModel(string expectedAppName, string pathToProjectRootDir, string targetFrameworkMoniker, IServiceProvider services) : base(services)
         {
@@ -67,6 +68,16 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             {
                 _appToDebug = value;
                 RaisePropertyChangedEvent("AppToDebug");
+            }
+        }
+        
+        public CloudFoundryApp SelectedApp
+        {
+            get => _selectedApp;
+            set
+            {
+                _selectedApp = value;
+                RaisePropertyChangedEvent("SelectedApp");
             }
         }
 
@@ -233,6 +244,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             }
             else if (DebugExistingApp)
             {
+                AppToDebug = SelectedApp;
             }
             else
             {
