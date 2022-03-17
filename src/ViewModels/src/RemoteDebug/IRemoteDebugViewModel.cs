@@ -11,11 +11,11 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         string LoadingMessage { get; set; }
         bool ShowAppList { get; set; }
 
-        bool CanConfirmAppToDebug(object arg = null);
+        bool CanProceedToDebug(object arg = null);
         bool CheckForLaunchFile();
         bool CheckForRemoteDebugAgent();
         void Close();
-        void ConfirmAppToDebug(object arg = null);
+        void ProceedToDebug(object arg = null);
         void CreateLaunchFile();
         Task InitiateRemoteDebuggingAsync();
         void InstallRemoteDebugAgent();
