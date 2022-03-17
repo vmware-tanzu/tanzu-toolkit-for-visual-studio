@@ -120,7 +120,7 @@
 
             <ListView
                 ItemsSource="{Binding AccessibleApps}"
-                SelectedItem="{Binding AppToDebug}"
+                SelectedItem="{Binding SelectedApp}"
                 MaxHeight="150"
                 VerticalContentAlignment="Top"  
                 ScrollViewer.VerticalScrollBarVisibility="Auto"
