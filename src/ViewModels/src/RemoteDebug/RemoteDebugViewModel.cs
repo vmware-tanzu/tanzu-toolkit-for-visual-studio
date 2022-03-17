@@ -299,7 +299,13 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                     }
             };
 
-            await _cfClient.DeployAppAsync(appConfig, pathToPublishDir, _tasExplorer.TasConnection.CloudFoundryInstance, SelectedOrg, SelectedSpace, null, null);
+            var pushResult = await _cfClient.DeployAppAsync(appConfig, pathToPublishDir, _tasExplorer.TasConnection.CloudFoundryInstance, SelectedOrg, SelectedSpace, null, null);
+            if (!pushResult.Succeeded)
+            {
+                var msg = $"Failed to push app '{_expectedAppName}'; {pushResult.Explanation}";
+                Logger.Error(msg);
+                ErrorService.DisplayErrorDialog("Unable to initiate remote debugging", msg);
+            }
         }
 
         public bool CheckForRemoteDebugAgent()
