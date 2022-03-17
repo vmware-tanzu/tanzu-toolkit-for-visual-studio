@@ -34,7 +34,7 @@
             <TextBlock Text="{Binding LoadingMessage}"/>
         </StackPanel>
 
-        <StackPanel DockPanel.Dock="Top" Visibility="{Binding AppToDebug, Converter={StaticResource NullVisibilityConverter}}">
+        <StackPanel DockPanel.Dock="Top" Visibility="{Binding LoadingMessage, Converter={StaticResource StringVisibilityConverterReversed}}">
             <TextBlock Text="{Binding DialogMessage}" TextWrapping="Wrap" MaxWidth="500" HorizontalAlignment="Left"/>
 
             <Separator Margin="8" Visibility="Hidden"/>
