@@ -42,12 +42,25 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             _tasExplorer = services.GetRequiredService<ITasExplorerViewModel>();
             _cfCliService = services.GetRequiredService<ICfCliService>();
             _dotnetCliService = services.GetRequiredService<IDotnetCliService>();
+
+            if (_tasExplorer == null || _tasExplorer.TasConnection == null)
+            {
+                DialogService.ShowDialog(typeof(LoginViewModel).Name);
+            }
+            if (_tasExplorer == null || _tasExplorer.TasConnection == null)
+            {
+                Close();
+                return;
+            }
+
             _cfClient = _tasExplorer.TasConnection.CfClient;
 
             LoadingMessage = "Identifying remote app to debug...";
             Option1Text = $"Push new version of \"{_expectedAppName}\" to debug";
             Option2Text = $"Select existing app to debug";
             AppToDebug = null;
+
+            var _ = InitiateRemoteDebuggingAsync();
         }
 
         // Properties //
@@ -215,6 +228,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 AppToDebug = AccessibleApps.FirstOrDefault(app => app.AppName == _expectedAppName);
                 if (AppToDebug == null)
                 {
+                    LoadingMessage = null;
                     await UpdateCfOrgOptions();
                     DialogMessage = $"No app found with a name matching \"{_expectedAppName}\"";
                 }
@@ -256,11 +270,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         }
 
         public void CreateLaunchFile()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void InitiateRemoteDebugging()
         {
             throw new NotImplementedException();
         }
