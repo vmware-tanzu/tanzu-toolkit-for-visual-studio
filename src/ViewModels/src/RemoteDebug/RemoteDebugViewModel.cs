@@ -2,12 +2,14 @@
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.Dialog;
+using Tanzu.Toolkit.Services.DotnetCli;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
@@ -19,22 +21,31 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private readonly ITasExplorerViewModel _tasExplorer;
         private ICloudFoundryService _cfClient;
         private readonly ICfCliService _cfCliService;
+        private readonly IDotnetCliService _dotnetCliService;
         private readonly string _expectedAppName;
+        private readonly string _pathToProjectRootDir;
+        private readonly string _targetFrameworkMoniker;
         private List<CloudFoundryApp> _accessibleApps;
         private string _dialogMessage;
-        private bool _showAppList;
         private string _loadingMessage;
         private CloudFoundryApp _appToDebug;
         private bool _debugExistingApp;
         private bool _pushNewAppToDebug;
         private string _option1Text;
         private string _option2Text;
+        private List<CloudFoundryOrganization> _orgOptions;
+        private List<CloudFoundrySpace> _spaceOptions;
+        private CloudFoundryOrganization _selectedOrg;
+        private CloudFoundrySpace _selectedSpace;
 
-        public RemoteDebugViewModel(string expectedAppName, IServiceProvider services) : base(services)
+        public RemoteDebugViewModel(string expectedAppName, string pathToProjectRootDir, string targetFrameworkMoniker, IServiceProvider services) : base(services)
         {
             _expectedAppName = expectedAppName;
+            _pathToProjectRootDir = pathToProjectRootDir;
+            _targetFrameworkMoniker = targetFrameworkMoniker;
             _tasExplorer = services.GetRequiredService<ITasExplorerViewModel>();
             _cfCliService = services.GetRequiredService<ICfCliService>();
+            _dotnetCliService = services.GetRequiredService<IDotnetCliService>();
             Option1Text = $"Push new version of \"{_expectedAppName}\" to debug";
             Option2Text = $"Select existing app to debug";
         }
@@ -127,14 +138,46 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             }
         }
 
-        public bool ShowAppList
+        public List<CloudFoundryOrganization> OrgOptions
         {
-            get => _showAppList;
+            get => _orgOptions;
 
             set
             {
-                _showAppList = value;
-                RaisePropertyChangedEvent("ShowAppList");
+                _orgOptions = value;
+                RaisePropertyChangedEvent("OrgOptions");
+            }
+        }
+
+        public List<CloudFoundrySpace> SpaceOptions
+        {
+            get => _spaceOptions;
+
+            set
+            {
+                _spaceOptions = value;
+                RaisePropertyChangedEvent("SpaceOptions");
+            }
+        }
+        
+        public CloudFoundryOrganization SelectedOrg
+        {
+            get => _selectedOrg;
+            set
+            {
+                _selectedOrg = value;
+                var _ = UpdateCfSpaceOptions();
+                RaisePropertyChangedEvent("SelectedOrg");
+            }
+        }
+
+        public CloudFoundrySpace SelectedSpace
+        {
+            get => _selectedSpace;
+            set
+            {
+                _selectedSpace = value;
+                RaisePropertyChangedEvent("SelectedSpace");
             }
         }
 
@@ -175,6 +218,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             AppToDebug = AccessibleApps.FirstOrDefault(app => app.AppName == _expectedAppName);
             if (AppToDebug == null)
             {
+                await UpdateCfOrgOptions();
                 PromptAppSelection();
             }
         }
@@ -196,24 +240,56 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         public void PromptAppSelection()
         {
             DialogMessage = $"No app found with a name matching \"{_expectedAppName}\"";
-            ShowAppList = true;
         }
 
-        public void ProceedToDebug(object arg = null)
+        public async Task ProceedToDebug(object arg = null)
         {
-            if (arg is CloudFoundryApp selectedApp)
+            if (PushNewAppToDebug)
             {
-                AppToDebug = selectedApp;
+                var runtimeIdentifier = "linux-x64";
+                var publishConfiguration = "Debug";
+                var publishDirName = "publish";
+
+                var publishSucceeded = await _dotnetCliService.PublishProjectForRemoteDebuggingAsync(_pathToProjectRootDir, _targetFrameworkMoniker, runtimeIdentifier, publishConfiguration, publishDirName);
+                if (!publishSucceeded)
+                {
+                    Logger.Error("Unable to intitate remote debugging; project failed to publish");
+                    ErrorService.DisplayErrorDialog("Unable to intitate remote debugging", "Project failed to publish");
+                    return;
+                }
+
+                var pathToPublishDir = Path.Combine(_pathToProjectRootDir, publishDirName);
+                var appConfig = new AppManifest
+                {
+                    Applications = new List<AppConfig>
+                    {
+                        new AppConfig
+                        {
+                            Name = _expectedAppName,
+                            Path = pathToPublishDir,
+                        }
+                    }
+                };
+
+                //_cfClient.DeployAppAsync(appConfig, pathToPublishDir, _tasExplorer.TasConnection.CloudFoundryInstance);
             }
-            else if (arg == null)
+            else if (DebugExistingApp)
             {
 
+            }
+            else
+            {
+                var msg = "Encountered unexpected debug strategy";
+                Logger.Error(msg);
+                ErrorService.DisplayErrorDialog(string.Empty, msg);
+                Close();
             }
         }
 
         public bool CanProceedToDebug(object arg = null)
         {
-            return PushNewAppToDebug || (DebugExistingApp && AppToDebug != null);
+            return (PushNewAppToDebug && SelectedOrg != null && SelectedSpace != null)
+                || (DebugExistingApp && AppToDebug != null);
         }
 
         public void PushNewAppWithDebugConfiguration()
@@ -244,6 +320,50 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         public void InitiateRemoteDebugging()
         {
             throw new NotImplementedException();
+        }
+
+
+        public async Task UpdateCfOrgOptions()
+        {
+            if (_tasExplorer.TasConnection == null)
+            {
+                OrgOptions = new List<CloudFoundryOrganization>();
+            }
+            else
+            {
+                var orgsResponse = await _tasExplorer.TasConnection.CfClient.GetOrgsForCfInstanceAsync(_tasExplorer.TasConnection.CloudFoundryInstance);
+                if (orgsResponse.Succeeded)
+                {
+                    OrgOptions = orgsResponse.Content;
+                }
+                else
+                {
+                    Logger.Error("RemoteDebugViewModel failed to get orgs. {OrgsResponse}", orgsResponse);
+                    ErrorService.DisplayErrorDialog("Unable to retrieve orgs", orgsResponse.Explanation);
+                }
+            }
+        }
+
+        public async Task UpdateCfSpaceOptions()
+        {
+            if (SelectedOrg == null || _tasExplorer.TasConnection == null)
+            {
+                SpaceOptions = new List<CloudFoundrySpace>();
+            }
+            else
+            {
+                var spacesResponse = await _tasExplorer.TasConnection.CfClient.GetSpacesForOrgAsync(SelectedOrg);
+
+                if (spacesResponse.Succeeded)
+                {
+                    SpaceOptions = spacesResponse.Content;
+                }
+                else
+                {
+                    Logger.Error("RemoteDebugViewModel failed to get spaces. {SpacesResponse}", spacesResponse);
+                    ErrorService.DisplayErrorDialog("Unable to retrieve spaces", spacesResponse.Explanation);
+                }
+            }
         }
 
         public void Close()

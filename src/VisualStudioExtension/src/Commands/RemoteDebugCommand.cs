@@ -147,7 +147,7 @@ namespace Tanzu.Toolkit.VisualStudio
                 var solutionDirectory = Path.GetDirectoryName(dte.Solution.FullName);
                 var targetFrameworkMoniker = project.Properties.Item("TargetFrameworkMoniker").Value.ToString();
 
-                var remoteDebugViewModel = new RemoteDebugViewModel(projectName, _services) as IRemoteDebugViewModel;
+                var remoteDebugViewModel = new RemoteDebugViewModel(projectName, projectDirectory, targetFrameworkMoniker, _services) as IRemoteDebugViewModel;
                 var view = new RemoteDebugView(remoteDebugViewModel, new ThemeService());
                 var _ = remoteDebugViewModel.InitiateRemoteDebuggingAsync();
                 view.ShowDialog();
