@@ -199,7 +199,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             ShowAppList = true;
         }
 
-        public void ConfirmAppToDebug(object arg = null)
+        public void ProceedToDebug(object arg = null)
         {
             if (arg is CloudFoundryApp selectedApp)
             {
@@ -211,7 +211,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             }
         }
 
-        public bool CanConfirmAppToDebug(object arg = null)
+        public bool CanProceedToDebug(object arg = null)
         {
             return PushNewAppToDebug || (DebugExistingApp && AppToDebug != null);
         }

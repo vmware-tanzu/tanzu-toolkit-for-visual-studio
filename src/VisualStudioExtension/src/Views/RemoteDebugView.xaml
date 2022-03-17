@@ -60,7 +60,7 @@
             </ListView>
 
             <Separator Margin="4" Visibility="Hidden"/>
-            <Button Content="OK" Margin="4" Command="{Binding ElementName=RemoteDebugViewElement, Path=ConfirmAppToDebugCommand}" HorizontalAlignment="Right"/>
+            <Button Content="OK" Margin="4" Command="{Binding ElementName=RemoteDebugViewElement, Path=ProceedToDebugCommand}" HorizontalAlignment="Right"/>
         </StackPanel>
     </DockPanel>
 </ui:DialogWindow>
