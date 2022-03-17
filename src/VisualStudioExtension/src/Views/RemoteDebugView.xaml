@@ -23,20 +23,18 @@
 
     <ui:DialogWindow.Resources>
         <converters:VisibilityConverter x:Key="VisibilityConverter" ReserveSpace="False"/>
+        <converters:NullVisibilityConverter x:Key="NullVisibilityConverter" ReserveSpace="False" Reversed="True"/>
         <converters:StringNullVisibilityConverter x:Key="StringVisibilityConverter" ReserveSpace="False" Reversed="False"/>
         <converters:StringNullVisibilityConverter x:Key="StringVisibilityConverterReversed" ReserveSpace="False" Reversed="True"/>
     </ui:DialogWindow.Resources>
 
     <DockPanel Margin="16">
-        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
-            <local:Spinner
-                Visibility="{Binding LoadingMessage, Converter={StaticResource StringVisibilityConverter}}"/>
-            <TextBlock
-                Text="{Binding LoadingMessage}"
-                Visibility="{Binding LoadingMessage, Converter={StaticResource StringVisibilityConverter}}"/>
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Visibility="{Binding LoadingMessage, Converter={StaticResource StringVisibilityConverter}}">
+            <local:Spinner/>
+            <TextBlock Text="{Binding LoadingMessage}"/>
         </StackPanel>
 
-        <StackPanel DockPanel.Dock="Top" Visibility="{Binding LoadingMessage, Converter={StaticResource StringVisibilityConverterReversed}}">
+        <StackPanel DockPanel.Dock="Top" Visibility="{Binding AppToDebug, Converter={StaticResource NullVisibilityConverter}}">
             <TextBlock Text="{Binding DialogMessage}" TextWrapping="Wrap" MaxWidth="500" HorizontalAlignment="Left"/>
 
             <Separator Margin="8" Visibility="Hidden"/>
