@@ -83,6 +83,7 @@
   <ItemGroup>
     <Compile Include="Commands\RequestFeedbackCommand.cs" />
     <Compile Include="Commands\RemoteDebugCommand.cs" />
+    <Compile Include="Views\Converters\NullVisibilityConverter.cs" />
     <Compile Include="Views\Converters\StringNullVisibilityConverter.cs" />
     <Compile Include="Views\IRemoteDebugView.cs" />
     <Compile Include="Views\RemoteDebugView.xaml.cs">
