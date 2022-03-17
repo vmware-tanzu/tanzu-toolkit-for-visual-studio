@@ -44,6 +44,82 @@
             <CheckBox IsChecked="{Binding DebugExistingApp, Mode=TwoWay}" Content="{Binding Option2Text}"/>
 
             <Separator Margin="8" Visibility="Hidden"/>
+            <Grid Visibility="{Binding PushNewAppToDebug, Converter={StaticResource VisibilityConverter}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="Choose push location:" Grid.Row="0"/>
+
+                <ComboBox
+                    x:Name="OrgField"
+                    Grid.Row="1"
+                    ItemsSource="{Binding OrgOptions}" 
+                    SelectedItem="{Binding SelectedOrg}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding OrgName}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <TextBlock
+                    Grid.Row="1"
+                    Margin="8"
+                    IsHitTestVisible="False"
+                    Text="Select Org&lt;Required&gt;"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Left"
+                    Foreground="DarkGray">
+
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Text, ElementName=OrgField}" Value="">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <ComboBox
+                    x:Name="SpaceField"
+                    Grid.Row="2"
+                    ItemsSource="{Binding SpaceOptions}" 
+                    SelectedItem="{Binding SelectedSpace}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding SpaceName}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <TextBlock
+                    Grid.Row="2"
+                    Margin="8"
+                    IsHitTestVisible="False"
+                    Text="Select Space&lt;Required&gt;"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Left"
+                    Foreground="DarkGray">
+
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Text, ElementName=SpaceField}" Value="">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
+
             <ListView
                 ItemsSource="{Binding AccessibleApps}"
                 SelectedItem="{Binding AppToDebug}"
