@@ -248,7 +248,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         public void Close()
         {
-            DialogService.CloseDialogByName(nameof(LoginViewModel));
+            DialogService.CloseDialogByName(nameof(RemoteDebugViewModel));
         }
     }
 }
