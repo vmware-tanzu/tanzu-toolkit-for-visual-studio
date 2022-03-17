@@ -13,13 +13,13 @@ namespace Tanzu.Toolkit.VisualStudio
     /// </summary>
     public partial class RemoteDebugView : DialogWindow, IRemoteDebugView
     {
-        public ICommand ProceedToDebugCommand { get; }
+        public ICommand ResolveMissingAppCommand { get; }
 
         public RemoteDebugView(IRemoteDebugViewModel viewModel, IThemeService themeService)
         {
             themeService.SetTheme(this);
             DataContext = viewModel;
-            ProceedToDebugCommand = new DelegatingCommand(viewModel.ProceedToDebug, viewModel.CanProceedToDebug);
+            ResolveMissingAppCommand = new DelegatingCommand(viewModel.ResolveMissingApp, viewModel.CanResolveMissingApp);
             MouseDown += Window_MouseDown;
             InitializeComponent();
         }

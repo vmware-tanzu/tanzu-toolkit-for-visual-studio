@@ -64,7 +64,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             Option2Text = $"Select existing app to debug";
             AppToDebug = null;
 
-            var _ = IdentifyAppToDebugAsync();
+            var _ = BeginRemoteDebuggingAsync();
         }
 
         // Properties //
@@ -227,7 +227,13 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         // Methods //
 
-        public async Task IdentifyAppToDebugAsync()
+        public async Task BeginRemoteDebuggingAsync()
+        {
+            await EstablishAppToDebugAsync();
+            await EnsureDebuggingAgentInstalledOnRemoteAsync();
+        }
+
+        public async Task EstablishAppToDebugAsync()
         {
             LoadingMessage = "Identifying remote app to debug...";
             await PopulateAccessibleAppsAsync();
@@ -238,10 +244,9 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 DialogMessage = $"No app found with a name matching \"{_expectedAppName}\"";
                 LoadingMessage = null;
             }
-            CheckForRemoteDebugAgent();
         }
 
-        public void ProceedToDebug(object arg = null)
+        public void ResolveMissingApp(object arg = null)
         {
             if (PushNewAppToDebug)
             {
@@ -262,12 +267,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             }
         }
 
-        public bool CheckForRemoteDebugAgent()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void InstallRemoteDebugAgent()
+        public async Task EnsureDebuggingAgentInstalledOnRemoteAsync()
         {
             throw new NotImplementedException();
         }
@@ -379,7 +379,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 return;
             }
 
-            var _ = IdentifyAppToDebugAsync();
+            var _ = EstablishAppToDebugAsync();
             ViewOpener?.Invoke(); // reopen remote debug dialog
         }
 
@@ -402,7 +402,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         // Predicates //
 
-        public bool CanProceedToDebug(object arg = null)
+        public bool CanResolveMissingApp(object arg = null)
         {
             return (PushNewAppToDebug && SelectedOrg != null && SelectedSpace != null)
                 || (DebugExistingApp && AppToDebug != null);
