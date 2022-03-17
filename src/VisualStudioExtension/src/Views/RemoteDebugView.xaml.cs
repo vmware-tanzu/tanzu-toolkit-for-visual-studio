@@ -18,7 +18,7 @@ namespace Tanzu.Toolkit.VisualStudio
         {
             themeService.SetTheme(this);
             DataContext = viewModel;
-            ProceedToDebugCommand = new DelegatingCommand(viewModel.ProceedToDebug, viewModel.CanProceedToDebug);
+            ProceedToDebugCommand = new AsyncDelegatingCommand(viewModel.ProceedToDebug, viewModel.CanProceedToDebug);
             MouseDown += Window_MouseDown;
             InitializeComponent();
         }

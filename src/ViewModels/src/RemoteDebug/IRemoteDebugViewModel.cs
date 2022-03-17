@@ -9,13 +9,11 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         List<CloudFoundryApp> AccessibleApps { get; set; }
         string DialogMessage { get; set; }
         string LoadingMessage { get; set; }
-        bool ShowAppList { get; set; }
-
         bool CanProceedToDebug(object arg = null);
         bool CheckForLaunchFile();
         bool CheckForRemoteDebugAgent();
         void Close();
-        void ProceedToDebug(object arg = null);
+        Task ProceedToDebug(object arg = null);
         void CreateLaunchFile();
         Task InitiateRemoteDebuggingAsync();
         void InstallRemoteDebugAgent();
