@@ -17,6 +17,5 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         void CreateLaunchFile();
         Task InitiateRemoteDebuggingAsync();
         void InstallRemoteDebugAgent();
-        void PushNewAppWithDebugConfiguration();
     }
 }

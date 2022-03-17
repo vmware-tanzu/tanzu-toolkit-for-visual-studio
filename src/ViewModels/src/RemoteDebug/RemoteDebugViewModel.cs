@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,11 +7,7 @@ using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CloudFoundry;
-using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.DotnetCli;
-using Tanzu.Toolkit.Services.ErrorDialog;
-using Tanzu.Toolkit.Services.File;
-using Tanzu.Toolkit.Services.Logging;
 
 namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 {
@@ -51,6 +46,8 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             Option1Text = $"Push new version of \"{_expectedAppName}\" to debug";
             Option2Text = $"Select existing app to debug";
         }
+
+        // Properties //
 
         public List<CloudFoundryApp> AccessibleApps
         {
@@ -194,6 +191,8 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             }
         }
 
+        // Methods //
+
         public async Task InitiateRemoteDebuggingAsync()
         {
             if (_tasExplorer != null && _tasExplorer.TasConnection != null)
@@ -230,36 +229,10 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         {
             if (PushNewAppToDebug)
             {
-                var runtimeIdentifier = "linux-x64";
-                var publishConfiguration = "Debug";
-                var publishDirName = "publish";
-
-                var publishSucceeded = await _dotnetCliService.PublishProjectForRemoteDebuggingAsync(_pathToProjectRootDir, _targetFrameworkMoniker, runtimeIdentifier, publishConfiguration, publishDirName);
-                if (!publishSucceeded)
-                {
-                    Logger.Error("Unable to intitate remote debugging; project failed to publish");
-                    ErrorService.DisplayErrorDialog("Unable to intitate remote debugging", "Project failed to publish");
-                    return;
-                }
-
-                var pathToPublishDir = Path.Combine(_pathToProjectRootDir, publishDirName);
-                var appConfig = new AppManifest
-                {
-                    Applications = new List<AppConfig>
-                    {
-                        new AppConfig
-                        {
-                            Name = _expectedAppName,
-                            Path = pathToPublishDir,
-                        }
-                    }
-                };
-
-                //_cfClient.DeployAppAsync(appConfig, pathToPublishDir, _tasExplorer.TasConnection.CloudFoundryInstance);
+                await PushNewAppWithDebugConfiguration();   
             }
             else if (DebugExistingApp)
             {
-
             }
             else
             {
@@ -270,15 +243,51 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             }
         }
 
-        public bool CanProceedToDebug(object arg = null)
+        private async Task PushNewAppWithDebugConfiguration()
         {
-            return (PushNewAppToDebug && SelectedOrg != null && SelectedSpace != null)
-                || (DebugExistingApp && AppToDebug != null);
-        }
+            var runtimeIdentifier = "linux-x64";
+            var publishConfiguration = "Debug";
+            var publishDirName = "publish";
 
-        public void PushNewAppWithDebugConfiguration()
-        {
-            throw new NotImplementedException();
+            var errorString = string.Empty;
+            var outputString = string.Empty;
+            void AccumulateStdOut(string s)
+            {
+                outputString += s;
+            };
+            void AccumulateStdErr(string s)
+            {
+                errorString += s;
+            };
+
+            var publishSucceeded = await _dotnetCliService.PublishProjectForRemoteDebuggingAsync(_pathToProjectRootDir, _targetFrameworkMoniker, runtimeIdentifier, publishConfiguration, publishDirName, StdOutCallback: AccumulateStdOut, StdErrCallback: AccumulateStdErr);
+            if (!string.IsNullOrEmpty(errorString))
+            {
+                var msg = $"Project failed to publish with error: \"{errorString}\"";
+                Logger.Error("Unable to intitate remote debugging; project failed to publish, {PublishError}", errorString);
+                ErrorService.DisplayErrorDialog("Unable to intitate remote debugging", msg);
+            }
+            else if (!publishSucceeded)
+            {
+                Logger.Error("Unable to intitate remote debugging; project failed to publish. Publish command output: {PublishOutput}", outputString);
+                ErrorService.DisplayErrorDialog("Unable to intitate remote debugging", "Project failed to publish");
+                return;
+            }
+
+            var pathToPublishDir = Path.Combine(_pathToProjectRootDir, publishDirName);
+            var appConfig = new AppManifest
+            {
+                Applications = new List<AppConfig>
+                    {
+                        new AppConfig
+                        {
+                            Name = _expectedAppName,
+                            Path = pathToPublishDir,
+                        }
+                    }
+            };
+
+            await _cfClient.DeployAppAsync(appConfig, pathToPublishDir, _tasExplorer.TasConnection.CloudFoundryInstance, SelectedOrg, SelectedSpace, null, null);
         }
 
         public bool CheckForRemoteDebugAgent()
@@ -305,7 +314,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         {
             throw new NotImplementedException();
         }
-
 
         public async Task UpdateCfOrgOptions()
         {
@@ -353,6 +361,14 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         public void Close()
         {
             DialogService.CloseDialogByName(nameof(RemoteDebugViewModel));
+        }
+
+        // Predicates //
+
+        public bool CanProceedToDebug(object arg = null)
+        {
+            return (PushNewAppToDebug && SelectedOrg != null && SelectedSpace != null)
+                || (DebugExistingApp && AppToDebug != null);
         }
     }
 }
