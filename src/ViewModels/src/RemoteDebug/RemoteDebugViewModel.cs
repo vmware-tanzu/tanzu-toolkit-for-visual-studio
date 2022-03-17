@@ -46,6 +46,8 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             _tasExplorer = services.GetRequiredService<ITasExplorerViewModel>();
             _cfCliService = services.GetRequiredService<ICfCliService>();
             _dotnetCliService = services.GetRequiredService<IDotnetCliService>();
+
+            LoadingMessage = "Identifying remote app to debug...";
             Option1Text = $"Push new version of \"{_expectedAppName}\" to debug";
             Option2Text = $"Select existing app to debug";
         }
@@ -159,7 +161,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 RaisePropertyChangedEvent("SpaceOptions");
             }
         }
-        
+
         public CloudFoundryOrganization SelectedOrg
         {
             get => _selectedOrg;
@@ -194,32 +196,33 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         public async Task InitiateRemoteDebuggingAsync()
         {
-            AppToDebug = null;
-            EnsureIsLoggedIn();
-            _cfClient = _tasExplorer.TasConnection.CfClient;
+            if (_tasExplorer != null && _tasExplorer.TasConnection != null)
+            {
+                AppToDebug = null;
+                _cfClient = _tasExplorer.TasConnection.CfClient;
 
-            LoadingMessage = "Identifying remote app to debug...";
-            var appsResult = await _cfClient.ListAllAppsAsync();
-            LoadingMessage = null;
+                var appsResult = await _cfClient.ListAllAppsAsync();
+                LoadingMessage = null;
 
-            if (appsResult.Succeeded)
-            {
-                AccessibleApps = appsResult.Content;
-            }
-            else
-            {
-                var title = "Unable to initiate remote debugging";
-                var msg = $"Something went wrong while querying apps on {_tasExplorer.TasConnection.CloudFoundryInstance.InstanceName}.\nIt may help to try disconnecting & signing into TAS again; if this issue persists, please contact tas-vs-extension@vmware.com";
-                Logger.Error(title + "; " + msg);
-                ErrorService.DisplayErrorDialog(title, msg);
-                Close();
-                return;
-            }
-            AppToDebug = AccessibleApps.FirstOrDefault(app => app.AppName == _expectedAppName);
-            if (AppToDebug == null)
-            {
-                await UpdateCfOrgOptions();
-                PromptAppSelection();
+                if (appsResult.Succeeded)
+                {
+                    AccessibleApps = appsResult.Content;
+                }
+                else
+                {
+                    var title = "Unable to initiate remote debugging";
+                    var msg = $"Something went wrong while querying apps on {_tasExplorer.TasConnection.CloudFoundryInstance.InstanceName}.\nIt may help to try disconnecting & signing into TAS again; if this issue persists, please contact tas-vs-extension@vmware.com";
+                    Logger.Error(title + "; " + msg);
+                    ErrorService.DisplayErrorDialog(title, msg);
+                    Close();
+                    return;
+                }
+                AppToDebug = AccessibleApps.FirstOrDefault(app => app.AppName == _expectedAppName);
+                if (AppToDebug == null)
+                {
+                    await UpdateCfOrgOptions();
+                    PromptAppSelection();
+                }
             }
         }
 
@@ -234,6 +237,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             {
                 ErrorService.DisplayErrorDialog(string.Empty, "Must be logged in to remotely debug apps on Tanzu Application Service.");
                 Close();
+                return;
             }
         }
 
