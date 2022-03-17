@@ -221,29 +221,9 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 if (AppToDebug == null)
                 {
                     await UpdateCfOrgOptions();
-                    PromptAppSelection();
+                    DialogMessage = $"No app found with a name matching \"{_expectedAppName}\"";
                 }
             }
-        }
-
-        private void EnsureIsLoggedIn()
-        {
-            var loggedIn = _tasExplorer.TasConnection != null;
-            if (!loggedIn)
-            {
-                DialogService.ShowDialog(typeof(LoginViewModel).Name);
-            }
-            if (_tasExplorer.TasConnection == null)
-            {
-                ErrorService.DisplayErrorDialog(string.Empty, "Must be logged in to remotely debug apps on Tanzu Application Service.");
-                Close();
-                return;
-            }
-        }
-
-        public void PromptAppSelection()
-        {
-            DialogMessage = $"No app found with a name matching \"{_expectedAppName}\"";
         }
 
         public async Task ProceedToDebug(object arg = null)
