@@ -213,7 +213,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         public bool CanConfirmAppToDebug(object arg = null)
         {
-            return PushNewAppToDebug || DebugExistingApp;
+            return PushNewAppToDebug || (DebugExistingApp && AppToDebug != null);
         }
 
         public void PushNewAppWithDebugConfiguration()
