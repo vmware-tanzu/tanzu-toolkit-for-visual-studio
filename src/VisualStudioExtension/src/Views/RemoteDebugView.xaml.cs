@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Input;
 using Tanzu.Toolkit.ViewModels.RemoteDebug;
 using Tanzu.Toolkit.VisualStudio.Services;
+using Tanzu.Toolkit.VisualStudio.Views;
 using Tanzu.Toolkit.VisualStudio.Views.Commands;
 
 namespace Tanzu.Toolkit.VisualStudio
@@ -18,7 +19,7 @@ namespace Tanzu.Toolkit.VisualStudio
         {
             themeService.SetTheme(this);
             DataContext = viewModel;
-            ProceedToDebugCommand = new AsyncDelegatingCommand(viewModel.ProceedToDebug, viewModel.CanProceedToDebug);
+            ProceedToDebugCommand = new DelegatingCommand(viewModel.ProceedToDebug, viewModel.CanProceedToDebug);
             MouseDown += Window_MouseDown;
             InitializeComponent();
         }

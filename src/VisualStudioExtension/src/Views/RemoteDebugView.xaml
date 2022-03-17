@@ -54,6 +54,7 @@
                 <ComboBox
                     x:Name="OrgField"
                     Grid.Row="1"
+                    Margin="0,4"
                     ItemsSource="{Binding OrgOptions}" 
                     SelectedItem="{Binding SelectedOrg}">
                     <ComboBox.ItemTemplate>
