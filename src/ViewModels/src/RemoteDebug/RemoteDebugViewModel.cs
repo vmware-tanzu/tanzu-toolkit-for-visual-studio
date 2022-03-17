@@ -42,10 +42,12 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             _tasExplorer = services.GetRequiredService<ITasExplorerViewModel>();
             _cfCliService = services.GetRequiredService<ICfCliService>();
             _dotnetCliService = services.GetRequiredService<IDotnetCliService>();
+            _cfClient = _tasExplorer.TasConnection.CfClient;
 
             LoadingMessage = "Identifying remote app to debug...";
             Option1Text = $"Push new version of \"{_expectedAppName}\" to debug";
             Option2Text = $"Select existing app to debug";
+            AppToDebug = null;
         }
 
         // Properties //
@@ -70,7 +72,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 RaisePropertyChangedEvent("AppToDebug");
             }
         }
-        
+
         public CloudFoundryApp SelectedApp
         {
             get => _selectedApp;
@@ -208,25 +210,8 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         {
             if (_tasExplorer != null && _tasExplorer.TasConnection != null)
             {
-                AppToDebug = null;
-                _cfClient = _tasExplorer.TasConnection.CfClient;
+                await PopulateAccessibleAppsAsync();
 
-                var appsResult = await _cfClient.ListAllAppsAsync();
-                LoadingMessage = null;
-
-                if (appsResult.Succeeded)
-                {
-                    AccessibleApps = appsResult.Content;
-                }
-                else
-                {
-                    var title = "Unable to initiate remote debugging";
-                    var msg = $"Something went wrong while querying apps on {_tasExplorer.TasConnection.CloudFoundryInstance.InstanceName}.\nIt may help to try disconnecting & signing into TAS again; if this issue persists, please contact tas-vs-extension@vmware.com";
-                    Logger.Error(title + "; " + msg);
-                    ErrorService.DisplayErrorDialog(title, msg);
-                    Close();
-                    return;
-                }
                 AppToDebug = AccessibleApps.FirstOrDefault(app => app.AppName == _expectedAppName);
                 if (AppToDebug == null)
                 {
@@ -240,7 +225,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         {
             if (PushNewAppToDebug)
             {
-                await PushNewAppWithDebugConfiguration();   
+                await PushNewAppWithDebugConfiguration();
             }
             else if (DebugExistingApp)
             {
@@ -252,59 +237,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 Logger.Error(msg);
                 ErrorService.DisplayErrorDialog(string.Empty, msg);
                 Close();
-            }
-        }
-
-        private async Task PushNewAppWithDebugConfiguration()
-        {
-            var runtimeIdentifier = "linux-x64";
-            var publishConfiguration = "Debug";
-            var publishDirName = "publish";
-
-            var errorString = string.Empty;
-            var outputString = string.Empty;
-            void AccumulateStdOut(string s)
-            {
-                outputString += s;
-            };
-            void AccumulateStdErr(string s)
-            {
-                errorString += s;
-            };
-
-            var publishSucceeded = await _dotnetCliService.PublishProjectForRemoteDebuggingAsync(_pathToProjectRootDir, _targetFrameworkMoniker, runtimeIdentifier, publishConfiguration, publishDirName, StdOutCallback: AccumulateStdOut, StdErrCallback: AccumulateStdErr);
-            if (!string.IsNullOrEmpty(errorString))
-            {
-                var msg = $"Project failed to publish with error: \"{errorString}\"";
-                Logger.Error("Unable to intitate remote debugging; project failed to publish, {PublishError}", errorString);
-                ErrorService.DisplayErrorDialog("Unable to intitate remote debugging", msg);
-            }
-            else if (!publishSucceeded)
-            {
-                Logger.Error("Unable to intitate remote debugging; project failed to publish. Publish command output: {PublishOutput}", outputString);
-                ErrorService.DisplayErrorDialog("Unable to intitate remote debugging", "Project failed to publish");
-                return;
-            }
-
-            var pathToPublishDir = Path.Combine(_pathToProjectRootDir, publishDirName);
-            var appConfig = new AppManifest
-            {
-                Applications = new List<AppConfig>
-                    {
-                        new AppConfig
-                        {
-                            Name = _expectedAppName,
-                            Path = pathToPublishDir,
-                        }
-                    }
-            };
-
-            var pushResult = await _cfClient.DeployAppAsync(appConfig, pathToPublishDir, _tasExplorer.TasConnection.CloudFoundryInstance, SelectedOrg, SelectedSpace, null, null);
-            if (!pushResult.Succeeded)
-            {
-                var msg = $"Failed to push app '{_expectedAppName}'; {pushResult.Explanation}";
-                Logger.Error(msg);
-                ErrorService.DisplayErrorDialog("Unable to initiate remote debugging", msg);
             }
         }
 
@@ -379,6 +311,76 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         public void Close()
         {
             DialogService.CloseDialogByName(nameof(RemoteDebugViewModel));
+        }
+
+        private async Task PushNewAppWithDebugConfiguration()
+        {
+            var runtimeIdentifier = "linux-x64";
+            var publishConfiguration = "Debug";
+            var publishDirName = "publish";
+
+            var errorString = string.Empty;
+            var outputString = string.Empty;
+            void AccumulateStdOut(string s)
+            {
+                outputString += s;
+            };
+            void AccumulateStdErr(string s)
+            {
+                errorString += s;
+            };
+
+            var publishSucceeded = await _dotnetCliService.PublishProjectForRemoteDebuggingAsync(_pathToProjectRootDir, _targetFrameworkMoniker, runtimeIdentifier, publishConfiguration, publishDirName, StdOutCallback: AccumulateStdOut, StdErrCallback: AccumulateStdErr);
+            if (!string.IsNullOrEmpty(errorString))
+            {
+                var msg = $"Project failed to publish with error: \"{errorString}\"";
+                Logger.Error("Unable to intitate remote debugging; project failed to publish, {PublishError}", errorString);
+                ErrorService.DisplayErrorDialog("Unable to intitate remote debugging", msg);
+            }
+            else if (!publishSucceeded)
+            {
+                Logger.Error("Unable to intitate remote debugging; project failed to publish. Publish command output: {PublishOutput}", outputString);
+                ErrorService.DisplayErrorDialog("Unable to intitate remote debugging", "Project failed to publish");
+                return;
+            }
+
+            var pathToPublishDir = Path.Combine(_pathToProjectRootDir, publishDirName);
+            var appConfig = new AppManifest
+            {
+                Applications = new List<AppConfig>
+                    {
+                        new AppConfig
+                        {
+                            Name = _expectedAppName,
+                            Path = pathToPublishDir,
+                        }
+                    }
+            };
+
+            var pushResult = await _cfClient.DeployAppAsync(appConfig, pathToPublishDir, _tasExplorer.TasConnection.CloudFoundryInstance, SelectedOrg, SelectedSpace, null, null);
+            if (!pushResult.Succeeded)
+            {
+                var msg = $"Failed to push app '{_expectedAppName}'; {pushResult.Explanation}";
+                Logger.Error(msg);
+                ErrorService.DisplayErrorDialog("Unable to initiate remote debugging", msg);
+            }
+        }
+
+        private async Task PopulateAccessibleAppsAsync()
+        {
+            var appsResult = await _cfClient.ListAllAppsAsync();
+            if (appsResult.Succeeded)
+            {
+                AccessibleApps = appsResult.Content;
+            }
+            else
+            {
+                var title = "Unable to initiate remote debugging";
+                var msg = $"Something went wrong while querying apps on {_tasExplorer.TasConnection.CloudFoundryInstance.InstanceName}.\nIt may help to try disconnecting & signing into TAS again; if this issue persists, please contact tas-vs-extension@vmware.com";
+                Logger.Error(title + "; " + msg);
+                ErrorService.DisplayErrorDialog(title, msg);
+                Close();
+            }
         }
 
         // Predicates //
