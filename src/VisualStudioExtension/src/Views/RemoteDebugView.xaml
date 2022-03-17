@@ -33,6 +33,11 @@
                 Text="{Binding LoadingMessage}"
                 Visibility="{Binding LoadingMessage, Converter={StaticResource StringVisibilityConverter}}"/>
             <TextBlock Text="{Binding DialogMessage}" TextWrapping="Wrap" MaxWidth="500" HorizontalAlignment="Left"/>
+            
+            <Separator Margin="8" Visibility="Hidden"/>
+            <CheckBox IsChecked="{Binding PushNewAppToDebug, Mode=TwoWay}" Content="{Binding Option1Text}"/>
+            <CheckBox IsChecked="{Binding DebugExistingApp, Mode=TwoWay}" Content="{Binding Option2Text}"/>
+            
             <Separator Margin="8" Visibility="Hidden"/>
             <ListView
                 ItemsSource="{Binding AccessibleApps}"
@@ -41,7 +46,7 @@
                 VerticalContentAlignment="Top"  
                 ScrollViewer.VerticalScrollBarVisibility="Auto"
                 ScrollViewer.CanContentScroll="True"
-                Visibility="{Binding ShowAppList}">
+                Visibility="{Binding ShowAppList, Mode=TwoWay}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding AppName}"/>
@@ -53,7 +58,6 @@
 
         <StackPanel Orientation="Vertical" HorizontalAlignment="Right">
             <Button Content="Confirm App to Debug" Margin="4" Command="{Binding ElementName=RemoteDebugViewElement, Path=ConfirmAppToDebugCommand}"/>
-            <Button Content="Push New App" Margin="4"/>
         </StackPanel>
     </DockPanel>
 </ui:DialogWindow>
