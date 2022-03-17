@@ -6,6 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:toolkit="clr-namespace:Community.VisualStudio.Toolkit;assembly=Community.VisualStudio.Toolkit"
     xmlns:ui="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
+    xmlns:local="clr-namespace:Tanzu.Toolkit.VisualStudio.Views"
     xmlns:converters="clr-namespace:Tanzu.Toolkit.VisualStudio.Views.Converters"
     mc:Ignorable="d"
     d:DesignHeight="450" d:DesignWidth="800"
@@ -17,27 +18,31 @@
     WindowStyle="ToolWindow"
     WindowStartupLocation="CenterScreen"
     SizeToContent="WidthAndHeight"
-    MinHeight="200"
-    MinWidth="400"
     toolkit:Themes.UseVsTheme="True"
     HasDialogFrame="False">
 
     <ui:DialogWindow.Resources>
-        <converters:StringNullVisibilityConverter x:Key="StringVisibilityConverter" ReserveSpace="False"/>
+        <converters:VisibilityConverter x:Key="VisibilityConverter" ReserveSpace="False"/>
+        <converters:StringNullVisibilityConverter x:Key="StringVisibilityConverter" ReserveSpace="False" Reversed="False"/>
+        <converters:StringNullVisibilityConverter x:Key="StringVisibilityConverterReversed" ReserveSpace="False" Reversed="True"/>
     </ui:DialogWindow.Resources>
 
     <DockPanel Margin="16">
-
-        <StackPanel DockPanel.Dock="Top">
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
+            <local:Spinner
+                Visibility="{Binding LoadingMessage, Converter={StaticResource StringVisibilityConverter}}"/>
             <TextBlock
                 Text="{Binding LoadingMessage}"
                 Visibility="{Binding LoadingMessage, Converter={StaticResource StringVisibilityConverter}}"/>
+        </StackPanel>
+
+        <StackPanel DockPanel.Dock="Top" Visibility="{Binding LoadingMessage, Converter={StaticResource StringVisibilityConverterReversed}}">
             <TextBlock Text="{Binding DialogMessage}" TextWrapping="Wrap" MaxWidth="500" HorizontalAlignment="Left"/>
-            
+
             <Separator Margin="8" Visibility="Hidden"/>
             <CheckBox IsChecked="{Binding PushNewAppToDebug, Mode=TwoWay}" Content="{Binding Option1Text}"/>
             <CheckBox IsChecked="{Binding DebugExistingApp, Mode=TwoWay}" Content="{Binding Option2Text}"/>
-            
+
             <Separator Margin="8" Visibility="Hidden"/>
             <ListView
                 ItemsSource="{Binding AccessibleApps}"
@@ -46,18 +51,16 @@
                 VerticalContentAlignment="Top"  
                 ScrollViewer.VerticalScrollBarVisibility="Auto"
                 ScrollViewer.CanContentScroll="True"
-                Visibility="{Binding ShowAppList, Mode=TwoWay}">
+                Visibility="{Binding DebugExistingApp, Converter={StaticResource VisibilityConverter}}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding AppName}"/>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <Separator Margin="4" Visibility="Hidden"/>
-        </StackPanel>
 
-        <StackPanel Orientation="Vertical" HorizontalAlignment="Right">
-            <Button Content="Confirm App to Debug" Margin="4" Command="{Binding ElementName=RemoteDebugViewElement, Path=ConfirmAppToDebugCommand}"/>
+            <Separator Margin="4" Visibility="Hidden"/>
+            <Button Content="OK" Margin="4" Command="{Binding ElementName=RemoteDebugViewElement, Path=ConfirmAppToDebugCommand}" HorizontalAlignment="Right"/>
         </StackPanel>
     </DockPanel>
 </ui:DialogWindow>
