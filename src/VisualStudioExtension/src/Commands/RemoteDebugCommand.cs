@@ -149,7 +149,9 @@ namespace Tanzu.Toolkit.VisualStudio
 
                 var remoteDebugViewModel = new RemoteDebugViewModel(projectName, projectDirectory, targetFrameworkMoniker, _services) as IRemoteDebugViewModel;
                 var view = new RemoteDebugView(remoteDebugViewModel, new ThemeService());
-                view.ShowDialog();
+                remoteDebugViewModel.ViewOpener = view.Show;
+                remoteDebugViewModel.ViewCloser = view.Hide;
+                view.ShowDialog(); // open & wait
 
                 //// check to see if vsdbg is installed in app container
                 //var sshOutput = string.Empty;
