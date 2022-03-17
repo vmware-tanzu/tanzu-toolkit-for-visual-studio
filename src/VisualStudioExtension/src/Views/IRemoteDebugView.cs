@@ -1,4 +1,4 @@
-﻿namespace Tanzu.Toolkit.VisualStudio
+﻿namespace Tanzu.Toolkit.VisualStudio.Views
 {
     public interface IRemoteDebugView
     {
