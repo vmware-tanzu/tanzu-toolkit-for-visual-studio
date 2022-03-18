@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
+using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.DotnetCli;
@@ -269,7 +270,63 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         public async Task EnsureDebuggingAgentInstalledOnRemoteAsync()
         {
-            throw new NotImplementedException();
+            DetailedResult sshResult;
+            var expectedVsdbgBaseDirPath = "/home/vcap/app";
+            var vsdbgDirName = "vsdbg";
+            var sshCommand = $"ls {expectedVsdbgBaseDirPath} | grep {vsdbgDirName}";
+            try
+            {
+                sshResult = await _cfCliService.ExecuteSshCommand(_expectedAppName, SelectedOrg.OrgName, SelectedSpace.SpaceName, sshCommand);
+            }
+            catch (InvalidRefreshTokenException)
+            {
+                _tasExplorer.AuthenticationRequired = true;
+                ErrorService.DisplayErrorDialog("Unable to initate remote debugging", $"Connection to {_tasExplorer.TasConnection.DisplayText} has expired; please log in again to re-authenticate.");
+                Close();
+                return;
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Something unexpected happened while initializing remote debugging agent: {CfSshException}", ex);
+                ErrorService.DisplayErrorDialog("Unable to initate remote debugging", $"Something unexpected happened while initializing remote debugging agent. Please try again; if this issue persists, contact tas-vs-extension@vmware.com");
+                Close();
+                return;
+            }
+
+            var debugAgentInstalled = sshResult.Succeeded && sshResult.CmdResult.StdOut != null && sshResult.CmdResult.StdOut.Contains("vsdbg");
+            if (!debugAgentInstalled)
+            {
+                var vsdbgVersion = "latest";
+                var vsdbgLocation = Path.Combine(expectedVsdbgBaseDirPath, vsdbgDirName);
+                DetailedResult vsdbgInstallationResult;
+                try
+                {
+                    var installationSshCommand = $"curl - sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v {vsdbgVersion} -l {vsdbgLocation}";
+                    vsdbgInstallationResult = await _cfCliService.ExecuteSshCommand(_expectedAppName, SelectedOrg.OrgName, SelectedSpace.SpaceName, installationSshCommand);
+                }
+                catch (InvalidRefreshTokenException)
+                {
+                    _tasExplorer.AuthenticationRequired = true;
+                    ErrorService.DisplayErrorDialog("Unable to initate remote debugging", $"Connection to {_tasExplorer.TasConnection.DisplayText} has expired; please log in again to re-authenticate.");
+                    Close();
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error("Something unexpected happened while installing remote debugging agent: {VsdbgInstallationException}", ex);
+                    ErrorService.DisplayErrorDialog("Unable to initate remote debugging", $"Something unexpected happened while installing remote debugging agent. Please try again; if this issue persists, contact tas-vs-extension@vmware.com");
+                    Close();
+                    return;
+                }
+
+                if (!vsdbgInstallationResult.Succeeded)
+                {
+                    Logger.Error("Unable to install remote debugging agent: {VsdbgInstallationExplanation}", vsdbgInstallationResult.Explanation);
+                    ErrorService.DisplayErrorDialog("Unable to initate remote debugging", $"Something unexpected happened while installing remote debugging agent. Please try again; if this issue persists, contact tas-vs-extension@vmware.com");
+                    Close();
+                    return;
+                }
+            }
         }
 
         public bool CheckForLaunchFile()
