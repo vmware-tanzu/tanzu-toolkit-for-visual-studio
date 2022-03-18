@@ -37,6 +37,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private CloudFoundrySpace _selectedSpace;
         private CloudFoundryApp _selectedApp;
         private bool _waitingOnAppConfirmation = false;
+        private bool _debugAgentInstalled;
 
         public RemoteDebugViewModel(string expectedAppName, string pathToProjectRootDir, string targetFrameworkMoniker, IServiceProvider services) : base(services)
         {
@@ -290,8 +291,10 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             LoadingMessage = "Checking Debugging Agent...";
             DetailedResult sshResult;
             var expectedVsdbgBaseDirPath = "/home/vcap/app";
-            var vsdbgDirName = "vsdbg";
-            var sshCommand = $"ls {expectedVsdbgBaseDirPath} | grep {vsdbgDirName}";
+            var vsdbgDirName = "/vsdbg";
+            var vsdbgLocation = Path.Combine(expectedVsdbgBaseDirPath, vsdbgDirName);
+
+            var sshCommand = $"ls {expectedVsdbgBaseDirPath}";
             try
             {
                 sshResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
@@ -311,15 +314,27 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 return;
             }
 
-            var debugAgentInstalled = sshResult.Succeeded && sshResult.CmdResult.StdOut != null && sshResult.CmdResult.StdOut.Contains("vsdbg");
-            if (!debugAgentInstalled)
+            var response = sshResult.CmdResult.StdOut;
+            var sshQuerySucceeded = sshResult.Succeeded
+                && response != null
+                && response.Contains("publish")
+                && response.Contains(".dll");
+            if (!sshQuerySucceeded)
+            {
+                Logger.Error("Unable to verify remote debugging agent; couldn't connect to {AppName} via SSH.", AppToDebug.AppName);
+                ErrorService.DisplayErrorDialog("Unable to verify remote debugging agent.", $"Couldn't connect to {AppToDebug.AppName} via SSH.");
+                Close();
+                return;
+            }
+
+            _debugAgentInstalled = response.Contains("vsdbg");
+            if (!_debugAgentInstalled)
             {
                 var vsdbgVersion = "latest";
-                var vsdbgLocation = Path.Combine(expectedVsdbgBaseDirPath, vsdbgDirName);
                 DetailedResult vsdbgInstallationResult;
                 try
                 {
-                    var installationSshCommand = $"curl - sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v {vsdbgVersion} -l {vsdbgLocation}";
+                    var installationSshCommand = $"curl -sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v {vsdbgVersion} -l {vsdbgLocation}";
                     vsdbgInstallationResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, installationSshCommand);
                 }
                 catch (InvalidRefreshTokenException)
@@ -337,7 +352,17 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                     return;
                 }
 
-                if (!vsdbgInstallationResult.Succeeded)
+                var installationSucceeded = vsdbgInstallationResult.Succeeded
+                    && vsdbgInstallationResult.CmdResult != null
+                    && vsdbgInstallationResult.CmdResult.StdOut != null
+                    && vsdbgInstallationResult.CmdResult.StdOut.Contains($"Successfully installed vsdbg at '{vsdbgLocation}'");
+
+                if (installationSucceeded)
+                {
+                    _debugAgentInstalled = true;
+                    Logger.Information($"Successfully installed remote debugging agent for app '{AppToDebug.AppName}' at {vsdbgLocation}");
+                }
+                else
                 {
                     Logger.Error("Unable to install remote debugging agent: {VsdbgInstallationExplanation}", vsdbgInstallationResult.Explanation);
                     ErrorService.DisplayErrorDialog("Unable to initate remote debugging", $"Something unexpected happened while installing remote debugging agent. Please try again; if this issue persists, contact tas-vs-extension@vmware.com");
@@ -347,12 +372,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             }
         }
 
-        public bool CheckForLaunchFile()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void CreateLaunchFile()
+        public void CreateLaunchFileIfNonexistent()
         {
             throw new NotImplementedException();
         }
