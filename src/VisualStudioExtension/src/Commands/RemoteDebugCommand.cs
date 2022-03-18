@@ -43,7 +43,6 @@ namespace Tanzu.Toolkit.VisualStudio
         /// VS Package that provides this command, not null.
         /// </summary>
         private readonly AsyncPackage package;
-        private readonly string LaunchFileName = "launch.json";
         private static ILogger _logger;
         private static ICloudFoundryService _cfClient;
         private static ITasExplorerViewModel _tasExplorer;
@@ -153,62 +152,6 @@ namespace Tanzu.Toolkit.VisualStudio
                 remoteDebugViewModel.ViewCloser = view.Hide;
                 view.ShowDialog(); // open & wait
 
-                //// look for launch.json file
-                //var searchPaths = new string[] { solutionDirectory, projectDirectory };
-                //ProjectLaunchFilePath = null;
-                //foreach (var path in searchPaths)
-                //{
-                //    var dir = Path.GetDirectoryName(path);
-                //    var fullPath = Path.Combine(dir, LaunchFileName);
-                //    if (File.Exists(fullPath))
-                //    {
-                //        ProjectLaunchFilePath = fullPath;
-                //        break;
-                //    }
-                //}
-
-                //if (ProjectLaunchFilePath == null)
-                //{
-                //    var launchFileConfig = new RemoteDebugLaunchConfig
-                //    {
-                //        version = "0.2.0",
-                //        adapter = "cf",
-                //        adapterArgs = "ssh remote-debug -c \"/tmp/lifecycle/shell /home/vcap/app 'bash -c \\\"/home/vcap/app/vsdbg/vsdbg --interpreter=vscode\\\"'\"",
-                //        languageMappings = new Languagemappings
-                //        {
-                //            CSharp = new CSharp
-                //            {
-                //                languageId = "3F5162F8-07C6-11D3-9053-00C04FA302A1",
-                //                extensions = new string[] { "*" },
-                //            },
-                //        },
-                //        exceptionCategoryMappings = new Exceptioncategorymappings
-                //        {
-                //            CLR = "449EC4CC-30D2-4032-9256-EE18EB41B62B",
-                //            MDA = "6ECE07A9-0EDE-45C4-8296-818D8FC401D4",
-                //        },
-                //        configurations = new Configuration[]
-                //        {
-                //            new Configuration
-                //            {
-                //                name = ".NET Core Launch",
-                //                type = "coreclr",
-                //                processName = projectName,
-                //                request = "attach",
-                //                justMyCode = false,
-                //                cwd = "/home/vcap/app",
-                //                logging = new Logging
-                //                {
-                //                    engineLogging = true,
-                //                },
-                //            },
-                //        }
-                //    };
-                //    var newLaunchFileContents = JsonSerializer.Serialize(launchFileConfig);
-                //    ProjectLaunchFilePath = Path.Combine(projectDirectory, LaunchFileName);
-                //    _fileService.WriteTextToFile(ProjectLaunchFilePath, newLaunchFileContents);
-                //}
-
                 //dte.ExecuteCommand("DebugAdapterHost.Launch", $"/LaunchJson:\"{ProjectLaunchFilePath}\"");
             }
             catch (Exception ex)
@@ -216,50 +159,5 @@ namespace Tanzu.Toolkit.VisualStudio
                 _logger.Error("Failed to initiate remote debugging: {RemoteDebuggingError}", ex);
             }
         }
-    }
-
-
-    internal class RemoteDebugLaunchConfig
-    {
-        internal string version { get; set; }
-        internal string adapter { get; set; }
-        internal string adapterArgs { get; set; }
-        internal Languagemappings languageMappings { get; set; }
-        internal Exceptioncategorymappings exceptionCategoryMappings { get; set; }
-        internal Configuration[] configurations { get; set; }
-    }
-
-    internal class Languagemappings
-    {
-        [JsonPropertyName("C#")]
-        internal CSharp CSharp { get; set; }
-    }
-
-    internal class CSharp
-    {
-        internal string languageId { get; set; }
-        internal string[] extensions { get; set; }
-    }
-
-    internal class Exceptioncategorymappings
-    {
-        internal string CLR { get; set; }
-        internal string MDA { get; set; }
-    }
-
-    internal class Configuration
-    {
-        internal string name { get; set; }
-        internal string type { get; set; }
-        internal string processName { get; set; }
-        internal string request { get; set; }
-        internal bool justMyCode { get; set; }
-        internal string cwd { get; set; }
-        internal Logging logging { get; set; }
-    }
-
-    internal class Logging
-    {
-        internal bool engineLogging { get; set; }
     }
 }
