@@ -36,6 +36,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private CloudFoundryOrganization _selectedOrg;
         private CloudFoundrySpace _selectedSpace;
         private CloudFoundryApp _selectedApp;
+        private bool _waitingOnAppConfirmation = false;
 
         public RemoteDebugViewModel(string expectedAppName, string pathToProjectRootDir, string targetFrameworkMoniker, IServiceProvider services) : base(services)
         {
@@ -231,6 +232,19 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         public async Task BeginRemoteDebuggingAsync()
         {
             await EstablishAppToDebugAsync();
+            if (_waitingOnAppConfirmation)
+            {
+                return;
+            }
+
+            if (AppToDebug == null)
+            {
+                ErrorService.DisplayErrorDialog("Remote Debug Error", "Unable to identify app to debug.\n" +
+                    "This is unexpected; it may help to sign out of TAS & try debugging again after logging back in.\n" +
+                    "If this issue persists, please contact tas-vs-extension@vmware.com");
+                Close();
+                return;
+            }
             await EnsureDebuggingAgentInstalledOnRemoteAsync();
         }
 
@@ -241,19 +255,22 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             AppToDebug = AccessibleApps.FirstOrDefault(app => app.AppName == _expectedAppName);
             if (AppToDebug == null)
             {
-                await UpdateCfOrgOptions();
-                DialogMessage = $"No app found with a name matching \"{_expectedAppName}\"";
-                LoadingMessage = null;
+                _waitingOnAppConfirmation = true;
+                var _ = PromptAppResolutionAsync();
             }
         }
 
-        public void ResolveMissingApp(object arg = null)
+        public async Task ResolveMissingAppAsync(object arg = null)
         {
+            _waitingOnAppConfirmation = false;
+
             if (PushNewAppToDebug)
             {
                 Close();
                 _outputView.Show();
-                var _ = PushNewAppWithDebugConfigurationAsync();
+                await PushNewAppWithDebugConfigurationAsync();
+                var _ = BeginRemoteDebuggingAsync(); // start debug process over from beginning
+                ViewOpener?.Invoke(); // reopen remote debug dialog
             }
             else if (DebugExistingApp)
             {
@@ -276,7 +293,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             var sshCommand = $"ls {expectedVsdbgBaseDirPath} | grep {vsdbgDirName}";
             try
             {
-                sshResult = await _cfCliService.ExecuteSshCommand(_expectedAppName, SelectedOrg.OrgName, SelectedSpace.SpaceName, sshCommand);
+                sshResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
             }
             catch (InvalidRefreshTokenException)
             {
@@ -387,6 +404,13 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             ViewCloser?.Invoke();
         }
 
+        private async Task PromptAppResolutionAsync()
+        {
+            await UpdateCfOrgOptions();
+            DialogMessage = $"No app found with a name matching \"{_expectedAppName}\"";
+            LoadingMessage = null;
+        }
+
         private async Task PushNewAppWithDebugConfigurationAsync()
         {
             var runtimeIdentifier = "linux-x64";
@@ -435,9 +459,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 _outputViewModel.AppendLine(msg);
                 return;
             }
-
-            var _ = EstablishAppToDebugAsync();
-            ViewOpener?.Invoke(); // reopen remote debug dialog
         }
 
         private async Task PopulateAccessibleAppsAsync()
