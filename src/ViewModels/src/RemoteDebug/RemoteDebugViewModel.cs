@@ -357,6 +357,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 && response.Contains(".dll");
             if (!sshQuerySucceeded)
             {
+                // TODO: clean up the error process here; should only see 1 error dialog in this error case (thrown from BeginRemoteDebuggingAsync)
                 Logger.Error("Unable to verify remote debugging agent; couldn't connect to {AppName} via SSH.", AppToDebug.AppName);
                 ErrorService.DisplayErrorDialog("Unable to verify remote debugging agent.", $"Couldn't connect to {AppToDebug.AppName} via SSH.");
                 Close();
@@ -366,6 +367,10 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             _debugAgentInstalled = response.Contains("vsdbg");
             if (!_debugAgentInstalled)
             {
+                // TODO: find a way around lack of permissions for creating this directory 
+                // e.g. create it during the publish step?
+                // e.g. install the whole vsdbg tool during publish??
+
                 var vsdbgVersion = "latest";
                 DetailedResult vsdbgInstallationResult;
                 try
@@ -375,6 +380,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 }
                 catch (InvalidRefreshTokenException)
                 {
+                    // TODO: clean up the error process here; should only see 1 error dialog in this error case (thrown from BeginRemoteDebuggingAsync)
                     _tasExplorer.AuthenticationRequired = true;
                     ErrorService.DisplayErrorDialog("Unable to initate remote debugging", $"Connection to {_tasExplorer.TasConnection.DisplayText} has expired; please log in again to re-authenticate.");
                     Close();
@@ -382,6 +388,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 }
                 catch (Exception ex)
                 {
+                    // TODO: clean up the error process here; should only see 1 error dialog in this error case (thrown from BeginRemoteDebuggingAsync)
                     Logger.Error("Something unexpected happened while installing remote debugging agent: {VsdbgInstallationException}", ex);
                     ErrorService.DisplayErrorDialog("Unable to initate remote debugging", $"Something unexpected happened while installing remote debugging agent. Please try again; if this issue persists, contact tas-vs-extension@vmware.com");
                     Close();
@@ -400,6 +407,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 }
                 else
                 {
+                    // TODO: clean up the error process here; should only see 1 error dialog in this error case (thrown from BeginRemoteDebuggingAsync)
                     Logger.Error("Unable to install remote debugging agent: {VsdbgInstallationExplanation}", vsdbgInstallationResult.Explanation);
                     ErrorService.DisplayErrorDialog("Unable to initate remote debugging", $"Something unexpected happened while installing remote debugging agent. Please try again; if this issue persists, contact tas-vs-extension@vmware.com");
                     Close();
