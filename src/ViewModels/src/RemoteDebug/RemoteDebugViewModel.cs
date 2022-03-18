@@ -442,18 +442,74 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         private async Task PopulateAccessibleAppsAsync()
         {
-            var appsResult = await _cfClient.ListAllAppsAsync();
-            if (appsResult.Succeeded)
+            try
             {
-                AccessibleApps = appsResult.Content;
+                var apps = new List<CloudFoundryApp>();
+                var appListLock = new object();
+
+                var orgsResult = await _cfClient.GetOrgsForCfInstanceAsync(_tasExplorer.TasConnection.CloudFoundryInstance);
+                if (!orgsResult.Succeeded)
+                {
+                    var title = "Unable to initiate remote debugging";
+                    var msg = $"Something went wrong while querying apps on {_tasExplorer.TasConnection.CloudFoundryInstance.InstanceName}.\nIt may help to try disconnecting & signing into TAS again; if this issue persists, please contact tas-vs-extension@vmware.com";
+                    Logger.Error(title + "; " + "orgs request failed: {OrgsError}", orgsResult.Explanation);
+                    ErrorService.DisplayErrorDialog(title, msg);
+                    Close();
+                    return;
+                }
+
+                var spaceTasks = new List<Task>();
+                foreach (var org in orgsResult.Content)
+                {
+                    var getSpacesForOrgTask = Task.Run(async () =>
+                    {
+                        var spacesResult = await _cfClient.GetSpacesForOrgAsync(org);
+                        if (spacesResult.Succeeded)
+                        {
+                            var appTasks = new List<Task>();
+                            foreach (var space in spacesResult.Content)
+                            {
+                                var getAppsForSpaceTask = Task.Run(async () =>
+                                {
+                                    var appsResult = await _cfClient.GetAppsForSpaceAsync(space);
+                                    if (appsResult.Succeeded)
+                                    {
+                                        foreach (var app in appsResult.Content)
+                                        {
+                                            lock (appListLock)
+                                            {
+                                                apps.Add(app);
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Logger.Error("Apps request failed for space {SpaceName} while trying to query apps for remote debugging: {AppsError}", space.SpaceName, appsResult.Explanation);
+                                    }
+                                });
+                                appTasks.Add(getAppsForSpaceTask);
+                            }
+                            await Task.WhenAll(appTasks);
+                        }
+                        else
+                        {
+                            Logger.Error("Spaces request failed for org {OrgName} while trying to query apps for remote debugging: {SpacesError}", org.OrgName, spacesResult.Explanation);
+                        }
+                    });
+                    spaceTasks.Add(getSpacesForOrgTask);
+                }
+
+                await Task.WhenAll(spaceTasks);
+                AccessibleApps = apps;
             }
-            else
+            catch (Exception ex)
             {
                 var title = "Unable to initiate remote debugging";
-                var msg = $"Something went wrong while querying apps on {_tasExplorer.TasConnection.CloudFoundryInstance.InstanceName}.\nIt may help to try disconnecting & signing into TAS again; if this issue persists, please contact tas-vs-extension@vmware.com";
-                Logger.Error(title + "; " + msg);
+                var msg = $"Something unexpected happened while querying apps on {_tasExplorer.TasConnection.CloudFoundryInstance.InstanceName}.\nIt may help to try disconnecting & signing into TAS again; if this issue persists, please contact tas-vs-extension@vmware.com";
+                Logger.Error(title + "; " + msg + "{RemoteDebugException}", ex);
                 ErrorService.DisplayErrorDialog(title, msg);
                 Close();
+                return;
             }
         }
 
