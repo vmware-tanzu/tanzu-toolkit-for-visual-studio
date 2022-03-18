@@ -153,31 +153,6 @@ namespace Tanzu.Toolkit.VisualStudio
                 remoteDebugViewModel.ViewCloser = view.Hide;
                 view.ShowDialog(); // open & wait
 
-                //// check to see if vsdbg is installed in app container
-                //var sshOutput = string.Empty;
-                //var sshOutputCallback = new Action<string>((string output) => { sshOutput += output; });
-                //var sshResult = await _cfCliService.RunCfCommandAsync($"ssh {matchingApp.AppName} -c \"ls /home/vcap/app | grep vsdbg\"");
-                //var debugAgentInstalled = sshResult.Succeeded && sshOutput != null && sshOutput.Contains("vsdbg");
-                //if (!debugAgentInstalled)
-                //{
-                //    var vsdbgVersion = "latest";
-                //    var vsdbgLocation = "/home/vcap/app/vsdbg";
-                //    var vsdbgInstallationResult = await _cfCliService.RunCfCommandAsync($"ssh {matchingApp.AppName} -c \"curl - sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v {vsdbgVersion} -l {vsdbgLocation}\"");
-                //    if (!vsdbgInstallationResult.Succeeded)
-                //    {
-                //        var msg = $"Failed to install debugging agent into remote app \"{matchingApp.AppName}\"";
-                //        _logger.Error(msg);
-                //        VsShellUtilities.ShowMessageBox(
-                //            package,
-                //            msg,
-                //            title,
-                //            OLEMSGICON.OLEMSGICON_CRITICAL,
-                //            OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                //            OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
-                //        return;
-                //    }
-                //}
-
                 //// look for launch.json file
                 //var searchPaths = new string[] { solutionDirectory, projectDirectory };
                 //ProjectLaunchFilePath = null;
