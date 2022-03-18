@@ -19,7 +19,7 @@ namespace Tanzu.Toolkit.VisualStudio
         {
             themeService.SetTheme(this);
             DataContext = viewModel;
-            ResolveMissingAppCommand = new DelegatingCommand(viewModel.ResolveMissingApp, viewModel.CanResolveMissingApp);
+            ResolveMissingAppCommand = new AsyncDelegatingCommand(viewModel.ResolveMissingAppAsync, viewModel.CanResolveMissingApp);
             MouseDown += Window_MouseDown;
             InitializeComponent();
         }
