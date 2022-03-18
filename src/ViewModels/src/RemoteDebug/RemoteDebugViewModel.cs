@@ -287,6 +287,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         public async Task EnsureDebuggingAgentInstalledOnRemoteAsync()
         {
+            LoadingMessage = "Checking Debugging Agent...";
             DetailedResult sshResult;
             var expectedVsdbgBaseDirPath = "/home/vcap/app";
             var vsdbgDirName = "vsdbg";
@@ -319,7 +320,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 try
                 {
                     var installationSshCommand = $"curl - sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v {vsdbgVersion} -l {vsdbgLocation}";
-                    vsdbgInstallationResult = await _cfCliService.ExecuteSshCommand(_expectedAppName, SelectedOrg.OrgName, SelectedSpace.SpaceName, installationSshCommand);
+                    vsdbgInstallationResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, installationSshCommand);
                 }
                 catch (InvalidRefreshTokenException)
                 {
