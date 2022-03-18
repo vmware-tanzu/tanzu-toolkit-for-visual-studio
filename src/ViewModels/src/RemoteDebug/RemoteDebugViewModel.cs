@@ -27,6 +27,8 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private readonly string _expectedAppName;
         private readonly string _pathToProjectRootDir;
         private readonly string _targetFrameworkMoniker;
+        private readonly string _expectedPathToLaunchFile;
+        private readonly Action _initiateDebugCallback;
         private List<CloudFoundryApp> _accessibleApps;
         private string _dialogMessage;
         private string _loadingMessage;
@@ -43,16 +45,18 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private bool _waitingOnAppConfirmation = false;
         private bool _debugAgentInstalled;
         private bool _launchFileExists;
-        private readonly string _launchFileName = "launch.json";
         private const string _vsdbgInstallationBaseDir = "/home/vcap/app";
         private const string _vsdbgDirName = "/vsdbg";
         private const string _vsdbgExecutableName = "vsdbg";
+        public static readonly string _launchFileName = "launch.json";
 
-        public RemoteDebugViewModel(string expectedAppName, string pathToProjectRootDir, string targetFrameworkMoniker, IServiceProvider services) : base(services)
+        public RemoteDebugViewModel(string expectedAppName, string pathToProjectRootDir, string targetFrameworkMoniker, string expectedPathToLaunchFile, Action initiateDebugCallback, IServiceProvider services) : base(services)
         {
             _expectedAppName = expectedAppName;
             _pathToProjectRootDir = pathToProjectRootDir;
             _targetFrameworkMoniker = targetFrameworkMoniker;
+            _expectedPathToLaunchFile = expectedPathToLaunchFile;
+            _initiateDebugCallback = initiateDebugCallback;
             _tasExplorer = services.GetRequiredService<ITasExplorerViewModel>();
             _cfCliService = services.GetRequiredService<ICfCliService>();
             _dotnetCliService = services.GetRequiredService<IDotnetCliService>();
@@ -70,7 +74,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 Close();
                 return;
             }
-
             _cfClient = _tasExplorer.TasConnection.CfClient;
 
             Option1Text = $"Push new version of \"{_expectedAppName}\" to debug";
@@ -277,6 +280,9 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 Close();
                 return;
             }
+
+            _initiateDebugCallback?.Invoke();
+            FileService.DeleteFile(_expectedPathToLaunchFile);
         }
 
         public async Task EstablishAppToDebugAsync()
@@ -407,9 +413,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             _launchFileExists = false;
             try
             {
-                var dir = Path.GetDirectoryName(_pathToProjectRootDir);
-                var fullPath = Path.Combine(dir, _launchFileName);
-                if (File.Exists(fullPath))
+                if (!File.Exists(_expectedPathToLaunchFile))
                 {
                     var launchFileConfig = new RemoteDebugLaunchConfig
                     {
@@ -447,8 +451,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                         }
                     };
                     var newLaunchFileContents = JsonSerializer.Serialize(launchFileConfig);
-                    var projectLaunchFilePath = Path.Combine(_pathToProjectRootDir, _launchFileName);
-                    _fileService.WriteTextToFile(projectLaunchFilePath, newLaunchFileContents);
+                    _fileService.WriteTextToFile(_expectedPathToLaunchFile, newLaunchFileContents);
                     _launchFileExists = true;
                 }
             }

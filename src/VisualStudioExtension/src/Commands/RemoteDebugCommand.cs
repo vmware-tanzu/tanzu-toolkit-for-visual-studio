@@ -1,19 +1,14 @@
 ﻿using EnvDTE;
 using EnvDTE80;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Serilog;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.Dialog;
@@ -22,8 +17,6 @@ using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.ViewModels.RemoteDebug;
 using Tanzu.Toolkit.VisualStudio.Services;
-using Tanzu.Toolkit.VisualStudio.Views;
-using BuildEvents = EnvDTE.BuildEvents;
 
 namespace Tanzu.Toolkit.VisualStudio
 {
@@ -44,11 +37,6 @@ namespace Tanzu.Toolkit.VisualStudio
         /// </summary>
         private readonly AsyncPackage package;
         private static ILogger _logger;
-        private static ICloudFoundryService _cfClient;
-        private static ITasExplorerViewModel _tasExplorer;
-        private static IDialogService _dialogService;
-        private static ICfCliService _cfCliService;
-        private static IFileService _fileService;
         private static IServiceProvider _services;
 
         /// <summary>
@@ -76,11 +64,6 @@ namespace Tanzu.Toolkit.VisualStudio
             private set;
         }
 
-        public static BuildEvents BuildEvents { get; set; }
-        public string WaitForProject { get; private set; }
-        public string ProjectLaunchFilePath { get; private set; }
-        public bool RemoteDebugLaunchOnDone { get; private set; }
-
         /// <summary>
         /// Initializes the singleton instance of the command.
         /// </summary>
@@ -97,11 +80,6 @@ namespace Tanzu.Toolkit.VisualStudio
             Instance = new RemoteDebugCommand(package, commandService);
             var loggingSvc = services.GetRequiredService<ILoggingService>();
             _logger = loggingSvc.Logger;
-            _cfClient = services.GetRequiredService<ICloudFoundryService>();
-            _tasExplorer = services.GetRequiredService<ITasExplorerViewModel>();
-            _dialogService = services.GetRequiredService<IDialogService>();
-            _cfCliService = services.GetRequiredService<ICfCliService>();
-            _fileService = services.GetRequiredService<IFileService>();
         }
 
         /// <summary>
@@ -145,14 +123,14 @@ namespace Tanzu.Toolkit.VisualStudio
                 var projectDirectory = Path.GetDirectoryName(project.FullName);
                 var solutionDirectory = Path.GetDirectoryName(dte.Solution.FullName);
                 var targetFrameworkMoniker = project.Properties.Item("FriendlyTargetFramework").Value.ToString();
+                var launchFilePath = Path.Combine(projectDirectory, RemoteDebugViewModel._launchFileName);
+                var initiateDebugCallback = new Action(() => { dte.ExecuteCommand("DebugAdapterHost.Launch", $"/LaunchJson:\"{launchFilePath}\""); });
 
-                var remoteDebugViewModel = new RemoteDebugViewModel(projectName, projectDirectory, targetFrameworkMoniker, _services) as IRemoteDebugViewModel;
+                var remoteDebugViewModel = new RemoteDebugViewModel(projectName, projectDirectory, targetFrameworkMoniker, launchFilePath, initiateDebugCallback, services: _services) as IRemoteDebugViewModel;
                 var view = new RemoteDebugView(remoteDebugViewModel, new ThemeService());
                 remoteDebugViewModel.ViewOpener = view.Show;
                 remoteDebugViewModel.ViewCloser = view.Hide;
                 view.ShowDialog(); // open & wait
-
-                //dte.ExecuteCommand("DebugAdapterHost.Launch", $"/LaunchJson:\"{ProjectLaunchFilePath}\"");
             }
             catch (Exception ex)
             {
