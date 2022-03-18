@@ -3,12 +3,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.DotnetCli;
+using Tanzu.Toolkit.Services.File;
 
 namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 {
@@ -18,6 +21,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private readonly ICloudFoundryService _cfClient;
         private readonly ICfCliService _cfCliService;
         private readonly IDotnetCliService _dotnetCliService;
+        private readonly IFileService _fileService;
         private readonly IView _outputView;
         private IOutputViewModel _outputViewModel;
         private readonly string _expectedAppName;
@@ -38,6 +42,11 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private CloudFoundryApp _selectedApp;
         private bool _waitingOnAppConfirmation = false;
         private bool _debugAgentInstalled;
+        private bool _launchFileExists;
+        private readonly string _launchFileName = "launch.json";
+        private const string _vsdbgInstallationBaseDir = "/home/vcap/app";
+        private const string _vsdbgDirName = "/vsdbg";
+        private const string _vsdbgExecutableName = "vsdbg";
 
         public RemoteDebugViewModel(string expectedAppName, string pathToProjectRootDir, string targetFrameworkMoniker, IServiceProvider services) : base(services)
         {
@@ -47,6 +56,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             _tasExplorer = services.GetRequiredService<ITasExplorerViewModel>();
             _cfCliService = services.GetRequiredService<ICfCliService>();
             _dotnetCliService = services.GetRequiredService<IDotnetCliService>();
+            _fileService = services.GetRequiredService<IFileService>();
 
             _outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel)) as IView;
             _outputViewModel = _outputView?.ViewModel as IOutputViewModel;
@@ -235,9 +245,11 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             await EstablishAppToDebugAsync();
             if (_waitingOnAppConfirmation)
             {
+                // resolution delegated to UI;
+                // once a decision is made, this method should be called
+                // again after _waitingOnAppConfirmation is set to false
                 return;
             }
-
             if (AppToDebug == null)
             {
                 ErrorService.DisplayErrorDialog("Remote Debug Error", "Unable to identify app to debug.\n" +
@@ -246,7 +258,25 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 Close();
                 return;
             }
+
             await EnsureDebuggingAgentInstalledOnRemoteAsync();
+            if (!_debugAgentInstalled)
+            {
+                ErrorService.DisplayErrorDialog("Remote Debug Error", "Failed to install remote debugging agent.\n" +
+                    "It may help to sign out of TAS & try debugging again after logging back in.\n" +
+                    "If this issue persists, please contact tas-vs-extension@vmware.com");
+                Close();
+                return;
+            }
+
+            CreateLaunchFileIfNonexistent();
+            if (!_launchFileExists)
+            {
+                ErrorService.DisplayErrorDialog("Unable to bind to remote debugging agent.", $"Failed to specify launch configuration \"{_launchFileName}\".\n" +
+                    $"It may help to try disconnecting & signing into TAS again; if this issue persists, please contact tas-vs-extension@vmware.com");
+                Close();
+                return;
+            }
         }
 
         public async Task EstablishAppToDebugAsync()
@@ -290,8 +320,8 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         {
             LoadingMessage = "Checking Debugging Agent...";
             DetailedResult sshResult;
-            var expectedVsdbgBaseDirPath = "/home/vcap/app";
-            var vsdbgDirName = "/vsdbg";
+            var expectedVsdbgBaseDirPath = _vsdbgInstallationBaseDir;
+            var vsdbgDirName = _vsdbgDirName;
             var vsdbgLocation = Path.Combine(expectedVsdbgBaseDirPath, vsdbgDirName);
 
             var sshCommand = $"ls {expectedVsdbgBaseDirPath}";
@@ -374,7 +404,59 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         public void CreateLaunchFileIfNonexistent()
         {
-            throw new NotImplementedException();
+            _launchFileExists = false;
+            try
+            {
+                var dir = Path.GetDirectoryName(_pathToProjectRootDir);
+                var fullPath = Path.Combine(dir, _launchFileName);
+                if (File.Exists(fullPath))
+                {
+                    var launchFileConfig = new RemoteDebugLaunchConfig
+                    {
+                        version = "0.2.0",
+                        adapter = "cf",
+                        adapterArgs = $"ssh remote-debug -c \"/tmp/lifecycle/shell {_vsdbgInstallationBaseDir} 'bash -c \\\"{_vsdbgInstallationBaseDir}{_vsdbgDirName}/{_vsdbgExecutableName} --interpreter=vscode\\\"'\"",
+                        languageMappings = new Languagemappings
+                        {
+                            CSharp = new CSharp
+                            {
+                                languageId = "3F5162F8-07C6-11D3-9053-00C04FA302A1",
+                                extensions = new string[] { "*" },
+                            },
+                        },
+                        exceptionCategoryMappings = new Exceptioncategorymappings
+                        {
+                            CLR = "449EC4CC-30D2-4032-9256-EE18EB41B62B",
+                            MDA = "6ECE07A9-0EDE-45C4-8296-818D8FC401D4",
+                        },
+                        configurations = new Configuration[]
+                        {
+                            new Configuration
+                            {
+                                name = ".NET Core Launch",
+                                type = "coreclr",
+                                processName = AppToDebug.AppName,
+                                request = "attach",
+                                justMyCode = false,
+                                cwd = _vsdbgInstallationBaseDir,
+                                logging = new Logging
+                                {
+                                    engineLogging = true,
+                                },
+                            },
+                        }
+                    };
+                    var newLaunchFileContents = JsonSerializer.Serialize(launchFileConfig);
+                    var projectLaunchFilePath = Path.Combine(_pathToProjectRootDir, _launchFileName);
+                    _fileService.WriteTextToFile(projectLaunchFilePath, newLaunchFileContents);
+                    _launchFileExists = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Failed to create launch file for remote debugging: {FileCreationException}", ex);
+                _launchFileExists = false;
+            }
         }
 
         public async Task UpdateCfOrgOptions()
@@ -562,5 +644,49 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             return (PushNewAppToDebug && SelectedOrg != null && SelectedSpace != null)
                 || (DebugExistingApp && AppToDebug != null);
         }
+    }
+
+    internal class RemoteDebugLaunchConfig
+    {
+        internal string version { get; set; }
+        internal string adapter { get; set; }
+        internal string adapterArgs { get; set; }
+        internal Languagemappings languageMappings { get; set; }
+        internal Exceptioncategorymappings exceptionCategoryMappings { get; set; }
+        internal Configuration[] configurations { get; set; }
+    }
+
+    internal class Languagemappings
+    {
+        [JsonPropertyName("C#")]
+        internal CSharp CSharp { get; set; }
+    }
+
+    internal class CSharp
+    {
+        internal string languageId { get; set; }
+        internal string[] extensions { get; set; }
+    }
+
+    internal class Exceptioncategorymappings
+    {
+        internal string CLR { get; set; }
+        internal string MDA { get; set; }
+    }
+
+    internal class Configuration
+    {
+        internal string name { get; set; }
+        internal string type { get; set; }
+        internal string processName { get; set; }
+        internal string request { get; set; }
+        internal bool justMyCode { get; set; }
+        internal string cwd { get; set; }
+        internal Logging logging { get; set; }
+    }
+
+    internal class Logging
+    {
+        internal bool engineLogging { get; set; }
     }
 }
