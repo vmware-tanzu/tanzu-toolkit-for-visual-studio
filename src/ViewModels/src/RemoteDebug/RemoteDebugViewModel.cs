@@ -50,6 +50,10 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private const string _vsdbgExecutableName = "vsdbg";
         private readonly string _pathToVsdbgOnVM;
         public static readonly string _launchFileName = "launch.json";
+        private readonly JsonSerializerOptions _serializationOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        };
 
         public RemoteDebugViewModel(string expectedAppName, string pathToProjectRootDir, string targetFrameworkMoniker, string expectedPathToLaunchFile, Action initiateDebugCallback, IServiceProvider services) : base(services)
         {
@@ -457,7 +461,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                             },
                         }
                     };
-                    var newLaunchFileContents = JsonSerializer.Serialize(launchFileConfig);
+                    var newLaunchFileContents = JsonSerializer.Serialize(launchFileConfig, _serializationOptions);
                     _fileService.WriteTextToFile(_expectedPathToLaunchFile, newLaunchFileContents);
                 }
                 _launchFileExists = true;
@@ -656,47 +660,47 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         }
     }
 
-    internal class RemoteDebugLaunchConfig
+    public class RemoteDebugLaunchConfig
     {
-        internal string version { get; set; }
-        internal string adapter { get; set; }
-        internal string adapterArgs { get; set; }
-        internal Languagemappings languageMappings { get; set; }
-        internal Exceptioncategorymappings exceptionCategoryMappings { get; set; }
-        internal Configuration[] configurations { get; set; }
+        public string version { get; set; }
+        public string adapter { get; set; }
+        public string adapterArgs { get; set; }
+        public Languagemappings languageMappings { get; set; }
+        public Exceptioncategorymappings exceptionCategoryMappings { get; set; }
+        public Configuration[] configurations { get; set; }
     }
 
-    internal class Languagemappings
+    public class Languagemappings
     {
         [JsonPropertyName("C#")]
-        internal CSharp CSharp { get; set; }
+        public CSharp CSharp { get; set; }
     }
 
-    internal class CSharp
+    public class CSharp
     {
-        internal string languageId { get; set; }
-        internal string[] extensions { get; set; }
+        public string languageId { get; set; }
+        public string[] extensions { get; set; }
     }
 
-    internal class Exceptioncategorymappings
+    public class Exceptioncategorymappings
     {
-        internal string CLR { get; set; }
-        internal string MDA { get; set; }
+        public string CLR { get; set; }
+        public string MDA { get; set; }
     }
 
-    internal class Configuration
+    public class Configuration
     {
-        internal string name { get; set; }
-        internal string type { get; set; }
-        internal string processName { get; set; }
-        internal string request { get; set; }
-        internal bool justMyCode { get; set; }
-        internal string cwd { get; set; }
-        internal Logging logging { get; set; }
+        public string name { get; set; }
+        public string type { get; set; }
+        public string processName { get; set; }
+        public string request { get; set; }
+        public bool justMyCode { get; set; }
+        public string cwd { get; set; }
+        public Logging logging { get; set; }
     }
 
-    internal class Logging
+    public class Logging
     {
-        internal bool engineLogging { get; set; }
+        public bool engineLogging { get; set; }
     }
 }
