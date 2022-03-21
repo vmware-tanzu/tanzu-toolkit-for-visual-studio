@@ -67,6 +67,7 @@ namespace Tanzu.Toolkit.ViewModels
         private bool _stacksLoading = false;
         private bool _publishBeforePushing;
         private bool _configureForRemoteDebugging;
+        private readonly string _targetFrameworkMoniker;
 
         public DeploymentDialogViewModel(IServiceProvider services, string projectName, string directoryOfProjectToDeploy, string targetFrameworkMoniker)
             : base(services)
@@ -314,8 +315,6 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        private readonly string _targetFrameworkMoniker;
-
         public CloudFoundryOrganization SelectedOrg
         {
             get => _selectedOrg;
@@ -406,8 +405,6 @@ namespace Tanzu.Toolkit.ViewModels
         }
 
         public bool DeploymentInProgress { get; internal set; }
-
-        public Task DeploymentTask { get; private set; }
 
         public string TargetName
         {
@@ -504,9 +501,7 @@ namespace Tanzu.Toolkit.ViewModels
             if (CanDeployApp(null))
             {
                 DeploymentInProgress = true;
-
-                DeploymentTask = ThreadingService.StartBackgroundTask(StartDeployment);
-
+                var _ = ThreadingService.StartBackgroundTask(StartDeployment);
                 DialogService.CloseDialog(dialogWindow, true);
             }
         }
@@ -732,11 +727,29 @@ namespace Tanzu.Toolkit.ViewModels
             if (PublishBeforePushing)
             {
                 var runtimeIdentifier = "linux-x64";
-                var publishConfiguration = "Debug";
-                var publishSucceeded = await _dotnetCliService.PublishProjectForRemoteDebuggingAsync(PathToProjectRootDir, _targetFrameworkMoniker, runtimeIdentifier, publishConfiguration, PublishDirName);
+                if (SelectedStack != null && SelectedStack.Contains("windows"))
+                {
+                    runtimeIdentifier = "win-x64";
+                }
+                var publishConfiguration = ConfigureForRemoteDebugging ? "Debug" : "Release";
+                var publishSucceeded = await _dotnetCliService.PublishProjectForRemoteDebuggingAsync(
+                    PathToProjectRootDir,
+                    _targetFrameworkMoniker,
+                    runtimeIdentifier,
+                    publishConfiguration,
+                    PublishDirName,
+                    OutputViewModel.AppendLine,
+                    OutputViewModel.AppendLine);
+
                 if (!publishSucceeded)
                 {
-                    _errorDialogService.DisplayErrorDialog("Unable to intitate remote debugging", "Project failed to publish");
+                    _errorDialogService.DisplayErrorDialog("Unable to publish project with these parameters:\n", 
+                        $"Project path: {PathToProjectRootDir}\n" +
+                        $"Target framework: {_targetFrameworkMoniker}\n" +
+                        $"Runtime: {runtimeIdentifier}\n" +
+                        $"Configuration: {publishConfiguration}\n" +
+                        $"Output directory: {PublishDirName}\n" +
+                        $"\nIf this issue persists, please contact tas-vs-extension@vmware.com");
                     return;
                 }
             }
