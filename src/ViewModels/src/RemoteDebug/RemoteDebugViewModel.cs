@@ -430,7 +430,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                     {
                         version = "0.2.0",
                         adapter = "cf",
-                        adapterArgs = $"ssh remote-debug -c \"/tmp/lifecycle/shell {_pathToVsdbgOnVM} 'bash -c \\\"{_pathToVsdbgOnVM}/{_vsdbgExecutableName} --interpreter=vscode\\\"'\"",
+                        adapterArgs = $"ssh {AppToDebug.AppName} -c \"/tmp/lifecycle/shell {_pathToVsdbgOnVM} 'bash -c \\\"{_pathToVsdbgOnVM}/{_vsdbgExecutableName} --interpreter=vscode\\\"'\"",
                         languageMappings = new Languagemappings
                         {
                             CSharp = new CSharp
