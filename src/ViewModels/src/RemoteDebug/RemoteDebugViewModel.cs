@@ -288,6 +288,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 return;
             }
 
+            LoadingMessage = "Attaching to debugging agent...";
             _initiateDebugCallback?.Invoke();
             Close();
             FileService.DeleteFile(_expectedPathToLaunchFile);
@@ -332,7 +333,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         public async Task EnsureDebuggingAgentInstalledOnRemoteAsync()
         {
-            LoadingMessage = "Checking Debugging Agent...";
+            LoadingMessage = "Checking for debugging agent...";
             DetailedResult sshResult;
 
             var sshCommand = $"ls {_pathToVsdbgOnVM}";
@@ -369,10 +370,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             _debugAgentInstalled = response.Contains(_vsdbgExecutableName);
             if (!_debugAgentInstalled)
             {
-                // TODO: find a way around lack of permissions for creating this directory 
-                // e.g. create it during the publish step?
-                // e.g. install the whole vsdbg tool during publish??
-
+                LoadingMessage = "Installing debugging agent...";
                 var vsdbgVersion = "latest";
                 DetailedResult vsdbgInstallationResult;
                 try
