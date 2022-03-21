@@ -118,7 +118,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                 {
                     var projectDirectory = Path.GetDirectoryName(proj.FullName);
 
-                    var tfm = proj.Properties.Item("TargetFrameworkMoniker").Value.ToString();
+                    var tfm = proj.Properties.Item("FriendlyTargetFramework").Value.ToString();
                     if (tfm.StartsWith(".NETFramework") && !File.Exists(Path.Combine(projectDirectory, "Web.config")))
                     {
                         var msg = $"This project appears to target .NET Framework; pushing it to Tanzu Application Service requires a 'Web.config' file at it's base directory, but none was found in {projectDirectory}";
