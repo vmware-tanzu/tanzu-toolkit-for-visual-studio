@@ -285,6 +285,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             }
 
             _initiateDebugCallback?.Invoke();
+            Close();
             FileService.DeleteFile(_expectedPathToLaunchFile);
         }
 
