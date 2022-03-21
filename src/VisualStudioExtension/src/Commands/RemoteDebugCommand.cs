@@ -124,7 +124,11 @@ namespace Tanzu.Toolkit.VisualStudio
                 var solutionDirectory = Path.GetDirectoryName(dte.Solution.FullName);
                 var targetFrameworkMoniker = project.Properties.Item("FriendlyTargetFramework").Value.ToString();
                 var launchFilePath = Path.Combine(projectDirectory, RemoteDebugViewModel._launchFileName);
-                var initiateDebugCallback = new Action(() => { dte.ExecuteCommand("DebugAdapterHost.Launch", $"/LaunchJson:\"{launchFilePath}\""); });
+                var initiateDebugCallback = new Action(() =>
+                {
+                    dte.ExecuteCommand("DebugAdapterHost.Logging /On /OutputWindow");
+                    dte.ExecuteCommand("DebugAdapterHost.Launch", $"/LaunchJson:\"{launchFilePath}\"");
+                });
 
                 var remoteDebugViewModel = new RemoteDebugViewModel(projectName, projectDirectory, targetFrameworkMoniker, launchFilePath, initiateDebugCallback, services: _services) as IRemoteDebugViewModel;
                 var view = new RemoteDebugView(remoteDebugViewModel, new ThemeService());
