@@ -1,5 +1,6 @@
 ﻿using Serilog;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Services.CommandProcess;
 using Tanzu.Toolkit.Services.Logging;
@@ -32,6 +33,12 @@ namespace Tanzu.Toolkit.Services.DotnetCli
         {
             try
             {
+                var expectedOutputDirName = Path.Combine(projectDir, outputDirName);
+                if (Directory.Exists(expectedOutputDirName))
+                {
+                    Directory.Delete(expectedOutputDirName, true); // clean before recreating
+                }
+
                 var publishArgs = $"publish -f {targetFrameworkMoniker} -r {runtimeIdentifier} -c {configuration} -o {outputDirName} --self-contained";
                 var publishProcess = _commandProcessService.StartProcess(_dotnetCliExecutable, publishArgs, projectDir, stdOutDelegate: StdOutCallback, stdErrDelegate: StdErrCallback);
                 await Task.Run(() => publishProcess.WaitForExit());
