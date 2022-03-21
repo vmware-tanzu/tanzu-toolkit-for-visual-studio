@@ -83,11 +83,11 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             }
             _cfClient = _tasExplorer.TasConnection.CfClient;
 
-            Option1Text = $"Push new version of \"{_expectedAppName}\" to debug";
+            Option1Text = $"Push new version of \"{expectedAppName}\" to debug";
             Option2Text = $"Select existing app to debug";
             AppToDebug = null;
 
-            var _ = BeginRemoteDebuggingAsync();
+            var _ = BeginRemoteDebuggingAsync(expectedAppName);
         }
 
         // Properties //
@@ -250,9 +250,9 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         // Methods //
 
-        public async Task BeginRemoteDebuggingAsync()
+        public async Task BeginRemoteDebuggingAsync(string appName)
         {
-            await EstablishAppToDebugAsync();
+            await EstablishAppToDebugAsync(appName);
             if (_waitingOnAppConfirmation)
             {
                 // resolution delegated to UI;
@@ -291,15 +291,15 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             FileService.DeleteFile(_expectedPathToLaunchFile);
         }
 
-        public async Task EstablishAppToDebugAsync()
+        public async Task EstablishAppToDebugAsync(string expectedAppName)
         {
             LoadingMessage = "Identifying remote app to debug...";
             await PopulateAccessibleAppsAsync();
-            AppToDebug = AccessibleApps.FirstOrDefault(app => app.AppName == _expectedAppName);
+            AppToDebug = AccessibleApps.FirstOrDefault(app => app.AppName == expectedAppName);
             if (AppToDebug == null)
             {
                 _waitingOnAppConfirmation = true;
-                var _ = PromptAppResolutionAsync();
+                var _ = PromptAppResolutionAsync(expectedAppName);
             }
         }
 
@@ -312,12 +312,13 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 Close();
                 _outputView.Show();
                 await PushNewAppWithDebugConfigurationAsync();
-                var _ = BeginRemoteDebuggingAsync(); // start debug process over from beginning
+                var _ = BeginRemoteDebuggingAsync(_expectedAppName); // start debug process over from beginning
                 ViewOpener?.Invoke(); // reopen remote debug dialog
             }
             else if (DebugExistingApp)
             {
                 AppToDebug = SelectedApp;
+                var _ = BeginRemoteDebuggingAsync(AppToDebug.AppName); // start debug process over from beginning
             }
             else
             {
@@ -441,7 +442,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                             {
                                 name = ".NET Core Launch",
                                 type = "coreclr",
-                                processName = AppToDebug.AppName,
+                                processName = _expectedAppName, // this should be the app name as determined by .NET, not CF,
                                 request = "attach",
                                 justMyCode = false,
                                 cwd = _vsdbgInstallationBaseDir,
@@ -514,10 +515,10 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             ViewCloser?.Invoke();
         }
 
-        private async Task PromptAppResolutionAsync()
+        private async Task PromptAppResolutionAsync(string appName)
         {
             await UpdateCfOrgOptions();
-            DialogMessage = $"No app found with a name matching \"{_expectedAppName}\"";
+            DialogMessage = $"No app found with a name matching \"{appName}\"";
             LoadingMessage = null;
         }
 
@@ -649,7 +650,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         public bool CanResolveMissingApp(object arg = null)
         {
             return (PushNewAppToDebug && SelectedOrg != null && SelectedSpace != null)
-                || (DebugExistingApp && AppToDebug != null);
+                || (DebugExistingApp && SelectedApp != null);
         }
     }
 
