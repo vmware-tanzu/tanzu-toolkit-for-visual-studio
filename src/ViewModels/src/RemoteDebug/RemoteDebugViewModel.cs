@@ -260,6 +260,8 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 // again after _waitingOnAppConfirmation is set to false
                 return;
             }
+
+            // sanity check; AppToDebug should always be populated by this step
             if (AppToDebug == null)
             {
                 ErrorService.DisplayErrorDialog("Remote Debug Error", "Unable to identify app to debug.\n" +
@@ -272,9 +274,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             await EnsureDebuggingAgentInstalledOnRemoteAsync();
             if (!_debugAgentInstalled)
             {
-                ErrorService.DisplayErrorDialog("Remote Debug Error", "Failed to install remote debugging agent.\n" +
-                    "It may help to sign out of TAS & try debugging again after logging back in.\n" +
-                    "If this issue persists, please contact tas-vs-extension@vmware.com");
                 Close();
                 return;
             }
@@ -282,8 +281,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             CreateLaunchFileIfNonexistent();
             if (!_launchFileExists)
             {
-                ErrorService.DisplayErrorDialog("Unable to bind to remote debugging agent.", $"Failed to specify launch configuration \"{_launchFileName}\".\n" +
-                    $"It may help to try disconnecting & signing into TAS again; if this issue persists, please contact tas-vs-extension@vmware.com");
                 Close();
                 return;
             }
@@ -360,7 +357,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             var sshQuerySucceeded = sshResult.Succeeded && response != null;
             if (!sshQuerySucceeded)
             {
-                // TODO: clean up the error process here; should only see 1 error dialog in this error case (thrown from BeginRemoteDebuggingAsync)
                 Logger.Error("Unable to verify remote debugging agent; couldn't connect to {AppName} via SSH.", AppToDebug.AppName);
                 ErrorService.DisplayErrorDialog("Unable to verify remote debugging agent.", $"Couldn't connect to {AppToDebug.AppName} via SSH.");
                 Close();
@@ -381,7 +377,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 }
                 catch (InvalidRefreshTokenException)
                 {
-                    // TODO: clean up the error process here; should only see 1 error dialog in this error case (thrown from BeginRemoteDebuggingAsync)
                     _tasExplorer.AuthenticationRequired = true;
                     ErrorService.DisplayErrorDialog("Unable to initate remote debugging", $"Connection to {_tasExplorer.TasConnection.DisplayText} has expired; please log in again to re-authenticate.");
                     Close();
@@ -389,7 +384,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 }
                 catch (Exception ex)
                 {
-                    // TODO: clean up the error process here; should only see 1 error dialog in this error case (thrown from BeginRemoteDebuggingAsync)
                     Logger.Error("Something unexpected happened while installing remote debugging agent: {VsdbgInstallationException}", ex);
                     ErrorService.DisplayErrorDialog("Unable to initate remote debugging", $"Something unexpected happened while installing remote debugging agent. Please try again; if this issue persists, contact tas-vs-extension@vmware.com");
                     Close();
@@ -408,7 +402,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 }
                 else
                 {
-                    // TODO: clean up the error process here; should only see 1 error dialog in this error case (thrown from BeginRemoteDebuggingAsync)
                     Logger.Error("Unable to install remote debugging agent: {VsdbgInstallationExplanation}", vsdbgInstallationResult.Explanation);
                     ErrorService.DisplayErrorDialog("Unable to initate remote debugging", $"Something unexpected happened while installing remote debugging agent. Please try again; if this issue persists, contact tas-vs-extension@vmware.com");
                     Close();
@@ -467,6 +460,8 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             catch (Exception ex)
             {
                 Logger.Error("Failed to create launch file for remote debugging: {FileCreationException}", ex);
+                ErrorService.DisplayErrorDialog("Unable to attach to remote debugging agent.", $"Failed to specify launch configuration \"{_launchFileName}\".\n" +
+                    $"It may help to try disconnecting & signing into TAS again; if this issue persists, please contact tas-vs-extension@vmware.com");
                 _launchFileExists = false;
             }
         }
