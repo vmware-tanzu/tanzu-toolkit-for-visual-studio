@@ -46,8 +46,9 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private bool _debugAgentInstalled;
         private bool _launchFileExists;
         private const string _vsdbgInstallationBaseDir = "/home/vcap/app";
-        private const string _vsdbgDirName = "/vsdbg";
+        private const string _vsdbgDirName = "vsdbg";
         private const string _vsdbgExecutableName = "vsdbg";
+        private readonly string _pathToVsdbgOnVM;
         public static readonly string _launchFileName = "launch.json";
 
         public RemoteDebugViewModel(string expectedAppName, string pathToProjectRootDir, string targetFrameworkMoniker, string expectedPathToLaunchFile, Action initiateDebugCallback, IServiceProvider services) : base(services)
@@ -61,6 +62,8 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             _cfCliService = services.GetRequiredService<ICfCliService>();
             _dotnetCliService = services.GetRequiredService<IDotnetCliService>();
             _fileService = services.GetRequiredService<IFileService>();
+
+            _pathToVsdbgOnVM = _vsdbgInstallationBaseDir + "/" + _vsdbgDirName;
 
             _outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel)) as IView;
             _outputViewModel = _outputView?.ViewModel as IOutputViewModel;
@@ -326,11 +329,8 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         {
             LoadingMessage = "Checking Debugging Agent...";
             DetailedResult sshResult;
-            var expectedVsdbgBaseDirPath = _vsdbgInstallationBaseDir;
-            var vsdbgDirName = _vsdbgDirName;
-            var vsdbgLocation = Path.Combine(expectedVsdbgBaseDirPath, vsdbgDirName);
 
-            var sshCommand = $"ls {expectedVsdbgBaseDirPath}";
+            var sshCommand = $"ls {_pathToVsdbgOnVM}";
             try
             {
                 sshResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
@@ -351,10 +351,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             }
 
             var response = sshResult.CmdResult.StdOut;
-            var sshQuerySucceeded = sshResult.Succeeded
-                && response != null
-                && response.Contains("publish")
-                && response.Contains(".dll");
+            var sshQuerySucceeded = sshResult.Succeeded && response != null;
             if (!sshQuerySucceeded)
             {
                 // TODO: clean up the error process here; should only see 1 error dialog in this error case (thrown from BeginRemoteDebuggingAsync)
@@ -364,7 +361,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 return;
             }
 
-            _debugAgentInstalled = response.Contains("vsdbg");
+            _debugAgentInstalled = response.Contains(_vsdbgExecutableName);
             if (!_debugAgentInstalled)
             {
                 // TODO: find a way around lack of permissions for creating this directory 
@@ -375,7 +372,8 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 DetailedResult vsdbgInstallationResult;
                 try
                 {
-                    var installationSshCommand = $"curl -sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v {vsdbgVersion} -l {vsdbgLocation}";
+                    var installationSshCommand = $"curl -sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v {vsdbgVersion} -l {_pathToVsdbgOnVM}";
+                    
                     vsdbgInstallationResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, installationSshCommand);
                 }
                 catch (InvalidRefreshTokenException)
@@ -398,12 +396,12 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 var installationSucceeded = vsdbgInstallationResult.Succeeded
                     && vsdbgInstallationResult.CmdResult != null
                     && vsdbgInstallationResult.CmdResult.StdOut != null
-                    && vsdbgInstallationResult.CmdResult.StdOut.Contains($"Successfully installed vsdbg at '{vsdbgLocation}'");
+                    && vsdbgInstallationResult.CmdResult.StdOut.Contains($"Successfully installed vsdbg at '{_pathToVsdbgOnVM}'");
 
                 if (installationSucceeded)
                 {
                     _debugAgentInstalled = true;
-                    Logger.Information($"Successfully installed remote debugging agent for app '{AppToDebug.AppName}' at {vsdbgLocation}");
+                    Logger.Information($"Successfully installed remote debugging agent for app '{AppToDebug.AppName}' at {_pathToVsdbgOnVM}");
                 }
                 else
                 {

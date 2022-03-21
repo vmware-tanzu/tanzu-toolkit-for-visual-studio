@@ -42,6 +42,11 @@ namespace Tanzu.Toolkit.Services.DotnetCli
                 var publishArgs = $"publish -f {targetFrameworkMoniker} -r {runtimeIdentifier} -c {configuration} -o {outputDirName} --self-contained";
                 var publishProcess = _commandProcessService.StartProcess(_dotnetCliExecutable, publishArgs, projectDir, stdOutDelegate: StdOutCallback, stdErrDelegate: StdErrCallback);
                 await Task.Run(() => publishProcess.WaitForExit());
+
+                var expectedVsdbgInstallationDirName = "vsdbg";
+                var vsdbgInstallationDir = Path.Combine(projectDir, outputDirName, expectedVsdbgInstallationDirName);
+                var dirInfo = Directory.CreateDirectory(vsdbgInstallationDir);
+
                 return publishProcess.ExitCode == 0;
             }
             catch (Exception ex)
