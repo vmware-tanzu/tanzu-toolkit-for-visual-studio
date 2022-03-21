@@ -373,7 +373,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 try
                 {
                     var installationSshCommand = $"curl -sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v {vsdbgVersion} -l {_pathToVsdbgOnVM}";
-                    
+
                     vsdbgInstallationResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, installationSshCommand);
                 }
                 catch (InvalidRefreshTokenException)
@@ -458,8 +458,8 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                     };
                     var newLaunchFileContents = JsonSerializer.Serialize(launchFileConfig);
                     _fileService.WriteTextToFile(_expectedPathToLaunchFile, newLaunchFileContents);
-                    _launchFileExists = true;
                 }
+                _launchFileExists = true;
             }
             catch (Exception ex)
             {
