@@ -98,6 +98,7 @@
     </Compile>
     <Compile Include="Views\Converters\ListToStringConverter.cs" />
     <Compile Include="Views\Converters\PageNumberConverter.cs" />
+    <Compile Include="Views\Converters\StringNullVisibilityConverter.cs" />
     <Compile Include="Views\Converters\VisibilityConverter.cs" />
     <Compile Include="Views\IOutputView.cs" />
     <Compile Include="Views\IAppDeletionConfirmationView.cs" />

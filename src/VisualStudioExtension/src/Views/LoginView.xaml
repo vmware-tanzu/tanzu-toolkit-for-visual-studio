@@ -23,6 +23,7 @@
         <converters:VisibilityConverter x:Key="Visibility" />
         <converters:VisibilityConverter x:Key="CollapsedVisibility" ReserveSpace="False" />
         <converters:VisibilityConverter x:Key="InverseCollapsedVisibility" ReserveSpace="False" Reversed="True"/>
+        <converters:StringNullVisibilityConverter x:Key="StringNullVisibility" ReserveSpace="False" Reversed="False"/>
         <converters:PageNumberConverter x:Key="Page1Displayer" ShowValue="1" ReserveSpace="False"/>
         <converters:PageNumberConverter x:Key="Page2Displayer" ShowValue="2" ReserveSpace="False"/>
         <converters:PageNumberConverter x:Key="Page3Displayer" ShowValue="3" ReserveSpace="False"/>
@@ -114,6 +115,7 @@
 
                 <TextBlock
                     Text="{Binding ApiAddressError}"
+                    Visibility="{Binding ApiAddressError, Converter={StaticResource StringNullVisibility}}"
                     Foreground="Red"
                     TextWrapping="Wrap"
                     Grid.Row="1" />
