@@ -756,7 +756,7 @@ namespace Tanzu.Toolkit.ViewModels
 
             var deploymentResult = await TasExplorerViewModel.TasConnection.CfClient.DeployAppAsync(
                 ManifestModel,
-                DeploymentDirectoryPath,
+                PathToProjectRootDir,
                 SelectedSpace.ParentOrg.ParentCf,
                 SelectedSpace.ParentOrg,
                 SelectedSpace,
