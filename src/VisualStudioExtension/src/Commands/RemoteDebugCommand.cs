@@ -8,15 +8,10 @@ using System;
 using System.ComponentModel.Design;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
-using Tanzu.Toolkit.Services.CfCli;
-using Tanzu.Toolkit.Services.CloudFoundry;
-using Tanzu.Toolkit.Services.Dialog;
-using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
-using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.ViewModels.RemoteDebug;
 using Tanzu.Toolkit.VisualStudio.Services;
+using Task = System.Threading.Tasks.Task;
 
 namespace Tanzu.Toolkit.VisualStudio
 {
