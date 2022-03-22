@@ -18,7 +18,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
     public class RemoteDebugViewModel : AbstractViewModel, IRemoteDebugViewModel
     {
         private readonly ITasExplorerViewModel _tasExplorer;
-        private readonly ICloudFoundryService _cfClient;
+        private ICloudFoundryService _cfClient;
         private readonly ICfCliService _cfCliService;
         private readonly IDotnetCliService _dotnetCliService;
         private readonly IFileService _fileService;
@@ -35,6 +35,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private CloudFoundryApp _appToDebug;
         private bool _debugExistingApp;
         private bool _pushNewAppToDebug;
+        private bool _isLoggedIn;
         private string _option1Text;
         private string _option2Text;
         private List<CloudFoundryOrganization> _orgOptions;
@@ -72,22 +73,16 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             _outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel)) as IView;
             _outputViewModel = _outputView?.ViewModel as IOutputViewModel;
 
-            if (_tasExplorer == null || _tasExplorer.TasConnection == null)
-            {
-                DialogService.ShowDialog(typeof(LoginViewModel).Name);
-            }
-            if (_tasExplorer == null || _tasExplorer.TasConnection == null)
-            {
-                Close();
-                return;
-            }
-            _cfClient = _tasExplorer.TasConnection.CfClient;
-
             Option1Text = $"Push new version of \"{expectedAppName}\" to debug";
             Option2Text = $"Select existing app to debug";
             AppToDebug = null;
+            LoadingMessage = null;
 
-            var _ = BeginRemoteDebuggingAsync(expectedAppName);
+            IsLoggedIn = _tasExplorer != null && _tasExplorer.TasConnection != null;
+            if (IsLoggedIn)
+            {
+                var _ = BeginRemoteDebuggingAsync(expectedAppName);
+            }
         }
 
         // Properties //
@@ -95,6 +90,35 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         public Action ViewOpener { get; set; }
 
         public Action ViewCloser { get; set; }
+
+        public bool WaitingOnAppConfirmation
+        {
+            get => _waitingOnAppConfirmation;
+            set
+            {
+                _waitingOnAppConfirmation = value;
+                RaisePropertyChangedEvent("WaitingOnAppConfirmation");
+            }
+        }
+
+        public bool IsLoggedIn
+        {
+            get { return _isLoggedIn; }
+            set
+            {
+                if (value && _tasExplorer != null && _tasExplorer.TasConnection != null)
+                {
+                    _isLoggedIn = true;
+                    _cfClient = _tasExplorer.TasConnection.CfClient;
+                    var _ = BeginRemoteDebuggingAsync(_expectedAppName);
+                }
+                else if (!value)
+                {
+                    _isLoggedIn = false;
+                }
+                RaisePropertyChangedEvent("IsLoggedIn");
+            }
+        }
 
         public List<CloudFoundryApp> AccessibleApps
         {
@@ -250,14 +274,24 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         // Methods //
 
+        public void OpenLoginView(object arg = null)
+        {
+            _tasExplorer.OpenLoginView(arg);
+
+            if (_tasExplorer.TasConnection != null)
+            {
+                IsLoggedIn = true;
+            }
+        }
+
         public async Task BeginRemoteDebuggingAsync(string appName)
         {
             await EstablishAppToDebugAsync(appName);
-            if (_waitingOnAppConfirmation)
+            if (WaitingOnAppConfirmation)
             {
                 // resolution delegated to UI;
                 // once a decision is made, this method should be called
-                // again after _waitingOnAppConfirmation is set to false
+                // again after WaitingOnAppConfirmation is set to false
                 return;
             }
 
@@ -298,14 +332,14 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             AppToDebug = AccessibleApps.FirstOrDefault(app => app.AppName == expectedAppName);
             if (AppToDebug == null)
             {
-                _waitingOnAppConfirmation = true;
+                WaitingOnAppConfirmation = true;
                 var _ = PromptAppResolutionAsync(expectedAppName);
             }
         }
 
         public async Task ResolveMissingAppAsync(object arg = null)
         {
-            _waitingOnAppConfirmation = false;
+            WaitingOnAppConfirmation = false;
 
             if (PushNewAppToDebug)
             {
@@ -520,6 +554,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             await UpdateCfOrgOptions();
             DialogMessage = $"No app found with a name matching \"{appName}\"";
             LoadingMessage = null;
+            WaitingOnAppConfirmation = true;
         }
 
         private async Task PushNewAppWithDebugConfigurationAsync()
