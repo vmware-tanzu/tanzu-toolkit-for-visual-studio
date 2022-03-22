@@ -3,7 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Name="OutputViewElement">
-    
+
     <UserControl.Resources>
         <Style x:Key="ToggleButtonStyle" TargetType="{x:Type ToggleButton}">
             <Setter Property="BorderThickness" Value="1"/>
@@ -63,12 +63,39 @@
                 </MultiTrigger>
             </Style.Triggers>
         </Style>
-        
         <ControlTemplate x:Key="ToggleButtonTemplate" TargetType="{x:Type ToggleButton}">
             <ContentPresenter/>
         </ControlTemplate>
+
+        <Style x:Key="ClearButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="Width" Value="32px"/>
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center"                  
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Trigger.Setters>
+                        <Setter Property="Background" Value="{Binding ElementName=OutputViewElement, Path=ListItemMouseOverBrush}" />
+                    </Trigger.Setters>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <ControlTemplate x:Key="ClearButtonTemplate" TargetType="{x:Type Button}">
+            <ContentPresenter/>
+        </ControlTemplate>
     </UserControl.Resources>
-    
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="32"/>
@@ -90,8 +117,17 @@
                     Margin="6"
                     />
             </ToggleButton>
+            <Button
+                ToolTip="Clear"
+                Command="{Binding ElementName=OutputViewElement, Path=ClearContentCommand}"
+                Style="{DynamicResource ClearButtonStyle}">
+                <Image
+                    Source="Resources/ClearWindowContent.png"
+                    Width="16px"
+                    Height="16px"/>
+            </Button>
         </StackPanel>
-        
+
         <ScrollViewer
             x:Name="OutputScrollViewer"
             Grid.Row="1"

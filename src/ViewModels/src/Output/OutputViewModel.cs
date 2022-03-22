@@ -34,5 +34,10 @@ namespace Tanzu.Toolkit.ViewModels
             ActiveProcess?.Kill();
             ActiveProcess?.Dispose();
         }
+
+        public void ClearContent(object arg = null)
+        {
+            OutputContent = string.Empty;
+        }
     }
 }

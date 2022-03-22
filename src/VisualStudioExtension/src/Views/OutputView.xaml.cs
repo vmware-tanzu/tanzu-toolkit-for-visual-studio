@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.VisualStudio.Services;
+using Tanzu.Toolkit.VisualStudio.Views.Commands;
 
 namespace Tanzu.Toolkit.VisualStudio.Views
 {
@@ -12,9 +14,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
     /// </summary>
     public partial class OutputView : UserControl, IOutputView, IView
     {
-        private IServiceProvider _services;
-        private IOutputViewModel _viewModel;
-
+        public ICommand ClearContentCommand { get; set; }
         public IViewModel ViewModel { get; private set; }
 
         public static readonly DependencyProperty ListItemMouseOverBrushProperty = DependencyProperty.Register("ListItemMouseOverBrush", typeof(Brush), typeof(OutputView), new PropertyMetadata(default(Brush)));
@@ -34,11 +34,13 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         public OutputView(IOutputViewModel viewModel, IServiceProvider services, IThemeService themeService)
         {
-            _services = services;
+            bool alwaysTrue(object arg) { return true; }
+
             themeService.SetTheme(this);
             DataContext = viewModel;
-            _viewModel = viewModel;
             ViewModel = viewModel as IViewModel;
+
+            ClearContentCommand = new DelegatingCommand(viewModel.ClearContent, alwaysTrue);
 
             InitializeComponent();
         }

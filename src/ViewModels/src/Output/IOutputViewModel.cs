@@ -9,5 +9,6 @@ namespace Tanzu.Toolkit.ViewModels
 
         void AppendLine(string newContent);
         void CancelActiveProcess();
+        void ClearContent(object arg = null);
     }
 }
