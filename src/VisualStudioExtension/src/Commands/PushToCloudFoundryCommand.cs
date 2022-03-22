@@ -118,23 +118,42 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                 {
                     var projectDirectory = Path.GetDirectoryName(proj.FullName);
 
-                    var tfm = proj.Properties.Item("FriendlyTargetFramework").Value.ToString();
-                    if (tfm.StartsWith(".NETFramework") && !File.Exists(Path.Combine(projectDirectory, "Web.config")))
+                    var tfm = "netstandard2.1"; // fallback value
+                    try
                     {
-                        var msg = $"This project appears to target .NET Framework; pushing it to Tanzu Application Service requires a 'Web.config' file at it's base directory, but none was found in {projectDirectory}";
-                        _dialogService.DisplayErrorDialog("Unable to push to Tanzu Application Service", msg);
+                        tfm = proj.Properties.Item("FriendlyTargetFramework").Value.ToString();
                     }
-                    else
+                    catch (ArgumentException)
                     {
-                        var viewModel = new DeploymentDialogViewModel(_services, proj.Name, projectDirectory, tfm);
-                        var view = new DeploymentDialogView(viewModel, new ThemeService());
-
-                        view.ShowDialog();
-
-                        // * Actions to take after modal closes:
-                        if (viewModel.DeploymentInProgress) // don't open tool window if modal was closed via "X" button
+                        tfm = proj.Properties.Item("TargetFrameworkMoniker").Value.ToString();
+                    }
+                    finally
+                    {
+                        if (tfm == null)
                         {
-                            viewModel.OutputView.Show();
+                            _dialogService.DisplayWarningDialog(
+                                "Unable to identify target framework",
+                                "Proceeding with default target framework 'netstandard2.1'.\n" +
+                                "If this is not intended and the issue persists, please reach out to tas-vs-extension@vmware.com");
+                        }
+
+                        if (tfm.StartsWith(".NETFramework") && !File.Exists(Path.Combine(projectDirectory, "Web.config")))
+                        {
+                            var msg = $"This project appears to target .NET Framework; pushing it to Tanzu Application Service requires a 'Web.config' file at it's base directory, but none was found in {projectDirectory}";
+                            _dialogService.DisplayErrorDialog("Unable to push to Tanzu Application Service", msg);
+                        }
+                        else
+                        {
+                            var viewModel = new DeploymentDialogViewModel(_services, proj.Name, projectDirectory, tfm);
+                            var view = new DeploymentDialogView(viewModel, new ThemeService());
+
+                            view.ShowDialog();
+
+                            // * Actions to take after modal closes:
+                            if (viewModel.DeploymentInProgress) // don't open tool window if modal was closed via "X" button
+                            {
+                                viewModel.OutputView.Show();
+                            }
                         }
                     }
                 }
