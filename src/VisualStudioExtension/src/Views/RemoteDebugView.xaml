@@ -15,7 +15,7 @@
     Icon="Resources/tas_16px.png"
     BorderThickness="0"
     ResizeMode="NoResize"
-    WindowStyle="ToolWindow"
+    WindowStyle="SingleBorderWindow"
     WindowStartupLocation="CenterScreen"
     SizeToContent="WidthAndHeight"
     toolkit:Themes.UseVsTheme="True"
@@ -23,12 +23,33 @@
 
     <ui:DialogWindow.Resources>
         <converters:VisibilityConverter x:Key="VisibilityConverter" ReserveSpace="False"/>
+        <converters:VisibilityConverter x:Key="VisibilityConverterReversed" ReserveSpace="False" Reversed="True"/>
         <converters:NullVisibilityConverter x:Key="NullVisibilityConverter" ReserveSpace="False" Reversed="True"/>
         <converters:StringNullVisibilityConverter x:Key="StringVisibilityConverter" ReserveSpace="False" Reversed="False"/>
         <converters:StringNullVisibilityConverter x:Key="StringVisibilityConverterReversed" ReserveSpace="False" Reversed="True"/>
     </ui:DialogWindow.Resources>
 
     <DockPanel Margin="16">
+        <StackPanel Orientation="Horizontal" Margin="12" DockPanel.Dock="Top">
+            <Image
+                Source="Resources/tasicon.png"
+                Width="32"
+                Margin="4"
+                Grid.Row="0"
+                Grid.Column="0"
+                RenderOptions.BitmapScalingMode="Fant"/>
+            <TextBlock FontSize="24" Text="Remote Debug on Tanzu Application Service" Margin="4" Grid.Row="0" Grid.Column="1"/>
+        </StackPanel>
+        
+        <Button
+            DockPanel.Dock="Top"
+            ToolTip="Login to Tanzu Application Service"
+            Visibility="{Binding IsLoggedIn, Converter={StaticResource VisibilityConverterReversed}}"
+            Command ="{ Binding ElementName=RemoteDebugViewElement, Path=OpenLoginViewCommand }">
+
+            <local:LoginPromptButton/>
+        </Button>
+        
         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Visibility="{Binding LoadingMessage, Converter={StaticResource StringVisibilityConverter}}">
             <local:Spinner/>
             <TextBlock Text="{Binding LoadingMessage}"/>
@@ -38,8 +59,8 @@
             <TextBlock Text="{Binding DialogMessage}" TextWrapping="Wrap" MaxWidth="500" HorizontalAlignment="Left"/>
 
             <Separator Margin="8" Visibility="Hidden"/>
-            <CheckBox IsChecked="{Binding PushNewAppToDebug, Mode=TwoWay}" Content="{Binding Option1Text}"/>
-            <CheckBox IsChecked="{Binding DebugExistingApp, Mode=TwoWay}" Content="{Binding Option2Text}"/>
+            <CheckBox IsChecked="{Binding PushNewAppToDebug, Mode=TwoWay}" Content="{Binding Option1Text}" Visibility="{Binding WaitingOnAppConfirmation, Converter={StaticResource VisibilityConverter}}"/>
+            <CheckBox IsChecked="{Binding DebugExistingApp, Mode=TwoWay}" Content="{Binding Option2Text}" Visibility="{Binding WaitingOnAppConfirmation, Converter={StaticResource VisibilityConverter}}"/> 
 
             <Separator Margin="8" Visibility="Hidden"/>
             <Grid Visibility="{Binding PushNewAppToDebug, Converter={StaticResource VisibilityConverter}}">

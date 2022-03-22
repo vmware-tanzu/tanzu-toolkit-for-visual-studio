@@ -20,5 +20,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         Task EnsureDebuggingAgentInstalledOnRemoteAsync();
         Task BeginRemoteDebuggingAsync(string appName);
         Task EstablishAppToDebugAsync(string expectedAppName);
+        void OpenLoginView(object arg = null);
     }
 }
