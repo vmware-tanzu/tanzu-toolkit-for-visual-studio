@@ -12,6 +12,7 @@ using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.CommandProcess;
 using Tanzu.Toolkit.Services.DataPersistence;
 using Tanzu.Toolkit.Services.Dialog;
+using Tanzu.Toolkit.Services.DotnetCli;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
@@ -37,6 +38,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         protected Mock<ITasExplorerViewModel> MockTasExplorerViewModel { get; set; }
         protected Mock<ISerializationService> MockSerializationService { get; set; }
         protected Mock<IDataPersistenceService> MockDataPersistenceService { get; set; }
+        protected Mock<IDotnetCliService> MockDotnetCliService { get; set; }
         protected Mock<ILoginViewModel> MockLoginViewModel { get; set; }
         protected Mock<IAppDeletionConfirmationViewModel> MockAppDeletionConfirmationViewModel { get; set; }
 
@@ -329,6 +331,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockTasExplorerViewModel = new Mock<ITasExplorerViewModel>();
             MockSerializationService = new Mock<ISerializationService>();
             MockDataPersistenceService = new Mock<IDataPersistenceService>();
+            MockDotnetCliService = new Mock<IDotnetCliService>();
             MockLoginViewModel = new Mock<ILoginViewModel>();
             MockAppDeletionConfirmationViewModel = new Mock<IAppDeletionConfirmationViewModel>();
 
@@ -346,6 +349,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             services.AddSingleton(MockFileService.Object);
             services.AddSingleton(MockSerializationService.Object);
             services.AddSingleton(MockDataPersistenceService.Object);
+            services.AddSingleton(MockDotnetCliService.Object);
             services.AddSingleton(MockLoginViewModel.Object);
             services.AddSingleton(MockAppDeletionConfirmationViewModel.Object);
 
