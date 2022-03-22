@@ -139,6 +139,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
                 throw new NotImplementedException();
             }
+
+            public void ClearContent(object arg = null)
+            {
+                throw new NotImplementedException();
+            }
         }
 
 
