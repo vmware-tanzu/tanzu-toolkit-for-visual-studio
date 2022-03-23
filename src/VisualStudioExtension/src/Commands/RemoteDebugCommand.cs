@@ -117,19 +117,44 @@ namespace Tanzu.Toolkit.VisualStudio
                 var projectUniqueName = project.UniqueName;
                 var projectDirectory = Path.GetDirectoryName(project.FullName);
                 var solutionDirectory = Path.GetDirectoryName(dte.Solution.FullName);
-                var targetFrameworkMoniker = project.Properties.Item("FriendlyTargetFramework").Value.ToString();
-                var launchFilePath = Path.Combine(projectDirectory, RemoteDebugViewModel._launchFileName);
-                var initiateDebugCallback = new Action(() =>
+                var tfm = "netstandard2.1"; // fallback value
+                try
                 {
-                    dte.ExecuteCommand("DebugAdapterHost.Logging /On /OutputWindow");
-                    dte.ExecuteCommand("DebugAdapterHost.Launch", $"/LaunchJson:\"{launchFilePath}\"");
-                });
+                    tfm = project.Properties.Item("FriendlyTargetFramework").Value.ToString();
+                }
+                catch (ArgumentException)
+                {
+                    tfm = project.Properties.Item("TargetFrameworkMoniker").Value.ToString();
+                }
+                finally
+                {
+                    if (tfm == null)
+                    {
+                        var errorTitle = "Unable to identify target framework";
+                        var errorMsg = $"Proceeding with default target framework 'netstandard2.1'.\n" +
+                            "If this is not intended and the issue persists, please reach out to tas-vs-extension@vmware.com";
+                        VsShellUtilities.ShowMessageBox(
+                            package,
+                            errorMsg,
+                            errorTitle,
+                            OLEMSGICON.OLEMSGICON_CRITICAL,
+                        OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                        OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                    }
 
-                var remoteDebugViewModel = new RemoteDebugViewModel(projectName, projectDirectory, targetFrameworkMoniker, launchFilePath, initiateDebugCallback, services: _services) as IRemoteDebugViewModel;
-                var view = new RemoteDebugView(remoteDebugViewModel, new ThemeService());
-                remoteDebugViewModel.ViewOpener = view.Show;
-                remoteDebugViewModel.ViewCloser = view.Hide;
-                view.ShowDialog(); // open & wait
+                    var launchFilePath = Path.Combine(projectDirectory, RemoteDebugViewModel._launchFileName);
+                    var initiateDebugCallback = new Action(() =>
+                    {
+                        dte.ExecuteCommand("DebugAdapterHost.Logging /On /OutputWindow");
+                        dte.ExecuteCommand("DebugAdapterHost.Launch", $"/LaunchJson:\"{launchFilePath}\"");
+                    });
+
+                    var remoteDebugViewModel = new RemoteDebugViewModel(projectName, projectDirectory, tfm, launchFilePath, initiateDebugCallback, services: _services) as IRemoteDebugViewModel;
+                    var view = new RemoteDebugView(remoteDebugViewModel, new ThemeService());
+                    remoteDebugViewModel.ViewOpener = view.Show;
+                    remoteDebugViewModel.ViewCloser = view.Hide;
+                    view.ShowDialog(); // open & wait
+                }
             }
             catch (Exception ex)
             {
