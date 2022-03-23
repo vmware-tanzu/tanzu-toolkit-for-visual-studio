@@ -59,8 +59,8 @@
             <TextBlock Text="{Binding DialogMessage}" TextWrapping="Wrap" MaxWidth="500" HorizontalAlignment="Left"/>
 
             <Separator Margin="8" Visibility="Hidden"/>
-            <CheckBox IsChecked="{Binding PushNewAppToDebug, Mode=TwoWay}" Content="{Binding Option1Text}" Visibility="{Binding WaitingOnAppConfirmation, Converter={StaticResource VisibilityConverter}}"/>
-            <CheckBox IsChecked="{Binding DebugExistingApp, Mode=TwoWay}" Content="{Binding Option2Text}" Visibility="{Binding WaitingOnAppConfirmation, Converter={StaticResource VisibilityConverter}}"/>
+            <RadioButton IsChecked="{Binding PushNewAppToDebug, Mode=TwoWay}" Content="{Binding Option1Text}" Visibility="{Binding WaitingOnAppConfirmation, Converter={StaticResource VisibilityConverter}}"/>
+            <RadioButton IsChecked="{Binding DebugExistingApp, Mode=TwoWay}" Content="{Binding Option2Text}" Visibility="{Binding WaitingOnAppConfirmation, Converter={StaticResource VisibilityConverter}}"/>
 
             <Separator Margin="8" Visibility="Hidden"/>
             <Grid Visibility="{Binding PushNewAppToDebug, Converter={StaticResource VisibilityConverter}}">
