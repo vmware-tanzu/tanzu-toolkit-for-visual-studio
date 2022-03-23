@@ -30,7 +30,7 @@
     </ui:DialogWindow.Resources>
 
     <DockPanel Margin="16">
-        <StackPanel Orientation="Horizontal" Margin="12" DockPanel.Dock="Top">
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,12" DockPanel.Dock="Top">
             <Image
                 Source="Resources/tasicon.png"
                 Width="32"
