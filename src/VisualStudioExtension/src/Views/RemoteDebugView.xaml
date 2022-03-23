@@ -13,9 +13,9 @@
     Title="Remote Debug"
     Name="RemoteDebugViewElement"
     Icon="Resources/tas_16px.png"
-    BorderThickness="0"
+    BorderThickness="1"
     ResizeMode="NoResize"
-    WindowStyle="SingleBorderWindow"
+    WindowStyle="None"
     WindowStartupLocation="CenterScreen"
     SizeToContent="WidthAndHeight"
     toolkit:Themes.UseVsTheme="True"
@@ -40,7 +40,7 @@
                 RenderOptions.BitmapScalingMode="Fant"/>
             <TextBlock FontSize="24" Text="Remote Debug on Tanzu Application Service" Margin="4" Grid.Row="0" Grid.Column="1"/>
         </StackPanel>
-        
+
         <Button
             DockPanel.Dock="Top"
             ToolTip="Login to Tanzu Application Service"
@@ -49,7 +49,7 @@
 
             <local:LoginPromptButton/>
         </Button>
-        
+
         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Visibility="{Binding LoadingMessage, Converter={StaticResource StringVisibilityConverter}}">
             <local:Spinner/>
             <TextBlock Text="{Binding LoadingMessage}"/>
@@ -60,7 +60,7 @@
 
             <Separator Margin="8" Visibility="Hidden"/>
             <CheckBox IsChecked="{Binding PushNewAppToDebug, Mode=TwoWay}" Content="{Binding Option1Text}" Visibility="{Binding WaitingOnAppConfirmation, Converter={StaticResource VisibilityConverter}}"/>
-            <CheckBox IsChecked="{Binding DebugExistingApp, Mode=TwoWay}" Content="{Binding Option2Text}" Visibility="{Binding WaitingOnAppConfirmation, Converter={StaticResource VisibilityConverter}}"/> 
+            <CheckBox IsChecked="{Binding DebugExistingApp, Mode=TwoWay}" Content="{Binding Option2Text}" Visibility="{Binding WaitingOnAppConfirmation, Converter={StaticResource VisibilityConverter}}"/>
 
             <Separator Margin="8" Visibility="Hidden"/>
             <Grid Visibility="{Binding PushNewAppToDebug, Converter={StaticResource VisibilityConverter}}">
@@ -156,7 +156,10 @@
             </ListView>
 
             <Separator Margin="4" Visibility="Hidden"/>
-            <Button Content="OK" Margin="4" Command="{Binding ElementName=RemoteDebugViewElement, Path=ResolveMissingAppCommand}" HorizontalAlignment="Right"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel" Margin="4" Command="{Binding ElementName=RemoteDebugViewElement, Path=CancelCommand}" HorizontalAlignment="Right"/>
+                <Button Content="OK" Margin="4" Command="{Binding ElementName=RemoteDebugViewElement, Path=ResolveMissingAppCommand}" HorizontalAlignment="Right"/>
+            </StackPanel>
         </StackPanel>
     </DockPanel>
 </ui:DialogWindow>
