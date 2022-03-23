@@ -544,7 +544,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             }
         }
 
-        public void Close()
+        public void Close(object arg = null)
         {
             ViewCloser?.Invoke();
         }

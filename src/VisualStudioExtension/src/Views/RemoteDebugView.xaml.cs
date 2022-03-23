@@ -13,6 +13,7 @@ namespace Tanzu.Toolkit.VisualStudio
     /// </summary>
     public partial class RemoteDebugView : DialogWindow, IRemoteDebugView
     {
+        public ICommand CancelCommand { get; }
         public ICommand OpenLoginViewCommand { get; }
         public ICommand ResolveMissingAppCommand { get; }
 
@@ -22,6 +23,7 @@ namespace Tanzu.Toolkit.VisualStudio
 
             themeService.SetTheme(this);
             DataContext = viewModel;
+            CancelCommand = new DelegatingCommand(viewModel.Close, alwaysTrue);
             OpenLoginViewCommand = new DelegatingCommand(viewModel.OpenLoginView, alwaysTrue);
             ResolveMissingAppCommand = new AsyncDelegatingCommand(viewModel.ResolveMissingAppAsync, viewModel.CanResolveMissingApp);
             MouseDown += Window_MouseDown;
