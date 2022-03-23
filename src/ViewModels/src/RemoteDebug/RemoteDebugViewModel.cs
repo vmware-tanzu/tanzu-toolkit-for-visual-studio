@@ -392,7 +392,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             var sshQuerySucceeded = sshResult.Succeeded && response != null;
             if (!sshQuerySucceeded)
             {
-                Logger.Error("Unable to verify remote debugging agent; couldn't connect to {AppName} via SSH.", AppToDebug.AppName);
+                Logger.Error("Unable to verify remote debugging agent; couldn't connect to {AppName} via SSH. StdOut: {SshQueryStdOut}, StdErr: {SshQueryStdErr}, Exception: {SshQueryException}", AppToDebug.AppName, sshResult.CmdResult.StdOut, sshResult.CmdResult.StdErr, sshResult.Explanation);
                 ErrorService.DisplayErrorDialog("Unable to verify remote debugging agent.", $"Couldn't connect to {AppToDebug.AppName} via SSH.");
                 Close();
                 return;
