@@ -447,7 +447,7 @@ namespace Tanzu.Toolkit.Services.CfCli
 
         public async Task<DetailedResult> ExecuteSshCommand(string appName, string orgName, string spaceName, string sshCommand)
         {
-            var args = $"ssh {appName} -c \"{sshCommand}\"";
+            var args = $"ssh {appName} -c \"{sshCommand.Replace("\"", "\\\"")}\"";
             Task<DetailedResult> sshTask;
             lock (_cfEnvironmentLock)
             {
