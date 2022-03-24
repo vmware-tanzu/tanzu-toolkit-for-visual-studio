@@ -636,6 +636,85 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             };
         }
 
+        public async Task<DetailedResult<List<CfService>>> GetServicesAsync(string apiAddress, int retryAmount = 1)
+        {
+            string accessToken;
+            try
+            {
+                accessToken = _cfCliService.GetOAuthToken();
+            }
+            catch (InvalidRefreshTokenException)
+            {
+                var msg = "Unable to retrieve services because the connection has expired. Please log back in to re-authenticate.";
+                _logger.Information(msg);
+
+                return new DetailedResult<List<CfService>>
+                {
+                    Succeeded = false,
+                    Explanation = msg,
+                    Content = null,
+                    FailureType = FailureType.InvalidRefreshToken,
+                };
+            }
+
+            if (accessToken == null)
+            {
+                _logger.Error("CloudFoundryService attempted to get services but was unable to look up an access token.");
+
+                return new DetailedResult<List<CfService>>()
+                {
+                    Succeeded = false,
+                    Explanation = $"CloudFoundryService attempted to get services but was unable to look up an access token.",
+                };
+            }
+
+            List<Service> servicesFromApi;
+            try
+            {
+                servicesFromApi = await _cfApiClient.ListServices(apiAddress, accessToken);
+            }
+            catch (Exception originalException)
+            {
+                if (retryAmount > 0)
+                {
+                    _logger.Information("GetServicesAsync caught an exception when trying to retrieve services: {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).", originalException.Message, retryAmount);
+                    _cfCliService.ClearCachedAccessToken();
+                    retryAmount -= 1;
+                    return await GetServicesAsync(apiAddress, retryAmount);
+                }
+                else
+                {
+                    _logger.Error("{Error}. See logs for more details: toolkit-diagnostics.log", originalException.Message);
+
+                    return new DetailedResult<List<CfService>>()
+                    {
+                        Succeeded = false,
+                        Explanation = originalException.Message,
+                    };
+                }
+            }
+
+            var services = new List<CfService>();
+
+            foreach (var service in servicesFromApi)
+            {
+                if (string.IsNullOrWhiteSpace(service.Name))
+                {
+                    _logger.Error("CloudFoundryService.GetServicesAsync encountered a service without a name; omitting it from the returned list of services.");
+                }
+                else
+                {
+                    services.Add(new CfService { Name = service.Name});
+                }
+            }
+
+            return new DetailedResult<List<CfService>>()
+            {
+                Succeeded = true,
+                Content = services,
+            };
+        }
+
         /// <summary>
         /// Stop <paramref name="app"/> using token from <see cref="CfCliService"/>.
         /// <para>

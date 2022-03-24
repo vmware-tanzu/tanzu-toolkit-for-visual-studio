@@ -1168,6 +1168,209 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         }
 
         [TestMethod]
+        [TestCategory("GetServices")]
+        public async Task GetServicesAsync_ReturnsSuccessfulResult_WhenListServicesSucceeds()
+        {
+            var fakeServ1 = new Service
+            {
+                Name = "Serv1",
+            };
+            var fakeServ2 = new Service
+            {
+                Name = "Serv2",
+            };
+            var fakeServ3 = new Service
+            {
+                Name = "Serv3",
+            };
+
+            var fakeServicesResponse = new List<Service> { fakeServ1, fakeServ2, fakeServ3 };
+
+            var expectedResultContent = new List<CfService>
+            {
+                new CfService
+                {
+                    Name = fakeServ1.Name,
+                },
+                new CfService
+                {
+                    Name = fakeServ2.Name,
+                },
+                new CfService
+                {
+                    Name = fakeServ3.Name,
+                },
+            };
+
+            _mockCfCliService.Setup(m => m.GetOAuthToken()).Returns(_fakeAccessToken);
+
+            _mockCfApiClient.Setup(m => m.ListServices(_fakeValidTarget, _fakeAccessToken)).ReturnsAsync(fakeServicesResponse);
+
+            var result = await _sut.GetServicesAsync(_fakeValidTarget);
+
+            Assert.IsTrue(result.Succeeded);
+            Assert.AreEqual(expectedResultContent.Count, result.Content.Count);
+            foreach (var bp in result.Content)
+            {
+                Assert.IsTrue(expectedResultContent.Any(originalService => originalService.Name == bp.Name));
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("GetServices")]
+        public async Task GetServicesAsync_ReturnsFailedResult_WhenTokenRetrievalThrowsInvalidRefreshTokenException()
+        {
+
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Throws(new InvalidRefreshTokenException());
+
+            var result = await _sut.GetServicesAsync(_fakeValidTarget);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.AreEqual(null, result.CmdResult);
+            Assert.AreEqual(null, result.Content);
+            Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
+        }
+
+        [TestMethod]
+        [TestCategory("GetServices")]
+        public async Task GetServicesAsync_ReturnsFailedResult_WhenListServicesThrowsException()
+        {
+            var fakeExceptionMsg = "junk";
+
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns(_fakeValidAccessToken);
+
+            _mockCfApiClient.Setup(m => m.
+                ListServices(_fakeValidTarget, _fakeValidAccessToken))
+                    .Throws(new Exception(fakeExceptionMsg));
+
+            var result = await _sut.GetServicesAsync(_fakeValidTarget);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsNull(result.CmdResult);
+            Assert.IsNull(result.Content);
+
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("GetServices")]
+        public async Task GetServicesAsync_RetriesWithFreshToken_WhenListServicesThrowsException()
+        {
+            var fakeExceptionMsg = "junk";
+            var fakeServ1 = new Service
+            {
+                Name = "Serv1",
+            };
+            var fakeServ2 = new Service
+            {
+                Name = "Serv2",
+            };
+            var fakeServ3 = new Service
+            {
+                Name = "Serv3",
+            };
+
+            var fakeServicesResponse = new List<Service> { fakeServ1, fakeServ2, fakeServ3 };
+
+            var expectedResultContent = new List<CfService>
+            {
+                new CfService
+                {
+                    Name = fakeServ1.Name,
+                },
+                new CfService
+                {
+                    Name = fakeServ2.Name,
+                },
+                new CfService
+                {
+                    Name = fakeServ3.Name,
+                },
+            };
+
+            _mockCfCliService.SetupSequence(m => m.
+                GetOAuthToken())
+                    .Returns(expiredAccessToken) // simulate stale cached token on first attempt
+                    .Returns(_fakeValidAccessToken); // simulate fresh cached token on second attempt
+
+            _mockCfApiClient.Setup(m => m.
+                ListServices(_fakeValidTarget, expiredAccessToken))
+                    .Throws(new Exception(fakeExceptionMsg));
+
+            _mockCfApiClient.Setup(m => m.
+                ListServices(_fakeValidTarget, _fakeValidAccessToken))
+                    .ReturnsAsync(fakeServicesResponse);
+
+            var result = await _sut.GetServicesAsync(_fakeValidTarget);
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Succeeded);
+            Assert.IsNull(result.Explanation);
+            Assert.AreEqual(null, result.CmdResult);
+            Assert.AreEqual(expectedResultContent.Count, result.Content.Count);
+
+            _mockCfCliService.Verify(m => m.ClearCachedAccessToken(), Times.Once);
+            _mockCfApiClient.Verify(m => m.ListServices(_fakeValidTarget, expiredAccessToken), Times.Once);
+            _mockCfApiClient.Verify(m => m.ListServices(_fakeValidTarget, _fakeValidAccessToken), Times.Once);
+            _mockLogger.Verify(m => m.Information(It.Is<string>(s => s.Contains("retry")), fakeExceptionMsg, It.IsAny<int>()), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("GetServices")]
+        public async Task GetServicesAsync_ReturnsFailedResult_WhenListServicesThrowsException_AndThereAreZeroRetriesLeft()
+        {
+            var fakeExceptionMsg = "junk";
+
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns(_fakeValidAccessToken);
+
+            _mockCfApiClient.Setup(m => m.
+                ListServices(_fakeValidTarget, _fakeValidAccessToken))
+                    .Throws(new Exception(fakeExceptionMsg));
+
+            var result = await _sut.GetServicesAsync(_fakeValidTarget, retryAmount: 0);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsNull(result.CmdResult);
+            Assert.IsNull(result.Content);
+
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("GetServices")]
+        public async Task GetServicesAsync_ReturnsFailedResult_WhenTokenCannotBeFound()
+        {
+            _mockCfCliService.Setup(m => m.
+                GetOAuthToken())
+                    .Returns((string)null);
+
+            var result = await _sut.GetServicesAsync(_fakeValidTarget);
+
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Succeeded);
+            Assert.IsNotNull(result.Explanation);
+            Assert.IsNull(result.CmdResult);
+            Assert.IsNull(result.Content);
+
+            Assert.IsTrue(_mockCfApiClient.Invocations.Count == 0);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
         [TestCategory("StopApp")]
         public async Task StopAppAsync_ReturnsSuccessfulResult_AndUpdatesAppState()
         {
