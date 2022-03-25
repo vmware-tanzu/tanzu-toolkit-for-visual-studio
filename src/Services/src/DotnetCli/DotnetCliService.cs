@@ -59,7 +59,8 @@ namespace Tanzu.Toolkit.Services.DotnetCli
                 // install vsdbg into publish dir
                 var vsdbgInstallationDirName = "vsdbg";
                 var vsdbgVersion = "latest";
-                var installerArgs = $"-File \"{installerName}\" -Version {vsdbgVersion} -InstallPath {vsdbgInstallationDirName}/";
+                var vsdbgRuntimeId = runtimeIdentifier.StartsWith("win") ? "win7-x64" : "linux-x64";
+                var installerArgs = $"-File \"{installerName}\" -Version {vsdbgVersion} -InstallPath {vsdbgInstallationDirName}/ -RuntimeID {vsdbgRuntimeId}";
                 var installationProcess = _commandProcessService.StartProcess("powershell.exe", installerArgs, publishDirPath, stdOutDelegate: StdOutCallback, stdErrDelegate: StdErrCallback);
                 await Task.Run(() => installationProcess.WaitForExit());
 

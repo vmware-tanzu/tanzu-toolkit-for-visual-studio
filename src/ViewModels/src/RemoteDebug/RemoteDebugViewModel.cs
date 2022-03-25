@@ -25,7 +25,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private readonly IFileService _fileService;
         private readonly IView _outputView;
         private IOutputViewModel _outputViewModel;
-        private readonly string _expectedAppName;
+        private readonly string _projectName;
         private readonly string _pathToProjectRootDir;
         private readonly string _targetFrameworkMoniker;
         private readonly string _expectedPathToLaunchFile;
@@ -47,13 +47,12 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private bool _waitingOnAppConfirmation = false;
         private bool _debugAgentInstalled;
         private bool _launchFileExists;
-        private const string _vsdbgInstallationBaseDirLinux = "/home/vcap/app/publish";
-        private const string _vsdbgInstallationBaseDirWindows = "c:\\Users\\vcap\\app\\publish";
-        private const string _vsdbgDirName = "vsdbg";
+        private const string _vsdbgInstallationDirLinux = "/home/vcap/app/vsdbg";
+        private const string _vsdbgInstallationDirWindows = "c:\\Users\\vcap\\app\\vsdbg";
         private const string _vsdbgExecutableNameLinux = "vsdbg";
         private const string _vsdbgExecutableNameWindows = "vsdbg.exe";
-        private readonly string _pathToVsdbgOnLinux;
-        private readonly string _pathToVsdbgOnWindows;
+        private readonly string _vsdbgPathLinux;
+        private readonly string _vsdbgPathWindows;
         public static readonly string _launchFileName = "launch.json";
         private readonly JsonSerializerOptions _serializationOptions = new JsonSerializerOptions
         {
@@ -62,7 +61,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         public RemoteDebugViewModel(string expectedAppName, string pathToProjectRootDir, string targetFrameworkMoniker, string expectedPathToLaunchFile, Action initiateDebugCallback, IServiceProvider services) : base(services)
         {
-            _expectedAppName = expectedAppName;
+            _projectName = expectedAppName;
             _pathToProjectRootDir = pathToProjectRootDir;
             _targetFrameworkMoniker = targetFrameworkMoniker;
             _expectedPathToLaunchFile = expectedPathToLaunchFile;
@@ -72,8 +71,8 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             _dotnetCliService = services.GetRequiredService<IDotnetCliService>();
             _fileService = services.GetRequiredService<IFileService>();
 
-            _pathToVsdbgOnLinux = _vsdbgInstallationBaseDirLinux + "/" + _vsdbgDirName;
-            _pathToVsdbgOnWindows = _vsdbgInstallationBaseDirWindows + "\\" + _vsdbgDirName;
+            _vsdbgPathLinux = _vsdbgInstallationDirLinux + "/" + _vsdbgExecutableNameLinux;
+            _vsdbgPathWindows = _vsdbgInstallationDirWindows + "\\" + _vsdbgExecutableNameWindows;
 
             _outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel)) as IView;
             _outputViewModel = _outputView?.ViewModel as IOutputViewModel;
@@ -115,7 +114,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 {
                     _isLoggedIn = true;
                     _cfClient = _tasExplorer.TasConnection.CfClient;
-                    var _ = BeginRemoteDebuggingAsync(_expectedAppName);
+                    var _ = BeginRemoteDebuggingAsync(_projectName);
                 }
                 else if (!value)
                 {
@@ -310,10 +309,11 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 return;
             }
 
-            await EnsureDebuggingAgentInstalledOnRemoteAsync();
+            _debugAgentInstalled = await CheckForVsdbg("linux");
             if (!_debugAgentInstalled)
             {
-                Close();
+                Option1Text = $"Push new version of \"{AppToDebug.AppName}\" to debug (project \"{_projectName}\")";
+                var _ = PromptAppResolutionAsync($"Unable to locate debugging agent on \"{AppToDebug.AppName}\".");
                 return;
             }
 
@@ -330,15 +330,15 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             FileService.DeleteFile(_expectedPathToLaunchFile);
         }
 
-        public async Task EstablishAppToDebugAsync(string expectedAppName)
+        public async Task EstablishAppToDebugAsync(string appName)
         {
             LoadingMessage = "Identifying remote app to debug...";
             await PopulateAccessibleAppsAsync();
-            AppToDebug = AccessibleApps.FirstOrDefault(app => app.AppName == expectedAppName);
+            AppToDebug = AccessibleApps.FirstOrDefault(app => app.AppName == appName);
             if (AppToDebug == null)
             {
                 WaitingOnAppConfirmation = true;
-                var _ = PromptAppResolutionAsync(expectedAppName);
+                var _ = PromptAppResolutionAsync($"No app found with a name matching \"{appName}\"");
             }
         }
 
@@ -348,20 +348,16 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
             if (PushNewAppToDebug)
             {
+                var appName = AppToDebug == null ? _projectName : AppToDebug.AppName;
                 Close();
                 _outputView.Show();
-                await PushNewAppWithDebugConfigurationAsync();
-                var _ = BeginRemoteDebuggingAsync(_expectedAppName); // start debug process over from beginning
+                await PushNewAppWithDebugConfigurationAsync(appName);
+                var _ = BeginRemoteDebuggingAsync(appName); // start debug process over from beginning
                 ViewOpener?.Invoke(); // reopen remote debug dialog
             }
             else if (DebugExistingApp)
             {
                 AppToDebug = SelectedApp;
-                // TODO:
-                // check for existing vsdbg
-                // if !exists, explain issue & prompt redeploy of this app
-                // + should offer to push with AppToDebug.AppName (assuming it's been renamed if we're here)
-
                 var _ = BeginRemoteDebuggingAsync(AppToDebug.AppName); // start debug process over from beginning
             }
             else
@@ -379,120 +375,12 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             DetailedResult sshResult;
             if (stack != "linux" && stack != "windows")
             {
-                throw new ArgumentException($"Invalid value for `stack` param: {stack} (only \"linux\" & \"windows\" supported)");
+                throw new ArgumentException($"Invalid value for `stack` param: '{stack}' (only \"linux\" & \"windows\" supported)");
             }
-            var sshCommand = stack == "linux" ? $"ls {_pathToVsdbgOnLinux}" : $"dir {_pathToVsdbgOnWindows}";
+            var sshCommand = stack == "linux" ? $"ls {_vsdbgInstallationDirLinux}" : $"dir {_vsdbgInstallationDirWindows}";
             sshResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
             var vsdbExecutableListed = sshResult.CmdResult.StdOut.Contains(stack == "linux" ? _vsdbgExecutableNameLinux : _vsdbgExecutableNameWindows);
             return sshResult.Succeeded && vsdbExecutableListed;
-        }
-
-        public async Task EnsureDebuggingAgentInstalledOnRemoteAsync()
-        {
-            LoadingMessage = "Checking for debugging agent...";
-            var useWindowsCommands = false;
-            DetailedResult sshResult;
-
-            var sshCommand = $"ls {_pathToVsdbgOnLinux}";
-            try
-            {
-                sshResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
-            }
-            catch (InvalidRefreshTokenException)
-            {
-                _tasExplorer.AuthenticationRequired = true;
-                ErrorService.DisplayErrorDialog("Unable to initate remote debugging", $"Connection to {_tasExplorer.TasConnection.DisplayText} has expired; please log in again to re-authenticate.");
-                Close();
-                return;
-            }
-            catch (Exception ex)
-            {
-                Logger.Error("Something unexpected happened while initializing remote debugging agent: {CfSshException}", ex);
-                ErrorService.DisplayErrorDialog("Unable to initate remote debugging", $"Something unexpected happened while initializing remote debugging agent. Please try again; if this issue persists, contact tas-vs-extension@vmware.com");
-                Close();
-                return;
-            }
-
-            var response = sshResult.CmdResult.StdOut;
-            var sshQuerySucceeded = sshResult.Succeeded && response != null;
-
-            if (sshResult.CmdResult.StdErr.Contains("'ls' is not recognized"))
-            {
-                useWindowsCommands = true;
-                sshCommand = $"dir {_pathToVsdbgOnWindows}";
-                sshResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
-                response = sshResult.CmdResult.StdOut;
-                sshQuerySucceeded = sshResult.Succeeded && response != null;
-            }
-
-            if (!string.IsNullOrWhiteSpace(sshResult.CmdResult.StdErr))
-            {
-                Logger.Error(
-                    "Encountered error executing ssh command `{SshCommand}` for app '{AppName}'",
-                    "{SshQueryStdErr}",
-                    sshCommand,
-                    AppToDebug.AppName,
-                    sshResult.CmdResult.StdErr);
-            }
-
-            if (!sshQuerySucceeded)
-            {
-                Logger.Error("Unable to verify remote debugging agent; couldn't connect to {AppName} via SSH. StdOut: {SshQueryStdOut}, StdErr: {SshQueryStdErr}, Exception: {SshQueryException}", AppToDebug.AppName, sshResult.CmdResult.StdOut, sshResult.CmdResult.StdErr, sshResult.Explanation);
-                var msg = string.IsNullOrWhiteSpace(sshResult.CmdResult.StdErr) ? $"Couldn't connect to {AppToDebug.AppName} via SSH." : sshResult.CmdResult.StdErr;
-                ErrorService.DisplayErrorDialog("Unable to verify remote debugging agent.", msg);
-                Close();
-                return;
-            }
-
-            _debugAgentInstalled = useWindowsCommands
-                ? Regex.Matches(response, _vsdbgExecutableNameLinux).Count > 1 // windows output includes name of dir ("vsdbg"); must check for a *second* occurrence of "vsdbg" (exe)
-                : response.Contains(_vsdbgExecutableNameLinux);
-            if (!_debugAgentInstalled)
-            {
-                LoadingMessage = "Installing debugging agent...";
-                var vsdbgVersion = "latest";
-                DetailedResult vsdbgInstallationResult;
-                try
-                {
-                    var installationSshCommand = useWindowsCommands
-                        ? $"powershell -NoProfile -ExecutionPolicy unrestricted -Command \"[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; &([scriptblock]::Create((Invoke-WebRequest -useb 'https://aka.ms/getvsdbgps1'))) -Version {vsdbgVersion} -InstallPath {_pathToVsdbgOnWindows}\""
-                        : $"curl -sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v {vsdbgVersion} -l {_pathToVsdbgOnLinux}";
-
-                    vsdbgInstallationResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, installationSshCommand);
-                }
-                catch (InvalidRefreshTokenException)
-                {
-                    _tasExplorer.AuthenticationRequired = true;
-                    ErrorService.DisplayErrorDialog("Unable to initate remote debugging", $"Connection to {_tasExplorer.TasConnection.DisplayText} has expired; please log in again to re-authenticate.");
-                    Close();
-                    return;
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error("Something unexpected happened while installing remote debugging agent: {VsdbgInstallationException}", ex);
-                    ErrorService.DisplayErrorDialog("Unable to initate remote debugging", $"Something unexpected happened while installing remote debugging agent. Please try again; if this issue persists, contact tas-vs-extension@vmware.com");
-                    Close();
-                    return;
-                }
-
-                var installationSucceeded = vsdbgInstallationResult.Succeeded
-                    && vsdbgInstallationResult.CmdResult != null
-                    && vsdbgInstallationResult.CmdResult.StdOut != null
-                    && vsdbgInstallationResult.CmdResult.StdOut.Contains($"Successfully installed vsdbg at '{_pathToVsdbgOnLinux}'");
-
-                if (installationSucceeded)
-                {
-                    _debugAgentInstalled = true;
-                    Logger.Information($"Successfully installed remote debugging agent for app '{AppToDebug.AppName}' at {_pathToVsdbgOnLinux}");
-                }
-                else
-                {
-                    Logger.Error("Unable to install remote debugging agent: {VsdbgInstallationExplanation}, {VsdbgInstallationStdOut}, {VsdbgInstallationStdErr}", vsdbgInstallationResult.Explanation, vsdbgInstallationResult.CmdResult.StdOut, vsdbgInstallationResult.CmdResult.StdErr);
-                    ErrorService.DisplayErrorDialog("Unable to initate remote debugging", $"Something unexpected happened while installing remote debugging agent. Please try again; if this issue persists, contact tas-vs-extension@vmware.com");
-                    Close();
-                    return;
-                }
-            }
         }
 
         public void CreateLaunchFileIfNonexistent()
@@ -506,7 +394,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                     {
                         version = "0.2.0",
                         adapter = "cf",
-                        adapterArgs = $"ssh {AppToDebug.AppName} -c \"/tmp/lifecycle/shell {_vsdbgInstallationBaseDirLinux} 'bash -c \\\"{_pathToVsdbgOnLinux}/{_vsdbgExecutableNameLinux} --interpreter=vscode\\\"'\"",
+                        adapterArgs = $"ssh {AppToDebug.AppName} -c \"/tmp/lifecycle/shell {_vsdbgInstallationDirLinux} 'bash -c \\\"{_vsdbgPathLinux} --interpreter=vscode\\\"'\"",
                         languageMappings = new Languagemappings
                         {
                             CSharp = new CSharp
@@ -526,10 +414,10 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                             {
                                 name = ".NET Core Launch",
                                 type = "coreclr",
-                                processName = _expectedAppName, // this should be the app name as determined by .NET, not CF,
+                                processName = _projectName, // this should be the app name as determined by .NET, not CF,
                                 request = "attach",
                                 justMyCode = false,
-                                cwd = _vsdbgInstallationBaseDirLinux,
+                                cwd = _vsdbgInstallationDirLinux,
                                 logging = new Logging
                                 {
                                     engineLogging = true,
@@ -599,15 +487,15 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             ViewCloser?.Invoke();
         }
 
-        private async Task PromptAppResolutionAsync(string appName)
+        private async Task PromptAppResolutionAsync(string promptMsg)
         {
             await UpdateCfOrgOptions();
-            DialogMessage = $"No app found with a name matching \"{appName}\"";
+            DialogMessage = promptMsg;
             LoadingMessage = null;
             WaitingOnAppConfirmation = true;
         }
 
-        private async Task PushNewAppWithDebugConfigurationAsync()
+        private async Task PushNewAppWithDebugConfigurationAsync(string appName)
         {
             var runtimeIdentifier = "linux-x64";
             var publishConfiguration = "Debug";
@@ -638,7 +526,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 {
                     new AppConfig
                     {
-                        Name = _expectedAppName,
+                        Name = appName,
                         Path = pathToPublishDir,
                     }
                 }
@@ -653,7 +541,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 _outputViewModel.AppendLine);
             if (!pushResult.Succeeded)
             {
-                var msg = $"Failed to push app '{_expectedAppName}'; {pushResult.Explanation}";
+                var msg = $"Failed to push app '{appName}'; {pushResult.Explanation}";
                 Logger.Error(msg);
                 _outputViewModel.AppendLine(msg);
                 return;
