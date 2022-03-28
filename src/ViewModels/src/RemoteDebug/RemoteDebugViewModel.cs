@@ -395,7 +395,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                     var launchFileConfig = new RemoteDebugLaunchConfig
                     {
                         version = "0.2.0",
-                        adapter = "cf",
+                        adapter = _fileService.FullPathToCfExe,
                         adapterArgs = $"ssh {AppToDebug.AppName} -c \"/tmp/lifecycle/shell {_appDirLinux} 'bash -c \\\"{_vsdbgPathLinux} --interpreter=vscode\\\"'\"",
                         languageMappings = new Languagemappings
                         {
