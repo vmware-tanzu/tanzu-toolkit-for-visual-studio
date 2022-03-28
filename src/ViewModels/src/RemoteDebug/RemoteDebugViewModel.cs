@@ -87,6 +87,8 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             IsLoggedIn = _tasExplorer != null && _tasExplorer.TasConnection != null;
             if (IsLoggedIn)
             {
+                IsLoggedIn = true;
+                _cfClient = _tasExplorer.TasConnection.CfClient;
                 var _ = BeginRemoteDebuggingAsync(expectedAppName);
             }
         }
@@ -112,16 +114,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             get { return _isLoggedIn; }
             set
             {
-                if (value && _tasExplorer != null && _tasExplorer.TasConnection != null)
-                {
-                    _isLoggedIn = true;
-                    _cfClient = _tasExplorer.TasConnection.CfClient;
-                    var _ = BeginRemoteDebuggingAsync(_projectName);
-                }
-                else if (!value)
-                {
-                    _isLoggedIn = false;
-                }
+                _isLoggedIn = value;
                 RaisePropertyChangedEvent("IsLoggedIn");
             }
         }
@@ -284,9 +277,11 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         {
             _tasExplorer.OpenLoginView(arg);
 
-            if (_tasExplorer.TasConnection != null)
+            if (_tasExplorer != null && _tasExplorer.TasConnection != null)
             {
                 IsLoggedIn = true;
+                _cfClient = _tasExplorer.TasConnection.CfClient;
+                var _ = BeginRemoteDebuggingAsync(_projectName);
             }
         }
 
