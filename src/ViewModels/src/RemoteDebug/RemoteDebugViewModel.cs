@@ -47,6 +47,8 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private bool _waitingOnAppConfirmation = false;
         private bool _debugAgentInstalled;
         private bool _launchFileExists;
+        private const string _appDirLinux = "/home/vcap/app";
+        private const string _appDirWindows = "c:\\Users\\vcap\\app";
         private const string _vsdbgInstallationDirLinux = "/home/vcap/app/vsdbg";
         private const string _vsdbgInstallationDirWindows = "c:\\Users\\vcap\\app\\vsdbg";
         private const string _vsdbgExecutableNameLinux = "vsdbg";
@@ -394,7 +396,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                     {
                         version = "0.2.0",
                         adapter = "cf",
-                        adapterArgs = $"ssh {AppToDebug.AppName} -c \"/tmp/lifecycle/shell {_vsdbgInstallationDirLinux} 'bash -c \\\"{_vsdbgPathLinux} --interpreter=vscode\\\"'\"",
+                        adapterArgs = $"ssh {AppToDebug.AppName} -c \"/tmp/lifecycle/shell {_appDirLinux} 'bash -c \\\"{_vsdbgPathLinux} --interpreter=vscode\\\"'\"",
                         languageMappings = new Languagemappings
                         {
                             CSharp = new CSharp
