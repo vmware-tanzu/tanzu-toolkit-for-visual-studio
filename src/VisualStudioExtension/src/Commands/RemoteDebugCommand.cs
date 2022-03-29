@@ -141,19 +141,34 @@ namespace Tanzu.Toolkit.VisualStudio
                         OLEMSGBUTTON.OLEMSGBUTTON_OK,
                         OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
                     }
-
-                    var launchFilePath = Path.Combine(projectDirectory, RemoteDebugViewModel._launchFileName);
-                    var initiateDebugCallback = new Action(() =>
+                    else if (tfm.StartsWith(".NETFramework,Version=v"))
                     {
-                        dte.ExecuteCommand("DebugAdapterHost.Logging /On /OutputWindow");
-                        dte.ExecuteCommand("DebugAdapterHost.Launch", $"/LaunchJson:\"{launchFilePath}\"");
-                    });
+                        var errorTitle = "Not supported";
+                        var errorMsg = $"Remote debugging is not currently supported for projects targeting '{tfm}'.\n" +
+                            "If this is a feature you'd like to see implemented in the future, please let the team know! tas-vs-extension@vmware.com";
+                        VsShellUtilities.ShowMessageBox(
+                            package,
+                            errorMsg,
+                            errorTitle,
+                            OLEMSGICON.OLEMSGICON_CRITICAL,
+                        OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                        OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                    }
+                    else
+                    {
+                        var launchFilePath = Path.Combine(projectDirectory, RemoteDebugViewModel._launchFileName);
+                        var initiateDebugCallback = new Action(() =>
+                        {
+                            dte.ExecuteCommand("DebugAdapterHost.Logging /On /OutputWindow");
+                            dte.ExecuteCommand("DebugAdapterHost.Launch", $"/LaunchJson:\"{launchFilePath}\"");
+                        });
 
-                    var remoteDebugViewModel = new RemoteDebugViewModel(projectName, projectDirectory, tfm, launchFilePath, initiateDebugCallback, services: _services) as IRemoteDebugViewModel;
-                    var view = new RemoteDebugView(remoteDebugViewModel, new ThemeService());
-                    remoteDebugViewModel.ViewOpener = view.Show;
-                    remoteDebugViewModel.ViewCloser = view.Hide;
-                    view.ShowDialog(); // open & wait
+                        var remoteDebugViewModel = new RemoteDebugViewModel(projectName, projectDirectory, tfm, launchFilePath, initiateDebugCallback, services: _services) as IRemoteDebugViewModel;
+                        var view = new RemoteDebugView(remoteDebugViewModel, new ThemeService());
+                        remoteDebugViewModel.ViewOpener = view.Show;
+                        remoteDebugViewModel.ViewCloser = view.Hide;
+                        view.ShowDialog(); // open & wait
+                    }
                 }
             }
             catch (Exception ex)
