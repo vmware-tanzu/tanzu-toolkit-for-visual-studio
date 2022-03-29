@@ -68,6 +68,7 @@
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
 
                 <TextBlock Text="Choose push location:" Grid.Row="0"/>
@@ -75,7 +76,7 @@
                 <ComboBox
                     x:Name="OrgField"
                     Grid.Row="1"
-                    Margin="0,4"
+                    Margin="0,2"
                     ItemsSource="{Binding OrgOptions}" 
                     SelectedItem="{Binding SelectedOrg}">
                     <ComboBox.ItemTemplate>
@@ -89,7 +90,7 @@
                     Grid.Row="1"
                     Margin="8"
                     IsHitTestVisible="False"
-                    Text="Select Org&lt;Required&gt;"
+                    Text="&lt;Select Org&gt;"
                     VerticalAlignment="Center"
                     HorizontalAlignment="Left"
                     Foreground="DarkGray">
@@ -109,6 +110,7 @@
                 <ComboBox
                     x:Name="SpaceField"
                     Grid.Row="2"
+                    Margin="0,2"
                     ItemsSource="{Binding SpaceOptions}" 
                     SelectedItem="{Binding SelectedSpace}">
                     <ComboBox.ItemTemplate>
@@ -122,7 +124,7 @@
                     Grid.Row="2"
                     Margin="8"
                     IsHitTestVisible="False"
-                    Text="Select Space&lt;Required&gt;"
+                    Text="&lt;Select Space&gt;"
                     VerticalAlignment="Center"
                     HorizontalAlignment="Left"
                     Foreground="DarkGray">
@@ -132,6 +134,34 @@
                             <Setter Property="Visibility" Value="Collapsed"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding Text, ElementName=SpaceField}" Value="">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <ComboBox
+                    Grid.Row="3"
+                    Margin="0,2"
+                    x:Name="StackField"
+                    ItemsSource="{Binding StackOptions}"
+                    SelectedItem="{Binding SelectedStack}">
+                </ComboBox>
+
+                <TextBlock
+                    IsHitTestVisible="False"
+                    Text="&lt;Select Stack&gt;"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Left"
+                    Foreground="DarkGray"
+                    Margin="8"
+                    Grid.Row="3">
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Text, ElementName=StackField}" Value="">
                                     <Setter Property="Visibility" Value="Visible"/>
                                 </DataTrigger>
                             </Style.Triggers>

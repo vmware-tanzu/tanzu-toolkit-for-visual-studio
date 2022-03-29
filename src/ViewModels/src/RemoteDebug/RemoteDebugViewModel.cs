@@ -41,9 +41,11 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private string _option2Text;
         private List<CloudFoundryOrganization> _orgOptions;
         private List<CloudFoundrySpace> _spaceOptions;
+        private List<string> _stackOptions;
         private CloudFoundryOrganization _selectedOrg;
         private CloudFoundrySpace _selectedSpace;
         private CloudFoundryApp _selectedApp;
+        private string _selectedStack = "linux";
         private bool _waitingOnAppConfirmation = false;
         private bool _debugAgentInstalled;
         private bool _launchFileExists;
@@ -239,6 +241,16 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             }
         }
 
+        public List<string> StackOptions
+        {
+            get => _stackOptions;
+            set
+            {
+                _stackOptions = value;
+                RaisePropertyChangedEvent("StackOptions");
+            }
+        }
+
         public CloudFoundryOrganization SelectedOrg
         {
             get => _selectedOrg;
@@ -257,6 +269,16 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             {
                 _selectedSpace = value;
                 RaisePropertyChangedEvent("SelectedSpace");
+            }
+        }
+
+        public string SelectedStack
+        {
+            get => _selectedStack;
+            set
+            {
+                _selectedStack = value;
+                RaisePropertyChangedEvent("SelectedStack");
             }
         }
 
@@ -306,7 +328,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 return;
             }
 
-            _debugAgentInstalled = await CheckForVsdbg("linux");
+            _debugAgentInstalled = await CheckForVsdbg();
             if (!_debugAgentInstalled)
             {
                 Option1Text = $"Push new version of \"{AppToDebug.AppName}\" to debug (project \"{_projectName}\")";
@@ -335,6 +357,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             if (AppToDebug == null)
             {
                 WaitingOnAppConfirmation = true;
+                await PopulateStackOptionsAsync();
                 var _ = PromptAppResolutionAsync($"No app found with a name matching \"{appName}\"");
             }
         }
@@ -348,7 +371,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 var appName = AppToDebug == null ? _projectName : AppToDebug.AppName;
                 Close();
                 _outputView.Show();
-                await PushNewAppWithDebugConfigurationAsync(appName);
+                await PushNewAppWithDebugConfigurationAsync(appName, SelectedStack);
                 var _ = BeginRemoteDebuggingAsync(appName); // start debug process over from beginning
                 ViewOpener?.Invoke(); // reopen remote debug dialog
             }
@@ -366,17 +389,25 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             }
         }
 
-        private async Task<bool> CheckForVsdbg(string stack)
+        private async Task<bool> CheckForVsdbg()
         {
             LoadingMessage = "Checking for debugging agent...";
-            DetailedResult sshResult;
-            if (stack != "linux" && stack != "windows")
+            bool vsdbExecutableListed;
+
+            // try linux format
+            var sshCommand = $"ls {_vsdbgInstallationDirLinux}";
+            var sshResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
+            if (sshResult.CmdResult.StdErr.Contains("'ls' is not recognized"))
             {
-                throw new ArgumentException($"Invalid value for `stack` param: '{stack}' (only \"linux\" & \"windows\" supported)");
+                // try windows format
+                sshCommand = $"dir {_vsdbgInstallationDirWindows}";
+                sshResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
+                vsdbExecutableListed = sshResult.CmdResult.StdOut.Contains(_vsdbgExecutableNameWindows);
             }
-            var sshCommand = stack == "linux" ? $"ls {_vsdbgInstallationDirLinux}" : $"dir {_vsdbgInstallationDirWindows}";
-            sshResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
-            var vsdbExecutableListed = sshResult.CmdResult.StdOut.Contains(stack == "linux" ? _vsdbgExecutableNameLinux : _vsdbgExecutableNameWindows);
+            else
+            {
+                vsdbExecutableListed = sshResult.CmdResult.StdOut.Contains(_vsdbgExecutableNameLinux);
+            }
             return sshResult.Succeeded && vsdbExecutableListed;
         }
 
@@ -492,25 +523,41 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             WaitingOnAppConfirmation = true;
         }
 
-        private async Task PushNewAppWithDebugConfigurationAsync(string appName)
+        private async Task PushNewAppWithDebugConfigurationAsync(string appName, string stack)
         {
-            var runtimeIdentifier = "linux-x64";
+            var runtimeIdentifier = stack.Contains("win") ? "win-x64" : "linux-x64";
+            if (runtimeIdentifier == "linux-x64" && !stack.Contains("linux"))
+            {
+                Logger.Information($"Unexpected stack provided: '{stack}'; proceeding to publish with default runtime identifier 'linux-x64'...");
+            }
             var publishConfiguration = "Debug";
             var publishDirName = "publish";
-            var publishTask = _dotnetCliService.PublishProjectForRemoteDebuggingAsync(
-                _pathToProjectRootDir,
-                _targetFrameworkMoniker,
-                runtimeIdentifier,
-                publishConfiguration,
-                publishDirName,
-                StdOutCallback: _outputViewModel.AppendLine,
-                StdErrCallback: _outputViewModel.AppendLine);
-            var publishSucceeded = await publishTask;
-            if (!publishSucceeded)
+            try
             {
+                var publishTask = _dotnetCliService.PublishProjectForRemoteDebuggingAsync(
+                    _pathToProjectRootDir,
+                    _targetFrameworkMoniker,
+                    runtimeIdentifier,
+                    publishConfiguration,
+                    publishDirName,
+                    StdOutCallback: _outputViewModel.AppendLine,
+                    StdErrCallback: _outputViewModel.AppendLine);
+                var publishSucceeded = await publishTask;
+                if (!publishSucceeded)
+                {
+                    var title = "Unable to intitate remote debugging";
+                    var msg = "Project failed to publish.";
+                    Logger.Error(title + "; " + msg);
+                    ErrorService.DisplayErrorDialog(title, msg);
+                    _outputViewModel.AppendLine("Project failed to publish");
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Caught exception while publishing project for remote debugging: {RemoteDebugPublishException}", ex);
                 var title = "Unable to intitate remote debugging";
                 var msg = "Project failed to publish.";
-                Logger.Error(title + "; " + msg);
                 ErrorService.DisplayErrorDialog(title, msg);
                 _outputViewModel.AppendLine("Project failed to publish");
                 return;
@@ -525,6 +572,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                     {
                         Name = appName,
                         Path = pathToPublishDir,
+                        Stack = stack,
                     }
                 }
             };
@@ -615,6 +663,22 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 ErrorService.DisplayErrorDialog(title, msg);
                 Close();
                 return;
+            }
+        }
+
+        private async Task PopulateStackOptionsAsync()
+        {
+            var stacksRespsonse = await _cfClient.GetStackNamesAsync(_tasExplorer.TasConnection.CloudFoundryInstance);
+            if (stacksRespsonse.Succeeded)
+            {
+                StackOptions = stacksRespsonse.Content;
+            }
+            else
+            {
+                StackOptions = new List<string>();
+                var title = "Unable to retrieve list of available stacks";
+                Logger.Error(title + " {StacksResponseError}", stacksRespsonse.Explanation);
+                ErrorService.DisplayErrorDialog(title, stacksRespsonse.Explanation);
             }
         }
 
