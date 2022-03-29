@@ -45,7 +45,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private CloudFoundryOrganization _selectedOrg;
         private CloudFoundrySpace _selectedSpace;
         private CloudFoundryApp _selectedApp;
-        private string _selectedStack = "linux";
+        private string _selectedStack;
         private bool _waitingOnAppConfirmation = false;
         private bool _debugAgentInstalled;
         private bool _launchFileExists;
@@ -328,7 +328,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 return;
             }
 
-            _debugAgentInstalled = await CheckForVsdbg();
+            _debugAgentInstalled = await CheckForVsdbg(AppToDebug.Stack);
             if (!_debugAgentInstalled)
             {
                 Option1Text = $"Push new version of \"{AppToDebug.AppName}\" to debug (project \"{_projectName}\")";
@@ -336,7 +336,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 return;
             }
 
-            CreateLaunchFileIfNonexistent();
+            CreateLaunchFileIfNonexistent(AppToDebug.Stack);
             if (!_launchFileExists)
             {
                 Close();
@@ -389,40 +389,46 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             }
         }
 
-        private async Task<bool> CheckForVsdbg()
+        private async Task<bool> CheckForVsdbg(string stack)
         {
-            LoadingMessage = "Checking for debugging agent...";
+            LoadingMessage = $"Checking for debugging agent on {AppToDebug.AppName}...";
+            DetailedResult sshResult;
             bool vsdbExecutableListed;
 
-            // try linux format
-            var sshCommand = $"ls {_vsdbgInstallationDirLinux}";
-            var sshResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
-            if (sshResult.CmdResult.StdErr.Contains("'ls' is not recognized"))
+            if (stack.Contains("win"))
             {
-                // try windows format
-                sshCommand = $"dir {_vsdbgInstallationDirWindows}";
+                var sshCommand = $"dir {_vsdbgInstallationDirWindows}";
                 sshResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
                 vsdbExecutableListed = sshResult.CmdResult.StdOut.Contains(_vsdbgExecutableNameWindows);
             }
             else
             {
+                var sshCommand = $"ls {_vsdbgInstallationDirLinux}";
+                sshResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
                 vsdbExecutableListed = sshResult.CmdResult.StdOut.Contains(_vsdbgExecutableNameLinux);
             }
+
             return sshResult.Succeeded && vsdbExecutableListed;
         }
 
-        public void CreateLaunchFileIfNonexistent()
+        public void CreateLaunchFileIfNonexistent(string stack)
         {
             _launchFileExists = false;
             try
             {
                 if (!File.Exists(_expectedPathToLaunchFile))
                 {
+                    var adapterArgs = stack.Contains("win")
+                        ? $"ssh {AppToDebug.AppName} -c \"{_vsdbgPathWindows} --interpreter=vscode\""
+                        : $"ssh {AppToDebug.AppName} -c \"/tmp/lifecycle/shell {_appDirLinux} 'bash -c \\\"{_vsdbgPathLinux} --interpreter=vscode\\\"'\"";
+                    var appProcessName = stack.Contains("win")
+                        ? "hwc.exe"
+                        : _projectName; // this should be the app name as determined by .NET, not CF,
                     var launchFileConfig = new RemoteDebugLaunchConfig
                     {
                         version = "0.2.0",
                         adapter = _fileService.FullPathToCfExe,
-                        adapterArgs = $"ssh {AppToDebug.AppName} -c \"/tmp/lifecycle/shell {_appDirLinux} 'bash -c \\\"{_vsdbgPathLinux} --interpreter=vscode\\\"'\"",
+                        adapterArgs = adapterArgs,
                         languageMappings = new Languagemappings
                         {
                             CSharp = new CSharp
@@ -442,7 +448,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                             {
                                 name = ".NET Core Launch",
                                 type = "coreclr",
-                                processName = _projectName, // this should be the app name as determined by .NET, not CF,
+                                processName = appProcessName,
                                 request = "attach",
                                 justMyCode = false,
                                 cwd = _vsdbgInstallationDirLinux,
@@ -454,6 +460,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                         }
                     };
                     var newLaunchFileContents = JsonSerializer.Serialize(launchFileConfig, _serializationOptions);
+                    Logger.Information("About to try attaching to remote debugger with this configuration: {RemoteDebugConfig}", newLaunchFileContents);
                     _fileService.WriteTextToFile(_expectedPathToLaunchFile, newLaunchFileContents);
                 }
                 _launchFileExists = true;

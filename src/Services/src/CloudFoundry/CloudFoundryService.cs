@@ -455,7 +455,10 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
                 else
                 {
-                    appsToReturn.Add(new CloudFoundryApp(app.Name, app.Guid, space, app.State.ToUpper()));
+                    appsToReturn.Add(new CloudFoundryApp(app.Name, app.Guid, space, app.State.ToUpper())
+                    {
+                        Stack = app.Lifecycle.Data.Stack,
+                    });
                 }
             }
 
