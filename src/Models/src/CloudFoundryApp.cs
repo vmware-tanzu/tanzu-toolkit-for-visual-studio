@@ -6,6 +6,7 @@
         public string AppId { get; set; }
         public CloudFoundrySpace ParentSpace { get; set; }
         public string State { get; set; }
+        public string Stack { get; set; }
 
         public CloudFoundryApp(string appName, string appGuid, CloudFoundrySpace parentSpace, string state)
         {
