@@ -686,7 +686,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         public bool CanResolveMissingApp(object arg = null)
         {
-            return (PushNewAppToDebug && SelectedOrg != null && SelectedSpace != null)
+            return (PushNewAppToDebug && SelectedOrg != null && SelectedSpace != null && SelectedStack != null)
                 || (DebugExistingApp && SelectedApp != null);
         }
     }
