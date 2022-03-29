@@ -1,4 +1,6 @@
-﻿namespace Tanzu.Toolkit.Models
+﻿using System.Collections.Generic;
+
+namespace Tanzu.Toolkit.Models
 {
     public class CloudFoundryApp
     {
@@ -7,6 +9,7 @@
         public CloudFoundrySpace ParentSpace { get; set; }
         public string State { get; set; }
         public string Stack { get; set; }
+        public List<string> Buildpacks { get; set; }
 
         public CloudFoundryApp(string appName, string appGuid, CloudFoundrySpace parentSpace, string state)
         {
