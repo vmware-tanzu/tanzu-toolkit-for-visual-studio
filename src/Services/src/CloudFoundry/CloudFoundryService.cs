@@ -458,6 +458,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                     appsToReturn.Add(new CloudFoundryApp(app.Name, app.Guid, space, app.State.ToUpper())
                     {
                         Stack = app.Lifecycle.Data.Stack,
+                        Buildpacks = new List<string>(app.Lifecycle.Data.Buildpacks),
                     });
                 }
             }
