@@ -102,7 +102,7 @@
       <Button guid="guidTanzuToolkitPackageCmdSet" id="RemoteDebugId" priority="0x0100" type="Button">
         <Parent guid="guidTanzuToolkitPackageCmdSet" id="ProjContextMenuGroup" />
         <Strings>
-          <ButtonText>Remote debug</ButtonText>
+          <ButtonText>Remote debug on Tanzu Application Service</ButtonText>
         </Strings>
       </Button>
     </Buttons>
