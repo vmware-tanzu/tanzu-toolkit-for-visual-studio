@@ -371,9 +371,12 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 var appName = AppToDebug == null ? _projectName : AppToDebug.AppName;
                 Close();
                 _outputView.Show();
-                await PushNewAppWithDebugConfigurationAsync(appName, SelectedStack);
-                var _ = BeginRemoteDebuggingAsync(appName); // start debug process over from beginning
-                ViewOpener?.Invoke(); // reopen remote debug dialog
+                var pushSucceeded = await PushNewAppWithDebugConfigurationAsync(appName, SelectedStack);
+                if (pushSucceeded)
+                {
+                    var _ = BeginRemoteDebuggingAsync(appName); // start debug process over from beginning
+                    ViewOpener?.Invoke(); // reopen remote debug dialog
+                }
             }
             else if (DebugExistingApp)
             {
@@ -530,7 +533,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             WaitingOnAppConfirmation = true;
         }
 
-        private async Task PushNewAppWithDebugConfigurationAsync(string appName, string stack)
+        private async Task<bool> PushNewAppWithDebugConfigurationAsync(string appName, string stack)
         {
             var runtimeIdentifier = stack.Contains("win") ? "win-x64" : "linux-x64";
             if (runtimeIdentifier == "linux-x64" && !stack.Contains("linux"))
@@ -557,7 +560,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                     Logger.Error(title + "; " + msg);
                     ErrorService.DisplayErrorDialog(title, msg);
                     _outputViewModel.AppendLine("Project failed to publish");
-                    return;
+                    return false;
                 }
             }
             catch (Exception ex)
@@ -567,10 +570,13 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 var msg = "Project failed to publish.";
                 ErrorService.DisplayErrorDialog(title, msg);
                 _outputViewModel.AppendLine("Project failed to publish");
-                return;
+                return false;
             }
 
             var pathToPublishDir = Path.Combine(_pathToProjectRootDir, publishDirName);
+            var startCommand = stack.Contains("win") 
+                ? $"cmd /c .\\{appName} --urls=http://0.0.0.0:%PORT%"
+                : $"./{appName}";
             var appConfig = new AppManifest
             {
                 Applications = new List<AppConfig>
@@ -581,6 +587,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                         Path = pathToPublishDir,
                         Stack = stack,
                         Buildpack = "binary_buildpack",
+                        Command = startCommand,
                     }
                 }
             };
@@ -594,11 +601,14 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 _outputViewModel.AppendLine);
             if (!pushResult.Succeeded)
             {
-                var msg = $"Failed to push app '{appName}'; {pushResult.Explanation}";
-                Logger.Error(msg);
-                _outputViewModel.AppendLine(msg);
-                return;
+                var title = $"Failed to push app '{appName}'";
+                var msg = pushResult.Explanation.Replace("Instances starting...\n", string.Empty);
+                Logger.Error(title + msg);
+                _outputViewModel.AppendLine(title + msg);
+                ErrorService.DisplayErrorDialog(title, msg);
+                return false;
             }
+            return true;
         }
 
         private async Task PopulateAccessibleAppsAsync()
