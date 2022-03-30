@@ -47,6 +47,8 @@ namespace Tanzu.Toolkit.Services.Tests
         protected const string _app3State = "STARTED";
         protected const string _app4State = "STOPPED";
 
+        protected const string _onlySupportedAppLifecycleType = "buildpack";
+
         protected const string _stack1Name = "stack1";
         protected const string _stack2Name = "stack2";
         protected const string _stack3Name = "stack3";
@@ -55,6 +57,11 @@ namespace Tanzu.Toolkit.Services.Tests
         protected const string _stack2Guid = "stack-2-id";
         protected const string _stack3Guid = "stack-3-id";
         protected const string _stack4Guid = "stack-4-id";
+
+        protected const string _buildpack1Name = "buildpack1";
+        protected const string _buildpack2Name = "buildpack2";
+        protected const string _buildpack3Name = "buildpack3";
+        protected const string _buildpack4Name = "buildpack4";
 
         protected static readonly string _fakeValidTarget = "https://my.fake.target";
         protected static readonly string _fakeValidUsername = "junk";
