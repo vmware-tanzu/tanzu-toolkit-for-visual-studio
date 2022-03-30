@@ -707,12 +707,30 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                     Name = _app1Name,
                     Guid = _app1Guid,
                     State = _app1State,
+                    Lifecycle = new CloudFoundryApiClient.Models.AppsResponse.Lifecycle
+                    {
+                        Type = _onlySupportedAppLifecycleType,
+                        Data = new CloudFoundryApiClient.Models.AppsResponse.Data
+                        {
+                            Buildpacks = new string[] { _buildpack1Name },
+                            Stack = _stack1Name,
+                        }
+                    }
                 },
                 new CloudFoundryApiClient.Models.AppsResponse.App
                 {
                     Name = _app2Name,
                     Guid = _app2Guid,
                     State = _app2State,
+                    Lifecycle = new CloudFoundryApiClient.Models.AppsResponse.Lifecycle
+                    {
+                        Type = _onlySupportedAppLifecycleType,
+                        Data = new CloudFoundryApiClient.Models.AppsResponse.Data
+                        {
+                            Buildpacks = new string[] { _buildpack1Name, _buildpack2Name },
+                            Stack = _stack2Name,
+                        }
+                    }
                 },
             };
 
@@ -811,33 +829,85 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                     Name = _app1Name,
                     Guid = _app1Guid,
                     State = _app1State,
+                    Lifecycle = new CloudFoundryApiClient.Models.AppsResponse.Lifecycle
+                    {
+                        Type = _onlySupportedAppLifecycleType,
+                        Data = new CloudFoundryApiClient.Models.AppsResponse.Data
+                        {
+                            Buildpacks = new string[] { _buildpack1Name },
+                            Stack = _stack1Name,
+                        }
+                    }
                 },
                 new CloudFoundryApiClient.Models.AppsResponse.App
                 {
                     Name = _app2Name,
                     Guid = _app2Guid,
                     State = _app2State,
+                    Lifecycle = new CloudFoundryApiClient.Models.AppsResponse.Lifecycle
+                    {
+                        Type = _onlySupportedAppLifecycleType,
+                        Data = new CloudFoundryApiClient.Models.AppsResponse.Data
+                        {
+                            Buildpacks = new string[] { _buildpack1Name, _buildpack2Name },
+                            Stack = _stack2Name,
+                        }
+                    }
                 },
                 new CloudFoundryApiClient.Models.AppsResponse.App
                 {
                     Name = _app3Name,
                     Guid = _app3Guid,
                     State = _app3State,
+                    Lifecycle = new CloudFoundryApiClient.Models.AppsResponse.Lifecycle
+                    {
+                        Type = _onlySupportedAppLifecycleType,
+                        Data = new CloudFoundryApiClient.Models.AppsResponse.Data
+                        {
+                            Buildpacks = new string[] { _buildpack3Name },
+                            Stack = _stack3Name,
+                        }
+                    }
                 },
                 new CloudFoundryApiClient.Models.AppsResponse.App
                 {
                     Name = _app4Name,
                     Guid = _app4Guid,
                     State = _app4State,
+                    Lifecycle = new CloudFoundryApiClient.Models.AppsResponse.Lifecycle
+                    {
+                        Type = _onlySupportedAppLifecycleType,
+                        Data = new CloudFoundryApiClient.Models.AppsResponse.Data
+                        {
+                            Buildpacks = new string[] { _buildpack1Name, _buildpack2Name, _buildpack4Name },
+                            Stack = _stack4Name,
+                        }
+                    }
                 },
             };
 
             var expectedResultContent = new List<CloudFoundryApp>
             {
-                new CloudFoundryApp(_app1Name, _app1Guid, FakeSpace, _app1State),
-                new CloudFoundryApp(_app2Name, _app2Guid, FakeSpace, _app2State),
-                new CloudFoundryApp(_app3Name, _app3Guid, FakeSpace, _app3State),
-                new CloudFoundryApp(_app4Name, _app4Guid, FakeSpace, _app4State),
+                new CloudFoundryApp(_app1Name, _app1Guid, FakeSpace, _app1State)
+                {
+                    Stack = fakeAppsResponse[0].Lifecycle.Data.Stack,
+                    Buildpacks = new List<string>(fakeAppsResponse[0].Lifecycle.Data.Buildpacks),
+                },
+                new CloudFoundryApp(_app2Name, _app2Guid, FakeSpace, _app2State)
+                {
+                    Stack = fakeAppsResponse[1].Lifecycle.Data.Stack,
+                    Buildpacks = new List<string>(fakeAppsResponse[1].Lifecycle.Data.Buildpacks),
+                },
+                new CloudFoundryApp(_app3Name, _app3Guid, FakeSpace, _app3State)
+                {
+                    Stack = fakeAppsResponse[2].Lifecycle.Data.Stack,
+                    Buildpacks = new List<string>(fakeAppsResponse[2].Lifecycle.Data.Buildpacks),
+                },
+                new CloudFoundryApp(_app4Name, _app4Guid, FakeSpace, _app4State)
+                {
+                    Stack = fakeAppsResponse[3].Lifecycle.Data.Stack,
+                    Buildpacks = new List<string>(fakeAppsResponse[3].Lifecycle.Data.Buildpacks),
+                },
             };
 
             _mockCfCliService.Setup(m => m.
