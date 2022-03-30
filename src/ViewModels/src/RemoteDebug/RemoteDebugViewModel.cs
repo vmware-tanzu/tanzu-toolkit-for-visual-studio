@@ -422,9 +422,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                         ? $"ssh {AppToDebug.AppName} -c \"{_vsdbgPathWindows} --interpreter=vscode\""
                         : $"ssh {AppToDebug.AppName} -c \"/tmp/lifecycle/shell {_appDirLinux} 'bash -c \\\"{_vsdbgPathLinux} --interpreter=vscode\\\"'\"";
                     var appProcessName = stack.Contains("win")
-                        ? AppToDebug.Buildpacks.Any(bp => bp.Contains("hwc"))
-                            ? "hwc.exe"
-                            : $"{AppToDebug.AppName}.exe"
+                        ? $"{AppToDebug.AppName}.exe"
                         : _projectName; // this should be the app name as determined by .NET, not CF,
                     var launchFileConfig = new RemoteDebugLaunchConfig
                     {
