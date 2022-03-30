@@ -580,6 +580,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                         Name = appName,
                         Path = pathToPublishDir,
                         Stack = stack,
+                        Buildpack = "binary_buildpack",
                     }
                 }
             };
