@@ -583,6 +583,9 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             var startCommand = stack.Contains("win")
                 ? $"cmd /c .\\{appName} --urls=http://0.0.0.0:%PORT%"
                 : $"./{appName}";
+            var buildpack = stack.Contains("win")
+                ? "binary_buildpack"
+                : "dotnet_core_buildpack";
             var appConfig = new AppManifest
             {
                 Applications = new List<AppConfig>
@@ -592,14 +595,11 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                         Name = appName,
                         Path = pathToPublishDir,
                         Stack = stack,
+                        Buildpack = buildpack,
                         Command = startCommand,
                     }
                 }
             };
-            if (stack.Contains("win"))
-            {
-                appConfig.Applications[0].Buildpack = "binary_buildpack";
-            }
 
             try
             {
