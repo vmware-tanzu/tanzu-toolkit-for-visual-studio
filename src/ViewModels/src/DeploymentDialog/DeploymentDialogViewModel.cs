@@ -754,6 +754,16 @@ namespace Tanzu.Toolkit.ViewModels
                 }
             }
 
+            try
+            {
+                var manifestContents = SerializationService.SerializeCfAppManifest(ManifestModel);
+                OutputViewModel.AppendLine($"Pushing app with this configuration:\n{manifestContents}");
+            }
+            catch (Exception ex)
+            {
+                Logger?.Error("Unable to serialize manifest contents: {AppConfig}. {SerializationException}", ManifestModel, ex);
+            }
+
             var deploymentResult = await TasExplorerViewModel.TasConnection.CfClient.DeployAppAsync(
                 ManifestModel,
                 PathToProjectRootDir,
