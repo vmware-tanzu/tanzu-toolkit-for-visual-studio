@@ -556,6 +556,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                     runtimeIdentifier,
                     publishConfiguration,
                     publishDirName,
+                    includeDebuggingAgent: true,
                     StdOutCallback: _outputViewModel.AppendLine,
                     StdErrCallback: _outputViewModel.AppendLine);
                 var publishSucceeded = await publishTask;
