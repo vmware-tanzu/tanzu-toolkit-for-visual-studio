@@ -257,7 +257,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             set
             {
                 _selectedOrg = value;
-                var _ = UpdateCfSpaceOptions();
+                var _ = UpdateCfSpaceOptionsAsync();
                 RaisePropertyChangedEvent("SelectedOrg");
             }
         }
@@ -357,7 +357,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             if (AppToDebug == null)
             {
                 WaitingOnAppConfirmation = true;
-                await PopulateStackOptionsAsync();
                 var _ = PromptAppResolutionAsync($"No app found with a name matching \"{appName}\"");
             }
         }
@@ -477,7 +476,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             }
         }
 
-        public async Task UpdateCfOrgOptions()
+        public async Task UpdateCfOrgOptionsAsync()
         {
             if (_tasExplorer.TasConnection == null)
             {
@@ -498,7 +497,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             }
         }
 
-        public async Task UpdateCfSpaceOptions()
+        public async Task UpdateCfSpaceOptionsAsync()
         {
             if (SelectedOrg == null || _tasExplorer.TasConnection == null)
             {
@@ -527,7 +526,12 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         private async Task PromptAppResolutionAsync(string promptMsg)
         {
-            await UpdateCfOrgOptions();
+            var cfQueries = new List<Task>
+            {
+                UpdateCfOrgOptionsAsync(),
+                PopulateStackOptionsAsync(),
+            };
+            await Task.WhenAll(cfQueries);
             DialogMessage = promptMsg;
             LoadingMessage = null;
             WaitingOnAppConfirmation = true;
