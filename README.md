@@ -26,6 +26,10 @@ https://user-images.githubusercontent.com/22666145/144128093-8d1686c3-eac1-4bf1-
 
 https://user-images.githubusercontent.com/22666145/144897999-087c5a76-b844-4bb4-9e33-dabd4d42210f.mp4
 
+### Remote Debugging .NET apps running on Tanzu Application Service
+
+https://user-images.githubusercontent.com/22666145/161144428-eb695444-39c1-4bb3-93c9-996f81919678.mp4
+
 
 ## Install
 - To install this extension, you will need Visual Studio 2022 or 2019.
