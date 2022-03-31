@@ -92,6 +92,8 @@ namespace Tanzu.Toolkit.VisualStudio
 
         private async Task TryRemoteDebugAsync()
         {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
+
             try
             {
                 var title = "RemoteDebugCommand";
