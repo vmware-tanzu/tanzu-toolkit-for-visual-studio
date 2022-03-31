@@ -23,6 +23,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private readonly ICfCliService _cfCliService;
         private readonly IDotnetCliService _dotnetCliService;
         private readonly IFileService _fileService;
+        private readonly ISerializationService _serializationService;
         private readonly IView _outputView;
         private IOutputViewModel _outputViewModel;
         private readonly string _projectName;
@@ -74,6 +75,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             _cfCliService = services.GetRequiredService<ICfCliService>();
             _dotnetCliService = services.GetRequiredService<IDotnetCliService>();
             _fileService = services.GetRequiredService<IFileService>();
+            _serializationService = services.GetRequiredService<ISerializationService>();
 
             _vsdbgPathLinux = _vsdbgInstallationDirLinux + "/" + _vsdbgExecutableNameLinux;
             _vsdbgPathWindows = _vsdbgInstallationDirWindows + "\\" + _vsdbgExecutableNameWindows;
@@ -598,6 +600,17 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             {
                 appConfig.Applications[0].Buildpack = "binary_buildpack";
             }
+
+            try
+            {
+                var manifestContents = _serializationService.SerializeCfAppManifest(appConfig);
+                _outputViewModel.AppendLine($"Pushing app with this configuration:\n{manifestContents}");
+            }
+            catch (Exception ex)
+            {
+                Logger?.Error("Unable to serialize manifest contents: {AppConfig}. {SerializationException}", appConfig, ex);
+            }
+
             var pushResult = await _cfClient.DeployAppAsync(
                 appConfig,
                 pathToPublishDir,
