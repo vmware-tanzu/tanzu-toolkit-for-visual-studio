@@ -82,6 +82,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Commands\RequestFeedbackCommand.cs" />
+    <Compile Include="Commands\RemoteDebugCommand.cs" />
+    <Compile Include="Views\Converters\NullVisibilityConverter.cs" />
+    <Compile Include="Views\IRemoteDebugView.cs" />
+    <Compile Include="Views\RemoteDebugView.xaml.cs">
+      <DependentUpon>RemoteDebugView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Services\DataPersistenceService.cs" />
     <Compile Include="Services\IThemeService.cs" />
     <Compile Include="Services\IToolWindowService.cs" />
@@ -91,6 +97,11 @@
     <Compile Include="Commands\PushToCloudFoundryCommand.cs" />
     <Compile Include="Services\UiDispatcherService.cs" />
     <Compile Include="Services\DialogService.cs" />
+    <Compile Include="TanzuToolkitForVisualStudioPackage1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TanzuToolkitForVisualStudioPackage.vsct</DependentUpon>
+    </Compile>
     <Compile Include="Views\Commands\AsyncDelegatingCommand.cs" />
     <Compile Include="Views\Commands\DelegatingCommand.cs" />
     <Compile Include="Views\AppDeletionConfirmationView.xaml.cs">
@@ -191,6 +202,8 @@
   <ItemGroup>
     <VSCTCompile Include="TanzuToolkitForVisualStudioPackage.vsct">
       <ResourceName>Menus.ctmenu</ResourceName>
+      <Generator>VsctGenerator</Generator>
+      <LastGenOutput>TanzuToolkitForVisualStudioPackage1.cs</LastGenOutput>
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
@@ -254,6 +267,10 @@
     <Resource Include="Views\Resources\02_tanzu_newconnection_blue_dark_16x.png" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Views\RemoteDebugView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\AppDeletionConfirmationView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

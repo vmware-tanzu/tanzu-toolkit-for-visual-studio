@@ -5,14 +5,14 @@ using System.Windows.Data;
 
 namespace Tanzu.Toolkit.VisualStudio.Views.Converters
 {
-    public class StringNullVisibilityConverter : IValueConverter
+    public class NullVisibilityConverter : IValueConverter
     {
         public bool Reversed { get; set; }
         public bool ReserveSpace { get; set; }
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return string.IsNullOrWhiteSpace(value as string)
+            return value == null
                 ? Reversed ? Visibility.Visible : ReserveSpace ? Visibility.Hidden : (object)Visibility.Collapsed
                 : Reversed ? ReserveSpace ? Visibility.Hidden : (object)Visibility.Collapsed : Visibility.Visible;
         }

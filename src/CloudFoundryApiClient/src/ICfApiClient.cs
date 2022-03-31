@@ -24,5 +24,6 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         Task<List<Route>> ListRoutesForApp(string cfTarget, string accessToken, string appGuid);
         Task<bool> DeleteRouteWithGuid(string cfTarget, string accessToken, string routeGuid);
         void Configure(Uri cfApiAddress, bool skipSslCertValidation);
+        Task<List<App>> ListAppsAsync(string accessToken);
     }
 }

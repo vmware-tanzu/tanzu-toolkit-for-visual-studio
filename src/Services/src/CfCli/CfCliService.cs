@@ -445,6 +445,31 @@ namespace Tanzu.Toolkit.Services.CfCli
             return await loginTask;
         }
 
+        public async Task<DetailedResult> ExecuteSshCommand(string appName, string orgName, string spaceName, string sshCommand)
+        {
+            var args = $"ssh {appName} -c \"{sshCommand.Replace("\"", "\\\"")}\"";
+            Task<DetailedResult> sshTask;
+            lock (_cfEnvironmentLock)
+            {
+                var targetOrgResult = TargetOrg(orgName);
+                if (!targetOrgResult.Succeeded)
+                {
+                    return new DetailedResult<string>(null, targetOrgResult.Succeeded, targetOrgResult.Explanation, targetOrgResult.CmdResult);
+                }
+
+                var targetSpaceResult = TargetSpace(spaceName);
+                if (!targetSpaceResult.Succeeded)
+                {
+                    return new DetailedResult<string>(null, targetSpaceResult.Succeeded, targetSpaceResult.Explanation, targetSpaceResult.CmdResult);
+                }
+
+                sshTask = Task.Run(async () => await RunCfCommandAsync(args));
+            }
+            var sshResult = await sshTask;
+            ThrowIfResultIndicatesInvalidRefreshToken(sshResult);
+            return sshResult;
+        }
+
         public DetailedResult Logout()
         {
             return ExecuteCfCliCommand(_logoutCmd);

@@ -14,6 +14,7 @@ using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.CommandProcess;
 using Tanzu.Toolkit.Services.DataPersistence;
 using Tanzu.Toolkit.Services.Dialog;
+using Tanzu.Toolkit.Services.DotnetCli;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
@@ -21,6 +22,7 @@ using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.ViewModels.AppDeletionConfirmation;
+using Tanzu.Toolkit.ViewModels.RemoteDebug;
 using Tanzu.Toolkit.VisualStudio.Commands;
 using Tanzu.Toolkit.VisualStudio.Services;
 using Tanzu.Toolkit.VisualStudio.Views;
@@ -79,6 +81,7 @@ namespace Tanzu.Toolkit.VisualStudio
                 Task.Run(() => PushToCloudFoundryCommand.InitializeAsync(this, _serviceProvider)),
                 Task.Run(() => OpenLogsCommand.InitializeAsync(this, _serviceProvider)),
                 Task.Run(() => RequestFeedbackCommand.InitializeAsync(this)),
+                Task.Run(() => RemoteDebugCommand.InitializeAsync(this, _serviceProvider)),
             };
 
             await Task.WhenAll(commandInitializations);
@@ -141,6 +144,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddTransient<ICommandProcessService, CommandProcessService>();
             services.AddSingleton<ISerializationService, SerializationService>();
             services.AddSingleton<IDataPersistenceService>(provider => new DataPersistenceService(this, provider));
+            services.AddSingleton<IDotnetCliService, DotnetCliService>();
 
             /* Tool Windows */
             services.AddTransient<TanzuTasExplorerToolWindow>();
@@ -151,6 +155,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<ITasExplorerViewModel, TasExplorerViewModel>();
             services.AddSingleton<ILoginViewModel, LoginViewModel>();
             services.AddTransient<IDeploymentDialogViewModel, DeploymentDialogViewModel>();
+            services.AddTransient<IRemoteDebugViewModel, RemoteDebugViewModel>();
             services.AddTransient<ILoginViewModel, LoginViewModel>();
             services.AddSingleton<IAppDeletionConfirmationViewModel, AppDeletionConfirmationViewModel>();
 
@@ -159,6 +164,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<ILoginView, LoginView>();
             services.AddTransient<ITasExplorerView, TasExplorerView>();
             services.AddTransient<IDeploymentDialogView, DeploymentDialogView>();
+            services.AddTransient<IRemoteDebugView, RemoteDebugView>();
             services.AddTransient<IAppDeletionConfirmationView, AppDeletionConfirmationView>();
         }
     }
