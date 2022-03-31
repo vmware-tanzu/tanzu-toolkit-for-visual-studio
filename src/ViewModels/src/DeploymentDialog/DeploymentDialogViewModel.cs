@@ -738,8 +738,9 @@ namespace Tanzu.Toolkit.ViewModels
                     runtimeIdentifier,
                     publishConfiguration,
                     PublishDirName,
-                    OutputViewModel.AppendLine,
-                    OutputViewModel.AppendLine);
+                    includeDebuggingAgent: ConfigureForRemoteDebugging,
+                    StdOutCallback: OutputViewModel.AppendLine,
+                    StdErrCallback: OutputViewModel.AppendLine);
 
                 if (!publishSucceeded)
                 {

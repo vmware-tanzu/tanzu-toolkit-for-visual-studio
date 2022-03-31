@@ -33,7 +33,7 @@ namespace Tanzu.Toolkit.Services.DotnetCli
         /// <param name="outputDirName"></param>
         /// 
         /// <returns></returns>
-        public async Task<bool> PublishProjectForRemoteDebuggingAsync(string projectDir, string targetFrameworkMoniker, string runtimeIdentifier, string configuration, string outputDirName, Action<string> StdOutCallback = null, Action<string> StdErrCallback = null)
+        public async Task<bool> PublishProjectForRemoteDebuggingAsync(string projectDir, string targetFrameworkMoniker, string runtimeIdentifier, string configuration, string outputDirName, bool includeDebuggingAgent = false, Action<string> StdOutCallback = null, Action<string> StdErrCallback = null)
         {
             try
             {
@@ -47,26 +47,34 @@ namespace Tanzu.Toolkit.Services.DotnetCli
                 var publishProcess = _commandProcessService.StartProcess(_dotnetCliExecutable, publishArgs, projectDir, stdOutDelegate: StdOutCallback, stdErrDelegate: StdErrCallback);
                 await Task.Run(() => publishProcess.WaitForExit());
 
-                // get vsdbg installer
-                var vsdbgDownloadUrl = "https://aka.ms/getvsdbgps1";
-                const string installerName = "GetVsDbg.ps1";
-                var installScriptPath = Path.Combine(projectDir, outputDirName, installerName);
-                using (var client = new WebClient())
+                if (includeDebuggingAgent)
                 {
-                    await client.DownloadFileTaskAsync(vsdbgDownloadUrl, installScriptPath);
+                    // get vsdbg installer
+                    var vsdbgDownloadUrl = "https://aka.ms/getvsdbgps1";
+                    const string installerName = "GetVsDbg.ps1";
+                    var installScriptPath = Path.Combine(projectDir, outputDirName, installerName);
+                    using (var client = new WebClient())
+                    {
+                        await client.DownloadFileTaskAsync(vsdbgDownloadUrl, installScriptPath);
+                    }
+
+                    // install vsdbg into publish dir
+                    var vsdbgInstallationDirName = "vsdbg";
+                    var vsdbgVersion = "latest";
+                    var vsdbgRuntimeId = runtimeIdentifier.StartsWith("win") ? "win7-x64" : "linux-x64";
+                    var installerArgs = $"-File \"{installerName}\" -Version {vsdbgVersion} -InstallPath {vsdbgInstallationDirName}/ -RuntimeID {vsdbgRuntimeId}";
+                    var installationProcess = _commandProcessService.StartProcess("powershell.exe", installerArgs, publishDirPath, stdOutDelegate: StdOutCallback, stdErrDelegate: StdErrCallback);
+                    await Task.Run(() => installationProcess.WaitForExit());
+
+                    _fileService.DeleteFile(installScriptPath);
+
+                    if (installationProcess.ExitCode != 0)
+                    {
+                        return false;
+                    }
                 }
 
-                // install vsdbg into publish dir
-                var vsdbgInstallationDirName = "vsdbg";
-                var vsdbgVersion = "latest";
-                var vsdbgRuntimeId = runtimeIdentifier.StartsWith("win") ? "win7-x64" : "linux-x64";
-                var installerArgs = $"-File \"{installerName}\" -Version {vsdbgVersion} -InstallPath {vsdbgInstallationDirName}/ -RuntimeID {vsdbgRuntimeId}";
-                var installationProcess = _commandProcessService.StartProcess("powershell.exe", installerArgs, publishDirPath, stdOutDelegate: StdOutCallback, stdErrDelegate: StdErrCallback);
-                await Task.Run(() => installationProcess.WaitForExit());
-
-                _fileService.DeleteFile(installScriptPath);
-
-                return publishProcess.ExitCode == 0 && installationProcess.ExitCode == 0;
+                return publishProcess.ExitCode == 0;
             }
             catch (Exception ex)
             {
