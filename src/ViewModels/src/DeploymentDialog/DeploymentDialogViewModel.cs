@@ -121,8 +121,8 @@ namespace Tanzu.Toolkit.ViewModels
                 ThreadingService.StartBackgroundTask(UpdateStackOptions);
             }
 
+            AppName = projectName;
             _projectName = projectName;
-
             Expanded = false;
         }
 
