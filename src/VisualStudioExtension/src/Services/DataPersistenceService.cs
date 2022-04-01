@@ -95,7 +95,16 @@ namespace Tanzu.Toolkit.VisualStudio.Services
 
         public bool SavedCfCredsExist()
         {
-            return _cfCliService.GetOAuthToken() != null;
+            try
+            {
+                var credRecordExists = _cfCliService.GetOAuthToken() != null;
+                return credRecordExists;
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error("DataPersistenceService caught exception while trying to determine if prior credentials were saved: {Exception}", ex);
+                return false;
+            }
         }
     }
 }
