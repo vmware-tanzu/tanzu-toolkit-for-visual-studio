@@ -76,7 +76,7 @@ namespace Tanzu.Toolkit.ViewModels
             _dotnetCliService = services.GetRequiredService<IDotnetCliService>();
             TasExplorerViewModel = services.GetRequiredService<ITasExplorerViewModel>();
 
-            OutputView = ViewLocatorService.GetViewByViewModelName(nameof(ViewModels.OutputViewModel)) as IView;
+            OutputView = ViewLocatorService.GetViewByViewModelName(nameof(ViewModels.OutputViewModel), $"Tanzu Push Output (\"{projectName}\")") as IView;
             OutputViewModel = OutputView?.ViewModel as IOutputViewModel;
 
             DeploymentInProgress = false;

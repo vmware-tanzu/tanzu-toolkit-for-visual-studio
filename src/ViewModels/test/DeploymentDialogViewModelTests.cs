@@ -39,7 +39,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             // * return fake view/viewmodel for output window
             MockViewLocatorService.Setup(mock =>
-                mock.GetViewByViewModelName(nameof(OutputViewModel), null))
+                mock.GetViewByViewModelName(nameof(OutputViewModel), It.IsAny<string>()))
                     .Returns(new FakeOutputView());
 
             MockFileService.Setup(m => m.FileExists(_fakeManifestPath)).Returns(true);
