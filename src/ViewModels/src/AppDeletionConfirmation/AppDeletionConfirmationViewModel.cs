@@ -9,6 +9,7 @@ namespace Tanzu.Toolkit.ViewModels.AppDeletionConfirmation
     public class AppDeletionConfirmationViewModel : AbstractViewModel, IAppDeletionConfirmationViewModel
     {
         internal const string _deleteAppErrorMsg = "Encountered an error while deleting app";
+        private string _message;
         private bool _deleteRoutes;
         internal CloudFoundryApp CfApp { get; set; }
 
@@ -19,6 +20,10 @@ namespace Tanzu.Toolkit.ViewModels.AppDeletionConfirmation
         {
             _errorDialogService = services.GetRequiredService<IErrorDialog>();
             _tasExplorer = tasExplorerViewModel;
+            var identifier = CfApp == null || CfApp.AppName == null || string.IsNullOrWhiteSpace(CfApp.AppName)
+                ? "this app"
+                : $"\"CfApp.AppName\"";
+            Message = $"Are you sure you want to delete {identifier}?";
         }
 
         public bool CanDeleteApp(object arg)
@@ -33,6 +38,16 @@ namespace Tanzu.Toolkit.ViewModels.AppDeletionConfirmation
             {
                 _deleteRoutes = value;
                 RaisePropertyChangedEvent("DeleteRoutes");
+            }
+        }
+
+        public string Message
+        {
+            get { return _message; }
+            set
+            {
+                _message = value;
+                RaisePropertyChangedEvent("Message");
             }
         }
 
