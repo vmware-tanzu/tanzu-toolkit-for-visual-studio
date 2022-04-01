@@ -328,8 +328,7 @@
                     </Button>
                 </Grid>
 
-                <Grid
-                    Name="HiddenContent"
+                <Grid Name="HiddenContent"
                     Visibility="{Binding Expanded, Converter={StaticResource ExpansionConverter}}"
                     VerticalAlignment="Top"
                     Margin="48,0"
@@ -488,11 +487,11 @@
                                 <ListView.ItemTemplate>
                                     <DataTemplate>
                                         <CheckBox
-                                        Content="{Binding Name}"
-                                        IsChecked="{Binding IsSelected}"
-                                        IsEnabled="{Binding CompatibleWithStack}"
-                                        Checked="CheckBox_Checked"
-                                        Unchecked="CheckBox_Unchecked"/>
+                                            Content="{Binding Name}"
+                                            IsChecked="{Binding IsSelected}"
+                                            IsEnabled="{Binding CompatibleWithStack}"
+                                            Checked="CheckBox_Checked"
+                                            Unchecked="CheckBox_Unchecked"/>
                                     </DataTemplate>
                                 </ListView.ItemTemplate>
                             </ListView>
