@@ -295,7 +295,7 @@ namespace Tanzu.Toolkit.ViewModels
                 }
                 else
                 {
-                    var outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel)) as IView;
+                    var outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel), $"\"{cfApp.AppName}\" Logs") as IView;
                     var outputViewModel = outputView?.ViewModel as IOutputViewModel;
 
                     outputView.Show();
@@ -315,7 +315,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 try
                 {
-                    var viewTitle = $"Logs for {cfApp.AppName}";
+                    var viewTitle = $"\"{cfApp.AppName}\" Logs";
                     var outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel), viewTitle) as IView;
                     var outputViewModel = outputView.ViewModel as IOutputViewModel;
 

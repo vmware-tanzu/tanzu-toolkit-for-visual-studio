@@ -80,7 +80,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             _vsdbgPathLinux = _vsdbgInstallationDirLinux + "/" + _vsdbgExecutableNameLinux;
             _vsdbgPathWindows = _vsdbgInstallationDirWindows + "\\" + _vsdbgExecutableNameWindows;
 
-            _outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel)) as IView;
+            _outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel), $"Remote Debug Output (\"{_projectName}\")") as IView;
             _outputViewModel = _outputView?.ViewModel as IOutputViewModel;
 
             Option1Text = $"Push new version of \"{expectedAppName}\" to debug";

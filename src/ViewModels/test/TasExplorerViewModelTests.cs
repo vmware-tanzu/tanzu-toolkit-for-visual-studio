@@ -563,7 +563,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var fakeLogsResult = new DetailedResult<string>(content: "fake logs", succeeded: true, explanation: null, cmdDetails: FakeSuccessCmdResult);
 
             MockViewLocatorService.Setup(m => m.
-                GetViewByViewModelName(nameof(OutputViewModel), null))
+                GetViewByViewModelName(nameof(OutputViewModel), It.IsAny<string>()))
                     .Returns(fakeView);
 
             MockCloudFoundryService.Setup(m => m.
@@ -794,7 +794,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("StreamAppLogs")]
         public async Task StreamAppLogs_ConstructsAndDisplaysNewOutputView()
         {
-            var expectedViewParam = $"Logs for {FakeCfApp.AppName}"; // intended to be title of tool window
+            var expectedViewParam = $"\"{FakeCfApp.AppName}\" Logs"; // intended to be title of tool window
             var fakeView = new FakeOutputView();
             var fakeRecentLogsResult = new DetailedResult<string>
             {
@@ -815,7 +815,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("StreamAppLogs")]
         public async Task StreamAppLogs_PrintsRecentLogs_BeforeStartingStream()
         {
-            var expectedViewParam = $"Logs for {FakeCfApp.AppName}";
+            var expectedViewParam = $"\"{FakeCfApp.AppName}\" Logs";
             var fakeView = new FakeOutputView();
             var fakeViewModel = fakeView.ViewModel as IOutputViewModel;
             Action<string> expectedStdOutDelegate = fakeViewModel.AppendLine;
@@ -840,7 +840,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("StreamAppLogs")]
         public async Task StreamAppLogs_LogsError_WhenRecentLogsRequestFails()
         {
-            var expectedViewParam = $"Logs for {FakeCfApp.AppName}";
+            var expectedViewParam = $"\"{FakeCfApp.AppName}\" Logs";
             var fakeView = new FakeOutputView();
             var fakeViewModel = fakeView.ViewModel as IOutputViewModel;
             Action<string> expectedStdOutDelegate = fakeViewModel.AppendLine;
@@ -864,7 +864,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("StreamAppLogs")]
         public async Task StreamAppLogs_SetsAuthenticationRequiredToTrue_WhenRecentLogsRequestReportsInvalidRefreshToken()
         {
-            var expectedViewParam = $"Logs for {FakeCfApp.AppName}";
+            var expectedViewParam = $"\"{FakeCfApp.AppName}\" Logs";
             var fakeView = new FakeOutputView();
             var fakeViewModel = fakeView.ViewModel as IOutputViewModel;
             Action<string> expectedStdOutDelegate = fakeViewModel.AppendLine;
@@ -892,7 +892,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("StreamAppLogs")]
         public async Task StreamAppLogs_RequestsLogStreamProcessFromCloudFoundryService()
         {
-            var expectedViewParam = $"Logs for {FakeCfApp.AppName}";
+            var expectedViewParam = $"\"{FakeCfApp.AppName}\" Logs";
             var fakeView = new FakeOutputView();
             var fakeViewModel = fakeView.ViewModel as IOutputViewModel;
             Action<string> expectedStdOutDelegate = fakeViewModel.AppendLine;
@@ -924,7 +924,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             using (var fakeLogsProcess = new Process())
             {
-                var expectedViewParam = $"Logs for {FakeCfApp.AppName}"; // intended to be title of tool window
+                var expectedViewParam = $"\"{FakeCfApp.AppName}\" Logs"; // intended to be title of tool window
                 var fakeView = new FakeOutputView();
                 var fakeViewModel = fakeView.ViewModel as IOutputViewModel;
                 Action<string> expectedStdOutDelegate = fakeViewModel.AppendLine;
@@ -955,7 +955,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("StreamAppLogs")]
         public async Task StreamAppLogs_DisplaysError_WhenCloudFoundryServiceFailsToReturnLogStreamProcess()
         {
-            var expectedViewParam = $"Logs for {FakeCfApp.AppName}"; // intended to be title of tool window
+            var expectedViewParam = $"\"{FakeCfApp.AppName}\" Logs"; // intended to be title of tool window
             var fakeView = new FakeOutputView();
             var fakeViewModel = fakeView.ViewModel as IOutputViewModel;
             Action<string> expectedStdOutDelegate = fakeViewModel.AppendLine;
@@ -986,7 +986,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("StreamAppLogs")]
         public async Task StreamAppLogs_DisplaysError_ViewLocatorServiceThrowsException()
         {
-            var expectedViewParam = $"Logs for {FakeCfApp.AppName}"; // intended to be title of tool window
+            var expectedViewParam = $"\" {FakeCfApp.AppName} \" Logs"; // intended to be title of tool window
             var fakeView = new FakeOutputView();
             var fakeViewModel = fakeView.ViewModel as IOutputViewModel;
             Action<string> expectedStdOutDelegate = fakeViewModel.AppendLine;
@@ -1005,7 +1005,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("StreamAppLogs")]
         public async Task StreamAppLogs_DisplaysError_WhenCloudFoundryServiceThrowsException()
         {
-            var expectedViewParam = $"Logs for {FakeCfApp.AppName}"; // intended to be title of tool window
+            var expectedViewParam = $"\"{FakeCfApp.AppName}\" Logs"; // intended to be title of tool window
             var fakeView = new FakeOutputView();
             var fakeViewModel = fakeView.ViewModel as IOutputViewModel;
             Action<string> expectedStdOutDelegate = fakeViewModel.AppendLine;
@@ -1032,7 +1032,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("StreamAppLogs")]
         public async Task StreamAppLogs_SetsAuthenticationRequiredToTrue_WhenLogsRequestFailsDueToInvalidRefreshToken()
         {
-            var expectedViewParam = $"Logs for {FakeCfApp.AppName}";
+            var expectedViewParam = $"\"{FakeCfApp.AppName}\" Logs";
             var fakeView = new FakeOutputView();
             var fakeViewModel = fakeView.ViewModel as IOutputViewModel;
             Action<string> expectedStdOutDelegate = fakeViewModel.AppendLine;
