@@ -142,21 +142,18 @@ namespace Tanzu.Toolkit.VisualStudio
                         OLEMSGBUTTON.OLEMSGBUTTON_OK,
                         OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
                     }
-                    else if (tfm.StartsWith(".NETFramework,Version=v"))
-                    {
-                        var errorTitle = "Not supported";
-                        var errorMsg = $"Remote debugging is not currently supported for projects targeting '{tfm}'.\n" +
-                            "If this is a feature you'd like to see implemented in the future, please let the team know! tas-vs-extension@vmware.com";
-                        VsShellUtilities.ShowMessageBox(
-                            _package,
-                            errorMsg,
-                            errorTitle,
-                            OLEMSGICON.OLEMSGICON_CRITICAL,
-                        OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                        OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
-                    }
                     else
                     {
+                        var systemWebReferenceInCsProj = false;
+                        try
+                        {
+                            systemWebReferenceInCsProj = File.ReadAllText(project.FullName).Contains("System.Web");
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.Error("Encountered error while trying to read csproj file at '{CsProjFilePath}': {CsProjReadException}", project.FullName, ex);
+                        }
+
                         var launchFilePath = Path.Combine(projectDirectory, RemoteDebugViewModel._launchFileName);
                         var initiateDebugCallback = new Action(() =>
                         {
@@ -164,7 +161,7 @@ namespace Tanzu.Toolkit.VisualStudio
                             dte.ExecuteCommand("DebugAdapterHost.Launch", $"/LaunchJson:\"{launchFilePath}\"");
                         });
 
-                        var remoteDebugViewModel = new RemoteDebugViewModel(projectName, projectDirectory, tfm, launchFilePath, initiateDebugCallback, services: _services) as IRemoteDebugViewModel;
+                        var remoteDebugViewModel = new RemoteDebugViewModel(projectName, projectDirectory, tfm, launchFilePath, systemWebReferenceInCsProj, initiateDebugCallback, services: _services) as IRemoteDebugViewModel;
                         var view = new RemoteDebugView(remoteDebugViewModel, new ThemeService());
                         remoteDebugViewModel.ViewOpener = view.Show;
                         remoteDebugViewModel.ViewCloser = view.Hide;
