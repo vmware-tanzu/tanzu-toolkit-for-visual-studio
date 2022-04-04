@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -29,6 +30,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private readonly string _pathToProjectRootDir;
         private readonly string _targetFrameworkMoniker;
         private readonly string _expectedPathToLaunchFile;
+        private readonly bool _projDependsOnSystemWeb;
         private readonly Action _initiateDebugCallback;
         private List<CloudFoundryApp> _accessibleApps;
         private string _dialogMessage;
@@ -55,6 +57,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private const string _vsdbgInstallationDirWindows = "c:\\Users\\vcap\\app\\vsdbg";
         private const string _vsdbgExecutableNameLinux = "vsdbg";
         private const string _vsdbgExecutableNameWindows = "vsdbg.exe";
+        private const string _publishDirName = "publish";
         private readonly string _vsdbgPathLinux;
         private readonly string _vsdbgPathWindows;
         public static readonly string _launchFileName = "launch.json";
@@ -63,12 +66,13 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             PropertyNameCaseInsensitive = true
         };
 
-        public RemoteDebugViewModel(string expectedAppName, string pathToProjectRootDir, string targetFrameworkMoniker, string expectedPathToLaunchFile, Action initiateDebugCallback, IServiceProvider services) : base(services)
+        public RemoteDebugViewModel(string expectedAppName, string pathToProjectRootDir, string targetFrameworkMoniker, string expectedPathToLaunchFile, bool projDependsOnSystemWeb, Action initiateDebugCallback, IServiceProvider services) : base(services)
         {
             _projectName = expectedAppName;
             _pathToProjectRootDir = pathToProjectRootDir;
             _targetFrameworkMoniker = targetFrameworkMoniker;
             _expectedPathToLaunchFile = expectedPathToLaunchFile;
+            _projDependsOnSystemWeb = projDependsOnSystemWeb;
             _initiateDebugCallback = initiateDebugCallback;
             _tasExplorer = services.GetRequiredService<ITasExplorerViewModel>();
             _cfCliService = services.GetRequiredService<ICfCliService>();
@@ -424,9 +428,11 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                     var adapterArgs = stack.Contains("win")
                         ? $"ssh {AppToDebug.AppName} -c \"{_vsdbgPathWindows} --interpreter=vscode\""
                         : $"ssh {AppToDebug.AppName} -c \"/tmp/lifecycle/shell {_appDirLinux} 'bash -c \\\"{_vsdbgPathLinux} --interpreter=vscode\\\"'\"";
-                    var appProcessName = stack.Contains("win")
-                        ? $"{AppToDebug.AppName}.exe"
-                        : _projectName; // this should be the app name as determined by .NET, not CF,
+                    var appProcessName = _projDependsOnSystemWeb 
+                        ? "hwc.exe"
+                        : stack.Contains("win")
+                            ? $"{AppToDebug.AppName}.exe"
+                            : _projectName; // this should be the app name as determined by .NET, not CF,
                     var launchFileConfig = new RemoteDebugLaunchConfig
                     {
                         version = "0.2.0",
@@ -540,31 +546,23 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         private async Task<bool> PushNewAppWithDebugConfigurationAsync(string appName, string stack)
         {
-            var runtimeIdentifier = stack.Contains("win") ? "win-x64" : "linux-x64";
-            if (runtimeIdentifier == "linux-x64" && !stack.Contains("linux"))
-            {
-                Logger.Information($"Unexpected stack provided: '{stack}'; proceeding to publish with default runtime identifier 'linux-x64'...");
-            }
-            var publishConfiguration = "Debug";
-            var publishDirName = "publish";
+            var buildpackForPush = "dotnet_core_buildpack";
+            var publishSucceeded = false;
             try
             {
-                var publishTask = _dotnetCliService.PublishProjectForRemoteDebuggingAsync(
-                    _pathToProjectRootDir,
-                    _targetFrameworkMoniker,
-                    runtimeIdentifier,
-                    publishConfiguration,
-                    publishDirName,
-                    includeDebuggingAgent: true,
-                    StdOutCallback: _outputViewModel.AppendLine,
-                    StdErrCallback: _outputViewModel.AppendLine);
-                var publishSucceeded = await publishTask;
+                if (_projDependsOnSystemWeb)
+                {
+                    buildpackForPush = "hwc_buildpack";
+                    publishSucceeded = await PublishWithMSBuildAsync(includeVsdbg: true);
+                }
+                else
+                {
+                    publishSucceeded = await PublishWithDotnetCliAsync(_publishDirName, stack);
+                }
                 if (!publishSucceeded)
                 {
-                    var title = "Unable to intitate remote debugging";
-                    var msg = "Project failed to publish.";
-                    Logger.Error(title + "; " + msg);
-                    ErrorService.DisplayErrorDialog(title, msg);
+                    Logger.Error($"{(_projDependsOnSystemWeb ? nameof(PublishWithMSBuildAsync) : nameof(PublishWithDotnetCliAsync))} returned failed result");
+                    ErrorService.DisplayErrorDialog("Unable to intitate remote debugging", "Project failed to publish.");
                     _outputViewModel.AppendLine("Project failed to publish");
                     return false;
                 }
@@ -572,20 +570,13 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             catch (Exception ex)
             {
                 Logger.Error("Caught exception while publishing project for remote debugging: {RemoteDebugPublishException}", ex);
-                var title = "Unable to intitate remote debugging";
-                var msg = "Project failed to publish.";
-                ErrorService.DisplayErrorDialog(title, msg);
+                ErrorService.DisplayErrorDialog("Unable to intitate remote debugging", "Project failed to publish.");
                 _outputViewModel.AppendLine("Project failed to publish");
                 return false;
             }
 
-            var pathToPublishDir = Path.Combine(_pathToProjectRootDir, publishDirName);
-            var startCommand = stack.Contains("win")
-                ? $"cmd /c .\\{appName} --urls=http://0.0.0.0:%PORT%"
-                : $"./{appName}";
-            var buildpack = stack.Contains("win")
-                ? "binary_buildpack"
-                : "dotnet_core_buildpack";
+            var pathToPublishDir = Path.Combine(_pathToProjectRootDir, _publishDirName);
+
             var appConfig = new AppManifest
             {
                 Applications = new List<AppConfig>
@@ -595,8 +586,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                         Name = appName,
                         Path = pathToPublishDir,
                         Stack = stack,
-                        Buildpack = buildpack,
-                        Command = startCommand,
+                        Buildpack = buildpackForPush,
                     }
                 }
             };
@@ -629,6 +619,114 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 return false;
             }
             return true;
+        }
+
+        private async Task<bool> PublishWithMSBuildAsync(bool includeVsdbg)
+        {
+            var pathToCsProjFile = string.Empty;
+            try
+            {
+                pathToCsProjFile = Path.Combine(_pathToProjectRootDir, $"{_projectName}.csproj");
+                if (!File.Exists(pathToCsProjFile))
+                {
+                    Logger.Error($"Unable to publish project using MSBuild; no file found at \"{pathToCsProjFile}\"");
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Unable to publish project using MSBuild. {MSBuildException}", ex);
+                return false;
+            }
+
+            var expectedPublishDir = Path.Combine(_pathToProjectRootDir, _publishDirName);
+            var publishArgs = $"\"{pathToCsProjFile}\"";
+            publishArgs += " /p:DeployOnBuild=true";
+            publishArgs += $" /p:PublishUrl=\"{expectedPublishDir}\"";
+            publishArgs += " /p:WebPublishMethod=FileSystem";
+            publishArgs += " /p:DeployDefaultTarget=WebPublish";
+            publishArgs += " /p:Configuration=Debug";
+            publishArgs += " /p:DebugType=full"; // include PDB files
+            publishArgs += " /p:DebugSymbols=true"; // include PDB files
+            publishArgs += " /p:ExcludeGeneratedDebugSymbol=false"; // useful for web apps?
+
+            try
+            {
+                var msbuildProcess = CommandService.StartProcess(
+                    FileService.FullPathToMsBuildExe,
+                    publishArgs,
+                    _pathToProjectRootDir,
+                    stdOutDelegate: _outputViewModel.AppendLine,
+                    stdErrDelegate: _outputViewModel.AppendLine);
+                if (msbuildProcess == null)
+                {
+                    return false;
+                }
+                await Task.Run(() => msbuildProcess.WaitForExit());
+                if (msbuildProcess.ExitCode != 0)
+                {
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Caught exception while using MSBuild to publish project for remote debugging: {RemoteDebugPublishException}", ex);
+                return false;
+            }
+
+            if (includeVsdbg)
+            {
+                // get vsdbg installer
+                var vsdbgDownloadUrl = "https://aka.ms/getvsdbgps1";
+                const string installerName = "GetVsDbg.ps1";
+                var installScriptPath = Path.Combine(_pathToProjectRootDir, _publishDirName, installerName);
+                using (var client = new WebClient())
+                {
+                    await client.DownloadFileTaskAsync(vsdbgDownloadUrl, installScriptPath);
+                }
+
+                // install vsdbg into publish dir
+                var vsdbgInstallationDirName = "vsdbg";
+                var vsdbgVersion = "latest";
+                var vsdbgRuntimeId = "win7-x64";
+                var installerArgs = $"-File \"{installerName}\" -Version {vsdbgVersion} -InstallPath {vsdbgInstallationDirName}/ -RuntimeID {vsdbgRuntimeId}";
+                var installationProcess = CommandService.StartProcess("powershell.exe", installerArgs, expectedPublishDir, stdOutDelegate: _outputViewModel.AppendLine, stdErrDelegate: _outputViewModel.AppendLine);
+                await Task.Run(() => installationProcess.WaitForExit());
+
+                _fileService.DeleteFile(installScriptPath);
+
+                if (installationProcess.ExitCode != 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private async Task<bool> PublishWithDotnetCliAsync(string publishDirName, string stack)
+        {
+            var runtimeIdentifier = stack.Contains("win") ? "win-x64" : "linux-x64";
+            if (runtimeIdentifier == "linux-x64" && !stack.Contains("linux"))
+            {
+                Logger.Information($"Unexpected stack provided: '{stack}'; proceeding to publish with default runtime identifier 'linux-x64'...");
+            }
+            try
+            {
+                return await _dotnetCliService.PublishProjectForRemoteDebuggingAsync(
+                    _pathToProjectRootDir,
+                    _targetFrameworkMoniker,
+                    runtimeIdentifier,
+                    configuration: "Debug",
+                    outputDirName: publishDirName,
+                    StdOutCallback: _outputViewModel.AppendLine,
+                    StdErrCallback: _outputViewModel.AppendLine);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Caught exception while using the dotnet cli to publish project for remote debugging: {RemoteDebugPublishException}", ex);
+                return false;
+            }
         }
 
         private async Task PopulateAccessibleAppsAsync()

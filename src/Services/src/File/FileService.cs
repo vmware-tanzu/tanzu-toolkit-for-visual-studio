@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Tanzu.Toolkit.Services.File
@@ -21,7 +22,6 @@ namespace Tanzu.Toolkit.Services.File
         public FileService(string vsixBaseDirPath)
         {
             _vsixBaseDirPath = vsixBaseDirPath;
-
             _pathToCf7Exe = Path.Combine(VsixPackageBaseDir, _cfCliV7Dir, _cfCliV7ExeName);
             _pathToCf6Exe = Path.Combine(VsixPackageBaseDir, _cfCliV6Dir, _cfCliV6ExeName);
         }
@@ -68,6 +68,30 @@ namespace Tanzu.Toolkit.Services.File
                 }
 
                 throw new Exception($"Unable to locate cf.exe for CLI version {_cliVersion}.");
+            }
+        }
+
+        public string FullPathToMsBuildExe
+        {
+            get
+            {
+                var expectedLocations = new List<string>
+                {
+                    "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe",
+                    "C:/Program Files/Microsoft Visual Studio/2022/Professional/MSBuild/Current/Bin/MSBuild.exe",
+                    "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/MSBuild/Current/Bin/MSBuild.exe",
+                    "C:/Program Files/Microsoft Visual Studio/2019/Community/MSBuild/Current/Bin/MSBuild.exe",
+                    "C:/Program Files/Microsoft Visual Studio/2019/Professional/MSBuild/Current/Bin/MSBuild.exe",
+                    "C:/Program Files/Microsoft Visual Studio/2019/Enterprise/MSBuild/Current/Bin/MSBuild.exe",
+                };
+                foreach (var candidate in expectedLocations)
+                {
+                    if (System.IO.File.Exists(candidate))
+                    {
+                        return candidate;
+                    }
+                }
+                throw new Exception($"Unable to locate MSBuild.exe");
             }
         }
 

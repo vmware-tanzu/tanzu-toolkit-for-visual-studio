@@ -4,6 +4,7 @@ using System;
 using System.ComponentModel;
 using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CloudFoundry;
+using Tanzu.Toolkit.Services.CommandProcess;
 using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.File;
@@ -25,6 +26,7 @@ namespace Tanzu.Toolkit.ViewModels
         {
             Services = services;
             DialogService = services.GetRequiredService<IDialogService>();
+            CommandService = services.GetRequiredService<ICommandProcessService>();
             ViewLocatorService = services.GetRequiredService<IViewLocatorService>();
             ThreadingService = services.GetRequiredService<IThreadingService>();
             UiDispatcherService = services.GetRequiredService<IUiDispatcherService>();
@@ -44,6 +46,8 @@ namespace Tanzu.Toolkit.ViewModels
         public IUiDispatcherService UiDispatcherService { get; }
 
         public IDialogService DialogService { get; }
+
+        public ICommandProcessService CommandService { get; }
 
         public IFileService FileService { get; }
 
