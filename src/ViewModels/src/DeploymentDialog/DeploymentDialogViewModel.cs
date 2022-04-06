@@ -301,16 +301,6 @@ namespace Tanzu.Toolkit.ViewModels
                         RemoveFromSelectedBuildpacks(b.Name);
                     }
                 }
-
-                if (value != null && value.Contains("win") && PublishBeforePushing)
-                {
-                    var binaryBuildpack = BuildpackOptions.FirstOrDefault(b => b.Name == "binary_buildpack");
-                    if (binaryBuildpack != null)
-                    {
-                        SelectedBuildpacks.Clear();
-                        SelectBuildpack(binaryBuildpack);
-                    }
-                }
             }
         }
 
@@ -476,15 +466,6 @@ namespace Tanzu.Toolkit.ViewModels
                 if (_publishBeforePushing)
                 {
                     DeploymentDirectoryPath = Path.Combine(PathToProjectRootDir, PublishDirName);
-                    if (SelectedStack != null && SelectedStack.Contains("win"))
-                    {
-                        var binaryBuildpack = BuildpackOptions.FirstOrDefault(b => b.Name == "binary_buildpack");
-                        if (binaryBuildpack != null)
-                        {
-                            SelectedBuildpacks.Clear();
-                            SelectBuildpack(binaryBuildpack);
-                        }
-                    }
                 }
                 else
                 {
@@ -746,15 +727,9 @@ namespace Tanzu.Toolkit.ViewModels
             if (PublishBeforePushing)
             {
                 var runtimeIdentifier = "linux-x64";
-                if (SelectedStack != null && SelectedStack.Contains("win"))
+                if (SelectedStack != null && SelectedStack.Contains("windows"))
                 {
                     runtimeIdentifier = "win-x64";
-                    if (!SelectedBuildpacks.Contains("binary_buildpack"))
-                    {
-                        ErrorService.DisplayWarningDialog(
-                            "Recommended buildpack not found",
-                            "For best results, `binary_buildpack` should be used when pushing published apps to Tanzu Application Service for Windows, but `binary_buildpack` does not appear to be available.");
-                    }
                 }
                 var publishConfiguration = ConfigureForRemoteDebugging ? "Debug" : "Release";
                 var publishSucceeded = await _dotnetCliService.PublishProjectForRemoteDebuggingAsync(
@@ -769,7 +744,7 @@ namespace Tanzu.Toolkit.ViewModels
 
                 if (!publishSucceeded)
                 {
-                    _errorDialogService.DisplayErrorDialog("Unable to publish project with these parameters:\n",
+                    _errorDialogService.DisplayErrorDialog("Unable to publish project with these parameters:\n", 
                         $"Project path: {PathToProjectRootDir}\n" +
                         $"Target framework: {_targetFrameworkMoniker}\n" +
                         $"Runtime: {runtimeIdentifier}\n" +
@@ -903,12 +878,6 @@ namespace Tanzu.Toolkit.ViewModels
             var path = appManifest.Applications[0].Path;
 
             DeploymentDirectoryPath = string.IsNullOrWhiteSpace(path) ? null : path;
-        }
-
-        private void SelectBuildpack(BuildpackListItem bp)
-        {
-            bp.IsSelected = true;
-            AddToSelectedBuildpacks(bp.Name);
         }
     }
 
