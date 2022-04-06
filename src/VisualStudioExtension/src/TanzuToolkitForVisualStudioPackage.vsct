@@ -104,6 +104,8 @@
         <Strings>
           <ButtonText>Remote Debug on Tanzu Application Service</ButtonText>
         </Strings>
+        <Icon guid="ImageCatalogGuid" id="RemoteDebugger" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
       </Button>
     </Buttons>
 
