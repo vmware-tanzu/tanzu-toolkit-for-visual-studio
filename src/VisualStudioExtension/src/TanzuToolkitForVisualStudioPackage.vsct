@@ -80,7 +80,7 @@
         <Parent guid="guidTanzuToolkitPackageCmdSet" id="ProjContextMenuGroup" />
         <Icon guid="guidImages1" id="bmpPic1" />
         <Strings>
-          <ButtonText>Push To Tanzu Application Service</ButtonText>
+          <ButtonText>Push to Tanzu Application Service</ButtonText>
         </Strings>
       </Button>
 
@@ -102,7 +102,7 @@
       <Button guid="guidTanzuToolkitPackageCmdSet" id="RemoteDebugId" priority="0x0100" type="Button">
         <Parent guid="guidTanzuToolkitPackageCmdSet" id="ProjContextMenuGroup" />
         <Strings>
-          <ButtonText>Remote debug on Tanzu Application Service</ButtonText>
+          <ButtonText>Remote Debug on Tanzu Application Service</ButtonText>
         </Strings>
       </Button>
     </Buttons>
