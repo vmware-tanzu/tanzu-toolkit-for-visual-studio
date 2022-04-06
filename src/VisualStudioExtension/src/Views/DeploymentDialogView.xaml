@@ -366,10 +366,18 @@
                         <CheckBox
                             Content="Publish before pushing"
                             IsChecked="{Binding PublishBeforePushing}"/>
-                        <CheckBox
-                            Content="Configure for remote debugging"
-                            Margin="0,6"
-                            IsChecked="{Binding ConfigureForRemoteDebugging}"/>
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox
+                                Content="Configure for remote debugging"
+                                Margin="0,6"
+                                IsChecked="{Binding ConfigureForRemoteDebugging}"/>
+                            <Image
+                                Source="Resources/StatusInfo.png"
+                                Width="16"
+                                Height="16"
+                                Margin="4"
+                                ToolTip="Downloads a script from Microsoft (https://aka.ms/getvsdbgps1) to install the Visual Studio Remote Debugger into the published output folder for this app."/>
+                        </StackPanel>
                     </StackPanel>
             
                     <!--HIDDEN GRID ROW 1-->

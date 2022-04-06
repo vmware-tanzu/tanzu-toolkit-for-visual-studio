@@ -148,6 +148,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
+    <Content Include="Views\Resources\InfoTipInline.png" />
     <Resource Include="Views\Resources\ClearWindowContent.png" />
     <Resource Include="Views\Resources\ScrollBox.png" />
   </ItemGroup>
