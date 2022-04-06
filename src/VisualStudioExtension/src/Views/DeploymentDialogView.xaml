@@ -358,7 +358,7 @@
                     <StackPanel
                         Grid.Row="1">
                         <CheckBox
-                            Content="Publish app and push binaries to TAS"
+                            Content="Publish before pushing"
                             IsChecked="{Binding PublishBeforePushing}"/>
                         <CheckBox
                             Content="Configure for remote debugging"
