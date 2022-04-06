@@ -309,53 +309,21 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public async Task StreamAppLogsAsync(object app)
+        public void StreamAppLogs(object app)
         {
             if (app is CloudFoundryApp cfApp)
             {
                 try
                 {
-                    var viewTitle = $"\"{cfApp.AppName}\" Logs";
+                    var viewTitle = $"Logs for {cfApp.AppName}";
                     var outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel), viewTitle) as IView;
                     var outputViewModel = outputView.ViewModel as IOutputViewModel;
-
-                    var recentLogsTask = TasConnection.CfClient.GetRecentLogsAsync(cfApp);
-                    outputView.Show();
-
-                    var recentLogsResult = await recentLogsTask;
-                    if (recentLogsResult.Succeeded)
-                    {
-                        outputViewModel.AppendLine(recentLogsResult.Content);
-                        outputViewModel.AppendLine("\n*** End of recent logs, beginning live log stream ***\n");
-                    }
-                    else
-                    {
-                        if (recentLogsResult.FailureType == FailureType.InvalidRefreshToken)
-                        {
-                            AuthenticationRequired = true;
-                        }
-
-                        Logger.Error($"Unable to retrieve recent logs for {cfApp.AppName}. {recentLogsResult.Explanation}. {recentLogsResult.CmdResult}");
-                    }
-
-                    var logStreamResult = TasConnection.CfClient.StreamAppLogs(cfApp, stdOutCallback: outputViewModel.AppendLine, stdErrCallback: outputViewModel.AppendLine);
-                    if (logStreamResult.Succeeded)
-                    {
-                        outputViewModel.ActiveProcess = logStreamResult.Content;
-                    }
-                    else
-                    {
-                        if (logStreamResult.FailureType == FailureType.InvalidRefreshToken)
-                        {
-                            AuthenticationRequired = true;
-                        }
-
-                        _errorDialogService.DisplayErrorDialog("Error displaying app logs", $"Something went wrong while trying to display logs for {cfApp.AppName}, please try again.");
-                    }
+                    var _ = outputViewModel.BeginStreamingAppLogsForAppAsync(cfApp, outputView);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    _errorDialogService.DisplayErrorDialog("Error displaying app logs", $"Something went wrong while trying to display logs for {cfApp.AppName}, please try again.");
+                    Logger.Error("Caught exception trying to stream app logs for '{AppName}': {AppLogsException}", cfApp.AppName, ex);
+                    ErrorService.DisplayErrorDialog("Error displaying app logs", $"Something went wrong while trying to display logs for {cfApp.AppName}, please try again.");
                 }
             }
         }

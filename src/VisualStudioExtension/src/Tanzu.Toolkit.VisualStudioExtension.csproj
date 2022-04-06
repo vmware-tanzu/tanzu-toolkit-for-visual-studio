@@ -83,6 +83,7 @@
   <ItemGroup>
     <Compile Include="Commands\RequestFeedbackCommand.cs" />
     <Compile Include="Commands\RemoteDebugCommand.cs" />
+    <Compile Include="Views\Converters\InverseBoolConverter.cs" />
     <Compile Include="Views\Converters\NullVisibilityConverter.cs" />
     <Compile Include="Views\IRemoteDebugView.cs" />
     <Compile Include="Views\RemoteDebugView.xaml.cs">
@@ -148,6 +149,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
+    <Resource Include="Views\Resources\Pause.png" />
+    <Resource Include="Views\Resources\RunPaused.png" />
+    <Resource Include="Views\Resources\Stop.png" />
     <Content Include="Views\Resources\InfoTipInline.png" />
     <Resource Include="Views\Resources\ClearWindowContent.png" />
     <Resource Include="Views\Resources\ScrollBox.png" />
