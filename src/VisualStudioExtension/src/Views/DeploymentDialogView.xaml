@@ -54,7 +54,7 @@
             <TextBlock FontSize="24" Text="Push to Tanzu Application Service" Margin="4" Grid.Row="0" Grid.Column="1"/>
         </StackPanel>
 
-        <ScrollViewer VerticalScrollBarVisibility="Auto" CanContentScroll="True" MaxHeight="400" DockPanel.Dock="Top">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" CanContentScroll="True" MaxHeight="420" DockPanel.Dock="Top">
             <StackPanel>
                 <Grid x:Name="MainContent" VerticalAlignment="Top" Margin="48,0" DockPanel.Dock="Top">
                     <Grid.RowDefinitions>
