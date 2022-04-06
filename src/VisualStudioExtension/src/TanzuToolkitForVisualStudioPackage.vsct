@@ -78,7 +78,7 @@
 
       <Button guid="guidTanzuToolkitPackageCmdSet" id="PushToCloudFoundryCommandId" priority="0x0100" type="Button">
         <Parent guid="guidTanzuToolkitPackageCmdSet" id="ProjContextMenuGroup" />
-        <Icon guid="guidImages1" id="bmpPic1" />
+        <Icon guid="guidImages1" id="bmpPic2" />
         <Strings>
           <ButtonText>Push to Tanzu Application Service</ButtonText>
         </Strings>
@@ -115,7 +115,7 @@
             inside a button definition. An important aspect of this declaration is that the element id
             must be the actual index (1-based) of the bitmap inside the bitmap strip. -->
       <Bitmap guid="guidImages" href="Resources\tanzu16.png" usedList="bmpPic1" />
-      <Bitmap guid="guidImages1" href="Resources\tanzu_deploy_16x.png" usedList="bmpPic1" />
+      <Bitmap guid="guidImages1" href="Resources\tanzu_deploy_16x.png" usedList="bmpPic2" />
     </Bitmaps>
   </Commands>
 
@@ -149,10 +149,7 @@
       <IDSymbol name="bmpPic1" value="1" />
     </GuidSymbol>
     <GuidSymbol name="guidImages1" value="{1e401806-768f-42f2-af53-6e1281da6f5e}">
-      <IDSymbol name="bmpPic1" value="1" />
-    </GuidSymbol>
-    <GuidSymbol name="guidImages2" value="{2251cfc3-e92f-40ce-b730-98cf8bd7042d}">
-      <IDSymbol name="bmpPic1" value="1" />
+      <IDSymbol name="bmpPic2" value="1" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>

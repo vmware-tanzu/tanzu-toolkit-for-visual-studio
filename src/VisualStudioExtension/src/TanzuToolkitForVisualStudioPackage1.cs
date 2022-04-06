@@ -26,9 +26,6 @@ namespace Tanzu.Toolkit.VisualStudio
 
         public const string guidImages1String = "1e401806-768f-42f2-af53-6e1281da6f5e";
         public static Guid guidImages1 = new Guid(guidImages1String);
-
-        public const string guidImages2String = "2251cfc3-e92f-40ce-b730-98cf8bd7042d";
-        public static Guid guidImages2 = new Guid(guidImages2String);
     }
     /// <summary>
     /// Helper class that encapsulates all CommandIDs uses across VS Package.
@@ -47,5 +44,6 @@ namespace Tanzu.Toolkit.VisualStudio
         public const int ToolkitExtSubmenuGroup = 0x1023;
         public const int IDM_VS_MENU_EXTENSIONS = 0x0091;
         public const int bmpPic1 = 0x0001;
+        public const int bmpPic2 = 0x0001;
     }
 }
