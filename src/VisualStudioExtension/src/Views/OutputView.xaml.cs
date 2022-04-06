@@ -35,14 +35,12 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         public OutputView(IOutputViewModel viewModel, IServiceProvider services, IThemeService themeService)
         {
             bool alwaysTrue(object arg) { return true; }
-
             themeService.SetTheme(this);
             DataContext = viewModel;
             ViewModel = viewModel as IViewModel;
-
             ClearContentCommand = new DelegatingCommand(viewModel.ClearContent, alwaysTrue);
-
             InitializeComponent();
+            autoScrollToggleBtn.IsChecked = true;
         }
 
         public void Show()
@@ -66,8 +64,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         /// <param name="e"></param>
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            var scrollBarAtBottom = OutputScrollViewer.VerticalOffset == (OutputScrollViewer.ExtentHeight - OutputScrollViewer.ViewportHeight);
-            if (scrollBarAtBottom)
+            if ((bool)autoScrollToggleBtn.IsChecked)
             {
                 OutputScrollViewer.ScrollToBottom();
             }
