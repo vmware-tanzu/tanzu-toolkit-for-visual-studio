@@ -97,7 +97,7 @@
         <Strings>
           <ButtonText>Send Feedback</ButtonText>
         </Strings>
-        <Icon guid="ImageCatalogGuid" id="Feedback" />
+        <Icon guid="ImageCatalogGuid" id="EmailAddressViewer" />
         <CommandFlag>IconIsMoniker</CommandFlag>
       </Button>
 
