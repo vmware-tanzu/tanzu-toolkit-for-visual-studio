@@ -97,6 +97,8 @@
         <Strings>
           <ButtonText>Send Feedback</ButtonText>
         </Strings>
+        <Icon guid="ImageCatalogGuid" id="Feedback" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
       </Button>
 
       <Button guid="guidTanzuToolkitPackageCmdSet" id="RemoteDebugId" priority="0x0100" type="Button">
