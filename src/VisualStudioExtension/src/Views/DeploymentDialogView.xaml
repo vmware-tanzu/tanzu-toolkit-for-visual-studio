@@ -355,8 +355,14 @@
                         Margin="0,12"/>
 
                     <!--HIDDEN GRID ROW 1-->
+                    <TextBlock
+                        Grid.Row="1"
+                        VerticalAlignment="Top"
+                        Text="Push Options"
+                        Style="{StaticResource FieldNameStyle}"/>
                     <StackPanel
-                        Grid.Row="1">
+                        Grid.Row="1"
+                        Grid.Column="1">
                         <CheckBox
                             Content="Publish before pushing"
                             IsChecked="{Binding PublishBeforePushing}"/>
