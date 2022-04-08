@@ -24,5 +24,6 @@ namespace Tanzu.Toolkit.ViewModels
         void RemoveFromSelectedBuildpacks(object arg);
         void ClearSelectedBuildpacks(object arg = null);
         void WriteManifestToFile(string path);
+        void ClearSelectedManifest(object arg = null);
     }
 }

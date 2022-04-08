@@ -703,6 +703,11 @@ namespace Tanzu.Toolkit.ViewModels
 
             RaisePropertyChangedEvent("SelectedBuildpacks");
         }
+        
+        public void ClearSelectedManifest(object arg = null)
+        {
+            ManifestPath = null;
+        }
 
         public void WriteManifestToFile(string path)
         {
