@@ -14,6 +14,7 @@ namespace Tanzu.Toolkit.ViewModels
         private bool _outputIsAppLogs = false;
         private CloudFoundryApp _app;
         private IView _view;
+        private string _lastLinePrinted;
         private readonly ITasExplorerViewModel _tasExplorerViewModel;
         private readonly ICloudFoundryService _cfClient;
 
@@ -60,7 +61,18 @@ namespace Tanzu.Toolkit.ViewModels
         {
             if (!OutputPaused && !newContent.StartsWith("Retrieving logs for app"))
             {
-                OutputContent += $"{newContent}\n";
+                var newLine = $"{newContent}\n";
+                if (!string.IsNullOrWhiteSpace(newLine))
+                {
+                    OutputContent += newLine; 
+                }
+
+                // record last line of logs output to help determine
+                // "recent" lines to print when resuming paused logs
+                if (!newLine.StartsWith("\n***") && !newLine.StartsWith("***"))
+                {
+                    _lastLinePrinted = newLine;
+                }
             }
         }
 
@@ -108,13 +120,15 @@ namespace Tanzu.Toolkit.ViewModels
             var recentLogsResult = await recentLogsTask;
             if (recentLogsResult.Succeeded)
             {
-                var recentLines = recentLogsResult.Content.Split('\n');
-                foreach (var line in recentLines)
+                var recentLines = recentLogsResult.Content;
+                if (!string.IsNullOrWhiteSpace(_lastLinePrinted) && recentLines.Contains(_lastLinePrinted))
                 {
-                    if (!OutputContent.Contains(line))
-                    {
-                        AppendLine(line);
-                    }
+                    var newerLines = recentLines.Substring(recentLines.IndexOf(_lastLinePrinted) + _lastLinePrinted.Length);
+                    AppendLine(newerLines);
+                }
+                else
+                {
+                    AppendLine(recentLines);
                 }
                 AppendLine($"\n*** End of recent logs, beginning live log stream for \"{cfApp.AppName}\" in org \"{cfApp.ParentSpace.ParentOrg.OrgName}\" and space {cfApp.ParentSpace.SpaceName}...***");
             }
