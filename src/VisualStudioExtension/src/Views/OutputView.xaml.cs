@@ -15,6 +15,9 @@ namespace Tanzu.Toolkit.VisualStudio.Views
     public partial class OutputView : UserControl, IOutputView, IView
     {
         public ICommand ClearContentCommand { get; set; }
+        public ICommand PauseOutputCommand { get; set; }
+        public ICommand ResumeOutputCommand { get; set; }
+        public ICommand StopProcessCommand { get; set; }
         public IViewModel ViewModel { get; private set; }
 
         public static readonly DependencyProperty ListItemMouseOverBrushProperty = DependencyProperty.Register("ListItemMouseOverBrush", typeof(Brush), typeof(OutputView), new PropertyMetadata(default(Brush)));
@@ -34,11 +37,18 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         public OutputView(IOutputViewModel viewModel, IServiceProvider services, IThemeService themeService)
         {
-            bool alwaysTrue(object arg) { return true; }
             themeService.SetTheme(this);
             DataContext = viewModel;
             ViewModel = viewModel as IViewModel;
+
+            bool alwaysTrue(object arg) { return true; }
+            bool canPause(object arg) { return !viewModel.OutputPaused; }
+            bool canResume(object arg) { return viewModel.OutputPaused; }
+
             ClearContentCommand = new DelegatingCommand(viewModel.ClearContent, alwaysTrue);
+            PauseOutputCommand = new DelegatingCommand(viewModel.PauseOutput, canPause);
+            ResumeOutputCommand = new DelegatingCommand(viewModel.ResumeOutput, canResume);
+
             InitializeComponent();
             autoScrollToggleBtn.IsChecked = true;
         }

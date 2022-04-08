@@ -57,7 +57,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             RefreshAllCommand = new DelegatingCommand(viewModel.RefreshAllItems, viewModel.CanInitiateFullRefresh);
             DeleteConnectionCommand = new DelegatingCommand(viewModel.LogOutTas, viewModel.CanLogOutTas);
             ReAuthenticateCommand = new DelegatingCommand(viewModel.ReAuthenticate, viewModel.CanReAuthenticate);
-            StreamAppLogsCommand = new AsyncDelegatingCommand(viewModel.StreamAppLogsAsync, alwaysTrue);
+            StreamAppLogsCommand = new DelegatingCommand(viewModel.StreamAppLogs, alwaysTrue);
 
             themeService.SetTheme(this);
 
