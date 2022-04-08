@@ -19,6 +19,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         public ICommand OpenLoginDialogCommand { get; }
         public ICommand ToggleAdvancedOptionsCommand { get; }
         public ICommand ClearBuildpackSelectionCommand { get; }
+        public DelegatingCommand ClearManifestSelectionCommand { get; }
         public string PlaceholderText { get; set; }
 
         public Brush HyperlinkBrush { get { return (Brush)GetValue(HyperlinkBrushProperty); } set { SetValue(HyperlinkBrushProperty, value); } }
@@ -33,18 +34,21 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         public DeploymentDialogView(IDeploymentDialogViewModel viewModel, IThemeService themeService)
         {
             _viewModel = viewModel;
+            bool alwaysTrue(object arg) { return true; };
+
             UploadAppCommand = new DelegatingCommand(viewModel.DeployApp, viewModel.CanDeployApp);
             OpenLoginDialogCommand = new DelegatingCommand(viewModel.OpenLoginView, viewModel.CanOpenLoginView);
             ToggleAdvancedOptionsCommand = new DelegatingCommand(viewModel.ToggleAdvancedOptions, viewModel.CanToggleAdvancedOptions);
-            ClearBuildpackSelectionCommand = new DelegatingCommand(viewModel.ClearSelectedBuildpacks, (object arg) => { return true; });
+            ClearBuildpackSelectionCommand = new DelegatingCommand(viewModel.ClearSelectedBuildpacks, alwaysTrue);
+            ClearManifestSelectionCommand = new DelegatingCommand(viewModel.ClearSelectedManifest, alwaysTrue);
 
             themeService.SetTheme(this);
             DataContext = viewModel;
             InitializeComponent();
-            
+
             MouseDown += Window_MouseDown;
         }
-       
+
         private void CfOrgOptions_ComboBox_DropDownClosed(object sender, System.EventArgs e)
         {
             _viewModel.UpdateCfSpaceOptions();

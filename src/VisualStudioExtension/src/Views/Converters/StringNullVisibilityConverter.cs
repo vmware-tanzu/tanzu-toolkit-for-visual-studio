@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
@@ -7,12 +8,18 @@ namespace Tanzu.Toolkit.VisualStudio.Views.Converters
 {
     public class StringNullVisibilityConverter : IValueConverter
     {
+        private readonly List<string> _stringsToTreatAsEmpty = new List<string>
+        {
+            "<none selected>", 
+        };
+
         public bool Reversed { get; set; }
         public bool ReserveSpace { get; set; }
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return string.IsNullOrWhiteSpace(value as string)
+            var str = value as string;
+            return string.IsNullOrWhiteSpace(str) || _stringsToTreatAsEmpty.Contains(str)
                 ? Reversed ? Visibility.Visible : ReserveSpace ? Visibility.Hidden : (object)Visibility.Collapsed
                 : Reversed ? ReserveSpace ? Visibility.Hidden : (object)Visibility.Collapsed : Visibility.Visible;
         }
