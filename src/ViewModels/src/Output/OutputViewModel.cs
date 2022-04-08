@@ -58,7 +58,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public void AppendLine(string newContent)
         {
-            if (!OutputPaused)
+            if (!OutputPaused && !newContent.StartsWith("Retrieving logs for app"))
             {
                 OutputContent += $"{newContent}\n";
             }
@@ -82,6 +82,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 // stop app logs
                 CancelActiveProcess();
+                AppendLine("*** App logs paused ***\n");
             }
         }
 
@@ -102,7 +103,7 @@ namespace Tanzu.Toolkit.ViewModels
             var recentLogsTask = _cfClient.GetRecentLogsAsync(cfApp);
             OutputIsAppLogs = true;
             outputView.Show();
-            AppendLine("\n*** Fetching recent app logs... ***\n");
+            AppendLine($"\n*** Fetching recent app logs for \"{cfApp.AppName}\" in org \"{cfApp.ParentSpace.ParentOrg.OrgName}\" and space {cfApp.ParentSpace.SpaceName}... ***");
 
             var recentLogsResult = await recentLogsTask;
             if (recentLogsResult.Succeeded)
@@ -115,7 +116,7 @@ namespace Tanzu.Toolkit.ViewModels
                         AppendLine(line);
                     }
                 }
-                AppendLine("\n*** End of recent logs, beginning live log stream ***\n");
+                AppendLine($"\n*** End of recent logs, beginning live log stream for \"{cfApp.AppName}\" in org \"{cfApp.ParentSpace.ParentOrg.OrgName}\" and space {cfApp.ParentSpace.SpaceName}...***");
             }
             else
             {
