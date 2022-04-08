@@ -22,6 +22,8 @@
         <converters:VisibilityConverter x:Key="Visibility" />
         <converters:VisibilityConverter x:Key="InverseVisibility" Reversed="True"/>
         <converters:VisibilityConverter x:Key="ExpansionConverter" ReserveSpace="False" />
+        <converters:NullVisibilityConverter x:Key="NullVisibility" ReserveSpace="False"/>
+        <converters:StringNullVisibilityConverter x:Key="StringNullVisibility" ReserveSpace="False"/>
         <converters:ListToStringConverter x:Key="SelectedBuildpacksStringListConverter" EmptyListMessage="&lt;none selected&gt;" />
 
         <Style x:Key="RoundedButtonStyle" TargetType="{x:Type Button}">
@@ -128,6 +130,7 @@
 
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="32"/>
                         </Grid.ColumnDefinitions>
 
@@ -141,12 +144,33 @@
                             Text="{Binding ManifestPathLabel}" 
                             ToolTip="{Binding ManifestPathLabel}"/>
 
+                        <Button
+                                Grid.Column="1"
+                                MinHeight="0"
+                                MinWidth="0"
+                                Margin="8,0"
+                                Visibility="{Binding ManifestPathLabel, Converter={StaticResource StringNullVisibility}}"
+                                HorizontalAlignment="Right"
+                                IsEnabled="{Binding IsLoggedIn}"
+                                Command="{Binding ElementName=DeploymentDialogViewElement, Path=ClearManifestSelectionCommand}"
+                                VerticalAlignment="Center">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <ContentPresenter />
+                                </ControlTemplate>
+                            </Button.Template>
+                            <TextBlock
+                                    Foreground="{Binding ElementName=DeploymentDialogViewElement, Path=HyperlinkBrush}"
+                                    Text="Clear"
+                                    FontStyle="Italic"/>
+                        </Button>
+
                         <Button 
                             MaxWidth="32"
                             MinWidth="32"
                             Padding="0,0,0,0"
                             Grid.Row="0"
-                            Grid.Column="1"
+                            Grid.Column="2"
                             Click="SelectManifest"
                             IsEnabled="{Binding IsLoggedIn}">
                             <Image 
@@ -380,7 +404,7 @@
                                 ToolTip="Downloads a script from Microsoft (https://aka.ms/getvsdbgps1) to install the Visual Studio Remote Debugger into the published output folder for this app."/>
                         </StackPanel>
                     </StackPanel>
-            
+
                     <!--HIDDEN GRID ROW 1-->
                     <TextBlock
                         Grid.Row="2"
