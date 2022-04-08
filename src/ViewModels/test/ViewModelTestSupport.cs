@@ -105,7 +105,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         internal class FakeOutputView : IView
         {
-            public IViewModel ViewModel { get; }
+            public IViewModel ViewModel { get; set; }
 
             public bool ShowMethodWasCalled { get; private set; }
 
@@ -125,9 +125,18 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         internal class FakeOutputViewModel : IOutputViewModel, IViewModel
         {
+            public FakeOutputViewModel()
+            {
+                BeginStreamingAppLogsForAppAsyncWasCalled = false;
+            }
+
+            public bool BeginStreamingAppLogsForAppAsyncWasCalled { get; set; }
+
             public Process ActiveProcess { get; set; }
             public object ActiveView { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
             public List<string> AppendLineInvocationArgs { get; set; }
+            public bool OutputPaused { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            public bool OutputIsAppLogs { get => throw new NotImplementedException(); set { } }
 
             public void AppendLine(string newContent)
             {
@@ -135,7 +144,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 AppendLineInvocationArgs.Add(newContent);
             }
 
-            public void CancelActiveProcess()
+            public Task BeginStreamingAppLogsForAppAsync(CloudFoundryApp cfApp, IView outputView)
+            {
+                BeginStreamingAppLogsForAppAsyncWasCalled = true;
+                return Task.CompletedTask;
+            }
+
+            public void CancelActiveProcess(object arg = null)
             {
                 throw new NotImplementedException();
             }
@@ -144,8 +159,140 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
                 throw new NotImplementedException();
             }
+
+            public void PauseOutput(object arg = null)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void ResumeOutput(object arg = null)
+            {
+                throw new NotImplementedException();
+            }
         }
 
+        internal class FakeTasExplorerViewModel : ITasExplorerViewModel
+        {
+            public FakeTasExplorerViewModel(IServiceProvider services)
+            {
+            }
+
+            public bool AuthenticationRequired { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+            public CfInstanceViewModel TasConnection => throw new NotImplementedException();
+
+            public object ActiveView { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+            public bool CanDisplayRecentAppLogs(object arg)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool CanInitiateFullRefresh(object arg)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool CanLogOutTas(object arg)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool CanOpenDeletionView(object arg)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool CanOpenLoginView(object arg)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool CanReAuthenticate(object arg)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool CanRefreshOrg(object arg)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool CanRefreshSpace(object arg)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool CanStartCfApp(object arg)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool CanStopCfApp(object arg)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task DisplayRecentAppLogs(object app)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void LogOutTas(object arg)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void OpenDeletionView(object app)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void OpenLoginView(object arg)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void ReAuthenticate(object cf)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void RefreshAllItems(object arg)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task RefreshOrg(object arg)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task RefreshSpace(object arg)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SetConnection(CloudFoundryInstance cf)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task StartCfApp(object arg)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task StopCfApp(object arg)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void StreamAppLogs(object app)
+            {
+                throw new NotImplementedException();
+            }
+        }
 
         internal class FakeCfInstanceViewModel : CfInstanceViewModel
         {
