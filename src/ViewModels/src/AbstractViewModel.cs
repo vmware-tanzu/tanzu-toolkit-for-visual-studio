@@ -3,6 +3,7 @@ using Serilog;
 using System;
 using System.ComponentModel;
 using Tanzu.Toolkit.Services;
+using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.File;
@@ -15,6 +16,7 @@ namespace Tanzu.Toolkit.ViewModels
     public abstract class AbstractViewModel : IViewModel, INotifyPropertyChanged
     {
         private object _activeView;
+        private ITasExplorerViewModel _tasExplorer;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -47,8 +49,33 @@ namespace Tanzu.Toolkit.ViewModels
         public IErrorDialog ErrorService { get; }
 
         public ILogger Logger { get; }
-        
+
         public ISerializationService SerializationService { get; }
+
+        public ITasExplorerViewModel TasExplorer
+        {
+            get
+            {
+                if (_tasExplorer == null)
+                {
+                    _tasExplorer = Services.GetRequiredService<ITasExplorerViewModel>();
+                }
+                return _tasExplorer;
+            }
+        }
+
+        public ICloudFoundryService CfClient
+        {
+            get
+            {
+                if (TasExplorer.TasConnection == null)
+                {
+                    Logger.Information($"Detected null TAS connection in AbstractViewModel; prompting login");
+                    DialogService.ShowDialog(typeof(LoginViewModel).Name);
+                }
+                return TasExplorer.TasConnection?.CfClient;
+            }
+        }
 
         public object ActiveView
         {
