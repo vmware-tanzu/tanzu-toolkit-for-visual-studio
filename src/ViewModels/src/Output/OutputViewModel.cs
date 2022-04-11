@@ -16,12 +16,10 @@ namespace Tanzu.Toolkit.ViewModels
         private IView _view;
         private string _lastLinePrinted;
         private readonly ITasExplorerViewModel _tasExplorerViewModel;
-        private readonly ICloudFoundryService _cfClient;
 
         public OutputViewModel(ITasExplorerViewModel tasExplorerViewModel, IServiceProvider services) : base(services)
         {
             _tasExplorerViewModel = tasExplorerViewModel;
-            _cfClient = tasExplorerViewModel.TasConnection.CfClient;
         }
 
         public string OutputContent
@@ -64,7 +62,7 @@ namespace Tanzu.Toolkit.ViewModels
                 var newLine = $"{newContent}\n";
                 if (!string.IsNullOrWhiteSpace(newLine))
                 {
-                    OutputContent += newLine; 
+                    OutputContent += newLine;
                 }
 
                 // record last line of logs output to help determine
@@ -112,7 +110,7 @@ namespace Tanzu.Toolkit.ViewModels
         {
             _app = cfApp;
             _view = outputView;
-            var recentLogsTask = _cfClient.GetRecentLogsAsync(cfApp);
+            var recentLogsTask = CfClient.GetRecentLogsAsync(cfApp);
             OutputIsAppLogs = true;
             outputView.Show();
             AppendLine($"\n*** Fetching recent app logs for \"{cfApp.AppName}\" in org \"{cfApp.ParentSpace.ParentOrg.OrgName}\" and space {cfApp.ParentSpace.SpaceName}... ***");
@@ -147,7 +145,7 @@ namespace Tanzu.Toolkit.ViewModels
                 }
             }
 
-            var logStreamResult = _cfClient.StreamAppLogs(cfApp, stdOutCallback: AppendLine, stdErrCallback: AppendLine);
+            var logStreamResult = CfClient.StreamAppLogs(cfApp, stdOutCallback: AppendLine, stdErrCallback: AppendLine);
             if (logStreamResult.Succeeded)
             {
                 ActiveProcess = logStreamResult.Content;
