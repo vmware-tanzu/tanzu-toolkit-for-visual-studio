@@ -26,7 +26,7 @@ namespace Tanzu.Toolkit.ViewModels
         bool CanReAuthenticate(object arg);
         void ReAuthenticate(object cf);
         void SetConnection(CloudFoundryInstance cf);
-        void LogOutTas(object arg);
+        void LogOutTas(object arg = null);
         bool CanLogOutTas(object arg);
         void OpenDeletionView(object app);
         void StreamAppLogs(object app);
