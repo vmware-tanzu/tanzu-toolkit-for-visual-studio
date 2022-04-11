@@ -69,5 +69,10 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         {
             DisplayView?.Invoke();
         }
+
+        private void Disconnect(object sender, RoutedEventArgs e)
+        {
+            DeleteConnectionCommand.Execute(null);
+        }
     }
 }
