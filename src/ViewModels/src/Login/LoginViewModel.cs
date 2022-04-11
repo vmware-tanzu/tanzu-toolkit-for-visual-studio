@@ -185,8 +185,6 @@ namespace Tanzu.Toolkit.ViewModels
 
         public string SsoPasscode { get; set; }
 
-        internal ICloudFoundryService CfClient { get; set; }
-
         // Methods //
 
         public async Task ConnectToCf(object arg = null)

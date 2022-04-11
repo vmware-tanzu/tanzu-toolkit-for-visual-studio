@@ -17,6 +17,7 @@ namespace Tanzu.Toolkit.ViewModels
     {
         private object _activeView;
         private ITasExplorerViewModel _tasExplorer;
+        private ICloudFoundryService _cfClient;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -68,12 +69,25 @@ namespace Tanzu.Toolkit.ViewModels
         {
             get
             {
-                if (TasExplorer.TasConnection == null)
+                if (_cfClient == null)
                 {
-                    Logger.Information($"Detected null TAS connection in AbstractViewModel; prompting login");
-                    DialogService.ShowDialog(typeof(LoginViewModel).Name);
+                    if (TasExplorer.TasConnection == null)
+                    {
+                        Logger.Information("Detected null TAS connection in AbstractViewModel; prompting login");
+                        DialogService.ShowDialog(typeof(LoginViewModel).Name);
+                    }
+                    _cfClient = TasExplorer.TasConnection?.CfClient;
+                    if (_cfClient == null)
+                    {
+                        Logger.Information("CF client still null after prompting login");
+                    }
                 }
-                return TasExplorer.TasConnection?.CfClient;
+                return _cfClient;
+            }
+
+            set
+            {
+                _cfClient = value;
             }
         }
 
