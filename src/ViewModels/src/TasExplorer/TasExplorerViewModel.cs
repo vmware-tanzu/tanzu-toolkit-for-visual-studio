@@ -380,7 +380,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public void LogOutTas(object arg)
+        public void LogOutTas(object arg = null)
         {
             IsRefreshingAll = false;
             ThreadingService.IsPolling = false; 
