@@ -27,6 +27,21 @@
         <converters:NullVisibilityConverter x:Key="NullVisibilityConverter" ReserveSpace="False" Reversed="True"/>
         <converters:StringNullVisibilityConverter x:Key="StringVisibilityConverter" ReserveSpace="False" Reversed="False"/>
         <converters:StringNullVisibilityConverter x:Key="StringVisibilityConverterReversed" ReserveSpace="False" Reversed="True"/>
+
+        <DataTemplate x:Key="myHeaderTemplate">
+            <DockPanel>
+                <CheckBox/>
+                <TextBlock FontSize="16" Foreground="DarkBlue">
+                    <TextBlock.Text>
+                        <Binding/>
+                    </TextBlock.Text>
+                </TextBlock>
+            </DockPanel>
+        </DataTemplate>
+
+        <Style x:Key="myHeaderStyle" TargetType="{x:Type GridViewColumnHeader}">
+            <Setter Property="Background" Value="LightBlue"/>
+        </Style>
     </ui:DialogWindow.Resources>
 
     <DockPanel Margin="16">
@@ -178,11 +193,33 @@
                 ScrollViewer.VerticalScrollBarVisibility="Auto"
                 ScrollViewer.CanContentScroll="True"
                 Visibility="{Binding DebugExistingApp, Converter={StaticResource VisibilityConverter}}">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding AppName}"/>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
+                <ListView.View>
+                    <GridView ColumnHeaderTemplate="{StaticResource myHeaderTemplate}" ColumnHeaderContainerStyle="{StaticResource myHeaderStyle}">
+                        <GridView.Columns>
+                            <GridViewColumn Header="App" Width="180">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding AppName}" TextWrapping="Wrap"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="Space" Width="180">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding ParentSpace.SpaceName}" TextWrapping="Wrap"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="Org" Width="180">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding ParentSpace.ParentOrg.OrgName}" TextWrapping="Wrap"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                        </GridView.Columns>
+                    </GridView>
+                </ListView.View>
             </ListView>
 
             <Separator Margin="4" Visibility="Hidden"/>
