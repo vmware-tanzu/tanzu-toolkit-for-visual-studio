@@ -27,21 +27,6 @@
         <converters:NullVisibilityConverter x:Key="NullVisibilityConverter" ReserveSpace="False" Reversed="True"/>
         <converters:StringNullVisibilityConverter x:Key="StringVisibilityConverter" ReserveSpace="False" Reversed="False"/>
         <converters:StringNullVisibilityConverter x:Key="StringVisibilityConverterReversed" ReserveSpace="False" Reversed="True"/>
-
-        <DataTemplate x:Key="myHeaderTemplate">
-            <DockPanel>
-                <CheckBox/>
-                <TextBlock FontSize="16" Foreground="DarkBlue">
-                    <TextBlock.Text>
-                        <Binding/>
-                    </TextBlock.Text>
-                </TextBlock>
-            </DockPanel>
-        </DataTemplate>
-
-        <Style x:Key="myHeaderStyle" TargetType="{x:Type GridViewColumnHeader}">
-            <Setter Property="Background" Value="LightBlue"/>
-        </Style>
     </ui:DialogWindow.Resources>
 
     <DockPanel Margin="16">
@@ -185,16 +170,27 @@
                 </TextBlock>
             </Grid>
 
+            <Grid Visibility="{Binding DebugExistingApp, Converter={StaticResource VisibilityConverter}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="180"/>
+                    <ColumnDefinition Width="180"/>
+                    <ColumnDefinition Width="180"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Margin="8,0,0,8" Text="App" FontWeight="Bold"/>
+                <TextBlock Grid.Column="1" Margin="8,0,0,8" Text="Space" FontWeight="Bold"/>
+                <TextBlock Grid.Column="2" Margin="8,0,0,8" Text="Org" FontWeight="Bold"/>
+            </Grid>
             <ListView
                 ItemsSource="{Binding AccessibleApps}"
                 SelectedItem="{Binding SelectedApp}"
-                MaxHeight="150"
+                MaxHeight="200"
                 VerticalContentAlignment="Top"  
                 ScrollViewer.VerticalScrollBarVisibility="Auto"
                 ScrollViewer.CanContentScroll="True"
                 Visibility="{Binding DebugExistingApp, Converter={StaticResource VisibilityConverter}}">
                 <ListView.View>
-                    <GridView ColumnHeaderTemplate="{StaticResource myHeaderTemplate}" ColumnHeaderContainerStyle="{StaticResource myHeaderStyle}">
+                    <GridView>
                         <GridView.Columns>
                             <GridViewColumn Header="App" Width="180">
                                 <GridViewColumn.CellTemplate>
