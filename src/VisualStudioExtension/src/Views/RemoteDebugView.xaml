@@ -52,7 +52,7 @@
 
         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Visibility="{Binding LoadingMessage, Converter={StaticResource StringVisibilityConverter}}">
             <local:Spinner/>
-            <TextBlock Text="{Binding LoadingMessage}"/>
+            <TextBlock Text="{Binding LoadingMessage}" VerticalAlignment="Center"/>
         </StackPanel>
 
         <StackPanel DockPanel.Dock="Top" Visibility="{Binding LoadingMessage, Converter={StaticResource StringVisibilityConverterReversed}}">
