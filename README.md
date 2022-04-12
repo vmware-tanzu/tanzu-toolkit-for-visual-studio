@@ -14,6 +14,23 @@ Tanzu Toolkit for Visual Studio is an extension for Visual Studio (2022 & 2019) 
   - Use / create Cloud Foundry manifest files for consistent app deployments
 - [Remotely debug](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/wiki/Remote-Debugging-TAS-Apps) apps running on TAS within Visual Studio
 
+## Install
+- To install this extension, you will need Visual Studio 2022 or 2019.
+  - VS 2022
+    - You can find a pre-release under the `v0.0.4` tag in the ["Releases" section of this repository](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/releases).
+  - VS 2019
+    - You can find a pre-release under the `v0.0.4` tag in the ["Releases" section of this repository](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/releases).
+    - The latest build can be found [here on vsixgallery.com](https://www.vsixgallery.com/extension/TanzuToolkitForVisualStudio.ff7b6f3e-0410-4ff9-a40a-a719ee9da901)
+- Download the `Tanzu.Toolkit.VisualStudio.vsix` file & double-click to prompt an installation into your Visual Studio instance.
+- To uninstall this extension from Visual Studio, visit the Visual Studio Extension Manager found under the `Extensions` menu.
+
+## More Info
+Check out our [Wiki](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/wiki)! It goes into more detail on several features.
+
+Our team uses [this board in ZenHub](https://app.zenhub.com/workspaces/net-dev-x---visual-studio-extensions-604161e65a9f390012665e4d/board?repos=327998348) to track progress.
+
+## Demo videos
+
 ### Overview
 
 https://user-images.githubusercontent.com/22666145/153500532-c1c5b322-3a9c-40ad-8d7f-a479fa8a5f36.mp4
@@ -30,18 +47,3 @@ https://user-images.githubusercontent.com/22666145/144897999-087c5a76-b844-4bb4-
 
 https://user-images.githubusercontent.com/22666145/161144428-eb695444-39c1-4bb3-93c9-996f81919678.mp4
 
-
-## Install
-- To install this extension, you will need Visual Studio 2022 or 2019.
-  - VS 2022
-    - You can find a pre-release under the `v0.0.4` tag in the ["Releases" section of this repository](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/releases).
-  - VS 2019
-    - You can find a pre-release under the `v0.0.4` tag in the ["Releases" section of this repository](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/releases).
-    - The latest build can be found [here on vsixgallery.com](https://www.vsixgallery.com/extension/TanzuToolkitForVisualStudio.ff7b6f3e-0410-4ff9-a40a-a719ee9da901)
-- Download the `Tanzu.Toolkit.VisualStudio.vsix` file & double-click to prompt an installation into your Visual Studio instance.
-- To uninstall this extension from Visual Studio, visit the Visual Studio Extension Manager found under the `Extensions` menu.
-
-## More Info
-Check out our [Wiki](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/wiki)!
-
-Our team uses [this board in ZenHub](https://app.zenhub.com/workspaces/net-dev-x---visual-studio-extensions-604161e65a9f390012665e4d/board?repos=327998348) to track progress.
