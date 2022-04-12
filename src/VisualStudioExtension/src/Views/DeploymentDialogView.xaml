@@ -56,9 +56,9 @@
             <TextBlock FontSize="24" Text="Push to Tanzu Application Service" Margin="4" Grid.Row="0" Grid.Column="1"/>
         </StackPanel>
 
-        <ScrollViewer VerticalScrollBarVisibility="Auto" CanContentScroll="True" MaxHeight="420" DockPanel.Dock="Top">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="420" DockPanel.Dock="Top">
             <StackPanel>
-                <Grid x:Name="MainContent" VerticalAlignment="Top" Margin="48,0" DockPanel.Dock="Top">
+                <Grid x:Name="MainContent" VerticalAlignment="Top" Margin="48,0">
                     <Grid.RowDefinitions>
                         <!--ROW 0-->
                         <RowDefinition Height="4*"></RowDefinition>
@@ -352,8 +352,7 @@
                     </Button>
                 </Grid>
 
-                <Grid
-                    Name="HiddenContent"
+                <Grid Name="HiddenContent"
                     Visibility="{Binding Expanded, Converter={StaticResource ExpansionConverter}}"
                     VerticalAlignment="Top"
                     Margin="48,0"
@@ -621,6 +620,7 @@
                         </TextBlock.Style>
                     </TextBlock>
 
+                    <!--HIDDEN GRID ROW 6-->
                     <TextBlock VerticalAlignment="Top"
                         Margin="0,6,0,0"
                         Grid.Row="6"
@@ -701,6 +701,7 @@
                             </ListView>
                         </StackPanel>
                     </StackPanel>
+
                 </Grid>
             </StackPanel>
         </ScrollViewer>
