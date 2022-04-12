@@ -2,17 +2,18 @@
 
 [![Build Status](https://dev.azure.com/TanzuDevX/DevX/_apis/build/status/Build%2C%20Test%20%26%20Package%20VSIX?branchName=main)](https://dev.azure.com/TanzuDevX/DevX/_build/latest?definitionId=3&branchName=main)
 
-The `TanzuToolkit` solution provides an extension for Visual Studio that enables management of Tanzu Application Service ("TAS") environments directly within the IDE. This product is still under development; releases are not officially supported.
+Tanzu Toolkit for Visual Studio is an extension for Visual Studio (2022 & 2019) that allows users of Tanzu Application Service ("TAS") to manage apps directly from within the IDE.
 
-**Disclaimer:** SSL certificates are not validated when connecting to Tanzu Application Service using this extension.
+## Features
+Users of this extension are able to:
 
-## Visual Studio Extension Features
 - Manage your TAS environment with the [Tanzu Application Service Explorer](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/wiki/Tanzu-Application-Service-Explorer)
   - View orgs, spaces, and apps
   - Start / stop / delete apps
   - Tail app logs
 - Deploy apps from Visual Studio using the [App Deployment window](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/wiki/App-Deployment-Window)
   - Use / create Cloud Foundry manifest files for consistent app deployments
+- Remotely debug apps running on TAS within Visual Studio
 
 ### Overview
 
