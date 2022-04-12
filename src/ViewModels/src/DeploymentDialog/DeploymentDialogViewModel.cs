@@ -574,6 +574,7 @@ namespace Tanzu.Toolkit.ViewModels
 
                 ThreadingService.StartBackgroundTask(UpdateCfOrgOptions);
                 ThreadingService.StartBackgroundTask(UpdateBuildpackOptions);
+                ThreadingService.StartBackgroundTask(UpdateServiceOptions);
                 ThreadingService.StartBackgroundTask(UpdateStackOptions);
             }
         }
