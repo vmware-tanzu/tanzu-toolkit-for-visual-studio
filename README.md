@@ -1,4 +1,6 @@
-# tanzu-toolkit-for-visual-studio
+<img src="https://dtb5pzswcit1e.cloudfront.net/assets/images/product_logos/icon_elastic-runtime_1586547456.png" alt="VMware Tanzu logo" height="100" align="left"/>
+
+# Tanzu Toolkit for Visual Studio
 
 [![Build Status](https://dev.azure.com/TanzuDevX/DevX/_apis/build/status/Build%2C%20Test%20%26%20Package%20VSIX?branchName=main)](https://dev.azure.com/TanzuDevX/DevX/_build/latest?definitionId=3&branchName=main)
 
