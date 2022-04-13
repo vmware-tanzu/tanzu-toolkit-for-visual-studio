@@ -21,6 +21,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         private const string _fakeBuildpackName2 = "bp2";
         private const string _fakeBuildpackName3 = "bp3";
         private ObservableCollection<string> _fakeSelectedBuildpacks;
+        private const string _fakeServiceName1 = "sv1";
+        private const string _fakeServiceName2 = "sv2";
+        private const string _fakeServiceName3 = "sv3";
+        private ObservableCollection<string> _fakeSelectedServices;
         private const string FakeTargetFrameworkMoniker = "junk";
         private static readonly CloudFoundryInstance _fakeCfInstance = new CloudFoundryInstance("", "", false);
         private static readonly CloudFoundryOrganization _fakeOrg = new CloudFoundryOrganization("", "", _fakeCfInstance);
@@ -35,6 +39,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             _receivedEvents = new List<string>();
             _fakeSelectedBuildpacks = new ObservableCollection<string> { _fakeBuildpackName1, _fakeBuildpackName2, _fakeBuildpackName3 };
+            _fakeSelectedServices = new ObservableCollection<string> { _fakeServiceName1, _fakeServiceName2, _fakeServiceName3 };
             var fakeTasConnection = new FakeCfInstanceViewModel(_fakeCfInstance, Services);
 
             // * return fake view/viewmodel for output window
@@ -51,6 +56,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
                 ManifestModel = _fakeManifestModel,
                 SelectedBuildpacks = _fakeSelectedBuildpacks,
+                SelectedServices = _fakeSelectedServices,
             };
 
             _sut.PropertyChanged += (sender, e) =>
@@ -97,6 +103,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public void Constructor_SetsBuildpackOptionsToEmptyList()
         {
             CollectionAssert.AreEqual(new List<BuildpackListItem>(), _sut.BuildpackOptions);
+        }
+
+        [TestMethod]
+        [TestCategory("ctor")]
+        [TestCategory("ServiceOptions")]
+        public void Constructor_SetsServiceOptionsToEmptyList()
+        {
+            CollectionAssert.AreEqual(new List<ServiceListItem>(), _sut.ServiceOptions);
         }
 
         [TestMethod]
@@ -175,6 +189,19 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
             MockThreadingService.Verify(m => m.StartBackgroundTask(_sut.UpdateBuildpackOptions), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("ctor")]
+        [TestCategory("ServiceOptions")]
+        public void Constructor_UpdatesServiceOptions_WhenTasConnectionIsNotNull()
+        {
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(new FakeCfInstanceViewModel(FakeCfInstance, Services));
+
+            _sut = new DeploymentDialogViewModel(Services, null, _fakeProjectPath, FakeTargetFrameworkMoniker);
+
+            Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
+            MockThreadingService.Verify(m => m.StartBackgroundTask(_sut.UpdateServiceOptions), Times.Once);
         }
 
         [TestMethod]
@@ -895,6 +922,30 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("OpenLoginView")]
+        [TestCategory("ServiceOptions")]
+        public void OpenLoginView_UpdatesServiceOptions_WhenTasConnectionGetsSet()
+        {
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns((CfInstanceViewModel)null);
+            MockTasExplorerViewModel.Setup(m => m.
+                OpenLoginView(null))
+                    .Callback(() =>
+                    {
+                        MockTasExplorerViewModel.SetupGet(m => m.TasConnection)
+                            .Returns(new CfInstanceViewModel(FakeCfInstance, null, Services));
+                    });
+
+            _sut = new DeploymentDialogViewModel(Services, _fakeProjName, _fakeProjectPath, FakeTargetFrameworkMoniker);
+
+            Assert.IsNull(_sut.TasExplorerViewModel.TasConnection);
+
+            _sut.OpenLoginView(null);
+
+            Assert.IsNotNull(_sut.TasExplorerViewModel.TasConnection);
+            MockThreadingService.Verify(m => m.StartBackgroundTask(_sut.UpdateServiceOptions), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("OpenLoginView")]
         [TestCategory("StackOptions")]
         public void OpenLoginView_UpdatesStackOptions_WhenTasConnectionGetsSet()
         {
@@ -1269,6 +1320,134 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.ManifestPath = pathToFakeManifest;
 
             Assert.AreEqual(initialBuildpack, _sut.SelectedBuildpacks);
+            MockErrorDialogService.Verify(m => m.DisplayErrorDialog(DeploymentDialogViewModel.ManifestParsingErrorTitle, fakeExceptionMsg), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("ManifestPath")]
+        [TestCategory("SelectedServices")]
+        public void ManifestPathSetter_SetsSelectedServices_WhenManifestExistsAndContainsOneService()
+        {
+            var pathToFakeManifest = "some//fake//path";
+            var fakeManifestContent = "some yaml";
+            var expectedAppName1 = "app1";
+            var expectedServiceName1 = "my_cool_sv";
+            var expectedSelectedServices = new ObservableCollection<string> { expectedServiceName1 };
+
+            var fakeAppManifest = new AppManifest
+            {
+                Applications = new List<AppConfig>
+                {
+                    new AppConfig
+                    {
+                        Name = expectedAppName1,
+                        Services = new List<string>
+                        {
+                            expectedServiceName1,
+                        }
+                    }
+                }
+            };
+
+            var fakeManifestParsingResponse = new DetailedResult<AppManifest>
+            {
+                Succeeded = true,
+                Content = fakeAppManifest,
+            };
+
+            MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
+            MockFileService.Setup(m => m.ReadFileContents(pathToFakeManifest)).Returns(fakeManifestContent);
+            MockSerializationService.Setup(m => m.ParseCfAppManifest(fakeManifestContent)).Returns(fakeAppManifest);
+
+            CollectionAssert.AreNotEquivalent(expectedSelectedServices, _sut.SelectedServices);
+
+            _sut.ManifestPath = pathToFakeManifest;
+
+            CollectionAssert.AreEquivalent(expectedSelectedServices, _sut.SelectedServices);
+        }
+
+        [TestMethod]
+        [TestCategory("ManifestPath")]
+        [TestCategory("SelectedServices")]
+        public void ManifestPathSetter_SetsSelectedServices_WhenManifestExistsAndContainsMoreThanOneService()
+        {
+            var pathToFakeManifest = "some//fake//path";
+            var fakeManifestContent = "some yaml";
+            var expectedAppName1 = "app1";
+            var expectedServiceName1 = "my_cool_sv";
+            var expectedServiceName2 = "another";
+            var expectedServiceName3 = "junk";
+            var expectedSelectedServices = new ObservableCollection<string> { expectedServiceName1, expectedServiceName2, expectedServiceName3 };
+
+            var fakeAppManifest = new AppManifest
+            {
+                Applications = new List<AppConfig>
+                {
+                    new AppConfig
+                    {
+                        Name = expectedAppName1,
+                        Services = new List<string>
+                        {
+                            expectedServiceName1,
+                            expectedServiceName2,
+                            expectedServiceName3,
+                        }
+                    }
+                }
+            };
+
+            var fakeManifestParsingResponse = new DetailedResult<AppManifest>
+            {
+                Succeeded = true,
+                Content = fakeAppManifest,
+            };
+
+            MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
+            MockFileService.Setup(m => m.ReadFileContents(pathToFakeManifest)).Returns(fakeManifestContent);
+            MockSerializationService.Setup(m => m.ParseCfAppManifest(fakeManifestContent)).Returns(fakeAppManifest);
+
+            CollectionAssert.AreNotEquivalent(expectedSelectedServices, _sut.SelectedServices);
+
+            _sut.ManifestPath = pathToFakeManifest;
+
+            CollectionAssert.AreEquivalent(expectedSelectedServices, _sut.SelectedServices);
+        }
+
+        [TestMethod]
+        [TestCategory("ManifestPath")]
+        [TestCategory("SelectedServices")]
+        public void ManifestPathSetter_DoesNotChangeSelectedServices_AndDisplaysError_WhenManifestDoesNotExist()
+        {
+            var pathToNonexistentManifest = "bogus//path";
+            var initialService = _sut.SelectedServices;
+
+            MockFileService.Setup(m => m.FileExists(pathToNonexistentManifest)).Returns(false);
+
+            _sut.ManifestPath = pathToNonexistentManifest;
+
+            Assert.AreEqual(initialService, _sut.SelectedServices);
+            MockErrorDialogService.Verify(m => m.DisplayWarningDialog(DeploymentDialogViewModel.ManifestNotFoundTitle, It.Is<string>(s => s.Contains(pathToNonexistentManifest) && s.Contains("does not appear to be a valid path to a manifest"))), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("ManifestPath")]
+        [TestCategory("SelectedServices")]
+        public void ManifestPathSetter_DoesNotChangeSelectedServices_AndDisplaysError_WhenManifestParsingFails()
+        {
+            var pathToFakeManifest = "bogus//path";
+            var fakeManifestContent = "some yaml";
+            var fakeExceptionMsg = "parser didn't get out of bed this morning";
+            var fakeParsingException = new Exception(fakeExceptionMsg);
+
+            var initialService = _sut.SelectedServices;
+
+            MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
+            MockFileService.Setup(m => m.ReadFileContents(pathToFakeManifest)).Returns(fakeManifestContent);
+            MockSerializationService.Setup(m => m.ParseCfAppManifest(fakeManifestContent)).Throws(fakeParsingException);
+
+            _sut.ManifestPath = pathToFakeManifest;
+
+            Assert.AreEqual(initialService, _sut.SelectedServices);
             MockErrorDialogService.Verify(m => m.DisplayErrorDialog(DeploymentDialogViewModel.ManifestParsingErrorTitle, fakeExceptionMsg), Times.Once);
         }
 
@@ -1686,6 +1865,108 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("UpdateServiceOptions")]
+        public async Task UpdateServiceOptions_SetsServiceOptionsToEmptyList_WhenNotLoggedIn()
+        {
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns((CfInstanceViewModel)null);
+
+            _sut = new DeploymentDialogViewModel(Services, _fakeProjName, _fakeProjectPath, FakeTargetFrameworkMoniker);
+            _sut.PropertyChanged += (sender, e) =>
+            {
+                _receivedEvents.Add(e.PropertyName);
+            };
+
+            Assert.IsNull(_sut.TasExplorerViewModel.TasConnection);
+            CollectionAssert.DoesNotContain(_receivedEvents, "ServiceOptions");
+
+            await _sut.UpdateServiceOptions();
+
+            CollectionAssert.AreEqual(new List<ServiceListItem>(), _sut.ServiceOptions);
+            CollectionAssert.Contains(_receivedEvents, "ServiceOptions");
+        }
+
+        [TestMethod]
+        [TestCategory("UpdateServiceOptions")]
+        public async Task UpdateServiceOptions_SetsServiceOptionsToQueryContent_WhenQuerySucceeds()
+        {
+            var fakeCf = new FakeCfInstanceViewModel(FakeCfInstance, Services);
+            var fakeServicesContent = new List<CfService>
+            {
+                new CfService
+                {
+                    Name = "sv1",
+                },
+                new CfService
+                {
+                    Name = "sv1",
+                },
+                new CfService
+                {
+                    Name = "sv1",
+                },
+                new CfService
+                {
+                    Name = "sv2",
+                },
+                new CfService
+                {
+                    Name = "sv3",
+                },
+            };
+            var numUniqueSvNamesInFakeResponse = fakeServicesContent.GroupBy(bp => bp.Name).Select(g => g.FirstOrDefault()).ToList().Count;
+
+            var fakeServicesResponse = new DetailedResult<List<CfService>>
+            {
+                Succeeded = true,
+                Content = fakeServicesContent
+            };
+
+            // simulate service specification in a pre-loaded manifest; expect corresponding bp list item to be marked as selected
+            _sut.ManifestModel.Applications[0].Services = new List<string> { "sv2" };
+
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(fakeCf);
+
+            MockCloudFoundryService.Setup(m => m.GetServicesAsync(fakeCf.CloudFoundryInstance.ApiAddress, 1)).ReturnsAsync(fakeServicesResponse);
+
+            CollectionAssert.AreNotEquivalent(fakeServicesContent, _sut.ServiceOptions);
+            CollectionAssert.DoesNotContain(_receivedEvents, "ServiceOptions");
+
+            await _sut.UpdateServiceOptions();
+
+            Assert.AreEqual(numUniqueSvNamesInFakeResponse, _sut.ServiceOptions.Count);
+
+            Assert.IsTrue(_sut.ServiceOptions.Exists(bp => bp.Name == "sv1"
+                                                             && bp.IsSelected == false));
+
+            Assert.IsTrue(_sut.ServiceOptions.Exists(bp => bp.Name == "sv2"
+                                                             && bp.IsSelected == true));
+
+            Assert.IsTrue(_sut.ServiceOptions.Exists(bp => bp.Name == "sv3"
+                                                             && bp.IsSelected == false));
+
+            CollectionAssert.Contains(_receivedEvents, "ServiceOptions");
+        }
+
+        [TestMethod]
+        [TestCategory("UpdateServiceOptions")]
+        public async Task UpdateServiceOptions_SetsServiceOptionsToEmptyList_AndRaisesError_WhenQueryFails()
+        {
+            var fakeCf = new FakeCfInstanceViewModel(FakeCfInstance, Services);
+            const string fakeFailureReason = "junk";
+            var fakeServicesResponse = new DetailedResult<List<CfService>>(succeeded: false, content: null, explanation: fakeFailureReason, cmdDetails: null);
+
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(fakeCf);
+
+            MockCloudFoundryService.Setup(m => m.GetServicesAsync(fakeCf.CloudFoundryInstance.ApiAddress, 1)).ReturnsAsync(fakeServicesResponse);
+
+            CollectionAssert.DoesNotContain(_receivedEvents, "ServiceOptions");
+
+            await _sut.UpdateServiceOptions();
+
+            CollectionAssert.AreEquivalent(new List<ServiceListItem>(), _sut.ServiceOptions);
+        }
+
+        [TestMethod]
         [TestCategory("AddToSelectedBuildpacks")]
         [TestCategory("ManifestModel")]
         public void AddToSelectedBuildpacks_AddsToSelectedBuildpacks_AndAddsToManifestModelBuildpacks_AndRaisesPropChangedEvent_WhenArgIsString()
@@ -1818,6 +2099,141 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             CollectionAssert.AreEquivalent(initialSelectedBps, updatedSelectedBps);
             CollectionAssert.AreEquivalent(initialBpsInManifestModel, updatedBpsInManifestModel);
             CollectionAssert.DoesNotContain(_receivedEvents, "SelectedBuildpacks");
+        }
+
+        [TestMethod]
+        [TestCategory("AddToSelectedServices")]
+        [TestCategory("ManifestModel")]
+        public void AddToSelectedServices_AddsToSelectedServices_AndAddsToManifestModelServices_AndRaisesPropChangedEvent_WhenArgIsString()
+        {
+            var item = "new entry";
+            var initialSelectedSvs = _sut.SelectedServices.ToList();
+            var initialSvsInManifestModel = _sut.ManifestModel.Applications[0].Services;
+
+            CollectionAssert.DoesNotContain(initialSelectedSvs, item);
+            CollectionAssert.DoesNotContain(initialSvsInManifestModel, item);
+            CollectionAssert.DoesNotContain(_receivedEvents, "SelectedServices");
+
+            _sut.AddToSelectedServices(item);
+
+            var updatedSelectedSvs = _sut.SelectedServices;
+            var updatedManifestModelSvs = _sut.ManifestModel.Applications[0].Services;
+
+            CollectionAssert.AreNotEquivalent(initialSelectedSvs, updatedSelectedSvs);
+            CollectionAssert.AreNotEquivalent(initialSelectedSvs, updatedManifestModelSvs);
+            Assert.AreEqual(initialSelectedSvs.Count + 1, updatedSelectedSvs.Count);
+            Assert.AreEqual(initialSelectedSvs.Count + 1, updatedManifestModelSvs.Count);
+            CollectionAssert.Contains(updatedSelectedSvs, item);
+            CollectionAssert.Contains(updatedManifestModelSvs, item);
+
+            CollectionAssert.Contains(_receivedEvents, "SelectedServices");
+        }
+
+        [TestMethod]
+        [TestCategory("AddToSelectedServices")]
+        [TestCategory("ManifestModel")]
+        public void AddToSelectedServices_DoesNothing_WhenArgIsNotString()
+        {
+            var nonStringItem = new object();
+            var initialSelectedSvs = _sut.SelectedServices.ToList();
+            var initialSvsInManifestModel = _sut.ManifestModel.Applications[0].Services;
+
+            CollectionAssert.DoesNotContain(initialSelectedSvs, nonStringItem);
+            CollectionAssert.DoesNotContain(initialSvsInManifestModel, nonStringItem);
+            CollectionAssert.DoesNotContain(_receivedEvents, "SelectedServices");
+
+            _sut.AddToSelectedServices(nonStringItem);
+
+            var updatedSelectedSvs = _sut.SelectedServices;
+            var updatedSvsInManifestModel = _sut.ManifestModel.Applications[0].Services;
+
+            CollectionAssert.AreEquivalent(initialSelectedSvs, updatedSelectedSvs);
+            CollectionAssert.AreEquivalent(initialSvsInManifestModel, updatedSvsInManifestModel);
+            CollectionAssert.DoesNotContain(_receivedEvents, "SelectedServices");
+        }
+
+        [TestMethod]
+        [TestCategory("AddToSelectedServices")]
+        [TestCategory("ManifestModel")]
+        public void AddToSelectedServices_DoesNothing_WhenStringAlreadyExistsInSelectedServices()
+        {
+            var item = _sut.ManifestModel.Applications[0].Services[0];
+
+            _sut.SelectedServices = new ObservableCollection<string>(_sut.ManifestModel.Applications[0].Services);
+
+            var initialSelectedSvs = _sut.SelectedServices.ToList();
+            var initialSvsInManifestModel = _sut.ManifestModel.Applications[0].Services;
+
+            CollectionAssert.AreEquivalent(initialSelectedSvs, initialSvsInManifestModel);
+
+            _receivedEvents.Clear();
+
+            CollectionAssert.Contains(initialSelectedSvs, item);
+            CollectionAssert.Contains(initialSvsInManifestModel, item);
+            CollectionAssert.DoesNotContain(_receivedEvents, "SelectedServices");
+
+            _sut.AddToSelectedServices(item);
+
+            var updatedSelectedSvs = _sut.SelectedServices;
+            var updatedSvsInManifestModel = _sut.ManifestModel.Applications[0].Services;
+
+            CollectionAssert.AreEquivalent(initialSelectedSvs, updatedSelectedSvs);
+            CollectionAssert.AreEquivalent(initialSvsInManifestModel, updatedSvsInManifestModel);
+            CollectionAssert.DoesNotContain(_receivedEvents, "SelectedServices");
+        }
+
+        [TestMethod]
+        [TestCategory("RemoveFromSelectedServices")]
+        [TestCategory("ManifestModel")]
+        public void RemoveFromSelectedServices_RemovesFromSelectedServices_AndRemovesFromManifestModelServices_AndRaisesPropChangedEvent_WhenArgIsString()
+        {
+            var item = _sut.ManifestModel.Applications[0].Services[0];
+
+            _sut.SelectedServices = new ObservableCollection<string>(_sut.ManifestModel.Applications[0].Services);
+
+            var initialSelectedSvs = _sut.SelectedServices.ToList();
+            var initialSvsInManifestModel = _sut.ManifestModel.Applications[0].Services;
+
+            CollectionAssert.Contains(initialSelectedSvs, item);
+            CollectionAssert.Contains(initialSvsInManifestModel, item);
+            CollectionAssert.AreEquivalent(initialSelectedSvs, initialSvsInManifestModel);
+
+            _receivedEvents.Clear();
+            CollectionAssert.DoesNotContain(_receivedEvents, "SelectedServices");
+
+            _sut.RemoveFromSelectedServices(item);
+
+            var updatedSelectedSvs = _sut.SelectedServices;
+            var updatedSvsInManifestModel = _sut.ManifestModel.Applications[0].Services;
+
+            CollectionAssert.AreNotEquivalent(initialSelectedSvs, updatedSelectedSvs);
+            CollectionAssert.AreNotEquivalent(initialSvsInManifestModel, updatedSvsInManifestModel);
+            Assert.AreEqual(initialSelectedSvs.Count - 1, updatedSelectedSvs.Count);
+            Assert.AreEqual(initialSvsInManifestModel.Count - 1, updatedSvsInManifestModel.Count);
+            CollectionAssert.DoesNotContain(updatedSelectedSvs, item);
+            CollectionAssert.DoesNotContain(updatedSvsInManifestModel, item);
+
+            CollectionAssert.Contains(_receivedEvents, "SelectedServices");
+        }
+
+        [TestMethod]
+        [TestCategory("RemoveFromSelectedServices")]
+        [TestCategory("ManifestModel")]
+        public void RemoveFromSelectedServices_DoesNothing_WhenArgIsNotString()
+        {
+            var nonStringItem = new object();
+
+            var initialSelectedSvs = _sut.SelectedServices.ToList();
+            var initialSvsInManifestModel = _sut.ManifestModel.Applications[0].Services;
+
+            _sut.RemoveFromSelectedServices(nonStringItem);
+
+            var updatedSelectedSvs = _sut.SelectedServices;
+            var updatedSvsInManifestModel = _sut.ManifestModel.Applications[0].Services;
+
+            CollectionAssert.AreEquivalent(initialSelectedSvs, updatedSelectedSvs);
+            CollectionAssert.AreEquivalent(initialSvsInManifestModel, updatedSvsInManifestModel);
+            CollectionAssert.DoesNotContain(_receivedEvents, "SelectedServices");
         }
 
         [TestMethod]

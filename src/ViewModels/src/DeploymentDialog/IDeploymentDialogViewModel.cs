@@ -11,6 +11,7 @@ namespace Tanzu.Toolkit.ViewModels
         string DeploymentDirectoryPath { get; set; }
         bool Expanded { get; set; }
         ObservableCollection<string> SelectedBuildpacks { get; set; }
+        ObservableCollection<string> SelectedServices { get; set; }
 
         bool CanDeployApp(object arg);
         bool CanToggleAdvancedOptions(object arg);
@@ -24,6 +25,9 @@ namespace Tanzu.Toolkit.ViewModels
         void RemoveFromSelectedBuildpacks(object arg);
         void ClearSelectedBuildpacks(object arg = null);
         void WriteManifestToFile(string path);
+        void AddToSelectedServices(object arg);
+        void RemoveFromSelectedServices(object arg);
+        void ClearSelectedServices(object arg = null);
         void ClearSelectedManifest(object arg = null);
     }
 }
