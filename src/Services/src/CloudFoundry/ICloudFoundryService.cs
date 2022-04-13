@@ -29,6 +29,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         Task<DetailedResult<List<CloudFoundryRoute>>> GetRoutesForAppAsync(CloudFoundryApp app, int retryAmount = 1);
         DetailedResult<Process> StreamAppLogs(CloudFoundryApp app, Action<string> stdOutCallback, Action<string> stdErrCallback);
         DetailedResult ConfigureForCf(CloudFoundryInstance cf);
+        Task<DetailedResult<List<CfService>>> GetServicesAsync(string apiAddress, int retryAmount = 1);
         Task<DetailedResult<List<CloudFoundryApp>>> ListAllAppsAsync(int retryAmount = 1);
     }
 }

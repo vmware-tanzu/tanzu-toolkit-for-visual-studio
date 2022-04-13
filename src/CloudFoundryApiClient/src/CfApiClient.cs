@@ -27,6 +27,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         internal const string LoginInfoPath = "/login"; // the /login endpoint should be identical to the /info endpoint (for CF UAA v 75.10.0)
         internal const string ListRoutesPath = "/v3/routes";
         internal const string DeleteRoutesPath = "/v3/routes";
+        internal const string ListServicesPath = "/v3/service_instances";
 
         internal const string DefaultAuthClientId = "cf";
         internal const string DefaultAuthClientSecret = "";
@@ -209,6 +210,20 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             var visibleBuildpacks = await GetRemainingPagesForType(firstPageHref, accessToken, new List<Buildpack>());
 
             return visibleBuildpacks;
+        }
+
+        public async Task<List<Service>> ListServices(string cfApiAddress, string accessToken)
+        {
+            var uri = new UriBuilder(cfApiAddress)
+            {
+                Path = ListServicesPath,
+            };
+
+            var firstPageHref = new HypertextReference() { Href = uri.ToString() };
+
+            var visibleServices = await GetRemainingPagesForType(firstPageHref, accessToken, new List<Service>());
+
+            return visibleServices;
         }
 
         /// <summary>
@@ -490,6 +505,13 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             {
                 var results = JsonSerializer.Deserialize<RoutesResponse>(resultContent, _deserializationOptions);
                 resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Routes.ToList());
+
+                nextPageHref = results.Pagination.Next;
+            }
+            else if (typeof(TResourceType) == typeof(Service))
+            {
+                var results = JsonSerializer.Deserialize<ServicesResponse>(resultContent, _deserializationOptions);
+                resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Services.ToList());
 
                 nextPageHref = results.Pagination.Next;
             }
