@@ -26,6 +26,9 @@ namespace Tanzu.Toolkit.VisualStudio.Services
                 control.SetResourceReference(OutputView.WindowButtonDownBorderBrushProperty, ThemedDialogColors.WindowButtonDownBorderBrushKey);
                 control.SetResourceReference(OutputView.WindowButtonDownHoverBrushProperty, ThemedDialogColors.WindowButtonHoverBrushKey);
                 control.SetResourceReference(OutputView.WindowPanelBrushProperty, ThemedDialogColors.WindowPanelBrushKey);
+                control.SetResourceReference(RemoteDebugView.ListItemMouseOverBrushProperty, ThemedDialogColors.ListItemMouseOverBrushKey);
+                control.SetResourceReference(RemoteDebugView.SelectedItemActiveBrushProperty, ThemedDialogColors.SelectedItemActiveBrushKey);
+                control.SetResourceReference(RemoteDebugView.GridHeaderBrushProperty, ThemedDialogColors.GridLineBrushKey);
             }
 
             ThemedDialogStyleLoader.SetUseDefaultThemedDialogStyles(element, true);

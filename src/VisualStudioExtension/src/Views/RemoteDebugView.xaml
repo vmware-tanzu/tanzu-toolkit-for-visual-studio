@@ -170,16 +170,17 @@
                 </TextBlock>
             </Grid>
 
-            <Grid Visibility="{Binding DebugExistingApp, Converter={StaticResource VisibilityConverter}}">
+            <Grid Background="{Binding ElementName=RemoteDebugViewElement, Path=GridHeaderBrush}"
+                  Visibility="{Binding DebugExistingApp, Converter={StaticResource VisibilityConverter}}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="180"/>
                     <ColumnDefinition Width="180"/>
                     <ColumnDefinition Width="180"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Column="0" Margin="8,0,0,8" Text="App" FontWeight="Bold"/>
-                <TextBlock Grid.Column="1" Margin="8,0,0,8" Text="Space" FontWeight="Bold"/>
-                <TextBlock Grid.Column="2" Margin="8,0,0,8" Text="Org" FontWeight="Bold"/>
+                <TextBlock Grid.Column="0" Margin="8,6,0,8" Text="App" FontWeight="Bold"/>
+                <TextBlock Grid.Column="1" Margin="8,6,0,8" Text="Space" FontWeight="Bold"/>
+                <TextBlock Grid.Column="2" Margin="8,6,0,8" Text="Org" FontWeight="Bold"/>
             </Grid>
             <ListView
                 ItemsSource="{Binding AccessibleApps}"
@@ -189,6 +190,34 @@
                 ScrollViewer.VerticalScrollBarVisibility="Auto"
                 ScrollViewer.CanContentScroll="True"
                 Visibility="{Binding DebugExistingApp, Converter={StaticResource VisibilityConverter}}">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListViewItem}">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                    <Border Padding="{TemplateBinding Padding}"
+                                                    Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    SnapsToDevicePixels="true">
+                                        <GridViewRowPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                                      SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="FontWeight" Value="Bold"/>
+                                <Setter Property="Background" Value="{Binding ElementName=RemoteDebugViewElement, Path=SelectedItemActiveBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{Binding ElementName=RemoteDebugViewElement, Path=ListItemMouseOverBrush}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListView.ItemContainerStyle>
                 <ListView.View>
                     <GridView>
                         <GridView.Columns>
