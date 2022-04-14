@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System;
+using System.Threading.Tasks;
 
 namespace Tanzu.Toolkit.ViewModels.Tests
 {
@@ -10,7 +9,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
     public class TreeViewItemViewModelTests : ViewModelTestSupport
     {
         private TestTreeViewItemViewModel _collpasedTvivm;
-        private TestTreeViewItemViewModel _expandedTvivm;
 
         [TestInitialize]
         public void TestInit()
@@ -18,10 +16,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             RenewMockServices();
 
             _collpasedTvivm = new TestTreeViewItemViewModel(Services);
-            _expandedTvivm = new TestTreeViewItemViewModel(Services)
-            {
-                IsExpanded = true,
-            };
 
             // ignore first mock task invocation caused by initial expansion
             MockThreadingService.Invocations.Clear();
@@ -61,9 +55,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsFalse(sut.IsExpanded);
             Assert.IsFalse(sut.IsLoading);
-            
+
             sut.IsExpanded = true;
-            
+
             Assert.IsTrue(sut.IsExpanded);
             MockThreadingService.Verify(m => m.StartBackgroundTask(sut.UpdateAllChildren), Times.Once);
         }

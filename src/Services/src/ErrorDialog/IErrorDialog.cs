@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Tanzu.Toolkit.Services.ErrorDialog
+﻿namespace Tanzu.Toolkit.Services.ErrorDialog
 {
     public interface IErrorDialog
     {

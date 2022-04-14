@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse;
@@ -10,7 +11,6 @@ using Tanzu.Toolkit.CloudFoundryApiClient.Models.BasicInfoResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.OrgsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.SpacesResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.StacksResponse;
-using System.Text.Json;
 
 namespace Tanzu.Toolkit.CloudFoundryApiClient
 {
@@ -18,21 +18,20 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
     {
         public string AccessToken { get; private set; }
 
-        internal const string ListOrgsPath = "/v3/organizations";
-        internal const string ListSpacesPath = "/v3/spaces";
-        internal const string ListAppsPath = "/v3/apps";
-        internal const string ListBuildpacksPath = "/v3/buildpacks";
-        internal const string DeleteAppsPath = "/v3/apps";
-        internal const string ListStacksPath = "/v3/stacks";
-        internal const string LoginInfoPath = "/login"; // the /login endpoint should be identical to the /info endpoint (for CF UAA v 75.10.0)
-        internal const string ListRoutesPath = "/v3/routes";
-        internal const string DeleteRoutesPath = "/v3/routes";
-        internal const string ListServicesPath = "/v3/service_instances";
-
-        internal const string DefaultAuthClientId = "cf";
-        internal const string DefaultAuthClientSecret = "";
-        internal const string AuthServerLookupFailureMessage = "Unable to locate authentication server";
-        internal const string InvalidTargetUriMessage = "Invalid target URI";
+        internal const string _listOrgsPath = "/v3/organizations";
+        internal const string _listSpacesPath = "/v3/spaces";
+        internal const string _listAppsPath = "/v3/apps";
+        internal const string _listBuildpacksPath = "/v3/buildpacks";
+        internal const string _deleteAppsPath = "/v3/apps";
+        internal const string _listStacksPath = "/v3/stacks";
+        internal const string _loginInfoPath = "/login"; // the /login endpoint should be identical to the /info endpoint (for CF UAA v 75.10.0)
+        internal const string _listRoutesPath = "/v3/routes";
+        internal const string _deleteRoutesPath = "/v3/routes";
+        internal const string _listServicesPath = "/v3/service_instances";
+        internal const string _defaultAuthClientId = "cf";
+        internal const string _defaultAuthClientSecret = "";
+        internal const string _authServerLookupFailureMessage = "Unable to locate authentication server";
+        internal const string _invalidTargetUriMessage = "Invalid target URI";
         private readonly IHttpClientFactory _httpClientFactory;
         private HttpClient _httpClient;
         private Uri _cfApiAddress;
@@ -111,7 +110,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         {
             var uri = new UriBuilder(cfApiAddress)
             {
-                Path = ListOrgsPath,
+                Path = _listOrgsPath,
             };
 
             var firstPageHref = new HypertextReference() { Href = uri.ToString() };
@@ -138,7 +137,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         {
             var uri = new UriBuilder(cfApiAddress)
             {
-                Path = ListSpacesPath,
+                Path = _listSpacesPath,
                 Query = $"organization_guids={orgGuid}",
             };
 
@@ -164,7 +163,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         {
             var uri = new UriBuilder(cfTarget)
             {
-                Path = ListAppsPath,
+                Path = _listAppsPath,
                 Query = $"space_guids={spaceGuid}",
             };
 
@@ -177,7 +176,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         {
             var uri = new UriBuilder(CfApiAddress)
             {
-                Path = ListAppsPath,
+                Path = _listAppsPath,
             };
 
             var firstPageHref = new HypertextReference() { Href = uri.ToString() };
@@ -189,7 +188,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         {
             var uri = new UriBuilder(cfTarget)
             {
-                Path = ListRoutesPath,
+                Path = _listRoutesPath,
                 Query = $"app_guids={appGuid}",
             };
 
@@ -197,12 +196,12 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
 
             return await GetRemainingPagesForType(firstPageHref, accessToken, new List<Route>());
         }
-        
+
         public async Task<List<Buildpack>> ListBuildpacks(string cfApiAddress, string accessToken)
         {
             var uri = new UriBuilder(cfApiAddress)
             {
-                Path = ListBuildpacksPath,
+                Path = _listBuildpacksPath,
             };
 
             var firstPageHref = new HypertextReference() { Href = uri.ToString() };
@@ -216,7 +215,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         {
             var uri = new UriBuilder(cfApiAddress)
             {
-                Path = ListServicesPath,
+                Path = _listServicesPath,
             };
 
             var firstPageHref = new HypertextReference() { Href = uri.ToString() };
@@ -244,7 +243,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         /// </returns>
         public async Task<bool> StopAppWithGuid(string cfApiAddress, string accessToken, string appGuid)
         {
-            var stopAppPath = ListAppsPath + $"/{appGuid}/actions/stop";
+            var stopAppPath = _listAppsPath + $"/{appGuid}/actions/stop";
 
             var uri = new UriBuilder(cfApiAddress)
             {
@@ -289,7 +288,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         /// </returns>
         public async Task<bool> StartAppWithGuid(string cfApiAddress, string accessToken, string appGuid)
         {
-            var startAppPath = ListAppsPath + $"/{appGuid}/actions/start";
+            var startAppPath = _listAppsPath + $"/{appGuid}/actions/start";
 
             var uri = new UriBuilder(cfApiAddress)
             {
@@ -318,7 +317,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
 
         public async Task<bool> DeleteAppWithGuid(string cfTarget, string accessToken, string appGuid)
         {
-            var deleteAppPath = DeleteAppsPath + $"/{appGuid}";
+            var deleteAppPath = _deleteAppsPath + $"/{appGuid}";
 
             var uri = new UriBuilder(cfTarget)
             {
@@ -344,7 +343,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
 
         public async Task<bool> DeleteRouteWithGuid(string cfTarget, string accessToken, string routeGuid)
         {
-            var deleteRoutePath = DeleteRoutesPath + $"/{routeGuid}";
+            var deleteRoutePath = _deleteRoutesPath + $"/{routeGuid}";
 
             var uri = new UriBuilder(cfTarget)
             {
@@ -372,7 +371,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         {
             var uri = new UriBuilder(cfTarget)
             {
-                Path = ListStacksPath,
+                Path = _listStacksPath,
             };
 
             var firstPageHref = new HypertextReference() { Href = uri.ToString() };
@@ -385,7 +384,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             var loginServerUri = await GetAuthServerUriFromCfTarget(cfApiAddress);
             var uri = new UriBuilder(loginServerUri)
             {
-                Path = LoginInfoPath,
+                Path = _loginInfoPath,
             };
             var request = new HttpRequestMessage(HttpMethod.Get, uri.ToString());
             request.Headers.Add("Accept", "application/json");
@@ -428,15 +427,14 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             }
             catch (Exception e)
             {
-                e.Data.Add("MessageToDisplay", AuthServerLookupFailureMessage);
+                e.Data.Add("MessageToDisplay", _authServerLookupFailureMessage);
                 throw;
             }
         }
 
         private Uri ValidateUriStringOrThrow(string uriString, string errorMessage)
         {
-            Uri uriResult;
-            Uri.TryCreate(uriString, UriKind.Absolute, out uriResult);
+            Uri.TryCreate(uriString, UriKind.Absolute, out var uriResult);
 
             if (uriResult == null)
             {

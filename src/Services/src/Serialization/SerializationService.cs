@@ -12,12 +12,12 @@ namespace Tanzu.Toolkit.Services
         public SerializationService()
         {
             _cfAppManifestSerializer = new SerializerBuilder()
-                .WithNamingConvention(CfAppManifestNamingConvention.Instance)
+                .WithNamingConvention(CfAppManifestNamingConvention._instance)
                 .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults)
                 .Build();
 
             _cfAppManifestParser = new DeserializerBuilder()
-                .WithNamingConvention(CfAppManifestNamingConvention.Instance)
+                .WithNamingConvention(CfAppManifestNamingConvention._instance)
                 .Build();
         }
 

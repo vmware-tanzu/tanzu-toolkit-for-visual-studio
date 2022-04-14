@@ -15,7 +15,7 @@ namespace Tanzu.Toolkit.ViewModels
         private TreeViewItemViewModel _parent;
         private ObservableCollection<TreeViewItemViewModel> _children;
         private bool _isLoading;
-        private IThreadingService _threadingService;
+        private readonly IThreadingService _threadingService;
 
         protected TreeViewItemViewModel(TreeViewItemViewModel parent, ITasExplorerViewModel parentTasExplorer, IServiceProvider services, bool childless = false, bool expanded = false)
             : base(services)
@@ -161,7 +161,7 @@ namespace Tanzu.Toolkit.ViewModels
         protected internal virtual async Task UpdateAllChildren()
         {
             // await to suppress aync warning
-            await Task.Run(() => Logger.Error("TreeViewItemViewModel.UpdateChildrenRecursive was called; this method should only ever be run by classes that inherit from TreeViewItemViewModel."));
+            await Task.Run(() => Logger.Error("TreeViewItemViewModel.UpdateAllChildren was called; this method should only ever be run by classes that inherit from TreeViewItemViewModel."));
         }
     }
 }

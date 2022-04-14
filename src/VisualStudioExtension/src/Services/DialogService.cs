@@ -8,8 +8,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services
 {
     public class DialogService : IDialogService
     {
-        private IServiceProvider _serviceProvider;
-        private IViewLocatorService _viewLocatorService;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly IViewLocatorService _viewLocatorService;
 
         public DialogService(IServiceProvider serviceProvider)
         {

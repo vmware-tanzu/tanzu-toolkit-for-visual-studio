@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.IO;
-using EnvDTE;
+﻿using EnvDTE;
 using EnvDTE80;
 using Microsoft;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Shell;
 using Serilog;
-using Tanzu.Toolkit.Services.Dialog;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.Design;
+using System.IO;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
@@ -24,17 +23,12 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         /// <summary>
         /// Command ID.
         /// </summary>
-        public const int CommandId = 259;
+        public const int _commandId = 259;
 
         /// <summary>
         /// Command menu group (command set GUID).
         /// </summary>
-        public static readonly Guid CommandSet = new Guid("f91c88fb-6e17-42a6-878d-f4d16ead7625");
-
-        /// <summary>
-        /// VS Package that provides this command, not null.
-        /// </summary>
-        private readonly AsyncPackage _package;
+        public static readonly Guid _commandSet = new Guid("f91c88fb-6e17-42a6-878d-f4d16ead7625");
 
         public static DTE2 Dte { get; private set; }
         private static IFileService _fileService;
@@ -45,14 +39,12 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         /// Initializes a new instance of the <see cref="OpenLogsCommand"/> class.
         /// Adds our command handlers for menu (commands must exist in the command table file).
         /// </summary>
-        /// <param name="package">Owner package, not null.</param>
         /// <param name="commandService">Command service to add command to, not null.</param>
-        private OpenLogsCommand(AsyncPackage package, OleMenuCommandService commandService)
+        /// 
+        private OpenLogsCommand(OleMenuCommandService commandService)
         {
-            this._package = package ?? throw new ArgumentNullException(nameof(package));
             commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
-
-            var menuCommandID = new CommandID(CommandSet, CommandId);
+            var menuCommandID = new CommandID(_commandSet, _commandId);
             var menuItem = new MenuCommand(this.Execute, menuCommandID);
             commandService.AddCommand(menuItem);
         }
@@ -67,17 +59,6 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         }
 
         /// <summary>
-        /// Gets the service provider from the owner package.
-        /// </summary>
-        private Microsoft.VisualStudio.Shell.IAsyncServiceProvider ServiceProvider
-        {
-            get
-            {
-                return this._package;
-            }
-        }
-
-        /// <summary>
         /// Initializes the command.
         /// </summary>
         /// <param name="package">Owner package, not null.</param>
@@ -89,13 +70,13 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
 
             var commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
-            Instance = new OpenLogsCommand(package, commandService);
+            Instance = new OpenLogsCommand(commandService);
 
             Dte = await package.GetServiceAsync(typeof(DTE)) as DTE2;
             _fileService = services.GetRequiredService<IFileService>();
             _dialogService = services.GetRequiredService<IErrorDialog>();
             var logSvc = services.GetRequiredService<ILoggingService>();
-             
+
             Assumes.Present(Dte);
             Assumes.Present(_fileService);
             Assumes.Present(_dialogService);
@@ -134,7 +115,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error($"An error occurred in OpenLogsCommand while trying to generate a tmp log file to display. {ex.Message}");
+                    _logger.Error("An error occurred in OpenLogsCommand while trying to generate a tmp log file to display: {OpenLogsCommandException}", ex);
                     _dialogService.DisplayErrorDialog("Unable to open log file.", ex.Message);
                 }
 
@@ -154,9 +135,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                         }
                         catch (Exception ex)
                         {
-                            var errorMsg = $"Unable to delete tmp log file '${tmpFilePath}'.{Environment.NewLine}{ex.Message}";
-
-                            _logger.Error(errorMsg);
+                            _logger.Error("Unable to delete tmp log file '{TmpFilePath}'.\n{CloseLogsWindowException}", tmpFilePath, ex);
                         }
                     }
                 }

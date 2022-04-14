@@ -3,7 +3,6 @@ using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
-using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.DataPersistence;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.Threading;
@@ -17,21 +16,21 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string _deleteAppErrorMsg = "Encountered an error while deleting app";
         internal const string _stopAppErrorMsg = "Encountered an error while stopping app";
         internal const string _startAppErrorMsg = "Encountered an error while starting app";
-        internal const string SingleLoginErrorTitle = "Unable to add more TAS connections.";
-        internal const string SingleLoginErrorMessage1 = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
-        internal const string SingleLoginErrorMessage2 = "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Application Service Explorer & re-connecting to a new one.";
-        internal const string ConnectionNameKey = "connection-name";
-        internal const string ConnectionAddressKey = "connection-api-address";
-        internal const string ConnectionSslPolicyKey = "connection-should-skip-ssl-cert-validation";
-        internal const string SkipCertValidationValue = "skip-ssl-cert-validation";
-        internal const string ValidateSslCertsValue = "validate-ssl-certificates";
+        internal const string _singleLoginErrorTitle = "Unable to add more TAS connections.";
+        internal const string _singleLoginErrorMessage1 = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
+        internal const string _singleLoginErrorMessage2 = "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Application Service Explorer & re-connecting to a new one.";
+        internal const string _connectionNameKey = "connection-name";
+        internal const string _connectionAddressKey = "connection-api-address";
+        internal const string _connectionSslPolicyKey = "connection-should-skip-ssl-cert-validation";
+        internal const string _skipCertValidationValue = "skip-ssl-cert-validation";
+        internal const string _validateSslCertsValue = "validate-ssl-certificates";
 
         private CfInstanceViewModel _tas;
         private volatile bool _isRefreshingAll = false;
-        private object _refreshLock = new object();
+        private readonly object _refreshLock = new object();
         private bool _authenticationRequired;
         private bool _isLoggedIn;
-        private ObservableCollection<TreeViewItemViewModel> treeRoot;
+        private ObservableCollection<TreeViewItemViewModel> _treeRoot;
         private readonly IThreadingService _threadingService;
         private readonly IErrorDialog _errorDialogService;
         private readonly IDataPersistenceService _dataPersistenceService;
@@ -46,9 +45,9 @@ namespace Tanzu.Toolkit.ViewModels
             _viewLocatorService = services.GetRequiredService<IViewLocatorService>();
 
             var savedConnectionCredsExist = _dataPersistenceService.SavedCfCredsExist();
-            var existingSavedConnectionName = _dataPersistenceService.ReadStringData(ConnectionNameKey);
-            var existingSavedConnectionAddress = _dataPersistenceService.ReadStringData(ConnectionAddressKey);
-            var existingSavedConnectionSslPolicy = _dataPersistenceService.ReadStringData(ConnectionSslPolicyKey);
+            var existingSavedConnectionName = _dataPersistenceService.ReadStringData(_connectionNameKey);
+            var existingSavedConnectionAddress = _dataPersistenceService.ReadStringData(_connectionAddressKey);
+            var existingSavedConnectionSslPolicy = _dataPersistenceService.ReadStringData(_connectionSslPolicyKey);
 
             if (!savedConnectionCredsExist || existingSavedConnectionName == null || existingSavedConnectionAddress == null)
             {
@@ -59,7 +58,7 @@ namespace Tanzu.Toolkit.ViewModels
                 var restoredConnection = new CloudFoundryInstance(
                     name: existingSavedConnectionName,
                     apiAddress: existingSavedConnectionAddress,
-                    skipSslCertValidation: existingSavedConnectionSslPolicy != null && existingSavedConnectionSslPolicy == SkipCertValidationValue);
+                    skipSslCertValidation: existingSavedConnectionSslPolicy != null && existingSavedConnectionSslPolicy == _skipCertValidationValue);
 
                 SetConnection(restoredConnection);
             }
@@ -94,11 +93,11 @@ namespace Tanzu.Toolkit.ViewModels
 
         public ObservableCollection<TreeViewItemViewModel> TreeRoot
         {
-            get => treeRoot;
+            get => _treeRoot;
 
             set
             {
-                treeRoot = value;
+                _treeRoot = value;
                 RaisePropertyChangedEvent("TreeRoot");
             }
         }
@@ -187,22 +186,12 @@ namespace Tanzu.Toolkit.ViewModels
             return true;
         }
 
-        public bool CanRefreshCfInstance(object arg)
-        {
-            return true;
-        }
-
         public bool CanRefreshOrg(object arg)
         {
             return true;
         }
 
         public bool CanRefreshSpace(object arg)
-        {
-            return true;
-        }
-
-        public bool CanRefreshApp(object arg)
         {
             return true;
         }
@@ -232,9 +221,9 @@ namespace Tanzu.Toolkit.ViewModels
         {
             if (TasConnection != null)
             {
-                var errorMsg = SingleLoginErrorMessage1 + Environment.NewLine + SingleLoginErrorMessage2;
+                var errorMsg = _singleLoginErrorMessage1 + Environment.NewLine + _singleLoginErrorMessage2;
 
-                _errorDialogService.DisplayErrorDialog(SingleLoginErrorTitle, errorMsg);
+                _errorDialogService.DisplayErrorDialog(_singleLoginErrorTitle, errorMsg);
             }
             else
             {
@@ -373,21 +362,21 @@ namespace Tanzu.Toolkit.ViewModels
                     ThreadingService.StartRecurrentUiTaskInBackground(RefreshAllItems, null, 10);
                 }
 
-                _dataPersistenceService.WriteStringData(ConnectionNameKey, TasConnection.CloudFoundryInstance.InstanceName);
-                _dataPersistenceService.WriteStringData(ConnectionAddressKey, TasConnection.CloudFoundryInstance.ApiAddress);
-                _dataPersistenceService.WriteStringData(ConnectionSslPolicyKey,
-                    TasConnection.CloudFoundryInstance.SkipSslCertValidation ? SkipCertValidationValue : ValidateSslCertsValue);
+                _dataPersistenceService.WriteStringData(_connectionNameKey, TasConnection.CloudFoundryInstance.InstanceName);
+                _dataPersistenceService.WriteStringData(_connectionAddressKey, TasConnection.CloudFoundryInstance.ApiAddress);
+                _dataPersistenceService.WriteStringData(_connectionSslPolicyKey,
+                    TasConnection.CloudFoundryInstance.SkipSslCertValidation ? _skipCertValidationValue : _validateSslCertsValue);
             }
         }
 
         public void LogOutTas(object arg = null)
         {
             IsRefreshingAll = false;
-            ThreadingService.IsPolling = false; 
+            ThreadingService.IsPolling = false;
             TasConnection.CfClient.LogoutCfUser();
-            _dataPersistenceService.ClearData(ConnectionNameKey);
-            _dataPersistenceService.ClearData(ConnectionAddressKey);
-            _dataPersistenceService.ClearData(ConnectionSslPolicyKey);
+            _dataPersistenceService.ClearData(_connectionNameKey);
+            _dataPersistenceService.ClearData(_connectionAddressKey);
+            _dataPersistenceService.ClearData(_connectionSslPolicyKey);
             IsLoggedIn = false;
             TasConnection = null;
         }

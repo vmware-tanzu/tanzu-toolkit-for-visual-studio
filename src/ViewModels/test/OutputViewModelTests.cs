@@ -2,12 +2,9 @@
 using Moq;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
-using Tanzu.Toolkit.ViewModels.AppDeletionConfirmation;
 
 namespace Tanzu.Toolkit.ViewModels.Tests
 {
@@ -40,12 +37,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 Content = _fakeLogStreamProcess,
             };
 
-            _fakeCfInstanceViewModel = new FakeCfInstanceViewModel(FakeCfInstance, Services);
+            _fakeCfInstanceViewModel = new FakeCfInstanceViewModel(_fakeCfInstance, Services);
             _fakeTasExplorerViewModel = MockTasExplorerViewModel.Object;
 
             MockTasExplorerViewModel.Setup(m => m.TasConnection).Returns(_fakeCfInstanceViewModel);
-            MockCloudFoundryService.Setup(m => m.GetRecentLogsAsync(FakeCfApp)).ReturnsAsync(_fakeRecentLogsResult);
-            MockCloudFoundryService.Setup(m => m.StreamAppLogs(FakeCfApp, _sut.AppendLine, _sut.AppendLine)).Returns(_fakeLogsStreamResult);
+            MockCloudFoundryService.Setup(m => m.GetRecentLogsAsync(_fakeCfApp)).ReturnsAsync(_fakeRecentLogsResult);
+            MockCloudFoundryService.Setup(m => m.StreamAppLogs(_fakeCfApp, _sut.AppendLine, _sut.AppendLine)).Returns(_fakeLogsStreamResult);
 
             _sut = new OutputViewModel(_fakeTasExplorerViewModel, Services);
 
@@ -70,7 +67,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task BeginStreamingAppLogsForAppAsync_DisplaysOutputView()
         {
             Assert.IsFalse(_fakeOutputView.ShowMethodWasCalled);
-            await _sut.BeginStreamingAppLogsForAppAsync(FakeCfApp, _fakeOutputView);
+            await _sut.BeginStreamingAppLogsForAppAsync(_fakeCfApp, _fakeOutputView);
             Assert.IsTrue(_fakeOutputView.ShowMethodWasCalled);
         }
 
@@ -79,7 +76,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task BeginStreamingAppLogsForAppAsync_MarksOutputIsAppLogsAsTrue()
         {
             Assert.IsFalse(_sut.OutputIsAppLogs);
-            await _sut.BeginStreamingAppLogsForAppAsync(FakeCfApp, _fakeOutputView);
+            await _sut.BeginStreamingAppLogsForAppAsync(_fakeCfApp, _fakeOutputView);
             Assert.IsTrue(_sut.OutputIsAppLogs);
         }
 
@@ -89,14 +86,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             var logsStreamException = new Exception("just breaking execution to make sure recent logs appear before logs stream");
 
-            MockCloudFoundryService.Setup(m => m.GetRecentLogsAsync(FakeCfApp)).ReturnsAsync(_fakeRecentLogsResult);
-            MockCloudFoundryService.Setup(m => m.StreamAppLogs(FakeCfApp, _sut.AppendLine, _sut.AppendLine)).Throws(logsStreamException);
+            MockCloudFoundryService.Setup(m => m.GetRecentLogsAsync(_fakeCfApp)).ReturnsAsync(_fakeRecentLogsResult);
+            MockCloudFoundryService.Setup(m => m.StreamAppLogs(_fakeCfApp, _sut.AppendLine, _sut.AppendLine)).Throws(logsStreamException);
 
             Assert.IsNull(_sut.OutputContent);
 
             try
             {
-                await _sut.BeginStreamingAppLogsForAppAsync(FakeCfApp, _fakeOutputView);
+                await _sut.BeginStreamingAppLogsForAppAsync(_fakeCfApp, _fakeOutputView);
             }
             catch (Exception ex)
             {
@@ -116,14 +113,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var expectedFailureMsg = "\n*** Unable to fetch recent logs, attempting to start live log stream... ***\n";
             _fakeRecentLogsResult.Succeeded = false;
             _fakeRecentLogsResult.Explanation = ":(";
-            MockCloudFoundryService.Setup(m => m.GetRecentLogsAsync(FakeCfApp)).ReturnsAsync(_fakeRecentLogsResult);
+            MockCloudFoundryService.Setup(m => m.GetRecentLogsAsync(_fakeCfApp)).ReturnsAsync(_fakeRecentLogsResult);
 
             Assert.IsNull(_sut.OutputContent);
 
-            await _sut.BeginStreamingAppLogsForAppAsync(FakeCfApp, _fakeOutputView);
+            await _sut.BeginStreamingAppLogsForAppAsync(_fakeCfApp, _fakeOutputView);
 
             Assert.IsTrue(_sut.OutputContent.Contains(expectedFailureMsg));
-            MockLogger.Verify(m => m.Error(It.Is<string>(s => s.Contains(FakeCfApp.AppName) && s.Contains(_fakeRecentLogsResult.Explanation))));
+            MockLogger.Verify(m => m.Error(It.Is<string>(s => s.Contains(_fakeCfApp.AppName) && s.Contains(_fakeRecentLogsResult.Explanation))));
         }
 
         [TestMethod]
@@ -132,9 +129,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             _fakeRecentLogsResult.Succeeded = false;
             _fakeRecentLogsResult.FailureType = FailureType.InvalidRefreshToken;
-            MockCloudFoundryService.Setup(m => m.GetRecentLogsAsync(FakeCfApp)).ReturnsAsync(_fakeRecentLogsResult);
+            MockCloudFoundryService.Setup(m => m.GetRecentLogsAsync(_fakeCfApp)).ReturnsAsync(_fakeRecentLogsResult);
 
-            await _sut.BeginStreamingAppLogsForAppAsync(FakeCfApp, _fakeOutputView);
+            await _sut.BeginStreamingAppLogsForAppAsync(_fakeCfApp, _fakeOutputView);
 
             MockTasExplorerViewModel.VerifySet(m => m.AuthenticationRequired = true);
         }
@@ -143,12 +140,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("BeginStreamingAppLogsForAppAsync")]
         public async Task BeginStreamingAppLogsForAppAsync_SetsActiveProcess_WhenLogsStreamSucceeds()
         {
-            MockCloudFoundryService.Setup(m => m.GetRecentLogsAsync(FakeCfApp)).ReturnsAsync(_fakeRecentLogsResult);
-            MockCloudFoundryService.Setup(m => m.StreamAppLogs(FakeCfApp, _sut.AppendLine, _sut.AppendLine)).Returns(_fakeLogsStreamResult);
+            MockCloudFoundryService.Setup(m => m.GetRecentLogsAsync(_fakeCfApp)).ReturnsAsync(_fakeRecentLogsResult);
+            MockCloudFoundryService.Setup(m => m.StreamAppLogs(_fakeCfApp, _sut.AppendLine, _sut.AppendLine)).Returns(_fakeLogsStreamResult);
 
             Assert.IsNull(_sut.ActiveProcess);
 
-            await _sut.BeginStreamingAppLogsForAppAsync(FakeCfApp, _fakeOutputView);
+            await _sut.BeginStreamingAppLogsForAppAsync(_fakeCfApp, _fakeOutputView);
 
             Assert.AreEqual(_fakeLogsStreamResult.Content, _sut.ActiveProcess);
         }
@@ -160,10 +157,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _fakeLogsStreamResult.Succeeded = false;
             _fakeLogsStreamResult.FailureType = FailureType.InvalidRefreshToken;
 
-            MockCloudFoundryService.Setup(m => m.GetRecentLogsAsync(FakeCfApp)).ReturnsAsync(_fakeRecentLogsResult);
-            MockCloudFoundryService.Setup(m => m.StreamAppLogs(FakeCfApp, _sut.AppendLine, _sut.AppendLine)).Returns(_fakeLogsStreamResult);
+            MockCloudFoundryService.Setup(m => m.GetRecentLogsAsync(_fakeCfApp)).ReturnsAsync(_fakeRecentLogsResult);
+            MockCloudFoundryService.Setup(m => m.StreamAppLogs(_fakeCfApp, _sut.AppendLine, _sut.AppendLine)).Returns(_fakeLogsStreamResult);
 
-            await _sut.BeginStreamingAppLogsForAppAsync(FakeCfApp, _fakeOutputView);
+            await _sut.BeginStreamingAppLogsForAppAsync(_fakeCfApp, _fakeOutputView);
 
             MockTasExplorerViewModel.VerifySet(m => m.AuthenticationRequired = true);
         }

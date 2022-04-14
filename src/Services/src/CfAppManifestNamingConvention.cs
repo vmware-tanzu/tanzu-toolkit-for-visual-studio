@@ -9,19 +9,15 @@ namespace Tanzu.Toolkit.Services
         {
             var hyphenatedString = HyphenatedNamingConvention.Instance.Apply(value);
 
-            switch (hyphenatedString)
+            return hyphenatedString switch
             {
-                case "disk-quota":
-                    return "disk_quota";
-                case "binding-name":
-                    return "binding_name";
-                case "process-types":
-                    return "process_types";
-                default:
-                    return hyphenatedString;
-            }
+                "disk-quota" => "disk_quota",
+                "binding-name" => "binding_name",
+                "process-types" => "process_types",
+                _ => hyphenatedString,
+            };
         }
 
-        public static readonly INamingConvention Instance = new CfAppManifestNamingConvention();
+        public static readonly INamingConvention _instance = new CfAppManifestNamingConvention();
     }
 }

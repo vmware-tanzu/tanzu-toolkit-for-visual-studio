@@ -20,7 +20,7 @@ namespace Tanzu.Toolkit.VisualStudio.VSToolWindows
     [Guid("1c563078-79b7-4b16-842f-d85ba441e92e")]
     public class OutputToolWindow : ToolWindowPane
     {
-        private IOutputView _view;
+        private readonly IOutputView _view;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OutputToolWindow"/> class.

@@ -21,7 +21,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse
 
         [JsonPropertyName("state")]
         public string State { get; set; }
-        
+
         [JsonPropertyName("lifecycle")]
         public Lifecycle Lifecycle { get; set; }
     }
@@ -30,7 +30,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse
     {
         [JsonPropertyName("type")]
         public string Type { get; set; }
-        
+
         /** NOTE:
          * Cloud Controller v3.116.0 supports 3 valid lifecycle "type" values:
          * "buildpack"

@@ -9,8 +9,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services
     public class VsViewLocatorService : IViewLocatorService
     {
         private readonly string _viewNamespace;
-        private IToolWindowService _toolWindowService;
-        private ILogger _logger;
+        private readonly IToolWindowService _toolWindowService;
+        private readonly ILogger _logger;
 
         public IServiceProvider ServiceProvider { get; }
 

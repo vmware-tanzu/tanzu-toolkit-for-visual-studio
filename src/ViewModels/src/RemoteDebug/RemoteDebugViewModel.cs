@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
@@ -25,7 +24,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private readonly IFileService _fileService;
         private readonly ISerializationService _serializationService;
         private readonly IView _outputView;
-        private IOutputViewModel _outputViewModel;
+        private readonly IOutputViewModel _outputViewModel;
         private readonly string _projectName;
         private readonly string _pathToProjectRootDir;
         private readonly string _targetFrameworkMoniker;
@@ -388,7 +387,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             {
                 var msg = "Encountered unexpected debug strategy";
                 Logger.Error(msg);
-                ErrorService.DisplayErrorDialog(string.Empty, msg);
+                ErrorService.DisplayErrorDialog(string.Empty, msg + "\nThis should not happen. If you see this message, please let us know: tas-vs-extension@vmware.com");
                 Close();
             }
         }
