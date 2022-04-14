@@ -10,9 +10,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views.Converters
 
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            var valueList = value as ObservableCollection<string>;
-
-            if (valueList == null)
+            if (!(value is ObservableCollection<string> valueList))
             {
                 return string.Empty;
             }

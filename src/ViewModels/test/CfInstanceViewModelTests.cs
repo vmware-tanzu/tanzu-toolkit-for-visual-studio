@@ -17,16 +17,16 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         private List<string> _receivedEvents;
         private TasExplorerViewModel _fakeTasExplorerViewModel;
         private CloudFoundryInstance _expectedCf;
-        private bool _expectedSkipSslValue = false;
-        private int _expectedRetryAmount = 1;
+        private readonly bool _expectedSkipSslValue = false;
+        private readonly int _expectedRetryAmount = 1;
         private readonly DetailedResult<List<CloudFoundryOrganization>> _fakeOrgsResponse = new DetailedResult<List<CloudFoundryOrganization>>
         {
             Succeeded = true,
             Content = new List<CloudFoundryOrganization>
             {
-                FakeOrgs[0],
-                FakeOrgs[1],
-                FakeOrgs[2],
+                _fakeOrgs[0],
+                _fakeOrgs[1],
+                _fakeOrgs[2],
             }
         };
 
@@ -58,8 +58,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 });
 
             _fakeTasExplorerViewModel = new TasExplorerViewModel(Services);
-            _sut = new CfInstanceViewModel(FakeCfInstance, _fakeTasExplorerViewModel, Services);
-            _sut = new CfInstanceViewModel(FakeCfInstance, _fakeTasExplorerViewModel, Services, expanded: true);
+            _sut = new CfInstanceViewModel(_fakeCfInstance, _fakeTasExplorerViewModel, Services);
+            _sut = new CfInstanceViewModel(_fakeCfInstance, _fakeTasExplorerViewModel, Services, expanded: true);
 
             _receivedEvents = new List<string>();
             _sut.PropertyChanged += (sender, e) =>
@@ -80,7 +80,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ctor")]
         public void Constructor_SetsDisplayTextToInstanceName()
         {
-            Assert.AreEqual(FakeCfInstance.InstanceName, _sut.DisplayText);
+            Assert.AreEqual(_fakeCfInstance.InstanceName, _sut.DisplayText);
         }
 
         [TestMethod]
@@ -111,10 +111,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             /** mock 4 initial children */
             _sut.Children = new ObservableCollection<TreeViewItemViewModel>
             {
-                new OrgViewModel(FakeOrgs[0], _sut, _fakeTasExplorerViewModel, Services),
-                new OrgViewModel(FakeOrgs[1], _sut, _fakeTasExplorerViewModel, Services),
-                new OrgViewModel(FakeOrgs[2], _sut, _fakeTasExplorerViewModel, Services),
-                new OrgViewModel(FakeOrgs[3], _sut, _fakeTasExplorerViewModel, Services),
+                new OrgViewModel(_fakeOrgs[0], _sut, _fakeTasExplorerViewModel, Services),
+                new OrgViewModel(_fakeOrgs[1], _sut, _fakeTasExplorerViewModel, Services),
+                new OrgViewModel(_fakeOrgs[2], _sut, _fakeTasExplorerViewModel, Services),
+                new OrgViewModel(_fakeOrgs[3], _sut, _fakeTasExplorerViewModel, Services),
             };
 
             /** mock retrieving all initial children except for FakeOrgs[3] */
@@ -125,13 +125,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             await _sut.UpdateAllChildren();
 
             Assert.AreEqual(3, _sut.Children.Count);
-            Assert.IsTrue(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == FakeOrgs[0].OrgName));
-            Assert.IsTrue(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == FakeOrgs[1].OrgName));
-            Assert.IsTrue(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == FakeOrgs[2].OrgName));
-            Assert.IsFalse(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == FakeOrgs[3].OrgName));
+            Assert.IsTrue(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == _fakeOrgs[0].OrgName));
+            Assert.IsTrue(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == _fakeOrgs[1].OrgName));
+            Assert.IsTrue(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == _fakeOrgs[2].OrgName));
+            Assert.IsFalse(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == _fakeOrgs[3].OrgName));
 
             MockThreadingService.Verify(m => m
-              .RemoveItemFromCollectionOnUiThreadAsync(_sut.Children, It.Is<OrgViewModel>((ovm) => ovm.Org == FakeOrgs[3])),
+              .RemoveItemFromCollectionOnUiThreadAsync(_sut.Children, It.Is<OrgViewModel>((ovm) => ovm.Org == _fakeOrgs[3])),
                 Times.Once);
         }
 
@@ -142,8 +142,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             /** mock 2 initial children */
             _sut.Children = new ObservableCollection<TreeViewItemViewModel>
             {
-                new OrgViewModel(FakeOrgs[0], _sut, _fakeTasExplorerViewModel, Services),
-                new OrgViewModel(FakeOrgs[1], _sut, _fakeTasExplorerViewModel, Services),
+                new OrgViewModel(_fakeOrgs[0], _sut, _fakeTasExplorerViewModel, Services),
+                new OrgViewModel(_fakeOrgs[1], _sut, _fakeTasExplorerViewModel, Services),
             };
 
             /** mock retrieving all initial children plus FakeOrgs[2] */
@@ -154,12 +154,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             await _sut.UpdateAllChildren();
 
             Assert.AreEqual(3, _sut.Children.Count);
-            Assert.IsTrue(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == FakeOrgs[0].OrgName));
-            Assert.IsTrue(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == FakeOrgs[1].OrgName));
-            Assert.IsTrue(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == FakeOrgs[2].OrgName));
+            Assert.IsTrue(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == _fakeOrgs[0].OrgName));
+            Assert.IsTrue(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == _fakeOrgs[1].OrgName));
+            Assert.IsTrue(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == _fakeOrgs[2].OrgName));
 
             MockThreadingService.Verify(m => m
-              .AddItemToCollectionOnUiThreadAsync(_sut.Children, It.Is<OrgViewModel>((ovm) => ovm.Org == FakeOrgs[2])),
+              .AddItemToCollectionOnUiThreadAsync(_sut.Children, It.Is<OrgViewModel>((ovm) => ovm.Org == _fakeOrgs[2])),
                 Times.Once);
         }
 
@@ -201,8 +201,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             /** mock 2 initial children */
             var initialChildren = new ObservableCollection<TreeViewItemViewModel>
             {
-                new OrgViewModel(FakeOrgs[0], _sut, _fakeTasExplorerViewModel, Services),
-                new OrgViewModel(FakeOrgs[1], _sut, _fakeTasExplorerViewModel, Services),
+                new OrgViewModel(_fakeOrgs[0], _sut, _fakeTasExplorerViewModel, Services),
+                new OrgViewModel(_fakeOrgs[1], _sut, _fakeTasExplorerViewModel, Services),
             };
             _sut.Children = new ObservableCollection<TreeViewItemViewModel>(initialChildren);
 
@@ -275,8 +275,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             /** mock 2 initial children */
             _sut.Children = new ObservableCollection<TreeViewItemViewModel>
             {
-                new OrgViewModel(FakeOrgs[0], _sut, _fakeTasExplorerViewModel, Services),
-                new OrgViewModel(FakeOrgs[1], _sut, _fakeTasExplorerViewModel, Services),
+                new OrgViewModel(_fakeOrgs[0], _sut, _fakeTasExplorerViewModel, Services),
+                new OrgViewModel(_fakeOrgs[1], _sut, _fakeTasExplorerViewModel, Services),
             };
 
             MockCloudFoundryService.Setup(m => m

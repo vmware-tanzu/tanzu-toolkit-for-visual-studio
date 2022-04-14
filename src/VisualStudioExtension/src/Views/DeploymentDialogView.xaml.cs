@@ -14,7 +14,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
     /// </summary>
     public partial class DeploymentDialogView : DialogWindow, IDeploymentDialogView
     {
-        private IDeploymentDialogViewModel _viewModel;
+        private readonly IDeploymentDialogViewModel _viewModel;
         public ICommand UploadAppCommand { get; }
         public ICommand OpenLoginDialogCommand { get; }
         public ICommand ToggleAdvancedOptionsCommand { get; }
@@ -23,9 +23,9 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         public ICommand ClearServiceSelectionCommand { get; }
         public string PlaceholderText { get; set; }
 
-        public Brush HyperlinkBrush { get { return (Brush)GetValue(HyperlinkBrushProperty); } set { SetValue(HyperlinkBrushProperty, value); } }
+        public Brush HyperlinkBrush { get { return (Brush)GetValue(_hyperlinkBrushProperty); } set { SetValue(_hyperlinkBrushProperty, value); } }
 
-        public static readonly DependencyProperty HyperlinkBrushProperty = DependencyProperty.Register("HyperlinkBrush", typeof(Brush), typeof(DeploymentDialogView), new PropertyMetadata(default(Brush)));
+        public static readonly DependencyProperty _hyperlinkBrushProperty = DependencyProperty.Register("HyperlinkBrush", typeof(Brush), typeof(DeploymentDialogView), new PropertyMetadata(default(Brush)));
 
         public DeploymentDialogView()
         {

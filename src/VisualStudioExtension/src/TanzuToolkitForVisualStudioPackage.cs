@@ -49,7 +49,7 @@ namespace Tanzu.Toolkit.VisualStudio
     /// </para>
     /// </remarks>
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
-    [Guid(PackageGuidString)]
+    [Guid(_packageGuidString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [ProvideToolWindow(typeof(TanzuTasExplorerToolWindow))]
     [ProvideToolWindow(typeof(OutputToolWindow), MultiInstances = true, Transient = true)]
@@ -58,7 +58,7 @@ namespace Tanzu.Toolkit.VisualStudio
         /// <summary>
         /// TanzuToolkitPackage GUID string.
         /// </summary>
-        public const string PackageGuidString = "9419e55b-9e82-4d87-8ee5-70871b01b7cc";
+        public const string _packageGuidString = "9419e55b-9e82-4d87-8ee5-70871b01b7cc";
 
         private IServiceProvider _serviceProvider;
 

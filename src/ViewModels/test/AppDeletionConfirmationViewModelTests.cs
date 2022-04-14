@@ -13,8 +13,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
     {
         private AppDeletionConfirmationViewModel _sut;
         private List<string> _receivedEvents;
-        object _fakeConfirmationWindow = new object();
-        private CloudFoundryApp _fakeCfApp = new CloudFoundryApp("fake app name", "fake-app-guid", FakeCfSpace, "fake invalid app state");
+        private readonly object _fakeConfirmationWindow = new object();
+        private new readonly CloudFoundryApp _fakeCfApp = new CloudFoundryApp("fake app name", "fake-app-guid", _fakeCfSpace, "fake invalid app state");
         private FakeCfInstanceViewModel _fakeCfInstanceViewModel;
 
         [TestInitialize]
@@ -22,7 +22,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             RenewMockServices();
 
-            _fakeCfInstanceViewModel = new FakeCfInstanceViewModel(FakeCfInstance, Services);
+            _fakeCfInstanceViewModel = new FakeCfInstanceViewModel(_fakeCfInstance, Services);
             _sut = new AppDeletionConfirmationViewModel(MockTasExplorerViewModel.Object, Services) { CfApp = _fakeCfApp };
             _receivedEvents = new List<string>();
 
@@ -52,7 +52,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [DataRow(false)]
         public async Task DeleteApp_ClearsCfAppValue_AndClosesDialog_WhenDeleteAppAsyncSucceeds(bool deleteRoutes)
         {
-            MockCloudFoundryService.Setup(m => m.DeleteAppAsync(_fakeCfApp, true, deleteRoutes, 1)).ReturnsAsync(FakeSuccessDetailedResult);
+            MockCloudFoundryService.Setup(m => m.DeleteAppAsync(_fakeCfApp, true, deleteRoutes, 1)).ReturnsAsync(_fakeSuccessDetailedResult);
 
             Assert.AreEqual(_fakeCfApp, _sut.CfApp);
             _sut.DeleteRoutes = deleteRoutes;
@@ -70,7 +70,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task DeleteApp_LogsError_DisplaysError_ClearsCfAppValue_AndClosesDialog_WhenDeleteAppAsyncFails(bool deleteRoutes)
         {
             MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(_fakeCfInstanceViewModel);
-            MockCloudFoundryService.Setup(m => m.DeleteAppAsync(_fakeCfApp, false, deleteRoutes, 1)).ReturnsAsync(FakeFailureDetailedResult);
+            MockCloudFoundryService.Setup(m => m.DeleteAppAsync(_fakeCfApp, false, deleteRoutes, 1)).ReturnsAsync(_fakeFailureDetailedResult);
 
             Assert.AreEqual(_fakeCfApp, _sut.CfApp);
             _sut.DeleteRoutes = deleteRoutes;
@@ -79,8 +79,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsNull(_sut.CfApp);
             MockDialogService.Verify(ds => ds.CloseDialog(_fakeConfirmationWindow, true), Times.Once);
-            MockLogger.Verify(m => m.Error(It.Is<string>(s => s.Contains(AppDeletionConfirmationViewModel._deleteAppErrorMsg)), It.Is<string>(s => s == _fakeCfApp.AppName), It.Is<string>(s => s == FakeFailureDetailedResult.ToString())), Times.Once);
-            MockErrorDialogService.Verify(m => m.DisplayErrorDialog(It.Is<string>(s => s.Contains(AppDeletionConfirmationViewModel._deleteAppErrorMsg) && s.Contains(_fakeCfApp.AppName)), It.Is<string>(s => s.Contains(FakeFailureDetailedResult.Explanation))), Times.Once);
+            MockLogger.Verify(m => m.Error(It.Is<string>(s => s.Contains(AppDeletionConfirmationViewModel._deleteAppErrorMsg)), It.Is<string>(s => s == _fakeCfApp.AppName), It.Is<string>(s => s == _fakeFailureDetailedResult.ToString())), Times.Once);
+            MockErrorDialogService.Verify(m => m.DisplayErrorDialog(It.Is<string>(s => s.Contains(AppDeletionConfirmationViewModel._deleteAppErrorMsg) && s.Contains(_fakeCfApp.AppName)), It.Is<string>(s => s.Contains(_fakeFailureDetailedResult.Explanation))), Times.Once);
         }
 
         [TestMethod]

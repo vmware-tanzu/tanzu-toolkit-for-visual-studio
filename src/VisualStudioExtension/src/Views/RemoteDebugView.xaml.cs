@@ -17,13 +17,13 @@ namespace Tanzu.Toolkit.VisualStudio
         public ICommand CancelCommand { get; }
         public ICommand OpenLoginViewCommand { get; }
         public ICommand ResolveMissingAppCommand { get; }
-        public Brush ListItemMouseOverBrush { get { return (Brush)GetValue(ListItemMouseOverBrushProperty); } set { SetValue(ListItemMouseOverBrushProperty, value); } }
-        public Brush SelectedItemActiveBrush { get { return (Brush)GetValue(SelectedItemActiveBrushProperty); } set { SetValue(SelectedItemActiveBrushProperty, value); } }
-        public Brush GridHeaderBrush { get { return (Brush)GetValue(GridHeaderBrushProperty); } set { SetValue(GridHeaderBrushProperty, value); } }
+        public Brush ListItemMouseOverBrush { get { return (Brush)GetValue(_listItemMouseOverBrushProperty); } set { SetValue(_listItemMouseOverBrushProperty, value); } }
+        public Brush SelectedItemActiveBrush { get { return (Brush)GetValue(_selectedItemActiveBrushProperty); } set { SetValue(_selectedItemActiveBrushProperty, value); } }
+        public Brush GridHeaderBrush { get { return (Brush)GetValue(_gridHeaderBrushProperty); } set { SetValue(_gridHeaderBrushProperty, value); } }
 
-        public static readonly DependencyProperty ListItemMouseOverBrushProperty = DependencyProperty.Register("ListItemMouseOverBrush", typeof(Brush), typeof(RemoteDebugView), new PropertyMetadata(default(Brush)));
-        public static readonly DependencyProperty SelectedItemActiveBrushProperty = DependencyProperty.Register("SelectedItemActiveBrush", typeof(Brush), typeof(RemoteDebugView), new PropertyMetadata(default(Brush)));
-        public static readonly DependencyProperty GridHeaderBrushProperty = DependencyProperty.Register("GridHeaderBrushProperty", typeof(Brush), typeof(RemoteDebugView), new PropertyMetadata(default(Brush)));
+        public static readonly DependencyProperty _listItemMouseOverBrushProperty = DependencyProperty.Register("ListItemMouseOverBrush", typeof(Brush), typeof(RemoteDebugView), new PropertyMetadata(default(Brush)));
+        public static readonly DependencyProperty _selectedItemActiveBrushProperty = DependencyProperty.Register("SelectedItemActiveBrush", typeof(Brush), typeof(RemoteDebugView), new PropertyMetadata(default(Brush)));
+        public static readonly DependencyProperty _gridHeaderBrushProperty = DependencyProperty.Register("GridHeaderBrushProperty", typeof(Brush), typeof(RemoteDebugView), new PropertyMetadata(default(Brush)));
 
         public RemoteDebugView(IRemoteDebugViewModel viewModel, IThemeService themeService)
         {

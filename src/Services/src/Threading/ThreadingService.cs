@@ -8,7 +8,7 @@ namespace Tanzu.Toolkit.Services.Threading
     public class ThreadingService : IThreadingService
     {
         private bool _isPolling = false;
-        private IUiDispatcherService _dispatcherService;
+        private readonly IUiDispatcherService _dispatcherService;
 
         public ThreadingService(IUiDispatcherService dispatcherService)
         {

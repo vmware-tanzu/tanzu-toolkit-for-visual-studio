@@ -24,12 +24,12 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         /// <summary>
         /// Command ID.
         /// </summary>
-        public const int CommandId = 257;
+        public const int _commandId = 257;
 
         /// <summary>
         /// Command menu group (command set GUID).
         /// </summary>
-        public static readonly Guid CommandSet = new Guid("f91c88fb-6e17-42a6-878d-f4d16ead7625");
+        public static readonly Guid _commandSet = new Guid("f91c88fb-6e17-42a6-878d-f4d16ead7625");
 
         /// <summary>
         /// VS Package that provides this command, not null.
@@ -47,14 +47,11 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         /// <param name="commandService">Command service to add command to, not null.</param>
         private PushToCloudFoundryCommand(AsyncPackage package, OleMenuCommandService commandService, IServiceProvider services)
         {
-            this._package = package ?? throw new ArgumentNullException(nameof(package));
+            _package = package ?? throw new ArgumentNullException(nameof(package));
             commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
-
             _services = services;
-
             _dialogService = services.GetRequiredService<IErrorDialog>();
-
-            var menuCommandID = new CommandID(CommandSet, CommandId);
+            var menuCommandID = new CommandID(_commandSet, _commandId);
             var menuItem = new MenuCommand(Execute, menuCommandID);
             commandService.AddCommand(menuItem);
         }
@@ -66,17 +63,6 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         {
             get;
             private set;
-        }
-
-        /// <summary>
-        /// Gets the service provider from the owner package.
-        /// </summary>
-        private Microsoft.VisualStudio.Shell.IAsyncServiceProvider ServiceProvider
-        {
-            get
-            {
-                return _package;
-            }
         }
 
         /// <summary>

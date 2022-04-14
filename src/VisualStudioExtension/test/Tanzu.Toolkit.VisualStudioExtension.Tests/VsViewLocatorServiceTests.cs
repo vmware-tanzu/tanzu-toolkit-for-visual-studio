@@ -20,10 +20,10 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
         private Mock<ILoggingService> _mockLoggingService;
         private Mock<ILogger> _mockLogger;
 
-        private string _fakeViewModelName = "MyCoolViewModel";
-        private string _fakeViewName = "IMyCoolView";
+        private readonly string _fakeViewModelName = "MyCoolViewModel";
+        private readonly string _fakeViewName = "IMyCoolView";
         private Type _fakeViewType;
-        private object _fakeReturnedView = "Pretend this is a view";
+        private readonly object _fakeReturnedView = "Pretend this is a view";
 
         [TestInitialize]
         public void TestInit()
@@ -89,10 +89,6 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
     {
         public TestVsViewLocatorService(IToolWindowService toolWindowService, ILoggingService loggingService, IServiceProvider serviceProvider) : base(toolWindowService, loggingService, serviceProvider)
         {
-            var defaultTypeLookupOverrides = new Dictionary<string, Type>
-            {
-
-            };
         }
 
         public Dictionary<string, Type> TypeLookupOverrides { get; set; }

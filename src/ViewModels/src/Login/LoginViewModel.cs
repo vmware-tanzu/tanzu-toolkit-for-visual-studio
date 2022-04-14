@@ -14,8 +14,8 @@ namespace Tanzu.Toolkit.ViewModels
 {
     public class LoginViewModel : AbstractViewModel, ILoginViewModel
     {
-        public const string TargetEmptyMessage = "Invalid URI: The URI is empty.";
-        public const string TargetInvalidFormatMessage = "Invalid URI: The format of the URI could not be determined.";
+        public const string _targetEmptyMessage = "Invalid URI: The URI is empty.";
+        public const string _targetInvalidFormatMessage = "Invalid URI: The format of the URI could not be determined.";
         private string _target;
         private string _username;
         private bool _skipSsl = false;
@@ -275,7 +275,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
-                ApiAddressError = TargetInvalidFormatMessage;
+                ApiAddressError = _targetInvalidFormatMessage;
                 IsApiAddressFormatValid = false;
 
                 return false;
@@ -391,7 +391,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool CanProceedToAuthentication(object arg = null)
         {
-            bool certValidOrBypassed = !CertificateInvalid || (CertificateInvalid && SkipSsl);
+            var certValidOrBypassed = !CertificateInvalid || (CertificateInvalid && SkipSsl);
             return IsApiAddressFormatValid && certValidOrBypassed;
         }
     }
