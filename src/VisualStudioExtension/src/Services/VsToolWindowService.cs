@@ -2,7 +2,6 @@
 using Microsoft.VisualStudio.Shell.Interop;
 using Serilog;
 using System;
-using System.Collections.Generic;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.VisualStudio.Views;

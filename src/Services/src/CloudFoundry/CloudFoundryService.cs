@@ -704,7 +704,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
                 else
                 {
-                    services.Add(new CfService { Name = service.Name});
+                    services.Add(new CfService { Name = service.Name });
                 }
             }
 

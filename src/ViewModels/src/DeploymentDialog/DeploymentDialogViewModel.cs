@@ -796,7 +796,7 @@ namespace Tanzu.Toolkit.ViewModels
 
             RaisePropertyChangedEvent("SelectedBuildpacks");
         }
-        
+
         public void ClearSelectedManifest(object arg = null)
         {
             ManifestPath = null;
@@ -876,7 +876,7 @@ namespace Tanzu.Toolkit.ViewModels
 
                 if (!publishSucceeded)
                 {
-                    _errorDialogService.DisplayErrorDialog("Unable to publish project with these parameters:\n", 
+                    _errorDialogService.DisplayErrorDialog("Unable to publish project with these parameters:\n",
                         $"Project path: {PathToProjectRootDir}\n" +
                         $"Target framework: {_targetFrameworkMoniker}\n" +
                         $"Runtime: {runtimeIdentifier}\n" +

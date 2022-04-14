@@ -108,7 +108,7 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
             FakeServiceToReturn = fakeServiceToReturn;
         }
 
-        public object FakeServiceToReturn {get; set;}
+        public object FakeServiceToReturn { get; set; }
 
         public bool GetServiceWasCalled { get; private set; }
 

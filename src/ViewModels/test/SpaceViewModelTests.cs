@@ -35,7 +35,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public void TestInit()
         {
             RenewMockServices();
-            
+
             _fakeCfInstanceViewModel = new CfInstanceViewModel(_fakeCfInstance, MockTasExplorerViewModel.Object, Services, expanded: true);
 
             MockUiDispatcherService.Setup(mock => mock.
