@@ -91,7 +91,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("ctor")]  
+        [TestCategory("ctor")]
         public void Constructor_SetsEmptyPlaceholder()
         {
             Assert.AreEqual(CfInstanceViewModel._emptyOrgsPlaceholderMsg, _sut.EmptyPlaceholder.DisplayText);
@@ -363,7 +363,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockErrorDialogService.Setup(m => m
               .DisplayWarningDialog(
                 CfInstanceViewModel._getOrgsFailureMsg,
-                It.Is<string>(s => s.Contains("try disconnecting & logging in again")&& s.Contains("If this issue persists, please contact dotnetdevx@groups.vmware.com"))))
+                It.Is<string>(s => s.Contains("try disconnecting & logging in again") && s.Contains("If this issue persists, please contact dotnetdevx@groups.vmware.com"))))
                 .Verifiable();
 
             await _sut.UpdateAllChildren();

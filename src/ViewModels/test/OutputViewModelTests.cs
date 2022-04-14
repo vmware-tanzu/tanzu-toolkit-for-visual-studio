@@ -2,12 +2,9 @@
 using Moq;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
-using Tanzu.Toolkit.ViewModels.AppDeletionConfirmation;
 
 namespace Tanzu.Toolkit.ViewModels.Tests
 {

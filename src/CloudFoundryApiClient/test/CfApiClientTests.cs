@@ -22,7 +22,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         {
             var fakeHttpClientFactory = (IFakeHttpClientFactory)_fakeHttpClientFactory;
             _mockHttp = fakeHttpClientFactory.MockHttpMessageHandler;
-            
+
             _sut = new CfApiClient(_fakeHttpClientFactory);
             _sut.Configure(_defaultApiAddressConfigValue, _defaultSkipCertValidationConfigValue);
         }
@@ -329,8 +329,9 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Exception resultException = null;
 
             var cfStartAppRequest = _mockHttp.Expect(expectedPath)
-               .Respond("application/json", JsonSerializer.Serialize(new App { State = "STARTED" }));            var startResult = false;
+               .Respond("application/json", JsonSerializer.Serialize(new App { State = "STARTED" }));
 
+            var startResult = false;
             try
             {
                 startResult = await _sut.StartAppWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);

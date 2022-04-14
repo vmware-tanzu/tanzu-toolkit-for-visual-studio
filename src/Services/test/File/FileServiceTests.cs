@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Tanzu.Toolkit.Services.File;
 
 namespace Tanzu.Toolkit.Services.Tests.File

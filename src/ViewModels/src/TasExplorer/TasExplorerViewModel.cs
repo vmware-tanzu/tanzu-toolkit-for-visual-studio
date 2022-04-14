@@ -3,7 +3,6 @@ using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
-using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.DataPersistence;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.Threading;
@@ -373,7 +372,7 @@ namespace Tanzu.Toolkit.ViewModels
         public void LogOutTas(object arg = null)
         {
             IsRefreshingAll = false;
-            ThreadingService.IsPolling = false; 
+            ThreadingService.IsPolling = false;
             TasConnection.CfClient.LogoutCfUser();
             _dataPersistenceService.ClearData(_connectionNameKey);
             _dataPersistenceService.ClearData(_connectionAddressKey);

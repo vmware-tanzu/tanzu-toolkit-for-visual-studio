@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.IO;
-using EnvDTE;
+﻿using EnvDTE;
 using EnvDTE80;
 using Microsoft;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Shell;
 using Serilog;
-using Tanzu.Toolkit.Services.Dialog;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.Design;
+using System.IO;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
@@ -77,7 +76,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             _fileService = services.GetRequiredService<IFileService>();
             _dialogService = services.GetRequiredService<IErrorDialog>();
             var logSvc = services.GetRequiredService<ILoggingService>();
-             
+
             Assumes.Present(Dte);
             Assumes.Present(_fileService);
             Assumes.Present(_dialogService);

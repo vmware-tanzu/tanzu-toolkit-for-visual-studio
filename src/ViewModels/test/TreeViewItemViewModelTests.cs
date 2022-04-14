@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System;
+using System.Threading.Tasks;
 
 namespace Tanzu.Toolkit.ViewModels.Tests
 {
@@ -56,9 +55,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsFalse(sut.IsExpanded);
             Assert.IsFalse(sut.IsLoading);
-            
+
             sut.IsExpanded = true;
-            
+
             Assert.IsTrue(sut.IsExpanded);
             MockThreadingService.Verify(m => m.StartBackgroundTask(sut.UpdateAllChildren), Times.Once);
         }

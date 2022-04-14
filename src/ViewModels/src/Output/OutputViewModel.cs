@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
-using Tanzu.Toolkit.Services.CloudFoundry;
 
 namespace Tanzu.Toolkit.ViewModels
 {
