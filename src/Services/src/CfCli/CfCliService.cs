@@ -45,7 +45,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         private readonly IFileService _fileService;
         private readonly ILogger _logger;
 
-        private object _cfEnvironmentLock = new object();
+        private readonly object _cfEnvironmentLock = new object();
 
         private volatile string _cachedAccessToken = null;
         private DateTime _accessTokenExpiration = new DateTime(0);

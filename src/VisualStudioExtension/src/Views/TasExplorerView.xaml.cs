@@ -14,8 +14,6 @@ namespace Tanzu.Toolkit.VisualStudio.Views
     /// </summary>
     public partial class TasExplorerView : UserControl, ITasExplorerView, IView
     {
-        private IToolWindowService ViewService;
-
         public ICommand OpenLoginFormCommand { get; }
         public ICommand StopCfAppCommand { get; }
         public ICommand StartCfAppCommand { get; }
@@ -28,13 +26,13 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         public ICommand StreamAppLogsCommand { get; }
         public IViewModel ViewModel { get; private set; }
 
-        public Brush ListItemMouseOverBrush { get { return (Brush)GetValue(ListItemMouseOverBrushProperty); } set { SetValue(ListItemMouseOverBrushProperty, value); } }
-        public Brush WizardFooterBrush { get { return (Brush)GetValue(WizardFooterBrushProperty); } set { SetValue(WizardFooterBrushProperty, value); } }
+        public Brush ListItemMouseOverBrush { get { return (Brush)GetValue(_listItemMouseOverBrushProperty); } set { SetValue(_listItemMouseOverBrushProperty, value); } }
+        public Brush WizardFooterBrush { get { return (Brush)GetValue(_wizardFooterBrushProperty); } set { SetValue(_wizardFooterBrushProperty, value); } }
 
-        public Action DisplayView { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+        public Action DisplayView { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public static readonly DependencyProperty ListItemMouseOverBrushProperty = DependencyProperty.Register("ListItemMouseOverBrush", typeof(Brush), typeof(TasExplorerView), new PropertyMetadata(default(Brush)));
-        public static readonly DependencyProperty WizardFooterBrushProperty = DependencyProperty.Register("WizardFooterBrush", typeof(Brush), typeof(TasExplorerView), new PropertyMetadata(default(Brush)));
+        public static readonly DependencyProperty _listItemMouseOverBrushProperty = DependencyProperty.Register("ListItemMouseOverBrush", typeof(Brush), typeof(TasExplorerView), new PropertyMetadata(default(Brush)));
+        public static readonly DependencyProperty _wizardFooterBrushProperty = DependencyProperty.Register("WizardFooterBrush", typeof(Brush), typeof(TasExplorerView), new PropertyMetadata(default(Brush)));
 
         public TasExplorerView()
         {
@@ -43,10 +41,9 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         public TasExplorerView(ITasExplorerViewModel viewModel, IThemeService themeService, IToolWindowService viewService)
         {
-            ViewModel = viewModel;
-            ViewService = viewService;
-
             bool alwaysTrue(object arg) { return true; }
+
+            ViewModel = viewModel;
 
             OpenLoginFormCommand = new DelegatingCommand(viewModel.OpenLoginView, viewModel.CanOpenLoginView);
             StopCfAppCommand = new AsyncDelegatingCommand(viewModel.StopCfApp, viewModel.CanStopCfApp);

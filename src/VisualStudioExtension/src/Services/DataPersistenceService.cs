@@ -12,12 +12,11 @@ namespace Tanzu.Toolkit.VisualStudio.Services
 {
     public class DataPersistenceService : IDataPersistenceService
     {
-        private const string tasCollectionPath = @"Tanzu Application Service";
-
-        private SettingsStore _readOnlySettingsStore;
-        private WritableSettingsStore _writableSettingsStore;
-        private ILogger _logger;
-        private ICfCliService _cfCliService;
+        private const string _tasCollectionPath = @"Tanzu Application Service";
+        private readonly SettingsStore _readOnlySettingsStore;
+        private readonly WritableSettingsStore _writableSettingsStore;
+        private readonly ILogger _logger;
+        private readonly ICfCliService _cfCliService;
 
         public DataPersistenceService(IServiceProvider VsPackage, IServiceProvider services)
         {
@@ -34,16 +33,16 @@ namespace Tanzu.Toolkit.VisualStudio.Services
         {
             try
             {
-                if (!_readOnlySettingsStore.CollectionExists(tasCollectionPath))
+                if (!_readOnlySettingsStore.CollectionExists(_tasCollectionPath))
                 {
-                    _logger.Error($"Attempted to read user settings store value under \"{tasCollectionPath}\" but no such collection path exists");
+                    _logger.Error($"Attempted to read user settings store value under \"{_tasCollectionPath}\" but no such collection path exists");
 
                     return null;
                 }
 
-                if (_readOnlySettingsStore.PropertyExists(tasCollectionPath, key))
+                if (_readOnlySettingsStore.PropertyExists(_tasCollectionPath, key))
                 {
-                    return _readOnlySettingsStore.GetString(tasCollectionPath, key);
+                    return _readOnlySettingsStore.GetString(_tasCollectionPath, key);
                 }
                 else
                 {
@@ -64,14 +63,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services
         {
             try
             {
-                if (!_writableSettingsStore.CollectionExists(tasCollectionPath))
+                if (!_writableSettingsStore.CollectionExists(_tasCollectionPath))
                 {
-                    _writableSettingsStore.CreateCollection(tasCollectionPath);
+                    _writableSettingsStore.CreateCollection(_tasCollectionPath);
                 }
 
-                _writableSettingsStore.SetString(tasCollectionPath, key, value);
+                _writableSettingsStore.SetString(_tasCollectionPath, key, value);
 
-                if (_writableSettingsStore.PropertyExists(tasCollectionPath, key))
+                if (_writableSettingsStore.PropertyExists(_tasCollectionPath, key))
                 {
                     return true;
                 }
@@ -90,7 +89,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services
 
         public bool ClearData(string propertyName)
         {
-            return _writableSettingsStore.DeleteProperty(tasCollectionPath, propertyName);
+            return _writableSettingsStore.DeleteProperty(_tasCollectionPath, propertyName);
         }
 
         public bool SavedCfCredsExist()

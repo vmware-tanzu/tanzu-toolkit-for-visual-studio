@@ -11,11 +11,10 @@ namespace Tanzu.Toolkit.ViewModels
 {
     public class SpaceViewModel : TreeViewItemViewModel
     {
-        internal const string EmptyAppsPlaceholderMsg = "No apps found";
-        internal const string LoadingMsg = "Loading apps...";
+        internal const string _emptyAppsPlaceholderMsg = "No apps found";
+        internal const string _loadingMsg = "Loading apps...";
         internal static readonly string _getAppsFailureMsg = "Unable to load apps.";
         private readonly IErrorDialog _dialogService;
-
         private volatile int _updatesInProgress = 0;
         private readonly object _loadingLock = new object();
 
@@ -30,12 +29,12 @@ namespace Tanzu.Toolkit.ViewModels
 
             LoadingPlaceholder = new PlaceholderViewModel(parent: this, services)
             {
-                DisplayText = LoadingMsg,
+                DisplayText = _loadingMsg,
             };
 
             EmptyPlaceholder = new PlaceholderViewModel(parent: this, Services)
             {
-                DisplayText = EmptyAppsPlaceholderMsg,
+                DisplayText = _emptyAppsPlaceholderMsg,
             };
         }
 

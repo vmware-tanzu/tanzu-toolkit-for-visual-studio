@@ -14,7 +14,7 @@ namespace Tanzu.Toolkit.Services.DotnetCli
         private const string _dotnetCliExecutable = "C:\\Program Files\\dotnet\\dotnet.exe";
         private readonly ICommandProcessService _commandProcessService;
         private readonly IFileService _fileService;
-        private ILogger _logger;
+        private readonly ILogger _logger;
 
         public DotnetCliService(ICommandProcessService commandProcessService, ILoggingService loggingService, IFileService fileService)
         {

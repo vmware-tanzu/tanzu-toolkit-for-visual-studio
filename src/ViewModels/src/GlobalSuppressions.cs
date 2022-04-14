@@ -5,4 +5,4 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "'internal' allows this field to be easily accessed by the test class for this view model.", Scope = "member", Target = "~F:Tanzu.Toolkit.ViewModels.DeploymentDialogViewModel.OutputViewModel")]
+[assembly: SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "'internal' allows this field to be easily accessed by the test class for this view model.", Scope = "member", Target = "~F:Tanzu.Toolkit.ViewModels.DeploymentDialogViewModel._outputViewModel")]

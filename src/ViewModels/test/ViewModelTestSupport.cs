@@ -42,65 +42,65 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         protected Mock<ILoginViewModel> MockLoginViewModel { get; set; }
         protected Mock<IAppDeletionConfirmationViewModel> MockAppDeletionConfirmationViewModel { get; set; }
 
-        protected const string FakeCfName = "fake cf name";
-        protected const string FakeCfApiAddress = "http://fake.api.address";
-        protected const string FakeAccessToken = "fake.access.token";
-        protected const string FakeOrgName = "fake org name";
-        protected const string FakeOrgGuid = "fake-org-guid";
-        protected const string FakeSpaceName = "fake space name";
-        protected const string FakeSpaceGuid = "fake-space-guid";
-        protected const string FakeAppName = "fake app name";
-        protected const string FakeAppGuid = "fake-app-guid";
+        protected const string _fakeCfName = "fake cf name";
+        protected const string _fakeCfApiAddress = "http://fake.api.address";
+        protected const string _fakeAccessToken = "fake.access.token";
+        protected const string _fakeOrgName = "fake org name";
+        protected const string _fakeOrgGuid = "fake-org-guid";
+        protected const string _fakeSpaceName = "fake space name";
+        protected const string _fakeSpaceGuid = "fake-space-guid";
+        protected const string _fakeAppName = "fake app name";
+        protected const string _fakeAppGuid = "fake-app-guid";
 
-        protected static readonly CloudFoundryInstance FakeCfInstance = new CloudFoundryInstance(FakeCfName, FakeCfApiAddress, false);
-        protected static readonly CloudFoundryOrganization FakeCfOrg = new CloudFoundryOrganization(FakeOrgName, FakeOrgGuid, FakeCfInstance);
-        protected static readonly CloudFoundrySpace FakeCfSpace = new CloudFoundrySpace(FakeSpaceName, FakeSpaceGuid, FakeCfOrg);
-        protected static readonly CloudFoundryApp FakeCfApp = new CloudFoundryApp(FakeAppName, FakeAppGuid, FakeCfSpace, "junk state");
+        protected static readonly CloudFoundryInstance _fakeCfInstance = new CloudFoundryInstance(_fakeCfName, _fakeCfApiAddress, false);
+        protected static readonly CloudFoundryOrganization _fakeCfOrg = new CloudFoundryOrganization(_fakeOrgName, _fakeOrgGuid, _fakeCfInstance);
+        protected static readonly CloudFoundrySpace _fakeCfSpace = new CloudFoundrySpace(_fakeSpaceName, _fakeSpaceGuid, _fakeCfOrg);
+        protected static readonly CloudFoundryApp _fakeCfApp = new CloudFoundryApp(_fakeAppName, _fakeAppGuid, _fakeCfSpace, "junk state");
 
-        protected static readonly List<CloudFoundryOrganization> EmptyListOfOrgs = new List<CloudFoundryOrganization>();
-        protected static readonly List<CloudFoundrySpace> EmptyListOfSpaces = new List<CloudFoundrySpace>();
-        protected static readonly List<CloudFoundryApp> EmptyListOfApps = new List<CloudFoundryApp>();
+        protected static readonly List<CloudFoundryOrganization> _emptyListOfOrgs = new List<CloudFoundryOrganization>();
+        protected static readonly List<CloudFoundrySpace> _emptyListOfSpaces = new List<CloudFoundrySpace>();
+        protected static readonly List<CloudFoundryApp> _emptyListOfApps = new List<CloudFoundryApp>();
 
-        protected static readonly CommandResult FakeSuccessCmdResult = new CommandResult("junk output", "junk error", 0);
-        protected static readonly CommandResult FakeFailureCmdResult = new CommandResult("junk output", "junk error", 1);
+        protected static readonly CommandResult _fakeSuccessCmdResult = new CommandResult("junk output", "junk error", 0);
+        protected static readonly CommandResult _fakeFailureCmdResult = new CommandResult("junk output", "junk error", 1);
 
-        protected static readonly DetailedResult FakeSuccessDetailedResult = new DetailedResult(true, null, FakeSuccessCmdResult);
-        protected static readonly DetailedResult FakeFailureDetailedResult = new DetailedResult(false, "junk error", FakeFailureCmdResult);
+        protected static readonly DetailedResult _fakeSuccessDetailedResult = new DetailedResult(true, null, _fakeSuccessCmdResult);
+        protected static readonly DetailedResult _fakeFailureDetailedResult = new DetailedResult(false, "junk error", _fakeFailureCmdResult);
 
         protected static readonly string _fakeProjectPath = "this\\is\\a\\fake\\path\\to\\a\\project\\directory";
         protected static readonly string _fakeManifestPath = "this\\is\\a\\fake\\path\\to\\a\\manifest";
         protected static readonly Action<string> _fakeOutCallback = content => { };
         protected static readonly Action<string> _fakeErrCallback = content => { };
 
-        internal string[] sampleManifestLines = File.ReadAllLines("TestFakes//fake-manifest.yml");
-        internal string[] sampleInvalidManifestLines = File.ReadAllLines("TestFakes//fake-invalid-manifest.yml");
-        internal string[] multiBuildpackManifestLines = File.ReadAllLines("TestFakes//fake-multi-buildpack-manifest.yml");
+        internal string[] _sampleManifestLines = File.ReadAllLines("TestFakes//fake-manifest.yml");
+        internal string[] _sampleInvalidManifestLines = File.ReadAllLines("TestFakes//fake-invalid-manifest.yml");
+        internal string[] _multiBuildpackManifestLines = File.ReadAllLines("TestFakes//fake-multi-buildpack-manifest.yml");
 
-        protected static readonly List<CloudFoundryOrganization> FakeOrgs = new List<CloudFoundryOrganization>
+        protected static readonly List<CloudFoundryOrganization> _fakeOrgs = new List<CloudFoundryOrganization>
         {
-            new CloudFoundryOrganization("fakeOrg1", "fake-org-guid-1", FakeCfInstance),
-            new CloudFoundryOrganization("fakeOrg2", "fake-org-guid-2", FakeCfInstance),
-            new CloudFoundryOrganization("fakeOrg3", "fake-org-guid-3", FakeCfInstance),
-            new CloudFoundryOrganization("fakeOrg4", "fake-org-guid-4", FakeCfInstance),
-            new CloudFoundryOrganization("fakeOrg5", "fake-org-guid-5", FakeCfInstance),
+            new CloudFoundryOrganization("fakeOrg1", "fake-org-guid-1", _fakeCfInstance),
+            new CloudFoundryOrganization("fakeOrg2", "fake-org-guid-2", _fakeCfInstance),
+            new CloudFoundryOrganization("fakeOrg3", "fake-org-guid-3", _fakeCfInstance),
+            new CloudFoundryOrganization("fakeOrg4", "fake-org-guid-4", _fakeCfInstance),
+            new CloudFoundryOrganization("fakeOrg5", "fake-org-guid-5", _fakeCfInstance),
         };
 
-        protected static readonly List<CloudFoundrySpace> FakeSpaces = new List<CloudFoundrySpace>
+        protected static readonly List<CloudFoundrySpace> _fakeSpaces = new List<CloudFoundrySpace>
         {
-            new CloudFoundrySpace("fakeSpace1", "fake-space-guid-1", FakeCfOrg),
-            new CloudFoundrySpace("fakeSpace2", "fake-space-guid-2", FakeCfOrg),
-            new CloudFoundrySpace("fakeSpace3", "fake-space-guid-3", FakeCfOrg),
-            new CloudFoundrySpace("fakeSpace4", "fake-space-guid-4", FakeCfOrg),
-            new CloudFoundrySpace("fakeSpace5", "fake-space-guid-5", FakeCfOrg),
+            new CloudFoundrySpace("fakeSpace1", "fake-space-guid-1", _fakeCfOrg),
+            new CloudFoundrySpace("fakeSpace2", "fake-space-guid-2", _fakeCfOrg),
+            new CloudFoundrySpace("fakeSpace3", "fake-space-guid-3", _fakeCfOrg),
+            new CloudFoundrySpace("fakeSpace4", "fake-space-guid-4", _fakeCfOrg),
+            new CloudFoundrySpace("fakeSpace5", "fake-space-guid-5", _fakeCfOrg),
         };
 
-        protected static readonly List<CloudFoundryApp> FakeApps = new List<CloudFoundryApp>
+        protected static readonly List<CloudFoundryApp> _fakeApps = new List<CloudFoundryApp>
         {
-            new CloudFoundryApp("fakeApp1", "fake-app-guid-1", FakeCfSpace, "junk state"),
-            new CloudFoundryApp("fakeApp2", "fake-app-guid-2", FakeCfSpace, "junk state"),
-            new CloudFoundryApp("fakeApp3", "fake-app-guid-3", FakeCfSpace, "junk state"),
-            new CloudFoundryApp("fakeApp4", "fake-app-guid-4", FakeCfSpace, "junk state"),
-            new CloudFoundryApp("fakeApp5", "fake-app-guid-5", FakeCfSpace, "junk state"),
+            new CloudFoundryApp("fakeApp1", "fake-app-guid-1", _fakeCfSpace, "junk state"),
+            new CloudFoundryApp("fakeApp2", "fake-app-guid-2", _fakeCfSpace, "junk state"),
+            new CloudFoundryApp("fakeApp3", "fake-app-guid-3", _fakeCfSpace, "junk state"),
+            new CloudFoundryApp("fakeApp4", "fake-app-guid-4", _fakeCfSpace, "junk state"),
+            new CloudFoundryApp("fakeApp5", "fake-app-guid-5", _fakeCfSpace, "junk state"),
         };
 
         internal class FakeOutputView : IView
@@ -173,7 +173,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         internal class FakeTasExplorerViewModel : ITasExplorerViewModel
         {
-            public FakeTasExplorerViewModel(IServiceProvider services)
+            public FakeTasExplorerViewModel()
             {
             }
 
