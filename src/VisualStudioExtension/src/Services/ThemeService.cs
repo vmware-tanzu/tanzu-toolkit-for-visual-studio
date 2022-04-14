@@ -18,17 +18,17 @@ namespace Tanzu.Toolkit.VisualStudio.Services
                 control.SetResourceReference(Control.BackgroundProperty, ThemedDialogColors.WindowPanelBrushKey);
                 control.SetResourceReference(Control.ForegroundProperty, ThemedDialogColors.WindowPanelTextBrushKey);
                 control.SetResourceReference(Control.BorderBrushProperty, ThemedDialogColors.WindowBorderBrushKey);
-                control.SetResourceReference(TasExplorerView.ListItemMouseOverBrushProperty, ThemedDialogColors.ListItemMouseOverBrushKey);
-                control.SetResourceReference(TasExplorerView.WizardFooterBrushProperty, ThemedDialogColors.WizardFooterBrushKey);
-                control.SetResourceReference(DeploymentDialogView.HyperlinkBrushProperty, ThemedDialogColors.HyperlinkBrushKey);
-                control.SetResourceReference(LoginView.HyperlinkBrushProperty, ThemedDialogColors.HyperlinkBrushKey);
-                control.SetResourceReference(OutputView.ListItemMouseOverBrushProperty, ThemedDialogColors.ListItemMouseOverBrushKey);
-                control.SetResourceReference(OutputView.WindowButtonDownBorderBrushProperty, ThemedDialogColors.WindowButtonDownBorderBrushKey);
-                control.SetResourceReference(OutputView.WindowButtonDownHoverBrushProperty, ThemedDialogColors.WindowButtonHoverBrushKey);
-                control.SetResourceReference(OutputView.WindowPanelBrushProperty, ThemedDialogColors.WindowPanelBrushKey);
-                control.SetResourceReference(RemoteDebugView.ListItemMouseOverBrushProperty, ThemedDialogColors.ListItemMouseOverBrushKey);
-                control.SetResourceReference(RemoteDebugView.SelectedItemActiveBrushProperty, ThemedDialogColors.SelectedItemActiveBrushKey);
-                control.SetResourceReference(RemoteDebugView.GridHeaderBrushProperty, ThemedDialogColors.GridLineBrushKey);
+                control.SetResourceReference(TasExplorerView._listItemMouseOverBrushProperty, ThemedDialogColors.ListItemMouseOverBrushKey);
+                control.SetResourceReference(TasExplorerView._wizardFooterBrushProperty, ThemedDialogColors.WizardFooterBrushKey);
+                control.SetResourceReference(DeploymentDialogView._hyperlinkBrushProperty, ThemedDialogColors.HyperlinkBrushKey);
+                control.SetResourceReference(LoginView._hyperlinkBrushProperty, ThemedDialogColors.HyperlinkBrushKey);
+                control.SetResourceReference(OutputView._listItemMouseOverBrushProperty, ThemedDialogColors.ListItemMouseOverBrushKey);
+                control.SetResourceReference(OutputView._windowButtonDownBorderBrushProperty, ThemedDialogColors.WindowButtonDownBorderBrushKey);
+                control.SetResourceReference(OutputView._windowButtonDownHoverBrushProperty, ThemedDialogColors.WindowButtonHoverBrushKey);
+                control.SetResourceReference(OutputView._windowPanelBrushProperty, ThemedDialogColors.WindowPanelBrushKey);
+                control.SetResourceReference(RemoteDebugView._listItemMouseOverBrushProperty, ThemedDialogColors.ListItemMouseOverBrushKey);
+                control.SetResourceReference(RemoteDebugView._selectedItemActiveBrushProperty, ThemedDialogColors.SelectedItemActiveBrushKey);
+                control.SetResourceReference(RemoteDebugView._gridHeaderBrushProperty, ThemedDialogColors.GridLineBrushKey);
             }
 
             ThemedDialogStyleLoader.SetUseDefaultThemedDialogStyles(element, true);

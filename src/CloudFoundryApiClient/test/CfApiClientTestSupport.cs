@@ -214,10 +214,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var isFirstPage = pageNum == 1;
             var isLastPage = pageNum == totalPages;
 
-            var firstHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListOrgsPath}?page=1&per_page={resultsPerPage}" };
-            var lastHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListOrgsPath}?page={totalPages}&per_page={resultsPerPage}" };
-            var nextHref = isLastPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListOrgsPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
-            var previousHref = isFirstPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListOrgsPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
+            var firstHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient._listOrgsPath}?page=1&per_page={resultsPerPage}" };
+            var lastHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient._listOrgsPath}?page={totalPages}&per_page={resultsPerPage}" };
+            var nextHref = isLastPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient._listOrgsPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
+            var previousHref = isFirstPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient._listOrgsPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
 
             Pagination = new Pagination
             {
@@ -269,10 +269,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var isFirstPage = pageNum == 1;
             var isLastPage = pageNum == totalPages;
 
-            var firstHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListSpacesPath}?page=1&per_page={resultsPerPage}" };
-            var lastHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListSpacesPath}?page={totalPages}&per_page={resultsPerPage}" };
-            var nextHref = isLastPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListSpacesPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
-            var previousHref = isFirstPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListSpacesPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
+            var firstHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient._listSpacesPath}?page=1&per_page={resultsPerPage}" };
+            var lastHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient._listSpacesPath}?page={totalPages}&per_page={resultsPerPage}" };
+            var nextHref = isLastPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient._listSpacesPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
+            var previousHref = isFirstPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient._listSpacesPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
 
             Pagination = new Pagination
             {
@@ -324,10 +324,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var isFirstPage = pageNum == 1;
             var isLastPage = pageNum == totalPages;
 
-            var firstHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListAppsPath}?page=1&per_page={resultsPerPage}" };
-            var lastHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListAppsPath}?page={totalPages}&per_page={resultsPerPage}" };
-            var nextHref = isLastPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListAppsPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
-            var previousHref = isFirstPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListAppsPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
+            var firstHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient._listAppsPath}?page=1&per_page={resultsPerPage}" };
+            var lastHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient._listAppsPath}?page={totalPages}&per_page={resultsPerPage}" };
+            var nextHref = isLastPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient._listAppsPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
+            var previousHref = isFirstPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient._listAppsPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
 
             Pagination = new Pagination
             {
@@ -377,10 +377,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var isFirstPage = pageNum == 1;
             var isLastPage = pageNum == totalPages;
 
-            var firstHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListBuildpacksPath}?page=1&per_page={resultsPerPage}" };
-            var lastHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListBuildpacksPath}?page={totalPages}&per_page={resultsPerPage}" };
-            var nextHref = isLastPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListBuildpacksPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
-            var previousHref = isFirstPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListBuildpacksPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
+            var firstHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient._listBuildpacksPath}?page=1&per_page={resultsPerPage}" };
+            var lastHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient._listBuildpacksPath}?page={totalPages}&per_page={resultsPerPage}" };
+            var nextHref = isLastPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient._listBuildpacksPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
+            var previousHref = isFirstPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient._listBuildpacksPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
 
             Pagination = new Pagination
             {
@@ -452,10 +452,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var isFirstPage = pageNum == 1;
             var isLastPage = pageNum == totalPages;
 
-            var firstHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListServicesPath}?page=1&per_page={resultsPerPage}" };
-            var lastHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListServicesPath}?page={totalPages}&per_page={resultsPerPage}" };
-            var nextHref = isLastPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListServicesPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
-            var previousHref = isFirstPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListServicesPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
+            var firstHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient._listServicesPath}?page=1&per_page={resultsPerPage}" };
+            var lastHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient._listServicesPath}?page={totalPages}&per_page={resultsPerPage}" };
+            var nextHref = isLastPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient._listServicesPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
+            var previousHref = isFirstPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient._listServicesPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
 
             Pagination = new Pagination
             {
@@ -505,10 +505,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var isFirstPage = pageNum == 1;
             var isLastPage = pageNum == totalPages;
 
-            var firstHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListStacksPath}?page=1&per_page={resultsPerPage}" };
-            var lastHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListStacksPath}?page={totalPages}&per_page={resultsPerPage}" };
-            var nextHref = isLastPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListStacksPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
-            var previousHref = isFirstPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListStacksPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
+            var firstHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient._listStacksPath}?page=1&per_page={resultsPerPage}" };
+            var lastHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient._listStacksPath}?page={totalPages}&per_page={resultsPerPage}" };
+            var nextHref = isLastPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient._listStacksPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
+            var previousHref = isFirstPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient._listStacksPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
 
             Pagination = new Pagination
             {
@@ -560,10 +560,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var isFirstPage = pageNum == 1;
             var isLastPage = pageNum == totalPages;
 
-            var firstHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListRoutesPath}?page=1&per_page={resultsPerPage}" };
-            var lastHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListRoutesPath}?page={totalPages}&per_page={resultsPerPage}" };
-            var nextHref = isLastPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListRoutesPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
-            var previousHref = isFirstPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListRoutesPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
+            var firstHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient._listRoutesPath}?page=1&per_page={resultsPerPage}" };
+            var lastHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient._listRoutesPath}?page={totalPages}&per_page={resultsPerPage}" };
+            var nextHref = isLastPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient._listRoutesPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
+            var previousHref = isFirstPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient._listRoutesPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
 
             Pagination = new Pagination
             {

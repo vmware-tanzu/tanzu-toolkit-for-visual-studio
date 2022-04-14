@@ -20,17 +20,17 @@ namespace Tanzu.Toolkit.VisualStudio
         /// <summary>
         /// Command ID.
         /// </summary>
-        public const int CommandId = PackageIds.RemoteDebugId;
+        public const int _commandId = PackageIds.RemoteDebugId;
 
         /// <summary>
         /// Command menu group (command set GUID).
         /// </summary>
-        public static readonly Guid CommandSet = new Guid(PackageGuids.guidTanzuToolkitPackageCmdSetString);
+        public static readonly Guid _commandSet = new Guid(PackageGuids.guidTanzuToolkitPackageCmdSetString);
 
         /// <summary>
         /// VS Package that provides this command, not null.
         /// </summary>
-        private readonly AsyncPackage package;
+        private readonly AsyncPackage _package;
         private static ILogger _logger;
         private static IServiceProvider _services;
 
@@ -42,10 +42,10 @@ namespace Tanzu.Toolkit.VisualStudio
         /// <param name="commandService">Command service to add command to, not null.</param>
         private RemoteDebugCommand(AsyncPackage package, OleMenuCommandService commandService)
         {
-            this.package = package ?? throw new ArgumentNullException(nameof(package));
+            _package = package ?? throw new ArgumentNullException(nameof(package));
             commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
 
-            var menuCommandID = new CommandID(CommandSet, CommandId);
+            var menuCommandID = new CommandID(_commandSet, _commandId);
             var menuItem = new MenuCommand(Execute, menuCommandID);
             commandService.AddCommand(menuItem);
         }
@@ -70,8 +70,7 @@ namespace Tanzu.Toolkit.VisualStudio
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
 
             _services = services;
-
-            OleMenuCommandService commandService = await package.GetServiceAsync((typeof(IMenuCommandService))) as OleMenuCommandService;
+            var commandService = await package.GetServiceAsync((typeof(IMenuCommandService))) as OleMenuCommandService;
             Instance = new RemoteDebugCommand(package, commandService);
             var loggingSvc = services.GetRequiredService<ILoggingService>();
             _logger = loggingSvc.Logger;
@@ -87,18 +86,18 @@ namespace Tanzu.Toolkit.VisualStudio
         private void Execute(object sender, EventArgs e)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
-            var _ = package.JoinableTaskFactory.RunAsync(TryRemoteDebugAsync);
+            var _ = _package.JoinableTaskFactory.RunAsync(TryRemoteDebugAsync);
         }
 
         private async Task TryRemoteDebugAsync()
         {
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(_package.DisposalToken);
 
             try
             {
                 var title = "RemoteDebugCommand";
                 var dte = (DTE2)Package.GetGlobalService(typeof(SDTE));
-                var VsUiShell = await package.GetServiceAsync(typeof(IVsUIShell)) as IVsUIShell;
+                var VsUiShell = await _package.GetServiceAsync(typeof(IVsUIShell)) as IVsUIShell;
 
                 if (!(((object[])dte.ActiveSolutionProjects).FirstOrDefault() is Project project))
                 {
@@ -106,7 +105,7 @@ namespace Tanzu.Toolkit.VisualStudio
                     _logger.Error(msg);
 
                     VsShellUtilities.ShowMessageBox(
-                        package,
+                        _package,
                         msg,
                         title,
                         OLEMSGICON.OLEMSGICON_CRITICAL,
@@ -136,7 +135,7 @@ namespace Tanzu.Toolkit.VisualStudio
                         var errorMsg = $"Proceeding with default target framework 'netstandard2.1'.\n" +
                             "If this is not intended and the issue persists, please reach out to tas-vs-extension@vmware.com";
                         VsShellUtilities.ShowMessageBox(
-                            package,
+                            _package,
                             errorMsg,
                             errorTitle,
                             OLEMSGICON.OLEMSGICON_CRITICAL,
@@ -149,7 +148,7 @@ namespace Tanzu.Toolkit.VisualStudio
                         var errorMsg = $"Remote debugging is not currently supported for projects targeting '{tfm}'.\n" +
                             "If this is a feature you'd like to see implemented in the future, please let the team know! tas-vs-extension@vmware.com";
                         VsShellUtilities.ShowMessageBox(
-                            package,
+                            _package,
                             errorMsg,
                             errorTitle,
                             OLEMSGICON.OLEMSGICON_CRITICAL,

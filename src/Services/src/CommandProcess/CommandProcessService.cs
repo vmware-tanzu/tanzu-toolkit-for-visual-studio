@@ -15,7 +15,7 @@ namespace Tanzu.Toolkit.Services.CommandProcess
         private string _stdErrAggregator = "";
         private List<string> _cancelTriggers;
         private int _customExitCode = 1;
-        private ILogger _logger;
+        private readonly ILogger _logger;
 
         public CommandProcessService(ILoggingService loggingService)
         {

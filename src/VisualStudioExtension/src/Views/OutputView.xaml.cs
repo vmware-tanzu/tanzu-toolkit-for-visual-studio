@@ -20,22 +20,22 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         public ICommand StopProcessCommand { get; set; }
         public IViewModel ViewModel { get; private set; }
 
-        public static readonly DependencyProperty ListItemMouseOverBrushProperty = DependencyProperty.Register("ListItemMouseOverBrush", typeof(Brush), typeof(OutputView), new PropertyMetadata(default(Brush)));
-        public static readonly DependencyProperty WindowButtonDownBorderBrushProperty = DependencyProperty.Register("WindowButtonDownBorderBrush", typeof(Brush), typeof(OutputView), new PropertyMetadata(default(Brush)));
-        public static readonly DependencyProperty WindowButtonDownHoverBrushProperty = DependencyProperty.Register("WindowButtonDownHoverBrush", typeof(Brush), typeof(OutputView), new PropertyMetadata(default(Brush)));
-        public static readonly DependencyProperty WindowPanelBrushProperty = DependencyProperty.Register("WindowPanelBrush", typeof(Brush), typeof(OutputView), new PropertyMetadata(default(Brush)));
+        public static readonly DependencyProperty _listItemMouseOverBrushProperty = DependencyProperty.Register("ListItemMouseOverBrush", typeof(Brush), typeof(OutputView), new PropertyMetadata(default(Brush)));
+        public static readonly DependencyProperty _windowButtonDownBorderBrushProperty = DependencyProperty.Register("WindowButtonDownBorderBrush", typeof(Brush), typeof(OutputView), new PropertyMetadata(default(Brush)));
+        public static readonly DependencyProperty _windowButtonDownHoverBrushProperty = DependencyProperty.Register("WindowButtonDownHoverBrush", typeof(Brush), typeof(OutputView), new PropertyMetadata(default(Brush)));
+        public static readonly DependencyProperty _windowPanelBrushProperty = DependencyProperty.Register("WindowPanelBrush", typeof(Brush), typeof(OutputView), new PropertyMetadata(default(Brush)));
 
-        public Brush ListItemMouseOverBrush { get { return (Brush)GetValue(ListItemMouseOverBrushProperty); } set { SetValue(ListItemMouseOverBrushProperty, value); } }
-        public Brush WindowButtonDownBorderBrush { get { return (Brush)GetValue(WindowButtonDownBorderBrushProperty); } set { SetValue(WindowButtonDownBorderBrushProperty, value); } }
-        public Brush WindowButtonDownHoverBrush { get { return (Brush)GetValue(WindowButtonDownHoverBrushProperty); } set { SetValue(WindowButtonDownHoverBrushProperty, value); } }
-        public Brush WindowPanelBrush { get { return (Brush)GetValue(WindowPanelBrushProperty); } set { SetValue(WindowPanelBrushProperty, value); } }
+        public Brush ListItemMouseOverBrush { get { return (Brush)GetValue(_listItemMouseOverBrushProperty); } set { SetValue(_listItemMouseOverBrushProperty, value); } }
+        public Brush WindowButtonDownBorderBrush { get { return (Brush)GetValue(_windowButtonDownBorderBrushProperty); } set { SetValue(_windowButtonDownBorderBrushProperty, value); } }
+        public Brush WindowButtonDownHoverBrush { get { return (Brush)GetValue(_windowButtonDownHoverBrushProperty); } set { SetValue(_windowButtonDownHoverBrushProperty, value); } }
+        public Brush WindowPanelBrush { get { return (Brush)GetValue(_windowPanelBrushProperty); } set { SetValue(_windowPanelBrushProperty, value); } }
 
         public OutputView()
         {
             InitializeComponent();
         }
 
-        public OutputView(IOutputViewModel viewModel, IServiceProvider services, IThemeService themeService)
+        public OutputView(IOutputViewModel viewModel, IThemeService themeService)
         {
             themeService.SetTheme(this);
             DataContext = viewModel;

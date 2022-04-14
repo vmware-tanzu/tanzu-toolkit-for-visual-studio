@@ -15,7 +15,7 @@ namespace Tanzu.Toolkit.ViewModels
         private TreeViewItemViewModel _parent;
         private ObservableCollection<TreeViewItemViewModel> _children;
         private bool _isLoading;
-        private IThreadingService _threadingService;
+        private readonly IThreadingService _threadingService;
 
         protected TreeViewItemViewModel(TreeViewItemViewModel parent, ITasExplorerViewModel parentTasExplorer, IServiceProvider services, bool childless = false, bool expanded = false)
             : base(services)

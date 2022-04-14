@@ -25,7 +25,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private readonly IFileService _fileService;
         private readonly ISerializationService _serializationService;
         private readonly IView _outputView;
-        private IOutputViewModel _outputViewModel;
+        private readonly IOutputViewModel _outputViewModel;
         private readonly string _projectName;
         private readonly string _pathToProjectRootDir;
         private readonly string _targetFrameworkMoniker;

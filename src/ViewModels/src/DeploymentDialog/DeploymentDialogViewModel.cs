@@ -18,31 +18,31 @@ namespace Tanzu.Toolkit.ViewModels
 {
     public class DeploymentDialogViewModel : AbstractViewModel, IDeploymentDialogViewModel
     {
-        internal const string AppNameEmptyMsg = "App name not specified.";
-        internal const string TargetEmptyMsg = "Target not specified.";
-        internal const string OrgEmptyMsg = "Org not specified.";
-        internal const string SpaceEmptyMsg = "Space not specified.";
-        internal const string DeploymentSuccessMsg = "App was successfully deployed!\nYou can now close this window.";
-        internal const string DeploymentErrorMsg = "Encountered an issue while deploying app:";
-        internal const string GetOrgsFailureMsg = "Unable to fetch orgs.";
-        internal const string GetSpacesFailureMsg = "Unable to fetch spaces.";
-        internal const string GetBuildpacksFailureMsg = "Unable to fetch buildpacks.";
-        internal const string GetServicesFailureMsg = "Unable to fetch services.";
-        internal const string GetStacksFailureMsg = "Unable to fetch stacks.";
-        internal const string SingleLoginErrorTitle = "Unable to add more TAS connections.";
-        internal const string SingleLoginErrorMessage1 = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
-        internal const string SingleLoginErrorMessage2 = "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Application Service Explorer & re-connecting to a new one.";
-        internal const string FullFrameworkTFM = ".NETFramework";
-        internal const string ManifestNotFoundTitle = "Unable to set manifest path";
-        internal const string ManifestParsingErrorTitle = "Unable to parse app manifest";
-        internal const string DirectoryNotFoundTitle = "Unable to set push directory path";
-        internal const string PublishDirName = "publish";
+        internal const string _appNameEmptyMsg = "App name not specified.";
+        internal const string _targetEmptyMsg = "Target not specified.";
+        internal const string _orgEmptyMsg = "Org not specified.";
+        internal const string _spaceEmptyMsg = "Space not specified.";
+        internal const string _deploymentSuccessMsg = "App was successfully deployed!\nYou can now close this window.";
+        internal const string _deploymentErrorMsg = "Encountered an issue while deploying app:";
+        internal const string _getOrgsFailureMsg = "Unable to fetch orgs.";
+        internal const string _getSpacesFailureMsg = "Unable to fetch spaces.";
+        internal const string _getBuildpacksFailureMsg = "Unable to fetch buildpacks.";
+        internal const string _getServicesFailureMsg = "Unable to fetch services.";
+        internal const string _getStacksFailureMsg = "Unable to fetch stacks.";
+        internal const string _singleLoginErrorTitle = "Unable to add more TAS connections.";
+        internal const string _singleLoginErrorMessage1 = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
+        internal const string _singleLoginErrorMessage2 = "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Application Service Explorer & re-connecting to a new one.";
+        internal const string _fullFrameworkTFM = ".NETFramework";
+        internal const string _manifestNotFoundTitle = "Unable to set manifest path";
+        internal const string _manifestParsingErrorTitle = "Unable to parse app manifest";
+        internal const string _directoryNotFoundTitle = "Unable to set push directory path";
+        internal const string _publishDirName = "publish";
         private string _appName;
         internal readonly bool _fullFrameworkDeployment = false;
         private readonly IErrorDialog _errorDialogService;
         private readonly IDotnetCliService _dotnetCliService;
-        internal IOutputViewModel OutputViewModel;
-        internal ITasExplorerViewModel TasExplorerViewModel;
+        internal IOutputViewModel _outputViewModel;
+        internal ITasExplorerViewModel _tasExplorerViewModel;
 
         private List<CloudFoundryInstance> _cfInstances;
         private List<CloudFoundryOrganization> _cfOrgs;
@@ -50,7 +50,7 @@ namespace Tanzu.Toolkit.ViewModels
         private CloudFoundryOrganization _selectedOrg;
         private CloudFoundrySpace _selectedSpace;
         private string _startCmmd;
-        private string _projectName;
+        private readonly string _projectName;
         private string _manifestPathLabel;
         private string _manifestPath;
         private string _directoryPathLabel;
@@ -78,10 +78,10 @@ namespace Tanzu.Toolkit.ViewModels
         {
             _errorDialogService = services.GetRequiredService<IErrorDialog>();
             _dotnetCliService = services.GetRequiredService<IDotnetCliService>();
-            TasExplorerViewModel = services.GetRequiredService<ITasExplorerViewModel>();
+            _tasExplorerViewModel = services.GetRequiredService<ITasExplorerViewModel>();
 
             OutputView = ViewLocatorService.GetViewByViewModelName(nameof(ViewModels.OutputViewModel), $"Tanzu Push Output (\"{projectName}\")") as IView;
-            OutputViewModel = OutputView?.ViewModel as IOutputViewModel;
+            _outputViewModel = OutputView?.ViewModel as IOutputViewModel;
 
             DeploymentInProgress = false;
             PathToProjectRootDir = directoryOfProjectToDeploy;
@@ -89,7 +89,7 @@ namespace Tanzu.Toolkit.ViewModels
             SelectedServices = new ObservableCollection<string>();
 
             _targetFrameworkMoniker = targetFrameworkMoniker;
-            if (_targetFrameworkMoniker.StartsWith(FullFrameworkTFM))
+            if (_targetFrameworkMoniker.StartsWith(_fullFrameworkTFM))
             {
                 _fullFrameworkDeployment = true;
             }
@@ -118,9 +118,9 @@ namespace Tanzu.Toolkit.ViewModels
 
             SetManifestIfDefaultExists();
 
-            if (TasExplorerViewModel.TasConnection != null)
+            if (_tasExplorerViewModel.TasConnection != null)
             {
-                TargetName = TasExplorerViewModel.TasConnection.DisplayText;
+                TargetName = _tasExplorerViewModel.TasConnection.DisplayText;
                 IsLoggedIn = true;
 
                 ThreadingService.StartBackgroundTask(UpdateCfOrgOptions);
@@ -204,12 +204,12 @@ namespace Tanzu.Toolkit.ViewModels
                     }
                     catch (Exception ex)
                     {
-                        _errorDialogService.DisplayErrorDialog(ManifestParsingErrorTitle, ex.Message);
+                        _errorDialogService.DisplayErrorDialog(_manifestParsingErrorTitle, ex.Message);
                     }
                 }
                 else
                 {
-                    _errorDialogService.DisplayWarningDialog(ManifestNotFoundTitle, $"'{value}' does not appear to be a valid path to a manifest.");
+                    _errorDialogService.DisplayWarningDialog(_manifestNotFoundTitle, $"'{value}' does not appear to be a valid path to a manifest.");
                 }
             }
         }
@@ -231,7 +231,7 @@ namespace Tanzu.Toolkit.ViewModels
 
             set
             {
-                if (FileService.DirectoryExists(value) || (value != null && value.EndsWith(PublishDirName)))
+                if (FileService.DirectoryExists(value) || (value != null && value.EndsWith(_publishDirName)))
                 {
                     _directoryPath = value;
                     DirectoryPathLabel = value;
@@ -242,7 +242,7 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     if (value != null)
                     {
-                        _errorDialogService.DisplayWarningDialog(DirectoryNotFoundTitle, $"'{value}' does not appear to be a valid path to a directory.");
+                        _errorDialogService.DisplayWarningDialog(_directoryNotFoundTitle, $"'{value}' does not appear to be a valid path to a directory.");
 
                         ManifestModel.Applications[0].Path = null;
                     }
@@ -507,7 +507,7 @@ namespace Tanzu.Toolkit.ViewModels
                 _publishBeforePushing = value;
                 if (_publishBeforePushing)
                 {
-                    DeploymentDirectoryPath = Path.Combine(PathToProjectRootDir, PublishDirName);
+                    DeploymentDirectoryPath = Path.Combine(PathToProjectRootDir, _publishDirName);
                 }
                 else
                 {
@@ -560,16 +560,16 @@ namespace Tanzu.Toolkit.ViewModels
 
         public void OpenLoginView(object arg)
         {
-            TasExplorerViewModel.OpenLoginView(arg);
+            _tasExplorerViewModel.OpenLoginView(arg);
 
-            if (TasExplorerViewModel.TasConnection != null)
+            if (_tasExplorerViewModel.TasConnection != null)
             {
                 CfInstanceOptions = new List<CloudFoundryInstance>
                 {
-                    TasExplorerViewModel.TasConnection.CloudFoundryInstance,
+                    _tasExplorerViewModel.TasConnection.CloudFoundryInstance,
                 };
 
-                TargetName = TasExplorerViewModel.TasConnection.DisplayText;
+                TargetName = _tasExplorerViewModel.TasConnection.DisplayText;
                 IsLoggedIn = true;
 
                 ThreadingService.StartBackgroundTask(UpdateCfOrgOptions);
@@ -581,34 +581,34 @@ namespace Tanzu.Toolkit.ViewModels
 
         public async Task UpdateCfOrgOptions()
         {
-            if (TasExplorerViewModel.TasConnection == null)
+            if (_tasExplorerViewModel.TasConnection == null)
             {
                 CfOrgOptions = new List<CloudFoundryOrganization>();
             }
             else
             {
-                var orgsResponse = await TasExplorerViewModel.TasConnection.CfClient.GetOrgsForCfInstanceAsync(TasExplorerViewModel.TasConnection.CloudFoundryInstance);
+                var orgsResponse = await _tasExplorerViewModel.TasConnection.CfClient.GetOrgsForCfInstanceAsync(_tasExplorerViewModel.TasConnection.CloudFoundryInstance);
                 if (orgsResponse.Succeeded)
                 {
                     CfOrgOptions = orgsResponse.Content;
                 }
                 else
                 {
-                    Logger.Error($"{GetOrgsFailureMsg}. {orgsResponse}");
-                    _errorDialogService.DisplayErrorDialog(GetOrgsFailureMsg, orgsResponse.Explanation);
+                    Logger.Error($"{_getOrgsFailureMsg}. {orgsResponse}");
+                    _errorDialogService.DisplayErrorDialog(_getOrgsFailureMsg, orgsResponse.Explanation);
                 }
             }
         }
 
         public async Task UpdateCfSpaceOptions()
         {
-            if (SelectedOrg == null || TasExplorerViewModel.TasConnection == null)
+            if (SelectedOrg == null || _tasExplorerViewModel.TasConnection == null)
             {
                 CfSpaceOptions = new List<CloudFoundrySpace>();
             }
             else
             {
-                var spacesResponse = await TasExplorerViewModel.TasConnection.CfClient.GetSpacesForOrgAsync(SelectedOrg);
+                var spacesResponse = await _tasExplorerViewModel.TasConnection.CfClient.GetSpacesForOrgAsync(SelectedOrg);
 
                 if (spacesResponse.Succeeded)
                 {
@@ -616,22 +616,22 @@ namespace Tanzu.Toolkit.ViewModels
                 }
                 else
                 {
-                    Logger.Error($"{GetSpacesFailureMsg}. {spacesResponse}");
-                    _errorDialogService.DisplayErrorDialog(GetSpacesFailureMsg, spacesResponse.Explanation);
+                    Logger.Error($"{_getSpacesFailureMsg}. {spacesResponse}");
+                    _errorDialogService.DisplayErrorDialog(_getSpacesFailureMsg, spacesResponse.Explanation);
                 }
             }
         }
 
         public async Task UpdateBuildpackOptions()
         {
-            if (TasExplorerViewModel.TasConnection == null)
+            if (_tasExplorerViewModel.TasConnection == null)
             {
                 BuildpackOptions = new List<BuildpackListItem>();
             }
             else
             {
                 BuildpacksLoading = true;
-                var buildpacksRespsonse = await TasExplorerViewModel.TasConnection.CfClient.GetBuildpacksAsync(TasExplorerViewModel.TasConnection.CloudFoundryInstance.ApiAddress);
+                var buildpacksRespsonse = await _tasExplorerViewModel.TasConnection.CfClient.GetBuildpacksAsync(_tasExplorerViewModel.TasConnection.CloudFoundryInstance.ApiAddress);
 
                 if (buildpacksRespsonse.Succeeded)
                 {
@@ -675,22 +675,22 @@ namespace Tanzu.Toolkit.ViewModels
                     BuildpackOptions = new List<BuildpackListItem>();
                     BuildpacksLoading = false;
 
-                    Logger.Error(GetBuildpacksFailureMsg + " {BuildpacksResponseError}", buildpacksRespsonse.Explanation);
-                    _errorDialogService.DisplayErrorDialog(GetBuildpacksFailureMsg, buildpacksRespsonse.Explanation);
+                    Logger.Error(_getBuildpacksFailureMsg + " {BuildpacksResponseError}", buildpacksRespsonse.Explanation);
+                    _errorDialogService.DisplayErrorDialog(_getBuildpacksFailureMsg, buildpacksRespsonse.Explanation);
                 }
             }
         }
 
         public async Task UpdateServiceOptions()
         {
-            if (TasExplorerViewModel.TasConnection == null)
+            if (_tasExplorerViewModel.TasConnection == null)
             {
                 ServiceOptions = new List<ServiceListItem>();
             }
             else
             {
                 ServicesLoading = true;
-                var servicesRespsonse = await TasExplorerViewModel.TasConnection.CfClient.GetServicesAsync(TasExplorerViewModel.TasConnection.CloudFoundryInstance.ApiAddress);
+                var servicesRespsonse = await _tasExplorerViewModel.TasConnection.CfClient.GetServicesAsync(_tasExplorerViewModel.TasConnection.CloudFoundryInstance.ApiAddress);
 
                 if (servicesRespsonse.Succeeded)
                 {
@@ -725,22 +725,22 @@ namespace Tanzu.Toolkit.ViewModels
                     ServiceOptions = new List<ServiceListItem>();
                     ServicesLoading = false;
 
-                    Logger.Error(GetServicesFailureMsg + " {ServicesResponseError}", servicesRespsonse.Explanation);
-                    _errorDialogService.DisplayErrorDialog(GetServicesFailureMsg, servicesRespsonse.Explanation);
+                    Logger.Error(_getServicesFailureMsg + " {ServicesResponseError}", servicesRespsonse.Explanation);
+                    _errorDialogService.DisplayErrorDialog(_getServicesFailureMsg, servicesRespsonse.Explanation);
                 }
             }
         }
 
         public async Task UpdateStackOptions()
         {
-            if (TasExplorerViewModel.TasConnection == null)
+            if (_tasExplorerViewModel.TasConnection == null)
             {
                 StackOptions = new List<string>();
             }
             else
             {
                 StacksLoading = true;
-                var stacksRespsonse = await TasExplorerViewModel.TasConnection.CfClient.GetStackNamesAsync(TasExplorerViewModel.TasConnection.CloudFoundryInstance);
+                var stacksRespsonse = await _tasExplorerViewModel.TasConnection.CfClient.GetStackNamesAsync(_tasExplorerViewModel.TasConnection.CloudFoundryInstance);
 
                 if (stacksRespsonse.Succeeded)
                 {
@@ -752,8 +752,8 @@ namespace Tanzu.Toolkit.ViewModels
                     StackOptions = new List<string>();
                     StacksLoading = false;
 
-                    Logger.Error(GetStacksFailureMsg + " {StacksResponseError}", stacksRespsonse.Explanation);
-                    _errorDialogService.DisplayErrorDialog(GetStacksFailureMsg, stacksRespsonse.Explanation);
+                    Logger.Error(_getStacksFailureMsg + " {StacksResponseError}", stacksRespsonse.Explanation);
+                    _errorDialogService.DisplayErrorDialog(_getStacksFailureMsg, stacksRespsonse.Explanation);
                 }
             }
         }
@@ -869,10 +869,10 @@ namespace Tanzu.Toolkit.ViewModels
                     _targetFrameworkMoniker,
                     runtimeIdentifier,
                     publishConfiguration,
-                    PublishDirName,
+                    _publishDirName,
                     includeDebuggingAgent: ConfigureForRemoteDebugging,
-                    StdOutCallback: OutputViewModel.AppendLine,
-                    StdErrCallback: OutputViewModel.AppendLine);
+                    StdOutCallback: _outputViewModel.AppendLine,
+                    StdErrCallback: _outputViewModel.AppendLine);
 
                 if (!publishSucceeded)
                 {
@@ -881,7 +881,7 @@ namespace Tanzu.Toolkit.ViewModels
                         $"Target framework: {_targetFrameworkMoniker}\n" +
                         $"Runtime: {runtimeIdentifier}\n" +
                         $"Configuration: {publishConfiguration}\n" +
-                        $"Output directory: {PublishDirName}\n" +
+                        $"Output directory: {_publishDirName}\n" +
                         $"\nIf this issue persists, please contact tas-vs-extension@vmware.com");
                     return;
                 }
@@ -890,30 +890,30 @@ namespace Tanzu.Toolkit.ViewModels
             try
             {
                 var manifestContents = SerializationService.SerializeCfAppManifest(ManifestModel);
-                OutputViewModel.AppendLine($"Pushing app with this configuration:\n{manifestContents}");
+                _outputViewModel.AppendLine($"Pushing app with this configuration:\n{manifestContents}");
             }
             catch (Exception ex)
             {
                 Logger?.Error("Unable to serialize manifest contents: {AppConfig}. {SerializationException}", ManifestModel, ex);
             }
 
-            var deploymentResult = await TasExplorerViewModel.TasConnection.CfClient.DeployAppAsync(
+            var deploymentResult = await _tasExplorerViewModel.TasConnection.CfClient.DeployAppAsync(
                 ManifestModel,
                 PathToProjectRootDir,
                 SelectedSpace.ParentOrg.ParentCf,
                 SelectedSpace.ParentOrg,
                 SelectedSpace,
-                stdOutCallback: OutputViewModel.AppendLine,
-                stdErrCallback: OutputViewModel.AppendLine);
+                stdOutCallback: _outputViewModel.AppendLine,
+                stdErrCallback: _outputViewModel.AppendLine);
 
             if (!deploymentResult.Succeeded)
             {
                 if (deploymentResult.FailureType == FailureType.InvalidRefreshToken)
                 {
-                    TasExplorerViewModel.AuthenticationRequired = true;
+                    _tasExplorerViewModel.AuthenticationRequired = true;
                 }
 
-                var errorTitle = $"{DeploymentErrorMsg} {AppName}.";
+                var errorTitle = $"{_deploymentErrorMsg} {AppName}.";
                 var errorMsg = deploymentResult.Explanation.Replace("Instances starting...\n", "");
 
                 Logger.Error(
@@ -1087,12 +1087,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         protected void RaisePropertyChangedEvent(string propertyName)
         {
-            var handler = PropertyChanged;
-
-            if (handler != null)
-            {
-                handler(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 
@@ -1124,12 +1119,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         protected void RaisePropertyChangedEvent(string propertyName)
         {
-            var handler = PropertyChanged;
-
-            if (handler != null)
-            {
-                handler(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

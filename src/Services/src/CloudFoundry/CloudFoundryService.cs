@@ -22,12 +22,12 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 {
     public class CloudFoundryService : ICloudFoundryService
     {
-        internal const string EmptyOutputDirMessage = "Unable to locate app files; project output directory is empty. (Has your project already been compiled?)";
-        internal const string CcApiVersionUndetectableErrTitle = "Unable to detect Cloud Controller API version.";
-        internal const string CcApiVersionUndetectableErrMsg = "Failed to detect which version of the Cloud Controller API is being run on the provided instance; some features of this extension may not work properly.";
-        internal const string LoginFailureMessage = "Login failed.";
-        internal const string CfApiSsoPromptKey = "passcode";
-        internal const string RouteDeletionErrorMsg = "Encountered error deleting certain routes";
+        internal const string _emptyOutputDirMessage = "Unable to locate app files; project output directory is empty. (Has your project already been compiled?)";
+        internal const string _ccApiVersionUndetectableErrTitle = "Unable to detect Cloud Controller API version.";
+        internal const string _ccApiVersionUndetectableErrMsg = "Failed to detect which version of the Cloud Controller API is being run on the provided instance; some features of this extension may not work properly.";
+        internal const string _loginFailureMessage = "Login failed.";
+        internal const string _cfApiSsoPromptKey = "passcode";
+        internal const string _routeDeletionErrorMsg = "Encountered error deleting certain routes";
         private readonly ICfApiClient _cfApiClient;
         private readonly ICfCliService _cfCliService;
         private readonly IFileService _fileService;
@@ -102,7 +102,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     if (authResult.FailureType != FailureType.InvalidCertificate)
                     {
-                        authResult.Explanation = LoginFailureMessage + Environment.NewLine + $"Unable to authenticate user \"{username}\"" + Environment.NewLine + authResult.CmdResult.StdErr;
+                        authResult.Explanation = _loginFailureMessage + Environment.NewLine + $"Unable to authenticate user \"{username}\"" + Environment.NewLine + authResult.CmdResult.StdErr;
                     }
 
                     return authResult;
@@ -136,9 +136,9 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 var loginServerInfo = await _cfApiClient.GetLoginServerInformation(cfApiAddress, skipSsl);
 
-                if (loginServerInfo.Prompts.ContainsKey(CfApiSsoPromptKey))
+                if (loginServerInfo.Prompts.ContainsKey(_cfApiSsoPromptKey))
                 {
-                    var ssoPasscodePrompt = loginServerInfo.Prompts[CfApiSsoPromptKey][1];
+                    var ssoPasscodePrompt = loginServerInfo.Prompts[_cfApiSsoPromptKey][1];
 
                     return new DetailedResult<string>
                     {
@@ -1150,34 +1150,34 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
             catch (Exception ex)
             {
-                _logger.Error("{RouteDeletionMessage}; {RouteDeletionException}", RouteDeletionErrorMsg, ex.Message);
+                _logger.Error("{RouteDeletionMessage}; {RouteDeletionException}", _routeDeletionErrorMsg, ex.Message);
 
                 return new DetailedResult
                 {
                     Succeeded = false,
-                    Explanation = RouteDeletionErrorMsg,
+                    Explanation = _routeDeletionErrorMsg,
                 };
             }
 
             if (allRouteDeletions.Status != TaskStatus.RanToCompletion)
             {
-                _logger.Error("Not all route deletion tasks ran to completion. {RouteDeletionMessage}", RouteDeletionErrorMsg);
+                _logger.Error("Not all route deletion tasks ran to completion. {RouteDeletionMessage}", _routeDeletionErrorMsg);
 
                 return new DetailedResult
                 {
                     Succeeded = false,
-                    Explanation = RouteDeletionErrorMsg,
+                    Explanation = _routeDeletionErrorMsg,
                 };
             }
 
             if (failed > 0)
             {
-                _logger.Error("{RouteDeletionMessage}; {NumFailedRouteDeletions} routes were not deleted", RouteDeletionErrorMsg, failed);
+                _logger.Error("{RouteDeletionMessage}; {NumFailedRouteDeletions} routes were not deleted", _routeDeletionErrorMsg, failed);
 
                 return new DetailedResult
                 {
                     Succeeded = false,
-                    Explanation = RouteDeletionErrorMsg,
+                    Explanation = _routeDeletionErrorMsg,
                 };
             }
 
@@ -1196,7 +1196,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
             if (!_fileService.DirContainsFiles(pathToDeploymentDirectory))
             {
-                return new DetailedResult(false, EmptyOutputDirMessage);
+                return new DetailedResult(false, _emptyOutputDirMessage);
             }
 
             var newManifestPath = _fileService.GetUniquePathForTempFile($"temp_manifest_{appName}");
@@ -1430,7 +1430,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             if (apiVersion == null)
             {
                 _fileService.CliVersion = 7;
-                _dialogService.DisplayErrorDialog(CcApiVersionUndetectableErrTitle, CcApiVersionUndetectableErrMsg);
+                _dialogService.DisplayErrorDialog(_ccApiVersionUndetectableErrTitle, _ccApiVersionUndetectableErrMsg);
             }
             else
             {

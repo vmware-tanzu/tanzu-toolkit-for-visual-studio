@@ -15,16 +15,16 @@ namespace Tanzu.Toolkit.VisualStudio.Views
     /// </summary>
     public partial class LoginView : DialogWindow, ILoginView
     {
-        private ILoginViewModel _viewModel;
+        private readonly ILoginViewModel _viewModel;
         public ICommand AddCloudCommand { get; }
         public ICommand SsoCommand { get; }
         public ICommand IncrementPageCommand { get; }
         public ICommand DecrementPageCommand { get; }
         public ICommand LogInWithPasscodeCommand { get; }
 
-        public Brush HyperlinkBrush { get { return (Brush)GetValue(HyperlinkBrushProperty); } set { SetValue(HyperlinkBrushProperty, value); } }
+        public Brush HyperlinkBrush { get { return (Brush)GetValue(_hyperlinkBrushProperty); } set { SetValue(_hyperlinkBrushProperty, value); } }
 
-        public static readonly DependencyProperty HyperlinkBrushProperty = DependencyProperty.Register("HyperlinkBrush", typeof(Brush), typeof(LoginView), new PropertyMetadata(default(Brush)));
+        public static readonly DependencyProperty _hyperlinkBrushProperty = DependencyProperty.Register("HyperlinkBrush", typeof(Brush), typeof(LoginView), new PropertyMetadata(default(Brush)));
 
         public LoginView()
         {
