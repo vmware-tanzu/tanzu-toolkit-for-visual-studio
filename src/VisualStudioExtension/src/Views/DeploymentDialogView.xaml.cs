@@ -53,7 +53,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         private void CfOrgOptions_ComboBox_DropDownClosed(object sender, System.EventArgs e)
         {
-            _viewModel.UpdateCfSpaceOptions();
+            var _ = _viewModel.UpdateCfSpaceOptions();
         }
 
         private void SelectManifest(object sender, RoutedEventArgs e)
