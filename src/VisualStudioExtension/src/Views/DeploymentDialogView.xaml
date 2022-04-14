@@ -56,9 +56,9 @@
             <TextBlock FontSize="24" Text="Push to Tanzu Application Service" Margin="4" Grid.Row="0" Grid.Column="1"/>
         </StackPanel>
 
-        <ScrollViewer VerticalScrollBarVisibility="Auto" CanContentScroll="True" MaxHeight="420" DockPanel.Dock="Top">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="420" DockPanel.Dock="Top">
             <StackPanel>
-                <Grid x:Name="MainContent" VerticalAlignment="Top" Margin="48,0" DockPanel.Dock="Top">
+                <Grid x:Name="MainContent" VerticalAlignment="Top" Margin="48,0">
                     <Grid.RowDefinitions>
                         <!--ROW 0-->
                         <RowDefinition Height="4*"></RowDefinition>
@@ -352,14 +352,14 @@
                     </Button>
                 </Grid>
 
-                <Grid
-                    Name="HiddenContent"
+                <Grid Name="HiddenContent"
                     Visibility="{Binding Expanded, Converter={StaticResource ExpansionConverter}}"
                     VerticalAlignment="Top"
                     Margin="48,0"
                     DockPanel.Dock="Top">
 
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
@@ -619,6 +619,88 @@
                             </Style>
                         </TextBlock.Style>
                     </TextBlock>
+
+                    <!--HIDDEN GRID ROW 6-->
+                    <TextBlock VerticalAlignment="Top"
+                        Margin="0,6,0,0"
+                        Grid.Row="6"
+                        Grid.Column="0"
+                        Text="Services"/>
+
+                    <StackPanel Grid.Row="6" Grid.Column="1">
+
+                        <Grid Grid.Row="2" Grid.Column="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"></RowDefinition>
+                            </Grid.RowDefinitions>
+
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="7*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="{Binding SelectedServices, Converter={StaticResource SelectedBuildpacksStringListConverter}}"
+                                ToolTip="{Binding SelectedServices, Converter={StaticResource SelectedBuildpacksStringListConverter}}"
+                                Grid.Column="0"
+                                MaxWidth="350"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                IsEnabled="{Binding IsLoggedIn}"/>
+
+                            <Button Grid.Column="1"
+                                MinHeight="0"
+                                MinWidth="0"
+                                Margin="4"
+                                HorizontalAlignment="Right"
+                                IsEnabled="{Binding IsLoggedIn}"
+                                Command="{Binding ElementName=DeploymentDialogViewElement, Path=ClearBuildpackSelectionCommand}"
+                                VerticalAlignment="Center">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <ContentPresenter />
+                                    </ControlTemplate>
+                                </Button.Template>
+                                <TextBlock Foreground="{Binding ElementName=DeploymentDialogViewElement, Path=HyperlinkBrush}"
+                                    Text="Clear"
+                                    FontStyle="Italic"/>
+                            </Button>
+                        </Grid>
+
+                        <StackPanel Visibility="{Binding IsLoggedIn, Converter={StaticResource Visibility}}">
+                            <TextBlock Text="Loading Services..."
+                                Foreground="Gray"
+                                Grid.Row="6"
+                                Grid.Column="1"
+                                Margin="4,0,0,4"
+                                FontStyle="Italic"
+                                Visibility="{Binding ServicesLoading, Converter={StaticResource Visibility}}"/>
+
+                            <ListView ItemsSource="{Binding ServiceOptions}"
+                                Grid.Row="6"
+                                Grid.Column="1"
+                                Margin="0,4"
+                                MaxHeight="128"
+                                Visibility="{Binding ServicesLoading, Converter={StaticResource InverseVisibility}}"
+                                SelectionMode="Multiple"
+                                IsEnabled="{Binding IsLoggedIn}">
+
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="Focusable" Value="false"/>
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <CheckBox Content="{Binding Name}"
+                                            IsChecked="{Binding IsSelected}"
+                                            Checked="CheckBox_Checked"
+                                            Unchecked="CheckBox_Unchecked"/>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </StackPanel>
+                    </StackPanel>
 
                 </Grid>
             </StackPanel>

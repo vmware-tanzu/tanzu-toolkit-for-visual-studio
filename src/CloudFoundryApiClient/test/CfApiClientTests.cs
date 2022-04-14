@@ -557,6 +557,60 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         }
 
         [TestMethod]
+        [TestCategory("ListServices")]
+        public async Task ListServices_ReturnsListOfServices_WhenResponseContainsMultiplePages()
+        {
+            var expectedPath = CfApiClient.ListServicesPath;
+            var page2Identifier = "?page=2&per_page=50";
+            var page3Identifier = "?page=3&per_page=50";
+
+            var servicesRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
+                    .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                    .Respond("application/json", _fakeServicesJsonResponsePage1);
+
+            var servicesPage2Request = _mockHttp.Expect(_fakeCfApiAddress + expectedPath + page2Identifier)
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond("application/json", _fakeServicesJsonResponsePage2);
+
+            var servicesPage3Request = _mockHttp.Expect(_fakeCfApiAddress + expectedPath + page3Identifier)
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond("application/json", _fakeServicesJsonResponsePage3);
+
+            var result = await _sut.ListServices(_fakeCfApiAddress, _fakeAccessToken);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(125, result.Count);
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(servicesRequest));
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(servicesPage2Request));
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(servicesPage3Request));
+        }
+
+        [TestMethod]
+        [TestCategory("ListServices")]
+        public async Task ListServices_ThrowsException_WhenStatusCodeIsNotASuccess()
+        {
+            var expectedPath = CfApiClient.ListServicesPath;
+
+            var servicesRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond(HttpStatusCode.Unauthorized);
+
+            Exception thrownException = null;
+            try
+            {
+                var result = await _sut.ListServices(_fakeCfApiAddress, _fakeAccessToken);
+            }
+            catch (Exception ex)
+            {
+                thrownException = ex;
+            }
+
+            Assert.IsNotNull(thrownException);
+            Assert.IsTrue(thrownException.Message.Contains(CfApiClient.ListServicesPath));
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(servicesRequest));
+        }
+
+        [TestMethod]
         [TestCategory("GetLoginServerInformation")]
         public async Task GetLoginServerInformation_ReturnsLoginInfoResponse_WhenRequestsSucceed()
         {

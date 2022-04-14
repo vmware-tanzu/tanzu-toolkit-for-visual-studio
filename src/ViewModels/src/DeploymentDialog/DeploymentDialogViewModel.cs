@@ -27,6 +27,7 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string GetOrgsFailureMsg = "Unable to fetch orgs.";
         internal const string GetSpacesFailureMsg = "Unable to fetch spaces.";
         internal const string GetBuildpacksFailureMsg = "Unable to fetch buildpacks.";
+        internal const string GetServicesFailureMsg = "Unable to fetch services.";
         internal const string GetStacksFailureMsg = "Unable to fetch stacks.";
         internal const string SingleLoginErrorTitle = "Unable to add more TAS connections.";
         internal const string SingleLoginErrorMessage1 = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
@@ -58,12 +59,15 @@ namespace Tanzu.Toolkit.ViewModels
         private bool _isLoggedIn;
         private string _selectedStack;
         private ObservableCollection<string> _selectedBuildpacks;
+        private ObservableCollection<string> _selectedServices;
         private List<string> _stackOptions;
         private List<BuildpackListItem> _buildpackOptions;
+        private List<ServiceListItem> _serviceOptions;
         private bool _expanded;
         private string _expansionButtonText;
         private AppManifest _appManifest;
         private bool _buildpacksLoading = false;
+        private bool _servicesLoading = false;
         private bool _stacksLoading = false;
         private bool _publishBeforePushing;
         private bool _configureForRemoteDebugging;
@@ -82,6 +86,7 @@ namespace Tanzu.Toolkit.ViewModels
             DeploymentInProgress = false;
             PathToProjectRootDir = directoryOfProjectToDeploy;
             SelectedBuildpacks = new ObservableCollection<string>();
+            SelectedServices = new ObservableCollection<string>();
 
             _targetFrameworkMoniker = targetFrameworkMoniker;
             if (_targetFrameworkMoniker.StartsWith(FullFrameworkTFM))
@@ -93,6 +98,7 @@ namespace Tanzu.Toolkit.ViewModels
             CfOrgOptions = new List<CloudFoundryOrganization>();
             CfSpaceOptions = new List<CloudFoundrySpace>();
             BuildpackOptions = new List<BuildpackListItem>();
+            ServiceOptions = new List<ServiceListItem>();
             StackOptions = new List<string>();
             DeploymentDirectoryPath = null;
 
@@ -105,6 +111,7 @@ namespace Tanzu.Toolkit.ViewModels
                     {
                         Name = projectName,
                         Buildpacks = new List<string>(),
+                        Services = new List<string>(),
                     }
                 }
             };
@@ -118,6 +125,7 @@ namespace Tanzu.Toolkit.ViewModels
 
                 ThreadingService.StartBackgroundTask(UpdateCfOrgOptions);
                 ThreadingService.StartBackgroundTask(UpdateBuildpackOptions);
+                ThreadingService.StartBackgroundTask(UpdateServiceOptions);
                 ThreadingService.StartBackgroundTask(UpdateStackOptions);
             }
 
@@ -315,6 +323,17 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
+        public ObservableCollection<string> SelectedServices
+        {
+            get => _selectedServices;
+
+            set
+            {
+                _selectedServices = value;
+                RaisePropertyChangedEvent("SelectedServices");
+            }
+        }
+
         public CloudFoundryOrganization SelectedOrg
         {
             get => _selectedOrg;
@@ -404,6 +423,18 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
+        public List<ServiceListItem> ServiceOptions
+        {
+            get => _serviceOptions;
+
+            set
+            {
+                _serviceOptions = value;
+
+                RaisePropertyChangedEvent("ServiceOptions");
+            }
+        }
+
         public bool DeploymentInProgress { get; internal set; }
 
         public string TargetName
@@ -442,6 +473,17 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 _buildpacksLoading = value;
                 RaisePropertyChangedEvent("BuildpacksLoading");
+            }
+        }
+
+        public bool ServicesLoading
+        {
+            get { return _servicesLoading; }
+
+            set
+            {
+                _servicesLoading = value;
+                RaisePropertyChangedEvent("ServicesLoading");
             }
         }
 
@@ -532,6 +574,7 @@ namespace Tanzu.Toolkit.ViewModels
 
                 ThreadingService.StartBackgroundTask(UpdateCfOrgOptions);
                 ThreadingService.StartBackgroundTask(UpdateBuildpackOptions);
+                ThreadingService.StartBackgroundTask(UpdateServiceOptions);
                 ThreadingService.StartBackgroundTask(UpdateStackOptions);
             }
         }
@@ -638,6 +681,56 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
+        public async Task UpdateServiceOptions()
+        {
+            if (TasExplorerViewModel.TasConnection == null)
+            {
+                ServiceOptions = new List<ServiceListItem>();
+            }
+            else
+            {
+                ServicesLoading = true;
+                var servicesRespsonse = await TasExplorerViewModel.TasConnection.CfClient.GetServicesAsync(TasExplorerViewModel.TasConnection.CloudFoundryInstance.ApiAddress);
+
+                if (servicesRespsonse.Succeeded)
+                {
+                    var svOtps = new List<ServiceListItem>();
+
+                    foreach (var sv in servicesRespsonse.Content)
+                    {
+                        var nameSpecifiedInManifest = ManifestModel.Applications[0].Services.Contains(sv.Name);
+                        var nameAlreadyExistsInOptions = svOtps.Any(b => b.Name == sv.Name);
+
+                        if (nameAlreadyExistsInOptions) // don't add duplicate bp names, just add to list of viable stacks
+                        {
+                            var existingSv = svOtps.FirstOrDefault(b => b.Name == sv.Name);
+                        }
+                        else
+                        {
+                            var newSv = new ServiceListItem
+                            {
+                                Name = sv.Name,
+                                IsSelected = nameSpecifiedInManifest,
+                            };
+
+                            svOtps.Add(newSv);
+                        }
+                    }
+
+                    ServiceOptions = svOtps;
+                    ServicesLoading = false;
+                }
+                else
+                {
+                    ServiceOptions = new List<ServiceListItem>();
+                    ServicesLoading = false;
+
+                    Logger.Error(GetServicesFailureMsg + " {ServicesResponseError}", servicesRespsonse.Explanation);
+                    _errorDialogService.DisplayErrorDialog(GetServicesFailureMsg, servicesRespsonse.Explanation);
+                }
+            }
+        }
+
         public async Task UpdateStackOptions()
         {
             if (TasExplorerViewModel.TasConnection == null)
@@ -707,6 +800,40 @@ namespace Tanzu.Toolkit.ViewModels
         public void ClearSelectedManifest(object arg = null)
         {
             ManifestPath = null;
+        }
+
+        public void AddToSelectedServices(object arg)
+        {
+            if (arg is string serviceName && !SelectedServices.Contains(serviceName))
+            {
+                SelectedServices.Add(serviceName);
+                RaisePropertyChangedEvent("SelectedServices");
+
+                ManifestModel.Applications[0].Services = SelectedServices.ToList();
+            }
+        }
+
+        public void RemoveFromSelectedServices(object arg)
+        {
+            if (arg is string serviceName)
+            {
+                SelectedServices.Remove(serviceName);
+                RaisePropertyChangedEvent("SelectedServices");
+
+                ManifestModel.Applications[0].Services = SelectedServices.ToList();
+            }
+        }
+
+        public void ClearSelectedServices(object arg = null)
+        {
+            SelectedServices.Clear();
+
+            foreach (var svItem in ServiceOptions)
+            {
+                svItem.IsSelected = false;
+            }
+
+            RaisePropertyChangedEvent("SelectedServices");
         }
 
         public void WriteManifestToFile(string path)
@@ -827,6 +954,7 @@ namespace Tanzu.Toolkit.ViewModels
             SetAppNameFromManifest(manifest);
             SetStackFromManifest(manifest);
             SetBuildpacksFromManifest(manifest);
+            SetServicesFromManifest(manifest);
             SetStartCommandFromManifest(manifest);
             SetPathFromManifest(manifest);
         }
@@ -870,6 +998,31 @@ namespace Tanzu.Toolkit.ViewModels
                 }
             }
         }
+
+        private void SetServicesFromManifest(AppManifest appManifest)
+        {
+            var appConfig = appManifest.Applications[0];
+
+            var svs = appConfig.Services;
+
+            if (svs != null)
+            {
+                ClearSelectedServices();
+
+                foreach (var svName in svs)
+                {
+                    AddToSelectedServices(svName);
+
+                    // mark corresponding service option as selected
+                    var existingSvOption = ServiceOptions.FirstOrDefault(b => b.Name == svName);
+                    if (existingSvOption != null)
+                    {
+                        existingSvOption.IsSelected = true;
+                    }
+                }
+            }
+        }
+
 
         private void SetStartCommandFromManifest(AppManifest appManifest)
         {
@@ -930,6 +1083,43 @@ namespace Tanzu.Toolkit.ViewModels
         public void EvalutateStackCompatibility(string stackName)
         {
             CompatibleWithStack = ValidStacks.Contains(stackName) || stackName == null;
+        }
+
+        protected void RaisePropertyChangedEvent(string propertyName)
+        {
+            var handler = PropertyChanged;
+
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+
+    public class ServiceListItem : INotifyPropertyChanged
+    {
+        private string _name;
+        private bool _isSelected;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public string Name
+        {
+            get => _name;
+            set
+            {
+                _name = value;
+            }
+        }
+
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set
+            {
+                _isSelected = value;
+                RaisePropertyChangedEvent("IsSelected");
+            }
         }
 
         protected void RaisePropertyChangedEvent(string propertyName)

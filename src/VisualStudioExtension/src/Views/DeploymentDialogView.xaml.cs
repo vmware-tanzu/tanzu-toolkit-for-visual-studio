@@ -20,6 +20,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         public ICommand ToggleAdvancedOptionsCommand { get; }
         public ICommand ClearBuildpackSelectionCommand { get; }
         public DelegatingCommand ClearManifestSelectionCommand { get; }
+        public ICommand ClearServiceSelectionCommand { get; }
         public string PlaceholderText { get; set; }
 
         public Brush HyperlinkBrush { get { return (Brush)GetValue(HyperlinkBrushProperty); } set { SetValue(HyperlinkBrushProperty, value); } }
@@ -39,6 +40,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             UploadAppCommand = new DelegatingCommand(viewModel.DeployApp, viewModel.CanDeployApp);
             OpenLoginDialogCommand = new DelegatingCommand(viewModel.OpenLoginView, viewModel.CanOpenLoginView);
             ToggleAdvancedOptionsCommand = new DelegatingCommand(viewModel.ToggleAdvancedOptions, viewModel.CanToggleAdvancedOptions);
+            ClearServiceSelectionCommand = new DelegatingCommand(viewModel.ClearSelectedServices, alwaysTrue);
             ClearBuildpackSelectionCommand = new DelegatingCommand(viewModel.ClearSelectedBuildpacks, alwaysTrue);
             ClearManifestSelectionCommand = new DelegatingCommand(viewModel.ClearSelectedManifest, alwaysTrue);
 

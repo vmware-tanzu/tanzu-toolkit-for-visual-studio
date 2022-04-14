@@ -118,6 +118,27 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             totalPages: 3,
             resultsPerPage: 50));
 
+        internal static readonly string _fakeServicesJsonResponsePage1 = JsonSerializer.Serialize(new FakeServicesResponse(
+            apiAddress: _fakeCfApiAddress,
+            pageNum: 1,
+            totalResults: 125,
+            totalPages: 3,
+            resultsPerPage: 50));
+
+        internal static readonly string _fakeServicesJsonResponsePage2 = JsonSerializer.Serialize(new FakeServicesResponse(
+            apiAddress: _fakeCfApiAddress,
+            pageNum: 2,
+            totalResults: 125,
+            totalPages: 3,
+            resultsPerPage: 50));
+
+        internal static readonly string _fakeServicesJsonResponsePage3 = JsonSerializer.Serialize(new FakeServicesResponse(
+            apiAddress: _fakeCfApiAddress,
+            pageNum: 3,
+            totalResults: 125,
+            totalPages: 3,
+            resultsPerPage: 50));
+
         internal static readonly string _fakeStacksJsonResponsePage1 = JsonSerializer.Serialize(new FakeStacksResponse(
             apiAddress: _fakeCfApiAddress,
             pageNum: 1,
@@ -421,6 +442,59 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             }
 
             Buildpacks = buildpacks;
+        }
+    }
+
+    internal class FakeServicesResponse : ServicesResponse
+    {
+        public FakeServicesResponse(string apiAddress, int pageNum, int totalResults, int totalPages, int resultsPerPage)
+        {
+            var isFirstPage = pageNum == 1;
+            var isLastPage = pageNum == totalPages;
+
+            var firstHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListServicesPath}?page=1&per_page={resultsPerPage}" };
+            var lastHref = new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListServicesPath}?page={totalPages}&per_page={resultsPerPage}" };
+            var nextHref = isLastPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListServicesPath}?page={pageNum + 1}&per_page={resultsPerPage}" };
+            var previousHref = isFirstPage ? null : new HypertextReference() { Href = $"{apiAddress}{CfApiClient.ListServicesPath}?page={pageNum - 1}&per_page={resultsPerPage}" };
+
+            Pagination = new Pagination
+            {
+                Total_results = totalResults,
+                Total_pages = totalPages,
+                First = firstHref,
+                Last = lastHref,
+                Next = nextHref,
+                Previous = previousHref,
+            };
+
+            Service[] services;
+            if (isLastPage)
+            {
+                var numResourcesInLastPage = totalResults % resultsPerPage;
+                services = new Service[numResourcesInLastPage];
+
+                for (var i = 0; i < numResourcesInLastPage; i++)
+                {
+                    services[i] = new Service
+                    {
+                        Name = $"fakeService{i + 1}",
+                    };
+                }
+            }
+            else
+            {
+                services = new Service[resultsPerPage];
+
+                for (var i = 0; i < resultsPerPage; i++)
+                {
+                    services[i] = new Service
+                    {
+                        Name = $"fakeService{i + 1}",
+                    };
+                }
+            }
+
+            Services = services;
         }
     }
 
