@@ -388,7 +388,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             {
                 var msg = "Encountered unexpected debug strategy";
                 Logger.Error(msg);
-                ErrorService.DisplayErrorDialog(string.Empty, msg);
+                ErrorService.DisplayErrorDialog(string.Empty, msg + "\nThis should not happen. If you see this message, please let us know: tas-vs-extension@vmware.com");
                 Close();
             }
         }

@@ -234,7 +234,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
                 else
                 {
-                    _logger.Error("{Error}. See logs for more details: toolkit-diagnostics.log", originalException.Message);
+                    _logger.Error("GetOrgsForCfInstanceAsync encountered exception: {GetOrgsForCfInstanceAsyncException}", originalException);
 
                     return new DetailedResult<List<CloudFoundryOrganization>>()
                     {
@@ -333,7 +333,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
                 else
                 {
-                    _logger.Error("{Error}. See logs for more details: toolkit-diagnostics.log", originalException.Message);
+                    _logger.Error("GetSpacesForOrgAsync encountered exception: {GetSpacesForOrgAsyncException}", originalException);
 
                     return new DetailedResult<List<CloudFoundrySpace>>()
                     {
@@ -432,7 +432,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
                 else
                 {
-                    _logger.Error("{Error}. See logs for more details: toolkit-diagnostics.log", originalException.Message);
+                    _logger.Error("GetSpacesForOrgAsync encountered exception: {GetSpacesForOrgAsyncException}", originalException);
 
                     return new DetailedResult<List<CloudFoundryApp>>()
                     {
@@ -519,7 +519,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
                 else
                 {
-                    _logger.Error("{Error}. See logs for more details: toolkit-diagnostics.log", originalException.Message);
+                    _logger.Error("GetSpacesForOrgAsync encountered exception: {GetSpacesForOrgAsyncException}", originalException);
 
                     return new DetailedResult<List<CloudFoundryApp>>()
                     {
@@ -601,7 +601,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
                 else
                 {
-                    _logger.Error("{Error}. See logs for more details: toolkit-diagnostics.log", originalException.Message);
+                    _logger.Error("GetSpacesForOrgAsync encountered exception: {GetSpacesForOrgAsyncException}", originalException);
 
                     return new DetailedResult<List<CfBuildpack>>()
                     {
@@ -684,7 +684,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
                 else
                 {
-                    _logger.Error("{Error}. See logs for more details: toolkit-diagnostics.log", originalException.Message);
+                    _logger.Error("GetServicesAsync encountered exception: {GetServicesAsyncException}", originalException);
 
                     return new DetailedResult<List<CfService>>()
                     {
@@ -779,7 +779,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
                 else
                 {
-                    _logger.Error("{Error}. See logs for more details: toolkit-diagnostics.log", originalException.Message);
+                    _logger.Error("StopAppAsync encountered exception: {StopAppAsyncException}", originalException);
 
                     return new DetailedResult
                     {
@@ -871,7 +871,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
                 else
                 {
-                    _logger.Error("{Error}. See logs for more details: toolkit-diagnostics.log", originalException.Message);
+                    _logger.Error("StartAppAsync encountered exception: {StartAppAsyncException}", originalException);
 
                     return new DetailedResult
                     {
@@ -990,7 +990,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
                 else
                 {
-                    _logger.Error("{Error}. See logs for more details: toolkit-diagnostics.log", originalException.Message);
+                    _logger.Error("StartAppAsync encountered exception: {StartAppAsyncException}", originalException);
 
                     return new DetailedResult
                     {
@@ -1056,7 +1056,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
                 else
                 {
-                    _logger.Error("{Error}. See logs for more details: toolkit-diagnostics.log", originalException.Message);
+                    _logger.Error("GetRoutesForAppAsync encountered exception: {GetRoutesForAppAsyncException}", originalException);
 
                     return new DetailedResult<List<CloudFoundryRoute>>()
                     {
@@ -1368,7 +1368,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
                 else
                 {
-                    _logger.Error("{Error}. See logs for more details: toolkit-diagnostics.log", originalException.Message);
+                    _logger.Error("GetStackNamesAsync encountered exception: {GetStackNamesAsyncException}", originalException);
 
                     return new DetailedResult<List<string>>()
                     {

@@ -161,7 +161,7 @@ namespace Tanzu.Toolkit.ViewModels
         protected internal virtual async Task UpdateAllChildren()
         {
             // await to suppress aync warning
-            await Task.Run(() => Logger.Error("TreeViewItemViewModel.UpdateChildrenRecursive was called; this method should only ever be run by classes that inherit from TreeViewItemViewModel."));
+            await Task.Run(() => Logger.Error("TreeViewItemViewModel.UpdateAllChildren was called; this method should only ever be run by classes that inherit from TreeViewItemViewModel."));
         }
     }
 }
