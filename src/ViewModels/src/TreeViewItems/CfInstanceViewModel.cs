@@ -44,8 +44,6 @@ namespace Tanzu.Toolkit.ViewModels
 
         public CloudFoundryInstance CloudFoundryInstance { get; }
 
-        public ICloudFoundryService CfClient { get; private set; }
-
         protected internal override async Task UpdateAllChildren()
         {
             if (IsExpanded && !IsLoading)
