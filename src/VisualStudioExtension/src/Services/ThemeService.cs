@@ -2,7 +2,6 @@
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using System;
-using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using Tanzu.Toolkit.VisualStudio.Views;

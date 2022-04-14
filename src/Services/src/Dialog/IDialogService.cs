@@ -1,6 +1,4 @@
-﻿using Tanzu.Toolkit.Services.Dialog;
-
-namespace Tanzu.Toolkit.Services.Dialog
+﻿namespace Tanzu.Toolkit.Services.Dialog
 {
     public interface IDialogService
     {

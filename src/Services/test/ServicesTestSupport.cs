@@ -70,7 +70,7 @@ namespace Tanzu.Toolkit.Services.Tests
         protected static readonly bool _skipSsl = true;
         protected static readonly string _fakeValidAccessToken = "valid token";
         protected static readonly string _fakeProjectPath = "this\\is\\a\\fake\\path";
-        protected static readonly string _fakeManifestPath = "this\\is\\a\\fake\\path"; 
+        protected static readonly string _fakeManifestPath = "this\\is\\a\\fake\\path";
         protected static readonly Action<string> _fakeOutCallback = content => { };
         protected static readonly Action<string> _fakeErrCallback = content => { };
 
