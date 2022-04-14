@@ -54,7 +54,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services
             }
             catch (Exception ex)
             {
-                _logger.Error(ex.Message);
+                _logger.Error("DataPersistenceService caught exception while trying to read string data: {DataPersistenceReadException}", ex);
 
                 return null;
             }
@@ -82,7 +82,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services
             }
             catch (Exception ex)
             {
-                _logger.Error(ex.Message);
+                _logger.Error("DataPersistenceService caught exception while trying to write string data: {DataPersistenceWriteException}", ex);
 
                 return false;
             }
@@ -102,7 +102,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services
             }
             catch (Exception ex)
             {
-                _logger?.Error("DataPersistenceService caught exception while trying to determine if prior credentials were saved: {Exception}", ex);
+                _logger?.Error("DataPersistenceService caught exception while trying to determine if prior credentials were saved: {DataPersistenceCredsQueryException}", ex);
                 return false;
             }
         }

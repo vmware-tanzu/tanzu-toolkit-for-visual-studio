@@ -36,6 +36,8 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         private Mock<ILoggingService> _mockLoggingService;
         private Mock<ILogger> _mockLogger;
 
+        private Exception _fakeException = new Exception("junk");
+
         [TestInitialize]
         public void TestInit()
         {
@@ -374,26 +376,24 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("GetOrgs")]
         public async Task GetOrgsForCfInstanceAsync_ReturnsFailedResult_WhenListOrgsThrowsException_AndThereAreZeroRetriesLeft()
         {
-            var fakeExceptionMsg = "junk";
-
             _mockCfCliService.Setup(m => m.
                 GetOAuthToken())
                     .Returns(_fakeValidAccessToken);
 
             _mockCfApiClient.Setup(m => m.
                 ListOrgs(FakeCfInstance.ApiAddress, _fakeValidAccessToken))
-                    .Throws(new Exception(fakeExceptionMsg));
+                    .Throws(_fakeException);
 
             var result = await _sut.GetOrgsForCfInstanceAsync(FakeCfInstance, retryAmount: 0);
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
             Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), _fakeException), Times.Once);
         }
 
         [TestMethod]
@@ -549,52 +549,48 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("GetSpaces")]
         public async Task GetSpacesForOrgAsync_ReturnsFailedResult_WhenListSpacesForOrgThrowsException_AndThereAreZeroRetriesLeft()
         {
-            var fakeExceptionMsg = "junk";
-
             _mockCfCliService.Setup(m => m.
                 GetOAuthToken())
                     .Returns(_fakeValidAccessToken);
 
             _mockCfApiClient.Setup(m => m.
                 ListSpacesForOrg(FakeOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeOrg.OrgId))
-                    .Throws(new Exception(fakeExceptionMsg));
+                    .Throws(_fakeException);
 
             var result = await _sut.GetSpacesForOrgAsync(FakeOrg, retryAmount: 0);
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
             Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), _fakeException), Times.Once);
         }
 
         [TestMethod]
         [TestCategory("GetSpaces")]
         public async Task GetSpacesForOrgAsync_ReturnsFailedResult_WhenListSpacesForOrgThrowsException()
         {
-            var fakeExceptionMsg = "junk";
-
             _mockCfCliService.Setup(m => m.
                 GetOAuthToken())
                     .Returns(_fakeValidAccessToken);
 
             _mockCfApiClient.Setup(m => m.
                 ListSpacesForOrg(FakeOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeOrg.OrgId))
-                    .Throws(new Exception(fakeExceptionMsg));
+                    .Throws(_fakeException);
 
             var result = await _sut.GetSpacesForOrgAsync(FakeOrg);
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
             Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), _fakeException), Times.Once);
         }
 
         [TestMethod]
@@ -770,52 +766,48 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("GetApps")]
         public async Task GetAppsForSpaceAsync_ReturnsFailedResult_WhenListAppsForSpaceThrowsException_AndThereAreZeroRetriesLeft()
         {
-            var fakeExceptionMsg = "junk";
-
             _mockCfCliService.Setup(m => m.
                 GetOAuthToken())
                     .Returns(_fakeValidAccessToken);
 
             _mockCfApiClient.Setup(m => m.
                 ListAppsForSpace(FakeSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeSpace.SpaceId))
-                    .Throws(new Exception(fakeExceptionMsg));
+                    .Throws(_fakeException);
 
             var result = await _sut.GetAppsForSpaceAsync(FakeSpace, retryAmount: 0);
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
             Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), _fakeException), Times.Once);
         }
 
         [TestMethod]
         [TestCategory("GetApps")]
         public async Task GetAppsForSpaceAsync_ReturnsFailedResult_WhenListAppsForSpaceThrowsException()
         {
-            var fakeExceptionMsg = "junk";
-
             _mockCfCliService.Setup(m => m.
                 GetOAuthToken())
                     .Returns(_fakeValidAccessToken);
 
             _mockCfApiClient.Setup(m => m.
                 ListAppsForSpace(FakeSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeSpace.SpaceId))
-                    .Throws(new Exception(fakeExceptionMsg));
+                    .Throws(_fakeException);
 
             var result = await _sut.GetAppsForSpaceAsync(FakeSpace);
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
             Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), _fakeException), Times.Once);
         }
 
         [TestMethod]
@@ -1030,26 +1022,24 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("GetBuildpacks")]
         public async Task GetBuildpacksAsync_ReturnsFailedResult_WhenListBuildpacksThrowsException()
         {
-            var fakeExceptionMsg = "junk";
-
             _mockCfCliService.Setup(m => m.
                 GetOAuthToken())
                     .Returns(_fakeValidAccessToken);
 
             _mockCfApiClient.Setup(m => m.
                 ListBuildpacks(_fakeValidTarget, _fakeValidAccessToken))
-                    .Throws(new Exception(fakeExceptionMsg));
+                    .Throws(_fakeException);
 
             var result = await _sut.GetBuildpacksAsync(_fakeValidTarget);
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
             Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), _fakeException), Times.Once);
         }
 
         [TestMethod]
@@ -1125,26 +1115,24 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("GetBuildpacks")]
         public async Task GetBuildpacksAsync_ReturnsFailedResult_WhenListBuildpacksThrowsException_AndThereAreZeroRetriesLeft()
         {
-            var fakeExceptionMsg = "junk";
-
             _mockCfCliService.Setup(m => m.
                 GetOAuthToken())
                     .Returns(_fakeValidAccessToken);
 
             _mockCfApiClient.Setup(m => m.
                 ListBuildpacks(_fakeValidTarget, _fakeValidAccessToken))
-                    .Throws(new Exception(fakeExceptionMsg));
+                    .Throws(_fakeException);
 
             var result = await _sut.GetBuildpacksAsync(_fakeValidTarget, retryAmount: 0);
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
             Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), _fakeException), Times.Once);
         }
 
         [TestMethod]
@@ -1239,26 +1227,24 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("GetServices")]
         public async Task GetServicesAsync_ReturnsFailedResult_WhenListServicesThrowsException()
         {
-            var fakeExceptionMsg = "junk";
-
             _mockCfCliService.Setup(m => m.
                 GetOAuthToken())
                     .Returns(_fakeValidAccessToken);
 
             _mockCfApiClient.Setup(m => m.
                 ListServices(_fakeValidTarget, _fakeValidAccessToken))
-                    .Throws(new Exception(fakeExceptionMsg));
+                    .Throws(_fakeException);
 
             var result = await _sut.GetServicesAsync(_fakeValidTarget);
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
             Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), _fakeException), Times.Once);
         }
 
         [TestMethod]
@@ -1328,26 +1314,24 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("GetServices")]
         public async Task GetServicesAsync_ReturnsFailedResult_WhenListServicesThrowsException_AndThereAreZeroRetriesLeft()
         {
-            var fakeExceptionMsg = "junk";
-
             _mockCfCliService.Setup(m => m.
                 GetOAuthToken())
                     .Returns(_fakeValidAccessToken);
 
             _mockCfApiClient.Setup(m => m.
                 ListServices(_fakeValidTarget, _fakeValidAccessToken))
-                    .Throws(new Exception(fakeExceptionMsg));
+                    .Throws(_fakeException);
 
             var result = await _sut.GetServicesAsync(_fakeValidTarget, retryAmount: 0);
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
             Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), _fakeException), Times.Once);
         }
 
         [TestMethod]
@@ -1417,7 +1401,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("StopApp")]
         public async Task StopAppAsync_ReturnsFailedResult_WhenStopAppWithGuidThrowsException()
         {
-            var fakeExceptionMsg = "junk";
             var appName = FakeApp.AppName;
 
             _mockCfCliService.Setup(m => m.
@@ -1426,16 +1409,16 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             _mockCfApiClient.Setup(m => m.
                 StopAppWithGuid(FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
-                    .Throws(new Exception(fakeExceptionMsg));
+                    .Throws(_fakeException);
 
             var result = await _sut.StopAppAsync(FakeApp);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
             Assert.IsNull(result.CmdResult);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), _fakeException), Times.Once);
         }
 
         [TestMethod]
@@ -1473,24 +1456,22 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("StopApp")]
         public async Task StopAppAsync_ReturnsFailedResult_WhenStopAppWithGuidThrowsException_AndThereAreZeroRetriesLeft()
         {
-            var fakeExceptionMsg = "junk";
-
             _mockCfCliService.Setup(m => m.
                 GetOAuthToken())
                     .Returns(_fakeValidAccessToken);
 
             _mockCfApiClient.Setup(m => m.
                 StopAppWithGuid(FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
-                    .Throws(new Exception(fakeExceptionMsg));
+                    .Throws(_fakeException);
 
             var result = await _sut.StopAppAsync(FakeApp, retryAmount: 0);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
             Assert.IsNull(result.CmdResult);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), _fakeException), Times.Once);
         }
 
         [TestMethod]
@@ -1556,24 +1537,22 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("StartApp")]
         public async Task StartAppAsync_ReturnsFailedResult_WhenStartAppWithGuidThrowsException()
         {
-            var fakeExceptionMsg = "junk";
-
             _mockCfCliService.Setup(m => m.
                 GetOAuthToken())
                     .Returns(_fakeValidAccessToken);
 
             _mockCfApiClient.Setup(m => m.
                 StartAppWithGuid(FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
-                    .Throws(new Exception(fakeExceptionMsg));
+                    .Throws(_fakeException);
 
             var result = await _sut.StartAppAsync(FakeApp);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
             Assert.IsNull(result.CmdResult);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), _fakeException), Times.Once);
         }
 
         [TestMethod]
@@ -1611,24 +1590,22 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("StartApp")]
         public async Task StartAppAsync_ReturnsFailedResult_WhenStartAppWithGuidThrowsException_AndThereAreZeroRetriesLeft()
         {
-            var fakeExceptionMsg = "junk";
-
             _mockCfCliService.Setup(m => m.
                 GetOAuthToken())
                     .Returns(_fakeValidAccessToken);
 
             _mockCfApiClient.Setup(m => m.
                 StartAppWithGuid(FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
-                    .Throws(new Exception(fakeExceptionMsg));
+                    .Throws(_fakeException);
 
             var result = await _sut.StartAppAsync(FakeApp, retryAmount: 0);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
             Assert.IsNull(result.CmdResult);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), _fakeException), Times.Once);
         }
 
         [TestMethod]
@@ -1725,24 +1702,22 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("DeleteApp")]
         public async Task DeleteAppAsync_ReturnsFailedResult_WhenDeleteAppWithGuidThrowsException_AndThereAreZeroRetriesLeft()
         {
-            var fakeExceptionMsg = "junk";
-
             _mockCfCliService.Setup(m => m.
                 GetOAuthToken())
                     .Returns(_fakeValidAccessToken);
 
             _mockCfApiClient.Setup(m => m.
                 DeleteAppWithGuid(FakeApp.ParentSpace.ParentOrg.ParentCf.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
-                    .Throws(new Exception(fakeExceptionMsg));
+                    .Throws(_fakeException);
 
             var result = await _sut.DeleteAppAsync(FakeApp, retryAmount: 0);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
             Assert.IsNull(result.CmdResult);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), _fakeException), Times.Once);
         }
 
         [TestMethod]
@@ -2204,26 +2179,24 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("GetStacks")]
         public async Task GetStackNamesAsync_ReturnsFailedResult_WhenListStacksThrowsException_AndThereAreZeroRetriesLeft()
         {
-            var fakeExceptionMsg = "junk";
-
             _mockCfCliService.Setup(m => m.
                 GetOAuthToken())
                     .Returns(_fakeValidAccessToken);
 
             _mockCfApiClient.Setup(m => m.
                 ListStacks(FakeCfInstance.ApiAddress, _fakeValidAccessToken))
-                    .Throws(new Exception(fakeExceptionMsg));
+                    .Throws(_fakeException);
 
             var result = await _sut.GetStackNamesAsync(FakeCfInstance, retryAmount: 0);
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
             Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), _fakeException), Times.Once);
         }
 
         [TestMethod]
@@ -2482,26 +2455,24 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("GetRoutes")]
         public async Task GetRoutesForAppAsync_ReturnsFailedResult_WhenListRoutesThrowsException_AndThereAreZeroRetriesLeft()
         {
-            var fakeExceptionMsg = "junk";
-
             _mockCfCliService.Setup(m => m.
                 GetOAuthToken())
                     .Returns(_fakeValidAccessToken);
 
             _mockCfApiClient.Setup(m => m.
                 ListRoutesForApp(FakeCfInstance.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
-                    .Throws(new Exception(fakeExceptionMsg));
+                    .Throws(_fakeException);
 
             var result = await _sut.GetRoutesForAppAsync(FakeApp, retryAmount: 0);
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
             Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), _fakeException), Times.Once);
         }
 
         [TestMethod]
@@ -2648,25 +2619,23 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         [TestCategory("DeleteAllRoutesForAppAsync")]
         public async Task DeleteAllRoutesForAppAsync_ReturnsFailedResult_WhenListRoutesThrowsException_AndThereAreZeroRetriesLeft()
         {
-            var fakeExceptionMsg = "junk";
-
             _mockCfCliService.Setup(m => m.
                 GetOAuthToken())
                     .Returns(_fakeValidAccessToken);
 
             _mockCfApiClient.Setup(m => m.
                 ListRoutesForApp(FakeCfInstance.ApiAddress, _fakeValidAccessToken, FakeApp.AppId))
-                    .Throws(new Exception(fakeExceptionMsg));
+                    .Throws(_fakeException);
 
             var result = await _sut.DeleteAllRoutesForAppAsync(FakeApp);
 
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(fakeExceptionMsg));
+            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
             Assert.IsNull(result.CmdResult);
 
-            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            _mockLogger.Verify(m => m.Error(It.IsAny<string>(), _fakeException), Times.Once);
         }
 
         [TestMethod]

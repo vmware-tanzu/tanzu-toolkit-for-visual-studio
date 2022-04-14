@@ -848,7 +848,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 var errorMsg = $"Encountered an error while writing manifest contents to new file {path} : {ex.Message}";
 
-                Logger.Error(errorMsg);
+                Logger.Error(errorMsg + ex.StackTrace);
 
                 _errorDialogService.DisplayErrorDialog("Unable to save manifest file", errorMsg);
             }

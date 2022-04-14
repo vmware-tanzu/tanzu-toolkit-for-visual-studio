@@ -134,7 +134,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error($"An error occurred in OpenLogsCommand while trying to generate a tmp log file to display. {ex.Message}");
+                    _logger.Error("An error occurred in OpenLogsCommand while trying to generate a tmp log file to display: {OpenLogsCommandException}", ex);
                     _dialogService.DisplayErrorDialog("Unable to open log file.", ex.Message);
                 }
 
@@ -154,9 +154,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                         }
                         catch (Exception ex)
                         {
-                            var errorMsg = $"Unable to delete tmp log file '${tmpFilePath}'.{Environment.NewLine}{ex.Message}";
-
-                            _logger.Error(errorMsg);
+                            _logger.Error("Unable to delete tmp log file '{TmpFilePath}'.\n{CloseLogsWindowException}", tmpFilePath, ex);
                         }
                     }
                 }
