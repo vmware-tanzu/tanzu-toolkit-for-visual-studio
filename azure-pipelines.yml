@@ -15,9 +15,9 @@ strategy:
 pool:
   vmImage: $(imageName)
 variables:
-  major: 0
+  major: 1
   minor: 0
-  patch: 4 
+  patch: 0 
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
