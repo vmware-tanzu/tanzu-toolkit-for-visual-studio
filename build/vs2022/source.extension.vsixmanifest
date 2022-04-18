@@ -8,7 +8,6 @@
         <License>LICENSE.txt</License>
         <Icon>tanzu90.png</Icon>
         <PreviewImage>tanzu200.png</PreviewImage>
-        <Preview>true</Preview>
     </Metadata>
     <Installation>
         <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0, 18.0)">
