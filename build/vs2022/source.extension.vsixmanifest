@@ -3,7 +3,7 @@
     <Metadata>
         <Identity Id="TanzuToolkitForVisualStudio2022.ff7b6f3e-0410-4ff9-a40a-a719ee9da901" Version="1.0.0" Language="en-US" Publisher="VMware Tanzu .NET Experience" />
         <DisplayName>Tanzu Toolkit for Visual Studio 2022</DisplayName>
-        <Description xml:space="preserve">Administer your Tanzu Application Service instances directly from within Visual Studio! </Description>
+        <Description xml:space="preserve">Administer your Tanzu Application Service environment directly from within Visual Studio! </Description>
         <MoreInfo>https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio</MoreInfo>
         <License>LICENSE.txt</License>
         <Icon>tanzu90.png</Icon>
