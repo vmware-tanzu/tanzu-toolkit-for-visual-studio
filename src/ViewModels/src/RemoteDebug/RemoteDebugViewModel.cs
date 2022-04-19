@@ -646,7 +646,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             publishArgs += " /p:WebPublishMethod=FileSystem";
             publishArgs += " /p:DeployDefaultTarget=WebPublish";
             publishArgs += " /p:Configuration=Debug";
-            publishArgs += " /p:DebugType=full"; // include PDB files
+            publishArgs += " /p:DebugType=full"; // /p:DebugType=full = windows-only PDBs (as opposed to portable)
             publishArgs += " /p:DebugSymbols=true"; // include PDB files
             publishArgs += " /p:ExcludeGeneratedDebugSymbol=false"; // useful for web apps?
 
