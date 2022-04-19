@@ -18,6 +18,7 @@ using Tanzu.Toolkit.Services.DotnetCli;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
+using Tanzu.Toolkit.Services.Project;
 using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
 using Tanzu.Toolkit.ViewModels;
@@ -145,6 +146,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<ISerializationService, SerializationService>();
             services.AddSingleton<IDataPersistenceService>(provider => new DataPersistenceService(this, provider));
             services.AddSingleton<IDotnetCliService, DotnetCliService>();
+            services.AddSingleton<IProjectService, ProjectService>();
 
             /* Tool Windows */
             services.AddTransient<TanzuTasExplorerToolWindow>();
@@ -154,7 +156,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddTransient<IOutputViewModel, OutputViewModel>();
             services.AddSingleton<ITasExplorerViewModel, TasExplorerViewModel>();
             services.AddSingleton<ILoginViewModel, LoginViewModel>();
-            services.AddTransient<IDeploymentDialogViewModel, DeploymentDialogViewModel>();
+            services.AddSingleton<IDeploymentDialogViewModel, DeploymentDialogViewModel>();
             services.AddTransient<IRemoteDebugViewModel, RemoteDebugViewModel>();
             services.AddTransient<ILoginViewModel, LoginViewModel>();
             services.AddSingleton<IAppDeletionConfirmationViewModel, AppDeletionConfirmationViewModel>();
