@@ -525,6 +525,13 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             ViewCloser?.Invoke();
         }
 
+        public void NavigateToDeploymentWindow(object arg = null)
+        {
+            //var deploymentDialog = Services.GetRequiredService<IDeploymentDialogViewModel>();
+
+            DialogService.ShowDialog(nameof(DeploymentDialogViewModel)); // fails
+        }
+
         private async Task PromptAppResolutionAsync(string promptMsg)
         {
             var cfQueries = new List<Task>

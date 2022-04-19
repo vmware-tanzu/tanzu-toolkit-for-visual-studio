@@ -250,6 +250,7 @@
             <Separator Margin="4" Visibility="Hidden"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Content="Cancel" Margin="4" Command="{Binding ElementName=RemoteDebugViewElement, Path=CancelCommand}" HorizontalAlignment="Right"/>
+                <Button Content="Push New App to Debug" Margin="4" Command="{Binding ElementName=RemoteDebugViewElement, Path=ShowDeploymentWindowCommand}" HorizontalAlignment="Right"/>
                 <Button Content="OK" Margin="4" Command="{Binding ElementName=RemoteDebugViewElement, Path=ResolveMissingAppCommand}" HorizontalAlignment="Right"/>
             </StackPanel>
         </StackPanel>
