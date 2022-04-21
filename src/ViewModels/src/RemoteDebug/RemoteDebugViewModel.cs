@@ -425,10 +425,18 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             {
                 if (!File.Exists(_expectedPathToLaunchFile))
                 {
-                    var adapterArgs = stack.Contains("win")
-                        ? $"ssh {AppToDebug.AppName} -c \"{_vsdbgPathWindows} --interpreter=vscode\""
-                        : $"ssh {AppToDebug.AppName} -c \"/tmp/lifecycle/shell {_appDirLinux} 'bash -c \\\"{_vsdbgPathLinux} --interpreter=vscode\\\"'\"";
-                    var appProcessName = _projDependsOnSystemWeb 
+                    // TODO: revert this test!
+                    // TODO: revert this test!
+                    // TODO: revert this test!
+                    var adapterArgs = $"ssh {AppToDebug.AppName} -c \"c:\\Users\\vcap\\app\\remotedebugger\\msvsmon.exe /noauth /anyuser /silent /nostatus /noclrwarn /nosecuritywarn /nofirewallwarn /nowowwarn /fallbackloadremotemanagedpdbs /timeout:2147483646\"";
+                    // TODO: revert this test!
+                    // TODO: revert this test!
+                    // TODO: revert this test!
+
+                    //var adapterArgs = stack.Contains("win")
+                    //    ? $"ssh {AppToDebug.AppName} -c \"{_vsdbgPathWindows} --interpreter=vscode\""
+                    //    : $"ssh {AppToDebug.AppName} -c \"/tmp/lifecycle/shell {_appDirLinux} 'bash -c \\\"{_vsdbgPathLinux} --interpreter=vscode\\\"'\"";
+                    var appProcessName = _projDependsOnSystemWeb
                         ? "hwc.exe"
                         : stack.Contains("win")
                             ? $"{AppToDebug.AppName}.exe"
@@ -587,6 +595,34 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                         Path = pathToPublishDir,
                         Stack = stack,
                         Buildpack = buildpackForPush,
+                        // TODO: remove following test lines!
+                        // TODO: remove following test lines!
+                        // TODO: remove following test lines!
+                        // TODO: remove following test lines!
+                        // TODO: remove following test lines!
+                        // TODO: remove following test lines!
+                        // TODO: remove following test lines!
+                        // TODO: remove following test lines!
+                        // TODO: remove following test lines!
+                        Env = new Dictionary<string, string>
+                        {
+                            { "DEV_ENVIRONMENT", "1" },
+                            { "VBCSCOMPILER_TTL", "604800" },
+                            { "COMPLUS_ForceENC", "1" },
+                        },
+                        Services = new List<string>
+                        {
+                            "myMySqlService",
+                        }
+                        // TODO: remove above test lines!
+                        // TODO: remove above test lines!
+                        // TODO: remove above test lines!
+                        // TODO: remove above test lines!
+                        // TODO: remove above test lines!
+                        // TODO: remove above test lines!
+                        // TODO: remove above test lines!
+                        // TODO: remove above test lines!
+                        // TODO: remove above test lines!
                     }
                 }
             };
