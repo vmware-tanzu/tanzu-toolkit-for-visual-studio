@@ -35,7 +35,6 @@ namespace Tanzu.Toolkit.ViewModels
         {
             IsApiAddressFormatValid = false;
             _tasExplorer = services.GetRequiredService<ITasExplorerViewModel>();
-            CfClient = Services.GetRequiredService<ICloudFoundryService>();
         }
 
         // Properties //
