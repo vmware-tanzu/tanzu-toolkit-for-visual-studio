@@ -37,7 +37,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services
                 }
                 else
                 {
-                    view = ServiceProvider.GetService(type);
+                    try
+                    {
+                        view = ServiceProvider.GetService(type);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger?.Error("Caught exception in {ClassName}.{MethodName} thrown because of an unattainable service: {ServiceException}", nameof(VsViewLocatorService), nameof(GetViewByViewModelName), ex);
+                    }
                 }
 
                 return view;
