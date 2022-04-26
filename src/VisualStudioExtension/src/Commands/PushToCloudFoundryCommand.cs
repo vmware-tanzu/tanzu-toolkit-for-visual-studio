@@ -3,10 +3,12 @@ using EnvDTE80;
 using Microsoft;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Shell;
+using Serilog;
 using System;
 using System.ComponentModel.Design;
 using System.IO;
 using Tanzu.Toolkit.Services.ErrorDialog;
+using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.VisualStudio.Services;
 using Tanzu.Toolkit.VisualStudio.Views;
@@ -36,6 +38,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
 
         private readonly IServiceProvider _services;
         private readonly IErrorDialog _dialogService;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PushToCloudFoundryCommand"/> class.
@@ -49,6 +52,8 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
             _services = services;
             _dialogService = services.GetRequiredService<IErrorDialog>();
+            var loggingSvc = services.GetRequiredService<ILoggingService>();
+            _logger = loggingSvc.Logger;
             var menuCommandID = new CommandID(_commandSet, _commandId);
             var menuItem = new MenuCommand(Execute, menuCommandID);
             commandService.AddCommand(menuItem);
@@ -145,8 +150,10 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             catch (Exception ex)
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
-                _dialogService.DisplayErrorDialog("Unable to push to Tanzu Application Service", ex.Message);
+                _logger?.Error("{ClassName} caught exception in {MethodName}: {PushException}", nameof(PushToCloudFoundryCommand), nameof(Execute), ex);
+                var msg = ex.Message + Environment.NewLine + Environment.NewLine +
+                    "If this issue persists, please contact tas-vs-extension@vmware.com";
+                _dialogService.DisplayErrorDialog("Unable to push to Tanzu Application Service", msg);
             }
         }
     }

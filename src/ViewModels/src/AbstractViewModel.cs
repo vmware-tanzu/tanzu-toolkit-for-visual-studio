@@ -24,15 +24,23 @@ namespace Tanzu.Toolkit.ViewModels
         public AbstractViewModel(IServiceProvider services)
         {
             Services = services;
-            DialogService = services.GetRequiredService<IDialogService>();
-            ViewLocatorService = services.GetRequiredService<IViewLocatorService>();
-            ThreadingService = services.GetRequiredService<IThreadingService>();
-            UiDispatcherService = services.GetRequiredService<IUiDispatcherService>();
-            FileService = services.GetRequiredService<IFileService>();
-            SerializationService = services.GetRequiredService<ISerializationService>();
-            ErrorService = services.GetRequiredService<IErrorDialog>();
-            var logSvc = services.GetRequiredService<ILoggingService>();
-            Logger = logSvc.Logger;
+
+            try
+            {
+                var logSvc = services.GetRequiredService<ILoggingService>();
+                Logger = logSvc.Logger;
+                DialogService = services.GetRequiredService<IDialogService>();
+                ViewLocatorService = services.GetRequiredService<IViewLocatorService>();
+                ThreadingService = services.GetRequiredService<IThreadingService>();
+                UiDispatcherService = services.GetRequiredService<IUiDispatcherService>();
+                FileService = services.GetRequiredService<IFileService>();
+                SerializationService = services.GetRequiredService<ISerializationService>();
+                ErrorService = services.GetRequiredService<IErrorDialog>();
+            }
+            catch (Exception ex)
+            {
+                Logger?.Error("Unable to construct {ClassName} due to an unattainable service: {ServiceException}", nameof(AbstractViewModel), ex);
+            }
         }
 
         public IServiceProvider Services { get; }
