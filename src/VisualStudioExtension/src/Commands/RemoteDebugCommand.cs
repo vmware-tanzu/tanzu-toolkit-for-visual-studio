@@ -8,6 +8,7 @@ using System;
 using System.ComponentModel.Design;
 using System.IO;
 using System.Linq;
+using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.ViewModels.RemoteDebug;
 using Tanzu.Toolkit.VisualStudio.Services;
@@ -31,6 +32,7 @@ namespace Tanzu.Toolkit.VisualStudio
         /// VS Package that provides this command, not null.
         /// </summary>
         private readonly AsyncPackage _package;
+        private static IErrorDialog _errorService;
         private static ILogger _logger;
         private static IServiceProvider _services;
 
@@ -72,6 +74,7 @@ namespace Tanzu.Toolkit.VisualStudio
             _services = services;
             var commandService = await package.GetServiceAsync((typeof(IMenuCommandService))) as OleMenuCommandService;
             Instance = new RemoteDebugCommand(package, commandService);
+            _errorService = services.GetRequiredService<IErrorDialog>();
             var loggingSvc = services.GetRequiredService<ILoggingService>();
             _logger = loggingSvc.Logger;
         }
@@ -174,7 +177,11 @@ namespace Tanzu.Toolkit.VisualStudio
             }
             catch (Exception ex)
             {
-                _logger.Error("Failed to initiate remote debugging: {RemoteDebuggingError}", ex);
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                _logger?.Error("{ClassName} caught exception in {MethodName}: {RemoteDebugException}", nameof(RemoteDebugCommand), nameof(Execute), ex);
+                var msg = ex.Message + Environment.NewLine + Environment.NewLine +
+                    "If this issue persists, please contact tas-vs-extension@vmware.com";
+                _errorService.DisplayErrorDialog("Unable to initiate remote debugging", msg);
             }
         }
     }

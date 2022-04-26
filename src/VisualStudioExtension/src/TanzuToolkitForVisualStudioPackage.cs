@@ -89,20 +89,27 @@ namespace Tanzu.Toolkit.VisualStudio
 
         protected override object GetService(Type serviceType)
         {
-            if (_serviceProvider == null)
+            try
             {
-                var collection = new ServiceCollection();
-                ConfigureServices(collection);
-                _serviceProvider = collection.BuildServiceProvider();
-            }
+                if (_serviceProvider == null)
+                {
+                    var collection = new ServiceCollection();
+                    ConfigureServices(collection);
+                    _serviceProvider = collection.BuildServiceProvider();
+                }
 
-            var result = _serviceProvider.GetService(serviceType);
-            if (result != null)
+                var result = _serviceProvider.GetService(serviceType);
+                if (result != null)
+                {
+                    return result;
+                }
+
+                return base.GetService(serviceType);
+            }
+            catch (Exception)
             {
-                return result;
+                return null;
             }
-
-            return base.GetService(serviceType);
         }
 
         protected override WindowPane InstantiateToolWindow(Type toolWindowType)

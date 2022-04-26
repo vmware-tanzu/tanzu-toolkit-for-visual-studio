@@ -27,15 +27,12 @@ namespace Tanzu.Toolkit.ViewModels
         private bool _connectingToCf = false;
         private bool _isApiAddressFormatValid;
         private bool _certificateInvalid = false;
-        internal ITasExplorerViewModel _tasExplorer;
         private string _ssoLink;
 
         public LoginViewModel(IServiceProvider services)
             : base(services)
         {
             IsApiAddressFormatValid = false;
-            _tasExplorer = services.GetRequiredService<ITasExplorerViewModel>();
-            CfClient = Services.GetRequiredService<ICloudFoundryService>();
         }
 
         // Properties //
@@ -315,7 +312,7 @@ namespace Tanzu.Toolkit.ViewModels
             if (result.Succeeded)
             {
                 ErrorMessage = null;
-                _tasExplorer.SetConnection(TargetCf);
+                TasExplorer.SetConnection(TargetCf);
                 DialogService.CloseDialog(arg, true);
                 PageNum = 1;
                 ClearPassword();
@@ -344,7 +341,7 @@ namespace Tanzu.Toolkit.ViewModels
 
                 if (loginResult.Succeeded)
                 {
-                    _tasExplorer.SetConnection(TargetCf);
+                    TasExplorer.SetConnection(TargetCf);
                     CloseDialog();
                 }
                 else

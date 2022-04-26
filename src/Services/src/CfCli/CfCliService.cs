@@ -58,9 +58,17 @@ namespace Tanzu.Toolkit.Services.CfCli
         {
             ConfigFilePath = configFilePath;
             Services = services;
-            _fileService = services.GetRequiredService<IFileService>();
-            var logSvc = services.GetRequiredService<ILoggingService>();
-            _logger = logSvc.Logger;
+
+            try
+            {
+                var logSvc = services.GetRequiredService<ILoggingService>();
+                _logger = logSvc.Logger;
+                _fileService = services.GetRequiredService<IFileService>();
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error("Unable to construct {ClassName} due to an unattainable service: {ServiceException}", nameof(CfCliService), ex);
+            }
         }
 
         /// <summary>
