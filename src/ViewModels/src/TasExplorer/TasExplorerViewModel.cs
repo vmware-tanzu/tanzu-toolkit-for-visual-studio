@@ -227,8 +227,16 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
-                DialogService.ShowDialog(typeof(LoginViewModel).Name);
-
+                var dialog = DialogService.ShowDialog(nameof(LoginViewModel));
+                if (dialog == null)
+                {
+                    Logger?.Error("{ClassName}.{MethodName} encountered null DialogResult, indicating that something went wrong trying to construct the view.", nameof(TasExplorerViewModel), nameof(OpenLoginView));
+                    var title = "Something went wrong while trying to display login window";
+                    var msg = "View construction failed" +
+                        Environment.NewLine + Environment.NewLine +
+                        "If this issue persists, please contact tas-vs-extension@vmware.com";
+                    ErrorService.DisplayErrorDialog(title, msg);
+                }
             }
         }
 
