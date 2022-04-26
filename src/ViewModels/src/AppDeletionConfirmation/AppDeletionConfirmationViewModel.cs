@@ -54,7 +54,16 @@ namespace Tanzu.Toolkit.ViewModels.AppDeletionConfirmation
         public void ShowConfirmation(CloudFoundryApp app)
         {
             CfApp = app;
-            DialogService.ShowDialog(nameof(AppDeletionConfirmationViewModel));
+            var dialog = DialogService.ShowDialog(nameof(AppDeletionConfirmationViewModel));
+            if (dialog == null)
+            {
+                Logger?.Error("{ClassName}.{MethodName} encountered null DialogResult, indicating that something went wrong trying to construct the view.", nameof(AppDeletionConfirmation), nameof(ShowConfirmation));
+                var title = "Something went wrong while trying to display app deletion confirmation";
+                var msg = "View construction failed"+
+                    Environment.NewLine + Environment.NewLine +
+                    "If this issue persists, please contact tas-vs-extension@vmware.com";
+                ErrorService.DisplayErrorDialog(title, msg);
+            }
             CfApp = null;
         }
 
