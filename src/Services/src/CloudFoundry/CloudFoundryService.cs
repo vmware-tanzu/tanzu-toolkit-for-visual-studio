@@ -37,14 +37,21 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
         public CloudFoundryService(IServiceProvider services)
         {
-            _cfApiClient = services.GetRequiredService<ICfApiClient>();
-            _cfCliService = services.GetRequiredService<ICfCliService>();
-            _fileService = services.GetRequiredService<IFileService>();
-            _dialogService = services.GetRequiredService<IErrorDialog>();
-            _serializationService = services.GetRequiredService<ISerializationService>();
+            try
+            {
+                var logSvc = services.GetRequiredService<ILoggingService>();
+                _logger = logSvc.Logger;
 
-            var logSvc = services.GetRequiredService<ILoggingService>();
-            _logger = logSvc.Logger;
+                _cfApiClient = services.GetRequiredService<ICfApiClient>();
+                _cfCliService = services.GetRequiredService<ICfCliService>();
+                _fileService = services.GetRequiredService<IFileService>();
+                _dialogService = services.GetRequiredService<IErrorDialog>();
+                _serializationService = services.GetRequiredService<ISerializationService>();
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error("Unable to construct {ClassName} due to an unattainable service: {ServiceException}", nameof(CloudFoundryService), ex);
+            }
         }
 
         internal string CfApiAddress { get; set; }
