@@ -59,7 +59,7 @@
         </None>
         <!-- <PackageReference Include="Microsoft.VisualStudio.SDK" Version="16.0.206" ExcludeAssets="runtime" /> -->
         <PackageReference Include="Community.VisualStudio.Toolkit.16">
-          <Version>16.0.430</Version>
+          <Version>16.0.394</Version>
         </PackageReference>
       </ItemGroup>
     </Otherwise>
