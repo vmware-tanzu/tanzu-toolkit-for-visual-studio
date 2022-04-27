@@ -653,7 +653,7 @@
                                 Margin="4"
                                 HorizontalAlignment="Right"
                                 IsEnabled="{Binding IsLoggedIn}"
-                                Command="{Binding ElementName=DeploymentDialogViewElement, Path=ClearBuildpackSelectionCommand}"
+                                Command="{Binding ElementName=DeploymentDialogViewElement, Path=ClearServiceSelectionCommand}"
                                 VerticalAlignment="Center">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
