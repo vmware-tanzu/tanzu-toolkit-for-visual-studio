@@ -59,6 +59,7 @@ namespace Tanzu.Toolkit.ViewModels
         private string _targetName;
         private bool _isLoggedIn;
         private string _selectedStack;
+        private string _serviceNotRecognizedWarningMessage;
         private ObservableCollection<string> _selectedBuildpacks;
         private ObservableCollection<string> _selectedServices;
         private List<string> _stackOptions;
@@ -102,6 +103,7 @@ namespace Tanzu.Toolkit.ViewModels
             ServiceOptions = new List<ServiceListItem>();
             StackOptions = new List<string>();
             DeploymentDirectoryPath = null;
+            ServiceNotRecognizedWarningMessage = null;
 
             ManifestModel = new AppManifest
             {
@@ -534,6 +536,17 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
+        public string ServiceNotRecognizedWarningMessage
+        {
+            get => _serviceNotRecognizedWarningMessage;
+            set
+            {
+                _serviceNotRecognizedWarningMessage = value;
+                RaisePropertyChangedEvent("ServiceNotRecognizedWarningMessage");
+            }
+        }
+
+
         public bool CanDeployApp(object arg)
         {
             return !string.IsNullOrEmpty(AppName) && IsLoggedIn && SelectedOrg != null && SelectedSpace != null;
@@ -822,18 +835,18 @@ namespace Tanzu.Toolkit.ViewModels
                 RaisePropertyChangedEvent("SelectedServices");
 
                 ManifestModel.Applications[0].Services = SelectedServices.ToList();
+                RemoveWarningIfAllSelectedServicesExist();
             }
         }
 
         public void ClearSelectedServices(object arg = null)
         {
             SelectedServices.Clear();
-
             foreach (var svItem in ServiceOptions)
             {
                 svItem.IsSelected = false;
             }
-
+            RemoveWarningIfAllSelectedServicesExist();
             RaisePropertyChangedEvent("SelectedServices");
         }
 
@@ -1020,10 +1033,34 @@ namespace Tanzu.Toolkit.ViewModels
                     {
                         existingSvOption.IsSelected = true;
                     }
+
+                    ApplyWarningIfServiceNameNotPresentInOptions(svName);
                 }
             }
         }
 
+        private void ApplyWarningIfServiceNameNotPresentInOptions(string svName)
+        {
+            if (!ServiceOptions.Exists(s => s.Name == svName))
+            {
+                if (string.IsNullOrWhiteSpace(ServiceNotRecognizedWarningMessage))
+                {
+                    ServiceNotRecognizedWarningMessage = $"'{svName}' not recognized";
+                }
+                else
+                {
+                    ServiceNotRecognizedWarningMessage = "Multiple selected services not recognized";
+                }
+            }
+        }
+
+        private void RemoveWarningIfAllSelectedServicesExist()
+        {
+            if (SelectedServices.All(remainingSvcName => ServiceOptions.Exists(item => item.Name == remainingSvcName)))
+            {
+                ServiceNotRecognizedWarningMessage = null;
+            }
+        }
 
         private void SetStartCommandFromManifest(AppManifest appManifest)
         {
