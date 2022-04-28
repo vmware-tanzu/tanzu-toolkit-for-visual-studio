@@ -716,6 +716,7 @@
                     Margin="4"
                     Padding="4"
                     Click="Close"
+                    IsCancel="True"
                     Content="Cancel"/>
 
             </StackPanel>
@@ -733,7 +734,8 @@
                     Click="SaveManifestButton_Click"/>
 
                 <Button 
-                    Content="Push App" 
+                    Content="Push App"
+                    IsDefault="True"
                     Margin="4"
                     Padding="4"
                     Command="{ Binding ElementName=DeploymentDialogViewElement, Path=UploadAppCommand }" 

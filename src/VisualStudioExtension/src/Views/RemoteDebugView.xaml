@@ -139,9 +139,19 @@
         </StackPanel>
         
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Bottom" Margin="0,12,0,0">
-            <Button Content="Cancel" Margin="4" Command="{Binding ElementName=RemoteDebugViewElement, Path=CancelCommand}" HorizontalAlignment="Right"/>
-            <Button Content="{Binding PushNewAppButtonText}" Margin="4" Command="{Binding ElementName=RemoteDebugViewElement, Path=ShowDeploymentWindowCommand}" HorizontalAlignment="Right"/>
-            <Button Content="OK" Margin="4" Command="{Binding ElementName=RemoteDebugViewElement, Path=ResolveMissingAppCommand}" HorizontalAlignment="Right"/>
+            <Button Content="Cancel"
+                    IsCancel="True"
+                    Margin="4"
+                    Command="{Binding ElementName=RemoteDebugViewElement, Path=CancelCommand}"
+                    HorizontalAlignment="Right"/>
+            <Button Content="{Binding PushNewAppButtonText}" Margin="4"
+                    Command="{Binding ElementName=RemoteDebugViewElement, Path=ShowDeploymentWindowCommand}"
+                    HorizontalAlignment="Right"/>
+            <Button Content="OK"
+                    Margin="4"
+                    IsDefault="True"
+                    Command="{Binding ElementName=RemoteDebugViewElement, Path=ResolveMissingAppCommand}"
+                    HorizontalAlignment="Right"/>
         </StackPanel>
     </DockPanel>
 </ui:DialogWindow>
