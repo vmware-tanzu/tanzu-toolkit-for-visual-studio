@@ -1023,6 +1023,8 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 ClearSelectedServices();
 
+                var unrecognizedSvcNames = new List<string>();
+
                 foreach (var svName in svs)
                 {
                     AddToSelectedServices(svName);
@@ -1034,23 +1036,38 @@ namespace Tanzu.Toolkit.ViewModels
                         existingSvOption.IsSelected = true;
                     }
 
-                    ApplyWarningIfServiceNameNotPresentInOptions(svName);
+                    var svcPresentInOptions = ServiceOptions.Exists(s => s.Name == svName);
+                    if (!svcPresentInOptions)
+                    {
+                        ApplyUnrecognizedServiceWarning(svName);
+                        unrecognizedSvcNames.Add(svName);
+                    }
+                }
+                if (unrecognizedSvcNames.Count > 0)
+                {
+                    var svcStr = "";
+                    foreach (var svcName in unrecognizedSvcNames)
+                    {
+                        svcStr += $"{Environment.NewLine}    - {svcName}";
+                    }
+                    ErrorService.DisplayWarningDialog(
+                        "Unrecognized service provided",
+                        "Manifest indicated that the following should be used, but no such service detected:" +
+                        Environment.NewLine + svcStr + Environment.NewLine + Environment.NewLine +
+                        "Deployment may not succeed.");
                 }
             }
         }
 
-        private void ApplyWarningIfServiceNameNotPresentInOptions(string svName)
+        private void ApplyUnrecognizedServiceWarning(string svName)
         {
-            if (!ServiceOptions.Exists(s => s.Name == svName))
+            if (string.IsNullOrWhiteSpace(ServiceNotRecognizedWarningMessage))
             {
-                if (string.IsNullOrWhiteSpace(ServiceNotRecognizedWarningMessage))
-                {
-                    ServiceNotRecognizedWarningMessage = $"'{svName}' not recognized";
-                }
-                else
-                {
-                    ServiceNotRecognizedWarningMessage = "Multiple selected services not recognized";
-                }
+                ServiceNotRecognizedWarningMessage = $"'{svName}' not recognized";
+            }
+            else
+            {
+                ServiceNotRecognizedWarningMessage = "Multiple selected services not recognized";
             }
         }
 
