@@ -24,7 +24,7 @@
         <converters:VisibilityConverter x:Key="ExpansionConverter" ReserveSpace="False" />
         <converters:NullVisibilityConverter x:Key="NullVisibility" ReserveSpace="False"/>
         <converters:StringNullVisibilityConverter x:Key="StringNullVisibility" ReserveSpace="False"/>
-        <converters:ListToStringConverter x:Key="SelectedBuildpacksStringListConverter" EmptyListMessage="&lt;none selected&gt;" />
+        <converters:ListToStringConverter x:Key="SelectedItemStringListConverter" EmptyListMessage="&lt;none selected&gt;" />
 
         <Style x:Key="RoundedButtonStyle" TargetType="{x:Type Button}">
             <Setter Property="Template">
@@ -468,8 +468,8 @@
                             </Grid.ColumnDefinitions>
 
                             <TextBlock
-                                Text="{Binding SelectedBuildpacks, Converter={StaticResource SelectedBuildpacksStringListConverter}}"
-                                ToolTip="{Binding SelectedBuildpacks, Converter={StaticResource SelectedBuildpacksStringListConverter}}"
+                                Text="{Binding SelectedBuildpacks, Converter={StaticResource SelectedItemStringListConverter}}"
+                                ToolTip="{Binding SelectedBuildpacks, Converter={StaticResource SelectedItemStringListConverter}}"
                                 Grid.Column="0"
                                 MaxWidth="350"
                                 HorizontalAlignment="Left"
@@ -529,8 +529,8 @@
                                         Content="{Binding Name}"
                                         IsChecked="{Binding IsSelected}"
                                         IsEnabled="{Binding CompatibleWithStack}"
-                                        Checked="CheckBox_Checked"
-                                        Unchecked="CheckBox_Unchecked"/>
+                                        Checked="BuildpackItemSelected"
+                                        Unchecked="BuildpackItemDeselected"/>
                                     </DataTemplate>
                                 </ListView.ItemTemplate>
                             </ListView>
@@ -639,8 +639,8 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Text="{Binding SelectedServices, Converter={StaticResource SelectedBuildpacksStringListConverter}}"
-                                ToolTip="{Binding SelectedServices, Converter={StaticResource SelectedBuildpacksStringListConverter}}"
+                            <TextBlock Text="{Binding SelectedServices, Converter={StaticResource SelectedItemStringListConverter}}"
+                                ToolTip="{Binding SelectedServices, Converter={StaticResource SelectedItemStringListConverter}}"
                                 Grid.Column="0"
                                 MaxWidth="350"
                                 HorizontalAlignment="Left"
@@ -653,7 +653,7 @@
                                 Margin="4"
                                 HorizontalAlignment="Right"
                                 IsEnabled="{Binding IsLoggedIn}"
-                                Command="{Binding ElementName=DeploymentDialogViewElement, Path=ClearBuildpackSelectionCommand}"
+                                Command="{Binding ElementName=DeploymentDialogViewElement, Path=ClearServiceSelectionCommand}"
                                 VerticalAlignment="Center">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
@@ -694,8 +694,8 @@
                                     <DataTemplate>
                                         <CheckBox Content="{Binding Name}"
                                             IsChecked="{Binding IsSelected}"
-                                            Checked="CheckBox_Checked"
-                                            Unchecked="CheckBox_Unchecked"/>
+                                            Checked="ServiceItemSelected"
+                                            Unchecked="ServiceItemDeselected"/>
                                     </DataTemplate>
                                 </ListView.ItemTemplate>
                             </ListView>
