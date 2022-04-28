@@ -8,6 +8,7 @@ using System;
 using System.ComponentModel.Design;
 using System.IO;
 using Tanzu.Toolkit.Services.ErrorDialog;
+using Tanzu.Toolkit.Services.Project;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.VisualStudio.Services;
@@ -133,10 +134,15 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                         }
                         else
                         {
-                            var viewModel = new DeploymentDialogViewModel(_services, proj.Name, projectDirectory, tfm);
-                            var view = new DeploymentDialogView(viewModel, new ThemeService());
+                            var projSvc = _services.GetRequiredService<IProjectService>();
+                            projSvc.ProjectName = proj.Name;
+                            projSvc.PathToProjectDirectory = projectDirectory;
+                            projSvc.TargetFrameworkMoniker = tfm;
 
-                            view.ShowDialog();
+                            var viewModel = _services.GetRequiredService<IDeploymentDialogViewModel>();
+                            var view = _services.GetRequiredService<IDeploymentDialogView>() as System.Windows.Window;
+
+                            view?.ShowDialog();
 
                             // * Actions to take after modal closes:
                             if (viewModel.DeploymentInProgress) // don't open tool window if modal was closed via "X" button

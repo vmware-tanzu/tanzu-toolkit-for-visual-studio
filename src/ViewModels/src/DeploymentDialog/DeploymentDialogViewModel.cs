@@ -11,6 +11,7 @@ using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.DotnetCli;
 using Tanzu.Toolkit.Services.ErrorDialog;
+using Tanzu.Toolkit.Services.Project;
 
 [assembly: InternalsVisibleTo("Tanzu.Toolkit.ViewModels.Tests")]
 
@@ -43,7 +44,7 @@ namespace Tanzu.Toolkit.ViewModels
         private readonly IDotnetCliService _dotnetCliService;
         internal IOutputViewModel _outputViewModel;
         internal ITasExplorerViewModel _tasExplorerViewModel;
-
+        private readonly IProjectService _projectService;
         private List<CloudFoundryInstance> _cfInstances;
         private List<CloudFoundryOrganization> _cfOrgs;
         private List<CloudFoundrySpace> _cfSpaces;
@@ -73,22 +74,22 @@ namespace Tanzu.Toolkit.ViewModels
         private bool _configureForRemoteDebugging;
         private readonly string _targetFrameworkMoniker;
 
-        public DeploymentDialogViewModel(IServiceProvider services, string projectName, string directoryOfProjectToDeploy, string targetFrameworkMoniker)
-            : base(services)
+        public DeploymentDialogViewModel(IServiceProvider services) : base(services)
         {
             _errorDialogService = services.GetRequiredService<IErrorDialog>();
             _dotnetCliService = services.GetRequiredService<IDotnetCliService>();
             _tasExplorerViewModel = services.GetRequiredService<ITasExplorerViewModel>();
+            _projectService = services.GetRequiredService<IProjectService>();
 
-            OutputView = ViewLocatorService.GetViewByViewModelName(nameof(ViewModels.OutputViewModel), $"Tanzu Push Output (\"{projectName}\")") as IView;
+            OutputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel), $"Tanzu Push Output (\"{_projectService.ProjectName}\")") as IView;
             _outputViewModel = OutputView?.ViewModel as IOutputViewModel;
 
             DeploymentInProgress = false;
-            PathToProjectRootDir = directoryOfProjectToDeploy;
+            PathToProjectRootDir = _projectService.PathToProjectDirectory;
             SelectedBuildpacks = new ObservableCollection<string>();
             SelectedServices = new ObservableCollection<string>();
 
-            _targetFrameworkMoniker = targetFrameworkMoniker;
+            _targetFrameworkMoniker = _projectService.TargetFrameworkMoniker;
             if (_targetFrameworkMoniker.StartsWith(_fullFrameworkTFM))
             {
                 _fullFrameworkDeployment = true;
@@ -109,7 +110,7 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     new AppConfig
                     {
-                        Name = projectName,
+                        Name = _projectService.ProjectName,
                         Buildpacks = new List<string>(),
                         Services = new List<string>(),
                     }
@@ -129,8 +130,8 @@ namespace Tanzu.Toolkit.ViewModels
                 ThreadingService.StartBackgroundTask(UpdateStackOptions);
             }
 
-            AppName = projectName;
-            _projectName = projectName;
+            AppName = _projectService.ProjectName;
+            _projectName = _projectService.ProjectName;
             Expanded = false;
         }
 
