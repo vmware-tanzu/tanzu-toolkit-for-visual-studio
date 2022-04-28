@@ -12,6 +12,7 @@ using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.DotnetCli;
 using Tanzu.Toolkit.Services.File;
+using Tanzu.Toolkit.Services.Project;
 
 namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 {
@@ -39,13 +40,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private bool _isLoggedIn;
         private string _option1Text;
         private string _option2Text;
-        private List<CloudFoundryOrganization> _orgOptions;
-        private List<CloudFoundrySpace> _spaceOptions;
-        private List<string> _stackOptions;
-        private CloudFoundryOrganization _selectedOrg;
-        private CloudFoundrySpace _selectedSpace;
         private CloudFoundryApp _selectedApp;
-        private string _selectedStack;
         private bool _waitingOnAppConfirmation = false;
         private bool _debugAgentInstalled;
         private bool _launchFileExists;
@@ -220,69 +215,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             }
         }
 
-        public List<CloudFoundryOrganization> OrgOptions
-        {
-            get => _orgOptions;
-
-            set
-            {
-                _orgOptions = value;
-                RaisePropertyChangedEvent("OrgOptions");
-            }
-        }
-
-        public List<CloudFoundrySpace> SpaceOptions
-        {
-            get => _spaceOptions;
-
-            set
-            {
-                _spaceOptions = value;
-                RaisePropertyChangedEvent("SpaceOptions");
-            }
-        }
-
-        public List<string> StackOptions
-        {
-            get => _stackOptions;
-            set
-            {
-                _stackOptions = value;
-                RaisePropertyChangedEvent("StackOptions");
-            }
-        }
-
-        public CloudFoundryOrganization SelectedOrg
-        {
-            get => _selectedOrg;
-            set
-            {
-                _selectedOrg = value;
-                var _ = UpdateCfSpaceOptionsAsync();
-                RaisePropertyChangedEvent("SelectedOrg");
-            }
-        }
-
-        public CloudFoundrySpace SelectedSpace
-        {
-            get => _selectedSpace;
-            set
-            {
-                _selectedSpace = value;
-                RaisePropertyChangedEvent("SelectedSpace");
-            }
-        }
-
-        public string SelectedStack
-        {
-            get => _selectedStack;
-            set
-            {
-                _selectedStack = value;
-                RaisePropertyChangedEvent("SelectedStack");
-            }
-        }
-
         public string LoadingMessage
         {
             get => _loadingMessage;
@@ -292,6 +224,11 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 _loadingMessage = value;
                 RaisePropertyChangedEvent("LoadingMessage");
             }
+        }
+
+        public string PushNewAppButtonText
+        {
+            get => "Push New App to Debug";
         }
 
         // Methods //
@@ -333,7 +270,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             if (!_debugAgentInstalled)
             {
                 Option1Text = $"Push new version of \"{AppToDebug.AppName}\" to debug (project \"{_projectName}\")";
-                var _ = PromptAppResolutionAsync($"Unable to locate debugging agent on \"{AppToDebug.AppName}\".");
+                PromptAppResolution($"Unable to locate debugging agent on \"{AppToDebug.AppName}\".");
                 return;
             }
 
@@ -358,38 +295,15 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             if (AppToDebug == null)
             {
                 WaitingOnAppConfirmation = true;
-                var _ = PromptAppResolutionAsync($"No app found with a name matching \"{appName}\"");
+                PromptAppResolution($"No app found with a name matching \"{appName}\"");
             }
         }
 
-        public async Task ResolveMissingAppAsync(object arg = null)
+        public void ConfirmAppToDebug(object arg = null)
         {
             WaitingOnAppConfirmation = false;
-
-            if (PushNewAppToDebug)
-            {
-                var appName = AppToDebug == null ? _projectName : AppToDebug.AppName;
-                Close();
-                _outputView.Show();
-                var pushSucceeded = await PushNewAppWithDebugConfigurationAsync(appName, SelectedStack);
-                if (pushSucceeded)
-                {
-                    var _ = BeginRemoteDebuggingAsync(appName); // start debug process over from beginning
-                    ViewOpener?.Invoke(); // reopen remote debug dialog
-                }
-            }
-            else if (DebugExistingApp)
-            {
-                AppToDebug = SelectedApp;
-                var _ = BeginRemoteDebuggingAsync(AppToDebug.AppName); // start debug process over from beginning
-            }
-            else
-            {
-                var msg = "Encountered unexpected debug strategy";
-                Logger.Error(msg);
-                ErrorService.DisplayErrorDialog(string.Empty, msg + "\nThis should not happen. If you see this message, please let us know: tas-vs-extension@vmware.com");
-                Close();
-            }
+            AppToDebug = SelectedApp;
+            var _ = BeginRemoteDebuggingAsync(AppToDebug.AppName); // start debug process over from beginning
         }
 
         private async Task<bool> CheckForVsdbg(string stack)
@@ -477,158 +391,35 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             }
         }
 
-        public async Task UpdateCfOrgOptionsAsync()
-        {
-            if (_tasExplorer.TasConnection == null)
-            {
-                OrgOptions = new List<CloudFoundryOrganization>();
-            }
-            else
-            {
-                var orgsResponse = await _tasExplorer.TasConnection.CfClient.GetOrgsForCfInstanceAsync(_tasExplorer.TasConnection.CloudFoundryInstance);
-                if (orgsResponse.Succeeded)
-                {
-                    OrgOptions = orgsResponse.Content;
-                }
-                else
-                {
-                    Logger.Error("RemoteDebugViewModel failed to get orgs. {OrgsResponse}", orgsResponse);
-                    ErrorService.DisplayErrorDialog("Unable to retrieve orgs", orgsResponse.Explanation);
-                }
-            }
-        }
-
-        public async Task UpdateCfSpaceOptionsAsync()
-        {
-            if (SelectedOrg == null || _tasExplorer.TasConnection == null)
-            {
-                SpaceOptions = new List<CloudFoundrySpace>();
-            }
-            else
-            {
-                var spacesResponse = await _tasExplorer.TasConnection.CfClient.GetSpacesForOrgAsync(SelectedOrg);
-
-                if (spacesResponse.Succeeded)
-                {
-                    SpaceOptions = spacesResponse.Content;
-                }
-                else
-                {
-                    Logger.Error("RemoteDebugViewModel failed to get spaces. {SpacesResponse}", spacesResponse);
-                    ErrorService.DisplayErrorDialog("Unable to retrieve spaces", spacesResponse.Explanation);
-                }
-            }
-        }
-
         public void Close(object arg = null)
         {
             ViewCloser?.Invoke();
         }
 
-        private async Task PromptAppResolutionAsync(string promptMsg)
+        public void DisplayDeploymentWindow(object arg = null)
         {
-            var cfQueries = new List<Task>
+            var projSvc = Services.GetRequiredService<IProjectService>();
+            projSvc.ProjectName = _projectName;
+            projSvc.PathToProjectDirectory = _pathToProjectRootDir;
+            projSvc.TargetFrameworkMoniker = _targetFrameworkMoniker;
+
+            var deploymentViewModel = Services.GetRequiredService<IDeploymentDialogViewModel>();
+            deploymentViewModel.ConfigureForRemoteDebugging = true;
+            DialogService.ShowDialog(nameof(DeploymentDialogViewModel));
+
+            if (deploymentViewModel.DeploymentInProgress)
             {
-                UpdateCfOrgOptionsAsync(),
-                PopulateStackOptionsAsync(),
-            };
-            await Task.WhenAll(cfQueries);
-            DialogMessage = promptMsg;
-            LoadingMessage = null;
-            WaitingOnAppConfirmation = true;
+                Close();
+                deploymentViewModel.OutputView.Show();
+            }
         }
 
-        private async Task<bool> PushNewAppWithDebugConfigurationAsync(string appName, string stack)
+        private void PromptAppResolution(string promptMsg)
         {
-            var runtimeIdentifier = stack.Contains("win") ? "win-x64" : "linux-x64";
-            if (runtimeIdentifier == "linux-x64" && !stack.Contains("linux"))
-            {
-                Logger.Information($"Unexpected stack provided: '{stack}'; proceeding to publish with default runtime identifier 'linux-x64'...");
-            }
-            var publishConfiguration = "Debug";
-            var publishDirName = "publish";
-            try
-            {
-                var publishTask = _dotnetCliService.PublishProjectForRemoteDebuggingAsync(
-                    _pathToProjectRootDir,
-                    _targetFrameworkMoniker,
-                    runtimeIdentifier,
-                    publishConfiguration,
-                    publishDirName,
-                    includeDebuggingAgent: true,
-                    StdOutCallback: _outputViewModel.AppendLine,
-                    StdErrCallback: _outputViewModel.AppendLine);
-                var publishSucceeded = await publishTask;
-                if (!publishSucceeded)
-                {
-                    var title = "Unable to intitate remote debugging";
-                    var msg = "Project failed to publish.";
-                    Logger.Error(title + "; " + msg);
-                    ErrorService.DisplayErrorDialog(title, msg);
-                    _outputViewModel.AppendLine("Project failed to publish");
-                    return false;
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Error("Caught exception while publishing project for remote debugging: {RemoteDebugPublishException}", ex);
-                var title = "Unable to intitate remote debugging";
-                var msg = "Project failed to publish.";
-                ErrorService.DisplayErrorDialog(title, msg);
-                _outputViewModel.AppendLine("Project failed to publish");
-                return false;
-            }
-
-            var pathToPublishDir = Path.Combine(_pathToProjectRootDir, publishDirName);
-            var startCommand = stack.Contains("win")
-                ? $"cmd /c .\\{appName} --urls=http://0.0.0.0:%PORT%"
-                : $"./{appName}";
-            var buildpack = stack.Contains("win")
-                ? "binary_buildpack"
-                : "dotnet_core_buildpack";
-            var appConfig = new AppManifest
-            {
-                Applications = new List<AppConfig>
-                {
-                    new AppConfig
-                    {
-                        Name = appName,
-                        Path = pathToPublishDir,
-                        Stack = stack,
-                        Buildpack = buildpack,
-                        Command = startCommand,
-                    }
-                }
-            };
-
-            try
-            {
-                var manifestContents = _serializationService.SerializeCfAppManifest(appConfig);
-                _outputViewModel.AppendLine($"Pushing app with this configuration:\n{manifestContents}");
-            }
-            catch (Exception ex)
-            {
-                Logger?.Error("Unable to serialize manifest contents: {AppConfig}. {SerializationException}", appConfig, ex);
-            }
-
-            var pushResult = await _cfClient.DeployAppAsync(
-                appConfig,
-                pathToPublishDir,
-                _tasExplorer.TasConnection.CloudFoundryInstance,
-                SelectedOrg,
-                SelectedSpace,
-                _outputViewModel.AppendLine,
-                _outputViewModel.AppendLine);
-            if (!pushResult.Succeeded)
-            {
-                var title = $"Failed to push app '{appName}'";
-                var msg = pushResult.Explanation.Replace("Instances starting...\n", string.Empty);
-                Logger.Error(title + msg);
-                _outputViewModel.AppendLine(title + msg);
-                ErrorService.DisplayErrorDialog(title, msg);
-                return false;
-            }
-            return true;
+            LoadingMessage = null;
+            DialogMessage = $"{promptMsg}\n\n" +
+                $"If this app is running under a different name, please select it below. Otherwise click '{PushNewAppButtonText}' and try remote debugging again once {_projectName} is running.";
+            WaitingOnAppConfirmation = true;
         }
 
         private async Task PopulateAccessibleAppsAsync()
@@ -704,28 +495,16 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             }
         }
 
-        private async Task PopulateStackOptionsAsync()
-        {
-            var stacksRespsonse = await _cfClient.GetStackNamesAsync(_tasExplorer.TasConnection.CloudFoundryInstance);
-            if (stacksRespsonse.Succeeded)
-            {
-                StackOptions = stacksRespsonse.Content;
-            }
-            else
-            {
-                StackOptions = new List<string>();
-                var title = "Unable to retrieve list of available stacks";
-                Logger.Error(title + " {StacksResponseError}", stacksRespsonse.Explanation);
-                ErrorService.DisplayErrorDialog(title, stacksRespsonse.Explanation);
-            }
-        }
-
         // Predicates //
 
         public bool CanResolveMissingApp(object arg = null)
         {
-            return (PushNewAppToDebug && SelectedOrg != null && SelectedSpace != null && SelectedStack != null)
-                || (DebugExistingApp && SelectedApp != null);
+            return SelectedApp != null;
+        }
+
+        public bool CanDisplayDeploymentWindow(object arg = null)
+        {
+            return IsLoggedIn && string.IsNullOrWhiteSpace(LoadingMessage);
         }
     }
 

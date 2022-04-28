@@ -17,6 +17,7 @@ namespace Tanzu.Toolkit.VisualStudio
         public ICommand CancelCommand { get; }
         public ICommand OpenLoginViewCommand { get; }
         public ICommand ResolveMissingAppCommand { get; }
+        public ICommand ShowDeploymentWindowCommand { get; }
         public Brush ListItemMouseOverBrush { get { return (Brush)GetValue(_listItemMouseOverBrushProperty); } set { SetValue(_listItemMouseOverBrushProperty, value); } }
         public Brush SelectedItemActiveBrush { get { return (Brush)GetValue(_selectedItemActiveBrushProperty); } set { SetValue(_selectedItemActiveBrushProperty, value); } }
         public Brush GridHeaderBrush { get { return (Brush)GetValue(_gridHeaderBrushProperty); } set { SetValue(_gridHeaderBrushProperty, value); } }
@@ -33,7 +34,8 @@ namespace Tanzu.Toolkit.VisualStudio
             DataContext = viewModel;
             CancelCommand = new DelegatingCommand(viewModel.Close, alwaysTrue);
             OpenLoginViewCommand = new DelegatingCommand(viewModel.OpenLoginView, alwaysTrue);
-            ResolveMissingAppCommand = new AsyncDelegatingCommand(viewModel.ResolveMissingAppAsync, viewModel.CanResolveMissingApp);
+            ResolveMissingAppCommand = new DelegatingCommand(viewModel.ConfirmAppToDebug, viewModel.CanResolveMissingApp);
+            ShowDeploymentWindowCommand = new DelegatingCommand(viewModel.DisplayDeploymentWindow, viewModel.CanDisplayDeploymentWindow);
             MouseDown += Window_MouseDown;
             InitializeComponent();
         }

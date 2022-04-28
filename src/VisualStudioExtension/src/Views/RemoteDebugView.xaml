@@ -55,203 +55,93 @@
             <TextBlock Text="{Binding LoadingMessage}" VerticalAlignment="Center"/>
         </StackPanel>
 
-        <StackPanel DockPanel.Dock="Top" Visibility="{Binding LoadingMessage, Converter={StaticResource StringVisibilityConverterReversed}}">
-            <TextBlock Text="{Binding DialogMessage}" TextWrapping="Wrap" MaxWidth="500" HorizontalAlignment="Left"/>
+        <StackPanel DockPanel.Dock="Top" Visibility="{Binding IsLoggedIn, Converter={StaticResource VisibilityConverter}}">
+            <StackPanel Visibility="{Binding LoadingMessage, Converter={StaticResource StringVisibilityConverterReversed}}">
+                <TextBlock Text="{Binding DialogMessage}" TextWrapping="Wrap" MaxWidth="500" HorizontalAlignment="Left"/>
 
-            <Separator Margin="8" Visibility="Hidden"/>
-            <RadioButton IsChecked="{Binding PushNewAppToDebug, Mode=TwoWay}" Content="{Binding Option1Text}" Visibility="{Binding WaitingOnAppConfirmation, Converter={StaticResource VisibilityConverter}}"/>
-            <RadioButton IsChecked="{Binding DebugExistingApp, Mode=TwoWay}" Content="{Binding Option2Text}" Visibility="{Binding WaitingOnAppConfirmation, Converter={StaticResource VisibilityConverter}}"/>
+                <Separator Margin="8" Visibility="Hidden"/>
+          
+                <Grid Background="{Binding ElementName=RemoteDebugViewElement, Path=GridHeaderBrush}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="180"/>
+                        <ColumnDefinition Width="180"/>
+                        <ColumnDefinition Width="180"/>
+                    </Grid.ColumnDefinitions>
 
-            <Separator Margin="8" Visibility="Hidden"/>
-            <Grid Visibility="{Binding PushNewAppToDebug, Converter={StaticResource VisibilityConverter}}">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                </Grid.RowDefinitions>
-
-                <TextBlock Text="Choose push location:" Grid.Row="0"/>
-
-                <ComboBox
-                    x:Name="OrgField"
-                    Grid.Row="1"
-                    Margin="0,2"
-                    ItemsSource="{Binding OrgOptions}" 
-                    SelectedItem="{Binding SelectedOrg}">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding OrgName}"/>
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
-
-                <TextBlock
-                    Grid.Row="1"
-                    Margin="8"
-                    IsHitTestVisible="False"
-                    Text="&lt;Select Org&gt;"
-                    VerticalAlignment="Center"
-                    HorizontalAlignment="Left"
-                    Foreground="DarkGray">
-
-                    <TextBlock.Style>
-                        <Style TargetType="{x:Type TextBlock}">
-                            <Setter Property="Visibility" Value="Collapsed"/>
+                    <TextBlock Grid.Column="0" Margin="8,6,0,8" Text="App" FontWeight="Bold"/>
+                    <TextBlock Grid.Column="1" Margin="8,6,0,8" Text="Space" FontWeight="Bold"/>
+                    <TextBlock Grid.Column="2" Margin="8,6,0,8" Text="Org" FontWeight="Bold"/>
+                </Grid>
+                <ListView
+                    ItemsSource="{Binding AccessibleApps}"
+                    SelectedItem="{Binding SelectedApp}"
+                    MaxHeight="200"
+                    VerticalContentAlignment="Top"  
+                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                    ScrollViewer.CanContentScroll="True">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListViewItem}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                        <Border Padding="{TemplateBinding Padding}"
+                                                        Background="{TemplateBinding Background}"
+                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                                        SnapsToDevicePixels="true">
+                                            <GridViewRowPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding Text, ElementName=OrgField}" Value="">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                    <Setter Property="Background" Value="{Binding ElementName=RemoteDebugViewElement, Path=SelectedItemActiveBrush}"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="{Binding ElementName=RemoteDebugViewElement, Path=ListItemMouseOverBrush}"/>
+                                </Trigger>
                             </Style.Triggers>
                         </Style>
-                    </TextBlock.Style>
-                </TextBlock>
-
-                <ComboBox
-                    x:Name="SpaceField"
-                    Grid.Row="2"
-                    Margin="0,2"
-                    ItemsSource="{Binding SpaceOptions}" 
-                    SelectedItem="{Binding SelectedSpace}">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding SpaceName}"/>
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
-
-                <TextBlock
-                    Grid.Row="2"
-                    Margin="8"
-                    IsHitTestVisible="False"
-                    Text="&lt;Select Space&gt;"
-                    VerticalAlignment="Center"
-                    HorizontalAlignment="Left"
-                    Foreground="DarkGray">
-
-                    <TextBlock.Style>
-                        <Style TargetType="{x:Type TextBlock}">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Text, ElementName=SpaceField}" Value="">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
-
-                <ComboBox
-                    Grid.Row="3"
-                    Margin="0,2"
-                    x:Name="StackField"
-                    ItemsSource="{Binding StackOptions}"
-                    SelectedItem="{Binding SelectedStack}">
-                </ComboBox>
-
-                <TextBlock
-                    IsHitTestVisible="False"
-                    Text="&lt;Select Stack&gt;"
-                    VerticalAlignment="Center"
-                    HorizontalAlignment="Left"
-                    Foreground="DarkGray"
-                    Margin="8"
-                    Grid.Row="3">
-                    <TextBlock.Style>
-                        <Style TargetType="{x:Type TextBlock}">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Text, ElementName=StackField}" Value="">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
-            </Grid>
-
-            <Grid Background="{Binding ElementName=RemoteDebugViewElement, Path=GridHeaderBrush}"
-                  Visibility="{Binding DebugExistingApp, Converter={StaticResource VisibilityConverter}}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="180"/>
-                    <ColumnDefinition Width="180"/>
-                    <ColumnDefinition Width="180"/>
-                </Grid.ColumnDefinitions>
-
-                <TextBlock Grid.Column="0" Margin="8,6,0,8" Text="App" FontWeight="Bold"/>
-                <TextBlock Grid.Column="1" Margin="8,6,0,8" Text="Space" FontWeight="Bold"/>
-                <TextBlock Grid.Column="2" Margin="8,6,0,8" Text="Org" FontWeight="Bold"/>
-            </Grid>
-            <ListView
-                ItemsSource="{Binding AccessibleApps}"
-                SelectedItem="{Binding SelectedApp}"
-                MaxHeight="200"
-                VerticalContentAlignment="Top"  
-                ScrollViewer.VerticalScrollBarVisibility="Auto"
-                ScrollViewer.CanContentScroll="True"
-                Visibility="{Binding DebugExistingApp, Converter={StaticResource VisibilityConverter}}">
-                <ListView.ItemContainerStyle>
-                    <Style TargetType="{x:Type ListViewItem}">
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="{x:Type ListViewItem}">
-                                    <Border Padding="{TemplateBinding Padding}"
-                                                    Background="{TemplateBinding Background}"
-                                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                                    SnapsToDevicePixels="true">
-                                        <GridViewRowPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                                                      SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-                                    </Border>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                        <Style.Triggers>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="FontWeight" Value="Bold"/>
-                                <Setter Property="Background" Value="{Binding ElementName=RemoteDebugViewElement, Path=SelectedItemActiveBrush}"/>
-                            </Trigger>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="{Binding ElementName=RemoteDebugViewElement, Path=ListItemMouseOverBrush}"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </ListView.ItemContainerStyle>
-                <ListView.View>
-                    <GridView>
-                        <GridView.Columns>
-                            <GridViewColumn Header="App" Width="180">
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding AppName}" TextWrapping="Wrap"/>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
-                            <GridViewColumn Header="Space" Width="180">
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding ParentSpace.SpaceName}" TextWrapping="Wrap"/>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
-                            <GridViewColumn Header="Org" Width="180">
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding ParentSpace.ParentOrg.OrgName}" TextWrapping="Wrap"/>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
-                        </GridView.Columns>
-                    </GridView>
-                </ListView.View>
-            </ListView>
-
-            <Separator Margin="4" Visibility="Hidden"/>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="Cancel" Margin="4" Command="{Binding ElementName=RemoteDebugViewElement, Path=CancelCommand}" HorizontalAlignment="Right"/>
-                <Button Content="OK" Margin="4" Command="{Binding ElementName=RemoteDebugViewElement, Path=ResolveMissingAppCommand}" HorizontalAlignment="Right"/>
+                    </ListView.ItemContainerStyle>
+                    <ListView.View>
+                        <GridView>
+                            <GridView.Columns>
+                                <GridViewColumn Header="App" Width="180">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding AppName}" TextWrapping="Wrap"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Space" Width="180">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding ParentSpace.SpaceName}" TextWrapping="Wrap"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Org" Width="180">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding ParentSpace.ParentOrg.OrgName}" TextWrapping="Wrap"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView.Columns>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
             </StackPanel>
+        </StackPanel>
+        
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Bottom" Margin="0,12,0,0">
+            <Button Content="Cancel" Margin="4" Command="{Binding ElementName=RemoteDebugViewElement, Path=CancelCommand}" HorizontalAlignment="Right"/>
+            <Button Content="{Binding PushNewAppButtonText}" Margin="4" Command="{Binding ElementName=RemoteDebugViewElement, Path=ShowDeploymentWindowCommand}" HorizontalAlignment="Right"/>
+            <Button Content="OK" Margin="4" Command="{Binding ElementName=RemoteDebugViewElement, Path=ResolveMissingAppCommand}" HorizontalAlignment="Right"/>
         </StackPanel>
     </DockPanel>
 </ui:DialogWindow>
