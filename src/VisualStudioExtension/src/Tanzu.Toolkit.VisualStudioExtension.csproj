@@ -86,6 +86,7 @@
     <Compile Include="Services\ProjectService.cs" />
     <Compile Include="Views\Converters\InverseBoolConverter.cs" />
     <Compile Include="Views\Converters\NullVisibilityConverter.cs" />
+    <Compile Include="Views\Converters\IntToBoolConverter.cs" />
     <Compile Include="Views\IRemoteDebugView.cs" />
     <Compile Include="Views\RemoteDebugView.xaml.cs">
       <DependentUpon>RemoteDebugView.xaml</DependentUpon>
