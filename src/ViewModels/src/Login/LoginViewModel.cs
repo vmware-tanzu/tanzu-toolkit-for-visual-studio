@@ -28,6 +28,7 @@ namespace Tanzu.Toolkit.ViewModels
         private bool _isApiAddressFormatValid;
         private bool _certificateInvalid = false;
         private string _ssoLink;
+        private string _ssoPasscode;
 
         public LoginViewModel(IServiceProvider services)
             : base(services)
@@ -180,7 +181,15 @@ namespace Tanzu.Toolkit.ViewModels
 
         public Func<bool> PasswordEmpty { get; set; }
 
-        public string SsoPasscode { get; set; }
+        public string SsoPasscode
+        {
+            get => _ssoPasscode;
+            set
+            {
+                _ssoPasscode = value;
+                RaisePropertyChangedEvent("SsoPasscode");
+            }
+        }
 
         // Methods //
 
