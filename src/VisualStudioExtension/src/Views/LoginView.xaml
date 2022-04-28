@@ -27,6 +27,9 @@
         <converters:PageNumberConverter x:Key="Page1Displayer" ShowValue="1" ReserveSpace="False"/>
         <converters:PageNumberConverter x:Key="Page2Displayer" ShowValue="2" ReserveSpace="False"/>
         <converters:PageNumberConverter x:Key="Page3Displayer" ShowValue="3" ReserveSpace="False"/>
+        <converters:IntToBoolConverter x:Key="IntIs1" ExpectedInt="1"/>
+        <converters:IntToBoolConverter x:Key="IntIs2" ExpectedInt="2"/>
+        <converters:IntToBoolConverter x:Key="IntIs3" ExpectedInt="3"/>
 
         <Style x:Key="ApiAddressFieldStyle" TargetType="{x:Type TextBox}">
             <Style.Triggers>
@@ -187,6 +190,7 @@
 
                     <Button
                         Content="Next"
+                        IsDefault="{Binding PageNum, Converter={StaticResource IntIs1}}"
                         Margin="4"
                         Padding="4,0"
                         HorizontalAlignment="Right"
@@ -212,6 +216,7 @@
                         Margin="4"
                         Padding="4,0"
                         Click="Close"
+                        IsCancel="{Binding PageNum, Converter={StaticResource IntIs1}}"
                         Content="Cancel"/>
                 </StackPanel>
             </Grid>
@@ -295,6 +300,7 @@
 
                     <Button
                         Content="Log In"
+                        IsDefault="{Binding PageNum, Converter={StaticResource IntIs2}}"
                         IsEnabled="{Binding IsApiAddressFormatValid}"
                         Margin="4"
                         Padding="4,0"
@@ -313,6 +319,7 @@
                         Margin="4"
                         Padding="4,0"
                         Click="Close"
+                        IsCancel="{Binding PageNum, Converter={StaticResource IntIs2}}"
                         Content="Cancel"/>
                 </StackPanel>
             </Grid>
@@ -354,6 +361,7 @@
 
                     <Button
                         Content="Log In"
+                        IsDefault="{Binding PageNum, Converter={StaticResource IntIs3}}"
                         HorizontalAlignment="Right"
                         Command="{ Binding ElementName=LoginViewElement, Path=LogInWithPasscodeCommand }" 
                         CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
@@ -367,6 +375,7 @@
 
                     <Button
                         Click="Close"
+                        IsCancel="{Binding PageNum, Converter={StaticResource IntIs3}}"
                         Content="Cancel"/>
                 </StackPanel>
             </Grid>
