@@ -11,6 +11,9 @@ namespace Tanzu.Toolkit.ViewModels
         bool Expanded { get; set; }
         ObservableCollection<string> SelectedBuildpacks { get; set; }
         ObservableCollection<string> SelectedServices { get; set; }
+        bool DeploymentInProgress { get; }
+        IView OutputView { get; }
+        bool ConfigureForRemoteDebugging { get; set; }
 
         bool CanDeployApp(object arg);
         bool CanToggleAdvancedOptions(object arg);
