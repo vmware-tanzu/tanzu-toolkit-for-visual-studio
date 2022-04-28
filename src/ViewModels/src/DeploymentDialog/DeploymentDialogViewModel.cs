@@ -1036,7 +1036,7 @@ namespace Tanzu.Toolkit.ViewModels
                         existingSvOption.IsSelected = true;
                     }
 
-                    var svcPresentInOptions = ServiceOptions.Exists(s => s.Name.ToLower() == svName.ToLower());
+                    var svcPresentInOptions = ServiceOptions.Exists(s => s.Name == svName);
                     if (!svcPresentInOptions)
                     {
                         ApplyUnrecognizedServiceWarning(svName);
@@ -1073,7 +1073,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         private void RemoveWarningIfAllSelectedServicesExist()
         {
-            if (SelectedServices.All(remainingSvcName => ServiceOptions.Exists(item => item.Name.ToLower() == remainingSvcName.ToLower())))
+            if (SelectedServices.All(remainingSvcName => ServiceOptions.Exists(item => item.Name == remainingSvcName)))
             {
                 ServiceNotRecognizedWarningMessage = null;
             }
