@@ -99,7 +99,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         }
 
-        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        private void BuildpackItemSelected(object sender, RoutedEventArgs e)
         {
             if (e.Source is System.Windows.Controls.CheckBox cb)
             {
@@ -107,11 +107,27 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             }
         }
 
-        private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
+        private void BuildpackItemDeselected(object sender, RoutedEventArgs e)
         {
             if (e.Source is System.Windows.Controls.CheckBox cb)
             {
                 _viewModel.RemoveFromSelectedBuildpacks(cb.Content);
+            }
+        }
+
+        private void ServiceItemSelected(object sender, RoutedEventArgs e)
+        {
+            if (e.Source is System.Windows.Controls.CheckBox cb)
+            {
+                _viewModel.AddToSelectedServices(cb.Content);
+            }
+        }
+
+        private void ServiceItemDeselected(object sender, RoutedEventArgs e)
+        {
+            if (e.Source is System.Windows.Controls.CheckBox cb)
+            {
+                _viewModel.RemoveFromSelectedServices(cb.Content);
             }
         }
 

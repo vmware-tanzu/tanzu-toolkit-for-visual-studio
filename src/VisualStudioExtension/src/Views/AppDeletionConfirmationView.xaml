@@ -61,6 +61,7 @@
                     Content="OK"
                     Margin="4"
                     Padding="4"
+                    IsDefault="True"
                     Command="{ Binding ElementName=AppDeletionConfirmationViewElement, Path=DeleteAppCommand }" 
                     CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
                     HorizontalAlignment="Right"/>
@@ -76,6 +77,7 @@
                     Margin="4"
                     Padding="4"
                     Click="Close"
+                    IsCancel="True"
                     Content="Cancel"/>
             </StackPanel>
         </Grid>

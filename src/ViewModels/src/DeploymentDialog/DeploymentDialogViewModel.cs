@@ -11,6 +11,7 @@ using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.DotnetCli;
 using Tanzu.Toolkit.Services.ErrorDialog;
+using Tanzu.Toolkit.Services.Project;
 
 [assembly: InternalsVisibleTo("Tanzu.Toolkit.ViewModels.Tests")]
 
@@ -43,7 +44,7 @@ namespace Tanzu.Toolkit.ViewModels
         private readonly IDotnetCliService _dotnetCliService;
         internal IOutputViewModel _outputViewModel;
         internal ITasExplorerViewModel _tasExplorerViewModel;
-
+        private readonly IProjectService _projectService;
         private List<CloudFoundryInstance> _cfInstances;
         private List<CloudFoundryOrganization> _cfOrgs;
         private List<CloudFoundrySpace> _cfSpaces;
@@ -58,6 +59,7 @@ namespace Tanzu.Toolkit.ViewModels
         private string _targetName;
         private bool _isLoggedIn;
         private string _selectedStack;
+        private string _serviceNotRecognizedWarningMessage;
         private ObservableCollection<string> _selectedBuildpacks;
         private ObservableCollection<string> _selectedServices;
         private List<string> _stackOptions;
@@ -73,22 +75,22 @@ namespace Tanzu.Toolkit.ViewModels
         private bool _configureForRemoteDebugging;
         private readonly string _targetFrameworkMoniker;
 
-        public DeploymentDialogViewModel(IServiceProvider services, string projectName, string directoryOfProjectToDeploy, string targetFrameworkMoniker)
-            : base(services)
+        public DeploymentDialogViewModel(IServiceProvider services) : base(services)
         {
             _errorDialogService = services.GetRequiredService<IErrorDialog>();
             _dotnetCliService = services.GetRequiredService<IDotnetCliService>();
             _tasExplorerViewModel = services.GetRequiredService<ITasExplorerViewModel>();
+            _projectService = services.GetRequiredService<IProjectService>();
 
-            OutputView = ViewLocatorService.GetViewByViewModelName(nameof(ViewModels.OutputViewModel), $"Tanzu Push Output (\"{projectName}\")") as IView;
+            OutputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel), $"Tanzu Push Output (\"{_projectService.ProjectName}\")") as IView;
             _outputViewModel = OutputView?.ViewModel as IOutputViewModel;
 
             DeploymentInProgress = false;
-            PathToProjectRootDir = directoryOfProjectToDeploy;
+            PathToProjectRootDir = _projectService.PathToProjectDirectory;
             SelectedBuildpacks = new ObservableCollection<string>();
             SelectedServices = new ObservableCollection<string>();
 
-            _targetFrameworkMoniker = targetFrameworkMoniker;
+            _targetFrameworkMoniker = _projectService.TargetFrameworkMoniker;
             if (_targetFrameworkMoniker.StartsWith(_fullFrameworkTFM))
             {
                 _fullFrameworkDeployment = true;
@@ -101,6 +103,7 @@ namespace Tanzu.Toolkit.ViewModels
             ServiceOptions = new List<ServiceListItem>();
             StackOptions = new List<string>();
             DeploymentDirectoryPath = null;
+            ServiceNotRecognizedWarningMessage = null;
 
             ManifestModel = new AppManifest
             {
@@ -109,7 +112,7 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     new AppConfig
                     {
-                        Name = projectName,
+                        Name = _projectService.ProjectName,
                         Buildpacks = new List<string>(),
                         Services = new List<string>(),
                     }
@@ -129,8 +132,8 @@ namespace Tanzu.Toolkit.ViewModels
                 ThreadingService.StartBackgroundTask(UpdateStackOptions);
             }
 
-            AppName = projectName;
-            _projectName = projectName;
+            AppName = _projectService.ProjectName;
+            _projectName = _projectService.ProjectName;
             Expanded = false;
         }
 
@@ -533,6 +536,17 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
+        public string ServiceNotRecognizedWarningMessage
+        {
+            get => _serviceNotRecognizedWarningMessage;
+            set
+            {
+                _serviceNotRecognizedWarningMessage = value;
+                RaisePropertyChangedEvent("ServiceNotRecognizedWarningMessage");
+            }
+        }
+
+
         public bool CanDeployApp(object arg)
         {
             return !string.IsNullOrEmpty(AppName) && IsLoggedIn && SelectedOrg != null && SelectedSpace != null;
@@ -821,18 +835,18 @@ namespace Tanzu.Toolkit.ViewModels
                 RaisePropertyChangedEvent("SelectedServices");
 
                 ManifestModel.Applications[0].Services = SelectedServices.ToList();
+                RemoveWarningIfAllSelectedServicesExist();
             }
         }
 
         public void ClearSelectedServices(object arg = null)
         {
             SelectedServices.Clear();
-
             foreach (var svItem in ServiceOptions)
             {
                 svItem.IsSelected = false;
             }
-
+            RemoveWarningIfAllSelectedServicesExist();
             RaisePropertyChangedEvent("SelectedServices");
         }
 
@@ -1010,6 +1024,8 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 ClearSelectedServices();
 
+                var unrecognizedSvcNames = new List<string>();
+
                 foreach (var svName in svs)
                 {
                     AddToSelectedServices(svName);
@@ -1020,10 +1036,49 @@ namespace Tanzu.Toolkit.ViewModels
                     {
                         existingSvOption.IsSelected = true;
                     }
+
+                    var svcPresentInOptions = ServiceOptions.Exists(s => s.Name == svName);
+                    if (!svcPresentInOptions)
+                    {
+                        ApplyUnrecognizedServiceWarning(svName);
+                        unrecognizedSvcNames.Add(svName);
+                    }
+                }
+                if (unrecognizedSvcNames.Count > 0)
+                {
+                    var svcStr = "";
+                    foreach (var svcName in unrecognizedSvcNames)
+                    {
+                        svcStr += $"{Environment.NewLine}    - {svcName}";
+                    }
+                    ErrorService.DisplayWarningDialog(
+                        "Unrecognized service provided",
+                        "Manifest indicated that the following should be used, but no such service detected:" +
+                        Environment.NewLine + svcStr + Environment.NewLine + Environment.NewLine +
+                        "Deployment may not succeed.");
                 }
             }
         }
 
+        private void ApplyUnrecognizedServiceWarning(string svName)
+        {
+            if (string.IsNullOrWhiteSpace(ServiceNotRecognizedWarningMessage))
+            {
+                ServiceNotRecognizedWarningMessage = $"'{svName}' not recognized";
+            }
+            else
+            {
+                ServiceNotRecognizedWarningMessage = "Multiple selected services not recognized";
+            }
+        }
+
+        private void RemoveWarningIfAllSelectedServicesExist()
+        {
+            if (SelectedServices.All(remainingSvcName => ServiceOptions.Exists(item => item.Name == remainingSvcName)))
+            {
+                ServiceNotRecognizedWarningMessage = null;
+            }
+        }
 
         private void SetStartCommandFromManifest(AppManifest appManifest)
         {

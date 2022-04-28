@@ -16,6 +16,7 @@ using Tanzu.Toolkit.Services.DotnetCli;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
+using Tanzu.Toolkit.Services.Project;
 using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
 using Tanzu.Toolkit.ViewModels.AppDeletionConfirmation;
@@ -41,6 +42,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         protected Mock<IDotnetCliService> MockDotnetCliService { get; set; }
         protected Mock<ILoginViewModel> MockLoginViewModel { get; set; }
         protected Mock<IAppDeletionConfirmationViewModel> MockAppDeletionConfirmationViewModel { get; set; }
+        protected Mock<IProjectService> MockProjectService { get; set; }
 
         protected const string _fakeCfName = "fake cf name";
         protected const string _fakeCfApiAddress = "http://fake.api.address";
@@ -486,6 +488,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockDotnetCliService = new Mock<IDotnetCliService>();
             MockLoginViewModel = new Mock<ILoginViewModel>();
             MockAppDeletionConfirmationViewModel = new Mock<IAppDeletionConfirmationViewModel>();
+            MockProjectService = new Mock<IProjectService>();
 
             MockLogger = new Mock<ILogger>();
             MockLoggingService.SetupGet(m => m.Logger).Returns(MockLogger.Object);
@@ -504,6 +507,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             services.AddSingleton(MockDotnetCliService.Object);
             services.AddSingleton(MockLoginViewModel.Object);
             services.AddSingleton(MockAppDeletionConfirmationViewModel.Object);
+            services.AddSingleton(MockProjectService.Object);
 
             Services = services.BuildServiceProvider();
         }
