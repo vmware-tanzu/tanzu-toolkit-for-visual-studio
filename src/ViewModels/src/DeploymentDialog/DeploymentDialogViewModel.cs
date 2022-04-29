@@ -841,10 +841,14 @@ namespace Tanzu.Toolkit.ViewModels
 
         public void ClearSelectedServices(object arg = null)
         {
-            SelectedServices.Clear();
-            foreach (var svItem in ServiceOptions)
+            foreach (var svcName in SelectedServices.ToList()) // copy to avoid iterating over a collection that's being modified
             {
-                svItem.IsSelected = false;
+                RemoveFromSelectedServices(svcName);
+                var itemInOptions = ServiceOptions.FirstOrDefault(item => item.Name == svcName);
+                if (itemInOptions != null)
+                {
+                    itemInOptions.IsSelected = false;
+                }
             }
             RemoveWarningIfAllSelectedServicesExist();
             RaisePropertyChangedEvent("SelectedServices");
