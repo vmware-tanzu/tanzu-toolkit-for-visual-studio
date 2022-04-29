@@ -138,7 +138,7 @@
                             Grid.Row="0"
                             Grid.Column="0"
                             HorizontalAlignment="Left"
-                            MaxWidth="350"
+                            TextWrapping="Wrap"
                             IsEnabled="{Binding IsLoggedIn}"
                             Text="{Binding ManifestPathLabel}" 
                             ToolTip="{Binding ManifestPathLabel}"/>
