@@ -813,6 +813,7 @@ namespace Tanzu.Toolkit.ViewModels
         public void ClearSelectedManifest(object arg = null)
         {
             ManifestPath = null;
+            ResetAllPushConfigValues();
         }
 
         public void AddToSelectedServices(object arg)
@@ -840,10 +841,14 @@ namespace Tanzu.Toolkit.ViewModels
 
         public void ClearSelectedServices(object arg = null)
         {
-            SelectedServices.Clear();
-            foreach (var svItem in ServiceOptions)
+            foreach (var svcName in SelectedServices.ToList()) // copy to avoid iterating over a collection that's being modified
             {
-                svItem.IsSelected = false;
+                RemoveFromSelectedServices(svcName);
+                var itemInOptions = ServiceOptions.FirstOrDefault(item => item.Name == svcName);
+                if (itemInOptions != null)
+                {
+                    itemInOptions.IsSelected = false;
+                }
             }
             RemoveWarningIfAllSelectedServicesExist();
             RaisePropertyChangedEvent("SelectedServices");
@@ -970,12 +975,24 @@ namespace Tanzu.Toolkit.ViewModels
 
         private void SetViewModelValuesFromManifest(AppManifest manifest)
         {
+            ResetAllPushConfigValues();
+
             SetAppNameFromManifest(manifest);
             SetStackFromManifest(manifest);
             SetBuildpacksFromManifest(manifest);
             SetServicesFromManifest(manifest);
             SetStartCommandFromManifest(manifest);
             SetPathFromManifest(manifest);
+        }
+
+        private void ResetAllPushConfigValues()
+        {
+            AppName = _projectService.ProjectName;
+            SelectedStack = null;
+            ClearSelectedBuildpacks();
+            ClearSelectedServices();
+            StartCommand = null;
+            DeploymentDirectoryPath = null;
         }
 
         private void SetAppNameFromManifest(AppManifest appManifest)
@@ -1001,8 +1018,6 @@ namespace Tanzu.Toolkit.ViewModels
 
             if (bps != null)
             {
-                ClearSelectedBuildpacks();
-
                 foreach (var bpName in bps)
                 {
                     AddToSelectedBuildpacks(bpName);
@@ -1027,8 +1042,6 @@ namespace Tanzu.Toolkit.ViewModels
 
             if (svs != null)
             {
-                ClearSelectedServices();
-
                 var unrecognizedSvcNames = new List<string>();
 
                 foreach (var svName in svs)
