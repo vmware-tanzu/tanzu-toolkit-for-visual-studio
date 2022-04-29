@@ -94,6 +94,26 @@ namespace Tanzu.Toolkit.Models
 
                 newApp.Buildpacks = clonedBps;
             }
+            else 
+            { 
+                newApp.Buildpacks = new List<string>();
+            }
+
+            if (Services != null)
+            {
+                var clonedSvs = new List<string>();
+
+                foreach (var svName in Services)
+                {
+                    clonedSvs.Add(svName);
+                }
+
+                newApp.Services = clonedSvs;
+            }
+            else
+            {
+                newApp.Services = new List<string>();
+            }
 
             if (Docker != null)
             {
