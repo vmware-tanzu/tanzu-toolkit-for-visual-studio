@@ -403,7 +403,10 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             projSvc.PathToProjectDirectory = _pathToProjectRootDir;
             projSvc.TargetFrameworkMoniker = _targetFrameworkMoniker;
 
+            var tasExplorer = Services.GetRequiredService<ITasExplorerViewModel>();
             var deploymentViewModel = Services.GetRequiredService<IDeploymentDialogViewModel>();
+            deploymentViewModel.IsLoggedIn = tasExplorer.TasConnection != null;
+            deploymentViewModel.Expanded = false;
             deploymentViewModel.ConfigureForRemoteDebugging = true;
             DialogService.ShowDialog(nameof(DeploymentDialogViewModel));
 

@@ -139,15 +139,18 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                             projSvc.PathToProjectDirectory = projectDirectory;
                             projSvc.TargetFrameworkMoniker = tfm;
 
-                            var viewModel = _services.GetRequiredService<IDeploymentDialogViewModel>();
-                            var view = _services.GetRequiredService<IDeploymentDialogView>() as System.Windows.Window;
+                            var tasExplorer = _services.GetRequiredService<ITasExplorerViewModel>();
+                            var deploymentViewModel = _services.GetRequiredService<IDeploymentDialogViewModel>();
+                            deploymentViewModel.IsLoggedIn = tasExplorer.TasConnection != null;
+                            deploymentViewModel.Expanded = false;
 
-                            view?.ShowDialog();
+                            var deploymentWindow = _services.GetRequiredService<IDeploymentDialogView>() as System.Windows.Window;
+                            deploymentWindow?.ShowDialog();
 
                             // * Actions to take after modal closes:
-                            if (viewModel.DeploymentInProgress) // don't open tool window if modal was closed via "X" button
+                            if (deploymentViewModel.DeploymentInProgress) // don't open tool window if modal was closed via "X" button
                             {
-                                viewModel.OutputView.Show();
+                                deploymentViewModel.OutputView.Show();
                             }
                         }
                     }

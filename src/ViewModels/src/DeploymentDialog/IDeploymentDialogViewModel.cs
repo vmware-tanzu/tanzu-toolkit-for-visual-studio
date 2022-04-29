@@ -14,6 +14,7 @@ namespace Tanzu.Toolkit.ViewModels
         bool DeploymentInProgress { get; }
         IView OutputView { get; }
         bool ConfigureForRemoteDebugging { get; set; }
+        bool IsLoggedIn { get; set; }
 
         bool CanDeployApp(object arg);
         bool CanToggleAdvancedOptions(object arg);
