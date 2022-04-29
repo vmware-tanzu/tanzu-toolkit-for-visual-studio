@@ -1011,6 +1011,7 @@ namespace Tanzu.Toolkit.ViewModels
                     }
                 }
             }
+
         }
 
         private void SetServicesFromManifest(AppManifest appManifest)

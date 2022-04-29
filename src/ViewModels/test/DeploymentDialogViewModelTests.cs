@@ -1094,6 +1094,60 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("ManifestPath")]
+        public void ManifestPathSetter_SetsBuildpacksOnManifestModelPropertyToEmptyList_WhenManifestExistsAndDoesntContainBuildpacks()
+        {
+            var pathToFakeManifest = "some//fake//path";
+            var fakeManifestContent = "some yaml";
+
+            var fakeAppManifest = new AppManifest
+            {
+                Applications = new List<AppConfig>
+                {
+                    new AppConfig
+                    {
+                        Buildpack = null,
+                    }
+                }
+            };
+
+            MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
+            MockFileService.Setup(m => m.ReadFileContents(pathToFakeManifest)).Returns(fakeManifestContent);
+            MockSerializationService.Setup(m => m.ParseCfAppManifest(fakeManifestContent)).Returns(fakeAppManifest);
+
+            _sut.ManifestPath = pathToFakeManifest;
+
+            CollectionAssert.AreEqual(new List<string>(), _sut.ManifestModel.Applications[0].Buildpacks);
+        }
+
+        [TestMethod]
+        [TestCategory("ManifestPath")]
+        public void ManifestPathSetter_SetsServicesOnManifestModelPropertyToEmptyList_WhenManifestExistsAndDoesntContainServices()
+        {
+            var pathToFakeManifest = "some//fake//path";
+            var fakeManifestContent = "some yaml";
+
+            var fakeAppManifest = new AppManifest
+            {
+                Applications = new List<AppConfig>
+                {
+                    new AppConfig
+                    {
+                        Services = null,
+                    }
+                }
+            };
+
+            MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
+            MockFileService.Setup(m => m.ReadFileContents(pathToFakeManifest)).Returns(fakeManifestContent);
+            MockSerializationService.Setup(m => m.ParseCfAppManifest(fakeManifestContent)).Returns(fakeAppManifest);
+
+            _sut.ManifestPath = pathToFakeManifest;
+
+            CollectionAssert.AreEqual(new List<string>(), _sut.ManifestModel.Applications[0].Services);
+        }
+
+        [TestMethod]
+        [TestCategory("ManifestPath")]
         public void ManifestPathSetter_DisplaysError_AndDoesNotChangeAppName_WhenManifestDoesNotExist()
         {
             var pathToNonexistentManifest = "some//fake//path";
