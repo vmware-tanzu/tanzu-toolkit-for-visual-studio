@@ -81,10 +81,8 @@ namespace Tanzu.Toolkit.ViewModels
             _dotnetCliService = services.GetRequiredService<IDotnetCliService>();
             _tasExplorerViewModel = services.GetRequiredService<ITasExplorerViewModel>();
             _projectService = services.GetRequiredService<IProjectService>();
-
-            OutputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel), $"Tanzu Push Output (\"{_projectService.ProjectName}\")") as IView;
-            _outputViewModel = OutputView?.ViewModel as IOutputViewModel;
-
+            
+            CreateNewOutputView();
             DeploymentInProgress = false;
             PathToProjectRootDir = _projectService.PathToProjectDirectory;
             SelectedBuildpacks = new ObservableCollection<string>();
@@ -556,6 +554,7 @@ namespace Tanzu.Toolkit.ViewModels
         {
             if (CanDeployApp(null))
             {
+                CreateNewOutputView();
                 DeploymentInProgress = true;
                 var _ = ThreadingService.StartBackgroundTask(StartDeployment);
                 DialogService.CloseDialog(dialogWindow, true);
@@ -942,6 +941,12 @@ namespace Tanzu.Toolkit.ViewModels
             }
 
             DeploymentInProgress = false;
+        }
+
+        private void CreateNewOutputView()
+        {
+            OutputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel), $"Tanzu Push Output (\"{_projectService.ProjectName}\")") as IView;
+            _outputViewModel = OutputView?.ViewModel as IOutputViewModel;
         }
 
         private void SetManifestIfDefaultExists()

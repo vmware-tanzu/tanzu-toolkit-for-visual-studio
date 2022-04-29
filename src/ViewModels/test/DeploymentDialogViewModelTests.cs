@@ -366,6 +366,35 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
+        [TestCategory("DeployApp")]
+        public void DeployApp_CreatesNewOutputView_WhenCanDeployAppIsTrue()
+        {
+            var dw = new object();
+
+            _sut.AppName = _fakeAppName;
+            _sut.SelectedOrg = _fakeOrg;
+            _sut.SelectedSpace = _fakeSpace;
+            _sut.IsLoggedIn = true;
+            var initialView = _sut.OutputView;
+            var initialViewModel = _sut._outputViewModel;
+
+            // sanity check: ctor should've created a view already
+            MockViewLocatorService.Verify(mock =>
+                mock.GetViewByViewModelName(nameof(OutputViewModel), It.Is<string>(s => s.Contains("Tanzu Push Output"))),
+                Times.Once);
+
+            Assert.IsTrue(_sut.CanDeployApp(null));
+
+            _sut.DeployApp(dw);
+
+            // ensure new view was requested
+            MockViewLocatorService.Verify(mock =>
+                mock.GetViewByViewModelName(nameof(OutputViewModel), It.Is<string>(s => s.Contains("Tanzu Push Output"))),
+                Times.Exactly(2));
+        }
+
+        [TestMethod]
+        [TestCategory("DeployApp")]
         public void DeployApp_DoesNothing_WhenCanDeployAppIsFalse()
         {
             var dw = new object();
