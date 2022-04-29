@@ -79,7 +79,7 @@
 
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" MinWidth="200"/>
-                        <ColumnDefinition Width="2*" MinWidth="400"/>
+                        <ColumnDefinition Width="2*" MinWidth="500"/>
                     </Grid.ColumnDefinitions>
 
                     <!--MAIN GRID ROW 0-->
@@ -372,7 +372,7 @@
 
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" MinWidth="200"/>
-                        <ColumnDefinition Width="2*" MinWidth="400"/>
+                        <ColumnDefinition Width="2*" MinWidth="500"/>
                     </Grid.ColumnDefinitions>
 
                     <!--HIDDEN GRID ROW 0-->
