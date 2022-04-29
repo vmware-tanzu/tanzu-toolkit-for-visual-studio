@@ -449,14 +449,15 @@
                     <!--HIDDEN GRID ROW 3-->
                     <TextBlock
                         VerticalAlignment="Top"
-                        Margin="0,6,0,0"
+                        Margin="0,12,0,0"
                         Grid.Row="3"
                         Grid.Column="0"
                         Text="Buildpack"/>
 
                     <StackPanel
                         Grid.Row="3"
-                        Grid.Column="1">
+                        Grid.Column="1"
+                        Margin="0,8,0,0">
 
                         <Grid Grid.Row="3" Grid.Column="1">
                             <Grid.RowDefinitions>
@@ -471,6 +472,7 @@
                             <TextBlock
                                 Text="{Binding SelectedBuildpacks, Converter={StaticResource SelectedItemStringListConverter}}"
                                 ToolTip="{Binding SelectedBuildpacks, Converter={StaticResource SelectedItemStringListConverter}}"
+                                TextWrapping="Wrap"
                                 Grid.Column="0"
                                 MaxWidth="350"
                                 HorizontalAlignment="Left"
