@@ -813,6 +813,7 @@ namespace Tanzu.Toolkit.ViewModels
         public void ClearSelectedManifest(object arg = null)
         {
             ManifestPath = null;
+            ResetAllPushConfigValues();
         }
 
         public void AddToSelectedServices(object arg)
