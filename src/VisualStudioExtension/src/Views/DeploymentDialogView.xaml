@@ -647,6 +647,7 @@
                                 ToolTip="{Binding SelectedServices, Converter={StaticResource SelectedItemStringListConverter}}"
                                 Grid.Column="0"
                                 MaxWidth="350"
+                                TextWrapping="Wrap"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
                                 IsEnabled="{Binding IsLoggedIn}"/>
