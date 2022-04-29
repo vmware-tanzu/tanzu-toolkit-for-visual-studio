@@ -453,7 +453,7 @@ namespace Tanzu.Toolkit.ViewModels
         {
             get => _isLoggedIn;
 
-            internal set
+            set
             {
                 _isLoggedIn = value;
                 RaisePropertyChangedEvent("IsLoggedIn");
