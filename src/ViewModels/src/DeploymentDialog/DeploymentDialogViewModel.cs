@@ -970,12 +970,24 @@ namespace Tanzu.Toolkit.ViewModels
 
         private void SetViewModelValuesFromManifest(AppManifest manifest)
         {
+            ResetAllPushConfigValues();
+
             SetAppNameFromManifest(manifest);
             SetStackFromManifest(manifest);
             SetBuildpacksFromManifest(manifest);
             SetServicesFromManifest(manifest);
             SetStartCommandFromManifest(manifest);
             SetPathFromManifest(manifest);
+        }
+
+        private void ResetAllPushConfigValues()
+        {
+            AppName = _projectService.ProjectName;
+            SelectedStack = null;
+            ClearSelectedBuildpacks();
+            ClearSelectedServices();
+            StartCommand = null;
+            DeploymentDirectoryPath = null;
         }
 
         private void SetAppNameFromManifest(AppManifest appManifest)
@@ -1001,8 +1013,6 @@ namespace Tanzu.Toolkit.ViewModels
 
             if (bps != null)
             {
-                ClearSelectedBuildpacks();
-
                 foreach (var bpName in bps)
                 {
                     AddToSelectedBuildpacks(bpName);
@@ -1027,8 +1037,6 @@ namespace Tanzu.Toolkit.ViewModels
 
             if (svs != null)
             {
-                ClearSelectedServices();
-
                 var unrecognizedSvcNames = new List<string>();
 
                 foreach (var svName in svs)
