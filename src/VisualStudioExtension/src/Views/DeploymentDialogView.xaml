@@ -426,6 +426,7 @@
                             Grid.Column="0"
                             HorizontalAlignment="Left"
                             MaxWidth="350"
+                            TextWrapping="Wrap"
                             IsEnabled="{Binding IsLoggedIn}"
                             Text="{Binding DirectoryPathLabel}" 
                             ToolTip="{Binding DirectoryPathLabel}"/>
