@@ -313,6 +313,8 @@
                     <!--MAIN GRID ROW 6-->
                     <Button
                         Command="{Binding ElementName=DeploymentDialogViewElement, Path=ToggleAdvancedOptionsCommand}"
+                        IsEnabled="{Binding IsLoggedIn}"
+                        Visibility="{Binding IsLoggedIn, Converter={StaticResource Visibility}}"
                         Grid.Row="6"
                         Grid.Column="0"
                         Padding="0"
