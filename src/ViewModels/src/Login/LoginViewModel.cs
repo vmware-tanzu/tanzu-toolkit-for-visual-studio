@@ -288,12 +288,18 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public void NavigateToTargetPage(object arg = null)
+        public void DecrementPageNum(object arg = null)
         {
-            PageNum = 1;
-
-            // clear previous login errors
-            ErrorMessage = null;
+            if (PageNum > 1)
+            {
+                PageNum--;
+                ErrorMessage = null; // clear previous login errors
+            }
+            else
+            {
+                PageNum = 1;
+                ErrorMessage = null; // clear previous login errors
+            }
         }
 
         public void ShowSsoLogin(object arg = null)

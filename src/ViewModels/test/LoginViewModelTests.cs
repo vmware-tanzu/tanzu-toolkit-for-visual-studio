@@ -478,14 +478,32 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("NavigateToTargetPage")]
-        public void NavigateToTargetPage_SetsPageNumTo1()
+        [TestCategory("DecrementPageNum")]
+        [DataRow(1234)]
+        [DataRow(12)]
+        [DataRow(2)]
+        public void DecrementPageNum_ReducesPageNumBy1_WhenPageNumGreaterThan1(int pgVal)
         {
-            _sut.PageNum = 1234;
+            _sut.PageNum = pgVal;
+            var expectedNewVal = pgVal - 1;
 
-            Assert.AreNotEqual(1, _sut.PageNum);
+            Assert.AreNotEqual(expectedNewVal, _sut.PageNum);
 
-            _sut.NavigateToTargetPage();
+            _sut.DecrementPageNum();
+
+            Assert.AreEqual(expectedNewVal, _sut.PageNum);
+        }
+
+        [TestMethod]
+        [TestCategory("DecrementPageNum")]
+        [DataRow(1)]
+        [DataRow(0)]
+        [DataRow(-1)]
+        public void DecrementPageNum_SetsPageNumTo1_WhenPageNumLessThanOrEqualTo1(int pgVal)
+        {
+            _sut.PageNum = pgVal;
+
+            _sut.DecrementPageNum();
 
             Assert.AreEqual(1, _sut.PageNum);
         }

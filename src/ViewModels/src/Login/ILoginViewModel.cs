@@ -23,7 +23,7 @@ namespace Tanzu.Toolkit.ViewModels
         bool ValidateApiAddressFormat(string apiAddress);
         void ShowSsoLogin(object apiAddress = null);
         void CloseDialog();
-        void NavigateToTargetPage(object arg = null);
+        void DecrementPageNum(object arg = null);
         Task ConnectToCf(object arg = null);
         bool CanProceedToAuthentication(object arg = null);
         void ResetTargetDependentFields();
