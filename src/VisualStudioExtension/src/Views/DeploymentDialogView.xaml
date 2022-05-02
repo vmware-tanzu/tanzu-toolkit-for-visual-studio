@@ -79,7 +79,7 @@
 
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" MinWidth="200"/>
-                        <ColumnDefinition Width="2*" MinWidth="400"/>
+                        <ColumnDefinition Width="2*" MinWidth="500"/>
                     </Grid.ColumnDefinitions>
 
                     <!--MAIN GRID ROW 0-->
@@ -104,7 +104,6 @@
                     <Label Content="{Binding TargetName}"
                            VerticalContentAlignment="Center"
                            Grid.Row="0" Grid.Column="1"
-                           Margin="4,0,0,0"
                            Visibility="{Binding IsLoggedIn, Converter={StaticResource Visibility}}"/>
 
                     <!--MAIN GRID ROW 1-->
@@ -139,7 +138,7 @@
                             Grid.Row="0"
                             Grid.Column="0"
                             HorizontalAlignment="Left"
-                            MaxWidth="350"
+                            TextWrapping="Wrap"
                             IsEnabled="{Binding IsLoggedIn}"
                             Text="{Binding ManifestPathLabel}" 
                             ToolTip="{Binding ManifestPathLabel}"/>
@@ -190,9 +189,7 @@
                         Grid.Column="1"
                         Grid.ColumnSpan="1" 
                         Margin="0,4"
-                        HorizontalAlignment="Left"
-                        MinWidth="450"
-                        MaxWidth="450"
+                        HorizontalAlignment="Stretch"
                         x:Name="AppNameField"
                         Text="{Binding AppName}" 
                         IsEnabled="{Binding IsLoggedIn}"
@@ -372,7 +369,7 @@
 
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" MinWidth="200"/>
-                        <ColumnDefinition Width="2*" MinWidth="400"/>
+                        <ColumnDefinition Width="2*" MinWidth="500"/>
                     </Grid.ColumnDefinitions>
 
                     <!--HIDDEN GRID ROW 0-->
@@ -429,6 +426,7 @@
                             Grid.Column="0"
                             HorizontalAlignment="Left"
                             MaxWidth="350"
+                            TextWrapping="Wrap"
                             IsEnabled="{Binding IsLoggedIn}"
                             Text="{Binding DirectoryPathLabel}" 
                             ToolTip="{Binding DirectoryPathLabel}"/>
@@ -450,14 +448,15 @@
                     <!--HIDDEN GRID ROW 3-->
                     <TextBlock
                         VerticalAlignment="Top"
-                        Margin="0,6,0,0"
+                        Margin="0,12,0,0"
                         Grid.Row="3"
                         Grid.Column="0"
                         Text="Buildpack"/>
 
                     <StackPanel
                         Grid.Row="3"
-                        Grid.Column="1">
+                        Grid.Column="1"
+                        Margin="0,8,0,0">
 
                         <Grid Grid.Row="3" Grid.Column="1">
                             <Grid.RowDefinitions>
@@ -472,6 +471,7 @@
                             <TextBlock
                                 Text="{Binding SelectedBuildpacks, Converter={StaticResource SelectedItemStringListConverter}}"
                                 ToolTip="{Binding SelectedBuildpacks, Converter={StaticResource SelectedItemStringListConverter}}"
+                                TextWrapping="Wrap"
                                 Grid.Column="0"
                                 MaxWidth="350"
                                 HorizontalAlignment="Left"
@@ -590,9 +590,7 @@
                         Grid.Column="1"
                         Grid.ColumnSpan="1"
                         Margin="0,4"
-                        HorizontalAlignment="Left"
-                        MinWidth="450"
-                        MaxWidth="450"
+                        HorizontalAlignment="Stretch"
                         x:Name="StartCommandField"
                         Text="{Binding StartCommand}" 
                         IsEnabled="{Binding IsLoggedIn}"
@@ -646,6 +644,7 @@
                                 ToolTip="{Binding SelectedServices, Converter={StaticResource SelectedItemStringListConverter}}"
                                 Grid.Column="0"
                                 MaxWidth="350"
+                                TextWrapping="Wrap"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
                                 IsEnabled="{Binding IsLoggedIn}"/>
