@@ -18,7 +18,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         private readonly ILoginViewModel _viewModel;
         public ICommand AddCloudCommand { get; }
         public ICommand SsoCommand { get; }
-        public ICommand IncrementPageCommand { get; }
+        public ICommand ProceedToAuthenticationCommand { get; }
         public ICommand DecrementPageCommand { get; }
         public ICommand LogInWithPasscodeCommand { get; }
 
@@ -37,7 +37,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
             AddCloudCommand = new AsyncDelegatingCommand(viewModel.LogIn, viewModel.CanLogIn);
             SsoCommand = new DelegatingCommand(viewModel.ShowSsoLogin, alwaysTrue);
-            IncrementPageCommand = new AsyncDelegatingCommand(viewModel.ConnectToCf, viewModel.CanProceedToAuthentication);
+            ProceedToAuthenticationCommand = new AsyncDelegatingCommand(viewModel.ConnectToCf, viewModel.CanProceedToAuthentication);
             DecrementPageCommand = new DelegatingCommand(viewModel.NavigateToTargetPage, alwaysTrue);
             LogInWithPasscodeCommand = new AsyncDelegatingCommand(viewModel.LoginWithSsoPasscodeAsync, alwaysTrue);
 
