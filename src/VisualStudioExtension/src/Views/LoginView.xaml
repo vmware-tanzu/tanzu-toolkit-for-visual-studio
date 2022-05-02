@@ -195,7 +195,7 @@
                         Padding="4,0"
                         HorizontalAlignment="Right"
                         Visibility="{Binding ConnectingToCf, Converter={StaticResource InverseCollapsedVisibility}}"
-                        Command="{Binding ElementName=LoginViewElement, Path=IncrementPageCommand}"/>
+                        Command="{Binding ElementName=LoginViewElement, Path=ProceedToAuthenticationCommand}"/>
 
                     <Button
                         Content="Verifying..."
