@@ -38,7 +38,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             AddCloudCommand = new AsyncDelegatingCommand(viewModel.LogIn, viewModel.CanLogIn);
             SsoCommand = new DelegatingCommand(viewModel.ShowSsoLogin, alwaysTrue);
             ProceedToAuthenticationCommand = new AsyncDelegatingCommand(viewModel.ConnectToCf, viewModel.CanProceedToAuthentication);
-            DecrementPageCommand = new DelegatingCommand(viewModel.NavigateToTargetPage, alwaysTrue);
+            DecrementPageCommand = new DelegatingCommand(viewModel.DecrementPageNum, alwaysTrue);
             LogInWithPasscodeCommand = new AsyncDelegatingCommand(viewModel.LoginWithSsoPasscodeAsync, alwaysTrue);
 
             viewModel.GetPassword = GetPassword;
@@ -72,7 +72,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         private void Close(object sender, RoutedEventArgs e)
         {
             Hide();
-            _viewModel.NavigateToTargetPage();
+            _viewModel.DecrementPageNum();
         }
 
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
