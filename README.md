@@ -15,10 +15,23 @@ Tanzu Toolkit for Visual Studio is an extension for Visual Studio (2022 & 2019) 
 - [Remotely debug](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/wiki/Remote-Debugging-TAS-Apps) apps running on TAS within Visual Studio
 
 ## Install
-- To install this extension, you will need Visual Studio 2022 or 2019.
-  - The extension can then be found on both versions' Visual Studio Marketplace, by searching for Tanzu Net Experience.
-- Download the `Tanzu.Toolkit.VisualStudio.vsix` file & double-click to prompt an installation into your Visual Studio instance.
-- To uninstall this extension from Visual Studio, visit the Visual Studio Extension Manager found under the `Extensions` menu.
+To install this extension, you will need:
+  1. Visual Studio version 2022 or 2019
+  2. The `Tanzu.Toolkit.VisualStudio.vsix` extension file, downloadable from any of these sources:
+      - The Visual Studio Marketplace:
+        - through the IDE by searching "Tanzu" in the "Manage Extensions" window
+        - through the website: [VS 2022](https://marketplace.visualstudio.com/items?itemName=TanzuNETExperience.TanzuToolkitForVisualStudio2022), [VS 2019](https://marketplace.visualstudio.com/items?itemName=TanzuNETExperience.TanzuToolkitForVisualStudio2019)
+      - vsixgallery.com: [VS 2022](https://www.vsixgallery.com/extension/TanzuToolkitForVisualStudio2022.ff7b6f3e-0410-4ff9-a40a-a719ee9da901), [VS 2019](https://www.vsixgallery.com/extension/TanzuToolkitForVisualStudio2019.ff7b6f3e-0410-4ff9-a40a-a719ee9da901)
+      - The ["Releases" section](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/releases) of this repository
+        - look for the `.vsix` file under "Assets" that corresponds to your version of Visual Studio
+
+Once you've downloaded `Tanzu.Toolkit.VisualStudio.vsix`, double-click it to prompt an installation into your instance of Visual Studio.
+
+## Uninstall
+To uninstall this extension from Visual Studio, visit the "Extension Manager" found under the `Extensions` menu.
+
+![image](https://user-images.githubusercontent.com/22666145/168169965-14855a9f-2f8c-458e-ad24-d50f1d8f1b24.png)
+![image](https://user-images.githubusercontent.com/22666145/168169970-969cf089-2028-433c-82d5-55a67afb7fd0.png)
 
 ## More Info
 Check out our [Wiki](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/wiki)! It goes into more detail on several features.
