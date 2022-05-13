@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using Tanzu.Toolkit.Models;
+using YamlDotNet.Core;
 using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.ObjectGraphVisitors;
 
 namespace Tanzu.Toolkit.Services
 {
@@ -14,6 +16,7 @@ namespace Tanzu.Toolkit.Services
             _cfAppManifestSerializer = new SerializerBuilder()
                 .WithNamingConvention(CfAppManifestNamingConvention._instance)
                 .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitDefaults)
+                .WithEmissionPhaseObjectGraphVisitor(args => new EmptyCollectionSkipper(args.InnerVisitor))
                 .Build();
 
             _cfAppManifestParser = new DeserializerBuilder()
@@ -59,6 +62,38 @@ namespace Tanzu.Toolkit.Services
         {
             manifest.Applications[0].Buildpacks = null;
             manifest.Applications[0].Buildpack = singleBuildpackName;
+        }
+    }
+
+    public sealed class EmptyCollectionSkipper : ChainedObjectGraphVisitor
+    {
+        public EmptyCollectionSkipper(IObjectGraphVisitor<IEmitter> nextVisitor)
+            : base(nextVisitor)
+        {
+        }
+
+        public override bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value, IEmitter context)
+        {
+            var retVal = false;
+
+            if (value.Value == null)
+                return retVal;
+
+            if (typeof(System.Collections.IEnumerable).IsAssignableFrom(value.Value.GetType()))
+            {   // We have a collection
+                var enumerableObject = (System.Collections.IEnumerable)value.Value;
+                if (enumerableObject.GetEnumerator().MoveNext()) // Returns true if the collection is not empty.
+                {   // Don't skip this item - serialize it as normal.
+                    retVal = base.EnterMapping(key, value, context);
+                }
+                // Else we have an empty collection and the initialized return value of false is correct.
+            }
+            else
+            {   // Not a collection, normal serialization.
+                retVal = base.EnterMapping(key, value, context);
+            }
+
+            return retVal;
         }
     }
 }
