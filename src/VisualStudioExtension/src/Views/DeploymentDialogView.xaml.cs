@@ -20,6 +20,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         public ICommand ToggleAdvancedOptionsCommand { get; }
         public ICommand ClearBuildpackSelectionCommand { get; }
         public DelegatingCommand ClearManifestSelectionCommand { get; }
+        public DelegatingCommand ClearDeploymentDirectorySelectionCommand { get; }
         public ICommand ClearServiceSelectionCommand { get; }
         public string PlaceholderText { get; set; }
 
@@ -43,6 +44,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             ClearServiceSelectionCommand = new DelegatingCommand(viewModel.ClearSelectedServices, alwaysTrue);
             ClearBuildpackSelectionCommand = new DelegatingCommand(viewModel.ClearSelectedBuildpacks, alwaysTrue);
             ClearManifestSelectionCommand = new DelegatingCommand(viewModel.ClearSelectedManifest, alwaysTrue);
+            ClearDeploymentDirectorySelectionCommand = new DelegatingCommand(viewModel.ClearSelectedDeploymentDirectory, alwaysTrue);
 
             themeService.SetTheme(this);
             DataContext = viewModel;
