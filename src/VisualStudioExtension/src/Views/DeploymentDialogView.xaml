@@ -139,6 +139,7 @@
                             Grid.Column="0"
                             HorizontalAlignment="Left"
                             TextWrapping="Wrap"
+                            MaxWidth="350"
                             IsEnabled="{Binding IsLoggedIn}"
                             Text="{Binding ManifestPathLabel}" 
                             ToolTip="{Binding ManifestPathLabel}"/>
@@ -417,6 +418,7 @@
 
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="32"/>
                         </Grid.ColumnDefinitions>
 
@@ -431,12 +433,32 @@
                             Text="{Binding DirectoryPathLabel}" 
                             ToolTip="{Binding DirectoryPathLabel}"/>
 
+                        <Button
+                                Grid.Column="1"
+                                MinHeight="0"
+                                MinWidth="0"
+                                Margin="8,0"
+                                Visibility="{Binding DirectoryPathLabel, Converter={StaticResource StringNullVisibility}}"
+                                HorizontalAlignment="Right"
+                                Command="{Binding ElementName=DeploymentDialogViewElement, Path=ClearDeploymentDirectorySelectionCommand}"
+                                VerticalAlignment="Center">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <ContentPresenter />
+                                </ControlTemplate>
+                            </Button.Template>
+                            <TextBlock
+                                    Foreground="{Binding ElementName=DeploymentDialogViewElement, Path=HyperlinkBrush}"
+                                    Text="Clear"
+                                    FontStyle="Italic"/>
+                        </Button>
+
                         <Button 
                             MaxWidth="32" 
                             MinWidth="32" 
                             Padding="0"
                             Grid.Row="0"
-                            Grid.Column="1"
+                            Grid.Column="2"
                             IsEnabled="{Binding IsLoggedIn}"
                             Click="SelectPublishDirectory">
                             <Image 
