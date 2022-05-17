@@ -50,7 +50,7 @@ https://user-images.githubusercontent.com/22666145/144128093-8d1686c3-eac1-4bf1-
 
 ### Deploying 'Published' .NET apps
 
-https://user-images.githubusercontent.com/22666145/144897999-087c5a76-b844-4bb4-9e33-dabd4d42210f.mp4
+https://user-images.githubusercontent.com/22666145/168921943-52da9ddd-4697-4f30-8181-8d6f9db01d52.mp4
 
 ### Remote Debugging .NET apps running on Tanzu Application Service
 
