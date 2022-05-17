@@ -30,7 +30,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private readonly string _pathToProjectRootDir;
         private readonly string _targetFrameworkMoniker;
         private readonly string _expectedPathToLaunchFile;
-        private readonly Action _initiateDebugCallback;
+        private readonly Action<string, string> _initiateDebugCallback;
         private List<CloudFoundryApp> _accessibleApps;
         private string _dialogMessage;
         private string _loadingMessage;
@@ -58,7 +58,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             PropertyNameCaseInsensitive = true
         };
 
-        public RemoteDebugViewModel(string expectedAppName, string pathToProjectRootDir, string targetFrameworkMoniker, string expectedPathToLaunchFile, Action initiateDebugCallback, IServiceProvider services) : base(services)
+        public RemoteDebugViewModel(string expectedAppName, string pathToProjectRootDir, string targetFrameworkMoniker, string expectedPathToLaunchFile, Action<string, string> initiateDebugCallback, IServiceProvider services) : base(services)
         {
             _projectName = expectedAppName;
             _pathToProjectRootDir = pathToProjectRootDir;
@@ -282,7 +282,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             }
 
             LoadingMessage = "Attaching to debugging agent...";
-            _initiateDebugCallback?.Invoke();
+            _initiateDebugCallback?.Invoke(AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName);
             Close();
             FileService.DeleteFile(_expectedPathToLaunchFile);
         }
