@@ -816,6 +816,11 @@ namespace Tanzu.Toolkit.ViewModels
             ResetAllPushConfigValues();
         }
 
+        public void ClearSelectedDeploymentDirectory(object arg = null)
+        {
+            DeploymentDirectoryPath = null;
+        }
+
         public void AddToSelectedServices(object arg)
         {
             if (arg is string serviceName && !SelectedServices.Contains(serviceName))

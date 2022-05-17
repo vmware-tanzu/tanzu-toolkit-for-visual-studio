@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30320.27
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32505.173
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tanzu.Toolkit.VisualStudioExtension", "VisualStudioExtension\src\Tanzu.Toolkit.VisualStudioExtension.csproj", "{DEA3D5BC-294A-4BF3-8F81-2A8A8D51A869}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -22,7 +22,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tanzu.Toolkit.CloudFoundryA
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tanzu.Toolkit.CloudFoundryApiClient.Tests", "CloudFoundryApiClient\test\Tanzu.Toolkit.CloudFoundryApiClient.Tests.csproj", "{061321D9-7434-4DC7-81D9-07254772E2DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tanzu.Toolkit.VisualStudioExtension.Tests", "VisualStudioExtension\test\Tanzu.Toolkit.VisualStudioExtension.Tests\Tanzu.Toolkit.VisualStudioExtension.Tests.csproj", "{0CF59C9F-5C05-4276-92AD-7786E47836EF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tanzu.Toolkit.VisualStudioExtension.Tests", "VisualStudioExtension\test\Tanzu.Toolkit.VisualStudioExtension.Tests.csproj", "{443333BA-74FC-4150-87CB-AE174B89BDD5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -62,10 +62,10 @@ Global
 		{061321D9-7434-4DC7-81D9-07254772E2DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{061321D9-7434-4DC7-81D9-07254772E2DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{061321D9-7434-4DC7-81D9-07254772E2DC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0CF59C9F-5C05-4276-92AD-7786E47836EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0CF59C9F-5C05-4276-92AD-7786E47836EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0CF59C9F-5C05-4276-92AD-7786E47836EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0CF59C9F-5C05-4276-92AD-7786E47836EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{443333BA-74FC-4150-87CB-AE174B89BDD5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{443333BA-74FC-4150-87CB-AE174B89BDD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{443333BA-74FC-4150-87CB-AE174B89BDD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{443333BA-74FC-4150-87CB-AE174B89BDD5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
