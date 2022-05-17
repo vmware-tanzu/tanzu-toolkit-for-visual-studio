@@ -8,6 +8,7 @@ using System;
 using System.ComponentModel.Design;
 using System.IO;
 using System.Linq;
+using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.ViewModels.RemoteDebug;
@@ -33,8 +34,11 @@ namespace Tanzu.Toolkit.VisualStudio
         /// </summary>
         private readonly AsyncPackage _package;
         private static IErrorDialog _errorService;
+        private static ICfCliService _cfCliService;
         private static ILogger _logger;
         private static IServiceProvider _services;
+
+        private readonly object _cfEnvironmentLock = new object();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RemoteDebugCommand"/> class.
@@ -75,6 +79,7 @@ namespace Tanzu.Toolkit.VisualStudio
             var commandService = await package.GetServiceAsync((typeof(IMenuCommandService))) as OleMenuCommandService;
             Instance = new RemoteDebugCommand(package, commandService);
             _errorService = services.GetRequiredService<IErrorDialog>();
+            _cfCliService = services.GetRequiredService<ICfCliService>();
             var loggingSvc = services.GetRequiredService<ILoggingService>();
             _logger = loggingSvc.Logger;
         }
@@ -161,10 +166,25 @@ namespace Tanzu.Toolkit.VisualStudio
                     else
                     {
                         var launchFilePath = Path.Combine(projectDirectory, RemoteDebugViewModel._launchFileName);
-                        var initiateDebugCallback = new Action(() =>
+                        var initiateDebugCallback = new Action<string, string>((string orgName, string spaceName) =>
                         {
                             dte.ExecuteCommand("DebugAdapterHost.Logging /On /OutputWindow");
-                            dte.ExecuteCommand("DebugAdapterHost.Launch", $"/LaunchJson:\"{launchFilePath}\"");
+                            lock (_cfEnvironmentLock)
+                            {
+                                var targetOrgResult = _cfCliService.TargetOrg(orgName);
+                                if (!targetOrgResult.Succeeded)
+                                {
+                                    _logger.Error("Failed to target org '{OrgName}' before invoking DebugAdapterHost.Launch -- cf may not be able to find intended app.", orgName);
+                                }
+
+                                var targetSpaceResult = _cfCliService.TargetSpace(spaceName);
+                                if (!targetSpaceResult.Succeeded)
+                                {
+                                    _logger.Error("Failed to target space '{SpaceName}' before invoking DebugAdapterHost.Launch -- cf may not be able to find intended app.", spaceName);
+                                }
+
+                                dte.ExecuteCommand("DebugAdapterHost.Launch", $"/LaunchJson:\"{launchFilePath}\"");
+                            }
                         });
 
                         var remoteDebugViewModel = new RemoteDebugViewModel(projectName, projectDirectory, tfm, launchFilePath, initiateDebugCallback, services: _services) as IRemoteDebugViewModel;
