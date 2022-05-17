@@ -54,5 +54,5 @@ https://user-images.githubusercontent.com/22666145/168921943-52da9ddd-4697-4f30-
 
 ### Remote Debugging .NET apps running on Tanzu Application Service
 
-https://user-images.githubusercontent.com/22666145/161144428-eb695444-39c1-4bb3-93c9-996f81919678.mp4
+https://user-images.githubusercontent.com/22666145/168921959-31d21d43-93bb-4b73-80d8-05a1256bb62f.mp4
 
