@@ -44,6 +44,7 @@ namespace Tanzu.Toolkit.Services.DotnetCli
                     Directory.Delete(publishDirPath, true); // clean before recreating
                 }
                 var publishArgs = $"publish -f {targetFrameworkMoniker} -r {runtimeIdentifier} -c {configuration} -o {outputDirName} --self-contained";
+                StdOutCallback.Invoke($"Executing \"dotnet {publishArgs}\" ...");
                 var publishProcess = _commandProcessService.StartProcess(_dotnetCliExecutable, publishArgs, projectDir, stdOutDelegate: StdOutCallback, stdErrDelegate: StdErrCallback);
                 await Task.Run(() => publishProcess.WaitForExit());
 
