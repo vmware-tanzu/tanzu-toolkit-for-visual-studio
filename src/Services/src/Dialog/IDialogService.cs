@@ -2,9 +2,8 @@
 {
     public interface IDialogService
     {
-        IDialogResult ShowDialog(string dialogViewModel, object parameter = null);
-
         void CloseDialog(object dialogWindow, bool result);
         void CloseDialogByName(string dialogName, object parameter = null);
+        IDialogResult ShowModal(string dialogName, object parameter = null);
     }
 }

@@ -210,7 +210,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             _sut.OpenLoginView(null);
 
-            MockDialogService.Verify(ds => ds.ShowDialog(typeof(LoginViewModel).Name, null), Times.Once);
+            MockDialogService.Verify(ds => ds.ShowModal(typeof(LoginViewModel).Name, null), Times.Once);
         }
 
         [TestMethod]
@@ -239,7 +239,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             };
 
             MockDialogService.Setup(mock => mock.
-                ShowDialog(typeof(LoginViewModel).Name, null))
+                ShowModal(typeof(LoginViewModel).Name, null))
                     .Callback(() =>
                     {
                         // Simulate unsuccessful login by NOT setting TasConnection as LoginView would've done on a successful login
@@ -272,7 +272,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             _sut.OpenDeletionView(null);
 
-            MockDialogService.Verify(ds => ds.ShowDialog(typeof(AppDeletionConfirmationViewModel).Name, null), Times.Never);
+            MockDialogService.Verify(ds => ds.ShowModal(typeof(AppDeletionConfirmationViewModel).Name, null), Times.Never);
         }
 
         [TestMethod]

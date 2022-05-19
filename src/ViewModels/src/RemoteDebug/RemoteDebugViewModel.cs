@@ -408,7 +408,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             deploymentViewModel.IsLoggedIn = tasExplorer.TasConnection != null;
             deploymentViewModel.Expanded = false;
             deploymentViewModel.ConfigureForRemoteDebugging = true;
-            DialogService.ShowDialog(nameof(DeploymentDialogViewModel));
+            DialogService.ShowModal(nameof(DeploymentDialogViewModel));
 
             if (deploymentViewModel.DeploymentInProgress)
             {

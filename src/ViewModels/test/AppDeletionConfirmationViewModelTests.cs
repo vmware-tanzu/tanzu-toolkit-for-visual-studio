@@ -43,7 +43,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             _sut.ShowConfirmation(_fakeCfApp);
 
-            MockDialogService.Verify(ds => ds.ShowDialog(nameof(AppDeletionConfirmationViewModel), null), Times.Once);
+            MockDialogService.Verify(ds => ds.ShowModal(nameof(AppDeletionConfirmationViewModel), null), Times.Once);
         }
 
         [TestMethod]
