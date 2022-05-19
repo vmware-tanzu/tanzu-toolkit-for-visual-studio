@@ -15,17 +15,17 @@ Tanzu Toolkit for Visual Studio is an extension for Visual Studio (2022 & 2019) 
 - [Remotely debug](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/wiki/Remote-Debugging-TAS-Apps) apps running on TAS within Visual Studio
 
 ## Install
-To install this extension, you will need:
-  1. Visual Studio version 2022 or 2019
-  2. The `Tanzu.Toolkit.VisualStudio.vsix` extension file, downloadable from any of these sources:
-      - The Visual Studio Marketplace:
-        - through the IDE by searching "Tanzu" in the "Manage Extensions" window
-        - through the website: [VS 2022](https://marketplace.visualstudio.com/items?itemName=TanzuNETExperience.TanzuToolkitForVisualStudio2022), [VS 2019](https://marketplace.visualstudio.com/items?itemName=TanzuNETExperience.TanzuToolkitForVisualStudio2019)
-      - vsixgallery.com: [VS 2022](https://www.vsixgallery.com/extension/TanzuToolkitForVisualStudio2022.ff7b6f3e-0410-4ff9-a40a-a719ee9da901), [VS 2019](https://www.vsixgallery.com/extension/TanzuToolkitForVisualStudio2019.ff7b6f3e-0410-4ff9-a40a-a719ee9da901)
-      - The ["Releases" section](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/releases) of this repository
-        - look for the `.vsix` file under "Assets" that corresponds to your version of Visual Studio
+To install this extension, you will need Visual Studio version 2022 or 2019. This extension can be downloaded within the IDE by searching "Tanzu" in the "Manage Extensions" window
 
-Once you've downloaded `Tanzu.Toolkit.VisualStudio.vsix`, double-click it to prompt an installation into your instance of Visual Studio.
+![Extension manager showing Tanzu Toolkit for Visual Studio 2022](https://user-images.githubusercontent.com/22666145/169391289-f8ebe6ef-8209-47ae-86e2-5ef293b19cf2.png)
+
+This extension can also be installed outside of the IDE by first downloading the appropriate `.vsix` file, then double-clicking it to prompt an installation into your instance of Visual Studio.
+
+The `Tanzu.Toolkit.VisualStudio.vsix` extension file is included in each [release](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/releases) in this repository.
+
+Alternatively, latest builds can be found on vsixgallery.com, though these may contain features still under development:
+  - [VS 2022](https://www.vsixgallery.com/extension/TanzuToolkitForVisualStudio2022.ff7b6f3e-0410-4ff9-a40a-a719ee9da901)
+  - [VS 2019](https://www.vsixgallery.com/extension/TanzuToolkitForVisualStudio2019.ff7b6f3e-0410-4ff9-a40a-a719ee9da901)
 
 ## Uninstall
 To uninstall this extension from Visual Studio, visit the "Extension Manager" found under the `Extensions` menu.
