@@ -15,7 +15,7 @@ Tanzu Toolkit for Visual Studio is an extension for Visual Studio (2022 & 2019) 
 - [Remotely debug](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/wiki/Remote-Debugging-TAS-Apps) apps running on TAS within Visual Studio
 
 ## Install
-To install this extension, you will need Visual Studio version 2022 or 2019. This extension can be downloaded within the IDE by searching "Tanzu" in the "Manage Extensions" window
+To install this extension, you will need Visual Studio version 2022 or 2019. This extension can be downloaded within the IDE by searching "Tanzu" in the "Manage Extensions" window.
 
 ![Extension manager showing Tanzu Toolkit for Visual Studio 2022](https://user-images.githubusercontent.com/22666145/169391289-f8ebe6ef-8209-47ae-86e2-5ef293b19cf2.png)
 
