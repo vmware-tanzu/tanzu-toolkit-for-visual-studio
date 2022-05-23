@@ -28,15 +28,15 @@ namespace Tanzu.Toolkit.VisualStudio.Services
             asWindows.Hide();
         }
 
-        public IDialogResult ShowDialog(string dialogName, object parameter = null)
+        public IDialogResult ShowModal(string dialogName, object parameter = null)
         {
             if (!(_viewLocatorService.GetViewByViewModelName(dialogName, parameter) is DependencyObject dialog))
             {
                 _logger?.Error("{ClassName} failed to show dialog for {DialogName}; {MethodName} returned null", nameof(DialogService), dialogName, nameof(_viewLocatorService.GetViewByViewModelName));
                 return null;
             }
-            var dialogWindow = Window.GetWindow(dialog);
-            var result = dialogWindow.ShowDialog();
+            var dialogWindow = Window.GetWindow(dialog) as Microsoft.VisualStudio.PlatformUI.DialogWindow;
+            var result = dialogWindow.ShowModal();
             return new DialogResult() { Result = result };
         }
 
