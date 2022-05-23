@@ -28,7 +28,7 @@ Alternatively, latest builds can be found on vsixgallery.com, though these may c
   - [VS 2019](https://www.vsixgallery.com/extension/TanzuToolkitForVisualStudio2019.ff7b6f3e-0410-4ff9-a40a-a719ee9da901)
 
 ## Uninstall
-To uninstall this extension from Visual Studio, visit the "Extension Manager" found under the `Extensions` menu.
+This extension can be uninstalled from Visual Studio using  "Manage Extensions" window.
 
 ![image](https://user-images.githubusercontent.com/22666145/168169965-14855a9f-2f8c-458e-ad24-d50f1d8f1b24.png)
 ![image](https://user-images.githubusercontent.com/22666145/168169970-969cf089-2028-433c-82d5-55a67afb7fd0.png)
