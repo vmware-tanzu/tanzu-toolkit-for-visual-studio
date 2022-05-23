@@ -19,7 +19,7 @@ To install this extension, you will need Visual Studio version 2022 or 2019. Thi
 
 ![Extension manager showing Tanzu Toolkit for Visual Studio 2022](https://user-images.githubusercontent.com/22666145/169391289-f8ebe6ef-8209-47ae-86e2-5ef293b19cf2.png)
 
-This extension can also be installed outside of the IDE by first downloading the appropriate `.vsix` file, then double-clicking it to prompt an installation into your instance of Visual Studio.
+This extension can also be installed outside of Visual Studio by first downloading the appropriate `.vsix` file, then double-clicking it to prompt an installation.
 
 The `Tanzu.Toolkit.VisualStudio.vsix` extension file is included in each [release](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/releases) in this repository.
 
