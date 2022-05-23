@@ -227,7 +227,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
-                var dialog = DialogService.ShowDialog(nameof(LoginViewModel));
+                var dialog = DialogService.ShowModal(nameof(LoginViewModel));
                 if (dialog == null)
                 {
                     Logger?.Error("{ClassName}.{MethodName} encountered null DialogResult, indicating that something went wrong trying to construct the view.", nameof(TasExplorerViewModel), nameof(OpenLoginView));

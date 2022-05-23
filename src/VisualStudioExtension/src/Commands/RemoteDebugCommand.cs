@@ -188,10 +188,10 @@ namespace Tanzu.Toolkit.VisualStudio
                         });
 
                         var remoteDebugViewModel = new RemoteDebugViewModel(projectName, projectDirectory, tfm, launchFilePath, initiateDebugCallback, services: _services) as IRemoteDebugViewModel;
-                        var view = new RemoteDebugView(remoteDebugViewModel, new ThemeService());
+                        var view = new RemoteDebugView(remoteDebugViewModel, new ThemeService()) as Microsoft.VisualStudio.PlatformUI.DialogWindow;
                         remoteDebugViewModel.ViewOpener = view.Show;
                         remoteDebugViewModel.ViewCloser = view.Hide;
-                        view.ShowDialog(); // open & wait
+                        view.ShowModal(); // open & wait
                     }
                 }
             }
