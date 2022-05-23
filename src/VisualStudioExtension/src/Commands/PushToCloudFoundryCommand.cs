@@ -144,8 +144,8 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                             deploymentViewModel.IsLoggedIn = tasExplorer.TasConnection != null;
                             deploymentViewModel.Expanded = false;
 
-                            var deploymentWindow = _services.GetRequiredService<IDeploymentDialogView>() as System.Windows.Window;
-                            deploymentWindow?.ShowDialog();
+                            var deploymentWindow = _services.GetRequiredService<IDeploymentDialogView>() as Microsoft.VisualStudio.PlatformUI.DialogWindow;
+                            deploymentWindow?.ShowModal();
 
                             // * Actions to take after modal closes:
                             if (deploymentViewModel.DeploymentInProgress) // don't open tool window if modal was closed via "X" button
