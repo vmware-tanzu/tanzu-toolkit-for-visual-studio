@@ -15,10 +15,23 @@ Tanzu Toolkit for Visual Studio is an extension for Visual Studio (2022 & 2019) 
 - [Remotely debug](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/wiki/Remote-Debugging-TAS-Apps) apps running on TAS within Visual Studio
 
 ## Install
-- To install this extension, you will need Visual Studio 2022 or 2019.
-  - The extension can then be found on both versions' Visual Studio Marketplace, by searching for Tanzu Net Experience.
-- Download the `Tanzu.Toolkit.VisualStudio.vsix` file & double-click to prompt an installation into your Visual Studio instance.
-- To uninstall this extension from Visual Studio, visit the Visual Studio Extension Manager found under the `Extensions` menu.
+To install this extension, you will need Visual Studio version 2022 or 2019. This extension can be downloaded within the IDE by searching "Tanzu" in the "Manage Extensions" window.
+
+![Extension manager showing Tanzu Toolkit for Visual Studio 2022](https://user-images.githubusercontent.com/22666145/169391289-f8ebe6ef-8209-47ae-86e2-5ef293b19cf2.png)
+
+This extension can also be installed outside of Visual Studio by first downloading the appropriate `.vsix` file, then double-clicking it to prompt an installation.
+
+The `Tanzu.Toolkit.VisualStudio.vsix` extension file is included in each [release](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/releases) in this repository.
+
+Alternatively, latest builds can be found on vsixgallery.com, though these may contain features still under development:
+  - [VS 2022](https://www.vsixgallery.com/extension/TanzuToolkitForVisualStudio2022.ff7b6f3e-0410-4ff9-a40a-a719ee9da901)
+  - [VS 2019](https://www.vsixgallery.com/extension/TanzuToolkitForVisualStudio2019.ff7b6f3e-0410-4ff9-a40a-a719ee9da901)
+
+## Uninstall
+This extension can be uninstalled from Visual Studio using  "Manage Extensions" window.
+
+![image](https://user-images.githubusercontent.com/22666145/168169965-14855a9f-2f8c-458e-ad24-d50f1d8f1b24.png)
+![image](https://user-images.githubusercontent.com/22666145/168169970-969cf089-2028-433c-82d5-55a67afb7fd0.png)
 
 ## More Info
 Check out our [Wiki](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/wiki)! It goes into more detail on several features.
@@ -37,9 +50,9 @@ https://user-images.githubusercontent.com/22666145/144128093-8d1686c3-eac1-4bf1-
 
 ### Deploying 'Published' .NET apps
 
-https://user-images.githubusercontent.com/22666145/144897999-087c5a76-b844-4bb4-9e33-dabd4d42210f.mp4
+https://user-images.githubusercontent.com/22666145/168921943-52da9ddd-4697-4f30-8181-8d6f9db01d52.mp4
 
 ### Remote Debugging .NET apps running on Tanzu Application Service
 
-https://user-images.githubusercontent.com/22666145/161144428-eb695444-39c1-4bb3-93c9-996f81919678.mp4
+https://user-images.githubusercontent.com/22666145/168921959-31d21d43-93bb-4b73-80d8-05a1256bb62f.mp4
 
