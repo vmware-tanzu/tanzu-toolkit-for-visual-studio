@@ -57,7 +57,7 @@ namespace Tanzu.Toolkit.ViewModels
         private string _directoryPathLabel;
         private string _directoryPath;
         private string _targetName;
-        private bool _isLoggedIn;
+        private bool _isLoggedIn = false;
         private string _selectedStack;
         private string _serviceNotRecognizedWarningMessage;
         private ObservableCollection<string> _selectedBuildpacks;

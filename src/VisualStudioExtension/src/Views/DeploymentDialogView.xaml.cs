@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.PlatformUI;
+using System;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
@@ -12,9 +13,10 @@ namespace Tanzu.Toolkit.VisualStudio.Views
     /// <summary>
     /// Interaction logic for DeploymentDialogView.xaml.
     /// </summary>
-    public partial class DeploymentDialogView : DialogWindow, IDeploymentDialogView
+    public partial class DeploymentDialogView : DialogWindow, IDeploymentDialogView, IView
     {
         private readonly IDeploymentDialogViewModel _viewModel;
+        private Action _displayView;
         public ICommand UploadAppCommand { get; }
         public ICommand OpenLoginDialogCommand { get; }
         public ICommand ToggleAdvancedOptionsCommand { get; }
@@ -25,6 +27,23 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         public string PlaceholderText { get; set; }
 
         public Brush HyperlinkBrush { get { return (Brush)GetValue(_hyperlinkBrushProperty); } set { SetValue(_hyperlinkBrushProperty, value); } }
+
+        public IViewModel ViewModel { get => (IViewModel)_viewModel; }
+
+        public Action DisplayView
+        {
+            get
+            {
+                if (_displayView == null)
+                {
+                    _displayView = () => ShowModal();
+                }
+
+                return _displayView;
+            }
+
+            set => _displayView = value;
+        }
 
         public static readonly DependencyProperty _hyperlinkBrushProperty = DependencyProperty.Register("HyperlinkBrush", typeof(Brush), typeof(DeploymentDialogView), new PropertyMetadata(default(Brush)));
 
