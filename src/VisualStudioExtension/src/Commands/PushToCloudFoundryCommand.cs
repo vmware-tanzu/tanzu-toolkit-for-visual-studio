@@ -160,7 +160,8 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 _logger?.Error("{ClassName} caught exception in {MethodName}: {PushException}", nameof(PushToCloudFoundryCommand), nameof(Execute), ex);
-                var msg = ex.Message + Environment.NewLine + Environment.NewLine +
+                var msg = $"Internal error: \"{ex.Message}\"" 
+                    + Environment.NewLine + Environment.NewLine +
                     "If this issue persists, please contact tas-vs-extension@vmware.com";
                 _dialogService.DisplayErrorDialog("Unable to push to Tanzu Application Service", msg);
             }
