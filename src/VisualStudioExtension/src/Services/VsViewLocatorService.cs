@@ -1,7 +1,9 @@
 ﻿using Serilog;
 using System;
+using System.Windows;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.ViewLocator;
+using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.VisualStudio.Views;
 
 namespace Tanzu.Toolkit.VisualStudio.Services
@@ -25,7 +27,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services
 
         public virtual object GetViewByViewModelName(string viewModelName, object parameter = null)
         {
-            object view = null;
+            IView view = null;
             try
             {
                 var viewTypeName = GetViewName(viewModelName);
@@ -39,7 +41,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services
                 {
                     try
                     {
-                        view = ServiceProvider.GetService(type);
+                        var instance = ServiceProvider.GetService(type);
+                        view = instance as IView;
+                        var dialogWindow = Window.GetWindow((DependencyObject)view) as Microsoft.VisualStudio.PlatformUI.DialogWindow;
+                        view.DisplayView = () => dialogWindow.ShowModal(); 
                     }
                     catch (Exception ex)
                     {

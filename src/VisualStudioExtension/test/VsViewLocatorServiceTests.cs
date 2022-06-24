@@ -4,6 +4,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using Tanzu.Toolkit.Services.Logging;
+using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.VisualStudio.Services;
 using Tanzu.Toolkit.VisualStudio.Views;
 
@@ -23,7 +24,7 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
         private readonly string _fakeViewModelName = "MyCoolViewModel";
         private readonly string _fakeViewName = "IMyCoolView";
         private Type _fakeViewType;
-        private readonly object _fakeReturnedView = "Pretend this is a view";
+        private readonly FakeView _fakeReturnedView = new();
 
         [TestInitialize]
         public void TestInit()
@@ -65,7 +66,7 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
         public void GetViewByViewModelName_CreatesToolWindow_AndReturnsView_WhenInterpretedViewTypeIsIOutputView()
         {
             var expectedViewType = typeof(IOutputView);
-            var fakeViewFromToolWindow = new object();
+            var fakeViewFromToolWindow = new FakeView();
             var fakeCaptionParam = "some caption";
 
             _sut.TypeLookupOverrides = new Dictionary<string, Type>
@@ -119,6 +120,18 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
             GetServiceWasCalled = true;
             GetServiceArgument = serviceType;
             return FakeServiceToReturn ?? "Fake return value (were you expecting a real service?)";
+        }
+    }
+
+    class FakeView : IView
+    {
+        public IViewModel ViewModel => throw new NotImplementedException();
+
+        public Action DisplayView { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        public void Show()
+        {
+            throw new NotImplementedException();
         }
     }
 }

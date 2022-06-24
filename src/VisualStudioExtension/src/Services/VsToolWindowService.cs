@@ -21,7 +21,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services
             _logger = loggingService.Logger;
         }
 
-        public object CreateToolWindowForView(Type viewType, string caption)
+        public IView CreateToolWindowForView(Type viewType, string caption)
         {
             IView view = null;
             Type toolWindowType = null;

@@ -1,9 +1,10 @@
 ﻿using System;
+using Tanzu.Toolkit.ViewModels;
 
 namespace Tanzu.Toolkit.VisualStudio.Services
 {
     public interface IToolWindowService
     {
-        object CreateToolWindowForView(Type viewType, string caption);
+        IView CreateToolWindowForView(Type viewType, string caption);
     }
 }
