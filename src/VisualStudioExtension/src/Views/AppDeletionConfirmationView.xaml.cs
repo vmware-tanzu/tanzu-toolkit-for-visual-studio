@@ -9,18 +9,13 @@ namespace Tanzu.Toolkit.VisualStudio.Views
     /// </summary>
     public partial class AppDeletionConfirmationView : AbstractModal, IAppDeletionConfirmationView
     {
-        public IAppDeletionConfirmationViewModel _confirmDeleteViewModel;
-
         public ICommand DeleteAppCommand { get; }
 
         public AppDeletionConfirmationView(IAppDeletionConfirmationViewModel viewModel)
         {
             DeleteAppCommand = new AsyncDelegatingCommand(viewModel.DeleteApp, viewModel.CanDeleteApp);
             DataContext = viewModel;
-            _confirmDeleteViewModel = viewModel;
-
             MouseDown += Window_MouseDown;
-
             InitializeComponent();
         }
 
