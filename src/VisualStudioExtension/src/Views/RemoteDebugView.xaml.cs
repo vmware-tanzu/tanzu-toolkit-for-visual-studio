@@ -39,10 +39,5 @@ namespace Tanzu.Toolkit.VisualStudio
             MouseDown += Window_MouseDown;
             InitializeComponent();
         }
-
-        private void Close(object sender, RoutedEventArgs e)
-        {
-            Hide();
-        }
     }
 }
