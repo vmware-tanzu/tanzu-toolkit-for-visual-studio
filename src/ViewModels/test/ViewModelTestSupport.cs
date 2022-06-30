@@ -107,21 +107,21 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         internal class FakeOutputView : IView
         {
+            private Action _displayView;
             public IViewModel ViewModel { get; set; }
 
             public bool ShowMethodWasCalled { get; private set; }
 
-            public Action DisplayView { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            public Action DisplayView
+            {
+                get => _displayView ?? (() => { ShowMethodWasCalled = true; });
+                set => _displayView = value;
+            }
 
             public FakeOutputView()
             {
                 ViewModel = new FakeOutputViewModel();
                 ShowMethodWasCalled = false;
-            }
-
-            public void Show()
-            {
-                ShowMethodWasCalled = true;
             }
         }
 

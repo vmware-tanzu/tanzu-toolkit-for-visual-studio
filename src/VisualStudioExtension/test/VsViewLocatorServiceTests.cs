@@ -128,10 +128,5 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
         public IViewModel ViewModel => throw new NotImplementedException();
 
         public Action DisplayView { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-        public void Show()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

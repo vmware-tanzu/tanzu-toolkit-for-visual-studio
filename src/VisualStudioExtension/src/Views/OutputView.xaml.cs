@@ -53,11 +53,6 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             autoScrollToggleBtn.IsChecked = true;
         }
 
-        public void Show()
-        {
-            DisplayView?.Invoke();
-        }
-
         /// <summary>
         /// This action starts null; the expectation is that VsToolWindowService will provide 
         /// a method which is able to display the tool window associated with this view.
