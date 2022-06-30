@@ -91,15 +91,6 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             Close();
         }
 
-        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.LeftButton == MouseButtonState.Pressed)
-            {
-                DragMove();
-            }
-
-        }
-
         private void BuildpackItemSelected(object sender, RoutedEventArgs e)
         {
             if (e.Source is System.Windows.Controls.CheckBox cb)

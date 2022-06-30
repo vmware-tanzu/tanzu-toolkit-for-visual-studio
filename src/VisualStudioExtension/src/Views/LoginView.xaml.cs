@@ -74,14 +74,6 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             _viewModel.NavigateToTargetPage();
         }
 
-        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.LeftButton == MouseButtonState.Pressed)
-            {
-                DragMove();
-            }
-        }
-
         private void TbUrl_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
             _viewModel.TargetApiAddress = tbUrl.Text; // update property *before* focus is lost from text box 

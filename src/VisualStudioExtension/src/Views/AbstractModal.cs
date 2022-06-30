@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.PlatformUI;
 using System;
+using System.Windows.Input;
 using Tanzu.Toolkit.ViewModels;
 
 namespace Tanzu.Toolkit.VisualStudio.Views
@@ -24,5 +25,13 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         }
 
         public IViewModel ViewModel { get => (IViewModel)DataContext; }
+
+        public void Window_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                DragMove();
+            }
+        }
     }
 }
