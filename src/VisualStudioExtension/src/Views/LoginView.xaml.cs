@@ -1,6 +1,4 @@
-﻿using Microsoft.VisualStudio.PlatformUI;
-using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Security;
 using System.Windows;
 using System.Windows.Input;
@@ -14,10 +12,9 @@ namespace Tanzu.Toolkit.VisualStudio.Views
     /// <summary>
     /// Interaction logic for LoginView.xaml.
     /// </summary>
-    public partial class LoginView : DialogWindow, ILoginView, IView
+    public partial class LoginView : AbstractModal, ILoginView
     {
         private readonly ILoginViewModel _viewModel;
-        private Action _displayView;
         public ICommand AddCloudCommand { get; }
         public ICommand SsoCommand { get; }
         public ICommand IncrementPageCommand { get; }
@@ -25,22 +22,6 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         public ICommand LogInWithPasscodeCommand { get; }
 
         public Brush HyperlinkBrush { get { return (Brush)GetValue(_hyperlinkBrushProperty); } set { SetValue(_hyperlinkBrushProperty, value); } }
-
-        public IViewModel ViewModel => _viewModel;
-        public Action DisplayView
-        {
-            get
-            {
-                if (_displayView == null)
-                {
-                    _displayView = () => ShowModal();
-                }
-
-                return _displayView;
-            }
-
-            set => _displayView = value;
-        }
 
         public static readonly DependencyProperty _hyperlinkBrushProperty = DependencyProperty.Register("HyperlinkBrush", typeof(Brush), typeof(LoginView), new PropertyMetadata(default(Brush)));
 
