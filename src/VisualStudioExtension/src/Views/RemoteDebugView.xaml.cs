@@ -12,7 +12,7 @@ namespace Tanzu.Toolkit.VisualStudio
     /// <summary>
     /// Interaction logic for RemoteDebugView.xaml
     /// </summary>
-    public partial class RemoteDebugView : DialogWindow, IRemoteDebugView
+    public partial class RemoteDebugView : AbstractModal, IRemoteDebugView
     {
         public ICommand CancelCommand { get; }
         public ICommand OpenLoginViewCommand { get; }
