@@ -12,7 +12,6 @@ namespace Tanzu.Toolkit.ViewModels
         ObservableCollection<string> SelectedBuildpacks { get; set; }
         ObservableCollection<string> SelectedServices { get; set; }
         bool DeploymentInProgress { get; }
-        IView OutputView { get; }
         bool ConfigureForRemoteDebugging { get; set; }
         bool IsLoggedIn { get; set; }
 
@@ -33,5 +32,6 @@ namespace Tanzu.Toolkit.ViewModels
         void ClearSelectedServices(object arg = null);
         void ClearSelectedManifest(object arg = null);
         void ClearSelectedDeploymentDirectory(object arg = null);
+        void DisplayDeploymentOutput();
     }
 }

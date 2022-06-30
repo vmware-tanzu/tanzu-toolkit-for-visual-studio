@@ -42,6 +42,7 @@ namespace Tanzu.Toolkit.ViewModels
         internal readonly bool _fullFrameworkDeployment = false;
         private readonly IErrorDialog _errorDialogService;
         private readonly IDotnetCliService _dotnetCliService;
+        internal IView _outputView;
         internal IOutputViewModel _outputViewModel;
         internal ITasExplorerViewModel _tasExplorerViewModel;
         private readonly IProjectService _projectService;
@@ -81,8 +82,10 @@ namespace Tanzu.Toolkit.ViewModels
             _dotnetCliService = services.GetRequiredService<IDotnetCliService>();
             _tasExplorerViewModel = services.GetRequiredService<ITasExplorerViewModel>();
             _projectService = services.GetRequiredService<IProjectService>();
-            
-            CreateNewOutputView();
+
+            _outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel), $"Tanzu Push Output (\"{_projectService.ProjectName}\")") as IView;
+            _outputViewModel = _outputView?.ViewModel as IOutputViewModel;
+
             DeploymentInProgress = false;
             PathToProjectRootDir = _projectService.PathToProjectDirectory;
             SelectedBuildpacks = new ObservableCollection<string>();
@@ -134,8 +137,6 @@ namespace Tanzu.Toolkit.ViewModels
             _projectName = _projectService.ProjectName;
             Expanded = false;
         }
-
-        public IView OutputView { get; internal set; }
 
         public string AppName
         {
@@ -554,11 +555,15 @@ namespace Tanzu.Toolkit.ViewModels
         {
             if (CanDeployApp(null))
             {
-                CreateNewOutputView();
                 DeploymentInProgress = true;
                 var _ = ThreadingService.StartBackgroundTask(StartDeployment);
                 DialogService.CloseDialog(dialogWindow, true);
             }
+        }
+
+        public void DisplayDeploymentOutput()
+        {
+            _outputView.DisplayView();
         }
 
         public bool CanOpenLoginView(object arg)
@@ -951,12 +956,6 @@ namespace Tanzu.Toolkit.ViewModels
             }
 
             DeploymentInProgress = false;
-        }
-
-        private void CreateNewOutputView()
-        {
-            OutputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel), $"Tanzu Push Output (\"{_projectService.ProjectName}\")") as IView;
-            _outputViewModel = OutputView?.ViewModel as IOutputViewModel;
         }
 
         private void SetManifestIfDefaultExists()

@@ -414,7 +414,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             if (deploymentViewModel.DeploymentInProgress)
             {
                 Close();
-                deploymentViewModel.OutputView.DisplayView();
+                deploymentViewModel.DisplayDeploymentOutput();
             }
         }
 

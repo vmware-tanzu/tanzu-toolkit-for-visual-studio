@@ -146,7 +146,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                             // * Actions to take after modal closes:
                             if (deploymentViewModel.DeploymentInProgress) // don't open tool window if modal was closed via "X" button
                             {
-                                deploymentViewModel.OutputView.DisplayView();
+                                deploymentViewModel.DisplayDeploymentOutput();
                             }
                         }
                     }

@@ -105,6 +105,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             new CloudFoundryApp("fakeApp5", "fake-app-guid-5", _fakeCfSpace, "junk state"),
         };
 
+        internal static FakeOutputView _fakeOutputView = new FakeOutputView();
+        internal static FakeOutputViewModel _fakeOutputViewModel = new FakeOutputViewModel();
+
         internal class FakeOutputView : IView
         {
             private Action _displayView;
