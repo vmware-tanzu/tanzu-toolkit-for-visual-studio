@@ -27,11 +27,6 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         public static readonly DependencyProperty _hyperlinkBrushProperty = DependencyProperty.Register("HyperlinkBrush", typeof(Brush), typeof(DeploymentDialogView), new PropertyMetadata(default(Brush)));
         private readonly IDeploymentDialogViewModel _viewModel;
 
-        public DeploymentDialogView()
-        {
-            InitializeComponent();
-        }
-
         public DeploymentDialogView(IDeploymentDialogViewModel viewModel, IThemeService themeService)
         {
             _viewModel = viewModel;
