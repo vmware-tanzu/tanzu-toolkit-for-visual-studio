@@ -1,10 +1,12 @@
 ﻿using Serilog;
 using System;
-using System.Windows;
+using System.Runtime.CompilerServices;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.ViewLocator;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.VisualStudio.Views;
+
+[assembly: InternalsVisibleTo("Tanzu.Toolkit.VisualStudioExtension.Tests")]
 
 namespace Tanzu.Toolkit.VisualStudio.Services
 {
@@ -33,11 +35,11 @@ namespace Tanzu.Toolkit.VisualStudio.Services
                 var viewTypeName = GetViewName(viewModelName);
                 var type = LookupViewType(viewTypeName);
 
-                if (type == typeof(IOutputView))
+                if (ViewShownAsToolWindow(type))
                 {
                     view = _toolWindowService.CreateToolWindowForView(type, parameter as string);
                 }
-                else
+                else if (ViewShownAsModal(type))
                 {
                     try
                     {
@@ -47,6 +49,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services
                     {
                         _logger?.Error("Caught exception in {ClassName}.{MethodName}({ViewModelName}); either the service was unattainable or could not be cast as {CastType}: {ServiceException}", nameof(VsViewLocatorService), nameof(GetViewByViewModelName), viewModelName, nameof(IView), ex);
                     }
+                }
+                else
+                {
+                    _logger?.Error("{ClassName}.{MethodName} given type not classified as either modal or tool window: {ViewModelName}", nameof(VsViewLocatorService), nameof(GetViewByViewModelName), viewModelName);
                 }
 
                 return view;
@@ -58,12 +64,23 @@ namespace Tanzu.Toolkit.VisualStudio.Services
             }
         }
 
+        internal bool ViewShownAsModal(Type type)
+        {
+            var expectedImplementationType = Type.GetType(type.Namespace + "." + type.Name.Substring(1));
+            return expectedImplementationType != null && expectedImplementationType.IsSubclassOf(typeof(AbstractModal));
+        }
+
+        internal bool ViewShownAsToolWindow(Type type)
+        {
+            return type == typeof(IOutputView);
+        }
+
         protected virtual Type LookupViewType(string viewTypeName)
         {
             return Type.GetType(_viewNamespace + "." + viewTypeName);
         }
 
-        private string GetViewName(string viewModelName)
+        internal string GetViewName(string viewModelName)
         {
             return "I" + viewModelName.Substring(0, viewModelName.Length - 5);  // prepend I and remove "Model"
         }
