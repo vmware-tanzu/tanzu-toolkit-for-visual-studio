@@ -41,14 +41,11 @@ namespace Tanzu.Toolkit.VisualStudio.Services
                 {
                     try
                     {
-                        var instance = ServiceProvider.GetService(type);
-                        view = instance as IView;
-                        var dialogWindow = Window.GetWindow((DependencyObject)view) as Microsoft.VisualStudio.PlatformUI.DialogWindow;
-                        view.DisplayView = () => dialogWindow.ShowModal(); 
+                        view = ServiceProvider.GetService(type) as IView;
                     }
                     catch (Exception ex)
                     {
-                        _logger?.Error("Caught exception in {ClassName}.{MethodName} thrown because of an unattainable service: {ServiceException}", nameof(VsViewLocatorService), nameof(GetViewByViewModelName), ex);
+                        _logger?.Error("Caught exception in {ClassName}.{MethodName}({ViewModelName}); either the service was unattainable or could not be cast as {CastType}: {ServiceException}", nameof(VsViewLocatorService), nameof(GetViewByViewModelName), viewModelName, nameof(IView), ex);
                     }
                 }
 
