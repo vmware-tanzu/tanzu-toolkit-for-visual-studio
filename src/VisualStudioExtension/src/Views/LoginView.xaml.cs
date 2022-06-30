@@ -25,11 +25,6 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         public static readonly DependencyProperty _hyperlinkBrushProperty = DependencyProperty.Register("HyperlinkBrush", typeof(Brush), typeof(LoginView), new PropertyMetadata(default(Brush)));
 
-        public LoginView()
-        {
-            InitializeComponent();
-        }
-
         public LoginView(ILoginViewModel viewModel, IThemeService themeService)
         {
             bool alwaysTrue(object arg) { return true; }
