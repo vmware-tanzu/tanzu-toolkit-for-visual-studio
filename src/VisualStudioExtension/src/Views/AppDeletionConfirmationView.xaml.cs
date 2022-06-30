@@ -13,14 +13,17 @@ namespace Tanzu.Toolkit.VisualStudio.Views
     public partial class AppDeletionConfirmationView : DialogWindow, IAppDeletionConfirmationView, IView
     {
         public IAppDeletionConfirmationViewModel _confirmDeleteViewModel;
+        private readonly IAppDeletionConfirmationViewModel _viewModel;
+
         public ICommand DeleteAppCommand { get; }
 
-        public IViewModel ViewModel => throw new NotImplementedException();
+        public IViewModel ViewModel => (IViewModel)_viewModel;
 
         public Action DisplayView { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public AppDeletionConfirmationView(IAppDeletionConfirmationViewModel viewModel)
         {
+            _viewModel = viewModel;
             DeleteAppCommand = new AsyncDelegatingCommand(viewModel.DeleteApp, viewModel.CanDeleteApp);
             DataContext = viewModel;
             _confirmDeleteViewModel = viewModel;
