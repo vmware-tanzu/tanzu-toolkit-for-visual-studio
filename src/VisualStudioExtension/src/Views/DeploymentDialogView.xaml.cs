@@ -88,7 +88,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         private void Close(object sender, RoutedEventArgs e)
         {
-            Hide();
+            Close();
         }
 
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
