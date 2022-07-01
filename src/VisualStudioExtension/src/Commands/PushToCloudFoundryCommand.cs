@@ -142,12 +142,6 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                             var view = _services.GetRequiredService<IDeploymentDialogView>() as IView;
                             var deploymentViewModel = view.ViewModel as IDeploymentDialogViewModel;
                             view.DisplayView();
-
-                            // * Actions to take after modal closes:
-                            if (deploymentViewModel.DeploymentInProgress) // don't open tool window if modal was closed via "X" button
-                            {
-                                deploymentViewModel.DisplayDeploymentOutput();
-                            }
                         }
                     }
                 }

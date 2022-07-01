@@ -136,6 +136,14 @@ namespace Tanzu.Toolkit.ViewModels
             AppName = _projectService.ProjectName;
             _projectName = _projectService.ProjectName;
             Expanded = false;
+
+            OnClosed = () =>
+            {
+                if (DeploymentInProgress) // don't open tool window if modal was closed via "X" button
+                {
+                    DisplayDeploymentOutput();
+                }
+            };
         }
 
         public string AppName
@@ -545,6 +553,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
+        public Action OnClosed { get; set; }
 
         public bool CanDeployApp(object arg)
         {

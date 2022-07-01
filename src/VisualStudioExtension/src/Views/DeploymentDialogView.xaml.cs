@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -45,6 +46,12 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             InitializeComponent();
 
             MouseDown += Window_MouseDown;
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            _viewModel.OnClosed();
+            base.OnClosed(e);
         }
 
         private void CfOrgOptions_ComboBox_DropDownClosed(object sender, System.EventArgs e)

@@ -216,6 +216,20 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("ctor")]
+        [TestCategory("OnClosed")]
+        public void Constructor_SetsOnClosedAction_ToDisplayDeploymentOutputIfDeploymentInProgress()
+        {
+            Assert.AreEqual(_fakeOutputView, _sut._outputView);
+            Assert.IsFalse(_fakeOutputView.ShowMethodWasCalled);
+            _sut.DeploymentInProgress = true; // fake so action will try to display output view
+            
+            _sut.OnClosed();
+            
+            Assert.IsTrue(_fakeOutputView.ShowMethodWasCalled);
+        }
+
+        [TestMethod]
+        [TestCategory("ctor")]
         [TestCategory("ManifestModel")]
         public void Constructor_SetsManifestModel_ToNewAppManifest_WhenNoDefaultManifestExistsAtAnExpectedPath()
         {

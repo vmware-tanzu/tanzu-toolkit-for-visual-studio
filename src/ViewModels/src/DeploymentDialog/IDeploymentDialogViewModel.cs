@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
 namespace Tanzu.Toolkit.ViewModels
@@ -14,6 +15,7 @@ namespace Tanzu.Toolkit.ViewModels
         bool DeploymentInProgress { get; }
         bool ConfigureForRemoteDebugging { get; set; }
         bool IsLoggedIn { get; set; }
+        Action OnClosed { get; set; }
 
         bool CanDeployApp(object arg);
         bool CanToggleAdvancedOptions(object arg);
