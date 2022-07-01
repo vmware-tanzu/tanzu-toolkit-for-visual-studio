@@ -120,8 +120,6 @@ namespace Tanzu.Toolkit.ViewModels
                 }
             };
 
-            SetManifestIfDefaultExists();
-
             if (_tasExplorerViewModel.TasConnection != null)
             {
                 TargetName = _tasExplorerViewModel.TasConnection.DisplayText;
@@ -136,6 +134,8 @@ namespace Tanzu.Toolkit.ViewModels
             AppName = _projectService.ProjectName;
             _projectName = _projectService.ProjectName;
             Expanded = false;
+
+            OnRendered = () => SetManifestIfDefaultExists();
 
             OnClosed = () =>
             {
@@ -554,6 +554,8 @@ namespace Tanzu.Toolkit.ViewModels
         }
 
         public Action OnClosed { get; set; }
+
+        public Action OnRendered { get; set; }
 
         public bool CanDeployApp(object arg)
         {

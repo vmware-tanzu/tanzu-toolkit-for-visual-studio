@@ -216,15 +216,28 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("ctor")]
+        [TestCategory("OnRendered")]
+        public void Constructor_SetsOnRenderedAction_ToSetManifestPathIfDefaultExists()
+        {
+            MockFileService.Setup(m => m.FileExists(It.Is<string>(s => s.Contains("manifest.yaml")))).Returns(true);
+            Assert.IsNull(_sut.ManifestPath);
+
+            _sut.OnRendered();
+
+            Assert.IsNotNull(_sut.ManifestPath);
+        }
+
+        [TestMethod]
+        [TestCategory("ctor")]
         [TestCategory("OnClosed")]
         public void Constructor_SetsOnClosedAction_ToDisplayDeploymentOutputIfDeploymentInProgress()
         {
             Assert.AreEqual(_fakeOutputView, _sut._outputView);
             Assert.IsFalse(_fakeOutputView.ShowMethodWasCalled);
             _sut.DeploymentInProgress = true; // fake so action will try to display output view
-            
+
             _sut.OnClosed();
-            
+
             Assert.IsTrue(_fakeOutputView.ShowMethodWasCalled);
         }
 
@@ -285,6 +298,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockSerializationService.Setup(m => m.ParseCfAppManifest(fakeManifestContent)).Returns(_fakeManifestModel);
 
             _sut = new DeploymentDialogViewModel(Services);
+            _sut.OnRendered(); // perform steps taken after rendering (i.e. setting values from manifest)
 
             Assert.IsNotNull(_sut.ManifestModel.Applications[0].Path); // ensure path value specified
             Assert.AreEqual(expectedPathValue, _sut.ManifestModel.Applications[0].Path);

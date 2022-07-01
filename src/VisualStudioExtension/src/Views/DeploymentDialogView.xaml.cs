@@ -48,6 +48,12 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             MouseDown += Window_MouseDown;
         }
 
+        protected override void OnContentRendered(EventArgs e)
+        {
+            _viewModel.OnRendered();
+            base.OnContentRendered(e);
+        }
+
         protected override void OnClosed(EventArgs e)
         {
             _viewModel.OnClosed();
