@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Services\src\Tanzu.Toolkit.Services.csproj" />
+    <ProjectReference Include="..\..\ViewModels\src\Tanzu.Toolkit.ViewModels.csproj" />
     <ProjectReference Include="..\src\Tanzu.Toolkit.VisualStudioExtension.csproj" />
   </ItemGroup>
 
