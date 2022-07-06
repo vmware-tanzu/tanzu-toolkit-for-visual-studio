@@ -32,7 +32,7 @@ namespace Tanzu.Toolkit.VisualStudio
 
             themeService.SetTheme(this);
             DataContext = viewModel;
-            CancelCommand = new DelegatingCommand(viewModel.Close, viewModel.CanCancel);
+            CancelCommand = new DelegatingCommand(viewModel.Close, alwaysTrue);
             OpenLoginViewCommand = new DelegatingCommand(viewModel.OpenLoginView, alwaysTrue);
             ResolveMissingAppCommand = new AsyncDelegatingCommand(viewModel.StartDebuggingAppAsync, viewModel.CanStartDebuggingApp);
             ShowDeploymentWindowCommand = new DelegatingCommand(viewModel.DisplayDeploymentWindow, viewModel.CanDisplayDeploymentWindow);

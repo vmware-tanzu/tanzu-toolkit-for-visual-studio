@@ -487,11 +487,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         {
             return IsLoggedIn && string.IsNullOrWhiteSpace(LoadingMessage);
         }
-
-        public bool CanCancel(object arg = null)
-        {
-            return string.IsNullOrWhiteSpace(LoadingMessage);
-        }
     }
 
     public class RemoteDebugLaunchConfig
