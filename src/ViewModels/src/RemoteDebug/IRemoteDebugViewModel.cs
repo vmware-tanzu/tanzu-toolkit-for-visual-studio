@@ -21,5 +21,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         void OpenLoginView(object arg = null);
         void DisplayDeploymentWindow(object arg = null);
         bool CanDisplayDeploymentWindow(object arg = null);
+        bool CanCancel(object arg = null);
     }
 }
