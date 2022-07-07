@@ -39,8 +39,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private bool _debugExistingApp;
         private bool _pushNewAppToDebug;
         private bool _isLoggedIn;
-        private string _option1Text;
-        private string _option2Text;
         private CloudFoundryApp _selectedApp;
         private bool _debugAgentInstalled;
         private bool _launchFileExists;
@@ -78,8 +76,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             _outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel), $"Remote Debug Output (\"{_projectName}\")") as IView;
             _outputViewModel = _outputView?.ViewModel as IOutputViewModel;
 
-            Option1Text = $"Push new version of \"{expectedAppName}\" to debug";
-            Option2Text = $"Select existing app to debug";
             AppToDebug = null;
             LoadingMessage = null;
 
@@ -183,26 +179,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             {
                 _dialogMessage = value;
                 RaisePropertyChangedEvent("DialogMessage");
-            }
-        }
-
-        public string Option1Text
-        {
-            get => _option1Text;
-            set
-            {
-                _option1Text = value;
-                RaisePropertyChangedEvent("Option1Text");
-            }
-        }
-
-        public string Option2Text
-        {
-            get => _option2Text;
-            set
-            {
-                _option2Text = value;
-                RaisePropertyChangedEvent("Option2Text");
             }
         }
 
