@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
@@ -42,6 +43,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private CloudFoundryApp _selectedApp;
         private bool _debugAgentInstalled;
         private bool _launchFileExists;
+        private CancellationTokenSource _tokenSource;
         private const string _appDirLinux = "/home/vcap/app";
         private const string _appDirWindows = "c:\\Users\\vcap\\app";
         private const string _vsdbgInstallationDirLinux = "/home/vcap/app/vsdbg";
@@ -76,13 +78,10 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             _outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel), $"Remote Debug Output (\"{_projectName}\")") as IView;
             _outputViewModel = _outputView?.ViewModel as IOutputViewModel;
 
-            AppToDebug = null;
-            LoadingMessage = null;
+            ResetState();
 
-            IsLoggedIn = _tasExplorer != null && _tasExplorer.TasConnection != null;
             if (IsLoggedIn)
             {
-                IsLoggedIn = true;
                 _cfClient = _tasExplorer.TasConnection.CfClient;
                 var _ = PromptAppSelectionAsync(expectedAppName);
             }
@@ -198,6 +197,10 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             get => "Push New App to Debug";
         }
 
+        public Action<object> CancelDebugging { get; set; }
+
+        private bool CanCancel { get; set; }
+
         // Methods //
 
         public void OpenLoginView(object arg = null)
@@ -233,35 +236,40 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 return;
             }
 
-            LoadingMessage = $"Checking for debugging agent on {AppToDebug.AppName}...";
-
-            _debugAgentInstalled = await CheckForVsdbg(AppToDebug.Stack);
-            if (!_debugAgentInstalled)
+            if (_tokenSource == null)
             {
-                LoadingMessage = $"Installing debugging agent for {AppToDebug.AppName}...";
-                var installationResult = await _vsdbgInstaller.InstallVsdbgForCFAppAsync(AppToDebug);
-                _debugAgentInstalled = await CheckForVsdbg(AppToDebug.Stack);
-                if (!_debugAgentInstalled)
-                {
-                    Logger.Error("Failed to install or start debugging agent for app '{AppName}': {DebugFailureMsg}", AppToDebug.AppName, installationResult.Explanation);
-                }
+                _tokenSource = new CancellationTokenSource();
             }
+            var cancellationToken = _tokenSource.Token;
 
-            CreateLaunchFileIfNonexistent(AppToDebug.Stack);
-            if (!_launchFileExists)
+            CancelDebugging = (object _) =>
             {
+                _tokenSource.Cancel();
                 Close();
-                return;
-            }
+            };
 
-            LoadingMessage = "Attaching to debugging agent...";
-            _initiateDebugCallback?.Invoke(AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName);
-            Close();
-            FileService.DeleteFile(_expectedPathToLaunchFile);
+            try
+            {
+                await RemoteDebugAppAsync(cancellationToken);
+            }
+            catch (OperationCanceledException ex)
+            {
+                Logger.Information("Remote debugging process canceled: {OperationCanceledException}", ex);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Unexpected exception caught while attempting to remote debug {AppName}: {RemoteDebugException}", AppToDebug.AppName ?? _projectName, ex);
+            }
+            finally
+            {
+                _tokenSource.Dispose();
+            }
         }
 
-        public void CreateLaunchFileIfNonexistent(string stack)
+        public void CreateLaunchFileIfNonexistent(string stack, CancellationToken ct)
         {
+            StopDebuggingAndCloseIfCancelled(ct);
+
             _launchFileExists = false;
             var remoteDebugAgentDir = stack.Contains("win") ? _vsdbgInstallationDirWindows : _vsdbgInstallationDirLinux;
 
@@ -336,7 +344,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             }
         }
 
-        public void Close(object arg = null)
+        private void Close()
         {
             ViewCloser?.Invoke();
         }
@@ -358,8 +366,55 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             }
         }
 
-        private async Task<bool> CheckForVsdbg(string stack)
+        private async Task RemoteDebugAppAsync(CancellationToken ct)
         {
+            LoadingMessage = $"Checking for debugging agent on {AppToDebug.AppName}...";
+
+            _debugAgentInstalled = await CheckForVsdbg(AppToDebug.Stack, ct);
+            if (!_debugAgentInstalled)
+            {
+                LoadingMessage = $"Installing debugging agent for {AppToDebug.AppName}...";
+                var installationResult = await _vsdbgInstaller.InstallVsdbgForCFAppAsync(AppToDebug);
+                _debugAgentInstalled = await CheckForVsdbg(AppToDebug.Stack, ct);
+                if (!_debugAgentInstalled)
+                {
+                    Logger.Error("Failed to install or start debugging agent for app '{AppName}': {DebugFailureMsg}", AppToDebug.AppName, installationResult.Explanation);
+                }
+            }
+
+            CreateLaunchFileIfNonexistent(AppToDebug.Stack, ct);
+            if (!_launchFileExists)
+            {
+                Close();
+                return;
+            }
+
+            LoadingMessage = "Attaching to debugging agent...";
+            StopDebuggingAndCloseIfCancelled(ct); // final check before starting debug connection
+            CanCancel = false;
+
+            _initiateDebugCallback?.Invoke(AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName);
+            Close();
+            FileService.DeleteFile(_expectedPathToLaunchFile);
+        }
+
+        private void ResetState()
+        {
+            AppToDebug = null;
+            LoadingMessage = null;
+            IsLoggedIn = _tasExplorer != null && _tasExplorer.TasConnection != null;
+            CanCancel = true;
+            CancelDebugging = (object arg) =>
+            {
+                Close();
+            };
+        }
+
+        private async Task<bool> CheckForVsdbg(string stack, CancellationToken ct)
+        {
+            StopDebuggingAndCloseIfCancelled(ct);
+
+            LoadingMessage = $"Checking for debugging agent on {AppToDebug.AppName}...";
             DetailedResult sshResult;
             bool vsdbExecutableListed;
 
@@ -452,6 +507,16 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             }
         }
 
+        private void StopDebuggingAndCloseIfCancelled(CancellationToken ct)
+        {
+            if (ct.IsCancellationRequested)
+            {
+                Close();
+                ResetState();
+                ct.ThrowIfCancellationRequested();
+            }
+        }
+
         // Predicates //
 
         public bool CanStartDebuggingApp(object arg = null)
@@ -462,6 +527,11 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         public bool CanDisplayDeploymentWindow(object arg = null)
         {
             return IsLoggedIn && string.IsNullOrWhiteSpace(LoadingMessage);
+        }
+
+        public bool CanCancelDebugging(object arg = null)
+        {
+            return CanCancel;
         }
     }
 
