@@ -508,8 +508,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         {
             if (ct.IsCancellationRequested)
             {
-                Close();
-                ResetState();
                 ct.ThrowIfCancellationRequested();
             }
         }
