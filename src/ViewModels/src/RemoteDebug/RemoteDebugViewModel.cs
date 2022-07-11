@@ -260,10 +260,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             {
                 Logger.Error("Unexpected exception caught while attempting to remote debug {AppName}: {RemoteDebugException}", AppToDebug.AppName ?? _projectName, ex);
             }
-            finally
-            {
-                _tokenSource.Dispose();
-            }
         }
 
         public void CreateLaunchFileIfNonexistent(string stack, CancellationToken ct)
@@ -346,6 +342,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         private void Close()
         {
+            _tokenSource?.Dispose();
             ThreadingService.ExecuteInUIThread(() => ViewCloser?.Invoke());
         }
 
