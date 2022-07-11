@@ -346,7 +346,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         private void Close()
         {
-            ViewCloser?.Invoke();
+            ThreadingService.ExecuteInUIThread(() => ViewCloser?.Invoke());
         }
 
         public void DisplayDeploymentWindow(object arg = null)
