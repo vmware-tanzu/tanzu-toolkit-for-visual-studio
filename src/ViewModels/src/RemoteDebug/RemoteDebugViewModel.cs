@@ -386,9 +386,9 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 return;
             }
 
+            CanCancel = false;
             LoadingMessage = "Attaching to debugging agent...";
             StopDebuggingAndCloseIfCancelled(ct); // final check before starting debug connection
-            CanCancel = false;
 
             _initiateDebugCallback?.Invoke(AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName);
             Close();
