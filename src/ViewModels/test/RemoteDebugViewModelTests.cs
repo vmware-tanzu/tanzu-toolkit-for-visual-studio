@@ -14,16 +14,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         private const string _fakeTargetFrameworkMoniker = "some fake tfm";
         private const string _fakePathToLaunchFile = "fake\\path\\to\\launch\\file";
         private RemoteDebugViewModel _sut;
-        private Action<string, string> _fakeDebugCallback;
 
         [TestInitialize]
         public void TestInit()
         {
-            var fakeTasConnection = new FakeCfInstanceViewModel(_fakeCfInstance, Services);
-            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(fakeTasConnection);
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns((CfInstanceViewModel)null);
             MockThreadingService.Setup(m => m.StartBackgroundTask(It.IsAny<Func<Task>>(), It.IsAny<CancellationToken>())).Verifiable();
 
-            _sut = new RemoteDebugViewModel(_fakeAppName, _fakeProjectPath, _fakeTargetFrameworkMoniker, _fakePathToLaunchFile, _fakeDebugCallback, Services);
+            _sut = new RemoteDebugViewModel(_fakeAppName, _fakeProjectPath, _fakeTargetFrameworkMoniker, _fakePathToLaunchFile, null, Services);
         }
 
         [TestCleanup]
@@ -47,15 +45,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ctor")]
         [DataRow(true)]
         [DataRow(false)]
-        public void Constructor_SetsIsLoggedIn(bool mockingLoggedOut)
+        public void Constructor_SetsIsLoggedIn(bool mockingLoggedIn)
         {
-            var expectedValueForIsLoggedIn = !mockingLoggedOut;
-            if (mockingLoggedOut)
+            if (mockingLoggedIn)
             {
-                MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns((CfInstanceViewModel)null);
+                MockLoggedIn();
             }
-            _sut = new RemoteDebugViewModel(_fakeAppName, _fakeProjectPath, _fakeTargetFrameworkMoniker, _fakePathToLaunchFile, _fakeDebugCallback, Services);
-            Assert.AreEqual(expectedValueForIsLoggedIn, _sut.IsLoggedIn);
+            Assert.AreEqual(mockingLoggedIn, _sut.IsLoggedIn);
         }
 
         [TestMethod]
@@ -76,6 +72,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ctor")]
         public void Constructor_PromptsAppSelection_WhenIsLoggedIn()
         {
+            MockLoggedIn();
+
             Assert.IsTrue(_sut.IsLoggedIn);
             Assert.AreEqual("Select app to debug:", _sut.DialogMessage);
             Assert.IsNull(_sut.LoadingMessage);
@@ -88,7 +86,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns((CfInstanceViewModel)null);
             MockCloudFoundryService.Invocations.Clear(); // reset any invocations from test init construction
 
-            _sut = new RemoteDebugViewModel(_fakeAppName, _fakeProjectPath, _fakeTargetFrameworkMoniker, _fakePathToLaunchFile, _fakeDebugCallback, Services);
+            _sut = new RemoteDebugViewModel(_fakeAppName, _fakeProjectPath, _fakeTargetFrameworkMoniker, _fakePathToLaunchFile, null, Services);
 
             Assert.IsNull(_sut._tasExplorer.TasConnection);
 
@@ -96,6 +94,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             
             Assert.IsNull(_sut.LoadingMessage);
             Assert.IsNull(_sut.DialogMessage);
+        }
+
+        private void MockLoggedIn()
+        {
+            var fakeTasConnection = new FakeCfInstanceViewModel(_fakeCfInstance, Services);
+            MockThreadingService.Invocations.Clear(); // reset invocations from test init
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(fakeTasConnection);
+
+            _sut = new RemoteDebugViewModel(_fakeAppName, _fakeProjectPath, _fakeTargetFrameworkMoniker, _fakePathToLaunchFile, null, Services);
         }
     }
 }
