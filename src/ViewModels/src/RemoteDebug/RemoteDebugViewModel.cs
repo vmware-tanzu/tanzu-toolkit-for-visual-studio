@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -15,11 +16,13 @@ using Tanzu.Toolkit.Services.DotnetCli;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Project;
 
+[assembly: InternalsVisibleTo("Tanzu.Toolkit.ViewModels.Tests")]
+
 namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 {
     public class RemoteDebugViewModel : AbstractViewModel, IRemoteDebugViewModel
     {
-        private readonly ITasExplorerViewModel _tasExplorer;
+        internal ITasExplorerViewModel _tasExplorer;
         private ICloudFoundryService _cfClient;
         private readonly ICfCliService _cfCliService;
         private readonly IDotnetCliService _dotnetCliService;
