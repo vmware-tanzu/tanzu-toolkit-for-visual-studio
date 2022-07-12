@@ -202,7 +202,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         public Action<object> CancelDebugging { get; set; }
 
-        private bool CanCancel { get; set; }
+        internal bool CanCancel { get; set; }
 
         // Methods //
 
@@ -253,7 +253,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
             try
             {
-                await RemoteDebugAppAsync(cancellationToken);
+                await ThreadingService.StartBackgroundTask(() => RemoteDebugAppAsync(cancellationToken), cancellationToken);
             }
             catch (OperationCanceledException ex)
             {

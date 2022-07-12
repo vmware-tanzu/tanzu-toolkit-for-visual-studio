@@ -1,5 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.ViewModels.RemoteDebug;
 
 namespace Tanzu.Toolkit.ViewModels.Tests
@@ -16,9 +20,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public void TestInit()
         {
             var fakeTasConnection = new FakeCfInstanceViewModel(_fakeCfInstance, Services);
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(fakeTasConnection);
+            MockThreadingService.Setup(m => m.StartBackgroundTask(It.IsAny<Func<Task>>(), It.IsAny<CancellationToken>())).Verifiable();
 
             _sut = new RemoteDebugViewModel(_fakeAppName, _fakeProjectPath, _fakeTargetFrameworkMoniker, _fakePathToLaunchFile, _fakeDebugCallback, Services);
-            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(fakeTasConnection);
         }
 
         [TestCleanup]
@@ -55,13 +60,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("ctor")]
-        public void Constructor_SetsWaitingOnAppConfirmationToFalse()
-        {
-            Assert.IsFalse(_sut.WaitingOnAppConfirmation);
-        }
-
-        [TestMethod]
-        [TestCategory("ctor")]
         public void Constructor_SetsCanCancelToTrue()
         {
             Assert.IsTrue(_sut.CanCancel);
@@ -72,6 +70,32 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public void Constructor_SetsCancelDebuggingAction()
         {
             Assert.IsNotNull(_sut.CancelDebugging);
+        }
+
+        [TestMethod]
+        [TestCategory("ctor")]
+        public void Constructor_PromptsAppSelection_WhenIsLoggedIn()
+        {
+            Assert.IsTrue(_sut.IsLoggedIn);
+            Assert.AreEqual("Select app to debug:", _sut.DialogMessage);
+            Assert.IsNull(_sut.LoadingMessage);
+        }
+
+        [TestMethod]
+        [TestCategory("ctor")]
+        public void Constructor_DoesNotPromptAppSelection_WhenNotLoggedIn()
+        {
+            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns((CfInstanceViewModel)null);
+            MockCloudFoundryService.Invocations.Clear(); // reset any invocations from test init construction
+
+            _sut = new RemoteDebugViewModel(_fakeAppName, _fakeProjectPath, _fakeTargetFrameworkMoniker, _fakePathToLaunchFile, _fakeDebugCallback, Services);
+
+            Assert.IsNull(_sut._tasExplorer.TasConnection);
+
+            MockCloudFoundryService.Verify(m => m.GetOrgsForCfInstanceAsync(It.IsAny<CloudFoundryInstance>(), It.IsAny<bool>(), It.IsAny<int>()), Times.Never);
+            
+            Assert.IsNull(_sut.LoadingMessage);
+            Assert.IsNull(_sut.DialogMessage);
         }
     }
 }
