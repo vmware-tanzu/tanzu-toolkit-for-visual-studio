@@ -139,19 +139,9 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                             projSvc.PathToProjectDirectory = projectDirectory;
                             projSvc.TargetFrameworkMoniker = tfm;
 
-                            var tasExplorer = _services.GetRequiredService<ITasExplorerViewModel>();
-                            var deploymentViewModel = _services.GetRequiredService<IDeploymentDialogViewModel>();
-                            deploymentViewModel.IsLoggedIn = tasExplorer.TasConnection != null;
-                            deploymentViewModel.Expanded = false;
-
-                            var deploymentWindow = _services.GetRequiredService<IDeploymentDialogView>() as Microsoft.VisualStudio.PlatformUI.DialogWindow;
-                            deploymentWindow?.ShowModal();
-
-                            // * Actions to take after modal closes:
-                            if (deploymentViewModel.DeploymentInProgress) // don't open tool window if modal was closed via "X" button
-                            {
-                                deploymentViewModel.OutputView.Show();
-                            }
+                            var view = _services.GetRequiredService<IDeploymentDialogView>() as IView;
+                            var deploymentViewModel = view.ViewModel as IDeploymentDialogViewModel;
+                            view.DisplayView();
                         }
                     }
                 }
@@ -160,7 +150,8 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 _logger?.Error("{ClassName} caught exception in {MethodName}: {PushException}", nameof(PushToCloudFoundryCommand), nameof(Execute), ex);
-                var msg = ex.Message + Environment.NewLine + Environment.NewLine +
+                var msg = $"Internal error: \"{ex.Message}\"" 
+                    + Environment.NewLine + Environment.NewLine +
                     "If this issue persists, please contact tas-vs-extension@vmware.com";
                 _dialogService.DisplayErrorDialog("Unable to push to Tanzu Application Service", msg);
             }

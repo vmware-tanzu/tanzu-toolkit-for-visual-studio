@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
 namespace Tanzu.Toolkit.ViewModels
@@ -12,9 +13,10 @@ namespace Tanzu.Toolkit.ViewModels
         ObservableCollection<string> SelectedBuildpacks { get; set; }
         ObservableCollection<string> SelectedServices { get; set; }
         bool DeploymentInProgress { get; }
-        IView OutputView { get; }
         bool ConfigureForRemoteDebugging { get; set; }
         bool IsLoggedIn { get; set; }
+        Action OnRendered { get; set; }
+        Action OnClosed { get; set; }
 
         bool CanDeployApp(object arg);
         bool CanToggleAdvancedOptions(object arg);
@@ -33,5 +35,6 @@ namespace Tanzu.Toolkit.ViewModels
         void ClearSelectedServices(object arg = null);
         void ClearSelectedManifest(object arg = null);
         void ClearSelectedDeploymentDirectory(object arg = null);
+        void DisplayDeploymentOutput();
     }
 }

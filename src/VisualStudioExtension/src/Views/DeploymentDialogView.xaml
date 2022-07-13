@@ -1,9 +1,9 @@
-﻿<ui:DialogWindow
+﻿<local:AbstractModal
     x:Class="Tanzu.Toolkit.VisualStudio.Views.DeploymentDialogView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ui="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
-    Name="DeploymentDialogViewElement"
+    x:Name="DeploymentDialogViewElement"
     Title="Push to Tanzu Application Service"
     Icon="Resources/tas_16px.png"
     BorderBrush="Gray"
@@ -776,4 +776,4 @@
             </StackPanel>
         </Grid>
     </DockPanel>
-</ui:DialogWindow>
+</local:AbstractModal>

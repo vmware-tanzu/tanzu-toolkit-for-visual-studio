@@ -163,7 +163,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddTransient<IOutputViewModel, OutputViewModel>();
             services.AddSingleton<ITasExplorerViewModel, TasExplorerViewModel>();
             services.AddSingleton<ILoginViewModel, LoginViewModel>();
-            services.AddSingleton<IDeploymentDialogViewModel, DeploymentDialogViewModel>();
+            services.AddTransient<IDeploymentDialogViewModel, DeploymentDialogViewModel>();
             services.AddTransient<IRemoteDebugViewModel, RemoteDebugViewModel>();
             services.AddTransient<ILoginViewModel, LoginViewModel>();
             services.AddSingleton<IAppDeletionConfirmationViewModel, AppDeletionConfirmationViewModel>();

@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.PlatformUI;
+﻿using System;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
@@ -12,9 +12,8 @@ namespace Tanzu.Toolkit.VisualStudio.Views
     /// <summary>
     /// Interaction logic for DeploymentDialogView.xaml.
     /// </summary>
-    public partial class DeploymentDialogView : DialogWindow, IDeploymentDialogView
+    public partial class DeploymentDialogView : AbstractModal, IDeploymentDialogView
     {
-        private readonly IDeploymentDialogViewModel _viewModel;
         public ICommand UploadAppCommand { get; }
         public ICommand OpenLoginDialogCommand { get; }
         public ICommand ToggleAdvancedOptionsCommand { get; }
@@ -27,11 +26,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         public Brush HyperlinkBrush { get { return (Brush)GetValue(_hyperlinkBrushProperty); } set { SetValue(_hyperlinkBrushProperty, value); } }
 
         public static readonly DependencyProperty _hyperlinkBrushProperty = DependencyProperty.Register("HyperlinkBrush", typeof(Brush), typeof(DeploymentDialogView), new PropertyMetadata(default(Brush)));
-
-        public DeploymentDialogView()
-        {
-            InitializeComponent();
-        }
+        private readonly IDeploymentDialogViewModel _viewModel;
 
         public DeploymentDialogView(IDeploymentDialogViewModel viewModel, IThemeService themeService)
         {
@@ -51,6 +46,18 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             InitializeComponent();
 
             MouseDown += Window_MouseDown;
+        }
+
+        protected override void OnContentRendered(EventArgs e)
+        {
+            _viewModel.OnRendered();
+            base.OnContentRendered(e);
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            _viewModel.OnClosed();
+            base.OnClosed(e);
         }
 
         private void CfOrgOptions_ComboBox_DropDownClosed(object sender, System.EventArgs e)
@@ -89,16 +96,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         private void Close(object sender, RoutedEventArgs e)
         {
-            Hide();
-        }
-
-        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.LeftButton == MouseButtonState.Pressed)
-            {
-                DragMove();
-            }
-
+            Close();
         }
 
         private void BuildpackItemSelected(object sender, RoutedEventArgs e)

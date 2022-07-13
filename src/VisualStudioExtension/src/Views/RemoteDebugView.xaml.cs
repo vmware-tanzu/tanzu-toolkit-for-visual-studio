@@ -12,7 +12,7 @@ namespace Tanzu.Toolkit.VisualStudio
     /// <summary>
     /// Interaction logic for RemoteDebugView.xaml
     /// </summary>
-    public partial class RemoteDebugView : DialogWindow, IRemoteDebugView
+    public partial class RemoteDebugView : AbstractModal, IRemoteDebugView
     {
         public ICommand CancelCommand { get; }
         public ICommand OpenLoginViewCommand { get; }
@@ -38,19 +38,6 @@ namespace Tanzu.Toolkit.VisualStudio
             ShowDeploymentWindowCommand = new DelegatingCommand(viewModel.DisplayDeploymentWindow, viewModel.CanDisplayDeploymentWindow);
             MouseDown += Window_MouseDown;
             InitializeComponent();
-        }
-
-        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.LeftButton == MouseButtonState.Pressed)
-            {
-                DragMove();
-            }
-        }
-
-        private void Close(object sender, RoutedEventArgs e)
-        {
-            Hide();
         }
     }
 }

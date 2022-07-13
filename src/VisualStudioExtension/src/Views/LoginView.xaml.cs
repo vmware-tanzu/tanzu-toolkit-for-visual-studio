@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualStudio.PlatformUI;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Security;
 using System.Windows;
 using System.Windows.Input;
@@ -13,7 +12,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
     /// <summary>
     /// Interaction logic for LoginView.xaml.
     /// </summary>
-    public partial class LoginView : DialogWindow, ILoginView
+    public partial class LoginView : AbstractModal, ILoginView
     {
         private readonly ILoginViewModel _viewModel;
         public ICommand AddCloudCommand { get; }
@@ -25,11 +24,6 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         public Brush HyperlinkBrush { get { return (Brush)GetValue(_hyperlinkBrushProperty); } set { SetValue(_hyperlinkBrushProperty, value); } }
 
         public static readonly DependencyProperty _hyperlinkBrushProperty = DependencyProperty.Register("HyperlinkBrush", typeof(Brush), typeof(LoginView), new PropertyMetadata(default(Brush)));
-
-        public LoginView()
-        {
-            InitializeComponent();
-        }
 
         public LoginView(ILoginViewModel viewModel, IThemeService themeService)
         {
@@ -73,14 +67,6 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         {
             Hide();
             _viewModel.NavigateToTargetPage();
-        }
-
-        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.LeftButton == MouseButtonState.Pressed)
-            {
-                DragMove();
-            }
         }
 
         private void TbUrl_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
