@@ -4,6 +4,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using Tanzu.Toolkit.Services.Logging;
+using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.VisualStudio.Services;
 using Tanzu.Toolkit.VisualStudio.Views;
 
@@ -22,13 +23,12 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
 
         private readonly string _fakeViewModelName = "MyCoolViewModel";
         private readonly string _fakeViewName = "IMyCoolView";
-        private Type _fakeViewType;
-        private readonly object _fakeReturnedView = "Pretend this is a view";
+        private readonly FakeView _fakeView = new();
 
         [TestInitialize]
         public void TestInit()
         {
-            _services = new FakeServiceProvider(_fakeReturnedView);
+            _services = new FakeServiceProvider(_fakeView);
 
             _mockToolWindowService = new Mock<IToolWindowService>();
             _mockLoggingService = new Mock<ILoggingService>();
@@ -37,27 +37,62 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
             _mockLoggingService.SetupGet(m => m.Logger).Returns(_mockLogger.Object);
 
             _sut = new TestVsViewLocatorService(_mockToolWindowService.Object, _mockLoggingService.Object, _services);
-
-            _fakeViewType = GetType(); // some arbitrary type to return
-
-            // pretend that looking up `expectedViewName` returns `fakeViewType`
-            _sut.TypeLookupOverrides = new Dictionary<string, Type>
-            {
-                { _fakeViewName, _fakeViewType }
-            };
         }
 
         [TestMethod]
         [TestCategory("GetViewByViewModelName")]
-        public void GetViewByViewModelName_ReturnsView_OfTypeMatchingProvidedViewModel()
+        public void GetViewByViewModelName_ReturnsView_OfTypeMatchingProvidedViewModel_ForToolWindowTypes()
         {
+            var dummyToolWindowViewType = typeof(IOutputView);
+            Assert.IsTrue(_sut.ViewShownAsToolWindow(dummyToolWindowViewType)); // ensure this type is characterized as a tool window view
+
+            Assert.AreEqual(_sut.GetViewName(_fakeViewModelName), _fakeViewName);
+            _sut.TypeLookupOverrides[_fakeViewName] = dummyToolWindowViewType;
+
+            _mockToolWindowService.Setup(m => m.CreateToolWindowForView(dummyToolWindowViewType, It.IsAny<string>())).Returns(_fakeView);
+
             var result = _sut.GetViewByViewModelName(_fakeViewModelName);
 
-            Assert.AreEqual(_fakeReturnedView, result);
+            Assert.AreEqual(_fakeView, result);
+            _mockToolWindowService.VerifyAll();
+        }
+
+        [TestMethod]
+        [TestCategory("GetViewByViewModelName")]
+        public void GetViewByViewModelName_ReturnsView_OfTypeMatchingProvidedViewModel_ForModalTypes()
+        {
+            var dummyToolWindowViewType = typeof(ILoginView);
+            Assert.IsTrue(_sut.ViewShownAsModal(dummyToolWindowViewType)); // ensure this type is characterized as a modal view
+
+            Assert.AreEqual(_sut.GetViewName(_fakeViewModelName), _fakeViewName);
+            _sut.TypeLookupOverrides[_fakeViewName] = dummyToolWindowViewType;
+
+            var result = _sut.GetViewByViewModelName(_fakeViewModelName);
+
+            Assert.AreEqual(_fakeView, result);
 
             var fakeServiceProvider = _services as FakeServiceProvider;
             Assert.IsTrue(fakeServiceProvider.GetServiceWasCalled);
-            Assert.AreEqual(_fakeViewType, fakeServiceProvider.GetServiceArgument);
+            Assert.AreEqual(dummyToolWindowViewType, fakeServiceProvider.GetServiceArgument);
+        }
+
+        [TestMethod]
+        [TestCategory("GetViewByViewModelName")]
+        public void GetViewByViewModelName_ReturnsNull_AndLogsError_WhenTypeNotModalNorToolWindow()
+        {
+            var dummyToolWindowViewType = GetType(); // some arbitrary type to return
+            _sut.TypeLookupOverrides.Add(_fakeViewName, dummyToolWindowViewType);
+
+            Assert.IsFalse(_sut.ViewShownAsToolWindow(dummyToolWindowViewType));
+            Assert.IsFalse(_sut.ViewShownAsModal(dummyToolWindowViewType));
+
+            var result = _sut.GetViewByViewModelName(_fakeViewModelName);
+
+            Assert.IsNull(result);
+            _mockLogger.Verify(m => m.Error(It.Is<string>(s => s.Contains("given type not classified as either modal or tool window")),
+                                            nameof(VsViewLocatorService),
+                                            nameof(_sut.GetViewByViewModelName),
+                                            _fakeViewModelName), Times.Once);
         }
 
         [TestMethod]
@@ -65,7 +100,7 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
         public void GetViewByViewModelName_CreatesToolWindow_AndReturnsView_WhenInterpretedViewTypeIsIOutputView()
         {
             var expectedViewType = typeof(IOutputView);
-            var fakeViewFromToolWindow = new object();
+            var fakeViewFromToolWindow = new FakeView();
             var fakeCaptionParam = "some caption";
 
             _sut.TypeLookupOverrides = new Dictionary<string, Type>
@@ -91,7 +126,7 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
         {
         }
 
-        public Dictionary<string, Type> TypeLookupOverrides { get; set; }
+        public Dictionary<string, Type> TypeLookupOverrides { get; set; } = new Dictionary<string, Type>();
 
         protected override Type LookupViewType(string viewTypeName)
         {
@@ -120,5 +155,12 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
             GetServiceArgument = serviceType;
             return FakeServiceToReturn ?? "Fake return value (were you expecting a real service?)";
         }
+    }
+
+    class FakeView : IView
+    {
+        public IViewModel ViewModel => throw new NotImplementedException();
+
+        public Action DisplayView { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     }
 }

@@ -111,7 +111,7 @@ namespace Tanzu.Toolkit.ViewModels
             _view = outputView;
             var recentLogsTask = CfClient.GetRecentLogsAsync(cfApp);
             OutputIsAppLogs = true;
-            outputView.Show();
+            outputView.DisplayView();
             AppendLine($"\n*** Fetching recent app logs for \"{cfApp.AppName}\" in org \"{cfApp.ParentSpace.ParentOrg.OrgName}\" and space {cfApp.ParentSpace.SpaceName}... ***");
 
             var recentLogsResult = await recentLogsTask;

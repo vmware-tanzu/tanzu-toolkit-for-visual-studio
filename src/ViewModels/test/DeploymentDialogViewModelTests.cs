@@ -40,11 +40,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _fakeSelectedServices = new ObservableCollection<string> { _fakeServiceName1, _fakeServiceName2, _fakeServiceName3 };
             var fakeTasConnection = new FakeCfInstanceViewModel(_fakeCfInstance, Services);
 
-            // * return fake view/viewmodel for output window
-            MockViewLocatorService.Setup(mock =>
-                mock.GetViewByViewModelName(nameof(OutputViewModel), It.IsAny<string>()))
-                    .Returns(new FakeOutputView());
-
             MockFileService.Setup(m => m.FileExists(_fakeManifestPath)).Returns(true);
             MockFileService.Setup(m => m.DirectoryExists(_fakeProjectPath)).Returns(true);
             MockFileService.Setup(m => m.DirContainsFiles(_fakeProjectPath)).Returns(true);
@@ -52,6 +47,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockProjectService.SetupGet(m => m.ProjectName).Returns(_fakeProjName);
             MockProjectService.SetupGet(m => m.PathToProjectDirectory).Returns(_fakeProjectPath);
             MockProjectService.SetupGet(m => m.TargetFrameworkMoniker).Returns(_fakeTargetFrameworkMoniker);
+            MockViewLocatorService.Setup(m => m.GetViewByViewModelName(nameof(OutputViewModel), It.IsAny<string>())).Returns(_fakeOutputView);
 
             _sut = new DeploymentDialogViewModel(Services)
             {
@@ -220,6 +216,33 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("ctor")]
+        [TestCategory("OnRendered")]
+        public void Constructor_SetsOnRenderedAction_ToSetManifestPathIfDefaultExists()
+        {
+            MockFileService.Setup(m => m.FileExists(It.Is<string>(s => s.Contains("manifest.yaml")))).Returns(true);
+            Assert.IsNull(_sut.ManifestPath);
+
+            _sut.OnRendered();
+
+            Assert.IsNotNull(_sut.ManifestPath);
+        }
+
+        [TestMethod]
+        [TestCategory("ctor")]
+        [TestCategory("OnClosed")]
+        public void Constructor_SetsOnClosedAction_ToDisplayDeploymentOutputIfDeploymentInProgress()
+        {
+            Assert.AreEqual(_fakeOutputView, _sut._outputView);
+            Assert.IsFalse(_fakeOutputView.ShowMethodWasCalled);
+            _sut.DeploymentInProgress = true; // fake so action will try to display output view
+
+            _sut.OnClosed();
+
+            Assert.IsTrue(_fakeOutputView.ShowMethodWasCalled);
+        }
+
+        [TestMethod]
+        [TestCategory("ctor")]
         [TestCategory("ManifestModel")]
         public void Constructor_SetsManifestModel_ToNewAppManifest_WhenNoDefaultManifestExistsAtAnExpectedPath()
         {
@@ -275,6 +298,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockSerializationService.Setup(m => m.ParseCfAppManifest(fakeManifestContent)).Returns(_fakeManifestModel);
 
             _sut = new DeploymentDialogViewModel(Services);
+            _sut.OnRendered(); // perform steps taken after rendering (i.e. setting values from manifest)
 
             Assert.IsNotNull(_sut.ManifestModel.Applications[0].Path); // ensure path value specified
             Assert.AreEqual(expectedPathValue, _sut.ManifestModel.Applications[0].Path);
@@ -363,34 +387,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             MockDialogService.Verify(mock => mock.CloseDialog(dw, true), Times.Once);
             MockThreadingService.Verify(mock => mock.StartBackgroundTask(_sut.StartDeployment), Times.Once);
-        }
-
-        [TestMethod]
-        [TestCategory("DeployApp")]
-        public void DeployApp_CreatesNewOutputView_WhenCanDeployAppIsTrue()
-        {
-            var dw = new object();
-
-            _sut.AppName = _fakeAppName;
-            _sut.SelectedOrg = _fakeOrg;
-            _sut.SelectedSpace = _fakeSpace;
-            _sut.IsLoggedIn = true;
-            var initialView = _sut.OutputView;
-            var initialViewModel = _sut._outputViewModel;
-
-            // sanity check: ctor should've created a view already
-            MockViewLocatorService.Verify(mock =>
-                mock.GetViewByViewModelName(nameof(OutputViewModel), It.Is<string>(s => s.Contains("Tanzu Push Output"))),
-                Times.Once);
-
-            Assert.IsTrue(_sut.CanDeployApp(null));
-
-            _sut.DeployApp(dw);
-
-            // ensure new view was requested
-            MockViewLocatorService.Verify(mock =>
-                mock.GetViewByViewModelName(nameof(OutputViewModel), It.Is<string>(s => s.Contains("Tanzu Push Output"))),
-                Times.Exactly(2));
         }
 
         [TestMethod]

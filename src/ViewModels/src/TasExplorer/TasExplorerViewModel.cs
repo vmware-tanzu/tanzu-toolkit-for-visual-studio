@@ -295,7 +295,7 @@ namespace Tanzu.Toolkit.ViewModels
                     var outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel), $"\"{cfApp.AppName}\" Logs") as IView;
                     var outputViewModel = outputView?.ViewModel as IOutputViewModel;
 
-                    outputView.Show();
+                    outputView.DisplayView();
 
                     outputViewModel.AppendLine(recentLogsResult.Content);
                 }

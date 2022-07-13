@@ -6,7 +6,5 @@ namespace Tanzu.Toolkit.ViewModels
     {
         IViewModel ViewModel { get; }
         Action DisplayView { get; set; }
-
-        void Show();
     }
 }
