@@ -85,6 +85,7 @@
     <Compile Include="Commands\RemoteDebugCommand.cs" />
     <Compile Include="Services\IDebugAgentProvider.cs" />
     <Compile Include="Services\ProjectService.cs" />
+    <Compile Include="Services\VsdbgInstaller.cs" />
     <Compile Include="Views\AbstractModal.cs" />
     <Compile Include="Views\Converters\InverseBoolConverter.cs" />
     <Compile Include="Views\Converters\NullVisibilityConverter.cs" />
