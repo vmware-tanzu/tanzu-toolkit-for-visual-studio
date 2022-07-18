@@ -83,6 +83,7 @@
   <ItemGroup>
     <Compile Include="Commands\RequestFeedbackCommand.cs" />
     <Compile Include="Commands\RemoteDebugCommand.cs" />
+    <Compile Include="Services\IDebugAgentProvider.cs" />
     <Compile Include="Services\ProjectService.cs" />
     <Compile Include="Views\AbstractModal.cs" />
     <Compile Include="Views\Converters\InverseBoolConverter.cs" />
