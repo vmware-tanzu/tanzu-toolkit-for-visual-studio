@@ -54,12 +54,6 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             base.OnContentRendered(e);
         }
 
-        protected override void OnClosed(EventArgs e)
-        {
-            _viewModel.OnClosed();
-            base.OnClosed(e);
-        }
-
         private void CfOrgOptions_ComboBox_DropDownClosed(object sender, System.EventArgs e)
         {
             var _ = _viewModel.UpdateCfSpaceOptions();
@@ -97,6 +91,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         private void Close(object sender, RoutedEventArgs e)
         {
             Close();
+            _viewModel.OnClosed();
         }
 
         private void BuildpackItemSelected(object sender, RoutedEventArgs e)

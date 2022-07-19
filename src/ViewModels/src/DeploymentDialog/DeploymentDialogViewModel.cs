@@ -569,12 +569,8 @@ namespace Tanzu.Toolkit.ViewModels
                 DeploymentInProgress = true;
                 var _ = ThreadingService.StartBackgroundTask(StartDeployment);
                 DialogService.CloseDialog(dialogWindow, true);
+                OnClosed();
             }
-        }
-
-        public void DisplayDeploymentOutput()
-        {
-            _outputView.DisplayView();
         }
 
         public bool CanOpenLoginView(object arg)
@@ -1125,6 +1121,11 @@ namespace Tanzu.Toolkit.ViewModels
             var path = appManifest.Applications[0].Path;
 
             DeploymentDirectoryPath = string.IsNullOrWhiteSpace(path) ? null : path;
+        }
+
+        private void DisplayDeploymentOutput()
+        {
+            _outputView.DisplayView();
         }
     }
 

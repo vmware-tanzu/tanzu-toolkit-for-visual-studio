@@ -35,6 +35,5 @@ namespace Tanzu.Toolkit.ViewModels
         void ClearSelectedServices(object arg = null);
         void ClearSelectedManifest(object arg = null);
         void ClearSelectedDeploymentDirectory(object arg = null);
-        void DisplayDeploymentOutput();
     }
 }
