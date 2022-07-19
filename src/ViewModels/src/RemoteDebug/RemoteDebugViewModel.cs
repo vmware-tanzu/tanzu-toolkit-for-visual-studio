@@ -268,6 +268,8 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 Close();
                 return;
             }
+            
+            LoadingMessage = $"Checking for debugging agent on {AppToDebug.AppName}...";
 
             _debugAgentInstalled = await CheckForVsdbg(AppToDebug.Stack);
             if (!_debugAgentInstalled)
@@ -315,7 +317,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         private async Task<bool> CheckForVsdbg(string stack)
         {
-            LoadingMessage = $"Checking for debugging agent on {AppToDebug.AppName}...";
             DetailedResult sshResult;
             bool vsdbExecutableListed;
 
