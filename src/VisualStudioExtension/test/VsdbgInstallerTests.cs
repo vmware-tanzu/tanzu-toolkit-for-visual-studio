@@ -103,13 +103,12 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
                 Stack = stack,
             };
             var vsVersion = "junk";
+            var expectedStartCmd = stack == "windows" 
+                ? $"powershell -File {VsdbgInstaller._vsdbgInstallScriptName}.ps1 -Version {vsVersion} -RuntimeID win7-x64 -InstallPath .\\{_sut.VsdbgDirName}" 
+                : $"chmod +x {VsdbgInstaller._vsdbgInstallScriptName}.sh && ./{VsdbgInstaller._vsdbgInstallScriptName}.sh -v {vsVersion} -r linux-x64 -l ./{_sut.VsdbgDirName}";
+            var expectedSshCmd = $"cd app && curl -L https://aka.ms/getvsdbg{(stack == "windows" ? "ps1" : "sh")} -o GetVsDbg.{(stack == "windows" ? "ps1" : "sh")} && {expectedStartCmd}";
 
             var result = await _sut.InstallVsdbgForCFAppAsync(app, vsVersion);
-
-            var expectedStartCmd = stack == "windows" 
-                ? $"powershell -File {VsdbgInstaller._vsdbgInstallScriptName}.ps1 -Version {vsVersion} -RuntimeID win-x64" 
-                : $"./{VsdbgInstaller._vsdbgInstallScriptName}.sh -v {vsVersion} -r linux-x64";
-            var expectedSshCmd = $"cd app && curl -L https://aka.ms/getvsdbg{(stack == "windows" ? "ps1" : "sh")} -o GetVsDbg.{(stack == "windows" ? "ps1" : "sh")} && {expectedStartCmd}";
 
             _mockCfCliService.Verify(m => m.ExecuteSshCommand(app.AppName, app.ParentSpace.ParentOrg.OrgName, app.ParentSpace.SpaceName, expectedSshCmd), Times.Once);
         }

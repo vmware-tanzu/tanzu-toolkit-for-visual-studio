@@ -10,6 +10,7 @@ using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CloudFoundry;
+using Tanzu.Toolkit.Services.DebugAgentProvider;
 using Tanzu.Toolkit.Services.DotnetCli;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Project;
@@ -24,6 +25,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private readonly IDotnetCliService _dotnetCliService;
         private readonly IFileService _fileService;
         private readonly ISerializationService _serializationService;
+        private readonly IDebugAgentProvider _vsdbgInstaller;
         private readonly IView _outputView;
         private readonly IOutputViewModel _outputViewModel;
         private readonly string _projectName;
@@ -70,6 +72,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             _dotnetCliService = services.GetRequiredService<IDotnetCliService>();
             _fileService = services.GetRequiredService<IFileService>();
             _serializationService = services.GetRequiredService<ISerializationService>();
+            _vsdbgInstaller = services.GetRequiredService<IDebugAgentProvider>();
 
             _vsdbgPathLinux = _vsdbgInstallationDirLinux + "/" + _vsdbgExecutableNameLinux;
             _vsdbgPathWindows = _vsdbgInstallationDirWindows + "\\" + _vsdbgExecutableNameWindows;
@@ -269,9 +272,13 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             _debugAgentInstalled = await CheckForVsdbg(AppToDebug.Stack);
             if (!_debugAgentInstalled)
             {
-                Option1Text = $"Push new version of \"{AppToDebug.AppName}\" to debug (project \"{_projectName}\")";
-                PromptAppResolution($"Unable to locate debugging agent on \"{AppToDebug.AppName}\".");
-                return;
+                var vsVersion = "latest"; // TODO: make this dynamic
+                var installationResult = await _vsdbgInstaller.InstallVsdbgForCFAppAsync(AppToDebug, vsVersion);
+                _debugAgentInstalled = await CheckForVsdbg(AppToDebug.Stack);
+                if (!_debugAgentInstalled)
+                {
+                    Logger.Error("Failed to install or start debugging agent for app '{AppName}': {DebugFailureMsg}", AppToDebug.AppName, installationResult.Explanation);
+                }
             }
 
             CreateLaunchFileIfNonexistent(AppToDebug.Stack);

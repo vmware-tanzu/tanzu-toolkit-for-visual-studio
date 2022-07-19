@@ -21,6 +21,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services
             _cfClient = cfClient;
         }
 
+        public string VsdbgDirName { get; } = "vsdbg";
+        
         public async Task<DetailedResult> InstallVsdbgForCFAppAsync(CloudFoundryApp app, string vsVersion)
         {
             string scriptExt;
@@ -53,16 +55,17 @@ namespace Tanzu.Toolkit.VisualStudio.Services
         private void SetArgsBasedOnStack(string stack, string vsVersion, out string scriptExt, out string startCmd)
         {
             var linuxRuntimeId = "linux-x64";
-            var windowsRuntimeId = "win-x64";
+            var windowsRuntimeId = "win7-x64";
             if (stack != null && stack.Contains("windows"))
             {
                 scriptExt = "ps1";
-                startCmd = $"powershell -File {_vsdbgInstallScriptName}.ps1 -Version {vsVersion} -RuntimeID {windowsRuntimeId}";
+                startCmd = $"powershell -File {_vsdbgInstallScriptName}.{scriptExt} -Version {vsVersion} -RuntimeID {windowsRuntimeId} -InstallPath .\\{VsdbgDirName}";
             }
             else if (stack != null && stack.Contains("linux"))
             {
                 scriptExt = "sh";
-                startCmd = $"./{_vsdbgInstallScriptName}.sh -v {vsVersion} -r {linuxRuntimeId}";
+                var permissionGrant = $"chmod +x {_vsdbgInstallScriptName}.{scriptExt}";
+                startCmd = $"{permissionGrant} && ./{_vsdbgInstallScriptName}.{scriptExt} -v {vsVersion} -r {linuxRuntimeId} -l ./{VsdbgDirName}";
             }
             else
             {
