@@ -905,7 +905,6 @@ namespace Tanzu.Toolkit.ViewModels
                     runtimeIdentifier,
                     publishConfiguration,
                     _publishDirName,
-                    includeDebuggingAgent: ConfigureForRemoteDebugging,
                     StdOutCallback: _outputViewModel.AppendLine,
                     StdErrCallback: _outputViewModel.AppendLine);
 
