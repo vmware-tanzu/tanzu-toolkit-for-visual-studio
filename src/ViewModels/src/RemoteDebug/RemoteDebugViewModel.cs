@@ -338,6 +338,8 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         public void CreateLaunchFileIfNonexistent(string stack)
         {
             _launchFileExists = false;
+            var remoteDebugAgentDir = stack.Contains("win") ? _vsdbgInstallationDirWindows : _vsdbgInstallationDirLinux;
+
             try
             {
                 if (!File.Exists(_expectedPathToLaunchFile))
@@ -348,6 +350,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                     var appProcessName = stack.Contains("win")
                         ? $"{AppToDebug.AppName}.exe"
                         : _projectName; // this should be the app name as determined by .NET, not CF,
+
                     var launchFileConfig = new RemoteDebugLaunchConfig
                     {
                         version = "0.2.0",
@@ -375,7 +378,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                                 processName = appProcessName,
                                 request = "attach",
                                 justMyCode = false,
-                                cwd = _vsdbgInstallationDirLinux,
+                                cwd = remoteDebugAgentDir,
                                 logging = new Logging
                                 {
                                     engineLogging = true,
