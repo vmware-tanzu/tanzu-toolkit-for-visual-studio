@@ -347,9 +347,19 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                     var adapterArgs = stack.Contains("win")
                         ? $"ssh {AppToDebug.AppName} -c \"{_vsdbgPathWindows} --interpreter=vscode\""
                         : $"ssh {AppToDebug.AppName} -c \"/tmp/lifecycle/shell {_appDirLinux} 'bash -c \\\"{_vsdbgPathLinux} --interpreter=vscode\\\"'\"";
-                    var appProcessName = stack.Contains("win")
-                        ? $"{AppToDebug.AppName}.exe"
-                        : _projectName; // this should be the app name as determined by .NET, not CF,
+
+                    var appProcessName = _projectName; // this should be the app name as determined by .NET, not CF,
+                    if (stack.Contains("win"))
+                    {
+                        if (_targetFrameworkMoniker.StartsWith(".NETFramework"))
+                        {
+                            appProcessName = "hwc.exe";
+                        }
+                        else
+                        {
+                            appProcessName += ".exe";
+                        }
+                    }
 
                     var launchFileConfig = new RemoteDebugLaunchConfig
                     {
