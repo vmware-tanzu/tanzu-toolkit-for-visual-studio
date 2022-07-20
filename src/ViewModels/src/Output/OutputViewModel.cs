@@ -56,7 +56,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public void AppendLine(string newContent)
         {
-            if (!OutputPaused && !newContent.StartsWith("Retrieving logs for app"))
+            if (!OutputPaused)
             {
                 var newLine = $"{newContent}\n";
                 if (!string.IsNullOrWhiteSpace(newLine))
