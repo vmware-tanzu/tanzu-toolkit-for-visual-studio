@@ -23,15 +23,11 @@ namespace Tanzu.Toolkit.VisualStudio.Services
 
         public string VsdbgDirName { get; } = "vsdbg";
         
-        public async Task<DetailedResult> InstallVsdbgForCFAppAsync(CloudFoundryApp app, string vsVersion)
+        public async Task<DetailedResult> InstallVsdbgForCFAppAsync(CloudFoundryApp app)
         {
             string scriptExt;
             string startCmd;
-
-            if (string.IsNullOrWhiteSpace(vsVersion))
-            {
-                vsVersion = "latest";
-            }
+            var vsVersion = "latest";
 
             var stack = app.Stack;
             try

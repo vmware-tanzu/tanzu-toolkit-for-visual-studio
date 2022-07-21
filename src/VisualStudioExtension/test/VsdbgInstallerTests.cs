@@ -48,29 +48,11 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
                 Stack = stack,
             };
 
-            var result = await _sut.InstallVsdbgForCFAppAsync(appWithInvalidStack, "junk");
+            var result = await _sut.InstallVsdbgForCFAppAsync(appWithInvalidStack);
 
             Assert.IsFalse(result.Succeeded);
             Assert.AreEqual($"Unexpected stack: '{stack}'", result.Explanation);
             _mockCfCliService.Verify(m => m.ExecuteSshCommand(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-        }
-
-        [TestMethod]
-        [DataRow(null, "linux")]
-        [DataRow(null, "windows")]
-        [DataRow(_emptyStr, "linux")]
-        [DataRow(_emptyStr, "windows")]
-        public async Task InstallVsdbgForCFAppAsync_UsesLatest_WhenVSVersionMissing(string vsVersion, string stack)
-        {
-            var app = new CloudFoundryApp("fake app", "fake app guid", _fakeSpace, null)
-            {
-                Stack = stack,
-            };
-
-            var result = await _sut.InstallVsdbgForCFAppAsync(app, vsVersion);
-
-            var expectedVSVersion = "latest";
-            _mockCfCliService.Verify(m => m.ExecuteSshCommand(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.Is<string>(s => s.Contains(expectedVSVersion))), Times.Once);
         }
 
         [TestMethod]
@@ -86,7 +68,7 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
 
             _mockCfCliService.Setup(m => m.ExecuteSshCommand(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(sshFailure);
 
-            var result = await _sut.InstallVsdbgForCFAppAsync(app, "junk");
+            var result = await _sut.InstallVsdbgForCFAppAsync(app);
 
             Assert.AreEqual(sshFailure.Succeeded, result.Succeeded);
             Assert.AreEqual(sshFailure.Explanation, result.Explanation);
@@ -102,13 +84,13 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
             {
                 Stack = stack,
             };
-            var vsVersion = "junk";
+            var expectedVsVersion = "latest";
             var expectedStartCmd = stack == "windows" 
-                ? $"powershell -File {VsdbgInstaller._vsdbgInstallScriptName}.ps1 -Version {vsVersion} -RuntimeID win7-x64 -InstallPath .\\{_sut.VsdbgDirName}" 
-                : $"chmod +x {VsdbgInstaller._vsdbgInstallScriptName}.sh && ./{VsdbgInstaller._vsdbgInstallScriptName}.sh -v {vsVersion} -r linux-x64 -l ./{_sut.VsdbgDirName}";
+                ? $"powershell -File {VsdbgInstaller._vsdbgInstallScriptName}.ps1 -Version {expectedVsVersion} -RuntimeID win7-x64 -InstallPath .\\{_sut.VsdbgDirName}" 
+                : $"chmod +x {VsdbgInstaller._vsdbgInstallScriptName}.sh && ./{VsdbgInstaller._vsdbgInstallScriptName}.sh -v {expectedVsVersion} -r linux-x64 -l ./{_sut.VsdbgDirName}";
             var expectedSshCmd = $"cd app && curl -L https://aka.ms/getvsdbg{(stack == "windows" ? "ps1" : "sh")} -o GetVsDbg.{(stack == "windows" ? "ps1" : "sh")} && {expectedStartCmd}";
 
-            var result = await _sut.InstallVsdbgForCFAppAsync(app, vsVersion);
+            var result = await _sut.InstallVsdbgForCFAppAsync(app);
 
             _mockCfCliService.Verify(m => m.ExecuteSshCommand(app.AppName, app.ParentSpace.ParentOrg.OrgName, app.ParentSpace.SpaceName, expectedSshCmd), Times.Once);
         }

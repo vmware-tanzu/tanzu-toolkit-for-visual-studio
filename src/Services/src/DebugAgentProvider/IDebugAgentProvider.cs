@@ -5,6 +5,6 @@ namespace Tanzu.Toolkit.Services.DebugAgentProvider
 {
     public interface IDebugAgentProvider
     {
-        Task<DetailedResult> InstallVsdbgForCFAppAsync(CloudFoundryApp app, string vsVersion);
+        Task<DetailedResult> InstallVsdbgForCFAppAsync(CloudFoundryApp app);
     }
 }
