@@ -1,10 +1,8 @@
 ﻿using Serilog;
 using System;
 using System.IO;
-using System.Net;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Services.CommandProcess;
-using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
 
 namespace Tanzu.Toolkit.Services.DotnetCli
@@ -13,14 +11,12 @@ namespace Tanzu.Toolkit.Services.DotnetCli
     {
         private const string _dotnetCliExecutable = "C:\\Program Files\\dotnet\\dotnet.exe";
         private readonly ICommandProcessService _commandProcessService;
-        private readonly IFileService _fileService;
         private readonly ILogger _logger;
 
-        public DotnetCliService(ICommandProcessService commandProcessService, ILoggingService loggingService, IFileService fileService)
+        public DotnetCliService(ICommandProcessService commandProcessService, ILoggingService loggingService)
         {
             _logger = loggingService.Logger;
             _commandProcessService = commandProcessService;
-            _fileService = fileService;
         }
 
         /// <summary>
@@ -33,7 +29,7 @@ namespace Tanzu.Toolkit.Services.DotnetCli
         /// <param name="outputDirName"></param>
         /// 
         /// <returns></returns>
-        public async Task<bool> PublishProjectForRemoteDebuggingAsync(string projectDir, string targetFrameworkMoniker, string runtimeIdentifier, string configuration, string outputDirName, bool includeDebuggingAgent = false, Action<string> StdOutCallback = null, Action<string> StdErrCallback = null)
+        public async Task<bool> PublishProjectForRemoteDebuggingAsync(string projectDir, string targetFrameworkMoniker, string runtimeIdentifier, string configuration, string outputDirName, Action<string> StdOutCallback = null, Action<string> StdErrCallback = null)
         {
             try
             {
@@ -47,33 +43,6 @@ namespace Tanzu.Toolkit.Services.DotnetCli
                 StdOutCallback.Invoke($"Executing \"dotnet {publishArgs}\" ...");
                 var publishProcess = _commandProcessService.StartProcess(_dotnetCliExecutable, publishArgs, projectDir, stdOutDelegate: StdOutCallback, stdErrDelegate: StdErrCallback);
                 await Task.Run(() => publishProcess.WaitForExit());
-
-                if (includeDebuggingAgent)
-                {
-                    // get vsdbg installer
-                    var vsdbgDownloadUrl = "https://aka.ms/getvsdbgps1";
-                    const string installerName = "GetVsDbg.ps1";
-                    var installScriptPath = Path.Combine(projectDir, outputDirName, installerName);
-                    using (var client = new WebClient())
-                    {
-                        await client.DownloadFileTaskAsync(vsdbgDownloadUrl, installScriptPath);
-                    }
-
-                    // install vsdbg into publish dir
-                    var vsdbgInstallationDirName = "vsdbg";
-                    var vsdbgVersion = "latest";
-                    var vsdbgRuntimeId = runtimeIdentifier.StartsWith("win") ? "win7-x64" : "linux-x64";
-                    var installerArgs = $"-File \"{installerName}\" -Version {vsdbgVersion} -InstallPath {vsdbgInstallationDirName}/ -RuntimeID {vsdbgRuntimeId}";
-                    var installationProcess = _commandProcessService.StartProcess("powershell.exe", installerArgs, publishDirPath, stdOutDelegate: StdOutCallback, stdErrDelegate: StdErrCallback);
-                    await Task.Run(() => installationProcess.WaitForExit());
-
-                    _fileService.DeleteFile(installScriptPath);
-
-                    if (installationProcess.ExitCode != 0)
-                    {
-                        return false;
-                    }
-                }
 
                 return publishProcess.ExitCode == 0;
             }

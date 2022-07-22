@@ -10,6 +10,7 @@ using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CloudFoundry;
+using Tanzu.Toolkit.Services.DebugAgentProvider;
 using Tanzu.Toolkit.Services.DotnetCli;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Project;
@@ -24,6 +25,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private readonly IDotnetCliService _dotnetCliService;
         private readonly IFileService _fileService;
         private readonly ISerializationService _serializationService;
+        private readonly IDebugAgentProvider _vsdbgInstaller;
         private readonly IView _outputView;
         private readonly IOutputViewModel _outputViewModel;
         private readonly string _projectName;
@@ -70,6 +72,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             _dotnetCliService = services.GetRequiredService<IDotnetCliService>();
             _fileService = services.GetRequiredService<IFileService>();
             _serializationService = services.GetRequiredService<ISerializationService>();
+            _vsdbgInstaller = services.GetRequiredService<IDebugAgentProvider>();
 
             _vsdbgPathLinux = _vsdbgInstallationDirLinux + "/" + _vsdbgExecutableNameLinux;
             _vsdbgPathWindows = _vsdbgInstallationDirWindows + "\\" + _vsdbgExecutableNameWindows;
@@ -265,13 +268,20 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 Close();
                 return;
             }
+            
+            LoadingMessage = $"Checking for debugging agent on {AppToDebug.AppName}...";
 
             _debugAgentInstalled = await CheckForVsdbg(AppToDebug.Stack);
             if (!_debugAgentInstalled)
             {
-                Option1Text = $"Push new version of \"{AppToDebug.AppName}\" to debug (project \"{_projectName}\")";
-                PromptAppResolution($"Unable to locate debugging agent on \"{AppToDebug.AppName}\".");
-                return;
+                var vsVersion = "latest"; // TODO: make this dynamic
+                LoadingMessage = $"Installing debugging agent for {AppToDebug.AppName}...";
+                var installationResult = await _vsdbgInstaller.InstallVsdbgForCFAppAsync(AppToDebug);
+                _debugAgentInstalled = await CheckForVsdbg(AppToDebug.Stack);
+                if (!_debugAgentInstalled)
+                {
+                    Logger.Error("Failed to install or start debugging agent for app '{AppName}': {DebugFailureMsg}", AppToDebug.AppName, installationResult.Explanation);
+                }
             }
 
             CreateLaunchFileIfNonexistent(AppToDebug.Stack);
@@ -308,7 +318,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         private async Task<bool> CheckForVsdbg(string stack)
         {
-            LoadingMessage = $"Checking for debugging agent on {AppToDebug.AppName}...";
             DetailedResult sshResult;
             bool vsdbExecutableListed;
 
@@ -331,6 +340,8 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         public void CreateLaunchFileIfNonexistent(string stack)
         {
             _launchFileExists = false;
+            var remoteDebugAgentDir = stack.Contains("win") ? _vsdbgInstallationDirWindows : _vsdbgInstallationDirLinux;
+
             try
             {
                 if (!File.Exists(_expectedPathToLaunchFile))
@@ -338,9 +349,20 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                     var adapterArgs = stack.Contains("win")
                         ? $"ssh {AppToDebug.AppName} -c \"{_vsdbgPathWindows} --interpreter=vscode\""
                         : $"ssh {AppToDebug.AppName} -c \"/tmp/lifecycle/shell {_appDirLinux} 'bash -c \\\"{_vsdbgPathLinux} --interpreter=vscode\\\"'\"";
-                    var appProcessName = stack.Contains("win")
-                        ? $"{AppToDebug.AppName}.exe"
-                        : _projectName; // this should be the app name as determined by .NET, not CF,
+
+                    var appProcessName = _projectName; // this should be the app name as determined by .NET, not CF,
+                    if (stack.Contains("win"))
+                    {
+                        if (_targetFrameworkMoniker.StartsWith(".NETFramework"))
+                        {
+                            appProcessName = "hwc.exe";
+                        }
+                        else
+                        {
+                            appProcessName += ".exe";
+                        }
+                    }
+
                     var launchFileConfig = new RemoteDebugLaunchConfig
                     {
                         version = "0.2.0",
@@ -368,7 +390,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                                 processName = appProcessName,
                                 request = "attach",
                                 justMyCode = false,
-                                cwd = _vsdbgInstallationDirLinux,
+                                cwd = remoteDebugAgentDir,
                                 logging = new Logging
                                 {
                                     engineLogging = true,
