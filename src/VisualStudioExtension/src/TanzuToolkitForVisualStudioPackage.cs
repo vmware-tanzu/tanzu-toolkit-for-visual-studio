@@ -13,6 +13,7 @@ using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.CommandProcess;
 using Tanzu.Toolkit.Services.DataPersistence;
+using Tanzu.Toolkit.Services.DebugAgentProvider;
 using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.DotnetCli;
 using Tanzu.Toolkit.Services.ErrorDialog;
@@ -154,6 +155,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<IDataPersistenceService>(provider => new DataPersistenceService(this, provider));
             services.AddSingleton<IDotnetCliService, DotnetCliService>();
             services.AddSingleton<IProjectService, ProjectService>();
+            services.AddSingleton<IDebugAgentProvider, VsdbgInstaller>();
 
             /* Tool Windows */
             services.AddTransient<TanzuTasExplorerToolWindow>();
