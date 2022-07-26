@@ -346,10 +346,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             {
                 if (!File.Exists(_expectedPathToLaunchFile))
                 {
-                    var adapterArgs = stack.Contains("win")
-                        ? $"ssh {AppToDebug.AppName} -c \"{_vsdbgPathWindows} --interpreter=vscode\""
-                        : $"ssh {AppToDebug.AppName} -c \"/tmp/lifecycle/shell {_appDirLinux} 'bash -c \\\"{_vsdbgPathLinux} --interpreter=vscode\\\"'\"";
-
                     var appProcessName = _projectName; // this should be the app name as determined by .NET, not CF,
                     if (stack.Contains("win"))
                     {
@@ -363,11 +359,15 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                         }
                     }
 
+                    var sshCmd = stack.Contains("win")
+                        ? $"{_vsdbgPathWindows}"
+                        : $"/tmp/lifecycle/shell {_appDirLinux} {_vsdbgPathLinux}";
+
                     var launchFileConfig = new RemoteDebugLaunchConfig
                     {
                         version = "0.2.0",
-                        adapter = _fileService.FullPathToCfExe,
-                        adapterArgs = adapterArgs,
+                        adapter = FileService.PathToCfDebugAdapterScript,
+                        adapterArgs = $"\"{FileService.VsixPackageBaseDir}\" \"{FileService.FullPathToCfExe}\" \"{AppToDebug.AppName}\" \"{sshCmd}\"",
                         languageMappings = new Languagemappings
                         {
                             CSharp = new CSharp
