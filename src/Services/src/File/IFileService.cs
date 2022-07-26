@@ -7,6 +7,7 @@
         string PathToLogsFile { get; }
         int CliVersion { get; set; }
         string PathToCfCliConfigFile { get; }
+        string PathToCfDebugAdapterScript { get; }
 
         void DeleteFile(string filePath);
         bool DirContainsFiles(string dirPath);
