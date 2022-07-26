@@ -274,7 +274,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             _debugAgentInstalled = await CheckForVsdbg(AppToDebug.Stack);
             if (!_debugAgentInstalled)
             {
-                var vsVersion = "latest"; // TODO: make this dynamic
                 LoadingMessage = $"Installing debugging agent for {AppToDebug.AppName}...";
                 var installationResult = await _vsdbgInstaller.InstallVsdbgForCFAppAsync(AppToDebug);
                 _debugAgentInstalled = await CheckForVsdbg(AppToDebug.Stack);
