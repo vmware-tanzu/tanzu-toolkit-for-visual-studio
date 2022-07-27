@@ -365,7 +365,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                     var launchFileConfig = new RemoteDebugLaunchConfig
                     {
                         version = "0.2.0",
-                        adapter = FileService.PathToCfDebugAdapterScript,
+                        adapter = FileService.PathToCfDebugAdapter,
                         adapterArgs = $"\"{FileService.VsixPackageBaseDir}\" \"{FileService.FullPathToCfExe}\" \"{AppToDebug.AppName}\" \"{sshCmd}\"",
                         languageMappings = new Languagemappings
                         {
