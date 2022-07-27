@@ -13,7 +13,6 @@ namespace Tanzu.Toolkit.Services.File
         private const string _defaultLogsDir = "Logs";
         private const string _defaultCfCliDir = ".cf";
         private const string _defaultCfCliConfigFileName = "config.json";
-        private const string _cfDebugAdapterDir = "Resources";
         private const string _cfDebugAdapterName = "CfSshWrapper.exe";
         private int _cliVersion = 7;
         private readonly string _pathToCf6Exe;
@@ -107,7 +106,7 @@ namespace Tanzu.Toolkit.Services.File
             }
         }
 
-        public string PathToCfDebugAdapter => Path.Combine(VsixPackageBaseDir, _cfDebugAdapterDir, _cfDebugAdapterName);
+        public string PathToCfDebugAdapter => Path.Combine(VsixPackageBaseDir, _cfDebugAdapterName);
 
         public void WriteTextToFile(string filePath, string contentsToWrite)
         {
