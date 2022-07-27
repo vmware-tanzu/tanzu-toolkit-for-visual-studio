@@ -24,7 +24,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tanzu.Toolkit.CloudFoundryA
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tanzu.Toolkit.VisualStudioExtension.Tests", "VisualStudioExtension\test\Tanzu.Toolkit.VisualStudioExtension.Tests.csproj", "{443333BA-74FC-4150-87CB-AE174B89BDD5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CfSshWrapper", "CFSsh\CfSshWrapper.csproj", "{3EB9CBAE-8032-4051-9A31-99B108DD019D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CfSshWrapper", "CfSshWrapper\CfSshWrapper.csproj", "{BE154B7A-6193-4A60-87BF-27DF6FAABA33}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -68,10 +68,10 @@ Global
 		{443333BA-74FC-4150-87CB-AE174B89BDD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{443333BA-74FC-4150-87CB-AE174B89BDD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{443333BA-74FC-4150-87CB-AE174B89BDD5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3EB9CBAE-8032-4051-9A31-99B108DD019D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3EB9CBAE-8032-4051-9A31-99B108DD019D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3EB9CBAE-8032-4051-9A31-99B108DD019D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3EB9CBAE-8032-4051-9A31-99B108DD019D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE154B7A-6193-4A60-87BF-27DF6FAABA33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE154B7A-6193-4A60-87BF-27DF6FAABA33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE154B7A-6193-4A60-87BF-27DF6FAABA33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE154B7A-6193-4A60-87BF-27DF6FAABA33}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

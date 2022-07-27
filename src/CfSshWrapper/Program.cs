@@ -1,6 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-using System;
+﻿using System;
 using System.Diagnostics;
 
 namespace CfSshWrapper
@@ -25,6 +23,7 @@ namespace CfSshWrapper
                 {
                     FileName = pathToCfExe,
                     Arguments = $"ssh {appName} -c \"{sshCmd}\"",
+                    UseShellExecute = false,
                 }
             };
 
