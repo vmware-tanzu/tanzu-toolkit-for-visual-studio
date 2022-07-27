@@ -3,7 +3,7 @@
 using System;
 using System.Diagnostics;
 
-namespace CFSsh
+namespace CfSshWrapper
 {
     internal class Program
     {

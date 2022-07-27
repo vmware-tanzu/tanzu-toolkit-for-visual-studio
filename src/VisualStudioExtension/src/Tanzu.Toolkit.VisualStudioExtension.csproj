@@ -156,11 +156,11 @@
     <Resource Include="Views\Resources\Pause.png" />
     <Resource Include="Views\Resources\RunPaused.png" />
     <Resource Include="Views\Resources\Stop.png" />
-    <Content Include="Resources\CFSsh.dll">
+    <Content Include="Resources\CfSshWrapper.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="Resources\CFSsh.exe">
+    <Content Include="Resources\CfSshWrapper.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
@@ -311,11 +311,11 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\CFSsh.deps.json">
+    <Content Include="Resources\CfSshWrapper.deps.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="Resources\CFSsh.runtimeconfig.json">
+    <Content Include="Resources\CfSshWrapper.runtimeconfig.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>

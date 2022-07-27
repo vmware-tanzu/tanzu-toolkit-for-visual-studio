@@ -14,7 +14,7 @@ namespace Tanzu.Toolkit.Services.File
         private const string _defaultCfCliDir = ".cf";
         private const string _defaultCfCliConfigFileName = "config.json";
         private const string _cfDebugAdapterDir = "Resources";
-        private const string _cfDebugAdapterName = "CFSsh.exe";
+        private const string _cfDebugAdapterName = "CfSshWrapper.exe";
         private int _cliVersion = 7;
         private readonly string _pathToCf6Exe;
         private readonly string _pathToCf7Exe;
