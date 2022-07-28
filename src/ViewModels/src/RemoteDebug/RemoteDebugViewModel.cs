@@ -240,44 +240,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         {
             LoadingMessage = "Fetching apps...";
             await PopulateAccessibleAppsAsync();
-
-            PromptAppResolution();
-
-            // sanity check; AppToDebug should always be populated by this step
-            if (AppToDebug == null)
-            {
-                ErrorService.DisplayErrorDialog("Remote Debug Error", "Unable to identify app to debug.\n" +
-                    "This is unexpected; it may help to sign out of TAS & try debugging again after logging back in.\n" +
-                    "If this issue persists, please contact tas-vs-extension@vmware.com");
-                Close();
-                return;
-            }
-            
-            LoadingMessage = $"Checking for debugging agent on {AppToDebug.AppName}...";
-
-            _debugAgentInstalled = await CheckForVsdbg(AppToDebug.Stack);
-            if (!_debugAgentInstalled)
-            {
-                LoadingMessage = $"Installing debugging agent for {AppToDebug.AppName}...";
-                var installationResult = await _vsdbgInstaller.InstallVsdbgForCFAppAsync(AppToDebug);
-                _debugAgentInstalled = await CheckForVsdbg(AppToDebug.Stack);
-                if (!_debugAgentInstalled)
-                {
-                    Logger.Error("Failed to install or start debugging agent for app '{AppName}': {DebugFailureMsg}", AppToDebug.AppName, installationResult.Explanation);
-                }
-            }
-
-            CreateLaunchFileIfNonexistent(AppToDebug.Stack);
-            if (!_launchFileExists)
-            {
-                Close();
-                return;
-            }
-
-            LoadingMessage = "Attaching to debugging agent...";
-            _initiateDebugCallback?.Invoke(AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName);
-            Close();
-            FileService.DeleteFile(_expectedPathToLaunchFile);
         }
 
         public async Task StartDebuggingAppAsync(object arg = null)
