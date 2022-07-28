@@ -379,6 +379,9 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 if (!_debugAgentInstalled)
                 {
                     Logger.Error("Failed to install or start debugging agent for app '{AppName}': {DebugFailureMsg}", AppToDebug.AppName, installationResult.Explanation);
+                    ErrorService.DisplayErrorDialog("Unable to install or start debugging agent", installationResult.Explanation);
+                    Close();
+                    return;
                 }
             }
 
