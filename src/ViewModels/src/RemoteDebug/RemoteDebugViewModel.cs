@@ -416,20 +416,17 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
             LoadingMessage = $"Checking for debugging agent on {AppToDebug.AppName}...";
             DetailedResult sshResult;
-            bool vsdbExecutableListed;
+            var sshCommand = $"ls {_vsdbgInstallationDirLinux}";
+            var vsdbgName = _vsdbgExecutableNameLinux;
 
             if (stack.Contains("win"))
             {
-                var sshCommand = $"dir {_vsdbgInstallationDirWindows}";
-                sshResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
-                vsdbExecutableListed = sshResult.CmdResult.StdOut.Contains(_vsdbgExecutableNameWindows);
+                sshCommand = $"dir {_vsdbgInstallationDirWindows}";
+                vsdbgName = _vsdbgExecutableNameWindows;
             }
-            else
-            {
-                var sshCommand = $"ls {_vsdbgInstallationDirLinux}";
-                sshResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
-                vsdbExecutableListed = sshResult.CmdResult.StdOut.Contains(_vsdbgExecutableNameLinux);
-            }
+
+            sshResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
+            var vsdbExecutableListed = sshResult.CmdResult.StdOut.Contains(vsdbgName);
 
             return sshResult.Succeeded && vsdbExecutableListed;
         }
