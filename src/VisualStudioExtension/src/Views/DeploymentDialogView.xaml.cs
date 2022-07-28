@@ -90,7 +90,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         private void Close(object sender, RoutedEventArgs e)
         {
-            Close();
+            Hide(); // important to hide instead of closing (which has a side effect of permanently closing LoginView)
             _viewModel.OnClosed();
         }
 

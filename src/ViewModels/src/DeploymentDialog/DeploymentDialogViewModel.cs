@@ -139,6 +139,7 @@ namespace Tanzu.Toolkit.ViewModels
 
             OnClosed = () =>
             {
+                DialogService.CloseDialogByName(nameof(DeploymentDialogViewModel));
                 if (DeploymentInProgress) // don't open tool window if modal was closed via "X" button
                 {
                     DisplayDeploymentOutput();

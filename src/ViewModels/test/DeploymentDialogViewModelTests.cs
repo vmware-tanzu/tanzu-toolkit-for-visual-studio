@@ -230,6 +230,16 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         [TestCategory("ctor")]
         [TestCategory("OnClosed")]
+        public void Constructor_SetsOnClosedAction_ToCloseDeploymentDialog()
+        {
+            _sut.OnClosed();
+
+            MockDialogService.Verify(m => m.CloseDialogByName(nameof(DeploymentDialogViewModel), It.IsAny<object>()), Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("ctor")]
+        [TestCategory("OnClosed")]
         public void Constructor_SetsOnClosedAction_ToDisplayDeploymentOutputIfDeploymentInProgress()
         {
             Assert.AreEqual(_fakeOutputView, _sut._outputView);
