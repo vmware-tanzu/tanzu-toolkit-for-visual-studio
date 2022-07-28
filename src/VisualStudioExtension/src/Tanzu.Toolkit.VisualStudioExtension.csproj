@@ -188,6 +188,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\CfSshWrapper\CfSshWrapper.csproj">
+      <Project>{be154b7a-6193-4a60-87bf-27df6faaba33}</Project>
+      <Name>CfSshWrapper</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\CloudFoundryApiClient\src\Tanzu.Toolkit.CloudFoundryApiClient.csproj">
       <Project>{56A68904-C31A-45E7-8617-FB8FDCFB49CB}</Project>
       <Name>Tanzu.Toolkit.CloudFoundryApiClient</Name>
