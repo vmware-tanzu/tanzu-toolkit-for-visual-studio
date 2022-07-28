@@ -24,9 +24,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut = new RemoteDebugViewModel(_fakeAppName, _fakeProjectPath, _fakeTargetFrameworkMoniker, _fakePathToLaunchFile, null, Services);
         }
 
-        [TestCleanup]
-        public void TestCleanup() { }
-
         [TestMethod]
         [TestCategory("ctor")]
         public void Constructor_SetsAppToDebugToNull()
