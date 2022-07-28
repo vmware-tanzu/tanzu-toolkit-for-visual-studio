@@ -260,27 +260,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             FileService.DeleteFile(_expectedPathToLaunchFile);
         }
 
-        private async Task<bool> CheckForVsdbg(string stack)
-        {
-            DetailedResult sshResult;
-            bool vsdbExecutableListed;
-
-            if (stack.Contains("win"))
-            {
-                var sshCommand = $"dir {_vsdbgInstallationDirWindows}";
-                sshResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
-                vsdbExecutableListed = sshResult.CmdResult.StdOut.Contains(_vsdbgExecutableNameWindows);
-            }
-            else
-            {
-                var sshCommand = $"ls {_vsdbgInstallationDirLinux}";
-                sshResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
-                vsdbExecutableListed = sshResult.CmdResult.StdOut.Contains(_vsdbgExecutableNameLinux);
-            }
-
-            return sshResult.Succeeded && vsdbExecutableListed;
-        }
-
         public void CreateLaunchFileIfNonexistent(string stack)
         {
             _launchFileExists = false;
@@ -377,6 +356,27 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 vm.OnClose += () => Close();
                 view.DisplayView();
             }
+        }
+
+        private async Task<bool> CheckForVsdbg(string stack)
+        {
+            DetailedResult sshResult;
+            bool vsdbExecutableListed;
+
+            if (stack.Contains("win"))
+            {
+                var sshCommand = $"dir {_vsdbgInstallationDirWindows}";
+                sshResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
+                vsdbExecutableListed = sshResult.CmdResult.StdOut.Contains(_vsdbgExecutableNameWindows);
+            }
+            else
+            {
+                var sshCommand = $"ls {_vsdbgInstallationDirLinux}";
+                sshResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
+                vsdbExecutableListed = sshResult.CmdResult.StdOut.Contains(_vsdbgExecutableNameLinux);
+            }
+
+            return sshResult.Succeeded && vsdbExecutableListed;
         }
 
         private async Task PopulateAccessibleAppsAsync()
