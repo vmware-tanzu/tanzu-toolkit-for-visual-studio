@@ -240,6 +240,9 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         {
             LoadingMessage = "Fetching apps...";
             await PopulateAccessibleAppsAsync();
+
+            LoadingMessage = null;
+            DialogMessage = "Select app to debug:";
         }
 
         public async Task StartDebuggingAppAsync(object arg = null)
