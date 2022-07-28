@@ -280,7 +280,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             FileService.DeleteFile(_expectedPathToLaunchFile);
         }
 
-        public void ConfirmAppToDebug(object arg = null)
+        public async Task StartDebuggingAppAsync(object arg = null)
         {
             AppToDebug = SelectedApp;
             var _ = BeginRemoteDebuggingAsync(AppToDebug.AppName); // start debug process over from beginning
@@ -486,7 +486,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         // Predicates //
 
-        public bool CanResolveMissingApp(object arg = null)
+        public bool CanStartDebuggingApp(object arg = null)
         {
             return SelectedApp != null;
         }

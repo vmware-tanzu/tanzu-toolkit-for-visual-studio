@@ -13,9 +13,9 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         Action ViewOpener { get; set; }
         Action ViewCloser { get; set; }
 
-        bool CanResolveMissingApp(object arg = null);
+        bool CanStartDebuggingApp(object arg = null);
         void Close(object arg = null);
-        void ConfirmAppToDebug(object arg = null);
+        Task StartDebuggingAppAsync(object arg = null);
         void CreateLaunchFileIfNonexistent(string stack);
         Task BeginRemoteDebuggingAsync(string appName);
         void OpenLoginView(object arg = null);
