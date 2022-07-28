@@ -88,7 +88,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             {
                 IsLoggedIn = true;
                 _cfClient = _tasExplorer.TasConnection.CfClient;
-                var _ = BeginRemoteDebuggingAsync(expectedAppName);
+                var _ = PromptAppSelectionAsync(expectedAppName);
             }
         }
 
@@ -232,11 +232,11 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             {
                 IsLoggedIn = true;
                 _cfClient = _tasExplorer.TasConnection.CfClient;
-                var _ = BeginRemoteDebuggingAsync(_projectName);
+                var _ = PromptAppSelectionAsync(_projectName);
             }
         }
 
-        public async Task BeginRemoteDebuggingAsync(string appName)
+        public async Task PromptAppSelectionAsync(string appName)
         {
             LoadingMessage = "Fetching apps...";
             await PopulateAccessibleAppsAsync();
