@@ -283,7 +283,40 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         public async Task StartDebuggingAppAsync(object arg = null)
         {
             AppToDebug = SelectedApp;
-            var _ = BeginRemoteDebuggingAsync(AppToDebug.AppName); // start debug process over from beginning
+            if (AppToDebug == null)
+            {
+                ErrorService.DisplayErrorDialog("Unable to start debugging", "Empty selection; please select app to debug.\n\n" +
+                    "This is unexpected; it may help to sign out of TAS & try debugging again after logging back in.\n" +
+                    "If this issue persists, please contact tas-vs-extension@vmware.com");
+                Logger.Error("{ClassName} encountered an error in {MethodName}: {PropertyName} was null when it shouldn't have been.", nameof(RemoteDebugViewModel), nameof(StartDebuggingAppAsync), nameof(AppToDebug));
+                return;
+            }
+
+            LoadingMessage = $"Checking for debugging agent on {AppToDebug.AppName}...";
+
+            _debugAgentInstalled = await CheckForVsdbg(AppToDebug.Stack);
+            if (!_debugAgentInstalled)
+            {
+                LoadingMessage = $"Installing debugging agent for {AppToDebug.AppName}...";
+                var installationResult = await _vsdbgInstaller.InstallVsdbgForCFAppAsync(AppToDebug);
+                _debugAgentInstalled = await CheckForVsdbg(AppToDebug.Stack);
+                if (!_debugAgentInstalled)
+                {
+                    Logger.Error("Failed to install or start debugging agent for app '{AppName}': {DebugFailureMsg}", AppToDebug.AppName, installationResult.Explanation);
+                }
+            }
+
+            CreateLaunchFileIfNonexistent(AppToDebug.Stack);
+            if (!_launchFileExists)
+            {
+                Close();
+                return;
+            }
+
+            LoadingMessage = "Attaching to debugging agent...";
+            _initiateDebugCallback?.Invoke(AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName);
+            Close();
+            FileService.DeleteFile(_expectedPathToLaunchFile);
         }
 
         private async Task<bool> CheckForVsdbg(string stack)
