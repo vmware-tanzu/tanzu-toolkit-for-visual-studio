@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -43,7 +42,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private string _option1Text;
         private string _option2Text;
         private CloudFoundryApp _selectedApp;
-        private bool _waitingOnAppConfirmation = false;
         private bool _debugAgentInstalled;
         private bool _launchFileExists;
         private const string _appDirLinux = "/home/vcap/app";
@@ -99,16 +97,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         public Action ViewOpener { get; set; }
 
         public Action ViewCloser { get; set; }
-
-        public bool WaitingOnAppConfirmation
-        {
-            get => _waitingOnAppConfirmation;
-            set
-            {
-                _waitingOnAppConfirmation = value;
-                RaisePropertyChangedEvent("WaitingOnAppConfirmation");
-            }
-        }
 
         public bool IsLoggedIn
         {
@@ -250,14 +238,10 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         public async Task BeginRemoteDebuggingAsync(string appName)
         {
-            await EstablishAppToDebugAsync(appName);
-            if (WaitingOnAppConfirmation)
-            {
-                // resolution delegated to UI;
-                // once a decision is made, this method should be called
-                // again after WaitingOnAppConfirmation is set to false
-                return;
-            }
+            LoadingMessage = "Fetching apps...";
+            await PopulateAccessibleAppsAsync();
+
+            PromptAppResolution();
 
             // sanity check; AppToDebug should always be populated by this step
             if (AppToDebug == null)
@@ -296,21 +280,8 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             FileService.DeleteFile(_expectedPathToLaunchFile);
         }
 
-        public async Task EstablishAppToDebugAsync(string appName)
-        {
-            LoadingMessage = "Identifying remote app to debug...";
-            await PopulateAccessibleAppsAsync();
-            AppToDebug = AccessibleApps.FirstOrDefault(app => app.AppName == appName);
-            if (AppToDebug == null)
-            {
-                WaitingOnAppConfirmation = true;
-                PromptAppResolution($"No app found with a name matching \"{appName}\"");
-            }
-        }
-
         public void ConfirmAppToDebug(object arg = null)
         {
-            WaitingOnAppConfirmation = false;
             AppToDebug = SelectedApp;
             var _ = BeginRemoteDebuggingAsync(AppToDebug.AppName); // start debug process over from beginning
         }
@@ -434,12 +405,10 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             }
         }
 
-        private void PromptAppResolution(string promptMsg)
+        private void PromptAppResolution()
         {
             LoadingMessage = null;
-            DialogMessage = $"{promptMsg}\n\n" +
-                $"If this app is running under a different name, please select it below. Otherwise click '{PushNewAppButtonText}' and try remote debugging again once {_projectName} is running.";
-            WaitingOnAppConfirmation = true;
+            DialogMessage = "Select app to debug:";
         }
 
         private async Task PopulateAccessibleAppsAsync()

@@ -18,7 +18,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         void ConfirmAppToDebug(object arg = null);
         void CreateLaunchFileIfNonexistent(string stack);
         Task BeginRemoteDebuggingAsync(string appName);
-        Task EstablishAppToDebugAsync(string expectedAppName);
         void OpenLoginView(object arg = null);
         void DisplayDeploymentWindow(object arg = null);
         bool CanDisplayDeploymentWindow(object arg = null);
