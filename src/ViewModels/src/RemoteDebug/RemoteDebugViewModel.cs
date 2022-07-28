@@ -403,12 +403,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             }
         }
 
-        private void PromptAppResolution()
-        {
-            LoadingMessage = null;
-            DialogMessage = "Select app to debug:";
-        }
-
         private async Task PopulateAccessibleAppsAsync()
         {
             try
