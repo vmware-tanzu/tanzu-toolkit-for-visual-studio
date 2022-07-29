@@ -398,7 +398,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             if (view.ViewModel is IDeploymentDialogViewModel vm)
             {
                 vm.ConfigureForRemoteDebugging = true;
-                vm.OnClosed += () => Close();
+                vm.OnClose += () => Close();
                 view.DisplayView();
             }
         }
