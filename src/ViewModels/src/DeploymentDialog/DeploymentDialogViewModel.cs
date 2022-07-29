@@ -137,8 +137,9 @@ namespace Tanzu.Toolkit.ViewModels
 
             OnRendered = () => SetManifestIfDefaultExists();
 
-            OnClosed = () =>
+            OnClose = () =>
             {
+                DialogService.CloseDialogByName(nameof(DeploymentDialogViewModel));
                 if (DeploymentInProgress) // don't open tool window if modal was closed via "X" button
                 {
                     DisplayDeploymentOutput();
@@ -553,7 +554,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public Action OnClosed { get; set; }
+        public Action OnClose { get; set; }
 
         public Action OnRendered { get; set; }
 
@@ -569,7 +570,7 @@ namespace Tanzu.Toolkit.ViewModels
                 DeploymentInProgress = true;
                 var _ = ThreadingService.StartBackgroundTask(StartDeployment);
                 DialogService.CloseDialog(dialogWindow, true);
-                OnClosed();
+                OnClose();
             }
         }
 
