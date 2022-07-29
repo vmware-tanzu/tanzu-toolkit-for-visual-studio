@@ -34,7 +34,7 @@ namespace Tanzu.Toolkit.VisualStudio
             DataContext = viewModel;
             CancelCommand = new DelegatingCommand(viewModel.Close, alwaysTrue);
             OpenLoginViewCommand = new DelegatingCommand(viewModel.OpenLoginView, alwaysTrue);
-            ResolveMissingAppCommand = new DelegatingCommand(viewModel.ConfirmAppToDebug, viewModel.CanResolveMissingApp);
+            ResolveMissingAppCommand = new AsyncDelegatingCommand(viewModel.StartDebuggingAppAsync, viewModel.CanStartDebuggingApp);
             ShowDeploymentWindowCommand = new DelegatingCommand(viewModel.DisplayDeploymentWindow, viewModel.CanDisplayDeploymentWindow);
             MouseDown += Window_MouseDown;
             InitializeComponent();
