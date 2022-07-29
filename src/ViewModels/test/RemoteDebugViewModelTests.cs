@@ -1,9 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
+using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.ViewModels.RemoteDebug;
 
 namespace Tanzu.Toolkit.ViewModels.Tests
@@ -69,6 +71,16 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ctor")]
         public void Constructor_PromptsAppSelection_WhenIsLoggedIn()
         {
+            var fakeOrgsResponse = new DetailedResult<List<CloudFoundryOrganization>>
+            {
+                Succeeded = true,
+                Content = _emptyListOfOrgs,
+            };
+
+            MockCloudFoundryService.Setup(m => m.GetOrgsForCfInstanceAsync(
+                It.IsAny<CloudFoundryInstance>(), It.IsAny<bool>(), It.IsAny<int>()))
+                .ReturnsAsync(fakeOrgsResponse);
+
             MockLoggedIn();
 
             Assert.IsTrue(_sut.IsLoggedIn);

@@ -221,7 +221,18 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         public async Task PromptAppSelectionAsync(string appName)
         {
             LoadingMessage = "Fetching apps...";
-            await PopulateAccessibleAppsAsync();
+            try
+            {
+                await PopulateAccessibleAppsAsync();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Caught exception thrown by {MethodName}: {AppFetchException}.", nameof(PopulateAccessibleAppsAsync), ex);
+                ErrorService.DisplayErrorDialog("Unable to start debugging", $"Something went wrong while fetching apps: \n{ex.Message}\n\n" +
+                    "It may help to try disconnecting & signing into TAS again.\nIf this issue persists, please contact tas-vs-extension@vmware.com");
+                Close();
+                return;
+            }
 
             LoadingMessage = null;
             DialogMessage = "Select app to debug:";
@@ -436,75 +447,63 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         private async Task PopulateAccessibleAppsAsync()
         {
-            try
-            {
-                var apps = new List<CloudFoundryApp>();
-                var appListLock = new object();
+            var apps = new List<CloudFoundryApp>();
+            var appListLock = new object();
 
-                var orgsResult = await _cfClient.GetOrgsForCfInstanceAsync(_tasExplorer.TasConnection.CloudFoundryInstance);
-                if (!orgsResult.Succeeded)
-                {
-                    var title = "Unable to initiate remote debugging";
-                    var msg = $"Something went wrong while querying apps on {_tasExplorer.TasConnection.CloudFoundryInstance.InstanceName}.\nIt may help to try disconnecting & signing into TAS again; if this issue persists, please contact tas-vs-extension@vmware.com";
-                    Logger.Error(title + "; " + "orgs request failed: {OrgsError}", orgsResult.Explanation);
-                    ErrorService.DisplayErrorDialog(title, msg);
-                    Close();
-                    return;
-                }
-
-                var spaceTasks = new List<Task>();
-                foreach (var org in orgsResult.Content)
-                {
-                    var getSpacesForOrgTask = Task.Run(async () =>
-                    {
-                        var spacesResult = await _cfClient.GetSpacesForOrgAsync(org);
-                        if (spacesResult.Succeeded)
-                        {
-                            var appTasks = new List<Task>();
-                            foreach (var space in spacesResult.Content)
-                            {
-                                var getAppsForSpaceTask = Task.Run(async () =>
-                                {
-                                    var appsResult = await _cfClient.GetAppsForSpaceAsync(space);
-                                    if (appsResult.Succeeded)
-                                    {
-                                        foreach (var app in appsResult.Content)
-                                        {
-                                            lock (appListLock)
-                                            {
-                                                apps.Add(app);
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        Logger.Error("Apps request failed for space {SpaceName} while trying to query apps for remote debugging: {AppsError}", space.SpaceName, appsResult.Explanation);
-                                    }
-                                });
-                                appTasks.Add(getAppsForSpaceTask);
-                            }
-                            await Task.WhenAll(appTasks);
-                        }
-                        else
-                        {
-                            Logger.Error("Spaces request failed for org {OrgName} while trying to query apps for remote debugging: {SpacesError}", org.OrgName, spacesResult.Explanation);
-                        }
-                    });
-                    spaceTasks.Add(getSpacesForOrgTask);
-                }
-
-                await Task.WhenAll(spaceTasks);
-                AccessibleApps = apps;
-            }
-            catch (Exception ex)
+            var orgsResult = await _cfClient.GetOrgsForCfInstanceAsync(_tasExplorer.TasConnection.CloudFoundryInstance);
+            if (!orgsResult.Succeeded)
             {
                 var title = "Unable to initiate remote debugging";
-                var msg = $"Something unexpected happened while querying apps on {_tasExplorer.TasConnection.CloudFoundryInstance.InstanceName}.\nIt may help to try disconnecting & signing into TAS again; if this issue persists, please contact tas-vs-extension@vmware.com";
-                Logger.Error(title + "; " + msg + "{RemoteDebugException}", ex);
+                var msg = $"Something went wrong while querying apps on {_tasExplorer.TasConnection.CloudFoundryInstance.InstanceName}.\nIt may help to try disconnecting & signing into TAS again; if this issue persists, please contact tas-vs-extension@vmware.com";
+                Logger.Error(title + "; " + "orgs request failed: {OrgsError}", orgsResult.Explanation);
                 ErrorService.DisplayErrorDialog(title, msg);
                 Close();
                 return;
             }
+
+            var spaceTasks = new List<Task>();
+            foreach (var org in orgsResult.Content)
+            {
+                var getSpacesForOrgTask = Task.Run(async () =>
+                {
+                    var spacesResult = await _cfClient.GetSpacesForOrgAsync(org);
+                    if (spacesResult.Succeeded)
+                    {
+                        var appTasks = new List<Task>();
+                        foreach (var space in spacesResult.Content)
+                        {
+                            var getAppsForSpaceTask = Task.Run(async () =>
+                            {
+                                var appsResult = await _cfClient.GetAppsForSpaceAsync(space);
+                                if (appsResult.Succeeded)
+                                {
+                                    foreach (var app in appsResult.Content)
+                                    {
+                                        lock (appListLock)
+                                        {
+                                            apps.Add(app);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    Logger.Error("Apps request failed for space {SpaceName} while trying to query apps for remote debugging: {AppsError}", space.SpaceName, appsResult.Explanation);
+                                }
+                            });
+                            appTasks.Add(getAppsForSpaceTask);
+                        }
+                        await Task.WhenAll(appTasks);
+                    }
+                    else
+                    {
+                        Logger.Error("Spaces request failed for org {OrgName} while trying to query apps for remote debugging: {SpacesError}", org.OrgName, spacesResult.Explanation);
+                    }
+                });
+                spaceTasks.Add(getSpacesForOrgTask);
+            }
+
+            await Task.WhenAll(spaceTasks);
+            AccessibleApps = apps;
         }
 
         private void StopDebuggingAndCloseIfCancelled(CancellationToken ct)
