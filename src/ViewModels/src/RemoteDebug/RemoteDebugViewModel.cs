@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -43,7 +42,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private string _option1Text;
         private string _option2Text;
         private CloudFoundryApp _selectedApp;
-        private bool _waitingOnAppConfirmation = false;
         private bool _debugAgentInstalled;
         private bool _launchFileExists;
         private const string _appDirLinux = "/home/vcap/app";
@@ -90,7 +88,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             {
                 IsLoggedIn = true;
                 _cfClient = _tasExplorer.TasConnection.CfClient;
-                var _ = BeginRemoteDebuggingAsync(expectedAppName);
+                var _ = PromptAppSelectionAsync(expectedAppName);
             }
         }
 
@@ -99,16 +97,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         public Action ViewOpener { get; set; }
 
         public Action ViewCloser { get; set; }
-
-        public bool WaitingOnAppConfirmation
-        {
-            get => _waitingOnAppConfirmation;
-            set
-            {
-                _waitingOnAppConfirmation = value;
-                RaisePropertyChangedEvent("WaitingOnAppConfirmation");
-            }
-        }
 
         public bool IsLoggedIn
         {
@@ -244,31 +232,31 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             {
                 IsLoggedIn = true;
                 _cfClient = _tasExplorer.TasConnection.CfClient;
-                var _ = BeginRemoteDebuggingAsync(_projectName);
+                var _ = PromptAppSelectionAsync(_projectName);
             }
         }
 
-        public async Task BeginRemoteDebuggingAsync(string appName)
+        public async Task PromptAppSelectionAsync(string appName)
         {
-            await EstablishAppToDebugAsync(appName);
-            if (WaitingOnAppConfirmation)
+            LoadingMessage = "Fetching apps...";
+            await PopulateAccessibleAppsAsync();
+
+            LoadingMessage = null;
+            DialogMessage = "Select app to debug:";
+        }
+
+        public async Task StartDebuggingAppAsync(object arg = null)
+        {
+            AppToDebug = SelectedApp;
+            if (AppToDebug == null)
             {
-                // resolution delegated to UI;
-                // once a decision is made, this method should be called
-                // again after WaitingOnAppConfirmation is set to false
+                ErrorService.DisplayErrorDialog("Unable to start debugging", "Empty selection; please select app to debug.\n\n" +
+                    "This is unexpected; it may help to sign out of TAS & try debugging again after logging back in.\n" +
+                    "If this issue persists, please contact tas-vs-extension@vmware.com");
+                Logger.Error("{ClassName} encountered an error in {MethodName}: {PropertyName} was null when it shouldn't have been.", nameof(RemoteDebugViewModel), nameof(StartDebuggingAppAsync), nameof(AppToDebug));
                 return;
             }
 
-            // sanity check; AppToDebug should always be populated by this step
-            if (AppToDebug == null)
-            {
-                ErrorService.DisplayErrorDialog("Remote Debug Error", "Unable to identify app to debug.\n" +
-                    "This is unexpected; it may help to sign out of TAS & try debugging again after logging back in.\n" +
-                    "If this issue persists, please contact tas-vs-extension@vmware.com");
-                Close();
-                return;
-            }
-            
             LoadingMessage = $"Checking for debugging agent on {AppToDebug.AppName}...";
 
             _debugAgentInstalled = await CheckForVsdbg(AppToDebug.Stack);
@@ -294,25 +282,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             _initiateDebugCallback?.Invoke(AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName);
             Close();
             FileService.DeleteFile(_expectedPathToLaunchFile);
-        }
-
-        public async Task EstablishAppToDebugAsync(string appName)
-        {
-            LoadingMessage = "Identifying remote app to debug...";
-            await PopulateAccessibleAppsAsync();
-            AppToDebug = AccessibleApps.FirstOrDefault(app => app.AppName == appName);
-            if (AppToDebug == null)
-            {
-                WaitingOnAppConfirmation = true;
-                PromptAppResolution($"No app found with a name matching \"{appName}\"");
-            }
-        }
-
-        public void ConfirmAppToDebug(object arg = null)
-        {
-            WaitingOnAppConfirmation = false;
-            AppToDebug = SelectedApp;
-            var _ = BeginRemoteDebuggingAsync(AppToDebug.AppName); // start debug process over from beginning
         }
 
         private async Task<bool> CheckForVsdbg(string stack)
@@ -434,14 +403,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             }
         }
 
-        private void PromptAppResolution(string promptMsg)
-        {
-            LoadingMessage = null;
-            DialogMessage = $"{promptMsg}\n\n" +
-                $"If this app is running under a different name, please select it below. Otherwise click '{PushNewAppButtonText}' and try remote debugging again once {_projectName} is running.";
-            WaitingOnAppConfirmation = true;
-        }
-
         private async Task PopulateAccessibleAppsAsync()
         {
             try
@@ -517,7 +478,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         // Predicates //
 
-        public bool CanResolveMissingApp(object arg = null)
+        public bool CanStartDebuggingApp(object arg = null)
         {
             return SelectedApp != null;
         }
