@@ -8,9 +8,11 @@ using System.IO;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
+using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CloudFoundry;
 using Tanzu.Toolkit.Services.CommandProcess;
 using Tanzu.Toolkit.Services.DataPersistence;
+using Tanzu.Toolkit.Services.DebugAgentProvider;
 using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.DotnetCli;
 using Tanzu.Toolkit.Services.ErrorDialog;
@@ -43,6 +45,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         protected Mock<ILoginViewModel> MockLoginViewModel { get; set; }
         protected Mock<IAppDeletionConfirmationViewModel> MockAppDeletionConfirmationViewModel { get; set; }
         protected Mock<IProjectService> MockProjectService { get; set; }
+        protected Mock<ICfCliService> MockCfCliService { get; set; }
+        protected Mock<IDebugAgentProvider> MockDebugAgentProvider { get; set; }
 
         protected const string _fakeCfName = "fake cf name";
         protected const string _fakeCfApiAddress = "http://fake.api.address";
@@ -492,6 +496,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockLoginViewModel = new Mock<ILoginViewModel>();
             MockAppDeletionConfirmationViewModel = new Mock<IAppDeletionConfirmationViewModel>();
             MockProjectService = new Mock<IProjectService>();
+            MockCfCliService = new Mock<ICfCliService>();
+            MockDebugAgentProvider = new Mock<IDebugAgentProvider>();
 
             MockLogger = new Mock<ILogger>();
             MockLoggingService.SetupGet(m => m.Logger).Returns(MockLogger.Object);
@@ -511,6 +517,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             services.AddSingleton(MockLoginViewModel.Object);
             services.AddSingleton(MockAppDeletionConfirmationViewModel.Object);
             services.AddSingleton(MockProjectService.Object);
+            services.AddSingleton(MockCfCliService.Object);
+            services.AddSingleton(MockDebugAgentProvider.Object);
 
             Services = services.BuildServiceProvider();
         }
