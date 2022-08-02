@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Tanzu.Toolkit.Services.Threading
@@ -24,6 +25,11 @@ namespace Tanzu.Toolkit.Services.Threading
         public Task StartBackgroundTask(Func<Task> method)
         {
             return method.Invoke();
+        }
+
+        public Task StartBackgroundTask(Func<Task> method, CancellationToken cancellationToken)
+        {
+            return Task.Run(method, cancellationToken);
         }
 
         public void StartRecurrentUiTaskInBackground(Action<object> action, object param, int intervalInSeconds)
