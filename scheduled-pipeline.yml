@@ -11,6 +11,7 @@ schedules:
       - 'main'
 pool:
   vmImage: ubuntu-latest
-
+variables:
+  environmentId: 203
 steps:
-- bash: curl -v https://environments.toolsmiths.cf-app.com/custom_gcp_environments/465/renew
+- bash: curl -v https://environments.toolsmiths.cf-app.com/custom_gcp_environments/$(environmentId)/renew
