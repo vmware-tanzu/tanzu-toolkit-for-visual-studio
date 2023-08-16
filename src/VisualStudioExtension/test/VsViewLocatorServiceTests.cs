@@ -23,7 +23,7 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
 
         private readonly string _fakeViewModelName = "MyCoolViewModel";
         private readonly string _fakeViewName = "IMyCoolView";
-        private readonly FakeView _fakeView = new();
+        private readonly FakeView _fakeView = new FakeView();
 
         [TestInitialize]
         public void TestInit()
