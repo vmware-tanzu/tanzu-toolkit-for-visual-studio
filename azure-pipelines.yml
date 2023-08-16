@@ -4,40 +4,18 @@ trigger:
 pr:
   drafts: false
 
-strategy:
-  matrix:
-    Visual Studio 2019:
-      VsTargetVersion: '2019'
-      imageName: windows-2019
-    Visual Studio 2022:
-      VsTargetVersion: '2022'
-      imageName: windows-2022
 pool:
-  vmImage: $(imageName)
+  vmImage: windows-latest
 variables:
   major: 1
   minor: 0
-  patch: 1
+  patch: 2
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
 name: $(major).$(minor).$(patch)-build$(Rev:.r) # Set the value of $(Build.BuildNumber)
 
 steps:
-  # Run PowerShell script to sync vsix version with build number
-- task: PowerShell@2
-  displayName: Update version in the vsix manifest
-  inputs:
-    filePath: build\update-version.ps1
-    arguments: $(Build.BuildNumber)
-    pwsh: true
-
-# Default NuGet version is 4.1.0 so target something newer
-- task: NuGetToolInstaller@1
-  displayName: Specify NuGet version
-  inputs:
-    versionSpec: 6.x
-
 - task: NuGetCommand@2
   displayName: Restore NuGet packages
   inputs:
@@ -51,6 +29,7 @@ steps:
   inputs:
     solution: '**/*.sln' 
     configuration: $(buildConfiguration)
+    restoreNugetPackages: false
 
 - task: DotNetCoreCLI@2
   displayName: Run tests
@@ -61,22 +40,20 @@ steps:
     
 - task: Palmmedia.reportgenerator.reportgenerator-build-release-task.reportgenerator@4
   displayName: Build code coverage report
-  condition: eq(variables['VsTargetVersion'], '2022')
   inputs:
     reports: $(Agent.TempDirectory)/**/coverage.cobertura.xml
     targetdir: $(build.artifactstagingdirectory)/TestResults/
     reporttypes: Cobertura
 
 - task: PublishCodeCoverageResults@1
-  condition: eq(variables['VsTargetVersion'], '2022')
   displayName: Publish code coverage
   inputs:
     codeCoverageTool: cobertura
     summaryFileLocation: $(build.artifactstagingdirectory)/TestResults/cobertura.xml
 
-- pwsh: Rename-Item -Path "$(Build.SourcesDirectory)\src\VisualStudioExtension\src\bin\$(VsTargetVersion)\$(buildConfiguration)\Tanzu.Toolkit.VisualStudio.$(VsTargetVersion).vsix" -NewName "Tanzu.Toolkit.VisualStudio.$(VsTargetVersion).$(Build.BuildNumber).vsix"
+- pwsh: Rename-Item -Path "$(Build.SourcesDirectory)\src\VisualStudioExtension\src\bin\2022\$(buildConfiguration)\Tanzu.Toolkit.VisualStudio.2022.vsix" -NewName "Tanzu.Toolkit.VisualStudio.2022.$(Build.BuildNumber).vsix"
   displayName: Include version in vsix name
 
-- publish: src/VisualStudioExtension/src/bin/$(VsTargetVersion)/$(buildConfiguration)/Tanzu.Toolkit.VisualStudio.$(VsTargetVersion).$(Build.BuildNumber).vsix
-  artifact: Tanzu.Toolkit.VS$(VsTargetVersion)
+- publish: src/VisualStudioExtension/src/bin/2022/$(buildConfiguration)/Tanzu.Toolkit.VisualStudio.2022.$(Build.BuildNumber).vsix
+  artifact: Tanzu.Toolkit.VS2022
   displayName: Publish vsix

@@ -12,7 +12,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
     public class OutputViewModelTests : ViewModelTestSupport
     {
         private OutputViewModel _sut;
-        private FakeOutputView _fakeOutputView;
         private List<string> _receivedEvents;
         private Process _fakeLogStreamProcess;
         private DetailedResult<string> _fakeRecentLogsResult;
