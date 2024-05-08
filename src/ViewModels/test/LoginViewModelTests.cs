@@ -27,7 +27,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             RenewMockServices();
 
-            _receivedEvents = new List<string>();
+            _receivedEvents = [];
             _fakeSecurePw = new NetworkCredential("", _fakePwStr).SecurePassword;
 
             _sut = new LoginViewModel(Services)

@@ -15,7 +15,7 @@ using Tanzu.Toolkit.ViewModels.RemoteDebug;
 using Tanzu.Toolkit.VisualStudio.Services;
 using Task = System.Threading.Tasks.Task;
 
-namespace Tanzu.Toolkit.VisualStudio
+namespace Tanzu.Toolkit.VisualStudio.Commands
 {
     internal sealed class RemoteDebugCommand
     {

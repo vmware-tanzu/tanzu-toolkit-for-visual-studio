@@ -65,7 +65,7 @@ namespace Tanzu.Toolkit.Services.Tests
 
         protected static readonly string _fakeValidTarget = "https://my.fake.target";
         protected static readonly string _fakeValidUsername = "junk";
-        protected static readonly SecureString _fakeValidPassword = new SecureString();
+        protected static readonly SecureString _fakeValidPassword = new();
         protected static readonly string _fakeHttpProxy = "junk";
         protected static readonly bool _skipSsl = true;
         protected static readonly string _fakeValidAccessToken = "valid token";
@@ -74,15 +74,15 @@ namespace Tanzu.Toolkit.Services.Tests
         protected static readonly Action<string> _fakeOutCallback = content => { };
         protected static readonly Action<string> _fakeErrCallback = content => { };
 
-        protected static readonly CloudFoundryInstance _fakeCfInstance = new CloudFoundryInstance("fake cf", _fakeValidTarget, false);
-        protected static readonly CloudFoundryOrganization _fakeOrg = new CloudFoundryOrganization("fake org", "fake org guid", _fakeCfInstance);
-        protected static readonly CloudFoundrySpace _fakeSpace = new CloudFoundrySpace("fake space", "fake space guid", _fakeOrg);
-        protected static readonly CloudFoundryApp _fakeApp = new CloudFoundryApp("fake app", "fake app guid", _fakeSpace, null);
+        protected static readonly CloudFoundryInstance _fakeCfInstance = new("fake cf", _fakeValidTarget, false);
+        protected static readonly CloudFoundryOrganization _fakeOrg = new("fake org", "fake org guid", _fakeCfInstance);
+        protected static readonly CloudFoundrySpace _fakeSpace = new("fake space", "fake space guid", _fakeOrg);
+        protected static readonly CloudFoundryApp _fakeApp = new("fake app", "fake app guid", _fakeSpace, null);
 
-        protected static readonly CommandResult _fakeSuccessCmdResult = new CommandResult("junk output", "junk error", 0);
-        protected static readonly CommandResult _fakeFailureCmdResult = new CommandResult("junk output", "junk error", 1);
-        protected static readonly DetailedResult _fakeSuccessDetailedResult = new DetailedResult(true, null, _fakeSuccessCmdResult);
-        protected static readonly DetailedResult _fakeFailureDetailedResult = new DetailedResult(false, "junk", _fakeSuccessCmdResult);
+        protected static readonly CommandResult _fakeSuccessCmdResult = new("junk output", "junk error", 0);
+        protected static readonly CommandResult _fakeFailureCmdResult = new("junk output", "junk error", 1);
+        protected static readonly DetailedResult _fakeSuccessDetailedResult = new(true, null, _fakeSuccessCmdResult);
+        protected static readonly DetailedResult _fakeFailureDetailedResult = new(false, "junk", _fakeSuccessCmdResult);
 
         /** this fake JWT was created using these values:
          * HEADER:
@@ -117,19 +117,18 @@ namespace Tanzu.Toolkit.Services.Tests
          */
         internal static readonly string _expiredAccessToken = "eyJhbGciOiJSUzI1NiIsImprdSI6Imh0dHBzOi8vdWFhLnN5cy5qYW1lc3Rvd24uY2YtYXBwLmNvbS90b2tlbl9rZXlzIiwia2lkIjoia2V5LTEiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiIyNmY3ZGFhNTI5MDM0OGVmOWQyZTRkYTg4MmZiMWMyZiIsInN1YiI6IjY0NzljMjY0LWE3YTQtNGRiYS05MGFmLTk1MGE4YTMyODE5ZSIsInNjb3BlIjpbIm9wZW5pZCIsInJvdXRpbmcucm91dGVyX2dyb3Vwcy53cml0ZSIsIm5ldHdvcmsud3JpdGUiLCJzY2ltLnJlYWQiLCJjbG91ZF9jb250cm9sbGVyLmFkbWluIiwidWFhLnVzZXIiLCJyb3V0aW5nLnJvdXRlcl9ncm91cHMucmVhZCIsImNsb3VkX2NvbnRyb2xsZXIucmVhZCIsInBhc3N3b3JkLndyaXRlIiwiY2xvdWRfY29udHJvbGxlci53cml0ZSIsIm5ldHdvcmsuYWRtaW4iLCJkb3BwbGVyLmZpcmVob3NlIiwic2NpbS53cml0ZSJdLCJjbGllbnRfaWQiOiJjZiIsImNpZCI6ImNmIiwiYXpwIjoiY2YiLCJncmFudF90eXBlIjoicGFzc3dvcmQiLCJ1c2VyX2lkIjoiNjQ3OWMyNjQtYTdhNC00ZGJhLTkwYWYtOTUwYThhMzI4MTllIiwib3JpZ2luIjoidWFhIiwidXNlcl9uYW1lIjoiYWRtaW4iLCJlbWFpbCI6ImFkbWluIiwiYXV0aF90aW1lIjoxNjIzMTY0ODE2LCJyZXZfc2lnIjoiNDFkOTJiYiIsImlhdCI6MTYyMzE4MTEzNSwiZXhwIjoxNjIzMTg4MzM1LCJpc3MiOiJodHRwczovL3VhYS5zeXMuamFtZXN0b3duLmNmLWFwcC5jb20vb2F1dGgvdG9rZW4iLCJ6aWQiOiJ1YWEiLCJhdWQiOlsiY2xvdWRfY29udHJvbGxlciIsInNjaW0iLCJwYXNzd29yZCIsImNmIiwidWFhIiwib3BlbmlkIiwiZG9wcGxlciIsIm5ldHdvcmsiLCJyb3V0aW5nLnJvdXRlcl9ncm91cHMiXX0.qCfIxuJb2Xv21pq9idUO44PY50n4FY1cTwpmoWbjAmVs2Cu1smeD2L8gJFSZtg04MlKEJLspfSwfsAfu4YTbUB_iWyBmrZybnZFNrU335z8jReAnHTD5Nq5wVvPLNKdwVy3VyyhHTpD7BQ-oTPLDFaVTysoqR8C13ln0Sbr8jctOHVGRS8sOxJVedtRrLAhQUtZJUPpxbq4msFa0YWLQfXRwWTUc4boYOqtHx1jXg5T2qOJDcUF8MvvLE5ROnfsRciMEtCjCqJsteIEG2lfHcE7JwH3XXSJoiz1pIBoDw1DEUplHmNgQ1saK7tNQu-gg4RVWHFKvqhnGwT94buwHkA";
 
-        internal readonly AppManifest _exampleManifest = new AppManifest
+        internal readonly AppManifest _exampleManifest = new()
         {
             Version = 1,
-            Applications = new List<AppConfig>
-                {
-                    new AppConfig
-                    {
+            Applications =
+                [
+                    new() {
                         Name = "app1",
-                        Buildpacks = new List<string>
-                        {
+                        Buildpacks =
+                        [
                             "ruby_buildpack",
                             "java_buildpack",
-                        },
+                        ],
                         Env = new Dictionary<string, string>
                         {
                             {"my_snake_case_var_key", "my_snake_case_var_val" },
@@ -138,22 +137,20 @@ namespace Tanzu.Toolkit.Services.Tests
                             {"MyPascalCaseVarKey", "MyPascalCaseVarVal" },
                             {"MY_UPPER_CASE_VAR_KEY", "MY_UPPER_CASE_VAR_VAL" },
                         },
-                        Routes = new List<RouteConfig>
-                        {
-                            new RouteConfig
-                            {
+                        Routes =
+                        [
+                            new() {
                                 Route = "route.example.com",
                             },
-                            new RouteConfig
-                            {
+                            new() {
                                 Route = "another-route.example.com",
                                 Protocol = "http2"
                             },
-                        },
-                        Services = new List<string> {
+                        ],
+                        Services = [
                             "my-service1",
                             "my-service2",
-                        },
+                        ],
                         Stack = "cflinuxfs3",
                         Metadata = new MetadataConfig
                         {
@@ -166,10 +163,9 @@ namespace Tanzu.Toolkit.Services.Tests
                                 { "sensitive", "true" },
                             },
                         },
-                        Processes = new List<ProcessConfig>
-                        {
-                            new ProcessConfig
-                            {
+                        Processes =
+                        [
+                            new() {
                                 Type = "web",
                                 Command = "start-web.sh",
                                 DiskQuota = "512M",
@@ -180,8 +176,7 @@ namespace Tanzu.Toolkit.Services.Tests
                                 Memory = "500M",
                                 Timeout = 10,
                             },
-                            new ProcessConfig
-                            {
+                            new() {
                                 Type = "worker",
                                 Command = "start-worker.sh",
                                 DiskQuota = "1G",
@@ -190,50 +185,46 @@ namespace Tanzu.Toolkit.Services.Tests
                                 Memory = "256M",
                                 Timeout = 15,
                             },
-                        }
+                        ]
                     },
-                    new AppConfig
-                    {
+                    new() {
                         Name = "app2",
                         Env = new Dictionary<string, string>
                         {
                             { "VAR1", "value1" },
                         },
-                        Processes = new List<ProcessConfig>
-                        {
-                            new ProcessConfig
-                            {
+                        Processes =
+                        [
+                            new() {
                                 Type = "web",
                                 Instances = 1,
                                 Memory = "256M",
                             },
-                        },
-                        Sidecars = new List<SidecarConfig>
-                        {
-                            new SidecarConfig
-                            {
+                        ],
+                        Sidecars =
+                        [
+                            new() {
                                 Name = "authenticator",
-                                ProcessTypes = new List<string>
-                                {
+                                ProcessTypes =
+                                [
                                     "web",
                                     "worker",
-                                },
+                                ],
                                 Command = "bundle exec run-authenticator",
                                 Memory = "800M",
                             },
-                            new SidecarConfig
-                            {
+                            new() {
                                 Name = "upcaser",
-                                ProcessTypes = new List<string>
-                                {
+                                ProcessTypes =
+                                [
                                     "worker",
-                                },
+                                ],
                                 Command = "./tr-server",
                                 Memory = "2G",
                             }
-                        }
+                        ]
                     }
-                }
+                ]
         };
 
         internal readonly string _exampleManifestYaml = System.IO.File.ReadAllText("TestFakes/SampleManifest.yml");

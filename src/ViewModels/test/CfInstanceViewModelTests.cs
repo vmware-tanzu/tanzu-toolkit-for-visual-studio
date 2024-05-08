@@ -19,15 +19,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         private CloudFoundryInstance _expectedCf;
         private readonly bool _expectedSkipSslValue = false;
         private readonly int _expectedRetryAmount = 1;
-        private readonly DetailedResult<List<CloudFoundryOrganization>> _fakeOrgsResponse = new DetailedResult<List<CloudFoundryOrganization>>
+        private readonly DetailedResult<List<CloudFoundryOrganization>> _fakeOrgsResponse = new()
         {
             Succeeded = true,
-            Content = new List<CloudFoundryOrganization>
-            {
+            Content =
+            [
                 _fakeOrgs[0],
                 _fakeOrgs[1],
                 _fakeOrgs[2],
-            }
+            ]
         };
 
         [TestInitialize]
@@ -61,7 +61,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut = new CfInstanceViewModel(_fakeCfInstance, _fakeTasExplorerViewModel, Services);
             _sut = new CfInstanceViewModel(_fakeCfInstance, _fakeTasExplorerViewModel, Services, expanded: true);
 
-            _receivedEvents = new List<string>();
+            _receivedEvents = [];
             _sut.PropertyChanged += (sender, e) =>
             {
                 _receivedEvents.Add(e.PropertyName);
@@ -109,13 +109,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task UpdateAllChildren_RemovesStaleChildrenOnUiThread_WhenOrgsRequestSucceeds()
         {
             /** mock 4 initial children */
-            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
-            {
+            _sut.Children =
+            [
                 new OrgViewModel(_fakeOrgs[0], _sut, _fakeTasExplorerViewModel, Services),
                 new OrgViewModel(_fakeOrgs[1], _sut, _fakeTasExplorerViewModel, Services),
                 new OrgViewModel(_fakeOrgs[2], _sut, _fakeTasExplorerViewModel, Services),
                 new OrgViewModel(_fakeOrgs[3], _sut, _fakeTasExplorerViewModel, Services),
-            };
+            ];
 
             /** mock retrieving all initial children except for FakeOrgs[3] */
             MockCloudFoundryService.Setup(m => m
@@ -140,11 +140,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task UpdateAllChildren_AddsNewChildrenOnUiThread_WhenOrgsRequestSucceeds()
         {
             /** mock 2 initial children */
-            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
-            {
+            _sut.Children =
+            [
                 new OrgViewModel(_fakeOrgs[0], _sut, _fakeTasExplorerViewModel, Services),
                 new OrgViewModel(_fakeOrgs[1], _sut, _fakeTasExplorerViewModel, Services),
-            };
+            ];
 
             /** mock retrieving all initial children plus FakeOrgs[2] */
             MockCloudFoundryService.Setup(m => m
@@ -246,10 +246,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("UpdateAllChildren")]
         public async Task UpdateAllChildren_RemovesEmptyPlaceholder_WhenOrgsRequestReturnsOrgs()
         {
-            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
-            {
+            _sut.Children =
+            [
                 _sut.EmptyPlaceholder,
-            };
+            ];
 
             /** mock 3 new children */
             MockCloudFoundryService.Setup(m => m
@@ -273,11 +273,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             fakeNoOrgsResponse.Content.Clear();
 
             /** mock 2 initial children */
-            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
-            {
+            _sut.Children =
+            [
                 new OrgViewModel(_fakeOrgs[0], _sut, _fakeTasExplorerViewModel, Services),
                 new OrgViewModel(_fakeOrgs[1], _sut, _fakeTasExplorerViewModel, Services),
-            };
+            ];
 
             MockCloudFoundryService.Setup(m => m
               .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))

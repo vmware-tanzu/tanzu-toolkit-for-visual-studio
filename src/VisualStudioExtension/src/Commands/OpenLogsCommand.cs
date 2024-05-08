@@ -44,8 +44,8 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         private OpenLogsCommand(OleMenuCommandService commandService)
         {
             commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
-            var menuCommandID = new CommandID(_commandSet, _commandId);
-            var menuItem = new MenuCommand(this.Execute, menuCommandID);
+            var menuCommandId = new CommandID(_commandSet, _commandId);
+            var menuItem = new MenuCommand(this.Execute, menuCommandId);
             commandService.AddCommand(menuItem);
         }
 
@@ -124,7 +124,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                     var logsWindow = Dte.ItemOperations.OpenFile(tmpFilePath);
                     logsWindow.Document.ReadOnly = true;
 
-                    var windowEvents = Dte.Events.get_WindowEvents(logsWindow);
+                    var windowEvents = Dte.Events.WindowEvents[logsWindow];
                     windowEvents.WindowClosing += OnWindowClosing;
 
                     void OnWindowClosing(Window window)
@@ -167,17 +167,13 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             };
 
             // add explanation to the BEGINNING of the temp file
-            var newContents = extraInfo;
-            foreach (var s in logContents)
-            {
-                newContents.Add(s);
-            }
+            extraInfo.AddRange(logContents);
 
             // remove original copy to allow extra info to be prepended
             File.Delete(tempFilePath);
 
             // write entire content to new file with same "temp" name
-            File.AppendAllLines(tempFilePath, newContents);
+            File.AppendAllLines(tempFilePath, extraInfo);
         }
 
         private void RemoveTmpLogFile(string filePath)

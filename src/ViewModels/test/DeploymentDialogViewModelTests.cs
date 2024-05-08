@@ -25,8 +25,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         private const string _fakeServiceName3 = "sv3";
         private ObservableCollection<string> _fakeSelectedServices;
         private const string _fakeTargetFrameworkMoniker = "junk";
-        private static readonly CloudFoundryOrganization _fakeOrg = new CloudFoundryOrganization("", "", _fakeCfInstance);
-        private readonly CloudFoundrySpace _fakeSpace = new CloudFoundrySpace("", "", _fakeOrg);
+        private static readonly CloudFoundryOrganization _fakeOrg = new("", "", _fakeCfInstance);
+        private readonly CloudFoundrySpace _fakeSpace = new("", "", _fakeOrg);
         private DeploymentDialogViewModel _sut;
         private List<string> _receivedEvents;
 
@@ -35,9 +35,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             RenewMockServices();
 
-            _receivedEvents = new List<string>();
-            _fakeSelectedBuildpacks = new ObservableCollection<string> { _fakeBuildpackName1, _fakeBuildpackName2, _fakeBuildpackName3 };
-            _fakeSelectedServices = new ObservableCollection<string> { _fakeServiceName1, _fakeServiceName2, _fakeServiceName3 };
+            _receivedEvents = [];
+            _fakeSelectedBuildpacks = [_fakeBuildpackName1, _fakeBuildpackName2, _fakeBuildpackName3];
+            _fakeSelectedServices = [_fakeServiceName1, _fakeServiceName2, _fakeServiceName3];
             var fakeTasConnection = new FakeCfInstanceViewModel(_fakeCfInstance, Services);
 
             MockFileService.Setup(m => m.FileExists(_fakeManifestPath)).Returns(true);
@@ -1071,13 +1071,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             var fakeAppManifest = new AppManifest
             {
-                Applications = new List<AppConfig>
-                {
-                    new AppConfig
-                    {
+                Applications =
+                [
+                    new() {
                         Name = expectedAppName1,
                     }
-                }
+                ]
             };
 
             var fakeManifestParsingResponse = new DetailedResult<AppManifest>
@@ -1107,13 +1106,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             var fakeAppManifest = new AppManifest
             {
-                Applications = new List<AppConfig>
-                {
-                    new AppConfig
-                    {
+                Applications =
+                [
+                    new() {
                         Command = expectedStartCommand,
                     }
-                }
+                ]
             };
 
             MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
@@ -1136,13 +1134,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             var fakeAppManifest = new AppManifest
             {
-                Applications = new List<AppConfig>
-                {
-                    new AppConfig
-                    {
+                Applications =
+                [
+                    new() {
                         Buildpack = null,
                     }
-                }
+                ]
             };
 
             MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
@@ -1163,13 +1160,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             var fakeAppManifest = new AppManifest
             {
-                Applications = new List<AppConfig>
-                {
-                    new AppConfig
-                    {
+                Applications =
+                [
+                    new() {
                         Services = null,
                     }
-                }
+                ]
             };
 
             MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
@@ -1208,12 +1204,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             var fakeAppManifest = new AppManifest
             {
-                Applications = new List<AppConfig>
-                {
-                    new AppConfig
-                    {
+                Applications =
+                [
+                    new() {
                     }
-                }
+                ]
             };
 
             var fakeManifestParsingResponse = new DetailedResult<AppManifest>
@@ -1245,14 +1240,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             var fakeAppManifest = new AppManifest
             {
-                Applications = new List<AppConfig>
-                {
-                    new AppConfig
-                    {
+                Applications =
+                [
+                    new() {
                         Name = expectedAppName1,
                         Stack = expectedFakeStackNameFromManifest,
                     }
-                }
+                ]
             };
 
             var fakeManifestParsingResponse = new DetailedResult<AppManifest>
@@ -1298,17 +1292,16 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             var fakeAppManifest = new AppManifest
             {
-                Applications = new List<AppConfig>
-                {
-                    new AppConfig
-                    {
+                Applications =
+                [
+                    new() {
                         Name = expectedAppName1,
-                        Buildpacks = new List<string>
-                        {
+                        Buildpacks =
+                        [
                             expectedBuildpackName1,
-                        }
+                        ]
                     }
-                }
+                ]
             };
 
             var fakeManifestParsingResponse = new DetailedResult<AppManifest>
@@ -1343,19 +1336,18 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             var fakeAppManifest = new AppManifest
             {
-                Applications = new List<AppConfig>
-                {
-                    new AppConfig
-                    {
+                Applications =
+                [
+                    new() {
                         Name = expectedAppName1,
-                        Buildpacks = new List<string>
-                        {
+                        Buildpacks =
+                        [
                             expectedBuildpackName1,
                             expectedBuildpackName2,
                             expectedBuildpackName3,
-                        }
+                        ]
                     }
-                }
+                ]
             };
 
             var fakeManifestParsingResponse = new DetailedResult<AppManifest>
@@ -1426,17 +1418,16 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             var fakeAppManifest = new AppManifest
             {
-                Applications = new List<AppConfig>
-                {
-                    new AppConfig
-                    {
+                Applications =
+                [
+                    new() {
                         Name = expectedAppName1,
-                        Services = new List<string>
-                        {
+                        Services =
+                        [
                             expectedServiceName1,
-                        }
+                        ]
                     }
-                }
+                ]
             };
 
             var fakeManifestParsingResponse = new DetailedResult<AppManifest>
@@ -1471,19 +1462,18 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             var fakeAppManifest = new AppManifest
             {
-                Applications = new List<AppConfig>
-                {
-                    new AppConfig
-                    {
+                Applications =
+                [
+                    new() {
                         Name = expectedAppName1,
-                        Services = new List<string>
-                        {
+                        Services =
+                        [
                             expectedServiceName1,
                             expectedServiceName2,
                             expectedServiceName3,
-                        }
+                        ]
                     }
-                }
+                ]
             };
 
             var fakeManifestParsingResponse = new DetailedResult<AppManifest>
@@ -1552,13 +1542,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             var manifestThatDoesNotSpecifyPath = new AppManifest
             {
-                Applications = new List<AppConfig>
-                {
-                    new AppConfig
-                    {
+                Applications =
+                [
+                    new() {
                         Path = null,
                     }
-                }
+                ]
             };
 
             MockFileService.Setup(m => m.ReadFileContents(newManifestPath)).Returns(fakeManifestContent);
@@ -1584,13 +1573,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             var manifestThatSpecifiesAppDirPath = new AppManifest
             {
-                Applications = new List<AppConfig>
-                {
-                    new AppConfig
-                    {
+                Applications =
+                [
+                    new() {
                         Path = pathValInNewManifest,
                     }
-                }
+                ]
             };
 
             MockFileService.Setup(m => m.ReadFileContents(newManifestPath)).Returns(fakeManifestContent);
@@ -1661,53 +1649,53 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 "incompatibleDeselectedBpToStayIncompatibleAndDeselected",
                 selected: false,
                 compatibleWithCurrentStack: false,
-                stacks: new List<string> { "unusedStack" });
+                stacks: ["unusedStack"]);
 
             var incompatibleDeselectedBpToBecomeCompatibleAndStayDeselected = new FakeBuildpackListItem(
                 "incompatibleDeselectedBpToBecomeCompatibleAndStayDeselected",
                 selected: false,
                 compatibleWithCurrentStack: false,
-                stacks: new List<string> { newStackVal });
+                stacks: [newStackVal]);
 
             var compatibleDeselectedBpToBecomeIncompatibleAndStayDeselected = new FakeBuildpackListItem(
                 "compatibleDeselectedBpToBecomeIncompatibleAndStayDeselected",
                 selected: false,
                 compatibleWithCurrentStack: true,
-                stacks: new List<string> { initialStackInManifestModel });
+                stacks: [initialStackInManifestModel]);
 
             var compatibleDeselectedBpToStayCompatibleAndDeselected = new FakeBuildpackListItem(
                 "compatibleDeselectedBpToStayCompatibleAndDeselected",
                 selected: false,
                 compatibleWithCurrentStack: true,
-                stacks: new List<string> { initialStackInManifestModel, newStackVal });
+                stacks: [initialStackInManifestModel, newStackVal]);
 
             var compatibleSelectedBpToBecomeIncompatibleAndDeselected = new FakeBuildpackListItem(
                 "compatibleSelectedBpToBecomeIncompatibleAndDeselected",
                 selected: true,
                 compatibleWithCurrentStack: true,
-                stacks: new List<string> { initialStackInManifestModel });
+                stacks: [initialStackInManifestModel]);
 
             var compatibleSelectedBpToStayCompatibleAndSelected = new FakeBuildpackListItem(
                 "compatibleSelectedBpToStayCompatibleAndSelected",
                 selected: true,
                 compatibleWithCurrentStack: true,
-                stacks: new List<string> { initialStackInManifestModel, newStackVal });
+                stacks: [initialStackInManifestModel, newStackVal]);
 
-            _sut.BuildpackOptions = new List<BuildpackListItem>
-            {
+            _sut.BuildpackOptions =
+            [
                 incompatibleDeselectedBpToStayIncompatibleAndDeselected,
                 incompatibleDeselectedBpToBecomeCompatibleAndStayDeselected,
                 compatibleDeselectedBpToBecomeIncompatibleAndStayDeselected,
                 compatibleDeselectedBpToStayCompatibleAndDeselected,
                 compatibleSelectedBpToBecomeIncompatibleAndDeselected,
                 compatibleSelectedBpToStayCompatibleAndSelected,
-            };
+            ];
 
-            _sut.SelectedBuildpacks = new ObservableCollection<string>
-            {
+            _sut.SelectedBuildpacks =
+            [
                 compatibleSelectedBpToBecomeIncompatibleAndDeselected.Name,
                 compatibleSelectedBpToStayCompatibleAndSelected.Name,
-            };
+            ];
 
             _receivedEvents.Clear();
 
@@ -1861,28 +1849,23 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var fakeCf = new FakeCfInstanceViewModel(ViewModelTestSupport._fakeCfInstance, Services);
             var fakeBuildpacksContent = new List<CfBuildpack>
             {
-                new CfBuildpack
-                {
+                new() {
                     Name = "bp1",
                     Stack = "stack1",
                 },
-                new CfBuildpack
-                {
+                new() {
                     Name = "bp1",
                     Stack = "stack2",
                 },
-                new CfBuildpack
-                {
+                new() {
                     Name = "bp1",
                     Stack = "stack3",
                 },
-                new CfBuildpack
-                {
+                new() {
                     Name = "bp2",
                     Stack = "stack1",
                 },
-                new CfBuildpack
-                {
+                new() {
                     Name = "bp3",
                     Stack = "stack2",
                 },
@@ -1896,7 +1879,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             };
 
             // simulate builpack specification in a pre-loaded manifest; expect corresponding bp list item to be marked as selected
-            _sut.ManifestModel.Applications[0].Buildpacks = new List<string> { "bp2" };
+            _sut.ManifestModel.Applications[0].Buildpacks = ["bp2"];
 
             // simulate existing stack selection; expect corresponding bp list items to be appopriately marked as (in)compatible
             _sut.SelectedStack = "stack1";
@@ -1982,24 +1965,19 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var fakeCf = new FakeCfInstanceViewModel(ViewModelTestSupport._fakeCfInstance, Services);
             var fakeServicesContent = new List<CfService>
             {
-                new CfService
-                {
+                new() {
                     Name = "sv1",
                 },
-                new CfService
-                {
+                new() {
                     Name = "sv1",
                 },
-                new CfService
-                {
+                new() {
                     Name = "sv1",
                 },
-                new CfService
-                {
+                new() {
                     Name = "sv2",
                 },
-                new CfService
-                {
+                new() {
                     Name = "sv3",
                 },
             };
@@ -2012,7 +1990,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             };
 
             // simulate service specification in a pre-loaded manifest; expect corresponding bp list item to be marked as selected
-            _sut.ManifestModel.Applications[0].Services = new List<string> { "sv2" };
+            _sut.ManifestModel.Applications[0].Services = ["sv2"];
 
             MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(fakeCf);
 

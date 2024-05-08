@@ -69,10 +69,7 @@ namespace Tanzu.Toolkit.ViewModels
                             var freshSpaces = new ObservableCollection<CloudFoundrySpace>(spacesResponse.Content);
                             if (freshSpaces.Count < 1)
                             {
-                                foreach (var child in originalChildren)
-                                {
-                                    removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, child));
-                                }
+                                removalTasks.AddRange(originalChildren.Select(child => ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, child)));
                                 additionTasks.Add(ThreadingService.AddItemToCollectionOnUiThreadAsync(Children, EmptyPlaceholder));
                             }
                             else

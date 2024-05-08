@@ -3,7 +3,7 @@ using System;
 using System.ComponentModel.Design;
 using Task = System.Threading.Tasks.Task;
 
-namespace Tanzu.Toolkit.VisualStudio
+namespace Tanzu.Toolkit.VisualStudio.Commands
 {
     /// <summary>
     /// Command handler

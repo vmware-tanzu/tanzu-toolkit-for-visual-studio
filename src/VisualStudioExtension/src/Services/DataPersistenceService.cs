@@ -43,12 +43,9 @@ namespace Tanzu.Toolkit.VisualStudio.Services
                 {
                     return _readOnlySettingsStore.GetString(_tasCollectionPath, key);
                 }
-                else
-                {
-                    _logger.Error($"Attempted to read user settings store value for \"{key}\" but no such property exists");
 
-                    return null;
-                }
+                _logger.Error($"Attempted to read user settings store value for \"{key}\" but no such property exists");
+                return null;
             }
             catch (Exception ex)
             {
@@ -73,10 +70,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services
                 {
                     return true;
                 }
-                else
-                {
-                    throw new Exception($"Tried to write value \"{value}\" to user settings store property \"{key}\" but no such property existed after writing.");
-                }
+
+                throw new Exception($"Tried to write value \"{value}\" to user settings store property \"{key}\" but no such property existed after writing.");
             }
             catch (Exception ex)
             {

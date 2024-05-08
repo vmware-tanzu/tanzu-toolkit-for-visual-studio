@@ -35,7 +35,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         private Mock<ILoggingService> _mockLoggingService;
         private Mock<ILogger> _mockLogger;
 
-        private readonly Exception _fakeException = new Exception("junk");
+        private readonly Exception _fakeException = new("junk");
 
         [TestInitialize]
         public void TestInit()
@@ -187,9 +187,9 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             var expectedCliVersion = 6;
             var versionInputs = new Version[]
             {
-                new Version(major: 2, minor: 149, build: 0),
-                new Version(major: 2, minor: 138, build: 0),
-                new Version(major: 2, minor: 128, build: 0),
+                new(major: 2, minor: 149, build: 0),
+                new(major: 2, minor: 138, build: 0),
+                new(major: 2, minor: 128, build: 0),
             };
 
             foreach (var mockApiVersion in versionInputs)
@@ -218,9 +218,9 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             var expectedCliVersion = 6;
             var versionInputs = new Version[]
             {
-                new Version(major: 3, minor: 84, build: 0),
-                new Version(major: 3, minor: 73, build: 0),
-                new Version(major: 3, minor: 63, build: 0),
+                new(major: 3, minor: 84, build: 0),
+                new(major: 3, minor: 73, build: 0),
+                new(major: 3, minor: 63, build: 0),
             };
 
             foreach (var mockApiVersion in versionInputs)
@@ -249,9 +249,9 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             var expectedCliVersion = 7;
             var versionInputs = new Version[]
             {
-                new Version(major: 2, minor: 150, build: 0),
-                new Version(major: 2, minor: 189, build: 0),
-                new Version(major: 2, minor: 150, build: 1),
+                new(major: 2, minor: 150, build: 0),
+                new(major: 2, minor: 189, build: 0),
+                new(major: 2, minor: 150, build: 1),
             };
 
             foreach (var mockApiVersion in versionInputs)
@@ -280,9 +280,9 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             var expectedCliVersion = 7;
             var versionInputs = new Version[]
             {
-                new Version(major: 3, minor: 85, build: 0),
-                new Version(major: 3, minor: 178, build: 0),
-                new Version(major: 3, minor: 85, build: 1),
+                new(major: 3, minor: 85, build: 0),
+                new(major: 3, minor: 178, build: 0),
+                new(major: 3, minor: 85, build: 1),
             };
 
             foreach (var mockApiVersion in versionInputs)
@@ -327,13 +327,11 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             var fakeExceptionMsg = "junk";
             var fakeOrgsResponse = new List<CloudFoundryApiClient.Models.OrgsResponse.Org>
             {
-                new CloudFoundryApiClient.Models.OrgsResponse.Org
-                {
+                new() {
                     Name = _org1Name,
                     Guid = _org1Guid,
                 },
-                new CloudFoundryApiClient.Models.OrgsResponse.Org
-                {
+                new() {
                     Name = _org2Name,
                     Guid = _org2Guid,
                 },
@@ -341,8 +339,8 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             var expectedResultContent = new List<CloudFoundryOrganization>
             {
-                new CloudFoundryOrganization(_org1Name, _org1Guid, _fakeCfInstance),
-                new CloudFoundryOrganization(_org2Name, _org2Guid, _fakeCfInstance),
+                new(_org1Name, _org1Guid, _fakeCfInstance),
+                new(_org2Name, _org2Guid, _fakeCfInstance),
             };
 
             _mockCfCliService.SetupSequence(m => m.
@@ -401,23 +399,19 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         {
             var fakeOrgsResponse = new List<CloudFoundryApiClient.Models.OrgsResponse.Org>
             {
-                new CloudFoundryApiClient.Models.OrgsResponse.Org
-                {
+                new() {
                     Name = _org1Name,
                     Guid = _org1Guid,
                 },
-                new CloudFoundryApiClient.Models.OrgsResponse.Org
-                {
+                new() {
                     Name = _org2Name,
                     Guid = _org2Guid,
                 },
-                new CloudFoundryApiClient.Models.OrgsResponse.Org
-                {
+                new() {
                     Name = _org3Name,
                     Guid = _org3Guid,
                 },
-                new CloudFoundryApiClient.Models.OrgsResponse.Org
-                {
+                new() {
                     Name = _org4Name,
                     Guid = _org4Guid,
                 },
@@ -425,10 +419,10 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             var expectedResultContent = new List<CloudFoundryOrganization>
             {
-                new CloudFoundryOrganization(_org1Name, _org1Guid, _fakeCfInstance),
-                new CloudFoundryOrganization(_org2Name, _org2Guid, _fakeCfInstance),
-                new CloudFoundryOrganization(_org3Name, _org3Guid, _fakeCfInstance),
-                new CloudFoundryOrganization(_org4Name, _org4Guid, _fakeCfInstance),
+                new(_org1Name, _org1Guid, _fakeCfInstance),
+                new(_org2Name, _org2Guid, _fakeCfInstance),
+                new(_org3Name, _org3Guid, _fakeCfInstance),
+                new(_org4Name, _org4Guid, _fakeCfInstance),
             };
 
             _mockCfCliService.Setup(m => m.
@@ -500,13 +494,11 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             var fakeExceptionMsg = "junk";
             var fakeSpacesResponse = new List<CloudFoundryApiClient.Models.SpacesResponse.Space>
             {
-                new CloudFoundryApiClient.Models.SpacesResponse.Space
-                {
+                new() {
                     Name = _space1Name,
                     Guid = _space1Guid,
                 },
-                new CloudFoundryApiClient.Models.SpacesResponse.Space
-                {
+                new() {
                     Name = _space2Name,
                     Guid = _space2Guid,
                 },
@@ -514,8 +506,8 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             var expectedResultContent = new List<CloudFoundrySpace>
             {
-                new CloudFoundrySpace(_space1Name, _space1Guid, _fakeOrg),
-                new CloudFoundrySpace(_space2Name, _space2Guid, _fakeOrg),
+                new(_space1Name, _space1Guid, _fakeOrg),
+                new(_space2Name, _space2Guid, _fakeOrg),
             };
 
             _mockCfCliService.SetupSequence(m => m.
@@ -598,23 +590,19 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         {
             var fakeSpacesResponse = new List<CloudFoundryApiClient.Models.SpacesResponse.Space>
             {
-                new CloudFoundryApiClient.Models.SpacesResponse.Space
-                {
+                new() {
                     Name = _space1Name,
                     Guid = _space1Guid,
                 },
-                new CloudFoundryApiClient.Models.SpacesResponse.Space
-                {
+                new() {
                     Name = _space2Name,
                     Guid = _space2Guid,
                 },
-                new CloudFoundryApiClient.Models.SpacesResponse.Space
-                {
+                new() {
                     Name = _space3Name,
                     Guid = _space3Guid,
                 },
-                new CloudFoundryApiClient.Models.SpacesResponse.Space
-                {
+                new() {
                     Name = _space4Name,
                     Guid = _space4Guid,
                 },
@@ -622,10 +610,10 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             var expectedResultContent = new List<CloudFoundrySpace>
             {
-                new CloudFoundrySpace(_space1Name, _space1Guid, _fakeOrg),
-                new CloudFoundrySpace(_space2Name, _space2Guid, _fakeOrg),
-                new CloudFoundrySpace(_space3Name, _space3Guid, _fakeOrg),
-                new CloudFoundrySpace(_space4Name, _space4Guid, _fakeOrg),
+                new(_space1Name, _space1Guid, _fakeOrg),
+                new(_space2Name, _space2Guid, _fakeOrg),
+                new(_space3Name, _space3Guid, _fakeOrg),
+                new(_space4Name, _space4Guid, _fakeOrg),
             };
 
             _mockCfCliService.Setup(m => m.
@@ -697,8 +685,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             var fakeExceptionMsg = "junk";
             var fakeAppsResponse = new List<CloudFoundryApiClient.Models.AppsResponse.App>
             {
-                new CloudFoundryApiClient.Models.AppsResponse.App
-                {
+                new() {
                     Name = _app1Name,
                     Guid = _app1Guid,
                     State = _app1State,
@@ -707,13 +694,12 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                         Type = _onlySupportedAppLifecycleType,
                         Data = new CloudFoundryApiClient.Models.AppsResponse.Data
                         {
-                            Buildpacks = new string[] { _buildpack1Name },
+                            Buildpacks = [_buildpack1Name],
                             Stack = _stack1Name,
                         }
                     }
                 },
-                new CloudFoundryApiClient.Models.AppsResponse.App
-                {
+                new() {
                     Name = _app2Name,
                     Guid = _app2Guid,
                     State = _app2State,
@@ -722,7 +708,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                         Type = _onlySupportedAppLifecycleType,
                         Data = new CloudFoundryApiClient.Models.AppsResponse.Data
                         {
-                            Buildpacks = new string[] { _buildpack1Name, _buildpack2Name },
+                            Buildpacks = [_buildpack1Name, _buildpack2Name],
                             Stack = _stack2Name,
                         }
                     }
@@ -731,8 +717,8 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             var expectedResultContent = new List<CloudFoundryApp>
             {
-                new CloudFoundryApp(_app1Name, _app1Guid, _fakeSpace, "fake state"),
-                new CloudFoundryApp(_app2Name, _app2Guid, _fakeSpace, "fake state"),
+                new(_app1Name, _app1Guid, _fakeSpace, "fake state"),
+                new(_app2Name, _app2Guid, _fakeSpace, "fake state"),
             };
 
             _mockCfCliService.SetupSequence(m => m.
@@ -815,8 +801,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         {
             var fakeAppsResponse = new List<CloudFoundryApiClient.Models.AppsResponse.App>
             {
-                new CloudFoundryApiClient.Models.AppsResponse.App
-                {
+                new() {
                     Name = _app1Name,
                     Guid = _app1Guid,
                     State = _app1State,
@@ -825,13 +810,12 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                         Type = _onlySupportedAppLifecycleType,
                         Data = new CloudFoundryApiClient.Models.AppsResponse.Data
                         {
-                            Buildpacks = new string[] { _buildpack1Name },
+                            Buildpacks = [_buildpack1Name],
                             Stack = _stack1Name,
                         }
                     }
                 },
-                new CloudFoundryApiClient.Models.AppsResponse.App
-                {
+                new() {
                     Name = _app2Name,
                     Guid = _app2Guid,
                     State = _app2State,
@@ -840,13 +824,12 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                         Type = _onlySupportedAppLifecycleType,
                         Data = new CloudFoundryApiClient.Models.AppsResponse.Data
                         {
-                            Buildpacks = new string[] { _buildpack1Name, _buildpack2Name },
+                            Buildpacks = [_buildpack1Name, _buildpack2Name],
                             Stack = _stack2Name,
                         }
                     }
                 },
-                new CloudFoundryApiClient.Models.AppsResponse.App
-                {
+                new() {
                     Name = _app3Name,
                     Guid = _app3Guid,
                     State = _app3State,
@@ -855,13 +838,12 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                         Type = _onlySupportedAppLifecycleType,
                         Data = new CloudFoundryApiClient.Models.AppsResponse.Data
                         {
-                            Buildpacks = new string[] { _buildpack3Name },
+                            Buildpacks = [_buildpack3Name],
                             Stack = _stack3Name,
                         }
                     }
                 },
-                new CloudFoundryApiClient.Models.AppsResponse.App
-                {
+                new() {
                     Name = _app4Name,
                     Guid = _app4Guid,
                     State = _app4State,
@@ -870,7 +852,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
                         Type = _onlySupportedAppLifecycleType,
                         Data = new CloudFoundryApiClient.Models.AppsResponse.Data
                         {
-                            Buildpacks = new string[] { _buildpack1Name, _buildpack2Name, _buildpack4Name },
+                            Buildpacks = [_buildpack1Name, _buildpack2Name, _buildpack4Name],
                             Stack = _stack4Name,
                         }
                     }
@@ -879,25 +861,25 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             var expectedResultContent = new List<CloudFoundryApp>
             {
-                new CloudFoundryApp(_app1Name, _app1Guid, _fakeSpace, _app1State)
+                new(_app1Name, _app1Guid, _fakeSpace, _app1State)
                 {
                     Stack = fakeAppsResponse[0].Lifecycle.Data.Stack,
-                    Buildpacks = new List<string>(fakeAppsResponse[0].Lifecycle.Data.Buildpacks),
+                    Buildpacks = [..fakeAppsResponse[0].Lifecycle.Data.Buildpacks],
                 },
-                new CloudFoundryApp(_app2Name, _app2Guid, _fakeSpace, _app2State)
+                new(_app2Name, _app2Guid, _fakeSpace, _app2State)
                 {
                     Stack = fakeAppsResponse[1].Lifecycle.Data.Stack,
-                    Buildpacks = new List<string>(fakeAppsResponse[1].Lifecycle.Data.Buildpacks),
+                    Buildpacks = [..fakeAppsResponse[1].Lifecycle.Data.Buildpacks],
                 },
-                new CloudFoundryApp(_app3Name, _app3Guid, _fakeSpace, _app3State)
+                new(_app3Name, _app3Guid, _fakeSpace, _app3State)
                 {
                     Stack = fakeAppsResponse[2].Lifecycle.Data.Stack,
-                    Buildpacks = new List<string>(fakeAppsResponse[2].Lifecycle.Data.Buildpacks),
+                    Buildpacks = [..fakeAppsResponse[2].Lifecycle.Data.Buildpacks],
                 },
-                new CloudFoundryApp(_app4Name, _app4Guid, _fakeSpace, _app4State)
+                new(_app4Name, _app4Guid, _fakeSpace, _app4State)
                 {
                     Stack = fakeAppsResponse[3].Lifecycle.Data.Stack,
-                    Buildpacks = new List<string>(fakeAppsResponse[3].Lifecycle.Data.Buildpacks),
+                    Buildpacks = [..fakeAppsResponse[3].Lifecycle.Data.Buildpacks],
                 },
             };
 
@@ -967,18 +949,15 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             var expectedResultContent = new List<CfBuildpack>
             {
-                new CfBuildpack
-                {
+                new() {
                     Name = fakeBp1.Name,
                     Stack = fakeBp1.Stack,
                 },
-                new CfBuildpack
-                {
+                new() {
                     Name = fakeBp2.Name,
                     Stack = fakeBp2.Stack,
                 },
-                new CfBuildpack
-                {
+                new() {
                     Name = fakeBp3.Name,
                     Stack = fakeBp3.Stack,
                 },
@@ -1066,18 +1045,15 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             var expectedResultContent = new List<CfBuildpack>
             {
-                new CfBuildpack
-                {
+                new() {
                     Name = fakeBp1.Name,
                     Stack = fakeBp1.Stack,
                 },
-                new CfBuildpack
-                {
+                new() {
                     Name = fakeBp2.Name,
                     Stack = fakeBp2.Stack,
                 },
-                new CfBuildpack
-                {
+                new() {
                     Name = fakeBp3.Name,
                     Stack = fakeBp3.Stack,
                 },
@@ -1175,16 +1151,13 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             var expectedResultContent = new List<CfService>
             {
-                new CfService
-                {
+                new() {
                     Name = fakeServ1.Name,
                 },
-                new CfService
-                {
+                new() {
                     Name = fakeServ2.Name,
                 },
-                new CfService
-                {
+                new() {
                     Name = fakeServ3.Name,
                 },
             };
@@ -1268,16 +1241,13 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             var expectedResultContent = new List<CfService>
             {
-                new CfService
-                {
+                new() {
                     Name = fakeServ1.Name,
                 },
-                new CfService
-                {
+                new() {
                     Name = fakeServ2.Name,
                 },
-                new CfService
-                {
+                new() {
                     Name = fakeServ3.Name,
                 },
             };
@@ -1942,10 +1912,10 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         {
             var appManifest = new AppManifest()
             {
-                Applications = new List<AppConfig>
-                {
-                    new AppConfig(),
-                }
+                Applications =
+                [
+                    new(),
+                ]
             };
 
             var defaultAppPath = @"fake\app\path";
@@ -1972,13 +1942,13 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         {
             var appManifest = new AppManifest()
             {
-                Applications = new List<AppConfig>
-                {
-                    new AppConfig()
+                Applications =
+                [
+                    new()
                     {
                         Path = @"manifest\app\path",
                     },
-                }
+                ]
             };
 
             var defaultAppPath = @"fake\app\path";
@@ -2127,13 +2097,11 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             var fakeExceptionMsg = "junk";
             var fakeStacksResponse = new List<CloudFoundryApiClient.Models.StacksResponse.Stack>
             {
-                new CloudFoundryApiClient.Models.StacksResponse.Stack
-                {
+                new() {
                     Name = _stack1Name,
                     Guid = _stack1Guid,
                 },
-                new CloudFoundryApiClient.Models.StacksResponse.Stack
-                {
+                new() {
                     Name = _stack2Name,
                     Guid = _stack2Guid,
                 },
@@ -2201,23 +2169,19 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
         {
             var fakeStacksResponse = new List<CloudFoundryApiClient.Models.StacksResponse.Stack>
             {
-                new CloudFoundryApiClient.Models.StacksResponse.Stack
-                {
+                new() {
                     Name = _stack1Name,
                     Guid = _stack1Guid,
                 },
-                new CloudFoundryApiClient.Models.StacksResponse.Stack
-                {
+                new() {
                     Name = _stack2Name,
                     Guid = _stack2Guid,
                 },
-                new CloudFoundryApiClient.Models.StacksResponse.Stack
-                {
+                new() {
                     Name = _stack3Name,
                     Guid = _stack3Guid,
                 },
-                new CloudFoundryApiClient.Models.StacksResponse.Stack
-                {
+                new() {
                     Name = _stack4Name,
                     Guid = _stack4Guid,
                 },
@@ -2280,7 +2244,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             {
                 Prompts = new Dictionary<string, string[]>
                 {
-                    { CloudFoundryService._cfApiSsoPromptKey, new[] {"fake content type", fakePasscode}}
+                    { CloudFoundryService._cfApiSsoPromptKey, ["fake content type", fakePasscode] }
                 }
             };
 
@@ -2318,7 +2282,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             {
                 Prompts = new Dictionary<string, string[]>
                 {
-                    { "some irrelevant key", new[] {"fake content type", "some content"}}
+                    { "some irrelevant key", ["fake content type", "some content"] }
                 }
             };
 
@@ -2412,8 +2376,8 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             var expectedResultContent = new List<CloudFoundryRoute>
             {
-                new CloudFoundryRoute(fakeRoute1.Guid),
-                new CloudFoundryRoute(fakeRoute2.Guid),
+                new(fakeRoute1.Guid),
+                new(fakeRoute2.Guid),
             };
 
             _mockCfCliService.SetupSequence(m => m.
@@ -2497,8 +2461,8 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             var expectedResultContent = new List<CloudFoundryRoute>
             {
-                new CloudFoundryRoute(fakeRoute1.Guid),
-                new CloudFoundryRoute(fakeRoute2.Guid),
+                new(fakeRoute1.Guid),
+                new(fakeRoute2.Guid),
             };
 
             _mockCfCliService.Setup(m => m.
@@ -2551,12 +2515,10 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             var fakeRoutesResponse = new List<Route>
             {
-                new Route
-                {
+                new() {
                     Guid = "this-is-a-fake-guid-1",
                 },
-                new Route
-                {
+                new() {
                     Guid = "this-is-a-fake-guid-2",
                 },
             };
@@ -2643,12 +2605,10 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             var fakeRoutesResponse = new List<Route>
             {
-                new Route
-                {
+                new() {
                     Guid = "this-is-a-fake-guid-1",
                 },
-                new Route
-                {
+                new() {
                     Guid = "this-is-a-fake-guid-2",
                 },
             };
@@ -2675,12 +2635,10 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             var fakeRoutesResponse = new List<Route>
             {
-                new Route
-                {
+                new() {
                     Guid = "this-is-a-fake-guid-1",
                 },
-                new Route
-                {
+                new() {
                     Guid = "this-is-a-fake-guid-2",
                 },
             };
@@ -2709,12 +2667,10 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             var fakeRoutesResponse = new List<Route>
             {
-                new Route
-                {
+                new() {
                     Guid = "this-is-a-fake-guid-1",
                 },
-                new Route
-                {
+                new() {
                     Guid = "this-is-a-fake-guid-2",
                 },
             };
@@ -2741,12 +2697,10 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             var fakeRoutesResponse = new List<Route>
             {
-                new Route
-                {
+                new() {
                     Guid = "this-is-a-fake-guid-1",
                 },
-                new Route
-                {
+                new() {
                     Guid = "this-is-a-fake-guid-2",
                 },
             };
@@ -2830,8 +2784,8 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Action<string> fakeErrCallback = (string s) => { };
             Action<string> fakeErrCallback2 = (string s) => { };
 
-            yield return new object[] { _fakeApp, fakeOutCallback, fakeErrCallback };
-            yield return new object[] { FakeApp2, fakeOutCallback2, fakeErrCallback2 };
+            yield return [_fakeApp, fakeOutCallback, fakeErrCallback];
+            yield return [FakeApp2, fakeOutCallback2, fakeErrCallback2];
         }
     }
 }
