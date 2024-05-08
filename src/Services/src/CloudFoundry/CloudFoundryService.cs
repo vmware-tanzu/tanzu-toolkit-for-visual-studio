@@ -462,12 +462,21 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
                 else
                 {
-                    appsToReturn.Add(new CloudFoundryApp(app.Name, app.Guid, space, app.State.ToUpper())
+                    var cfApp = new CloudFoundryApp(app.Name, app.Guid, space, app.State.ToUpper())
                     {
-                        Stack = app.Lifecycle.Data.Stack,
-                        Buildpacks = new List<string>(app.Lifecycle.Data.Buildpacks),
-                    });
+                        Stack = app.Lifecycle.Data.Stack, Buildpacks = app.Lifecycle.Data.Buildpacks != null
+                            ? new List<string>(app.Lifecycle.Data.Buildpacks)
+                            : new List<string>()
+                    };
+
+                    // This happens with Docker containers
+                    if (cfApp.Stack == null && cfApp.Buildpacks.Count == 0)
+                    {
+                        cfApp.Stack = app.Lifecycle.Type;
                 }
+
+                    appsToReturn.Add(cfApp);
+            }
             }
 
             return new DetailedResult<List<CloudFoundryApp>>()
