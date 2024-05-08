@@ -24,10 +24,10 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         private static readonly string _fakeStdOut = "some output content";
         private static readonly string _fakeStdErr = "some error content";
         private static readonly string _fakeRealisticTokenOutput = $"bearer {_fakeAccessToken}\n";
-        private static readonly CommandResult _fakeSuccessResult = new CommandResult("junk output", "junk error", 0);
-        private static readonly CommandResult _fakeFailureResult = new CommandResult("junk output", "junk error", 1);
+        private static readonly CommandResult _fakeSuccessResult = new("junk output", "junk error", 0);
+        private static readonly CommandResult _fakeFailureResult = new("junk output", "junk error", 1);
         private static readonly string _fakeCfCliConfigFilePath = "this\\is\\a\\fake\\path";
-        private static readonly Dictionary<string, string> _defaultEnvVars = new Dictionary<string, string> { { "CF_HOME", _fakeCfCliConfigFilePath } };
+        private static readonly Dictionary<string, string> _defaultEnvVars = new() { { "CF_HOME", _fakeCfCliConfigFilePath } };
 
         private IServiceProvider _services;
 

@@ -19,15 +19,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         private CloudFoundryOrganization _expectedOrg;
         private readonly bool _expectedSkipSslValue = false;
         private readonly int _expectedRetryAmount = 1;
-        private readonly DetailedResult<List<CloudFoundrySpace>> _fakeSpacesResponse = new DetailedResult<List<CloudFoundrySpace>>
+        private readonly DetailedResult<List<CloudFoundrySpace>> _fakeSpacesResponse = new()
         {
             Succeeded = true,
-            Content = new List<CloudFoundrySpace>
-            {
+            Content =
+            [
                 _fakeSpaces[0],
                 _fakeSpaces[1],
                 _fakeSpaces[2],
-            }
+            ]
         };
 
         [TestInitialize]
@@ -36,7 +36,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             RenewMockServices();
 
             _fakeCfInstanceViewModel = new CfInstanceViewModel(_fakeCfInstance, MockTasExplorerViewModel.Object, Services, expanded: true);
-            _receivedEvents = new List<string>();
+            _receivedEvents = [];
 
             MockUiDispatcherService.Setup(mock => mock.
                 RunOnUiThreadAsync(It.IsAny<Action>()))
@@ -118,13 +118,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task UpdateAllChildren_RemovesStaleChildrenOnUiThread_WhenSpacesRequestSucceeds()
         {
             /** mock 4 initial children */
-            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
-            {
+            _sut.Children =
+            [
                 new SpaceViewModel(_fakeSpaces[0], _sut, MockTasExplorerViewModel.Object, Services),
                 new SpaceViewModel(_fakeSpaces[1], _sut, MockTasExplorerViewModel.Object, Services),
                 new SpaceViewModel(_fakeSpaces[2], _sut, MockTasExplorerViewModel.Object, Services),
                 new SpaceViewModel(_fakeSpaces[3], _sut, MockTasExplorerViewModel.Object, Services),
-            };
+            ];
 
             /** mock retrieving all initial children except for FakeSpaces[3] */
             MockCloudFoundryService.Setup(m => m
@@ -149,11 +149,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task UpdateAllChildren_AddsNewChildrenOnUiThread_WhenSpacesRequestSucceeds()
         {
             /** mock 2 initial children */
-            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
-            {
+            _sut.Children =
+            [
                 new SpaceViewModel(_fakeSpaces[0], _sut, MockTasExplorerViewModel.Object, Services),
                 new SpaceViewModel(_fakeSpaces[1], _sut, MockTasExplorerViewModel.Object, Services),
-            };
+            ];
 
             /** mock retrieving all initial children plus FakeSpaces[2] */
             MockCloudFoundryService.Setup(m => m
@@ -257,10 +257,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             _sut = new OrgViewModel(_fakeCfOrg, _fakeCfInstanceViewModel, MockTasExplorerViewModel.Object, Services, expanded: true)
             {
-                Children = new ObservableCollection<TreeViewItemViewModel>
-                {
+                Children =
+                [
                     _sut.EmptyPlaceholder,
-                },
+                ],
             };
 
             var fakeFailedResult = new DetailedResult<List<CloudFoundrySpace>>(succeeded: false, content: null, explanation: "junk", cmdDetails: _fakeFailureCmdResult)
@@ -292,11 +292,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             fakeNoSpacesResponse.Content.Clear();
 
             /** mock 2 initial children */
-            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
-            {
+            _sut.Children =
+            [
                 new SpaceViewModel(_fakeSpaces[0], _sut, MockTasExplorerViewModel.Object, Services),
                 new SpaceViewModel(_fakeSpaces[1], _sut, MockTasExplorerViewModel.Object, Services),
-            };
+            ];
 
             MockCloudFoundryService.Setup(m => m
               .GetSpacesForOrgAsync(_expectedOrg, _expectedSkipSslValue, _expectedRetryAmount))

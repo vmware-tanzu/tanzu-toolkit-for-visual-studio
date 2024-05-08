@@ -10,22 +10,21 @@ namespace Tanzu.Toolkit.VisualStudio.Services
 {
     public class DialogService : IDialogService
     {
-        private readonly IServiceProvider _serviceProvider;
         private readonly ILogger _logger;
         private readonly IViewLocatorService _viewLocatorService;
 
         public DialogService(IServiceProvider serviceProvider)
         {
-            _serviceProvider = serviceProvider;
-            var loggingSvc = _serviceProvider.GetRequiredService<ILoggingService>();
+            var serviceProvider1 = serviceProvider;
+            var loggingSvc = serviceProvider1.GetRequiredService<ILoggingService>();
             _logger = loggingSvc.Logger;
-            _viewLocatorService = _serviceProvider.GetRequiredService<IViewLocatorService>();
+            _viewLocatorService = serviceProvider1.GetRequiredService<IViewLocatorService>();
         }
 
         public void CloseDialog(object dialogWindow, bool result)
         {
             var asWindows = dialogWindow as Window;
-            asWindows.Hide();
+            asWindows?.Hide();
         }
 
         public IDialogResult ShowModal(string dialogName, object parameter = null)
@@ -44,7 +43,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services
         {
             var dialog = _viewLocatorService.GetViewByViewModelName(dialogName, parameter) as DependencyObject;
             var dialogWindow = Window.GetWindow(dialog);
-            dialogWindow.Hide();
+            dialogWindow?.Hide();
         }
     }
 

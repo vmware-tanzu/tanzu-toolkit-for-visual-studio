@@ -58,20 +58,20 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         protected const string _fakeAppName = "fake app name";
         protected const string _fakeAppGuid = "fake-app-guid";
 
-        protected static readonly CloudFoundryInstance _fakeCfInstance = new CloudFoundryInstance(_fakeCfName, _fakeCfApiAddress, false);
-        protected static readonly CloudFoundryOrganization _fakeCfOrg = new CloudFoundryOrganization(_fakeOrgName, _fakeOrgGuid, _fakeCfInstance);
-        protected static readonly CloudFoundrySpace _fakeCfSpace = new CloudFoundrySpace(_fakeSpaceName, _fakeSpaceGuid, _fakeCfOrg);
-        protected static readonly CloudFoundryApp _fakeCfApp = new CloudFoundryApp(_fakeAppName, _fakeAppGuid, _fakeCfSpace, "junk state");
+        protected static readonly CloudFoundryInstance _fakeCfInstance = new(_fakeCfName, _fakeCfApiAddress, false);
+        protected static readonly CloudFoundryOrganization _fakeCfOrg = new(_fakeOrgName, _fakeOrgGuid, _fakeCfInstance);
+        protected static readonly CloudFoundrySpace _fakeCfSpace = new(_fakeSpaceName, _fakeSpaceGuid, _fakeCfOrg);
+        protected static readonly CloudFoundryApp _fakeCfApp = new(_fakeAppName, _fakeAppGuid, _fakeCfSpace, "junk state");
 
-        protected static readonly List<CloudFoundryOrganization> _emptyListOfOrgs = new List<CloudFoundryOrganization>();
-        protected static readonly List<CloudFoundrySpace> _emptyListOfSpaces = new List<CloudFoundrySpace>();
-        protected static readonly List<CloudFoundryApp> _emptyListOfApps = new List<CloudFoundryApp>();
+        protected static readonly List<CloudFoundryOrganization> _emptyListOfOrgs = [];
+        protected static readonly List<CloudFoundrySpace> _emptyListOfSpaces = [];
+        protected static readonly List<CloudFoundryApp> _emptyListOfApps = [];
 
-        protected static readonly CommandResult _fakeSuccessCmdResult = new CommandResult("junk output", "junk error", 0);
-        protected static readonly CommandResult _fakeFailureCmdResult = new CommandResult("junk output", "junk error", 1);
+        protected static readonly CommandResult _fakeSuccessCmdResult = new("junk output", "junk error", 0);
+        protected static readonly CommandResult _fakeFailureCmdResult = new("junk output", "junk error", 1);
 
-        protected static readonly DetailedResult _fakeSuccessDetailedResult = new DetailedResult(true, null, _fakeSuccessCmdResult);
-        protected static readonly DetailedResult _fakeFailureDetailedResult = new DetailedResult(false, "junk error", _fakeFailureCmdResult);
+        protected static readonly DetailedResult _fakeSuccessDetailedResult = new(true, null, _fakeSuccessCmdResult);
+        protected static readonly DetailedResult _fakeFailureDetailedResult = new(false, "junk error", _fakeFailureCmdResult);
 
         protected static readonly string _fakeProjectPath = "this\\is\\a\\fake\\path\\to\\a\\project\\directory";
         protected static readonly string _fakeManifestPath = "this\\is\\a\\fake\\path\\to\\a\\manifest";
@@ -82,35 +82,35 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         internal string[] _sampleInvalidManifestLines = File.ReadAllLines("TestFakes//fake-invalid-manifest.yml");
         internal string[] _multiBuildpackManifestLines = File.ReadAllLines("TestFakes//fake-multi-buildpack-manifest.yml");
 
-        protected static readonly List<CloudFoundryOrganization> _fakeOrgs = new List<CloudFoundryOrganization>
-        {
+        protected static readonly List<CloudFoundryOrganization> _fakeOrgs =
+        [
             new CloudFoundryOrganization("fakeOrg1", "fake-org-guid-1", _fakeCfInstance),
             new CloudFoundryOrganization("fakeOrg2", "fake-org-guid-2", _fakeCfInstance),
             new CloudFoundryOrganization("fakeOrg3", "fake-org-guid-3", _fakeCfInstance),
             new CloudFoundryOrganization("fakeOrg4", "fake-org-guid-4", _fakeCfInstance),
             new CloudFoundryOrganization("fakeOrg5", "fake-org-guid-5", _fakeCfInstance),
-        };
+        ];
 
-        protected static readonly List<CloudFoundrySpace> _fakeSpaces = new List<CloudFoundrySpace>
-        {
+        protected static readonly List<CloudFoundrySpace> _fakeSpaces =
+        [
             new CloudFoundrySpace("fakeSpace1", "fake-space-guid-1", _fakeCfOrg),
             new CloudFoundrySpace("fakeSpace2", "fake-space-guid-2", _fakeCfOrg),
             new CloudFoundrySpace("fakeSpace3", "fake-space-guid-3", _fakeCfOrg),
             new CloudFoundrySpace("fakeSpace4", "fake-space-guid-4", _fakeCfOrg),
             new CloudFoundrySpace("fakeSpace5", "fake-space-guid-5", _fakeCfOrg),
-        };
+        ];
 
-        protected static readonly List<CloudFoundryApp> _fakeApps = new List<CloudFoundryApp>
-        {
+        protected static readonly List<CloudFoundryApp> _fakeApps =
+        [
             new CloudFoundryApp("fakeApp1", "fake-app-guid-1", _fakeCfSpace, "junk state"),
             new CloudFoundryApp("fakeApp2", "fake-app-guid-2", _fakeCfSpace, "junk state"),
             new CloudFoundryApp("fakeApp3", "fake-app-guid-3", _fakeCfSpace, "junk state"),
             new CloudFoundryApp("fakeApp4", "fake-app-guid-4", _fakeCfSpace, "junk state"),
             new CloudFoundryApp("fakeApp5", "fake-app-guid-5", _fakeCfSpace, "junk state"),
-        };
+        ];
 
-        internal static FakeOutputView _fakeOutputView = new FakeOutputView();
-        internal static FakeOutputViewModel _fakeOutputViewModel = new FakeOutputViewModel();
+        internal static FakeOutputView _fakeOutputView = new();
+        internal static FakeOutputViewModel _fakeOutputViewModel = new();
 
         internal class FakeOutputView : IView
         {
@@ -149,7 +149,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             public void AppendLine(string newContent)
             {
-                AppendLineInvocationArgs ??= new List<string>();
+                AppendLineInvocationArgs ??= [];
                 AppendLineInvocationArgs.Add(newContent);
             }
 
@@ -354,41 +354,38 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             }
         }
 
-        protected AppManifest _fakeManifestModel = new AppManifest
+        protected AppManifest _fakeManifestModel = new()
         {
             Version = 1,
-            Applications = new List<AppConfig>
-                {
-                    new AppConfig
-                    {
+            Applications =
+                [
+                    new() {
                         Name = "app1",
-                        Buildpacks = new List<string>
-                        {
+                        Buildpacks =
+                        [
                             "ruby_buildpack",
                             "java_buildpack",
                             "my_cool_buildpack",
-                        },
+                        ],
                         Env = new Dictionary<string, string>
                         {
                             {"VAR1", "value1" },
                             {"VAR2", "value2" },
                         },
-                        Routes = new List<RouteConfig>
-                        {
-                            new RouteConfig
-                            {
+                        Routes =
+                        [
+                            new() {
                                 Route = "route.example.com",
                             },
-                            new RouteConfig
-                            {
+                            new() {
                                 Route = "another-route.example.com",
                                 Protocol = "http2"
                             },
-                        },
-                        Services = new List<string> {
+                        ],
+                        Services = [
                             "my-service1",
                             "my-service2",
-                        },
+                        ],
                         Stack = "cflinuxfs3",
                         Metadata = new MetadataConfig
                         {
@@ -401,10 +398,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                 { "sensitive", "true" },
                             },
                         },
-                        Processes = new List<ProcessConfig>
-                        {
-                            new ProcessConfig
-                            {
+                        Processes =
+                        [
+                            new() {
                                 Type = "web",
                                 Command = "start-web.sh",
                                 DiskQuota = "512M",
@@ -415,8 +411,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                 Memory = "500M",
                                 Timeout = 10,
                             },
-                            new ProcessConfig
-                            {
+                            new() {
                                 Type = "worker",
                                 Command = "start-worker.sh",
                                 DiskQuota = "1G",
@@ -425,51 +420,47 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                                 Memory = "256M",
                                 Timeout = 15,
                             },
-                        },
+                        ],
                         Path = "some//fake//path",
                     },
-                    new AppConfig
-                    {
+                    new() {
                         Name = "app2",
                         Env = new Dictionary<string, string>
                         {
                             { "VAR1", "value1" },
                         },
-                        Processes = new List<ProcessConfig>
-                        {
-                            new ProcessConfig
-                            {
+                        Processes =
+                        [
+                            new() {
                                 Type = "web",
                                 Instances = 1,
                                 Memory = "256M",
                             },
-                        },
-                        Sidecars = new List<SidecarConfig>
-                        {
-                            new SidecarConfig
-                            {
+                        ],
+                        Sidecars =
+                        [
+                            new() {
                                 Name = "authenticator",
-                                ProcessTypes = new List<string>
-                                {
+                                ProcessTypes =
+                                [
                                     "web",
                                     "worker",
-                                },
+                                ],
                                 Command = "bundle exec run-authenticator",
                                 Memory = "800M",
                             },
-                            new SidecarConfig
-                            {
+                            new() {
                                 Name = "upcaser",
-                                ProcessTypes = new List<string>
-                                {
+                                ProcessTypes =
+                                [
                                     "worker",
-                                },
+                                ],
                                 Command = "./tr-server",
                                 Memory = "2G",
                             }
-                        }
+                        ]
                     }
-                }
+                ]
         };
 
         protected ViewModelTestSupport()

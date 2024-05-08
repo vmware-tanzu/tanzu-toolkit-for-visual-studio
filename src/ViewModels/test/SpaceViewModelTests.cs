@@ -20,15 +20,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         private CloudFoundrySpace _expectedSpace;
         private readonly bool _expectedSkipSslValue = false;
         private readonly int _expectedRetryAmount = 1;
-        private readonly DetailedResult<List<CloudFoundryApp>> _fakeAppsResponse = new DetailedResult<List<CloudFoundryApp>>
+        private readonly DetailedResult<List<CloudFoundryApp>> _fakeAppsResponse = new()
         {
             Succeeded = true,
-            Content = new List<CloudFoundryApp>
-            {
+            Content =
+            [
                 _fakeApps[0],
                 _fakeApps[1],
                 _fakeApps[2],
-            }
+            ]
         };
 
         [TestInitialize]
@@ -66,7 +66,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _fakeOrgViewModel = new OrgViewModel(_fakeCfOrg, _fakeCfInstanceViewModel, MockTasExplorerViewModel.Object, Services);
             _sut = new SpaceViewModel(_fakeCfSpace, _fakeOrgViewModel, MockTasExplorerViewModel.Object, Services, expanded: true);
 
-            _receivedEvents = new List<string>();
+            _receivedEvents = [];
             _sut.PropertyChanged += (sender, e) =>
             {
                 _receivedEvents.Add(e.PropertyName);
@@ -121,13 +121,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task UpdateAllChildren_RemovesStaleChildrenOnUiThread_WhenAppsRequestSucceeds()
         {
             /** mock 4 initial children */
-            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
-            {
+            _sut.Children =
+            [
                 new AppViewModel(_fakeApps[0], Services),
                 new AppViewModel(_fakeApps[1], Services),
                 new AppViewModel(_fakeApps[2], Services),
                 new AppViewModel(_fakeApps[3], Services),
-            };
+            ];
 
             /** mock retrieving all initial children except for FakeApps[3] */
             MockCloudFoundryService.Setup(m => m
@@ -152,11 +152,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task UpdateAllChildren_AddsNewChildrenOnUiThread_WhenAppsRequestSucceeds()
         {
             /** mock 2 initial children */
-            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
-            {
+            _sut.Children =
+            [
                 new AppViewModel(_fakeApps[0], Services),
                 new AppViewModel(_fakeApps[1], Services),
-            };
+            ];
 
             /** mock retrieving all initial children plus FakeApps[2] */
             MockCloudFoundryService.Setup(m => m
@@ -289,10 +289,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("UpdateAllChildren")]
         public async Task UpdateAllChildren_RemovesEmptyPlaceholder_WhenAppsRequestReturnsApps()
         {
-            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
-            {
+            _sut.Children =
+            [
                 _sut.EmptyPlaceholder,
-            };
+            ];
 
             /** mock 3 new children */
             MockCloudFoundryService.Setup(m => m
@@ -316,11 +316,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             fakeNoAppsResponse.Content.Clear();
 
             /** mock 2 initial children */
-            _sut.Children = new ObservableCollection<TreeViewItemViewModel>
-            {
+            _sut.Children =
+            [
                 new AppViewModel(_fakeApps[0], Services),
                 new AppViewModel(_fakeApps[1], Services),
-            };
+            ];
 
             MockCloudFoundryService.Setup(m => m
               .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))

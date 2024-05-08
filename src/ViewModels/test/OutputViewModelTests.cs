@@ -23,7 +23,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public void TestInit()
         {
             RenewMockServices();
-            _receivedEvents = new List<string>();
+            _receivedEvents = [];
             _fakeLogStreamProcess = new Process();
             _fakeRecentLogsResult = new DetailedResult<string>
             {

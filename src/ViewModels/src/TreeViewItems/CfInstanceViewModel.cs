@@ -72,10 +72,7 @@ namespace Tanzu.Toolkit.ViewModels
                             var freshOrgs = new ObservableCollection<CloudFoundryOrganization>(orgsResponse.Content);
                             if (freshOrgs.Count < 1)
                             {
-                                foreach (var child in originalChildren)
-                                {
-                                    removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, child));
-                                }
+                                removalTasks.AddRange(originalChildren.Select(child => ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, child)));
                                 additionTasks.Add(ThreadingService.AddItemToCollectionOnUiThreadAsync(Children, EmptyPlaceholder));
                             }
                             else
@@ -89,7 +86,7 @@ namespace Tanzu.Toolkit.ViewModels
                                     }
                                     else if (priorChild is OrgViewModel priorOrg)
                                     {
-                                        var orgStillExists = freshOrgs.Any(o => o is CloudFoundryOrganization freshOrg && freshOrg != null && freshOrg.OrgId == priorOrg.Org.OrgId);
+                                        var orgStillExists = freshOrgs.Any(o => o != null && o.OrgId == priorOrg.Org.OrgId);
                                         if (!orgStillExists)
                                         {
                                             removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, priorOrg));
@@ -101,11 +98,12 @@ namespace Tanzu.Toolkit.ViewModels
                                 foreach (var freshOrg in freshOrgs)
                                 {
                                     var orgAlreadyExists = originalChildren.Any(child => child is OrgViewModel extantOrg && extantOrg.Org.OrgId == freshOrg.OrgId);
-                                    if (!orgAlreadyExists)
+                                    if (orgAlreadyExists)
                                     {
-                                        var newOrg = new OrgViewModel(freshOrg, this, ParentTasExplorer, Services, expanded: false);
-                                        additionTasks.Add(ThreadingService.AddItemToCollectionOnUiThreadAsync(Children, newOrg));
+                                        continue;
                                     }
+                                    var newOrg = new OrgViewModel(freshOrg, this, ParentTasExplorer, Services, expanded: false);
+                                    additionTasks.Add(ThreadingService.AddItemToCollectionOnUiThreadAsync(Children, newOrg));
                                 }
                             }
 

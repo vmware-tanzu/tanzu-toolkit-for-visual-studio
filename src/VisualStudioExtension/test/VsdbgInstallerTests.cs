@@ -1,13 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Serilog;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CommandProcess;
-using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.VisualStudio.Services;
 
 namespace Tanzu.Toolkit.VisualStudioExtension.Tests
@@ -20,14 +17,6 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
         private Mock<ICfCliService> _mockCfCliService;
         private static readonly CloudFoundryOrganization _fakeOrg = new CloudFoundryOrganization("fake org", "fake org guid", null);
         private static readonly CloudFoundrySpace _fakeSpace = new CloudFoundrySpace("fake space", "fake space guid", _fakeOrg);
-        private static readonly CloudFoundryApp _fakeLinuxApp = new CloudFoundryApp("fake app", "fake app guid", _fakeSpace, null)
-        {
-            Stack = "linux",
-        };
-        private static readonly CloudFoundryApp _fakeWindowsApp = new CloudFoundryApp("fake app", "fake app guid", _fakeSpace, null)
-        {
-            Stack = "windows",
-        };
 
         [TestInitialize]
         public void TestInit()

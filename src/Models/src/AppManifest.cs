@@ -36,12 +36,7 @@ namespace Tanzu.Toolkit.Models
             get
             {
                 var manifestApp = Applications.FirstOrDefault();
-                if (manifestApp == null)
-                {
-                    throw new ArgumentException("No app specification detected in manifest");
-                }
-
-                return manifestApp;
+                return manifestApp ?? throw new ArgumentException("No app specification detected in manifest");
             }
         }
 
