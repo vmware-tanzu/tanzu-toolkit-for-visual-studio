@@ -1,4 +1,5 @@
-﻿using YamlDotNet.Serialization;
+﻿using System;
+using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
 namespace Tanzu.Toolkit.Services
@@ -16,6 +17,11 @@ namespace Tanzu.Toolkit.Services
                 "process-types" => "process_types",
                 _ => hyphenatedString,
             };
+        }
+
+        public string Reverse(string value)
+        {
+            throw new NotImplementedException();
         }
 
         public static readonly INamingConvention _instance = new CfAppManifestNamingConvention();
