@@ -14,7 +14,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public void TestInit()
         {
             RenewMockServices();
-            _receivedEvents = new List<string>();
+            _receivedEvents = [];
         }
 
         [TestMethod]

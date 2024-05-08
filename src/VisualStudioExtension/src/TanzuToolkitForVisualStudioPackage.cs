@@ -79,11 +79,11 @@ namespace Tanzu.Toolkit.VisualStudio
 
             var commandInitializations = new List<Task>
             {
-                Task.Run(() => TanzuTasExplorerCommand.InitializeAsync(this)),
-                Task.Run(() => PushToCloudFoundryCommand.InitializeAsync(this, _serviceProvider)),
-                Task.Run(() => OpenLogsCommand.InitializeAsync(this, _serviceProvider)),
-                Task.Run(() => RequestFeedbackCommand.InitializeAsync(this)),
-                Task.Run(() => RemoteDebugCommand.InitializeAsync(this, _serviceProvider)),
+                Task.Run(() => TanzuTasExplorerCommand.InitializeAsync(this), cancellationToken),
+                Task.Run(() => PushToCloudFoundryCommand.InitializeAsync(this, _serviceProvider), cancellationToken),
+                Task.Run(() => OpenLogsCommand.InitializeAsync(this, _serviceProvider), cancellationToken),
+                Task.Run(() => RequestFeedbackCommand.InitializeAsync(this), cancellationToken),
+                Task.Run(() => RemoteDebugCommand.InitializeAsync(this, _serviceProvider), cancellationToken),
             };
 
             await Task.WhenAll(commandInitializations);
@@ -101,12 +101,7 @@ namespace Tanzu.Toolkit.VisualStudio
                 }
 
                 var result = _serviceProvider.GetService(serviceType);
-                if (result != null)
-                {
-                    return result;
-                }
-
-                return base.GetService(serviceType);
+                return result ?? base.GetService(serviceType);
             }
             catch (Exception)
             {

@@ -202,7 +202,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
             catch (InvalidRefreshTokenException)
             {
-                var msg = "Unable to retrieve orgs for '{CfName}' because the connection has expired. Please log back in to re-authenticate.";
+                const string msg = "Unable to retrieve orgs for '{CfName}' because the connection has expired. Please log back in to re-authenticate.";
                 _logger.Information(msg, cf.InstanceName);
 
                 return new DetailedResult<List<CloudFoundryOrganization>>
@@ -301,7 +301,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
             catch (InvalidRefreshTokenException)
             {
-                var msg = "Unable to retrieve spaces for '{OrgName}' because the connection to '{CfName}' has expired. Please log back in to re-authenticate.";
+                const string msg = "Unable to retrieve spaces for '{OrgName}' because the connection to '{CfName}' has expired. Please log back in to re-authenticate.";
                 _logger.Information(msg, org.OrgName, org.ParentCf.InstanceName);
 
                 return new DetailedResult<List<CloudFoundrySpace>>
@@ -400,7 +400,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
             catch (InvalidRefreshTokenException)
             {
-                var msg = "Unable to retrieve apps for '{SpaceName}' because the connection to '{CfName}' has expired. Please log back in to re-authenticate.";
+                const string msg = "Unable to retrieve apps for '{SpaceName}' because the connection to '{CfName}' has expired. Please log back in to re-authenticate.";
                 _logger.Information(msg, space.SpaceName, space.ParentOrg.ParentCf.InstanceName);
 
                 return new DetailedResult<List<CloudFoundryApp>>
@@ -473,10 +473,10 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                     if (cfApp.Stack == null && cfApp.Buildpacks.Count == 0)
                     {
                         cfApp.Stack = app.Lifecycle.Type;
-                }
+                    }
 
                     appsToReturn.Add(cfApp);
-            }
+                }
             }
 
             return new DetailedResult<List<CloudFoundryApp>>()
@@ -495,7 +495,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
             catch (InvalidRefreshTokenException)
             {
-                var msg = "Unable to retrieve apps because the connection has expired. Please log back in to re-authenticate.";
+                const string msg = "Unable to retrieve apps because the connection has expired. Please log back in to re-authenticate.";
                 _logger.Information(msg);
 
                 return new DetailedResult<List<CloudFoundryApp>>
@@ -578,7 +578,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
             catch (InvalidRefreshTokenException)
             {
-                var msg = "Unable to retrieve buildpacks because the connection has expired. Please log back in to re-authenticate.";
+                const string msg = "Unable to retrieve buildpacks because the connection has expired. Please log back in to re-authenticate.";
                 _logger.Information(msg);
 
                 return new DetailedResult<List<CfBuildpack>>
@@ -661,7 +661,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
             catch (InvalidRefreshTokenException)
             {
-                var msg = "Unable to retrieve services because the connection has expired. Please log back in to re-authenticate.";
+                const string msg = "Unable to retrieve services because the connection has expired. Please log back in to re-authenticate.";
                 _logger.Information(msg);
 
                 return new DetailedResult<List<CfService>>
@@ -757,7 +757,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
             catch (InvalidRefreshTokenException)
             {
-                var msg = "Unable to stop app '{AppName}' because the connection to '{CfName}' has expired. Please log back in to re-authenticate.";
+                const string msg = "Unable to stop app '{AppName}' because the connection to '{CfName}' has expired. Please log back in to re-authenticate.";
                 _logger.Information(msg, app.AppName, app.ParentSpace.ParentOrg.ParentCf.InstanceName);
 
                 return new DetailedResult
@@ -838,6 +838,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         /// </summary>
         /// <param name="app"></param>
         /// <param name="skipSsl"></param>
+        /// <param name="retryAmount"></param>
         public async Task<DetailedResult> StartAppAsync(CloudFoundryApp app, bool skipSsl = false, int retryAmount = 1)
         {
             var apiAddress = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
@@ -849,7 +850,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
             catch (InvalidRefreshTokenException)
             {
-                var msg = "Unable to start app '{AppName}' because the connection to '{CfName}' has expired. Please log back in to re-authenticate.";
+                const string msg = "Unable to start app '{AppName}' because the connection to '{CfName}' has expired. Please log back in to re-authenticate.";
                 _logger.Information(msg, app.AppName, app.ParentSpace.ParentOrg.ParentCf.InstanceName);
 
                 return new DetailedResult
@@ -944,7 +945,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
             catch (InvalidRefreshTokenException)
             {
-                var msg = "Unable to delete app '{AppName}' because the connection to '{CfName}' has expired. Please log back in to re-authenticate.";
+                const string msg = "Unable to delete app '{AppName}' because the connection to '{CfName}' has expired. Please log back in to re-authenticate.";
                 _logger.Information(msg, app.AppName, app.ParentSpace.ParentOrg.ParentCf.InstanceName);
 
                 return new DetailedResult
@@ -966,7 +967,6 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 };
             }
 
-            bool appWasDeleted;
             try
             {
                 if (removeRoutes)
@@ -982,7 +982,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                     }
                 }
 
-                appWasDeleted = await _cfApiClient.DeleteAppWithGuid(apiAddress, accessToken, app.AppId);
+                var appWasDeleted = await _cfApiClient.DeleteAppWithGuid(apiAddress, accessToken, app.AppId);
 
                 if (!appWasDeleted)
                 {
@@ -1034,7 +1034,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
             catch (InvalidRefreshTokenException)
             {
-                var msg = "Unable to retrieve routes for '{AppName}' because the connection to '{CfName}' has expired. Please log back in to re-authenticate.";
+                const string msg = "Unable to retrieve routes for '{AppName}' because the connection to '{CfName}' has expired. Please log back in to re-authenticate.";
                 _logger.Information(msg, app.AppName, app.ParentSpace.ParentOrg.ParentCf.InstanceName);
 
                 return new DetailedResult<List<CloudFoundryRoute>>()
@@ -1101,7 +1101,6 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 Succeeded = true,
                 Content = routes,
             };
-
         }
 
         public async Task<DetailedResult> DeleteAllRoutesForAppAsync(CloudFoundryApp app)
@@ -1115,7 +1114,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
             catch (InvalidRefreshTokenException)
             {
-                var msg = "Unable to retrieve routes for '{AppName}' because the connection to '{CfName}' has expired. Please log back in to re-authenticate.";
+                const string msg = "Unable to retrieve routes for '{AppName}' because the connection to '{CfName}' has expired. Please log back in to re-authenticate.";
                 _logger.Information(msg, app.AppName, app.ParentSpace.ParentOrg.ParentCf.InstanceName);
 
                 return new DetailedResult()
@@ -1231,7 +1230,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
             catch (InvalidRefreshTokenException)
             {
-                var msg = "Unable to deploy app '{AppName}' to '{CfName}' because the connection has expired. Please log back in to re-authenticate.";
+                const string msg = "Unable to deploy app '{AppName}' to '{CfName}' because the connection has expired. Please log back in to re-authenticate.";
                 _logger.Information(msg, appName, targetCf.InstanceName);
 
                 _fileService.DeleteFile(newManifestPath);
@@ -1267,7 +1266,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
             catch (InvalidRefreshTokenException)
             {
-                var msg = "Unable to retrieve app logs from '{AppName}' because the connection has expired. Please log back in to re-authenticate.";
+                const string msg = "Unable to retrieve app logs from '{AppName}' because the connection has expired. Please log back in to re-authenticate.";
                 _logger.Information(msg, app.AppName);
 
                 return new DetailedResult<string>
@@ -1290,7 +1289,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
             catch (InvalidRefreshTokenException)
             {
-                var msg = "Unable to stream app logs from '{AppName}' because the connection has expired. Please log back in to re-authenticate.";
+                const string msg = "Unable to stream app logs from '{AppName}' because the connection has expired. Please log back in to re-authenticate.";
                 _logger.Information(msg, app.AppName);
 
                 return new DetailedResult<Process>
@@ -1345,7 +1344,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
             catch (InvalidRefreshTokenException)
             {
-                var msg = "Unable to retrieve stacks for '{CfName}' because the connection has expired. Please log back in to re-authenticate.";
+                const string msg = "Unable to retrieve stacks for '{CfName}' because the connection has expired. Please log back in to re-authenticate.";
                 _logger.Information(msg, cf.InstanceName);
 
                 return new DetailedResult<List<string>>

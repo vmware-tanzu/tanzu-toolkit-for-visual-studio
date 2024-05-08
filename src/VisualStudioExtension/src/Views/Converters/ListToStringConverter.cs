@@ -15,12 +15,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views.Converters
                 return string.Empty;
             }
 
-            if (valueList.Count == 0)
-            {
-                return EmptyListMessage;
-            }
-
-            return string.Join(", ", valueList);
+            return valueList.Count == 0 ? EmptyListMessage : string.Join(", ", valueList);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

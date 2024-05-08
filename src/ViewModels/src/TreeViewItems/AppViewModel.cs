@@ -14,10 +14,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public CloudFoundryApp App { get; }
 
-        public bool IsStopped
-        {
-            get => App.State == "STOPPED";
-        }
+        public bool IsStopped => App.State == "STOPPED";
 
         public void RefreshAppState()
         {

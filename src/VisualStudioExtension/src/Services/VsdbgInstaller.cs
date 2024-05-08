@@ -14,20 +14,20 @@ namespace Tanzu.Toolkit.VisualStudio.Services
     {
         internal const string _vsdbgInstallScriptName = "GetVsDbg";
         private ICfCliService _cfClient;
-        private string _defaultCfAppDir = "app";
+        private const string _defaultCfAppDir = "app";
 
         public VsdbgInstaller(ICfCliService cfClient)
         {
             _cfClient = cfClient;
         }
 
-        public string VsdbgDirName { get; } = "vsdbg";
-        
+        public string VsdbgDirName => "vsdbg";
+
         public async Task<DetailedResult> InstallVsdbgForCFAppAsync(CloudFoundryApp app)
         {
             string scriptExt;
             string startCmd;
-            var vsVersion = "latest";
+            const string vsVersion = "latest";
 
             var stack = app.Stack;
             try
@@ -50,8 +50,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services
 
         private void SetArgsBasedOnStack(string stack, string vsVersion, out string scriptExt, out string startCmd)
         {
-            var linuxRuntimeId = "linux-x64";
-            var windowsRuntimeId = "win7-x64";
+            const string linuxRuntimeId = "linux-x64";
+            const string windowsRuntimeId = "win7-x64";
             if (stack != null && stack.Contains("windows"))
             {
                 scriptExt = "ps1";

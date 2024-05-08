@@ -11,7 +11,6 @@ using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.Project;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.ViewModels;
-using Tanzu.Toolkit.VisualStudio.Services;
 using Tanzu.Toolkit.VisualStudio.Views;
 using Task = System.Threading.Tasks.Task;
 

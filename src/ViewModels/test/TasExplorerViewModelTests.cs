@@ -30,7 +30,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                         action();
                     });
 
-            _receivedEvents = new List<string>();
+            _receivedEvents = [];
             _fakeTasConnection = new FakeCfInstanceViewModel(_fakeCfInstance, Services);
 
             _sut = new TasExplorerViewModel(Services)
@@ -407,7 +407,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             var ovm = new FakeOrgViewModel(_fakeCfOrg, Services);
 
-            Assert.IsTrue(ovm is OrgViewModel);
+            Assert.IsInstanceOfType<OrgViewModel>(ovm);
             Assert.AreEqual(0, ovm.NumUpdates);
 
             await _sut.RefreshOrg(ovm);
@@ -421,7 +421,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             var svm = new FakeSpaceViewModel(_fakeCfSpace, Services);
 
-            Assert.IsTrue(svm is SpaceViewModel);
+            Assert.IsInstanceOfType<SpaceViewModel>(svm);
             Assert.AreEqual(0, svm.NumUpdates);
 
             await _sut.RefreshSpace(svm);

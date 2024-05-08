@@ -13,8 +13,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
     {
         private AppDeletionConfirmationViewModel _sut;
         private List<string> _receivedEvents;
-        private readonly object _fakeConfirmationWindow = new object();
-        private new readonly CloudFoundryApp _fakeCfApp = new CloudFoundryApp("fake app name", "fake-app-guid", _fakeCfSpace, "fake invalid app state");
+        private readonly object _fakeConfirmationWindow = new();
+        private new readonly CloudFoundryApp _fakeCfApp = new("fake app name", "fake-app-guid", _fakeCfSpace, "fake invalid app state");
         private FakeCfInstanceViewModel _fakeCfInstanceViewModel;
 
         [TestInitialize]
@@ -24,7 +24,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             _fakeCfInstanceViewModel = new FakeCfInstanceViewModel(_fakeCfInstance, Services);
             _sut = new AppDeletionConfirmationViewModel(MockTasExplorerViewModel.Object, Services) { CfApp = _fakeCfApp };
-            _receivedEvents = new List<string>();
+            _receivedEvents = [];
 
             _sut.PropertyChanged += (sender, e) =>
             {

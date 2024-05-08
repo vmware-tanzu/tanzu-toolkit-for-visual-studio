@@ -14,7 +14,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
     {
         private CfApiClient _sut;
         private MockHttpMessageHandler _mockHttp;
-        private readonly Uri _defaultApiAddressConfigValue = new Uri(_fakeCfApiAddress);
+        private readonly Uri _defaultApiAddressConfigValue = new(_fakeCfApiAddress);
         private readonly bool _defaultSkipCertValidationConfigValue = false;
 
         [TestInitialize]
@@ -623,8 +623,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             {
                 Prompts = new System.Collections.Generic.Dictionary<string, string[]>
                 {
-                    { "username", new[] {"text", "Email" } },
-                    { "password", new[] {"password", "Password" } },
+                    { "username", ["text", "Email"] },
+                    { "password", ["password", "Password"] },
                 }
             };
 
