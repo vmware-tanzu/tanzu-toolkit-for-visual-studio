@@ -40,7 +40,7 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string _publishDirName = "publish";
         internal const int _waitBeforeApplyingManifest = 2000;
         private string _appName;
-        internal readonly bool _fullFrameworkDeployment = false;
+        internal readonly bool _fullFrameworkDeployment;
         private readonly IErrorDialog _errorDialogService;
         private readonly IDotnetCliService _dotnetCliService;
         internal IView _outputView;
@@ -52,14 +52,13 @@ namespace Tanzu.Toolkit.ViewModels
         private List<CloudFoundrySpace> _cfSpaces;
         private CloudFoundryOrganization _selectedOrg;
         private CloudFoundrySpace _selectedSpace;
-        private string _startCmmd;
-        private readonly string _projectName;
+        private string _startCmd;
         private string _manifestPathLabel;
         private string _manifestPath;
         private string _directoryPathLabel;
         private string _directoryPath;
         private string _targetName;
-        private bool _isLoggedIn = false;
+        private bool _isLoggedIn;
         private string _selectedStack;
         private string _serviceNotRecognizedWarningMessage;
         private ObservableCollection<string> _selectedBuildpacks;
@@ -69,10 +68,9 @@ namespace Tanzu.Toolkit.ViewModels
         private List<ServiceListItem> _serviceOptions;
         private bool _expanded;
         private string _expansionButtonText;
-        private AppManifest _appManifest;
-        private bool _buildpacksLoading = false;
-        private bool _servicesLoading = false;
-        private bool _stacksLoading = false;
+        private bool _buildpacksLoading;
+        private bool _servicesLoading;
+        private bool _stacksLoading;
         private bool _publishBeforePushing;
         private bool _configureForRemoteDebugging;
         private readonly string _targetFrameworkMoniker;
@@ -134,13 +132,12 @@ namespace Tanzu.Toolkit.ViewModels
             }
 
             AppName = _projectService.ProjectName;
-            _projectName = _projectService.ProjectName;
             Expanded = false;
 
             // delay calling SetManifestIfDefaultExists to give background update tasks time to complete
             // -> should avoid false-positive "Unrecognized service" complaints
             OnRendered = () => Task.Delay(_waitBeforeApplyingManifest).ContinueWith(_ => SetManifestIfDefaultExists());
-
+            
             OnClose = () =>
             {
                 DialogService.CloseDialogByName(nameof(DeploymentDialogViewModel));
@@ -166,17 +163,17 @@ namespace Tanzu.Toolkit.ViewModels
 
         public string StartCommand
         {
-            get => _startCmmd;
+            get => _startCmd;
 
             set
             {
-                _startCmmd = value;
+                _startCmd = value;
                 RaisePropertyChangedEvent("StartCommand");
                 ManifestModel.Applications[0].Command = value;
             }
         }
 
-        public string PathToProjectRootDir { get; private set; }
+        public string PathToProjectRootDir { get; }
 
         public string ManifestPath
         {
@@ -186,7 +183,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 if (value == null)
                 {
-                    _manifestPath = value;
+                    _manifestPath = null;
                     ManifestPathLabel = "<none selected>";
                 }
                 else if (FileService.FileExists(value))
@@ -373,7 +370,7 @@ namespace Tanzu.Toolkit.ViewModels
 
             set
             {
-                    _selectedSpace = value;
+                _selectedSpace = value;
 
                 RaisePropertyChangedEvent("SelectedSpace");
             }
@@ -471,11 +468,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public AppManifest ManifestModel
-        {
-            get => _appManifest;
-            set => _appManifest = value;
-        }
+        public AppManifest ManifestModel { get; set; }
 
         public bool BuildpacksLoading
         {
@@ -616,7 +609,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
-                if (_lastUpdatedCfOrgOptions > DateTime.Now.Subtract(new TimeSpan(_cfRefreshBuffer * 3)))
+                if (CfOrgOptions.Any() && _lastUpdatedCfOrgOptions > DateTime.Now.Subtract(new TimeSpan(_cfRefreshBuffer * 3)))
                 {
                     return;
                 }
@@ -670,7 +663,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
-                if (_lastUpdatedBuildpackOptions > DateTime.Now.Subtract(new TimeSpan(_cfRefreshBuffer * 3)))
+                if (BuildpackOptions.Any() && _lastUpdatedBuildpackOptions > DateTime.Now.Subtract(new TimeSpan(_cfRefreshBuffer * 3)))
                 {
                     return;
                 }
@@ -735,12 +728,12 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 if (ServiceOptions == null)
                 {
-                ServiceOptions = new List<ServiceListItem>();
-            }
+                    ServiceOptions = new List<ServiceListItem>();
+                }
             }
             else
             {
-                if (_lastUpdatedServiceOptions > DateTime.Now.Subtract(new TimeSpan(_cfRefreshBuffer)))
+                if (ServiceOptions.Any() && _lastUpdatedServiceOptions > DateTime.Now.Subtract(new TimeSpan(_cfRefreshBuffer)))
                 {
                     return;
                 }
@@ -798,7 +791,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
-                if (_lastUpdatedStacks > DateTime.Now.Subtract(new TimeSpan(_cfRefreshBuffer * 3)))
+                if (StackOptions.Any() && _lastUpdatedStacks > DateTime.Now.Subtract(new TimeSpan(_cfRefreshBuffer * 3)))
                 {
                     return;
                 }
@@ -880,11 +873,11 @@ namespace Tanzu.Toolkit.ViewModels
                 return;
             }
 
-                SelectedServices.Add(serviceName);
-                RaisePropertyChangedEvent("SelectedServices");
+            SelectedServices.Add(serviceName);
+            RaisePropertyChangedEvent("SelectedServices");
 
-                ManifestModel.Applications[0].Services = SelectedServices.ToList();
-            }
+            ManifestModel.Applications[0].Services = SelectedServices.ToList();
+        }
 
         public void RemoveFromSelectedServices(object arg)
         {
@@ -1097,43 +1090,43 @@ namespace Tanzu.Toolkit.ViewModels
                 return;
             }
 
-                var unrecognizedSvcNames = new List<string>();
+            var unrecognizedSvcNames = new List<string>();
 
-                foreach (var svName in svs)
+            foreach (var svName in svs)
+            {
+                AddToSelectedServices(svName);
+
+                // mark corresponding service option as selected
+                var existingSvOption = ServiceOptions.FirstOrDefault(b => b.Name == svName);
+                if (existingSvOption != null)
                 {
-                    AddToSelectedServices(svName);
-
-                    // mark corresponding service option as selected
-                    var existingSvOption = ServiceOptions.FirstOrDefault(b => b.Name == svName);
-                    if (existingSvOption != null)
-                    {
-                        existingSvOption.IsSelected = true;
-                    }
-
-                    var svcPresentInOptions = ServiceOptions.Exists(s => s.Name == svName);
-                    if (!svcPresentInOptions)
-                    {
-                        ApplyUnrecognizedServiceWarning(svName);
-                        unrecognizedSvcNames.Add(svName);
-                    }
+                    existingSvOption.IsSelected = true;
                 }
-                if (unrecognizedSvcNames.Count > 0)
+
+                var svcPresentInOptions = ServiceOptions.Exists(s => s.Name == svName);
+                if (!svcPresentInOptions)
                 {
-                var svcStr = unrecognizedSvcNames.Aggregate("", (current, svcName) => current + $"{Environment.NewLine}    - {svcName}");
-                    ErrorService.DisplayWarningDialog(
-                        "Unrecognized service provided",
-                        "Manifest indicated that the following should be used, but no such service detected:" +
-                        Environment.NewLine + svcStr + Environment.NewLine + Environment.NewLine +
-                        "Deployment may not succeed.");
+                    ApplyUnrecognizedServiceWarning(svName);
+                    unrecognizedSvcNames.Add(svName);
                 }
             }
+            if (unrecognizedSvcNames.Count > 0)
+            {
+                var svcStr = unrecognizedSvcNames.Aggregate("", (current, svcName) => current + $"{Environment.NewLine}    - {svcName}");
+                ErrorService.DisplayWarningDialog(
+                    "Unrecognized service provided",
+                    "Manifest indicated that the following should be used, but no such service detected:" +
+                    Environment.NewLine + svcStr + Environment.NewLine + Environment.NewLine +
+                    "Deployment may not succeed.");
+            }
+        }
 
         private void ApplyUnrecognizedServiceWarning(string svName)
         {
             ServiceNotRecognizedWarningMessage = string.IsNullOrWhiteSpace(ServiceNotRecognizedWarningMessage) 
                 ? $"'{svName}' not recognized"
                 : "Multiple selected services not recognized";
-            }
+        }
 
         private void RemoveWarningIfAllSelectedServicesExist()
         {
@@ -1145,9 +1138,9 @@ namespace Tanzu.Toolkit.ViewModels
 
         private void SetStartCommandFromManifest(AppManifest appManifest)
         {
-            var startCmmd = appManifest.Applications[0].Command;
+            var startCmd = appManifest.Applications[0].Command;
 
-            StartCommand = string.IsNullOrWhiteSpace(startCmmd) ? null : startCmmd;
+            StartCommand = string.IsNullOrWhiteSpace(startCmd) ? null : startCmd;
         }
 
         private void SetPathFromManifest(AppManifest appManifest)
@@ -1165,20 +1158,12 @@ namespace Tanzu.Toolkit.ViewModels
 
     public class BuildpackListItem : INotifyPropertyChanged
     {
-        private string _name;
         private bool _isSelected;
         private bool _compatibleWithStack;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public string Name
-        {
-            get => _name;
-            set
-            {
-                _name = value;
-            }
-        }
+        public string Name { get; set; }
 
         public bool IsSelected
         {
@@ -1217,19 +1202,11 @@ namespace Tanzu.Toolkit.ViewModels
 
     public class ServiceListItem : INotifyPropertyChanged
     {
-        private string _name;
         private bool _isSelected;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public string Name
-        {
-            get => _name;
-            set
-            {
-                _name = value;
-            }
-        }
+        public string Name { get; set; }
 
         public bool IsSelected
         {

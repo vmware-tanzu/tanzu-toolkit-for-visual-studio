@@ -21,7 +21,11 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         public ICommand DecrementPageCommand { get; }
         public ICommand LogInWithPasscodeCommand { get; }
 
-        public Brush HyperlinkBrush { get { return (Brush)GetValue(_hyperlinkBrushProperty); } set { SetValue(_hyperlinkBrushProperty, value); } }
+        public Brush HyperlinkBrush
+        {
+            get => (Brush)GetValue(_hyperlinkBrushProperty);
+            set => SetValue(_hyperlinkBrushProperty, value);
+        }
 
         public static readonly DependencyProperty _hyperlinkBrushProperty = DependencyProperty.Register("HyperlinkBrush", typeof(Brush), typeof(LoginView), new PropertyMetadata(default(Brush)));
 
