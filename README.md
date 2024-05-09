@@ -2,7 +2,7 @@
 
 [![Build Status](https://dev.azure.com/TanzuDevX/DevX/_apis/build/status/Build%2C%20Test%20%26%20Package%20VSIX?branchName=main)](https://dev.azure.com/TanzuDevX/DevX/_build/latest?definitionId=3&branchName=main)
 
-Tanzu Toolkit for Visual Studio is an extension for Visual Studio (2022 & 2019) that allows users of Tanzu Application Service ("TAS") to manage apps directly from within the IDE. Users of this extension are able to:
+Tanzu Toolkit for Visual Studio is an extension for Visual Studio 2022 that allows users of Tanzu Application Service ("TAS") to manage apps directly from within the IDE. Users of this extension are able to:
 
 - Manage TAS environments with the [Tanzu Application Service Explorer](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/wiki/Tanzu-Application-Service-Explorer)
   - View orgs, spaces, and apps
@@ -13,7 +13,7 @@ Tanzu Toolkit for Visual Studio is an extension for Visual Studio (2022 & 2019) 
 - [Remotely debug](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/wiki/Remote-Debugging-TAS-Apps) apps running on TAS within Visual Studio
 
 ## Install
-To install this extension, you will need Visual Studio version 2022 or 2019. This extension can be downloaded within the IDE by searching "Tanzu" in the "Manage Extensions" window.
+To install this extension, you will need Visual Studio version 2022. This extension can be downloaded within the IDE by searching "Tanzu" in the "Manage Extensions" window.
 
 ![Extension manager showing Tanzu Toolkit for Visual Studio 2022](https://user-images.githubusercontent.com/22666145/169391289-f8ebe6ef-8209-47ae-86e2-5ef293b19cf2.png)
 
@@ -23,7 +23,6 @@ The `Tanzu.Toolkit.VisualStudio.vsix` extension file is included in each [releas
 
 Alternatively, latest builds can be found on vsixgallery.com, though these may contain features still under development:
   - [VS 2022](https://www.vsixgallery.com/extension/TanzuToolkitForVisualStudio2022.ff7b6f3e-0410-4ff9-a40a-a719ee9da901)
-  - [VS 2019](https://www.vsixgallery.com/extension/TanzuToolkitForVisualStudio2019.ff7b6f3e-0410-4ff9-a40a-a719ee9da901)
 
 ## Uninstall
 This extension can be uninstalled from Visual Studio using  "Manage Extensions" window.
@@ -33,8 +32,6 @@ This extension can be uninstalled from Visual Studio using  "Manage Extensions" 
 
 ## More Info
 Check out our [Wiki](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/wiki)! It goes into more detail on several features.
-
-Our team uses [this board in ZenHub](https://app.zenhub.com/workspaces/net-dev-x---visual-studio-extensions-604161e65a9f390012665e4d/board?repos=327998348) to track progress.
 
 ## Demo videos
 
