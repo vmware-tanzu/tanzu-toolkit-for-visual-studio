@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
@@ -309,6 +310,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             _sut = new DeploymentDialogViewModel(Services);
             _sut.OnRendered(); // perform steps taken after rendering (i.e. setting values from manifest)
+
+            Thread.Sleep(DeploymentDialogViewModel._waitBeforeApplyingManifest + 100);
 
             Assert.IsNotNull(_sut.ManifestModel.Applications[0].Path); // ensure path value specified
             Assert.AreEqual(expectedPathValue, _sut.ManifestModel.Applications[0].Path);

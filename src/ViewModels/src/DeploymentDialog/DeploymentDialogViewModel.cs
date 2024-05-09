@@ -38,6 +38,7 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string _manifestParsingErrorTitle = "Unable to parse app manifest";
         internal const string _directoryNotFoundTitle = "Unable to set push directory path";
         internal const string _publishDirName = "publish";
+        internal const int _waitBeforeApplyingManifest = 2000;
         private string _appName;
         internal readonly bool _fullFrameworkDeployment = false;
         private readonly IErrorDialog _errorDialogService;
@@ -75,6 +76,7 @@ namespace Tanzu.Toolkit.ViewModels
         private bool _publishBeforePushing;
         private bool _configureForRemoteDebugging;
         private readonly string _targetFrameworkMoniker;
+        private const int _cfRefreshBuffer = 5000;
 
         public DeploymentDialogViewModel(IServiceProvider services) : base(services)
         {
@@ -135,7 +137,9 @@ namespace Tanzu.Toolkit.ViewModels
             _projectName = _projectService.ProjectName;
             Expanded = false;
 
-            OnRendered = () => SetManifestIfDefaultExists();
+            // delay calling SetManifestIfDefaultExists to give background update tasks time to complete
+            // -> should avoid false-positive "Unrecognized service" complaints
+            OnRendered = () => Task.Delay(_waitBeforeApplyingManifest).ContinueWith(_ => SetManifestIfDefaultExists());
 
             OnClose = () =>
             {
@@ -369,10 +373,7 @@ namespace Tanzu.Toolkit.ViewModels
 
             set
             {
-                if (value != _selectedSpace)
-                {
                     _selectedSpace = value;
-                }
 
                 RaisePropertyChangedEvent("SelectedSpace");
             }
@@ -478,7 +479,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool BuildpacksLoading
         {
-            get { return _buildpacksLoading; }
+            get => _buildpacksLoading;
 
             set
             {
@@ -489,7 +490,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool ServicesLoading
         {
-            get { return _servicesLoading; }
+            get => _servicesLoading;
 
             set
             {
@@ -500,7 +501,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool StacksLoading
         {
-            get { return _stacksLoading; }
+            get => _stacksLoading;
 
             set
             {
@@ -605,6 +606,8 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
+        private DateTime _lastUpdatedCfOrgOptions = DateTime.Now;
+
         public async Task UpdateCfOrgOptions()
         {
             if (_tasExplorerViewModel.TasConnection == null)
@@ -613,10 +616,18 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
-                var orgsResponse = await _tasExplorerViewModel.TasConnection.CfClient.GetOrgsForCfInstanceAsync(_tasExplorerViewModel.TasConnection.CloudFoundryInstance);
+                if (_lastUpdatedCfOrgOptions > DateTime.Now.Subtract(new TimeSpan(_cfRefreshBuffer * 3)))
+                {
+                    return;
+                }
+
+                var orgsResponse =
+                    await _tasExplorerViewModel.TasConnection.CfClient.GetOrgsForCfInstanceAsync(
+                        _tasExplorerViewModel.TasConnection.CloudFoundryInstance);
                 if (orgsResponse.Succeeded)
                 {
                     CfOrgOptions = orgsResponse.Content;
+                    _lastUpdatedCfOrgOptions = DateTime.Now;
                 }
                 else
                 {
@@ -634,7 +645,8 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
-                var spacesResponse = await _tasExplorerViewModel.TasConnection.CfClient.GetSpacesForOrgAsync(SelectedOrg);
+                var spacesResponse =
+                    await _tasExplorerViewModel.TasConnection.CfClient.GetSpacesForOrgAsync(SelectedOrg);
 
                 if (spacesResponse.Succeeded)
                 {
@@ -648,6 +660,8 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
+        private DateTime _lastUpdatedBuildpackOptions = DateTime.Now;
+
         public async Task UpdateBuildpackOptions()
         {
             if (_tasExplorerViewModel.TasConnection == null)
@@ -656,22 +670,27 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
-                BuildpacksLoading = true;
-                var buildpacksRespsonse = await _tasExplorerViewModel.TasConnection.CfClient.GetBuildpacksAsync(_tasExplorerViewModel.TasConnection.CloudFoundryInstance.ApiAddress);
-
-                if (buildpacksRespsonse.Succeeded)
+                if (_lastUpdatedBuildpackOptions > DateTime.Now.Subtract(new TimeSpan(_cfRefreshBuffer * 3)))
                 {
-                    var bpOtps = new List<BuildpackListItem>();
+                    return;
+                }
 
-                    foreach (var bp in buildpacksRespsonse.Content)
+                BuildpacksLoading = true;
+                var buildpacksResponse = await _tasExplorerViewModel.TasConnection.CfClient.GetBuildpacksAsync(_tasExplorerViewModel.TasConnection.CloudFoundryInstance.ApiAddress);
+
+                if (buildpacksResponse.Succeeded)
+                {
+                    var buildpacks = new List<BuildpackListItem>();
+
+                    foreach (var bp in buildpacksResponse.Content)
                     {
-                        var nameSpecifiedInManifest = ManifestModel.Applications[0].Buildpacks.Contains(bp.Name);
+                        var nameSpecifiedInManifest = ManifestModel.Applications[0].Buildpack == bp.Name || ManifestModel.Applications[0].Buildpacks?.Contains(bp.Name) == true;
                         var bpCompatibleWithSelectedStack = SelectedStack == null || SelectedStack == bp.Stack;
-                        var nameAlreadyExistsInOptions = bpOtps.Any(b => b.Name == bp.Name);
+                        var nameAlreadyExistsInOptions = buildpacks.Any(b => b.Name == bp.Name);
 
                         if (nameAlreadyExistsInOptions) // don't add duplicate bp names, just add to list of viable stacks
                         {
-                            var existingBp = bpOtps.FirstOrDefault(b => b.Name == bp.Name);
+                            var existingBp = buildpacks.FirstOrDefault(b => b.Name == bp.Name);
 
                             if (!existingBp.ValidStacks.Contains(bp.Stack))
                             {
@@ -689,47 +708,58 @@ namespace Tanzu.Toolkit.ViewModels
 
                             newBp.EvalutateStackCompatibility(SelectedStack);
 
-                            bpOtps.Add(newBp);
+                            buildpacks.Add(newBp);
                         }
                     }
 
-                    BuildpackOptions = bpOtps;
+                    BuildpackOptions = buildpacks;
                     BuildpacksLoading = false;
+                    _lastUpdatedBuildpackOptions = DateTime.Now;
                 }
                 else
                 {
                     BuildpackOptions = new List<BuildpackListItem>();
                     BuildpacksLoading = false;
 
-                    Logger.Error(_getBuildpacksFailureMsg + " {BuildpacksResponseError}", buildpacksRespsonse.Explanation);
-                    _errorDialogService.DisplayErrorDialog(_getBuildpacksFailureMsg, buildpacksRespsonse.Explanation);
+                    Logger.Error(_getBuildpacksFailureMsg + " {BuildpacksResponseError}", buildpacksResponse.Explanation);
+                    _errorDialogService.DisplayErrorDialog(_getBuildpacksFailureMsg, buildpacksResponse.Explanation);
                 }
             }
         }
+
+        private DateTime _lastUpdatedServiceOptions = DateTime.Now;
 
         public async Task UpdateServiceOptions()
         {
             if (_tasExplorerViewModel.TasConnection == null)
             {
+                if (ServiceOptions == null)
+                {
                 ServiceOptions = new List<ServiceListItem>();
+            }
             }
             else
             {
-                ServicesLoading = true;
-                var servicesRespsonse = await _tasExplorerViewModel.TasConnection.CfClient.GetServicesAsync(_tasExplorerViewModel.TasConnection.CloudFoundryInstance.ApiAddress);
-
-                if (servicesRespsonse.Succeeded)
+                if (_lastUpdatedServiceOptions > DateTime.Now.Subtract(new TimeSpan(_cfRefreshBuffer)))
                 {
-                    var svOtps = new List<ServiceListItem>();
+                    return;
+                }
 
-                    foreach (var sv in servicesRespsonse.Content)
+                ServicesLoading = true;
+                var servicesResponse = await _tasExplorerViewModel.TasConnection.CfClient.GetServicesAsync(_tasExplorerViewModel.TasConnection.CloudFoundryInstance.ApiAddress);
+
+                if (servicesResponse.Succeeded)
+                {
+                    var serviceListItems = new List<ServiceListItem>();
+
+                    foreach (var sv in servicesResponse.Content)
                     {
                         var nameSpecifiedInManifest = ManifestModel.Applications[0].Services.Contains(sv.Name);
-                        var nameAlreadyExistsInOptions = svOtps.Any(b => b.Name == sv.Name);
+                        var nameAlreadyExistsInOptions = serviceListItems.Any(b => b.Name == sv.Name);
 
                         if (nameAlreadyExistsInOptions) // don't add duplicate bp names, just add to list of viable stacks
                         {
-                            var existingSv = svOtps.FirstOrDefault(b => b.Name == sv.Name);
+                            _ = serviceListItems.FirstOrDefault(b => b.Name == sv.Name);
                         }
                         else
                         {
@@ -739,23 +769,26 @@ namespace Tanzu.Toolkit.ViewModels
                                 IsSelected = nameSpecifiedInManifest,
                             };
 
-                            svOtps.Add(newSv);
+                            serviceListItems.Add(newSv);
                         }
                     }
 
-                    ServiceOptions = svOtps;
+                    ServiceOptions = serviceListItems;
                     ServicesLoading = false;
+                    _lastUpdatedServiceOptions = DateTime.Now;
                 }
                 else
                 {
                     ServiceOptions = new List<ServiceListItem>();
                     ServicesLoading = false;
 
-                    Logger.Error(_getServicesFailureMsg + " {ServicesResponseError}", servicesRespsonse.Explanation);
-                    _errorDialogService.DisplayErrorDialog(_getServicesFailureMsg, servicesRespsonse.Explanation);
+                    Logger.Error(_getServicesFailureMsg + " {ServicesResponseError}", servicesResponse.Explanation);
+                    _errorDialogService.DisplayErrorDialog(_getServicesFailureMsg, servicesResponse.Explanation);
                 }
             }
         }
+
+        private DateTime _lastUpdatedStacks = DateTime.Now;
 
         public async Task UpdateStackOptions()
         {
@@ -765,21 +798,27 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
-                StacksLoading = true;
-                var stacksRespsonse = await _tasExplorerViewModel.TasConnection.CfClient.GetStackNamesAsync(_tasExplorerViewModel.TasConnection.CloudFoundryInstance);
-
-                if (stacksRespsonse.Succeeded)
+                if (_lastUpdatedStacks > DateTime.Now.Subtract(new TimeSpan(_cfRefreshBuffer * 3)))
                 {
-                    StackOptions = stacksRespsonse.Content;
+                    return;
+                }
+
+                StacksLoading = true;
+                var stacksResponse = await _tasExplorerViewModel.TasConnection.CfClient.GetStackNamesAsync(_tasExplorerViewModel.TasConnection.CloudFoundryInstance);
+
+                if (stacksResponse.Succeeded)
+                {
+                    StackOptions = stacksResponse.Content;
                     StacksLoading = false;
+                    _lastUpdatedStacks = DateTime.Now;
                 }
                 else
                 {
                     StackOptions = new List<string>();
                     StacksLoading = false;
 
-                    Logger.Error(_getStacksFailureMsg + " {StacksResponseError}", stacksRespsonse.Explanation);
-                    _errorDialogService.DisplayErrorDialog(_getStacksFailureMsg, stacksRespsonse.Explanation);
+                    Logger.Error(_getStacksFailureMsg + " {StacksResponseError}", stacksResponse.Explanation);
+                    _errorDialogService.DisplayErrorDialog(_getStacksFailureMsg, stacksResponse.Explanation);
                 }
             }
         }
@@ -836,14 +875,16 @@ namespace Tanzu.Toolkit.ViewModels
 
         public void AddToSelectedServices(object arg)
         {
-            if (arg is string serviceName && !SelectedServices.Contains(serviceName))
+            if (!(arg is string serviceName) || SelectedServices.Contains(serviceName))
             {
+                return;
+            }
+
                 SelectedServices.Add(serviceName);
                 RaisePropertyChangedEvent("SelectedServices");
 
                 ManifestModel.Applications[0].Services = SelectedServices.ToList();
             }
-        }
 
         public void RemoveFromSelectedServices(object arg)
         {
@@ -1051,8 +1092,11 @@ namespace Tanzu.Toolkit.ViewModels
 
             var svs = appConfig.Services;
 
-            if (svs != null)
+            if (svs == null)
             {
+                return;
+            }
+
                 var unrecognizedSvcNames = new List<string>();
 
                 foreach (var svName in svs)
@@ -1075,11 +1119,7 @@ namespace Tanzu.Toolkit.ViewModels
                 }
                 if (unrecognizedSvcNames.Count > 0)
                 {
-                    var svcStr = "";
-                    foreach (var svcName in unrecognizedSvcNames)
-                    {
-                        svcStr += $"{Environment.NewLine}    - {svcName}";
-                    }
+                var svcStr = unrecognizedSvcNames.Aggregate("", (current, svcName) => current + $"{Environment.NewLine}    - {svcName}");
                     ErrorService.DisplayWarningDialog(
                         "Unrecognized service provided",
                         "Manifest indicated that the following should be used, but no such service detected:" +
@@ -1087,19 +1127,13 @@ namespace Tanzu.Toolkit.ViewModels
                         "Deployment may not succeed.");
                 }
             }
-        }
 
         private void ApplyUnrecognizedServiceWarning(string svName)
         {
-            if (string.IsNullOrWhiteSpace(ServiceNotRecognizedWarningMessage))
-            {
-                ServiceNotRecognizedWarningMessage = $"'{svName}' not recognized";
+            ServiceNotRecognizedWarningMessage = string.IsNullOrWhiteSpace(ServiceNotRecognizedWarningMessage) 
+                ? $"'{svName}' not recognized"
+                : "Multiple selected services not recognized";
             }
-            else
-            {
-                ServiceNotRecognizedWarningMessage = "Multiple selected services not recognized";
-            }
-        }
 
         private void RemoveWarningIfAllSelectedServicesExist()
         {
@@ -1158,7 +1192,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool CompatibleWithStack
         {
-            get { return _compatibleWithStack; }
+            get => _compatibleWithStack;
 
             private set
             {
