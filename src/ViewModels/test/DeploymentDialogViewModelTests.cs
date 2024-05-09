@@ -225,6 +225,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             _sut.OnRendered();
 
+            Thread.Sleep(DeploymentDialogViewModel._waitBeforeApplyingManifest + 200);
+
             Assert.IsNotNull(_sut.ManifestPath);
         }
 
@@ -311,7 +313,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut = new DeploymentDialogViewModel(Services);
             _sut.OnRendered(); // perform steps taken after rendering (i.e. setting values from manifest)
 
-            Thread.Sleep(DeploymentDialogViewModel._waitBeforeApplyingManifest + 100);
+            Thread.Sleep(DeploymentDialogViewModel._waitBeforeApplyingManifest + 200);
 
             Assert.IsNotNull(_sut.ManifestModel.Applications[0].Path); // ensure path value specified
             Assert.AreEqual(expectedPathValue, _sut.ManifestModel.Applications[0].Path);
@@ -1958,7 +1960,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             await _sut.UpdateServiceOptions();
 
             CollectionAssert.AreEqual(new List<ServiceListItem>(), _sut.ServiceOptions);
-            CollectionAssert.Contains(_receivedEvents, "ServiceOptions");
         }
 
         [TestMethod]

@@ -79,7 +79,7 @@ namespace Tanzu.Toolkit.ViewModels
                         new LoginPromptViewModel(Services),
                     };
                 }
-                else if (value is CfInstanceViewModel)
+                else
                 {
                     TreeRoot = new ObservableCollection<TreeViewItemViewModel>
                     {
@@ -103,7 +103,7 @@ namespace Tanzu.Toolkit.ViewModels
         }
 
         /// <summary>
-        /// A thread-safe indicator of whether or not this <see cref="TasExplorerViewModel"/> 
+        /// A thread-safe indicator of whether this <see cref="TasExplorerViewModel"/> 
         /// is in the process of updating all <see cref="CfInstanceViewModel"/>s, 
         /// <see cref="OrgViewModel"/>s, <see cref="SpaceViewModel"/>s & <see cref="AppViewModel"/>s.
         /// </summary>
@@ -128,7 +128,7 @@ namespace Tanzu.Toolkit.ViewModels
         }
 
         /// <summary>
-        /// A flag to indicate whether or not the view should prompt re-authentication.
+        /// A flag to indicate whether the view should prompt re-authentication.
         /// </summary>
         public bool AuthenticationRequired
         {
@@ -227,8 +227,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
-                var dialog = DialogService.ShowModal(nameof(LoginViewModel));
-                if (dialog == null)
+                if (DialogService.ShowModal(nameof(LoginViewModel)) == null)
                 {
                     Logger?.Error("{ClassName}.{MethodName} encountered null DialogResult, indicating that something went wrong trying to construct the view.", nameof(TasExplorerViewModel), nameof(OpenLoginView));
                     var title = "Something went wrong while trying to display login window";
@@ -295,9 +294,9 @@ namespace Tanzu.Toolkit.ViewModels
                     var outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel), $"\"{cfApp.AppName}\" Logs") as IView;
                     var outputViewModel = outputView?.ViewModel as IOutputViewModel;
 
-                    outputView.DisplayView();
+                    outputView?.DisplayView();
 
-                    outputViewModel.AppendLine(recentLogsResult.Content);
+                    outputViewModel?.AppendLine(recentLogsResult.Content);
                 }
             }
             else
@@ -308,20 +307,22 @@ namespace Tanzu.Toolkit.ViewModels
 
         public void StreamAppLogs(object app)
         {
-            if (app is CloudFoundryApp cfApp)
+            if (!(app is CloudFoundryApp cfApp))
             {
-                try
-                {
-                    var viewTitle = $"Logs for {cfApp.AppName}";
-                    var outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel), viewTitle) as IView;
-                    var outputViewModel = outputView.ViewModel as IOutputViewModel;
-                    var _ = outputViewModel.BeginStreamingAppLogsForAppAsync(cfApp, outputView);
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error("Caught exception trying to stream app logs for '{AppName}': {AppLogsException}", cfApp.AppName, ex);
-                    ErrorService.DisplayErrorDialog("Error displaying app logs", $"Something went wrong while trying to display logs for {cfApp.AppName}, please try again.");
-                }
+                return;
+            }
+
+            try
+            {
+                var viewTitle = $"Logs for {cfApp.AppName}";
+                var outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel), viewTitle) as IView;
+                var outputViewModel = outputView?.ViewModel as IOutputViewModel;
+                _ = outputViewModel?.BeginStreamingAppLogsForAppAsync(cfApp, outputView);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Caught exception trying to stream app logs for '{AppName}': {AppLogsException}", cfApp.AppName, ex);
+                ErrorService.DisplayErrorDialog("Error displaying app logs", $"Something went wrong while trying to display logs for {cfApp.AppName}, please try again.");
             }
         }
 
@@ -357,24 +358,26 @@ namespace Tanzu.Toolkit.ViewModels
 
         public void SetConnection(CloudFoundryInstance cf)
         {
-            if (TasConnection == null)
+            if (TasConnection != null)
             {
-                TasConnection = new CfInstanceViewModel(cf, this, Services);
-
-                AuthenticationRequired = false;
-
-                IsLoggedIn = true;
-
-                if (!ThreadingService.IsPolling)
-                {
-                    ThreadingService.StartRecurrentUiTaskInBackground(RefreshAllItems, null, 10);
-                }
-
-                _dataPersistenceService.WriteStringData(_connectionNameKey, TasConnection.CloudFoundryInstance.InstanceName);
-                _dataPersistenceService.WriteStringData(_connectionAddressKey, TasConnection.CloudFoundryInstance.ApiAddress);
-                _dataPersistenceService.WriteStringData(_connectionSslPolicyKey,
-                    TasConnection.CloudFoundryInstance.SkipSslCertValidation ? _skipCertValidationValue : _validateSslCertsValue);
+                return;
             }
+
+            TasConnection = new CfInstanceViewModel(cf, this, Services);
+
+            AuthenticationRequired = false;
+
+            IsLoggedIn = true;
+
+            if (!ThreadingService.IsPolling)
+            {
+                ThreadingService.StartRecurrentUiTaskInBackground(RefreshAllItems, null, 10);
+            }
+
+            _dataPersistenceService.WriteStringData(_connectionNameKey, TasConnection.CloudFoundryInstance.InstanceName);
+            _dataPersistenceService.WriteStringData(_connectionAddressKey, TasConnection.CloudFoundryInstance.ApiAddress);
+            _dataPersistenceService.WriteStringData(_connectionSslPolicyKey,
+                TasConnection.CloudFoundryInstance.SkipSslCertValidation ? _skipCertValidationValue : _validateSslCertsValue);
         }
 
         public void LogOutTas(object arg = null)
