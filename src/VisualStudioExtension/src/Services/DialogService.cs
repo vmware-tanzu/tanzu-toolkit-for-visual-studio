@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.PlatformUI;
 using Serilog;
 using System;
 using System.Windows;
@@ -15,10 +16,9 @@ namespace Tanzu.Toolkit.VisualStudio.Services
 
         public DialogService(IServiceProvider serviceProvider)
         {
-            var serviceProvider1 = serviceProvider;
-            var loggingSvc = serviceProvider1.GetRequiredService<ILoggingService>();
+            var loggingSvc = serviceProvider.GetRequiredService<ILoggingService>();
             _logger = loggingSvc.Logger;
-            _viewLocatorService = serviceProvider1.GetRequiredService<IViewLocatorService>();
+            _viewLocatorService = serviceProvider.GetRequiredService<IViewLocatorService>();
         }
 
         public void CloseDialog(object dialogWindow, bool result)
@@ -34,9 +34,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services
                 _logger?.Error("{ClassName} failed to show dialog for {DialogName}; {MethodName} returned null", nameof(DialogService), dialogName, nameof(_viewLocatorService.GetViewByViewModelName));
                 return null;
             }
-            var dialogWindow = Window.GetWindow(dialog) as Microsoft.VisualStudio.PlatformUI.DialogWindow;
-            var result = dialogWindow.ShowModal();
-            return new DialogResult() { Result = result };
+
+            if (Window.GetWindow(dialog) is DialogWindow dialogWindow)
+            {
+                var result = dialogWindow.ShowModal();
+                return new DialogResult { Result = result };
+            }
+
+            return null;
         }
 
         public void CloseDialogByName(string dialogName, object parameter = null)

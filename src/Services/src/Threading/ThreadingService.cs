@@ -7,7 +7,6 @@ namespace Tanzu.Toolkit.Services.Threading
 {
     public class ThreadingService : IThreadingService
     {
-        private bool _isPolling = false;
         private readonly IUiDispatcherService _dispatcherService;
 
         public ThreadingService(IUiDispatcherService dispatcherService)
@@ -15,12 +14,7 @@ namespace Tanzu.Toolkit.Services.Threading
             _dispatcherService = dispatcherService;
         }
 
-        public bool IsPolling
-        {
-            get => _isPolling;
-
-            set => _isPolling = value;
-        }
+        public bool IsPolling { get; set; }
 
         public Task StartBackgroundTask(Func<Task> method)
         {
@@ -34,19 +28,21 @@ namespace Tanzu.Toolkit.Services.Threading
 
         public void StartRecurrentUiTaskInBackground(Action<object> action, object param, int intervalInSeconds)
         {
-            if (!IsPolling)
+            if (IsPolling)
             {
-                IsPolling = true;
-                var pollingTask = new Task(async () =>
-                {
-                    while (IsPolling)
-                    {
-                        await Task.Delay(TimeSpan.FromSeconds(intervalInSeconds));
-                        ExecuteInUIThread(action, param);
-                    }
-                });
-                pollingTask.Start();
+                return;
             }
+
+            IsPolling = true;
+            var pollingTask = new Task(async () =>
+            {
+                while (IsPolling)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(intervalInSeconds));
+                    ExecuteInUIThread(action, param);
+                }
+            });
+            pollingTask.Start();
         }
 
         public void ExecuteInUIThread(Action method)

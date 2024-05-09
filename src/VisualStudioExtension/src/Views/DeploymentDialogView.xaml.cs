@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
@@ -23,7 +25,11 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         public ICommand ClearServiceSelectionCommand { get; }
         public string PlaceholderText { get; set; }
 
-        public Brush HyperlinkBrush { get { return (Brush)GetValue(_hyperlinkBrushProperty); } set { SetValue(_hyperlinkBrushProperty, value); } }
+        public Brush HyperlinkBrush
+        {
+            get => (Brush)GetValue(_hyperlinkBrushProperty);
+            set => SetValue(_hyperlinkBrushProperty, value);
+        }
 
         public static readonly DependencyProperty _hyperlinkBrushProperty = DependencyProperty.Register("HyperlinkBrush", typeof(Brush), typeof(DeploymentDialogView), new PropertyMetadata(default(Brush)));
         private readonly IDeploymentDialogViewModel _viewModel;
@@ -56,7 +62,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         private void CfOrgOptions_ComboBox_DropDownClosed(object sender, System.EventArgs e)
         {
-            var _ = _viewModel.UpdateCfSpaceOptions();
+             _ = _viewModel.UpdateCfSpaceOptions();
         }
 
         private void SelectManifest(object sender, RoutedEventArgs e)
