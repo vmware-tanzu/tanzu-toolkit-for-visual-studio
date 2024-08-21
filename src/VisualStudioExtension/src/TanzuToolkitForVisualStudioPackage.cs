@@ -77,16 +77,11 @@ namespace Tanzu.Toolkit.VisualStudio
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
-            var commandInitializations = new List<Task>
-            {
-                Task.Run(() => TanzuTasExplorerCommand.InitializeAsync(this)),
-                Task.Run(() => PushToCloudFoundryCommand.InitializeAsync(this, _serviceProvider)),
-                Task.Run(() => OpenLogsCommand.InitializeAsync(this, _serviceProvider)),
-                Task.Run(() => RequestFeedbackCommand.InitializeAsync(this)),
-                Task.Run(() => RemoteDebugCommand.InitializeAsync(this, _serviceProvider)),
-            };
-
-            await Task.WhenAll(commandInitializations);
+            await TanzuTasExplorerCommand.InitializeAsync(this);
+            await PushToCloudFoundryCommand.InitializeAsync(this, _serviceProvider);
+            await OpenLogsCommand.InitializeAsync(this, _serviceProvider);
+            await RequestFeedbackCommand.InitializeAsync(this);
+            await RemoteDebugCommand.InitializeAsync(this, _serviceProvider);
         }
 
         protected override object GetService(Type serviceType)
@@ -97,7 +92,7 @@ namespace Tanzu.Toolkit.VisualStudio
                 {
                     var collection = new ServiceCollection();
                     ConfigureServices(collection);
-                    _serviceProvider = collection.BuildServiceProvider();
+                    _serviceProvider = collection.BuildServiceProvider(true);
                 }
 
                 var result = _serviceProvider.GetService(serviceType);
@@ -142,7 +137,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<ILoggingService, LoggingService>();
             services.AddSingleton<IToolWindowService, VsToolWindowService>();
             services.AddSingleton<IThreadingService, ThreadingService>();
-            services.AddSingleton<IErrorDialog>(new ErrorDialogService(this));
+            services.AddSingleton<IErrorDialog, ErrorDialogService>();
             services.AddSingleton<IUiDispatcherService, UiDispatcherService>();
             services.AddSingleton<IThemeService>(new ThemeService());
             services.AddTransient<ICommandProcessService, CommandProcessService>();
