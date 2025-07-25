@@ -72,7 +72,7 @@
         <Parent guid="guidTanzuToolkitPackageCmdSet" id="ViewMenuGroup" />
         <Icon guid="guidImages" id="bmpPic1" />
         <Strings>
-          <ButtonText>Tanzu Application Service Explorer</ButtonText>
+          <ButtonText>Tanzu Platform Explorer</ButtonText>
         </Strings>
       </Button>
 
@@ -80,7 +80,7 @@
         <Parent guid="guidTanzuToolkitPackageCmdSet" id="ProjContextMenuGroup" />
         <Icon guid="guidImages1" id="bmpPic2" />
         <Strings>
-          <ButtonText>Push to Tanzu Application Service</ButtonText>
+          <ButtonText>Push to Tanzu Platform</ButtonText>
         </Strings>
       </Button>
 
@@ -104,7 +104,7 @@
       <Button guid="guidTanzuToolkitPackageCmdSet" id="RemoteDebugId" priority="0x0100" type="Button">
         <Parent guid="guidTanzuToolkitPackageCmdSet" id="ProjContextMenuGroup" />
         <Strings>
-          <ButtonText>Remote Debug on Tanzu Application Service</ButtonText>
+          <ButtonText>Remote Debug on Tanzu Platform</ButtonText>
         </Strings>
         <Icon guid="ImageCatalogGuid" id="RemoteDebugger" />
         <CommandFlag>IconIsMoniker</CommandFlag>

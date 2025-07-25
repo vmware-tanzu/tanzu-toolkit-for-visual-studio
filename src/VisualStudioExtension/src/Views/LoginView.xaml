@@ -61,7 +61,7 @@
                 Margin="4"
                 RenderOptions.BitmapScalingMode="Fant"/>
             <TextBlock
-                Text="Log In to Tanzu Application Service"
+                Text="Log In to Tanzu Platform"
                 FontSize="24"
                 Margin="4"/>
         </StackPanel>

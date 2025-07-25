@@ -81,7 +81,7 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     if (TasExplorer.TasConnection == null)
                     {
-                        Logger.Information("Detected null TAS connection in AbstractViewModel; prompting login");
+                        Logger.Information("Detected null Tanzu Platform connection in AbstractViewModel; prompting login");
                         DialogService.ShowModal(typeof(LoginViewModel).Name);
                     }
                     _cfClient = TasExplorer.TasConnection?.CfClient;

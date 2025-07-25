@@ -11,7 +11,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services
 {
     public class DataPersistenceService : IDataPersistenceService
     {
-        private const string _tasCollectionPath = @"Tanzu Application Service";
+        private const string _tasCollectionPath = @"Tanzu Platform";
         private readonly SettingsStore _readOnlySettingsStore;
         private readonly WritableSettingsStore _writableSettingsStore;
         private readonly ILogger _logger;

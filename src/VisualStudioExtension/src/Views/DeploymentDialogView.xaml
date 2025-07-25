@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ui="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
     x:Name="DeploymentDialogViewElement"
-    Title="Push to Tanzu Application Service"
+    Title="Push to Tanzu Platform"
     Icon="Resources/tas_16px.png"
     BorderBrush="Gray"
     BorderThickness="1"
@@ -53,7 +53,7 @@
                 Grid.Row="0"
                 Grid.Column="0"
                 RenderOptions.BitmapScalingMode="Fant"/>
-            <TextBlock FontSize="24" Text="Push to Tanzu Application Service" Margin="4" Grid.Row="0" Grid.Column="1"/>
+            <TextBlock FontSize="24" Text="Push to Tanzu Platform" Margin="4" Grid.Row="0" Grid.Column="1"/>
         </StackPanel>
 
         <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="420" DockPanel.Dock="Top">
@@ -92,7 +92,7 @@
                     <Button
                         Grid.Row="0"
                         Grid.Column="1"
-                        ToolTip="Login to Tanzu Application Service"
+                        ToolTip="Login to Tanzu Platform"
                         Visibility="{Binding IsLoggedIn, Converter={StaticResource InverseVisibility}}"
                         Command ="{ Binding ElementName=DeploymentDialogViewElement, Path=OpenLoginDialogCommand }"
                         CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"

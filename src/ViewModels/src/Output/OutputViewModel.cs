@@ -134,7 +134,7 @@ namespace Tanzu.Toolkit.ViewModels
                 if (recentLogsResult.FailureType == FailureType.InvalidRefreshToken)
                 {
                     _tasExplorerViewModel.AuthenticationRequired = true;
-                    AppendLine("\n*** Unable to fetch recent logs; authentication requied. Please log in to TAS and try again. ***\n");
+                    AppendLine("\n*** Unable to fetch recent logs; authentication requied. Please log in to Tanzu Platform and try again. ***\n");
                     return;
                 }
                 else

@@ -38,12 +38,12 @@
                 Grid.Row="0"
                 Grid.Column="0"
                 RenderOptions.BitmapScalingMode="Fant"/>
-            <TextBlock FontSize="24" Text="Remote Debug on Tanzu Application Service" Margin="4" Grid.Row="0" Grid.Column="1"/>
+            <TextBlock FontSize="24" Text="Remote Debug on Tanzu Platform" Margin="4" Grid.Row="0" Grid.Column="1"/>
         </StackPanel>
 
         <Button
             DockPanel.Dock="Top"
-            ToolTip="Login to Tanzu Application Service"
+            ToolTip="Login to Tanzu Platform"
             Visibility="{Binding IsLoggedIn, Converter={StaticResource VisibilityConverterReversed}}"
             Command ="{ Binding ElementName=RemoteDebugViewElement, Path=OpenLoginViewCommand }">
 

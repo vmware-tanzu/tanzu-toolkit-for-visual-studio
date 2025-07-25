@@ -16,9 +16,9 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string _deleteAppErrorMsg = "Encountered an error while deleting app";
         internal const string _stopAppErrorMsg = "Encountered an error while stopping app";
         internal const string _startAppErrorMsg = "Encountered an error while starting app";
-        internal const string _singleLoginErrorTitle = "Unable to add more TAS connections.";
+        internal const string _singleLoginErrorTitle = "Unable to add more Tanzu Platform connections.";
         internal const string _singleLoginErrorMessage1 = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
-        internal const string _singleLoginErrorMessage2 = "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Application Service Explorer & re-connecting to a new one.";
+        internal const string _singleLoginErrorMessage2 = "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Platform Explorer & re-connecting to a new one.";
         internal const string _connectionNameKey = "connection-name";
         internal const string _connectionAddressKey = "connection-api-address";
         internal const string _connectionSslPolicyKey = "connection-should-skip-ssl-cert-validation";
