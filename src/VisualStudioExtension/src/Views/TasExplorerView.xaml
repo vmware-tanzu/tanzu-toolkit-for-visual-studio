@@ -82,7 +82,7 @@
                         Width="16px"
                         Height="16px"
                         Margin="6"
-                        ToolTip="Log in to Tanzu Application Service"/>
+                        ToolTip="Log in to Tanzu Platform"/>
                 </Button>
 
                 <Button
@@ -96,7 +96,7 @@
                         Width="16px"
                         Height="16px"
                         Margin="6"
-                        ToolTip="Log out of Tanzu Application Service"/>
+                        ToolTip="Log out of Tanzu Platform"/>
                 </Button>
 
                 <Button

@@ -30,9 +30,9 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string _getBuildpacksFailureMsg = "Unable to fetch buildpacks.";
         internal const string _getServicesFailureMsg = "Unable to fetch services.";
         internal const string _getStacksFailureMsg = "Unable to fetch stacks.";
-        internal const string _singleLoginErrorTitle = "Unable to add more TAS connections.";
+        internal const string _singleLoginErrorTitle = "Unable to add more Tanzu Platform connections.";
         internal const string _singleLoginErrorMessage1 = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
-        internal const string _singleLoginErrorMessage2 = "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Application Service Explorer & re-connecting to a new one.";
+        internal const string _singleLoginErrorMessage2 = "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Platform Explorer & re-connecting to a new one.";
         internal const string _fullFrameworkTFM = ".NETFramework";
         internal const string _manifestNotFoundTitle = "Unable to set manifest path";
         internal const string _manifestParsingErrorTitle = "Unable to parse app manifest";

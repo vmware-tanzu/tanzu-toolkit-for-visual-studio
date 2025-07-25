@@ -386,7 +386,7 @@ namespace Tanzu.Toolkit.ViewModels
             if (!string.IsNullOrWhiteSpace(ConnectionName)) return ConnectionName;
 
             var targetAddressValidUri = Uri.TryCreate(TargetApiAddress, UriKind.Absolute, out var uri);
-            return targetAddressValidUri ? uri.Host : "Tanzu Application Service";
+            return targetAddressValidUri ? uri.Host : "Tanzu Platform";
         }
 
         // Predicates //
