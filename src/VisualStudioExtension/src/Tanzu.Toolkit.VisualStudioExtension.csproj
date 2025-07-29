@@ -132,11 +132,6 @@
       <Generator>VsixManifestGenerator</Generator>
       <LastGenOutput>source.extension.cs</LastGenOutput>
     </None>
-    <Content Include="..\..\cf_cli\cf7.exe">
-      <Link>Resources\cf7.exe</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
     <Content Include="..\..\cf_cli\cf8.exe">
       <Link>Resources\cf8.exe</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

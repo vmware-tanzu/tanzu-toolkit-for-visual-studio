@@ -28,9 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\..\cf_cli\cf7.exe" Link="Resources\cf7.exe">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="..\..\cf_cli\cf8.exe" Link="Resources\cf8.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

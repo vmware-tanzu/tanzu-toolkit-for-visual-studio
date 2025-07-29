@@ -1,4 +1,4 @@
-$cf_versions = @("7.8.0", "8.14.1")
+$cf_versions = @("8.14.1")
 
 $targetPath = Join-Path -Path $PSScriptRoot -ChildPath "src/cf_cli"
 

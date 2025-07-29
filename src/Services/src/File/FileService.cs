@@ -7,22 +7,18 @@ namespace Tanzu.Toolkit.Services.File
     {
         private const string _cfCliV8ExeName = "cf8.exe";
         private const string _cfCliV8Dir = "Resources";
-        private const string _cfCliV7ExeName = "cf7.exe";
-        private const string _cfCliV7Dir = "Resources";
         private const string _defaultLogsFileName = "toolkit-diagnostics.log";
         private const string _defaultLogsDir = "Logs";
         private const string _defaultCfCliDir = ".cf";
         private const string _defaultCfCliConfigFileName = "config.json";
         private const string _cfDebugAdapterName = "CfSshWrapper.exe";
-        private int _cliVersion = 7;
+        private int _cliVersion = 8;
         private readonly string _pathToCf8Exe;
-        private readonly string _pathToCf7Exe;
 
         public FileService(string vsixBaseDirPath)
         {
             VsixPackageBaseDir = vsixBaseDirPath;
 
-            _pathToCf7Exe = Path.Combine(VsixPackageBaseDir, _cfCliV7Dir, _cfCliV7ExeName);
             _pathToCf8Exe = Path.Combine(VsixPackageBaseDir, _cfCliV8Dir, _cfCliV8ExeName);
         }
 
@@ -31,16 +27,9 @@ namespace Tanzu.Toolkit.Services.File
             get => _cliVersion;
             set
             {
-                switch (value)
+                if (value == 8)
                 {
-                    case 8:
-                        _cliVersion = 8;
-                        break;
-                    case 7:
-                        _cliVersion = 7;
-                        break;
-                    default:
-                        break;
+                    _cliVersion = 8;
                 }
             }
         }
@@ -49,22 +38,11 @@ namespace Tanzu.Toolkit.Services.File
         {
             get
             {
-                switch (_cliVersion)
+                if (_cliVersion != 8) throw new Exception($"Unable to locate cf.exe for CLI version {_cliVersion}.");
+                
+                if (System.IO.File.Exists(_pathToCf8Exe))
                 {
-                    case 8:
-                        if (System.IO.File.Exists(_pathToCf8Exe))
-                        {
-                            return _pathToCf8Exe;
-                        }
-
-                        break;
-                    case 7:
-                        if (System.IO.File.Exists(_pathToCf7Exe))
-                        {
-                            return _pathToCf7Exe;
-                        }
-
-                        break;
+                    return _pathToCf8Exe;
                 }
 
                 throw new Exception($"Unable to locate cf.exe for CLI version {_cliVersion}.");
