@@ -29,6 +29,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{72FD36CE-6F19-4FE0-9470-22CD915B1B67}"
 	ProjectSection(SolutionItems) = preProject
 		..\azure-pipelines.yml = ..\azure-pipelines.yml
+		..\download-cfcli.ps1 = ..\download-cfcli.ps1
 		..\README.md = ..\README.md
 		StyleCop.ruleset = StyleCop.ruleset
 	EndProjectSection
