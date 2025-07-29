@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MinimumVisualStudioVersion>16.0</MinimumVisualStudioVersion>
@@ -132,6 +132,16 @@
       <Generator>VsixManifestGenerator</Generator>
       <LastGenOutput>source.extension.cs</LastGenOutput>
     </None>
+    <Content Include="..\..\cf_cli\cf7.exe">
+      <Link>Resources\cf7.exe</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="..\..\cf_cli\cf8.exe">
+      <Link>Resources\cf8.exe</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <Content Include="Views\Resources\InfoTipInline.png" />
     <Resource Include="Views\Resources\ClearWindowContent.png" />
     <Resource Include="Views\Resources\ScrollBox.png" />
@@ -151,7 +161,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Community.VisualStudio.Toolkit.17">
-      <Version>17.0.522</Version>
+      <Version>17.0.533</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection">
       <Version>8.0.0</Version>
@@ -193,16 +203,9 @@
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\cf7.exe">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
     <Content Include="Resources\tanzu_deploy_16x.png" />
     <Content Include="Resources\DeployApp.png" />
     <Content Include="Resources\tanzu16.png" />
-    <Content Include="Resources\cf6.exe" CopyToOutputDirectory="PreserveNewest">
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
     <Content Include="Resources\tas_16px.png" />
     <Content Include="tanzu200.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

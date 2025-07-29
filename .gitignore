@@ -199,3 +199,5 @@ FakesAssemblies/
 
 # Custom Scripts
 custom-scripts/
+
+*.exe

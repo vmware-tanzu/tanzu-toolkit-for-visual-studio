@@ -24,26 +24,26 @@ namespace Tanzu.Toolkit.Services.Tests.File
         }
 
         [TestMethod]
-        public void CliVersion_CanBeSetTo6()
+        public void CliVersion_CanBeSetTo8()
         {
             Assert.AreEqual(7, _sut.CliVersion);
 
-            _sut.CliVersion = 6;
-            Assert.AreEqual(6, _sut.CliVersion);
+            _sut.CliVersion = 8;
+            Assert.AreEqual(8, _sut.CliVersion);
         }
 
         [TestMethod]
         public void CliVersion_CanBeSetTo7()
         {
-            _sut.CliVersion = 6;
-            Assert.AreEqual(6, _sut.CliVersion);
+            _sut.CliVersion = 8;
+            Assert.AreEqual(8, _sut.CliVersion);
 
             _sut.CliVersion = 7;
             Assert.AreEqual(7, _sut.CliVersion);
         }
 
         [TestMethod]
-        public void CliVersion_CannotBeSetToAnythingBut6Or7()
+        public void CliVersion_CannotBeSetToAnythingBut8Or7()
         {
             Assert.AreEqual(7, _sut.CliVersion);
 
@@ -53,13 +53,13 @@ namespace Tanzu.Toolkit.Services.Tests.File
         }
 
         [TestMethod]
-        public void FullPathToCfExe_ReturnsV6Path_WhenCliVersionIs6()
+        public void FullPathToCfExe_ReturnsV8Path_WhenCliVersionIs8()
         {
-            _sut.CliVersion = 6;
+            _sut.CliVersion = 8;
 
             var path = _sut.FullPathToCfExe;
 
-            Assert.IsTrue(path.Contains("cf6.exe"));
+            Assert.IsTrue(path.Contains("cf8.exe"));
         }
 
         [TestMethod]

@@ -5,8 +5,8 @@ namespace Tanzu.Toolkit.Services.File
 {
     public class FileService : IFileService
     {
-        private const string _cfCliV6ExeName = "cf6.exe";
-        private const string _cfCliV6Dir = "Resources";
+        private const string _cfCliV8ExeName = "cf8.exe";
+        private const string _cfCliV8Dir = "Resources";
         private const string _cfCliV7ExeName = "cf7.exe";
         private const string _cfCliV7Dir = "Resources";
         private const string _defaultLogsFileName = "toolkit-diagnostics.log";
@@ -15,16 +15,15 @@ namespace Tanzu.Toolkit.Services.File
         private const string _defaultCfCliConfigFileName = "config.json";
         private const string _cfDebugAdapterName = "CfSshWrapper.exe";
         private int _cliVersion = 7;
-        private readonly string _pathToCf6Exe;
+        private readonly string _pathToCf8Exe;
         private readonly string _pathToCf7Exe;
-        private readonly string _vsixBaseDirPath;
 
         public FileService(string vsixBaseDirPath)
         {
-            _vsixBaseDirPath = vsixBaseDirPath;
+            VsixPackageBaseDir = vsixBaseDirPath;
 
             _pathToCf7Exe = Path.Combine(VsixPackageBaseDir, _cfCliV7Dir, _cfCliV7ExeName);
-            _pathToCf6Exe = Path.Combine(VsixPackageBaseDir, _cfCliV6Dir, _cfCliV6ExeName);
+            _pathToCf8Exe = Path.Combine(VsixPackageBaseDir, _cfCliV8Dir, _cfCliV8ExeName);
         }
 
         public int CliVersion
@@ -34,8 +33,8 @@ namespace Tanzu.Toolkit.Services.File
             {
                 switch (value)
                 {
-                    case 6:
-                        _cliVersion = 6;
+                    case 8:
+                        _cliVersion = 8;
                         break;
                     case 7:
                         _cliVersion = 7;
@@ -52,10 +51,10 @@ namespace Tanzu.Toolkit.Services.File
             {
                 switch (_cliVersion)
                 {
-                    case 6:
-                        if (System.IO.File.Exists(_pathToCf6Exe))
+                    case 8:
+                        if (System.IO.File.Exists(_pathToCf8Exe))
                         {
-                            return _pathToCf6Exe;
+                            return _pathToCf8Exe;
                         }
 
                         break;
@@ -82,29 +81,11 @@ namespace Tanzu.Toolkit.Services.File
             return Directory.Exists(dirPath) && Directory.GetFiles(dirPath).Length > 0;
         }
 
-        public string VsixPackageBaseDir
-        {
-            get
-            {
-                return _vsixBaseDirPath;
-            }
-        }
+        public string VsixPackageBaseDir { get; }
 
-        public string PathToLogsFile
-        {
-            get
-            {
-                return Path.Combine(VsixPackageBaseDir, _defaultLogsDir, _defaultLogsFileName);
-            }
-        }
+        public string PathToLogsFile => Path.Combine(VsixPackageBaseDir, _defaultLogsDir, _defaultLogsFileName);
 
-        public string PathToCfCliConfigFile
-        {
-            get
-            {
-                return Path.Combine(VsixPackageBaseDir, _defaultCfCliDir, _defaultCfCliConfigFileName);
-            }
-        }
+        public string PathToCfCliConfigFile => Path.Combine(VsixPackageBaseDir, _defaultCfCliDir, _defaultCfCliConfigFileName);
 
         public string PathToCfDebugAdapter => Path.Combine(VsixPackageBaseDir, _cfDebugAdapterName);
 
