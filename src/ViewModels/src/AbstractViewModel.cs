@@ -4,6 +4,7 @@ using System;
 using System.ComponentModel;
 using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CloudFoundry;
+using Tanzu.Toolkit.Services.DataPersistence;
 using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.File;
@@ -36,6 +37,7 @@ namespace Tanzu.Toolkit.ViewModels
                 FileService = services.GetRequiredService<IFileService>();
                 SerializationService = services.GetRequiredService<ISerializationService>();
                 ErrorService = services.GetRequiredService<IErrorDialog>();
+                DataPersistenceService = services.GetRequiredService<IDataPersistenceService>();
             }
             catch (Exception ex)
             {
@@ -56,6 +58,8 @@ namespace Tanzu.Toolkit.ViewModels
         public IFileService FileService { get; }
 
         public IErrorDialog ErrorService { get; }
+
+        protected IDataPersistenceService DataPersistenceService { get; }
 
         public ILogger Logger { get; }
 

@@ -35,7 +35,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             RenewMockServices();
 
-            _fakeCfInstanceViewModel = new CfInstanceViewModel(_fakeCfInstance, MockTasExplorerViewModel.Object, Services, expanded: true);
+            _fakeCfInstanceViewModel = new CfInstanceViewModel(_fakeCfInstance, MockTanzuExplorerViewModel.Object, Services, expanded: true);
             _receivedEvents = [];
 
             MockUiDispatcherService.Setup(mock => mock.
@@ -60,9 +60,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     collection.Add(item);
                 });
 
-            MockTasExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(_fakeCfInstanceViewModel);
+            MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(_fakeCfInstanceViewModel);
 
-            _sut = new OrgViewModel(_fakeCfOrg, _fakeCfInstanceViewModel, MockTasExplorerViewModel.Object, Services, expanded: true);
+            _sut = new OrgViewModel(_fakeCfOrg, _fakeCfInstanceViewModel, MockTanzuExplorerViewModel.Object, Services, expanded: true);
 
             _sut.PropertyChanged += (sender, e) =>
             {
@@ -108,9 +108,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("ctor")]
-        public void Constructor_SetsParentTasExplorer()
+        public void Constructor_SetsParentTanzuExplorer()
         {
-            Assert.AreEqual(MockTasExplorerViewModel.Object, _sut.ParentTanzuExplorer);
+            Assert.AreEqual(MockTanzuExplorerViewModel.Object, _sut.ParentTanzuExplorer);
         }
 
         [TestMethod]
@@ -120,10 +120,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             /** mock 4 initial children */
             _sut.Children =
             [
-                new SpaceViewModel(_fakeSpaces[0], _sut, MockTasExplorerViewModel.Object, Services),
-                new SpaceViewModel(_fakeSpaces[1], _sut, MockTasExplorerViewModel.Object, Services),
-                new SpaceViewModel(_fakeSpaces[2], _sut, MockTasExplorerViewModel.Object, Services),
-                new SpaceViewModel(_fakeSpaces[3], _sut, MockTasExplorerViewModel.Object, Services),
+                new SpaceViewModel(_fakeSpaces[0], _sut, MockTanzuExplorerViewModel.Object, Services),
+                new SpaceViewModel(_fakeSpaces[1], _sut, MockTanzuExplorerViewModel.Object, Services),
+                new SpaceViewModel(_fakeSpaces[2], _sut, MockTanzuExplorerViewModel.Object, Services),
+                new SpaceViewModel(_fakeSpaces[3], _sut, MockTanzuExplorerViewModel.Object, Services),
             ];
 
             /** mock retrieving all initial children except for FakeSpaces[3] */
@@ -151,8 +151,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             /** mock 2 initial children */
             _sut.Children =
             [
-                new SpaceViewModel(_fakeSpaces[0], _sut, MockTasExplorerViewModel.Object, Services),
-                new SpaceViewModel(_fakeSpaces[1], _sut, MockTasExplorerViewModel.Object, Services),
+                new SpaceViewModel(_fakeSpaces[0], _sut, MockTanzuExplorerViewModel.Object, Services),
+                new SpaceViewModel(_fakeSpaces[1], _sut, MockTanzuExplorerViewModel.Object, Services),
             ];
 
             /** mock retrieving all initial children plus FakeSpaces[2] */
@@ -210,8 +210,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             /** mock 2 initial children */
             var initialChildren = new ObservableCollection<TreeViewItemViewModel>
             {
-                new SpaceViewModel(_fakeSpaces[0], _sut, MockTasExplorerViewModel.Object, Services),
-                new SpaceViewModel(_fakeSpaces[1], _sut, MockTasExplorerViewModel.Object, Services),
+                new SpaceViewModel(_fakeSpaces[0], _sut, MockTanzuExplorerViewModel.Object, Services),
+                new SpaceViewModel(_fakeSpaces[1], _sut, MockTanzuExplorerViewModel.Object, Services),
             };
             _sut.Children = new ObservableCollection<TreeViewItemViewModel>(initialChildren);
 
@@ -255,7 +255,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("UpdateAllChildren")]
         public async Task UpdateAllChildren_RemovesEmptyPlaceholder_WhenSpacesRequestReturnsSpaces()
         {
-            _sut = new OrgViewModel(_fakeCfOrg, _fakeCfInstanceViewModel, MockTasExplorerViewModel.Object, Services, expanded: true)
+            _sut = new OrgViewModel(_fakeCfOrg, _fakeCfInstanceViewModel, MockTanzuExplorerViewModel.Object, Services, expanded: true)
             {
                 Children =
                 [
@@ -294,8 +294,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             /** mock 2 initial children */
             _sut.Children =
             [
-                new SpaceViewModel(_fakeSpaces[0], _sut, MockTasExplorerViewModel.Object, Services),
-                new SpaceViewModel(_fakeSpaces[1], _sut, MockTasExplorerViewModel.Object, Services),
+                new SpaceViewModel(_fakeSpaces[0], _sut, MockTanzuExplorerViewModel.Object, Services),
+                new SpaceViewModel(_fakeSpaces[1], _sut, MockTanzuExplorerViewModel.Object, Services),
             ];
 
             MockCloudFoundryService.Setup(m => m
@@ -327,7 +327,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockCloudFoundryService.Setup(m => m
               .GetSpacesForOrgAsync(_expectedOrg, _expectedSkipSslValue, _expectedRetryAmount))
                 .ReturnsAsync(fakeInvalidTokenResponse);
-            MockTasExplorerViewModel.SetupSet(m => m.AuthenticationRequired = true).Verifiable();
+            MockTanzuExplorerViewModel.SetupSet(m => m.AuthenticationRequired = true).Verifiable();
 
             Assert.IsTrue(_sut.IsExpanded);
             Assert.IsFalse(_sut.ParentTanzuExplorer.AuthenticationRequired);
@@ -336,7 +336,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsFalse(_sut.IsLoading);
             Assert.IsFalse(_sut.IsExpanded);
-            MockTasExplorerViewModel.VerifyAll();
+            MockTanzuExplorerViewModel.VerifyAll();
         }
 
         [TestMethod]

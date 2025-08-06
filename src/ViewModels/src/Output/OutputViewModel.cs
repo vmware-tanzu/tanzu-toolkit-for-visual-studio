@@ -155,7 +155,7 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     _tanzuExplorerViewModel.AuthenticationRequired = true;
                 }
-                ErrorService.DisplayErrorDialog("Error displaying app logs", $"Something went wrong while trying to display logs for {cfApp.AppName}. Please try again -- if this issue persists, contact tas-vs-extension@vmware.com.");
+                ErrorService.DisplayErrorDialog("Error displaying app logs", $"Something went wrong while trying to display logs for {cfApp.AppName}. Please try again.");
             }
         }
     }

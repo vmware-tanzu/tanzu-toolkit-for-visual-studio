@@ -117,7 +117,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         /// access token to be obtained using the refresh token via the CF CLI oauth-token command.
         /// </para>
         /// <exception cref="InvalidRefreshTokenException">Throws <see cref="InvalidRefreshTokenException"/> if a fresh access token
-        /// is unobtainable to due an invalid refresh token (this would occur once the refresh token reaches the end of its 
+        /// is unobtainable due to an invalid refresh token (this would occur once the refresh token reaches the end of its 
         /// prescribed lifetime).</exception>
         /// </summary>
         /// <returns><see cref="string"/> accessToken on success.<para>null on failure.</para></returns>

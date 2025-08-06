@@ -25,7 +25,7 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string _skipCertValidationValue = "skip-ssl-cert-validation";
         internal const string _validateSslCertsValue = "validate-ssl-certificates";
 
-        private CfInstanceViewModel _tas;
+        private CfInstanceViewModel _cloudFoundry;
         private volatile bool _isRefreshingAll = false;
         private readonly object _refreshLock = new object();
         private bool _authenticationRequired;
@@ -66,11 +66,11 @@ namespace Tanzu.Toolkit.ViewModels
 
         public CfInstanceViewModel CloudFoundryConnection
         {
-            get => _tas;
+            get => _cloudFoundry;
 
             internal set
             {
-                _tas = value;
+                _cloudFoundry = value;
 
                 if (value == null)
                 {
@@ -231,9 +231,7 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     Logger?.Error("{ClassName}.{MethodName} encountered null DialogResult, indicating that something went wrong trying to construct the view.", nameof(TanzuExplorerViewModel), nameof(OpenLoginView));
                     var title = "Something went wrong while trying to display login window";
-                    var msg = "View construction failed" +
-                        Environment.NewLine + Environment.NewLine +
-                        "If this issue persists, please contact tas-vs-extension@vmware.com";
+                    var msg = "View construction failed";
                     ErrorService.DisplayErrorDialog(title, msg);
                 }
             }
@@ -301,7 +299,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
-                Logger.Error($"TasExplorerViewModel.GetRecentAppLogs received expected argument 'app' to be of type '{typeof(CloudFoundryApp)}', but instead received type '{app.GetType()}'.");
+                Logger.Error($"{nameof(DisplayRecentAppLogs)} received expected argument 'app' to be of type '{typeof(CloudFoundryApp)}', but instead received type '{app.GetType()}'.");
             }
         }
 

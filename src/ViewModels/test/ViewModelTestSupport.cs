@@ -38,7 +38,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         protected Mock<IThreadingService> MockThreadingService { get; set; }
         protected Mock<IUiDispatcherService> MockUiDispatcherService { get; set; }
         protected Mock<IFileService> MockFileService { get; set; }
-        protected Mock<ITanzuExplorerViewModel> MockTasExplorerViewModel { get; set; }
+        protected Mock<ITanzuExplorerViewModel> MockTanzuExplorerViewModel { get; set; }
         protected Mock<ISerializationService> MockSerializationService { get; set; }
         protected Mock<IDataPersistenceService> MockDataPersistenceService { get; set; }
         protected Mock<IDotnetCliService> MockDotnetCliService { get; set; }
@@ -480,7 +480,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockThreadingService = new Mock<IThreadingService>();
             MockUiDispatcherService = new Mock<IUiDispatcherService>();
             MockFileService = new Mock<IFileService>();
-            MockTasExplorerViewModel = new Mock<ITanzuExplorerViewModel>();
+            MockTanzuExplorerViewModel = new Mock<ITanzuExplorerViewModel>();
             MockSerializationService = new Mock<ISerializationService>();
             MockDataPersistenceService = new Mock<IDataPersistenceService>();
             MockDotnetCliService = new Mock<IDotnetCliService>();
@@ -500,7 +500,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             services.AddSingleton(MockLoggingService.Object);
             services.AddSingleton(MockThreadingService.Object);
             services.AddSingleton(MockUiDispatcherService.Object);
-            services.AddSingleton(MockTasExplorerViewModel.Object);
+            services.AddSingleton(MockTanzuExplorerViewModel.Object);
             services.AddSingleton(MockFileService.Object);
             services.AddSingleton(MockSerializationService.Object);
             services.AddSingleton(MockDataPersistenceService.Object);
@@ -511,7 +511,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             services.AddSingleton(MockCfCliService.Object);
             services.AddSingleton(MockDebugAgentProvider.Object);
 
-            Services = services.BuildServiceProvider();
+            Services = services.BuildServiceProvider(true);
         }
     }
 }

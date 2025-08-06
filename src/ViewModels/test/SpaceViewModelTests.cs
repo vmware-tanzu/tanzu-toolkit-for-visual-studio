@@ -36,7 +36,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             RenewMockServices();
 
-            _fakeCfInstanceViewModel = new CfInstanceViewModel(_fakeCfInstance, MockTasExplorerViewModel.Object, Services, expanded: true);
+            _fakeCfInstanceViewModel = new CfInstanceViewModel(_fakeCfInstance, MockTanzuExplorerViewModel.Object, Services, expanded: true);
 
             MockUiDispatcherService.Setup(mock => mock.
                 RunOnUiThreadAsync(It.IsAny<Action>()))
@@ -60,11 +60,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     collection.Add(item);
                 });
 
-            MockTasExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(_fakeCfInstanceViewModel);
+            MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(_fakeCfInstanceViewModel);
 
-            _fakeCfInstanceViewModel = new CfInstanceViewModel(_fakeCfInstance, MockTasExplorerViewModel.Object, Services, expanded: true);
-            _fakeOrgViewModel = new OrgViewModel(_fakeCfOrg, _fakeCfInstanceViewModel, MockTasExplorerViewModel.Object, Services);
-            _sut = new SpaceViewModel(_fakeCfSpace, _fakeOrgViewModel, MockTasExplorerViewModel.Object, Services, expanded: true);
+            _fakeCfInstanceViewModel = new CfInstanceViewModel(_fakeCfInstance, MockTanzuExplorerViewModel.Object, Services, expanded: true);
+            _fakeOrgViewModel = new OrgViewModel(_fakeCfOrg, _fakeCfInstanceViewModel, MockTanzuExplorerViewModel.Object, Services);
+            _sut = new SpaceViewModel(_fakeCfSpace, _fakeOrgViewModel, MockTanzuExplorerViewModel.Object, Services, expanded: true);
 
             _receivedEvents = [];
             _sut.PropertyChanged += (sender, e) =>
@@ -111,9 +111,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("ctor")]
-        public void Constructor_SetsParentTasExplorer()
+        public void Constructor_SetsParentTanzuExplorer()
         {
-            Assert.AreEqual(MockTasExplorerViewModel.Object, _sut.ParentTanzuExplorer);
+            Assert.AreEqual(MockTanzuExplorerViewModel.Object, _sut.ParentTanzuExplorer);
         }
 
         [TestMethod]
@@ -351,17 +351,17 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockCloudFoundryService.Setup(m => m
               .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
                 .ReturnsAsync(fakeInvalidTokenResponse);
-            MockTasExplorerViewModel.SetupSet(m => m.AuthenticationRequired = true)
+            MockTanzuExplorerViewModel.SetupSet(m => m.AuthenticationRequired = true)
                 .Verifiable();
 
             Assert.IsTrue(_sut.IsExpanded);
-            MockTasExplorerViewModel.VerifySet(m => m.AuthenticationRequired = true, Times.Never);
+            MockTanzuExplorerViewModel.VerifySet(m => m.AuthenticationRequired = true, Times.Never);
 
             await _sut.UpdateAllChildren();
 
             Assert.IsFalse(_sut.IsLoading);
             Assert.IsFalse(_sut.IsExpanded);
-            MockTasExplorerViewModel.VerifySet(m => m.AuthenticationRequired = true, Times.Once);
+            MockTanzuExplorerViewModel.VerifySet(m => m.AuthenticationRequired = true, Times.Once);
         }
 
         [TestMethod]

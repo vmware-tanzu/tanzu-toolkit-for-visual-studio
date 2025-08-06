@@ -953,14 +953,16 @@ namespace Tanzu.Toolkit.ViewModels
                         $"Target framework: {_targetFrameworkMoniker}\n" +
                         $"Runtime: {runtimeIdentifier}\n" +
                         $"Configuration: {publishConfiguration}\n" +
-                        $"Output directory: {_publishDirName}\n" +
-                        "\nIf this issue persists, please contact tas-vs-extension@vmware.com");
+                        $"Output directory: {_publishDirName}");
                     return;
                 }
 
                 if (ConfigureForRemoteDebugging)
                 {
-                    var vsdbgPath = _dataPersistenceService.ReadStringData("VsdbgPath");
+                    var vsdbgPathSource = runtimeIdentifier.Contains("win")
+                        ? nameof(IDEOptions.VsdbgWindowsPath)
+                        : nameof(IDEOptions.VsdbgLinuxPath);
+                    var vsdbgPath = _dataPersistenceService.ReadStringData(vsdbgPathSource);
                     if (!string.IsNullOrEmpty(vsdbgPath) && Directory.Exists(vsdbgPath))
                     {
                         _outputViewModel.AppendLine($"VsdbgPath is set to '{vsdbgPath}' in Visual Studio Options. Copying to publish output...");
@@ -968,7 +970,7 @@ namespace Tanzu.Toolkit.ViewModels
                         var destinationPath = Path.Combine(PathToProjectRootDir, _publishDirName, "vsdbg");
 
                         // It looks weird now, but the script approach installs vsdbg at "app/vsdbg/vsdbg", so try to duplicate that here 
-                        if (File.Exists(Path.Combine(vsdbgPath, "vsdbg.dll")))
+                        if (File.Exists(Path.Combine(vsdbgPath, "vsdbg.dll")) || File.Exists(Path.Combine(vsdbgPath, "vsdbg.managed.dll")))
                         {
                             destinationPath = Path.Combine(destinationPath, "vsdbg");
                         }

@@ -37,9 +37,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             };
 
             _fakeCfInstanceViewModel = new FakeCfInstanceViewModel(_fakeCfInstance, Services);
-            _fakeTanzuExplorerViewModel = MockTasExplorerViewModel.Object;
+            _fakeTanzuExplorerViewModel = MockTanzuExplorerViewModel.Object;
 
-            MockTasExplorerViewModel.Setup(m => m.CloudFoundryConnection).Returns(_fakeCfInstanceViewModel);
+            MockTanzuExplorerViewModel.Setup(m => m.CloudFoundryConnection).Returns(_fakeCfInstanceViewModel);
             MockCloudFoundryService.Setup(m => m.GetRecentLogsAsync(_fakeCfApp)).ReturnsAsync(_fakeRecentLogsResult);
             MockCloudFoundryService.Setup(m => m.StreamAppLogs(_fakeCfApp, _sut.AppendLine, _sut.AppendLine)).Returns(_fakeLogsStreamResult);
 
@@ -132,7 +132,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             await _sut.BeginStreamingAppLogsForAppAsync(_fakeCfApp, _fakeOutputView);
 
-            MockTasExplorerViewModel.VerifySet(m => m.AuthenticationRequired = true);
+            MockTanzuExplorerViewModel.VerifySet(m => m.AuthenticationRequired = true);
         }
 
         [TestMethod]
@@ -161,7 +161,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             await _sut.BeginStreamingAppLogsForAppAsync(_fakeCfApp, _fakeOutputView);
 
-            MockTasExplorerViewModel.VerifySet(m => m.AuthenticationRequired = true);
+            MockTanzuExplorerViewModel.VerifySet(m => m.AuthenticationRequired = true);
         }
     }
 }

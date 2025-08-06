@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -34,6 +34,8 @@ namespace Tanzu.Toolkit.ViewModels
             : base(services)
         {
             IsApiAddressFormatValid = false;
+
+            TargetApiAddress = DataPersistenceService.ReadStringData(nameof(IDEOptions.CloudFoundryApiEndpoint));
         }
 
         // Properties //
@@ -100,7 +102,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool IsApiAddressFormatValid
         {
-            get { return _isApiAddressFormatValid; }
+            get => _isApiAddressFormatValid;
 
             set
             {
@@ -111,7 +113,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public string ApiAddressError
         {
-            get { return _apiAddressError; }
+            get => _apiAddressError;
 
             set
             {
@@ -269,6 +271,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 ApiAddressError = null;
                 IsApiAddressFormatValid = true;
+                DataPersistenceService.WriteStringData(apiAddress, "CloudFoundryApiEndpoint");
 
                 return true;
             }
@@ -342,7 +345,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else if (TargetCf == null)
             {
-                ErrorMessage = "Unable to contact specified api address; please close this window and try again.\nIf this issue persists, please email tas-vs-extension@vmware.com";
+                ErrorMessage = "Unable to contact specified api address; please close this window and try again.";
             }
             else
             {

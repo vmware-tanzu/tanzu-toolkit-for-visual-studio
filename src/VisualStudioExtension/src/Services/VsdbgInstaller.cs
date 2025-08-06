@@ -13,7 +13,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services
     public class VsdbgInstaller : IDebugAgentProvider
     {
         internal const string _vsdbgInstallScriptName = "GetVsDbg";
-        private ICfCliService _cfClient;
+        private readonly ICfCliService _cfClient;
         private const string _defaultCfAppDir = "app";
 
         public VsdbgInstaller(ICfCliService cfClient)

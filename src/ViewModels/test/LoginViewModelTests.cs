@@ -81,7 +81,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("LogIn")]
-        public async Task LogIn_SetsConnectionOnTasExplorer_WhenLoginRequestSucceeds()
+        public async Task LogIn_SetsConnectionOnTanzuExplorer_WhenLoginRequestSucceeds()
         {
             _sut.TargetCf = _fakeCfInstance;
 
@@ -89,7 +89,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
               LoginWithCredentials(_fakeUsername, _fakeSecurePw))
                 .ReturnsAsync(new DetailedResult(true, null));
 
-            MockTasExplorerViewModel.Setup(m => m.SetConnection(_sut.TargetCf)).Verifiable();
+            MockTanzuExplorerViewModel.Setup(m => m.SetConnection(_sut.TargetCf)).Verifiable();
 
             await _sut.LogIn();
 
@@ -97,7 +97,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockDialogService.Verify(mock => mock.CloseDialog(It.IsAny<object>(), It.IsAny<bool>()), Times.Once);
             MockDialogService.Verify(ds => ds.CloseDialog(It.IsAny<object>(), true), Times.Once);
 
-            MockTasExplorerViewModel.VerifyAll();
+            MockTanzuExplorerViewModel.VerifyAll();
         }
 
         [TestMethod]
@@ -268,7 +268,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsFalse(_sut.HasErrors);
             Assert.IsNull(_sut.ErrorMessage);
 
-            MockTasExplorerViewModel.Verify(m => m.SetConnection(_sut.TargetCf), Times.Once);
+            MockTanzuExplorerViewModel.Verify(m => m.SetConnection(_sut.TargetCf), Times.Once);
             MockDialogService.Verify(m => m.CloseDialogByName(nameof(LoginViewModel), null), Times.Once);
         }
 
