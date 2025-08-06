@@ -35,6 +35,17 @@ This extension can be uninstalled from Visual Studio using  "Manage Extensions" 
 ![image](https://user-images.githubusercontent.com/22666145/168169965-14855a9f-2f8c-458e-ad24-d50f1d8f1b24.png)
 ![image](https://user-images.githubusercontent.com/22666145/168169970-969cf089-2028-433c-82d5-55a67afb7fd0.png)
 
+## Airgapped installations
+
+### Remote Debugging
+
+Remote debugging in air-gapped environments requires you to supply your own OS-specific copy of vsdbg, which the extension can bundle with the app during deployment.
+The path to vsdbg must be specified in the Tanzu Toolkit section of the Visual Studio options on your machine:
+
+![Visual Studio Options](docs/images/vsdbg_options.png)
+
+On a machine that does have internet access, you may use the script [download-vsdbg.ps1](./download-vsdbg.ps1) to acquire the current version of vsdbg for apps running on Linux and Windows.
+
 ## More Info
 
 Check out our [Wiki](https://github.com/vmware-tanzu/tanzu-toolkit-for-visual-studio/wiki)! It goes into more detail on several features.

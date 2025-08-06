@@ -201,3 +201,5 @@ FakesAssemblies/
 custom-scripts/
 
 *.exe
+
+vsdbg/
