@@ -20,7 +20,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestInitialize]
         public void TestInit()
         {
-            MockTasExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns((CfInstanceViewModel)null);
+            MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns((CfInstanceViewModel)null);
             MockThreadingService.Setup(m => m.StartBackgroundTask(It.IsAny<Func<Task>>(), It.IsAny<CancellationToken>())).Verifiable();
 
             _sut = new RemoteDebugViewModel(_fakeAppName, _fakeProjectPath, _fakeTargetFrameworkMoniker, _fakePathToLaunchFile, null, Services);
@@ -92,7 +92,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ctor")]
         public void Constructor_DoesNotPromptAppSelection_WhenNotLoggedIn()
         {
-            MockTasExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns((CfInstanceViewModel)null);
+            MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns((CfInstanceViewModel)null);
             MockCloudFoundryService.Invocations.Clear(); // reset any invocations from test init construction
 
             _sut = new RemoteDebugViewModel(_fakeAppName, _fakeProjectPath, _fakeTargetFrameworkMoniker, _fakePathToLaunchFile, null, Services);
@@ -109,7 +109,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             var fakeTasConnection = new FakeCfInstanceViewModel(_fakeCfInstance, Services);
             MockThreadingService.Invocations.Clear(); // reset invocations from test init
-            MockTasExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(fakeTasConnection);
+            MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(fakeTasConnection);
 
             _sut = new RemoteDebugViewModel(_fakeAppName, _fakeProjectPath, _fakeTargetFrameworkMoniker, _fakePathToLaunchFile, null, Services);
         }

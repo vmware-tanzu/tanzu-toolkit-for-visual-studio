@@ -10,9 +10,9 @@ using Tanzu.Toolkit.VisualStudio.Views.Commands;
 namespace Tanzu.Toolkit.VisualStudio.Views
 {
     /// <summary>
-    /// Interaction logic for TasExplorerView.xaml.
+    /// Interaction logic for TanzuExplorerView.xaml.
     /// </summary>
-    public partial class TasExplorerView : UserControl, ITasExplorerView, IView
+    public partial class TanzuExplorerView : UserControl, ITanzuExplorerView, IView
     {
         public ICommand OpenLoginFormCommand { get; }
         public ICommand StopCfAppCommand { get; }
@@ -31,15 +31,15 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         public Action DisplayView { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public static readonly DependencyProperty _listItemMouseOverBrushProperty = DependencyProperty.Register("ListItemMouseOverBrush", typeof(Brush), typeof(TasExplorerView), new PropertyMetadata(default(Brush)));
-        public static readonly DependencyProperty _wizardFooterBrushProperty = DependencyProperty.Register("WizardFooterBrush", typeof(Brush), typeof(TasExplorerView), new PropertyMetadata(default(Brush)));
+        public static readonly DependencyProperty _listItemMouseOverBrushProperty = DependencyProperty.Register("ListItemMouseOverBrush", typeof(Brush), typeof(TanzuExplorerView), new PropertyMetadata(default(Brush)));
+        public static readonly DependencyProperty _wizardFooterBrushProperty = DependencyProperty.Register("WizardFooterBrush", typeof(Brush), typeof(TanzuExplorerView), new PropertyMetadata(default(Brush)));
 
-        public TasExplorerView()
+        public TanzuExplorerView()
         {
             InitializeComponent();
         }
 
-        public TasExplorerView(ITanzuExplorerViewModel viewModel, IThemeService themeService, IToolWindowService viewService)
+        public TanzuExplorerView(ITanzuExplorerViewModel viewModel, IThemeService themeService, IToolWindowService viewService)
         {
             bool alwaysTrue(object arg) { return true; }
 

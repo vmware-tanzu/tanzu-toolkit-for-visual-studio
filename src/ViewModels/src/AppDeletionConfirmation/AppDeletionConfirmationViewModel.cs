@@ -58,11 +58,7 @@ namespace Tanzu.Toolkit.ViewModels.AppDeletionConfirmation
             if (dialog == null)
             {
                 Logger?.Error("{ClassName}.{MethodName} encountered null DialogResult, indicating that something went wrong trying to construct the view.", nameof(AppDeletionConfirmation), nameof(ShowConfirmation));
-                var title = "Something went wrong while trying to display app deletion confirmation";
-                var msg = "View construction failed"+
-                    Environment.NewLine + Environment.NewLine +
-                    "If this issue persists, please contact tas-vs-extension@vmware.com";
-                ErrorService.DisplayErrorDialog(title, msg);
+                ErrorService.DisplayErrorDialog("Something went wrong while trying to display app deletion confirmation", "View construction failed");
             }
             CfApp = null;
         }

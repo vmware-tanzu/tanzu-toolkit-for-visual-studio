@@ -140,8 +140,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                     if (tfm == null)
                     {
                         var errorTitle = "Unable to identify target framework";
-                        var errorMsg = $"Proceeding with default target framework 'netstandard2.1'.\n" +
-                            "If this is not intended and the issue persists, please reach out to tas-vs-extension@vmware.com";
+                        var errorMsg = $"Proceeding with default target framework 'netstandard2.1'.";
                         VsShellUtilities.ShowMessageBox(
                             _package,
                             errorMsg,
@@ -153,8 +152,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                     else if (tfm.StartsWith(".NETFramework,Version=v"))
                     {
                         var errorTitle = "Not supported";
-                        var errorMsg = $"Remote debugging is not currently supported for projects targeting '{tfm}'.\n" +
-                            "If this is a feature you'd like to see implemented in the future, please let the team know! tas-vs-extension@vmware.com";
+                        var errorMsg = $"Remote debugging is not currently supported for projects targeting '{tfm}'.";
                         VsShellUtilities.ShowMessageBox(
                             _package,
                             errorMsg,
@@ -199,9 +197,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 _logger?.Error("{ClassName} caught exception in {MethodName}: {RemoteDebugException}", nameof(RemoteDebugCommand), nameof(Execute), ex);
-                var msg = ex.Message + Environment.NewLine + Environment.NewLine +
-                    "If this issue persists, please contact tas-vs-extension@vmware.com";
-                _errorService.DisplayErrorDialog("Unable to initiate remote debugging", msg);
+                _errorService.DisplayErrorDialog("Unable to initiate remote debugging", ex.Message);
             }
         }
     }

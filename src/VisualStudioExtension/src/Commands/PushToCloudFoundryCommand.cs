@@ -122,8 +122,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                         {
                             _dialogService.DisplayWarningDialog(
                                 "Unable to identify target framework",
-                                "Proceeding with default target framework 'netstandard2.1'.\n" +
-                                "If this is not intended and the issue persists, please reach out to tas-vs-extension@vmware.com");
+                                "Proceeding with default target framework 'netstandard2.1'.");
                         }
 
                         if (tfm.StartsWith(".NETFramework") && !File.Exists(Path.Combine(projectDirectory, "Web.config")))
@@ -149,9 +148,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 _logger?.Error("{ClassName} caught exception in {MethodName}: {PushException}", nameof(PushToCloudFoundryCommand), nameof(Execute), ex);
-                var msg = $"Internal error: \"{ex.Message}\"" 
-                    + Environment.NewLine + Environment.NewLine +
-                    "If this issue persists, please contact tas-vs-extension@vmware.com";
+                var msg = $"Internal error: \"{ex.Message}\"";
                 _dialogService.DisplayErrorDialog("Unable to push to Tanzu Platform", msg);
             }
         }

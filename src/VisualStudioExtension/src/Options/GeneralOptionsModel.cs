@@ -1,5 +1,4 @@
 ﻿using Community.VisualStudio.Toolkit;
-using Microsoft.VisualStudio.Shell;
 using System.ComponentModel;
 using System.Drawing.Design;
 using System.Runtime.InteropServices;
@@ -14,10 +13,16 @@ namespace Tanzu.Toolkit.VisualStudio.Options
 
     public class GeneralOptionsModel : BaseOptionModel<GeneralOptionsModel>
     {
-        [Category("RemoteDebug")]
-        [DisplayName("Path to vsdbg")]
-        [Description("For airgapped installations, specify the path to a local directory containing vsdbg.")]
+        [Category("Remote Debugging")]
+        [DisplayName("Path to vsdbg (apps on Linux)")]
+        [Description("For airgapped installations, specify the path to a local directory containing vsdbg for applications running on Linux.")]
         [Editor(typeof(FolderEditor), typeof(UITypeEditor))]
-        public string VsdbgPath { get; set; } = string.Empty;
+        public string VsdbgLinuxPath { get; set; } = string.Empty;
+
+        [Category("Remote Debugging")]
+        [DisplayName("Path to vsdbg (apps on Windows)")]
+        [Description("For airgapped installations, specify the path to a local directory containing vsdbg for applications running on Windows.")]
+        [Editor(typeof(FolderEditor), typeof(UITypeEditor))]
+        public string VsdbgWindowsPath { get; set; } = string.Empty;
     }
 }

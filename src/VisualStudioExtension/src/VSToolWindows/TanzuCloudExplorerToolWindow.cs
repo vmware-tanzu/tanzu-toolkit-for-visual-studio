@@ -16,13 +16,13 @@ namespace Tanzu.Toolkit.VisualStudio.VSToolWindows
     /// </para>
     /// </remarks>
     [Guid("051b6546-acb2-4f74-85b3-60de9fefab24")]
-    public class TanzuTasExplorerToolWindow : ToolWindowPane
+    public class TanzuExplorerToolWindow : ToolWindowPane
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TanzuTasExplorerToolWindow"/> class.
+        /// Initializes a new instance of the <see cref="TanzuExplorerToolWindow"/> class.
         /// </summary>
         /// <param name="view"></param>
-        public TanzuTasExplorerToolWindow(ITasExplorerView view) : base(null)
+        public TanzuExplorerToolWindow(ITanzuExplorerView view) : base(null)
         {
             Caption = "Tanzu Platform Explorer";
 

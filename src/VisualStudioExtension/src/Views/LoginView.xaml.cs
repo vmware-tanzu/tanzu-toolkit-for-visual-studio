@@ -42,6 +42,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             viewModel.GetPassword = GetPassword;
             viewModel.PasswordEmpty = PasswordBoxEmpty;
             viewModel.ClearPassword = ClearPassword;
+
             DataContext = viewModel;
             _viewModel = viewModel;
 
@@ -49,6 +50,10 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
             InitializeComponent();
 
+            if (!string.IsNullOrEmpty(viewModel.TargetApiAddress))
+            {
+                tbUrl.Text = viewModel.TargetApiAddress;
+            }
             MouseDown += Window_MouseDown;
         }
 

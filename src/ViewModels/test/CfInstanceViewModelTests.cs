@@ -15,7 +15,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
     {
         private CfInstanceViewModel _sut;
         private List<string> _receivedEvents;
-        private TanzuExplorerViewModel _fakeTasExplorerViewModel;
+        private TanzuExplorerViewModel _fakeTanzuExplorerViewModel;
         private CloudFoundryInstance _expectedCf;
         private readonly bool _expectedSkipSslValue = false;
         private readonly int _expectedRetryAmount = 1;
@@ -57,9 +57,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     collection.Add(item);
                 });
 
-            _fakeTasExplorerViewModel = new TanzuExplorerViewModel(Services);
-            _sut = new CfInstanceViewModel(_fakeCfInstance, _fakeTasExplorerViewModel, Services);
-            _sut = new CfInstanceViewModel(_fakeCfInstance, _fakeTasExplorerViewModel, Services, expanded: true);
+            _fakeTanzuExplorerViewModel = new TanzuExplorerViewModel(Services);
+            _sut = new CfInstanceViewModel(_fakeCfInstance, _fakeTanzuExplorerViewModel, Services);
+            _sut = new CfInstanceViewModel(_fakeCfInstance, _fakeTanzuExplorerViewModel, Services, expanded: true);
 
             _receivedEvents = [];
             _sut.PropertyChanged += (sender, e) =>
@@ -99,9 +99,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("ctor")]
-        public void Constructor_SetsParentTasExplorer()
+        public void Constructor_SetsParentTanzuExplorer()
         {
-            Assert.AreEqual(_fakeTasExplorerViewModel, _sut.ParentTanzuExplorer);
+            Assert.AreEqual(_fakeTanzuExplorerViewModel, _sut.ParentTanzuExplorer);
         }
 
         [TestMethod]
@@ -111,10 +111,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             /** mock 4 initial children */
             _sut.Children =
             [
-                new OrgViewModel(_fakeOrgs[0], _sut, _fakeTasExplorerViewModel, Services),
-                new OrgViewModel(_fakeOrgs[1], _sut, _fakeTasExplorerViewModel, Services),
-                new OrgViewModel(_fakeOrgs[2], _sut, _fakeTasExplorerViewModel, Services),
-                new OrgViewModel(_fakeOrgs[3], _sut, _fakeTasExplorerViewModel, Services),
+                new OrgViewModel(_fakeOrgs[0], _sut, _fakeTanzuExplorerViewModel, Services),
+                new OrgViewModel(_fakeOrgs[1], _sut, _fakeTanzuExplorerViewModel, Services),
+                new OrgViewModel(_fakeOrgs[2], _sut, _fakeTanzuExplorerViewModel, Services),
+                new OrgViewModel(_fakeOrgs[3], _sut, _fakeTanzuExplorerViewModel, Services),
             ];
 
             /** mock retrieving all initial children except for FakeOrgs[3] */
@@ -142,8 +142,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             /** mock 2 initial children */
             _sut.Children =
             [
-                new OrgViewModel(_fakeOrgs[0], _sut, _fakeTasExplorerViewModel, Services),
-                new OrgViewModel(_fakeOrgs[1], _sut, _fakeTasExplorerViewModel, Services),
+                new OrgViewModel(_fakeOrgs[0], _sut, _fakeTanzuExplorerViewModel, Services),
+                new OrgViewModel(_fakeOrgs[1], _sut, _fakeTanzuExplorerViewModel, Services),
             ];
 
             /** mock retrieving all initial children plus FakeOrgs[2] */
@@ -201,8 +201,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             /** mock 2 initial children */
             var initialChildren = new ObservableCollection<TreeViewItemViewModel>
             {
-                new OrgViewModel(_fakeOrgs[0], _sut, _fakeTasExplorerViewModel, Services),
-                new OrgViewModel(_fakeOrgs[1], _sut, _fakeTasExplorerViewModel, Services),
+                new OrgViewModel(_fakeOrgs[0], _sut, _fakeTanzuExplorerViewModel, Services),
+                new OrgViewModel(_fakeOrgs[1], _sut, _fakeTanzuExplorerViewModel, Services),
             };
             _sut.Children = new ObservableCollection<TreeViewItemViewModel>(initialChildren);
 
@@ -275,8 +275,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             /** mock 2 initial children */
             _sut.Children =
             [
-                new OrgViewModel(_fakeOrgs[0], _sut, _fakeTasExplorerViewModel, Services),
-                new OrgViewModel(_fakeOrgs[1], _sut, _fakeTasExplorerViewModel, Services),
+                new OrgViewModel(_fakeOrgs[0], _sut, _fakeTanzuExplorerViewModel, Services),
+                new OrgViewModel(_fakeOrgs[1], _sut, _fakeTanzuExplorerViewModel, Services),
             ];
 
             MockCloudFoundryService.Setup(m => m

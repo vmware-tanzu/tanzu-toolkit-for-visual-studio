@@ -10,11 +10,11 @@ using Tanzu.Toolkit.ViewModels.AppDeletionConfirmation;
 namespace Tanzu.Toolkit.ViewModels.Tests
 {
     [TestClass]
-    public class TasExplorerViewModelTests : ViewModelTestSupport
+    public class TanzuExplorerViewModelTests : ViewModelTestSupport
     {
         private TanzuExplorerViewModel _sut;
         private List<string> _receivedEvents;
-        private CfInstanceViewModel _fakeTasConnection;
+        private CfInstanceViewModel _fakeTanzuConnection;
 
         [TestInitialize]
         public void TestInit()
@@ -31,11 +31,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     });
 
             _receivedEvents = [];
-            _fakeTasConnection = new FakeCfInstanceViewModel(_fakeCfInstance, Services);
+            _fakeTanzuConnection = new FakeCfInstanceViewModel(_fakeCfInstance, Services);
 
             _sut = new TanzuExplorerViewModel(Services)
             {
-                CloudFoundryConnection = _fakeTasConnection,
+                CloudFoundryConnection = _fakeTanzuConnection,
             };
             _sut.PropertyChanged += (sender, e) =>
             {
@@ -137,7 +137,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("TreeRoot")]
         public void SettingTasConnectionToNull_ClearsTreeRoot()
         {
-            _sut.CloudFoundryConnection = _fakeTasConnection;
+            _sut.CloudFoundryConnection = _fakeTanzuConnection;
 
             Assert.IsNotNull(_sut.CloudFoundryConnection);
             Assert.AreEqual(1, _sut.TreeRoot.Count);
@@ -217,7 +217,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("OpenLoginView")]
         public void OpenLoginView_DisplaysErrorDialog_WhenTasConnectionIsNotNull()
         {
-            _sut.CloudFoundryConnection = _fakeTasConnection;
+            _sut.CloudFoundryConnection = _fakeTanzuConnection;
 
             Assert.IsNotNull(_sut.CloudFoundryConnection);
 
@@ -465,7 +465,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("RefreshAllItems")]
         public void RefreshAllItems_SetsIsRefreshingAllTrue_WhenNotPreviouslyRefreshingAll_AndTasConnectionNotNull()
         {
-            _sut.CloudFoundryConnection = _fakeTasConnection;
+            _sut.CloudFoundryConnection = _fakeTanzuConnection;
 
             Assert.IsNotNull(_sut.CloudFoundryConnection);
             Assert.IsFalse(_sut.IsRefreshingAll);
@@ -479,7 +479,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("RefreshAllItems")]
         public void RefreshAllItems_StartsBackgroundTaskToRefreshAllItems_WhenNotPreviouslyRefreshingAll_AndTasConnectionNotNull()
         {
-            _sut.CloudFoundryConnection = _fakeTasConnection;
+            _sut.CloudFoundryConnection = _fakeTanzuConnection;
 
             MockThreadingService.Setup(m => m.StartBackgroundTask(It.IsAny<Func<Task>>())).Verifiable();
 
@@ -629,7 +629,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("LogOutCloudFoundry")]
         public void LogOutTas_SetsTasConnectionToNull_AndSetsIsLoggedInToFalse()
         {
-            _sut.CloudFoundryConnection = _fakeTasConnection;
+            _sut.CloudFoundryConnection = _fakeTanzuConnection;
             _sut.IsLoggedIn = true;
 
             Assert.IsNotNull(_sut.CloudFoundryConnection);
@@ -644,7 +644,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("LogOutCloudFoundry")]
         public void LogOutTas_ClearsConnectionCache()
         {
-            _sut.CloudFoundryConnection = _fakeTasConnection;
+            _sut.CloudFoundryConnection = _fakeTanzuConnection;
 
             _sut.LogOutCloudFoundry(_sut.CloudFoundryConnection);
 
@@ -657,7 +657,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("LogOutCloudFoundry")]
         public void LogOutTas_ClearsCfAccessToken()
         {
-            _sut.CloudFoundryConnection = _fakeTasConnection;
+            _sut.CloudFoundryConnection = _fakeTanzuConnection;
 
             _sut.LogOutCloudFoundry(_sut.CloudFoundryConnection);
 

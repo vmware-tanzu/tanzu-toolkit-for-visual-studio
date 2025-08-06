@@ -48,7 +48,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Commands\RequestFeedbackCommand.cs" />
     <Compile Include="Commands\RemoteDebugCommand.cs" />
     <Compile Include="Options\FolderEditor.cs" />
     <Compile Include="Options\GeneralOptionsModel.cs" />
@@ -108,15 +107,15 @@
     </Compile>
     <Compile Include="Views\IDeploymentDialogView.cs" />
     <Compile Include="Views\ILoginView.cs" />
-    <Compile Include="Views\ITasExplorerView.cs" />
+    <Compile Include="Views\ITanzuExplorerView.cs" />
     <Compile Include="Views\LoginView.xaml.cs">
       <DependentUpon>LoginView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\OutputView.xaml.cs">
       <DependentUpon>OutputView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\TasExplorerView.xaml.cs">
-      <DependentUpon>TasExplorerView.xaml</DependentUpon>
+    <Compile Include="Views\TanzuExplorerView.xaml.cs">
+      <DependentUpon>TanzuExplorerView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Services\VsViewLocatorService.cs" />
     <Compile Include="Services\VsToolWindowService.cs" />
@@ -277,7 +276,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\TasExplorerView.xaml">
+    <Page Include="Views\TanzuExplorerView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
