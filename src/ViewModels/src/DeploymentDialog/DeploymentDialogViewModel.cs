@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -9,6 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
+using Tanzu.Toolkit.Services.DataPersistence;
 using Tanzu.Toolkit.Services.DotnetCli;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.Project;
@@ -45,8 +46,9 @@ namespace Tanzu.Toolkit.ViewModels
         private readonly IDotnetCliService _dotnetCliService;
         internal IView _outputView;
         internal IOutputViewModel _outputViewModel;
-        internal ITasExplorerViewModel _tasExplorerViewModel;
+        internal ITanzuExplorerViewModel _tanzuExplorerViewModel;
         private readonly IProjectService _projectService;
+        private readonly IDataPersistenceService _dataPersistenceService;
         private List<CloudFoundryInstance> _cfInstances;
         private List<CloudFoundryOrganization> _cfOrgs;
         private List<CloudFoundrySpace> _cfSpaces;
@@ -80,8 +82,9 @@ namespace Tanzu.Toolkit.ViewModels
         {
             _errorDialogService = services.GetRequiredService<IErrorDialog>();
             _dotnetCliService = services.GetRequiredService<IDotnetCliService>();
-            _tasExplorerViewModel = services.GetRequiredService<ITasExplorerViewModel>();
+            _tanzuExplorerViewModel = services.GetRequiredService<ITanzuExplorerViewModel>();
             _projectService = services.GetRequiredService<IProjectService>();
+            _dataPersistenceService = services.GetRequiredService<IDataPersistenceService>();
 
             _outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel), $"Tanzu Push Output (\"{_projectService.ProjectName}\")") as IView;
             _outputViewModel = _outputView?.ViewModel as IOutputViewModel;
@@ -120,23 +123,23 @@ namespace Tanzu.Toolkit.ViewModels
                 }
             };
 
-            if (_tasExplorerViewModel.TasConnection != null)
+            if (_tanzuExplorerViewModel.CloudFoundryConnection != null)
             {
-                TargetName = _tasExplorerViewModel.TasConnection.DisplayText;
+                TargetName = _tanzuExplorerViewModel.CloudFoundryConnection.DisplayText;
                 IsLoggedIn = true;
 
                 ThreadingService.StartBackgroundTask(UpdateCfOrgOptions);
                 ThreadingService.StartBackgroundTask(UpdateBuildpackOptions);
                 ThreadingService.StartBackgroundTask(UpdateServiceOptions);
                 ThreadingService.StartBackgroundTask(UpdateStackOptions);
+
+                // delay calling SetManifestIfDefaultExists to give background update tasks time to complete
+                // -> should reduce false-positive "Unrecognized service" complaints
+                OnRendered = () => Task.Delay(_waitBeforeApplyingManifest).ContinueWith(_ => SetManifestIfDefaultExists());
             }
 
             AppName = _projectService.ProjectName;
             Expanded = false;
-
-            // delay calling SetManifestIfDefaultExists to give background update tasks time to complete
-            // -> should avoid false-positive "Unrecognized service" complaints
-            OnRendered = () => Task.Delay(_waitBeforeApplyingManifest).ContinueWith(_ => SetManifestIfDefaultExists());
             
             OnClose = () =>
             {
@@ -580,16 +583,16 @@ namespace Tanzu.Toolkit.ViewModels
 
         public void OpenLoginView(object arg)
         {
-            _tasExplorerViewModel.OpenLoginView(arg);
+            _tanzuExplorerViewModel.OpenLoginView(arg);
 
-            if (_tasExplorerViewModel.TasConnection != null)
+            if (_tanzuExplorerViewModel.CloudFoundryConnection != null)
             {
                 CfInstanceOptions = new List<CloudFoundryInstance>
                 {
-                    _tasExplorerViewModel.TasConnection.CloudFoundryInstance,
+                    _tanzuExplorerViewModel.CloudFoundryConnection.CloudFoundryInstance,
                 };
 
-                TargetName = _tasExplorerViewModel.TasConnection.DisplayText;
+                TargetName = _tanzuExplorerViewModel.CloudFoundryConnection.DisplayText;
                 IsLoggedIn = true;
 
                 ThreadingService.StartBackgroundTask(UpdateCfOrgOptions);
@@ -603,7 +606,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public async Task UpdateCfOrgOptions()
         {
-            if (_tasExplorerViewModel.TasConnection == null)
+            if (_tanzuExplorerViewModel.CloudFoundryConnection == null)
             {
                 CfOrgOptions = new List<CloudFoundryOrganization>();
             }
@@ -615,8 +618,8 @@ namespace Tanzu.Toolkit.ViewModels
                 }
 
                 var orgsResponse =
-                    await _tasExplorerViewModel.TasConnection.CfClient.GetOrgsForCfInstanceAsync(
-                        _tasExplorerViewModel.TasConnection.CloudFoundryInstance);
+                    await _tanzuExplorerViewModel.CloudFoundryConnection.CfClient.GetOrgsForCfInstanceAsync(
+                        _tanzuExplorerViewModel.CloudFoundryConnection.CloudFoundryInstance);
                 if (orgsResponse.Succeeded)
                 {
                     CfOrgOptions = orgsResponse.Content;
@@ -632,14 +635,14 @@ namespace Tanzu.Toolkit.ViewModels
 
         public async Task UpdateCfSpaceOptions()
         {
-            if (SelectedOrg == null || _tasExplorerViewModel.TasConnection == null)
+            if (SelectedOrg == null || _tanzuExplorerViewModel.CloudFoundryConnection == null)
             {
                 CfSpaceOptions = new List<CloudFoundrySpace>();
             }
             else
             {
                 var spacesResponse =
-                    await _tasExplorerViewModel.TasConnection.CfClient.GetSpacesForOrgAsync(SelectedOrg);
+                    await _tanzuExplorerViewModel.CloudFoundryConnection.CfClient.GetSpacesForOrgAsync(SelectedOrg);
 
                 if (spacesResponse.Succeeded)
                 {
@@ -657,7 +660,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public async Task UpdateBuildpackOptions()
         {
-            if (_tasExplorerViewModel.TasConnection == null)
+            if (_tanzuExplorerViewModel.CloudFoundryConnection == null)
             {
                 BuildpackOptions = new List<BuildpackListItem>();
             }
@@ -669,7 +672,7 @@ namespace Tanzu.Toolkit.ViewModels
                 }
 
                 BuildpacksLoading = true;
-                var buildpacksResponse = await _tasExplorerViewModel.TasConnection.CfClient.GetBuildpacksAsync(_tasExplorerViewModel.TasConnection.CloudFoundryInstance.ApiAddress);
+                var buildpacksResponse = await _tanzuExplorerViewModel.CloudFoundryConnection.CfClient.GetBuildpacksAsync(_tanzuExplorerViewModel.CloudFoundryConnection.CloudFoundryInstance.ApiAddress);
 
                 if (buildpacksResponse.Succeeded)
                 {
@@ -724,7 +727,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public async Task UpdateServiceOptions()
         {
-            if (_tasExplorerViewModel.TasConnection == null)
+            if (_tanzuExplorerViewModel.CloudFoundryConnection == null)
             {
                 if (ServiceOptions == null)
                 {
@@ -739,7 +742,7 @@ namespace Tanzu.Toolkit.ViewModels
                 }
 
                 ServicesLoading = true;
-                var servicesResponse = await _tasExplorerViewModel.TasConnection.CfClient.GetServicesAsync(_tasExplorerViewModel.TasConnection.CloudFoundryInstance.ApiAddress);
+                var servicesResponse = await _tanzuExplorerViewModel.CloudFoundryConnection.CfClient.GetServicesAsync(_tanzuExplorerViewModel.CloudFoundryConnection.CloudFoundryInstance.ApiAddress);
 
                 if (servicesResponse.Succeeded)
                 {
@@ -785,7 +788,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public async Task UpdateStackOptions()
         {
-            if (_tasExplorerViewModel.TasConnection == null)
+            if (_tanzuExplorerViewModel.CloudFoundryConnection == null)
             {
                 StackOptions = new List<string>();
             }
@@ -797,7 +800,7 @@ namespace Tanzu.Toolkit.ViewModels
                 }
 
                 StacksLoading = true;
-                var stacksResponse = await _tasExplorerViewModel.TasConnection.CfClient.GetStackNamesAsync(_tasExplorerViewModel.TasConnection.CloudFoundryInstance);
+                var stacksResponse = await _tanzuExplorerViewModel.CloudFoundryConnection.CfClient.GetStackNamesAsync(_tanzuExplorerViewModel.CloudFoundryConnection.CloudFoundryInstance);
 
                 if (stacksResponse.Succeeded)
                 {
@@ -951,8 +954,28 @@ namespace Tanzu.Toolkit.ViewModels
                         $"Runtime: {runtimeIdentifier}\n" +
                         $"Configuration: {publishConfiguration}\n" +
                         $"Output directory: {_publishDirName}\n" +
-                        $"\nIf this issue persists, please contact tas-vs-extension@vmware.com");
+                        "\nIf this issue persists, please contact tas-vs-extension@vmware.com");
                     return;
+                }
+
+                if (ConfigureForRemoteDebugging)
+                {
+                    var vsdbgPath = _dataPersistenceService.ReadStringData("VsdbgPath");
+                    if (!string.IsNullOrEmpty(vsdbgPath) && Directory.Exists(vsdbgPath))
+                    {
+                        _outputViewModel.AppendLine($"VsdbgPath is set to '{vsdbgPath}' in Visual Studio Options. Copying to publish output...");
+                        
+                        var destinationPath = Path.Combine(PathToProjectRootDir, _publishDirName, "vsdbg");
+
+                        // It looks weird now, but the script approach installs vsdbg at "app/vsdbg/vsdbg", so try to duplicate that here 
+                        if (File.Exists(Path.Combine(vsdbgPath, "vsdbg.dll")))
+                        {
+                            destinationPath = Path.Combine(destinationPath, "vsdbg");
+                        }
+
+                        CopyDirectory(vsdbgPath, destinationPath, true);
+                        _outputViewModel.AppendLine("Finished copying vsdbg!");
+                    }
                 }
             }
 
@@ -966,7 +989,7 @@ namespace Tanzu.Toolkit.ViewModels
                 Logger?.Error("Unable to serialize manifest contents: {AppConfig}. {SerializationException}", ManifestModel, ex);
             }
 
-            var deploymentResult = await _tasExplorerViewModel.TasConnection.CfClient.DeployAppAsync(
+            var deploymentResult = await _tanzuExplorerViewModel.CloudFoundryConnection.CfClient.DeployAppAsync(
                 ManifestModel,
                 PathToProjectRootDir,
                 SelectedSpace.ParentOrg.ParentCf,
@@ -979,7 +1002,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 if (deploymentResult.FailureType == FailureType.InvalidRefreshToken)
                 {
-                    _tasExplorerViewModel.AuthenticationRequired = true;
+                    _tanzuExplorerViewModel.AuthenticationRequired = true;
                 }
 
                 var errorTitle = $"{_deploymentErrorMsg} {AppName}.";
@@ -997,6 +1020,40 @@ namespace Tanzu.Toolkit.ViewModels
             }
 
             DeploymentInProgress = false;
+        }
+
+        // https://learn.microsoft.com/en-us/dotnet/standard/io/how-to-copy-directories#example
+        private static void CopyDirectory(string sourceDir, string destinationDir, bool recursive)
+        {
+            // Get information about the source directory
+            var dir = new DirectoryInfo(sourceDir);
+
+            // Check if the source directory exists
+            if (!dir.Exists)
+                throw new DirectoryNotFoundException($"Source directory not found: {dir.FullName}");
+
+            // Cache directories before we start copying
+            var dirs = dir.GetDirectories();
+
+            // Create the destination directory
+            Directory.CreateDirectory(destinationDir);
+
+            // Get the files in the source directory and copy to the destination directory
+            foreach (var file in dir.GetFiles())
+            {
+                var targetFilePath = Path.Combine(destinationDir, file.Name);
+                file.CopyTo(targetFilePath);
+            }
+
+            // If recursive and copying subdirectories, recursively call this method
+            if (recursive)
+            {
+                foreach (var subDir in dirs)
+                {
+                    var newDestinationDir = Path.Combine(destinationDir, subDir.Name);
+                    CopyDirectory(subDir.FullName, newDestinationDir, true);
+                }
+            }
         }
 
         private void SetManifestIfDefaultExists()

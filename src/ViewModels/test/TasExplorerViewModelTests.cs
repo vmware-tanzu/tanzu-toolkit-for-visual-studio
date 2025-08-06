@@ -12,7 +12,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
     [TestClass]
     public class TasExplorerViewModelTests : ViewModelTestSupport
     {
-        private TasExplorerViewModel _sut;
+        private TanzuExplorerViewModel _sut;
         private List<string> _receivedEvents;
         private CfInstanceViewModel _fakeTasConnection;
 
@@ -33,9 +33,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _receivedEvents = [];
             _fakeTasConnection = new FakeCfInstanceViewModel(_fakeCfInstance, Services);
 
-            _sut = new TasExplorerViewModel(Services)
+            _sut = new TanzuExplorerViewModel(Services)
             {
-                TasConnection = _fakeTasConnection,
+                CloudFoundryConnection = _fakeTasConnection,
             };
             _sut.PropertyChanged += (sender, e) =>
             {
@@ -54,26 +54,26 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("Ctor")]
         public void Ctor_SetsTasConnectionToNull_WhenSavedConnectionNameNull()
         {
-            MockDataPersistenceService.Setup(m => m.ReadStringData(TasExplorerViewModel._connectionNameKey)).Returns((string)null);
-            MockDataPersistenceService.Setup(m => m.ReadStringData(TasExplorerViewModel._connectionAddressKey)).Returns("junk non-null value");
+            MockDataPersistenceService.Setup(m => m.ReadStringData(TanzuExplorerViewModel._connectionNameKey)).Returns((string)null);
+            MockDataPersistenceService.Setup(m => m.ReadStringData(TanzuExplorerViewModel._connectionAddressKey)).Returns("junk non-null value");
             MockDataPersistenceService.Setup(m => m.SavedCfCredsExist()).Returns(true);
 
-            _sut = new TasExplorerViewModel(Services);
+            _sut = new TanzuExplorerViewModel(Services);
 
-            Assert.IsNull(_sut.TasConnection);
+            Assert.IsNull(_sut.CloudFoundryConnection);
         }
 
         [TestMethod]
         [TestCategory("Ctor")]
         public void Ctor_SetsTasConnectionToNull_WhenSavedConnectionAddressNull()
         {
-            MockDataPersistenceService.Setup(m => m.ReadStringData(TasExplorerViewModel._connectionNameKey)).Returns("junk non-null value");
-            MockDataPersistenceService.Setup(m => m.ReadStringData(TasExplorerViewModel._connectionAddressKey)).Returns((string)null);
+            MockDataPersistenceService.Setup(m => m.ReadStringData(TanzuExplorerViewModel._connectionNameKey)).Returns("junk non-null value");
+            MockDataPersistenceService.Setup(m => m.ReadStringData(TanzuExplorerViewModel._connectionAddressKey)).Returns((string)null);
             MockDataPersistenceService.Setup(m => m.SavedCfCredsExist()).Returns(true);
 
-            _sut = new TasExplorerViewModel(Services);
+            _sut = new TanzuExplorerViewModel(Services);
 
-            Assert.IsNull(_sut.TasConnection);
+            Assert.IsNull(_sut.CloudFoundryConnection);
         }
 
         [TestMethod]
@@ -81,19 +81,19 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public void Ctor_SetsTasConnectionToNull_WhenAccessTokenIrretrievable()
         {
             MockDataPersistenceService.Setup(m => m.SavedCfCredsExist()).Returns(false);
-            MockDataPersistenceService.Setup(m => m.ReadStringData(TasExplorerViewModel._connectionNameKey)).Returns("junk non-null value");
-            MockDataPersistenceService.Setup(m => m.ReadStringData(TasExplorerViewModel._connectionAddressKey)).Returns("junk non-null value");
-            MockDataPersistenceService.Setup(m => m.ReadStringData(TasExplorerViewModel._connectionSslPolicyKey)).Returns("junk non-null value");
+            MockDataPersistenceService.Setup(m => m.ReadStringData(TanzuExplorerViewModel._connectionNameKey)).Returns("junk non-null value");
+            MockDataPersistenceService.Setup(m => m.ReadStringData(TanzuExplorerViewModel._connectionAddressKey)).Returns("junk non-null value");
+            MockDataPersistenceService.Setup(m => m.ReadStringData(TanzuExplorerViewModel._connectionSslPolicyKey)).Returns("junk non-null value");
 
-            _sut = new TasExplorerViewModel(Services);
+            _sut = new TanzuExplorerViewModel(Services);
 
-            Assert.IsNull(_sut.TasConnection);
+            Assert.IsNull(_sut.CloudFoundryConnection);
         }
 
         [TestMethod]
         [TestCategory("Ctor")]
-        [DataRow(TasExplorerViewModel._skipCertValidationValue, true)]
-        [DataRow(TasExplorerViewModel._validateSslCertsValue, false)]
+        [DataRow(TanzuExplorerViewModel._skipCertValidationValue, true)]
+        [DataRow(TanzuExplorerViewModel._validateSslCertsValue, false)]
         [DataRow("unexpected value", false)]
         [DataRow(null, false)]
         public void Ctor_RestoresTasConnection_WhenSavedConnectionNameAddressAndTokenExist(string savedSslPolicyValue, bool expectedSkipSslValue)
@@ -102,50 +102,50 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var savedConnectionAddress = "junk";
 
             MockDataPersistenceService.Setup(m => m.SavedCfCredsExist()).Returns(true);
-            MockDataPersistenceService.Setup(m => m.ReadStringData(TasExplorerViewModel._connectionNameKey)).Returns(savedConnectionName);
-            MockDataPersistenceService.Setup(m => m.ReadStringData(TasExplorerViewModel._connectionAddressKey)).Returns(savedConnectionAddress);
-            MockDataPersistenceService.Setup(m => m.ReadStringData(TasExplorerViewModel._connectionSslPolicyKey)).Returns(savedSslPolicyValue);
+            MockDataPersistenceService.Setup(m => m.ReadStringData(TanzuExplorerViewModel._connectionNameKey)).Returns(savedConnectionName);
+            MockDataPersistenceService.Setup(m => m.ReadStringData(TanzuExplorerViewModel._connectionAddressKey)).Returns(savedConnectionAddress);
+            MockDataPersistenceService.Setup(m => m.ReadStringData(TanzuExplorerViewModel._connectionSslPolicyKey)).Returns(savedSslPolicyValue);
 
-            _sut = new TasExplorerViewModel(Services);
+            _sut = new TanzuExplorerViewModel(Services);
 
-            Assert.IsNotNull(_sut.TasConnection);
-            Assert.AreEqual(savedConnectionName, _sut.TasConnection.CloudFoundryInstance.InstanceName);
-            Assert.AreEqual(savedConnectionAddress, _sut.TasConnection.CloudFoundryInstance.ApiAddress);
-            Assert.AreEqual(expectedSkipSslValue, _sut.TasConnection.CloudFoundryInstance.SkipSslCertValidation);
+            Assert.IsNotNull(_sut.CloudFoundryConnection);
+            Assert.AreEqual(savedConnectionName, _sut.CloudFoundryConnection.CloudFoundryInstance.InstanceName);
+            Assert.AreEqual(savedConnectionAddress, _sut.CloudFoundryConnection.CloudFoundryInstance.ApiAddress);
+            Assert.AreEqual(expectedSkipSslValue, _sut.CloudFoundryConnection.CloudFoundryInstance.SkipSslCertValidation);
         }
 
         [TestMethod]
-        [TestCategory("TasConnection")]
+        [TestCategory("CloudFoundryConnection")]
         [TestCategory("TreeRoot")]
         public void SettingTasConnection_PopulatesTreeRoot()
         {
-            _sut = new TasExplorerViewModel(Services);
+            _sut = new TanzuExplorerViewModel(Services);
 
-            Assert.IsNull(_sut.TasConnection);
+            Assert.IsNull(_sut.CloudFoundryConnection);
             Assert.AreEqual(1, _sut.TreeRoot.Count);
             Assert.IsTrue(_sut.TreeRoot[0] is LoginPromptViewModel);
 
-            _sut.TasConnection = new CfInstanceViewModel(_fakeCfInstance, _sut, Services);
+            _sut.CloudFoundryConnection = new CfInstanceViewModel(_fakeCfInstance, _sut, Services);
 
-            Assert.IsNotNull(_sut.TasConnection);
+            Assert.IsNotNull(_sut.CloudFoundryConnection);
             Assert.AreEqual(1, _sut.TreeRoot.Count);
-            Assert.AreEqual(_sut.TreeRoot[0], _sut.TasConnection);
+            Assert.AreEqual(_sut.TreeRoot[0], _sut.CloudFoundryConnection);
         }
 
         [TestMethod]
-        [TestCategory("TasConnection")]
+        [TestCategory("CloudFoundryConnection")]
         [TestCategory("TreeRoot")]
         public void SettingTasConnectionToNull_ClearsTreeRoot()
         {
-            _sut.TasConnection = _fakeTasConnection;
+            _sut.CloudFoundryConnection = _fakeTasConnection;
 
-            Assert.IsNotNull(_sut.TasConnection);
+            Assert.IsNotNull(_sut.CloudFoundryConnection);
             Assert.AreEqual(1, _sut.TreeRoot.Count);
-            Assert.AreEqual(_sut.TreeRoot[0], _sut.TasConnection);
+            Assert.AreEqual(_sut.TreeRoot[0], _sut.CloudFoundryConnection);
 
-            _sut.TasConnection = null;
+            _sut.CloudFoundryConnection = null;
 
-            Assert.IsNull(_sut.TasConnection);
+            Assert.IsNull(_sut.CloudFoundryConnection);
             Assert.AreEqual(1, _sut.TreeRoot.Count);
             Assert.IsTrue(_sut.TreeRoot[0] is LoginPromptViewModel);
         }
@@ -159,13 +159,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         public void CanStopCfApp_ReturnsTrue()
         {
-            Assert.IsTrue(_sut.CanStopCfApp(null));
+            Assert.IsTrue(_sut.CanStopCloudFoundryApp(null));
         }
 
         [TestMethod]
         public void CanStartCfApp_ReturnsTrue()
         {
-            Assert.IsTrue(_sut.CanStartCfApp(null));
+            Assert.IsTrue(_sut.CanStartCloudFoundryApp(null));
         }
 
         [TestMethod]
@@ -204,9 +204,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("OpenLoginView")]
         public void OpenLoginView_DisplaysLoginDialog_WhenTasConnectionIsNull()
         {
-            _sut = new TasExplorerViewModel(Services);
+            _sut = new TanzuExplorerViewModel(Services);
 
-            Assert.IsNull(_sut.TasConnection);
+            Assert.IsNull(_sut.CloudFoundryConnection);
 
             _sut.OpenLoginView(null);
 
@@ -217,15 +217,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("OpenLoginView")]
         public void OpenLoginView_DisplaysErrorDialog_WhenTasConnectionIsNotNull()
         {
-            _sut.TasConnection = _fakeTasConnection;
+            _sut.CloudFoundryConnection = _fakeTasConnection;
 
-            Assert.IsNotNull(_sut.TasConnection);
+            Assert.IsNotNull(_sut.CloudFoundryConnection);
 
             _sut.OpenLoginView(null);
 
             MockErrorDialogService.Verify(m => m.
-                DisplayErrorDialog(TasExplorerViewModel._singleLoginErrorTitle,
-                                   It.Is<string>(s => s.Contains(TasExplorerViewModel._singleLoginErrorMessage1) && s.Contains(TasExplorerViewModel._singleLoginErrorMessage2))),
+                DisplayErrorDialog(TanzuExplorerViewModel._singleLoginErrorTitle,
+                                   It.Is<string>(s => s.Contains(TanzuExplorerViewModel._singleLoginErrorMessage1) && s.Contains(TanzuExplorerViewModel._singleLoginErrorMessage2))),
                     Times.Once);
         }
 
@@ -233,7 +233,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("OpenLoginView")]
         public void OpenLoginView_DoesNotChangeAuthenticationRequired_WhenTasConnectionDoesNotGetSet()
         {
-            _sut = new TasExplorerViewModel(Services)
+            _sut = new TanzuExplorerViewModel(Services)
             {
                 AuthenticationRequired = true
             };
@@ -242,16 +242,16 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 ShowModal(typeof(LoginViewModel).Name, null))
                     .Callback(() =>
                     {
-                        // Simulate unsuccessful login by NOT setting TasConnection as LoginView would've done on a successful login
+                        // Simulate unsuccessful login by NOT setting CloudFoundryConnection as LoginView would've done on a successful login
                     });
 
             Assert.IsTrue(_sut.AuthenticationRequired);
-            Assert.IsNull(_sut.TasConnection);
+            Assert.IsNull(_sut.CloudFoundryConnection);
 
             Assert.IsTrue(_sut.CanOpenLoginView(null));
             _sut.OpenLoginView(null);
 
-            Assert.IsNull(_sut.TasConnection);
+            Assert.IsNull(_sut.CloudFoundryConnection);
             Assert.IsTrue(_sut.AuthenticationRequired); // this prop should not have changed
         }
 
@@ -276,7 +276,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("StopCfApp")]
+        [TestCategory("StopCloudFoundryApp")]
         public async Task StopCfApp_CallsStopCfAppAsync()
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
@@ -286,7 +286,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Exception shouldStayNull = null;
             try
             {
-                await _sut.StopCfApp(fakeApp);
+                await _sut.StopCloudFoundryApp(fakeApp);
             }
             catch (Exception e)
             {
@@ -298,7 +298,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("StopCfApp")]
+        [TestCategory("StopCloudFoundryApp")]
         public async Task StopCfApp_DisplaysErrorDialog_WhenStopAppAsyncFails()
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
@@ -307,9 +307,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 StopAppAsync(fakeApp, false, It.IsAny<int>()))
                     .ReturnsAsync(_fakeFailureDetailedResult);
 
-            await _sut.StopCfApp(fakeApp);
+            await _sut.StopCloudFoundryApp(fakeApp);
 
-            var expectedErrorTitle = $"{TasExplorerViewModel._stopAppErrorMsg} {fakeApp.AppName}.";
+            var expectedErrorTitle = $"{TanzuExplorerViewModel._stopAppErrorMsg} {fakeApp.AppName}.";
             var expectedErrorMsg = _fakeFailureDetailedResult.Explanation;
 
             MockErrorDialogService.Verify(mock => mock.
@@ -318,7 +318,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("StopCfApp")]
+        [TestCategory("StopCloudFoundryApp")]
         public async Task StopCfApp_LogsError_WhenStopAppAsyncFails()
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
@@ -327,11 +327,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 StopAppAsync(fakeApp, false, It.IsAny<int>()))
                     .ReturnsAsync(_fakeFailureDetailedResult);
 
-            await _sut.StopCfApp(fakeApp);
+            await _sut.StopCloudFoundryApp(fakeApp);
 
             var logPropVal1 = "{AppName}";
             var logPropVal2 = "{StopResult}";
-            var expectedLogMsg = $"{TasExplorerViewModel._stopAppErrorMsg} {logPropVal1}. {logPropVal2}";
+            var expectedLogMsg = $"{TanzuExplorerViewModel._stopAppErrorMsg} {logPropVal1}. {logPropVal2}";
 
             MockLogger.Verify(m => m.
                 Error(expectedLogMsg, fakeApp.AppName, _fakeFailureDetailedResult.ToString()),
@@ -339,7 +339,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("StartCfApp")]
+        [TestCategory("StartCloudFoundryApp")]
         public async Task StartCfApp_CallsStartAppAsync()
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
@@ -349,7 +349,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Exception shouldStayNull = null;
             try
             {
-                await _sut.StartCfApp(fakeApp);
+                await _sut.StartCloudFoundryApp(fakeApp);
             }
             catch (Exception e)
             {
@@ -361,7 +361,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("StartCfApp")]
+        [TestCategory("StartCloudFoundryApp")]
         public async Task StartCfApp_DisplaysErrorDialog_WhenStartAppAsyncFails()
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
@@ -370,9 +370,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 StartAppAsync(fakeApp, false, It.IsAny<int>()))
                     .ReturnsAsync(_fakeFailureDetailedResult);
 
-            await _sut.StartCfApp(fakeApp);
+            await _sut.StartCloudFoundryApp(fakeApp);
 
-            var expectedErrorTitle = $"{TasExplorerViewModel._startAppErrorMsg} {fakeApp.AppName}.";
+            var expectedErrorTitle = $"{TanzuExplorerViewModel._startAppErrorMsg} {fakeApp.AppName}.";
             var expectedErrorMsg = _fakeFailureDetailedResult.Explanation;
 
             MockErrorDialogService.Verify(mock => mock.
@@ -381,7 +381,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("StartCfApp")]
+        [TestCategory("StartCloudFoundryApp")]
         public async Task StartCfApp_LogsError_WhenStartAppAsyncFails()
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
@@ -390,11 +390,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 StartAppAsync(fakeApp, false, It.IsAny<int>()))
                     .ReturnsAsync(_fakeFailureDetailedResult);
 
-            await _sut.StartCfApp(fakeApp);
+            await _sut.StartCloudFoundryApp(fakeApp);
 
             var logPropVal1 = "{AppName}";
             var logPropVal2 = "{StartResult}";
-            var expectedLogMsg = $"{TasExplorerViewModel._startAppErrorMsg} {logPropVal1}. {logPropVal2}";
+            var expectedLogMsg = $"{TanzuExplorerViewModel._startAppErrorMsg} {logPropVal1}. {logPropVal2}";
 
             MockLogger.Verify(m => m.
                 Error(expectedLogMsg, fakeApp.AppName, _fakeFailureDetailedResult.ToString()),
@@ -433,12 +433,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("RefreshAllItems")]
         public void RefreshAllItems_SetsIsRefreshingAllFalse_WhenTasConnectionNull()
         {
-            _sut = new TasExplorerViewModel(Services)
+            _sut = new TanzuExplorerViewModel(Services)
             {
                 IsRefreshingAll = true
             };
 
-            Assert.IsNull(_sut.TasConnection);
+            Assert.IsNull(_sut.CloudFoundryConnection);
             Assert.IsTrue(_sut.IsRefreshingAll);
 
             _sut.RefreshAllItems();
@@ -450,11 +450,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("RefreshAllItems")]
         public void RefreshAllItems_SetsThreadServiceIsPollingFalse_WhenTasConnectionNull()
         {
-            _sut = new TasExplorerViewModel(Services);
+            _sut = new TanzuExplorerViewModel(Services);
 
             MockThreadingService.SetupSet(mock => mock.IsPolling = false).Verifiable();
 
-            Assert.IsNull(_sut.TasConnection);
+            Assert.IsNull(_sut.CloudFoundryConnection);
 
             _sut.RefreshAllItems();
 
@@ -465,9 +465,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("RefreshAllItems")]
         public void RefreshAllItems_SetsIsRefreshingAllTrue_WhenNotPreviouslyRefreshingAll_AndTasConnectionNotNull()
         {
-            _sut.TasConnection = _fakeTasConnection;
+            _sut.CloudFoundryConnection = _fakeTasConnection;
 
-            Assert.IsNotNull(_sut.TasConnection);
+            Assert.IsNotNull(_sut.CloudFoundryConnection);
             Assert.IsFalse(_sut.IsRefreshingAll);
 
             _sut.RefreshAllItems();
@@ -479,11 +479,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("RefreshAllItems")]
         public void RefreshAllItems_StartsBackgroundTaskToRefreshAllItems_WhenNotPreviouslyRefreshingAll_AndTasConnectionNotNull()
         {
-            _sut.TasConnection = _fakeTasConnection;
+            _sut.CloudFoundryConnection = _fakeTasConnection;
 
             MockThreadingService.Setup(m => m.StartBackgroundTask(It.IsAny<Func<Task>>())).Verifiable();
 
-            Assert.IsNotNull(_sut.TasConnection);
+            Assert.IsNotNull(_sut.CloudFoundryConnection);
             Assert.IsFalse(_sut.IsRefreshingAll);
 
             _sut.RefreshAllItems();
@@ -594,72 +594,72 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("AuthenticationRequired")]
         public void SettingAuthenticationRequiredToTrue_CollapsesCfInstanceViewModel()
         {
-            _sut.TasConnection = new FakeCfInstanceViewModel(_fakeCfInstance, Services, expanded: true);
+            _sut.CloudFoundryConnection = new FakeCfInstanceViewModel(_fakeCfInstance, Services, expanded: true);
 
             Assert.IsFalse(_sut.AuthenticationRequired);
-            Assert.IsTrue(_sut.TasConnection.IsExpanded);
+            Assert.IsTrue(_sut.CloudFoundryConnection.IsExpanded);
 
             _sut.AuthenticationRequired = true;
 
             Assert.IsTrue(_sut.AuthenticationRequired);
-            Assert.IsFalse(_sut.TasConnection.IsExpanded);
+            Assert.IsFalse(_sut.CloudFoundryConnection.IsExpanded);
         }
 
         [TestMethod]
         [TestCategory("AuthenticationRequired")]
         public void SettingAuthenticationRequiredToFalse_DoesNotExpandCfInstanceViewModel()
         {
-            _sut = new TasExplorerViewModel(Services)
+            _sut = new TanzuExplorerViewModel(Services)
             {
                 AuthenticationRequired = true,
             };
 
-            _sut.TasConnection = new FakeCfInstanceViewModel(_fakeCfInstance, Services, expanded: false);
+            _sut.CloudFoundryConnection = new FakeCfInstanceViewModel(_fakeCfInstance, Services, expanded: false);
 
             Assert.IsTrue(_sut.AuthenticationRequired);
-            Assert.IsFalse(_sut.TasConnection.IsExpanded);
+            Assert.IsFalse(_sut.CloudFoundryConnection.IsExpanded);
 
             _sut.AuthenticationRequired = false;
 
             Assert.IsFalse(_sut.AuthenticationRequired);
-            Assert.IsFalse(_sut.TasConnection.IsExpanded);
+            Assert.IsFalse(_sut.CloudFoundryConnection.IsExpanded);
         }
 
         [TestMethod]
-        [TestCategory("LogOutTas")]
+        [TestCategory("LogOutCloudFoundry")]
         public void LogOutTas_SetsTasConnectionToNull_AndSetsIsLoggedInToFalse()
         {
-            _sut.TasConnection = _fakeTasConnection;
+            _sut.CloudFoundryConnection = _fakeTasConnection;
             _sut.IsLoggedIn = true;
 
-            Assert.IsNotNull(_sut.TasConnection);
+            Assert.IsNotNull(_sut.CloudFoundryConnection);
             Assert.IsTrue(_sut.IsLoggedIn);
-            _sut.LogOutTas(_sut.TasConnection);
+            _sut.LogOutCloudFoundry(_sut.CloudFoundryConnection);
 
-            Assert.IsNull(_sut.TasConnection);
+            Assert.IsNull(_sut.CloudFoundryConnection);
             Assert.IsFalse(_sut.IsLoggedIn);
         }
 
         [TestMethod]
-        [TestCategory("LogOutTas")]
+        [TestCategory("LogOutCloudFoundry")]
         public void LogOutTas_ClearsConnectionCache()
         {
-            _sut.TasConnection = _fakeTasConnection;
+            _sut.CloudFoundryConnection = _fakeTasConnection;
 
-            _sut.LogOutTas(_sut.TasConnection);
+            _sut.LogOutCloudFoundry(_sut.CloudFoundryConnection);
 
-            MockDataPersistenceService.Verify(m => m.ClearData(TasExplorerViewModel._connectionNameKey), Times.Once);
-            MockDataPersistenceService.Verify(m => m.ClearData(TasExplorerViewModel._connectionAddressKey), Times.Once);
-            MockDataPersistenceService.Verify(m => m.ClearData(TasExplorerViewModel._connectionSslPolicyKey), Times.Once);
+            MockDataPersistenceService.Verify(m => m.ClearData(TanzuExplorerViewModel._connectionNameKey), Times.Once);
+            MockDataPersistenceService.Verify(m => m.ClearData(TanzuExplorerViewModel._connectionAddressKey), Times.Once);
+            MockDataPersistenceService.Verify(m => m.ClearData(TanzuExplorerViewModel._connectionSslPolicyKey), Times.Once);
         }
 
         [TestMethod]
-        [TestCategory("LogOutTas")]
+        [TestCategory("LogOutCloudFoundry")]
         public void LogOutTas_ClearsCfAccessToken()
         {
-            _sut.TasConnection = _fakeTasConnection;
+            _sut.CloudFoundryConnection = _fakeTasConnection;
 
-            _sut.LogOutTas(_sut.TasConnection);
+            _sut.LogOutCloudFoundry(_sut.CloudFoundryConnection);
 
             MockCloudFoundryService.Verify(m => m.LogoutCfUser(), Times.Once);
         }
@@ -668,21 +668,21 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("SetConnection")]
         public void SetConnection_UpdatesTasConnection_WithNewCfInfo_WhenTasConnectionIsNull()
         {
-            _sut = new TasExplorerViewModel(Services);
+            _sut = new TanzuExplorerViewModel(Services);
 
-            Assert.IsNull(_sut.TasConnection);
+            Assert.IsNull(_sut.CloudFoundryConnection);
 
             _sut.SetConnection(_fakeCfInstance);
 
-            Assert.IsNotNull(_sut.TasConnection);
-            Assert.AreEqual(_fakeCfInstance, _sut.TasConnection.CloudFoundryInstance);
+            Assert.IsNotNull(_sut.CloudFoundryConnection);
+            Assert.AreEqual(_fakeCfInstance, _sut.CloudFoundryConnection.CloudFoundryInstance);
         }
 
         [TestMethod]
         [TestCategory("SetConnection")]
         public void SetConnection_SetsAuthenticationRequiredToFalse_WhenTasConnectionIsNull()
         {
-            _sut = new TasExplorerViewModel(Services)
+            _sut = new TanzuExplorerViewModel(Services)
             {
                 AuthenticationRequired = true
             };
@@ -692,7 +692,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             };
             _receivedEvents.Clear();
 
-            Assert.IsNull(_sut.TasConnection);
+            Assert.IsNull(_sut.CloudFoundryConnection);
             Assert.IsTrue(_sut.AuthenticationRequired);
 
             Assert.AreEqual(0, _receivedEvents.Count);
@@ -707,9 +707,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("SetConnection")]
         public void SetConnection_StartsBackgroundRefreshTask_WhenTasConnectionIsNull()
         {
-            _sut = new TasExplorerViewModel(Services);
+            _sut = new TanzuExplorerViewModel(Services);
 
-            Assert.IsNull(_sut.TasConnection);
+            Assert.IsNull(_sut.CloudFoundryConnection);
 
             _sut.SetConnection(_fakeCfInstance);
 
@@ -720,58 +720,58 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("SetConnection")]
         public void SetConnection_SavesConnectionName_WhenTasConnectionIsNull()
         {
-            _sut = new TasExplorerViewModel(Services);
+            _sut = new TanzuExplorerViewModel(Services);
 
-            Assert.IsNull(_sut.TasConnection);
+            Assert.IsNull(_sut.CloudFoundryConnection);
 
             _sut.SetConnection(_fakeCfInstance);
 
-            MockDataPersistenceService.Verify(m => m.WriteStringData(TasExplorerViewModel._connectionNameKey, _fakeCfInstance.InstanceName), Times.Once);
+            MockDataPersistenceService.Verify(m => m.WriteStringData(TanzuExplorerViewModel._connectionNameKey, _fakeCfInstance.InstanceName), Times.Once);
         }
 
         [TestMethod]
         [TestCategory("SetConnection")]
         public void SetConnection_SavesConnectionApiAddress_WhenTasConnectionIsNull()
         {
-            _sut = new TasExplorerViewModel(Services);
+            _sut = new TanzuExplorerViewModel(Services);
 
-            Assert.IsNull(_sut.TasConnection);
+            Assert.IsNull(_sut.CloudFoundryConnection);
 
             _sut.SetConnection(_fakeCfInstance);
 
-            MockDataPersistenceService.Verify(m => m.WriteStringData(TasExplorerViewModel._connectionAddressKey, _fakeCfInstance.ApiAddress), Times.Once);
+            MockDataPersistenceService.Verify(m => m.WriteStringData(TanzuExplorerViewModel._connectionAddressKey, _fakeCfInstance.ApiAddress), Times.Once);
         }
 
         [TestMethod]
         [TestCategory("SetConnection")]
-        [DataRow(true, TasExplorerViewModel._skipCertValidationValue)]
-        [DataRow(false, TasExplorerViewModel._validateSslCertsValue)]
+        [DataRow(true, TanzuExplorerViewModel._skipCertValidationValue)]
+        [DataRow(false, TanzuExplorerViewModel._validateSslCertsValue)]
         public void SetConnection_SavesConnectionSslCertValidationPolicy_WhenTasConnectionIsNull(bool skipSslValue, string expectedSavedSslPolicyValue)
         {
-            _sut = new TasExplorerViewModel(Services);
+            _sut = new TanzuExplorerViewModel(Services);
 
-            Assert.IsNull(_sut.TasConnection);
+            Assert.IsNull(_sut.CloudFoundryConnection);
 
             _fakeCfInstance.SkipSslCertValidation = skipSslValue;
             _sut.SetConnection(_fakeCfInstance);
 
-            MockDataPersistenceService.Verify(m => m.WriteStringData(TasExplorerViewModel._connectionSslPolicyKey, expectedSavedSslPolicyValue), Times.Once);
+            MockDataPersistenceService.Verify(m => m.WriteStringData(TanzuExplorerViewModel._connectionSslPolicyKey, expectedSavedSslPolicyValue), Times.Once);
         }
 
         [TestMethod]
         [TestCategory("SetConnection")]
         public void SetConnection_DoesNotChangeTasConnection_WhenTasConnectionIsNotNull()
         {
-            _sut.TasConnection = new CfInstanceViewModel(_fakeCfInstance, _sut, Services);
+            _sut.CloudFoundryConnection = new CfInstanceViewModel(_fakeCfInstance, _sut, Services);
 
-            Assert.IsNotNull(_sut.TasConnection);
+            Assert.IsNotNull(_sut.CloudFoundryConnection);
 
-            var initialCf = _sut.TasConnection.CloudFoundryInstance;
+            var initialCf = _sut.CloudFoundryConnection.CloudFoundryInstance;
 
             _sut.SetConnection(_fakeCfInstance);
 
-            Assert.IsNotNull(_sut.TasConnection);
-            Assert.AreEqual(initialCf, _sut.TasConnection.CloudFoundryInstance);
+            Assert.IsNotNull(_sut.CloudFoundryConnection);
+            Assert.AreEqual(initialCf, _sut.CloudFoundryConnection.CloudFoundryInstance);
         }
 
         [TestMethod]

@@ -14,11 +14,11 @@ namespace Tanzu.Toolkit.ViewModels
         private CloudFoundryApp _app;
         private IView _view;
         private string _lastLinePrinted;
-        private readonly ITasExplorerViewModel _tasExplorerViewModel;
+        private readonly ITanzuExplorerViewModel _tanzuExplorerViewModel;
 
-        public OutputViewModel(ITasExplorerViewModel tasExplorerViewModel, IServiceProvider services) : base(services)
+        public OutputViewModel(ITanzuExplorerViewModel tanzuExplorerViewModel, IServiceProvider services) : base(services)
         {
-            _tasExplorerViewModel = tasExplorerViewModel;
+            _tanzuExplorerViewModel = tanzuExplorerViewModel;
         }
 
         public string OutputContent
@@ -133,7 +133,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 if (recentLogsResult.FailureType == FailureType.InvalidRefreshToken)
                 {
-                    _tasExplorerViewModel.AuthenticationRequired = true;
+                    _tanzuExplorerViewModel.AuthenticationRequired = true;
                     AppendLine("\n*** Unable to fetch recent logs; authentication requied. Please log in to Tanzu Platform and try again. ***\n");
                     return;
                 }
@@ -153,7 +153,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 if (logStreamResult.FailureType == FailureType.InvalidRefreshToken)
                 {
-                    _tasExplorerViewModel.AuthenticationRequired = true;
+                    _tanzuExplorerViewModel.AuthenticationRequired = true;
                 }
                 ErrorService.DisplayErrorDialog("Error displaying app logs", $"Something went wrong while trying to display logs for {cfApp.AppName}. Please try again -- if this issue persists, contact tas-vs-extension@vmware.com.");
             }

@@ -321,7 +321,7 @@ namespace Tanzu.Toolkit.ViewModels
             if (result.Succeeded)
             {
                 ErrorMessage = null;
-                TasExplorer.SetConnection(TargetCf);
+                TanzuExplorer.SetConnection(TargetCf);
                 DialogService.CloseDialog(arg, true);
                 PageNum = 1;
                 ClearPassword();
@@ -350,7 +350,7 @@ namespace Tanzu.Toolkit.ViewModels
 
                 if (loginResult.Succeeded)
                 {
-                    TasExplorer.SetConnection(TargetCf);
+                    TanzuExplorer.SetConnection(TargetCf);
                     CloseDialog();
                 }
                 else

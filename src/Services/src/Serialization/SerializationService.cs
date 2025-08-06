@@ -75,7 +75,7 @@ namespace Tanzu.Toolkit.Services
         {
             var retVal = false;
 
-            if (value.Value != null)
+            if (value.Value == null)
                 return false;
 
             if (typeof(System.Collections.IEnumerable).IsAssignableFrom(value.Value.GetType()))

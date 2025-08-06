@@ -69,7 +69,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [DataRow(false)]
         public async Task DeleteApp_LogsError_DisplaysError_ClearsCfAppValue_AndClosesDialog_WhenDeleteAppAsyncFails(bool deleteRoutes)
         {
-            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(_fakeCfInstanceViewModel);
+            MockTasExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(_fakeCfInstanceViewModel);
             MockCloudFoundryService.Setup(m => m.DeleteAppAsync(_fakeCfApp, false, deleteRoutes, 1)).ReturnsAsync(_fakeFailureDetailedResult);
 
             Assert.AreEqual(_fakeCfApp, _sut.CfApp);
@@ -91,7 +91,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             var fakeExceptionMsg = "something went wrong in DeleteAppAsync ;)";
 
-            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(_fakeCfInstanceViewModel);
+            MockTasExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(_fakeCfInstanceViewModel);
             MockCloudFoundryService.Setup(m => m.DeleteAppAsync(_fakeCfApp, false, deleteRoutes, 1)).Throws(new Exception(fakeExceptionMsg));
 
             Assert.AreEqual(_fakeCfApp, _sut.CfApp);

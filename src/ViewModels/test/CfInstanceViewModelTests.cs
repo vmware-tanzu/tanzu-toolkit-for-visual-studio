@@ -15,7 +15,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
     {
         private CfInstanceViewModel _sut;
         private List<string> _receivedEvents;
-        private TasExplorerViewModel _fakeTasExplorerViewModel;
+        private TanzuExplorerViewModel _fakeTasExplorerViewModel;
         private CloudFoundryInstance _expectedCf;
         private readonly bool _expectedSkipSslValue = false;
         private readonly int _expectedRetryAmount = 1;
@@ -57,7 +57,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     collection.Add(item);
                 });
 
-            _fakeTasExplorerViewModel = new TasExplorerViewModel(Services);
+            _fakeTasExplorerViewModel = new TanzuExplorerViewModel(Services);
             _sut = new CfInstanceViewModel(_fakeCfInstance, _fakeTasExplorerViewModel, Services);
             _sut = new CfInstanceViewModel(_fakeCfInstance, _fakeTasExplorerViewModel, Services, expanded: true);
 
@@ -101,7 +101,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ctor")]
         public void Constructor_SetsParentTasExplorer()
         {
-            Assert.AreEqual(_fakeTasExplorerViewModel, _sut.ParentTasExplorer);
+            Assert.AreEqual(_fakeTasExplorerViewModel, _sut.ParentTanzuExplorer);
         }
 
         [TestMethod]
@@ -310,13 +310,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 .ReturnsAsync(fakeInvalidTokenResponse);
 
             Assert.IsTrue(_sut.IsExpanded);
-            Assert.IsFalse(_sut.ParentTasExplorer.AuthenticationRequired);
+            Assert.IsFalse(_sut.ParentTanzuExplorer.AuthenticationRequired);
 
             await _sut.UpdateAllChildren();
 
             Assert.IsFalse(_sut.IsLoading);
             Assert.IsFalse(_sut.IsExpanded);
-            Assert.IsTrue(_sut.ParentTasExplorer.AuthenticationRequired);
+            Assert.IsTrue(_sut.ParentTanzuExplorer.AuthenticationRequired);
         }
 
         [TestMethod]

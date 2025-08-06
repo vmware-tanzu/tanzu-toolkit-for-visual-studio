@@ -11,7 +11,7 @@ using Tanzu.Toolkit.ViewModels.AppDeletionConfirmation;
 
 namespace Tanzu.Toolkit.ViewModels
 {
-    public class TasExplorerViewModel : AbstractViewModel, ITasExplorerViewModel
+    public class TanzuExplorerViewModel : AbstractViewModel, ITanzuExplorerViewModel
     {
         internal const string _deleteAppErrorMsg = "Encountered an error while deleting app";
         internal const string _stopAppErrorMsg = "Encountered an error while stopping app";
@@ -36,7 +36,7 @@ namespace Tanzu.Toolkit.ViewModels
         private readonly IDataPersistenceService _dataPersistenceService;
         private readonly IViewLocatorService _viewLocatorService;
 
-        public TasExplorerViewModel(IServiceProvider services)
+        public TanzuExplorerViewModel(IServiceProvider services)
             : base(services)
         {
             _errorDialogService = services.GetRequiredService<IErrorDialog>();
@@ -51,7 +51,7 @@ namespace Tanzu.Toolkit.ViewModels
 
             if (!savedConnectionCredsExist || existingSavedConnectionName == null || existingSavedConnectionAddress == null)
             {
-                TasConnection = null;
+                CloudFoundryConnection = null;
             }
             else
             {
@@ -64,7 +64,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public CfInstanceViewModel TasConnection
+        public CfInstanceViewModel CloudFoundryConnection
         {
             get => _tas;
 
@@ -87,7 +87,7 @@ namespace Tanzu.Toolkit.ViewModels
                     };
                 }
 
-                RaisePropertyChangedEvent("TasConnection");
+                RaisePropertyChangedEvent("CloudFoundryConnection");
             }
         }
 
@@ -103,7 +103,7 @@ namespace Tanzu.Toolkit.ViewModels
         }
 
         /// <summary>
-        /// A thread-safe indicator of whether this <see cref="TasExplorerViewModel"/> 
+        /// A thread-safe indicator of whether this <see cref="TanzuExplorerViewModel"/> 
         /// is in the process of updating all <see cref="CfInstanceViewModel"/>s, 
         /// <see cref="OrgViewModel"/>s, <see cref="SpaceViewModel"/>s & <see cref="AppViewModel"/>s.
         /// </summary>
@@ -140,13 +140,13 @@ namespace Tanzu.Toolkit.ViewModels
 
                 if (value == true)
                 {
-                    if (TasConnection != null)
+                    if (CloudFoundryConnection != null)
                     {
-                        TasConnection.IsExpanded = false;
+                        CloudFoundryConnection.IsExpanded = false;
                     }
                     else
                     {
-                        Logger.Error("Set AuthenticationRequired => true but there is no TasConnection to collapse");
+                        Logger.Error("Set AuthenticationRequired => true but there is no CloudFoundryConnection to collapse");
                     }
                 }
 
@@ -171,12 +171,12 @@ namespace Tanzu.Toolkit.ViewModels
             return true;
         }
 
-        public bool CanStopCfApp(object arg)
+        public bool CanStopCloudFoundryApp(object arg)
         {
             return true;
         }
 
-        public bool CanStartCfApp(object arg)
+        public bool CanStartCloudFoundryApp(object arg)
         {
             return true;
         }
@@ -211,7 +211,7 @@ namespace Tanzu.Toolkit.ViewModels
             return AuthenticationRequired;
         }
 
-        public bool CanLogOutTas(object arg)
+        public bool CanLogOutCloudFoundry(object arg)
         {
             return IsLoggedIn;
         }
@@ -219,7 +219,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public void OpenLoginView(object parent)
         {
-            if (TasConnection != null)
+            if (CloudFoundryConnection != null)
             {
                 var errorMsg = _singleLoginErrorMessage1 + Environment.NewLine + _singleLoginErrorMessage2;
 
@@ -229,7 +229,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 if (DialogService.ShowModal(nameof(LoginViewModel)) == null)
                 {
-                    Logger?.Error("{ClassName}.{MethodName} encountered null DialogResult, indicating that something went wrong trying to construct the view.", nameof(TasExplorerViewModel), nameof(OpenLoginView));
+                    Logger?.Error("{ClassName}.{MethodName} encountered null DialogResult, indicating that something went wrong trying to construct the view.", nameof(TanzuExplorerViewModel), nameof(OpenLoginView));
                     var title = "Something went wrong while trying to display login window";
                     var msg = "View construction failed" +
                         Environment.NewLine + Environment.NewLine +
@@ -248,11 +248,11 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public async Task StopCfApp(object app)
+        public async Task StopCloudFoundryApp(object app)
         {
             if (app is CloudFoundryApp cfApp)
             {
-                var stopResult = await TasConnection.CfClient.StopAppAsync(cfApp);
+                var stopResult = await CloudFoundryConnection.CfClient.StopAppAsync(cfApp);
                 if (!stopResult.Succeeded)
                 {
                     Logger.Error(_stopAppErrorMsg + " {AppName}. {StopResult}", cfApp.AppName, stopResult.ToString());
@@ -261,11 +261,11 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public async Task StartCfApp(object app)
+        public async Task StartCloudFoundryApp(object app)
         {
             if (app is CloudFoundryApp cfApp)
             {
-                var startResult = await TasConnection.CfClient.StartAppAsync(cfApp);
+                var startResult = await CloudFoundryConnection.CfClient.StartAppAsync(cfApp);
                 if (!startResult.Succeeded)
                 {
                     Logger.Error(_startAppErrorMsg + " {AppName}. {StartResult}", cfApp.AppName, startResult.ToString());
@@ -278,7 +278,7 @@ namespace Tanzu.Toolkit.ViewModels
         {
             if (app is CloudFoundryApp cfApp)
             {
-                var recentLogsResult = await TasConnection.CfClient.GetRecentLogsAsync(cfApp);
+                var recentLogsResult = await CloudFoundryConnection.CfClient.GetRecentLogsAsync(cfApp);
                 if (!recentLogsResult.Succeeded)
                 {
                     if (recentLogsResult.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
@@ -344,7 +344,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public void RefreshAllItems(object arg = null)
         {
-            if (TasConnection == null)
+            if (CloudFoundryConnection == null)
             {
                 IsRefreshingAll = false;
                 ThreadingService.IsPolling = false;
@@ -358,12 +358,12 @@ namespace Tanzu.Toolkit.ViewModels
 
         public void SetConnection(CloudFoundryInstance cf)
         {
-            if (TasConnection != null)
+            if (CloudFoundryConnection != null)
             {
                 return;
             }
 
-            TasConnection = new CfInstanceViewModel(cf, this, Services);
+            CloudFoundryConnection = new CfInstanceViewModel(cf, this, Services);
 
             AuthenticationRequired = false;
 
@@ -374,27 +374,27 @@ namespace Tanzu.Toolkit.ViewModels
                 ThreadingService.StartRecurrentUiTaskInBackground(RefreshAllItems, null, 10);
             }
 
-            _dataPersistenceService.WriteStringData(_connectionNameKey, TasConnection.CloudFoundryInstance.InstanceName);
-            _dataPersistenceService.WriteStringData(_connectionAddressKey, TasConnection.CloudFoundryInstance.ApiAddress);
+            _dataPersistenceService.WriteStringData(_connectionNameKey, CloudFoundryConnection.CloudFoundryInstance.InstanceName);
+            _dataPersistenceService.WriteStringData(_connectionAddressKey, CloudFoundryConnection.CloudFoundryInstance.ApiAddress);
             _dataPersistenceService.WriteStringData(_connectionSslPolicyKey,
-                TasConnection.CloudFoundryInstance.SkipSslCertValidation ? _skipCertValidationValue : _validateSslCertsValue);
+                CloudFoundryConnection.CloudFoundryInstance.SkipSslCertValidation ? _skipCertValidationValue : _validateSslCertsValue);
         }
 
-        public void LogOutTas(object arg = null)
+        public void LogOutCloudFoundry(object arg = null)
         {
             IsRefreshingAll = false;
             ThreadingService.IsPolling = false;
-            TasConnection.CfClient.LogoutCfUser();
+            CloudFoundryConnection.CfClient.LogoutCfUser();
             _dataPersistenceService.ClearData(_connectionNameKey);
             _dataPersistenceService.ClearData(_connectionAddressKey);
             _dataPersistenceService.ClearData(_connectionSslPolicyKey);
             IsLoggedIn = false;
-            TasConnection = null;
+            CloudFoundryConnection = null;
         }
 
         public void ReAuthenticate(object arg)
         {
-            LogOutTas(TasConnection);
+            LogOutCloudFoundry(CloudFoundryConnection);
             OpenLoginView(null);
         }
 

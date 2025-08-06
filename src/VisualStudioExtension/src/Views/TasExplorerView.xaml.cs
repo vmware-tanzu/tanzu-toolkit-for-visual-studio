@@ -39,20 +39,20 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             InitializeComponent();
         }
 
-        public TasExplorerView(ITasExplorerViewModel viewModel, IThemeService themeService, IToolWindowService viewService)
+        public TasExplorerView(ITanzuExplorerViewModel viewModel, IThemeService themeService, IToolWindowService viewService)
         {
             bool alwaysTrue(object arg) { return true; }
 
             ViewModel = viewModel;
 
             OpenLoginFormCommand = new DelegatingCommand(viewModel.OpenLoginView, viewModel.CanOpenLoginView);
-            StopCfAppCommand = new AsyncDelegatingCommand(viewModel.StopCfApp, viewModel.CanStopCfApp);
-            StartCfAppCommand = new AsyncDelegatingCommand(viewModel.StartCfApp, viewModel.CanStartCfApp);
+            StopCfAppCommand = new AsyncDelegatingCommand(viewModel.StopCloudFoundryApp, viewModel.CanStopCloudFoundryApp);
+            StartCfAppCommand = new AsyncDelegatingCommand(viewModel.StartCloudFoundryApp, viewModel.CanStartCloudFoundryApp);
             OpenDeletionViewCommand = new DelegatingCommand(viewModel.OpenDeletionView, viewModel.CanOpenDeletionView);
             RefreshSpaceCommand = new AsyncDelegatingCommand(viewModel.RefreshSpace, viewModel.CanRefreshSpace);
             RefreshOrgCommand = new AsyncDelegatingCommand(viewModel.RefreshOrg, viewModel.CanRefreshOrg);
             RefreshAllCommand = new DelegatingCommand(viewModel.RefreshAllItems, viewModel.CanInitiateFullRefresh);
-            DeleteConnectionCommand = new DelegatingCommand(viewModel.LogOutTas, viewModel.CanLogOutTas);
+            DeleteConnectionCommand = new DelegatingCommand(viewModel.LogOutCloudFoundry, viewModel.CanLogOutCloudFoundry);
             ReAuthenticateCommand = new DelegatingCommand(viewModel.ReAuthenticate, viewModel.CanReAuthenticate);
             StreamAppLogsCommand = new DelegatingCommand(viewModel.StreamAppLogs, alwaysTrue);
 

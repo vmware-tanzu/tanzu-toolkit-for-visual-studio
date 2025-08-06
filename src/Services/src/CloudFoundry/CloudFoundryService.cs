@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -1444,64 +1444,14 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             var apiVersion = await _cfCliService.GetApiVersion();
             if (apiVersion == null)
             {
-                _fileService.CliVersion = 7;
                 _dialogService.DisplayErrorDialog(_ccApiVersionUndetectableErrTitle, _ccApiVersionUndetectableErrMsg);
             }
             else
             {
-                switch (apiVersion.Major)
-                {
-                    case 2:
-                        if (apiVersion < new Version("2.128.0"))
-                        {
-                            _fileService.CliVersion = 6;
-
-                            var errorTitle = "API version not supported";
-                            var errorMsg = "Detected a Cloud Controller API version lower than the minimum supported version (2.128.0); some features of this extension may not work as expected for the given instance.";
-
-                            _logger.Information(errorMsg);
-                            _dialogService.DisplayErrorDialog(errorTitle, errorMsg);
-                        }
-                        else if (apiVersion < new Version("2.150.0"))
-                        {
-                            _fileService.CliVersion = 6;
-                        }
-                        else
-                        {
-                            _fileService.CliVersion = 7;
-                        }
-
-                        break;
-
-                    case 3:
-                        if (apiVersion < new Version("3.63.0"))
-                        {
-                            _fileService.CliVersion = 6;
-
-                            var errorTitle = "API version not supported";
-                            var errorMsg = "Detected a Cloud Controller API version lower than the minimum supported version (3.63.0); some features of this extension may not work as expected for the given instance.";
-
-                            _logger.Information(errorMsg);
-                            _dialogService.DisplayErrorDialog(errorTitle, errorMsg);
-                        }
-                        else if (apiVersion < new Version("3.85.0"))
-                        {
-                            _fileService.CliVersion = 6;
-                        }
-                        else
-                        {
-                            _fileService.CliVersion = 7;
-                        }
-
-                        break;
-
-                    default:
-                        _fileService.CliVersion = 7;
-                        _logger.Information("Detected an unexpected Cloud Controller API version: {apiVersion}. CLI version has been set to 7 by default.", apiVersion);
-
-                        break;
-                }
+                _logger.Information("Detected a Cloud Controller API version: {apiVersion}. CLI version has been set to 8.", apiVersion);
             }
+
+            _fileService.CliVersion = 8;
         }
     }
 }
