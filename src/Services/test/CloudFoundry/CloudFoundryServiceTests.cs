@@ -153,13 +153,13 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
         [TestMethod]
         [TestCategory("MatchCliVersionToApiVersion")]
-        public async Task MatchCliVersionToApiVersion_SetsCliVersionTo7_AndRaisesErrorDialog_WhenApiVersionCouldNotBeDetected()
+        public async Task MatchCliVersionToApiVersion_SetsCliVersionTo8_AndRaisesErrorDialog_WhenApiVersionCouldNotBeDetected()
         {
             _mockCfCliService.Setup(mock => mock.
                 AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
                     .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
 
-            var expectedCliVersion = 7;
+            var expectedCliVersion = 8;
 
             _mockCfCliService.Setup(m => m.
                 GetApiVersion()).ReturnsAsync((Version)null);
@@ -174,130 +174,6 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             _mockErrorDialogWindowService.Verify(m => m.
                 DisplayErrorDialog(CloudFoundryService._ccApiVersionUndetectableErrTitle, CloudFoundryService._ccApiVersionUndetectableErrMsg),
                     Times.Once);
-        }
-
-        [TestMethod]
-        [TestCategory("MatchCliVersionToApiVersion")]
-        public async Task MatchCliVersionToApiVersion_SetsCliVersionTo6_WhenApiMajorVersionIs2_AndBetweenMinors_128_149()
-        {
-            _mockCfCliService.Setup(mock => mock.
-                AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
-                    .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
-
-            var expectedCliVersion = 6;
-            var versionInputs = new Version[]
-            {
-                new(major: 2, minor: 149, build: 0),
-                new(major: 2, minor: 138, build: 0),
-                new(major: 2, minor: 128, build: 0),
-            };
-
-            foreach (var mockApiVersion in versionInputs)
-            {
-                _mockCfCliService.Setup(m => m.
-                    GetApiVersion()).ReturnsAsync(mockApiVersion);
-
-                _mockFileService.SetupSet(m => m.
-                    CliVersion = expectedCliVersion).Verifiable();
-
-                var result = await _sut.LoginWithCredentials(_fakeValidUsername, _fakeValidPassword);
-
-                _mockFileService.VerifyAll();
-                _mockCfCliService.VerifyAll();
-            }
-        }
-
-        [TestMethod]
-        [TestCategory("MatchCliVersionToApiVersion")]
-        public async Task MatchCliVersionToApiVersion_SetsCliVersionTo6_WhenApiMajorVersionIs3_AndBetweenMinors_63_84()
-        {
-            _mockCfCliService.Setup(mock => mock.
-                AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
-                    .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
-
-            var expectedCliVersion = 6;
-            var versionInputs = new Version[]
-            {
-                new(major: 3, minor: 84, build: 0),
-                new(major: 3, minor: 73, build: 0),
-                new(major: 3, minor: 63, build: 0),
-            };
-
-            foreach (var mockApiVersion in versionInputs)
-            {
-                _mockCfCliService.Setup(m => m.
-                    GetApiVersion()).ReturnsAsync(mockApiVersion);
-
-                _mockFileService.SetupSet(m => m.
-                    CliVersion = expectedCliVersion).Verifiable();
-
-                var result = await _sut.LoginWithCredentials(_fakeValidUsername, _fakeValidPassword);
-
-                _mockFileService.VerifyAll();
-                _mockCfCliService.VerifyAll();
-            }
-        }
-
-        [TestMethod]
-        [TestCategory("MatchCliVersionToApiVersion")]
-        public async Task MatchCliVersionToApiVersion_SetsCliVersionTo7_WhenApiMajorVersionIs2_AndAtOrAboveMinorVersion_150()
-        {
-            _mockCfCliService.Setup(mock => mock.
-                AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
-                    .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
-
-            var expectedCliVersion = 7;
-            var versionInputs = new Version[]
-            {
-                new(major: 2, minor: 150, build: 0),
-                new(major: 2, minor: 189, build: 0),
-                new(major: 2, minor: 150, build: 1),
-            };
-
-            foreach (var mockApiVersion in versionInputs)
-            {
-                _mockCfCliService.Setup(m => m.
-                    GetApiVersion()).ReturnsAsync(mockApiVersion);
-
-                _mockFileService.SetupSet(m => m.
-                    CliVersion = expectedCliVersion).Verifiable();
-
-                var result = await _sut.LoginWithCredentials(_fakeValidUsername, _fakeValidPassword);
-
-                _mockFileService.VerifyAll();
-                _mockCfCliService.VerifyAll();
-            }
-        }
-
-        [TestMethod]
-        [TestCategory("MatchCliVersionToApiVersion")]
-        public async Task MatchCliVersionToApiVersion_SetsCliVersionTo7_WhenApiMajorVersionIs3_AndAtOrAboveMinorVersion_85()
-        {
-            _mockCfCliService.Setup(mock => mock.
-                AuthenticateAsync(_fakeValidUsername, _fakeValidPassword))
-                    .ReturnsAsync(new DetailedResult(true, null, _fakeSuccessCmdResult));
-
-            var expectedCliVersion = 7;
-            var versionInputs = new Version[]
-            {
-                new(major: 3, minor: 85, build: 0),
-                new(major: 3, minor: 178, build: 0),
-                new(major: 3, minor: 85, build: 1),
-            };
-
-            foreach (var mockApiVersion in versionInputs)
-            {
-                _mockCfCliService.Setup(m => m.
-                    GetApiVersion()).ReturnsAsync(mockApiVersion);
-
-                _mockFileService.SetupSet(m => m.
-                    CliVersion = expectedCliVersion).Verifiable();
-
-                var result = await _sut.LoginWithCredentials(_fakeValidUsername, _fakeValidPassword);
-
-                _mockFileService.VerifyAll();
-                _mockCfCliService.VerifyAll();
-            }
         }
 
         [TestMethod]

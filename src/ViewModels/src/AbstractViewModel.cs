@@ -16,7 +16,7 @@ namespace Tanzu.Toolkit.ViewModels
     public abstract class AbstractViewModel : IViewModel, INotifyPropertyChanged
     {
         private object _activeView;
-        private ITasExplorerViewModel _tasExplorer;
+        private ITanzuExplorerViewModel _tanzuExplorer;
         private ICloudFoundryService _cfClient;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -61,17 +61,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public ISerializationService SerializationService { get; }
 
-        public ITasExplorerViewModel TasExplorer
-        {
-            get
-            {
-                if (_tasExplorer == null)
-                {
-                    _tasExplorer = Services.GetRequiredService<ITasExplorerViewModel>();
-                }
-                return _tasExplorer;
-            }
-        }
+        public ITanzuExplorerViewModel TanzuExplorer => _tanzuExplorer ?? (_tanzuExplorer = Services.GetRequiredService<ITanzuExplorerViewModel>());
 
         public ICloudFoundryService CfClient
         {
@@ -79,12 +69,12 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 if (_cfClient == null)
                 {
-                    if (TasExplorer.TasConnection == null)
+                    if (TanzuExplorer.CloudFoundryConnection == null)
                     {
                         Logger.Information("Detected null Tanzu Platform connection in AbstractViewModel; prompting login");
-                        DialogService.ShowModal(typeof(LoginViewModel).Name);
+                        DialogService.ShowModal(nameof(LoginViewModel));
                     }
-                    _cfClient = TasExplorer.TasConnection?.CfClient;
+                    _cfClient = TanzuExplorer.CloudFoundryConnection?.CfClient;
                     if (_cfClient == null)
                     {
                         Logger.Information("CF client still null after prompting login");

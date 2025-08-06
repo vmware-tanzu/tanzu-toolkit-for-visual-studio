@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,6 +11,7 @@ using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CloudFoundry;
+using Tanzu.Toolkit.Services.DataPersistence;
 using Tanzu.Toolkit.Services.DebugAgentProvider;
 using Tanzu.Toolkit.Services.DotnetCli;
 using Tanzu.Toolkit.Services.File;
@@ -22,12 +23,13 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 {
     public class RemoteDebugViewModel : AbstractViewModel, IRemoteDebugViewModel
     {
-        internal ITasExplorerViewModel _tasExplorer;
+        internal ITanzuExplorerViewModel _tanzuExplorer;
         private ICloudFoundryService _cfClient;
         private readonly ICfCliService _cfCliService;
         private readonly IDotnetCliService _dotnetCliService;
         private readonly IFileService _fileService;
         private readonly ISerializationService _serializationService;
+        private readonly IDataPersistenceService _dataPersistenceService;
         private readonly IDebugAgentProvider _vsdbgInstaller;
         private readonly IView _outputView;
         private readonly IOutputViewModel _outputViewModel;
@@ -48,13 +50,8 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private bool _launchFileExists;
         private CancellationTokenSource _tokenSource;
         private const string _appDirLinux = "/home/vcap/app";
-        private const string _appDirWindows = "c:\\Users\\vcap\\app";
-        private const string _vsdbgInstallationDirLinux = "/home/vcap/app/vsdbg";
-        private const string _vsdbgInstallationDirWindows = "c:\\Users\\vcap\\app\\vsdbg";
-        private const string _vsdbgExecutableNameLinux = "vsdbg";
-        private const string _vsdbgExecutableNameWindows = "vsdbg.exe";
-        private readonly string _vsdbgPathLinux;
-        private readonly string _vsdbgPathWindows;
+        private const string _appDirWindows = @"c:\Users\vcap\app";
+        private string _vsdbgInstallPath;
         public static readonly string _launchFileName = "launch.json";
         private readonly JsonSerializerOptions _serializationOptions = new JsonSerializerOptions
         {
@@ -68,15 +65,13 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             _targetFrameworkMoniker = targetFrameworkMoniker;
             _expectedPathToLaunchFile = expectedPathToLaunchFile;
             _initiateDebugCallback = initiateDebugCallback;
-            _tasExplorer = services.GetRequiredService<ITasExplorerViewModel>();
+            _tanzuExplorer = services.GetRequiredService<ITanzuExplorerViewModel>();
             _cfCliService = services.GetRequiredService<ICfCliService>();
             _dotnetCliService = services.GetRequiredService<IDotnetCliService>();
             _fileService = services.GetRequiredService<IFileService>();
             _serializationService = services.GetRequiredService<ISerializationService>();
             _vsdbgInstaller = services.GetRequiredService<IDebugAgentProvider>();
-
-            _vsdbgPathLinux = _vsdbgInstallationDirLinux + "/" + _vsdbgExecutableNameLinux;
-            _vsdbgPathWindows = _vsdbgInstallationDirWindows + "\\" + _vsdbgExecutableNameWindows;
+            _dataPersistenceService = services.GetRequiredService<IDataPersistenceService>();
 
             _outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel), $"Remote Debug Output (\"{_projectName}\")") as IView;
             _outputViewModel = _outputView?.ViewModel as IOutputViewModel;
@@ -85,7 +80,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
             if (IsLoggedIn)
             {
-                _cfClient = _tasExplorer.TasConnection.CfClient;
+                _cfClient = _tanzuExplorer.CloudFoundryConnection.CfClient;
                 var _ = PromptAppSelectionAsync(expectedAppName);
             }
         }
@@ -195,10 +190,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             }
         }
 
-        public string PushNewAppButtonText
-        {
-            get => "Push New App to Debug";
-        }
+        public string PushNewAppButtonText => "Push New App to Debug";
 
         public Action<object> CancelDebugging { get; set; }
 
@@ -208,13 +200,13 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         public void OpenLoginView(object arg = null)
         {
-            _tasExplorer.OpenLoginView(arg);
+            _tanzuExplorer.OpenLoginView(arg);
 
-            if (_tasExplorer != null && _tasExplorer.TasConnection != null)
+            if (_tanzuExplorer?.CloudFoundryConnection != null)
             {
                 IsLoggedIn = true;
-                _cfClient = _tasExplorer.TasConnection.CfClient;
-                var _ = PromptAppSelectionAsync(_projectName);
+                _cfClient = _tanzuExplorer.CloudFoundryConnection.CfClient;
+                _ = PromptAppSelectionAsync(_projectName);
             }
         }
 
@@ -281,7 +273,6 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             StopDebuggingAndCloseIfCancelled(ct);
 
             _launchFileExists = false;
-            var remoteDebugAgentDir = stack.Contains("win") ? _vsdbgInstallationDirWindows : _vsdbgInstallationDirLinux;
 
             try
             {
@@ -301,8 +292,8 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                     }
 
                     var sshCmd = stack.Contains("win")
-                        ? $"{_vsdbgPathWindows}"
-                        : $"/tmp/lifecycle/shell {_appDirLinux} {_vsdbgPathLinux}";
+                        ? $"{_vsdbgInstallPath}"
+                        : $"/tmp/lifecycle/shell {_appDirLinux} {_vsdbgInstallPath}";
 
                     var launchFileConfig = new RemoteDebugLaunchConfig
                     {
@@ -322,7 +313,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                             CLR = "449EC4CC-30D2-4032-9256-EE18EB41B62B",
                             MDA = "6ECE07A9-0EDE-45C4-8296-818D8FC401D4",
                         },
-                        configurations = new Configuration[]
+                        configurations = new[]
                         {
                             new Configuration
                             {
@@ -331,7 +322,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                                 processName = appProcessName,
                                 request = "attach",
                                 justMyCode = false,
-                                cwd = remoteDebugAgentDir,
+                                cwd = _vsdbgInstallPath,
                                 logging = new Logging
                                 {
                                     engineLogging = true,
@@ -349,7 +340,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             {
                 Logger.Error("Failed to create launch file for remote debugging: {FileCreationException}", ex);
                 ErrorService.DisplayErrorDialog("Unable to attach to remote debugging agent.", $"Failed to specify launch configuration \"{_launchFileName}\".\n" +
-                    $"It may help to try disconnecting & signing into Tanzu Platform again; if this issue persists, please contact tas-vs-extension@vmware.com");
+                    "It may help to try disconnecting & signing into Tanzu Platform again; if this issue persists, please contact tas-vs-extension@vmware.com");
                 _launchFileExists = false;
             }
         }
@@ -368,7 +359,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             projSvc.TargetFrameworkMoniker = _targetFrameworkMoniker;
 
             var view = ViewLocatorService.GetViewByViewModelName(nameof(DeploymentDialogViewModel)) as IView;
-            var deploymentViewModel = view.ViewModel as IDeploymentDialogViewModel;
+
             if (view.ViewModel is IDeploymentDialogViewModel vm)
             {
                 vm.ConfigureForRemoteDebugging = true;
@@ -384,6 +375,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             _debugAgentInstalled = await CheckForVsdbg(AppToDebug.Stack, ct);
             if (!_debugAgentInstalled)
             {
+                // TODO: install vsdbg from path set in options
                 LoadingMessage = $"Installing debugging agent for {AppToDebug.AppName}...";
                 var installationResult = await _vsdbgInstaller.InstallVsdbgForCFAppAsync(AppToDebug);
                 _debugAgentInstalled = await CheckForVsdbg(AppToDebug.Stack, ct);
@@ -416,7 +408,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         {
             AppToDebug = null;
             LoadingMessage = null;
-            IsLoggedIn = _tasExplorer != null && _tasExplorer.TasConnection != null;
+            IsLoggedIn = _tanzuExplorer != null && _tanzuExplorer.CloudFoundryConnection != null;
             CanCancel = true;
             CancelDebugging = (object arg) =>
             {
@@ -429,20 +421,36 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             StopDebuggingAndCloseIfCancelled(ct);
 
             LoadingMessage = $"Checking for debugging agent on {AppToDebug.AppName}...";
-            DetailedResult sshResult;
-            var sshCommand = $"ls {_vsdbgInstallationDirLinux}";
-            var vsdbgName = _vsdbgExecutableNameLinux;
-
+            const string vsdbgDll = "vsdbg.managed.dll";
+            var vsdbgSearchDirectory = "/home/vcap/app/vsdbg/";
+            var sshCommand = $"ls {vsdbgSearchDirectory}";
+            var pathSeparator = "/";
             if (stack.Contains("win"))
             {
-                sshCommand = $"dir {_vsdbgInstallationDirWindows}";
-                vsdbgName = _vsdbgExecutableNameWindows;
+                vsdbgSearchDirectory = @"c:\Users\vcap\app\vsdbg\";
+                sshCommand = $"dir {vsdbgSearchDirectory}";
+                pathSeparator = "\\";
             }
 
-            sshResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
-            var vsdbExecutableListed = sshResult.CmdResult.StdOut.Contains(vsdbgName);
+            var sshResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
+            var vsdbExecutableListed = sshResult.CmdResult.StdOut.IndexOf(vsdbgDll, StringComparison.OrdinalIgnoreCase) >= 0;
+            if (sshResult.Succeeded && vsdbExecutableListed)
+            {
+                _vsdbgInstallPath = vsdbgSearchDirectory + "vsdbg";
+                return true;
+            }
 
-            return sshResult.Succeeded && vsdbExecutableListed;
+            vsdbgSearchDirectory += "vsdbg";
+            sshCommand += "vsdbg";
+            sshResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
+            vsdbExecutableListed = sshResult.CmdResult.StdOut.IndexOf(vsdbgDll, StringComparison.OrdinalIgnoreCase) >= 0;
+            if (sshResult.Succeeded && vsdbExecutableListed)
+            {
+                _vsdbgInstallPath = vsdbgSearchDirectory + pathSeparator + "vsdbg";
+                return true;
+            }
+
+            return false;
         }
 
         private async Task PopulateAccessibleAppsAsync()
@@ -450,11 +458,11 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             var apps = new List<CloudFoundryApp>();
             var appListLock = new object();
 
-            var orgsResult = await _cfClient.GetOrgsForCfInstanceAsync(_tasExplorer.TasConnection.CloudFoundryInstance);
+            var orgsResult = await _cfClient.GetOrgsForCfInstanceAsync(_tanzuExplorer.CloudFoundryConnection.CloudFoundryInstance);
             if (!orgsResult.Succeeded)
             {
                 var title = "Unable to initiate remote debugging";
-                var msg = $"Something went wrong while querying apps on {_tasExplorer.TasConnection.CloudFoundryInstance.InstanceName}.\nIt may help to try disconnecting & signing into Tanzu Platform again; if this issue persists, please contact tas-vs-extension@vmware.com";
+                var msg = $"Something went wrong while querying apps on {_tanzuExplorer.CloudFoundryConnection.CloudFoundryInstance.InstanceName}.\nIt may help to try disconnecting & signing into Tanzu Platform again; if this issue persists, please contact tas-vs-extension@vmware.com";
                 Logger.Error(title + "; " + "orgs request failed: {OrgsError}", orgsResult.Explanation);
                 ErrorService.DisplayErrorDialog(title, msg);
                 Close();

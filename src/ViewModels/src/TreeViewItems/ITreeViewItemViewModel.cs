@@ -11,6 +11,6 @@ namespace Tanzu.Toolkit.ViewModels
         TreeViewItemViewModel Parent { get; }
         PlaceholderViewModel LoadingPlaceholder { get; }
         PlaceholderViewModel EmptyPlaceholder { get; }
-        ITasExplorerViewModel ParentTasExplorer { get; set; }
+        ITanzuExplorerViewModel ParentTanzuExplorer { get; set; }
     }
 }

@@ -60,7 +60,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     collection.Add(item);
                 });
 
-            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(_fakeCfInstanceViewModel);
+            MockTasExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(_fakeCfInstanceViewModel);
 
             _sut = new OrgViewModel(_fakeCfOrg, _fakeCfInstanceViewModel, MockTasExplorerViewModel.Object, Services, expanded: true);
 
@@ -110,7 +110,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ctor")]
         public void Constructor_SetsParentTasExplorer()
         {
-            Assert.AreEqual(MockTasExplorerViewModel.Object, _sut.ParentTasExplorer);
+            Assert.AreEqual(MockTasExplorerViewModel.Object, _sut.ParentTanzuExplorer);
         }
 
         [TestMethod]
@@ -330,7 +330,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockTasExplorerViewModel.SetupSet(m => m.AuthenticationRequired = true).Verifiable();
 
             Assert.IsTrue(_sut.IsExpanded);
-            Assert.IsFalse(_sut.ParentTasExplorer.AuthenticationRequired);
+            Assert.IsFalse(_sut.ParentTanzuExplorer.AuthenticationRequired);
 
             await _sut.UpdateAllChildren();
 

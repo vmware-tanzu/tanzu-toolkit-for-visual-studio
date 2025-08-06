@@ -3,22 +3,22 @@ using Tanzu.Toolkit.Models;
 
 namespace Tanzu.Toolkit.ViewModels
 {
-    public interface ITasExplorerViewModel : IViewModel
+    public interface ITanzuExplorerViewModel : IViewModel
     {
         bool AuthenticationRequired { get; set; }
-        CfInstanceViewModel TasConnection { get; }
+        CfInstanceViewModel CloudFoundryConnection { get; }
 
         bool CanOpenLoginView(object arg);
         void OpenLoginView(object arg);
-        bool CanStopCfApp(object arg);
-        bool CanStartCfApp(object arg);
+        bool CanStopCloudFoundryApp(object arg);
+        bool CanStartCloudFoundryApp(object arg);
         bool CanOpenDeletionView(object arg);
         bool CanRefreshSpace(object arg);
         bool CanRefreshOrg(object arg);
         bool CanInitiateFullRefresh(object arg);
         bool CanDisplayRecentAppLogs(object arg);
-        Task StopCfApp(object arg);
-        Task StartCfApp(object arg);
+        Task StopCloudFoundryApp(object arg);
+        Task StartCloudFoundryApp(object arg);
         Task RefreshSpace(object arg);
         Task RefreshOrg(object arg);
         void RefreshAllItems(object arg);
@@ -26,8 +26,8 @@ namespace Tanzu.Toolkit.ViewModels
         bool CanReAuthenticate(object arg);
         void ReAuthenticate(object cf);
         void SetConnection(CloudFoundryInstance cf);
-        void LogOutTas(object arg = null);
-        bool CanLogOutTas(object arg);
+        void LogOutCloudFoundry(object arg = null);
+        bool CanLogOutCloudFoundry(object arg);
         void OpenDeletionView(object app);
         void StreamAppLogs(object app);
     }

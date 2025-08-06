@@ -14,12 +14,12 @@ namespace Tanzu.Toolkit.ViewModels.AppDeletionConfirmation
         internal CloudFoundryApp CfApp { get; set; }
 
         private readonly IErrorDialog _errorDialogService;
-        private readonly ITasExplorerViewModel _tasExplorer;
+        private readonly ITanzuExplorerViewModel _tanzuExplorer;
 
-        public AppDeletionConfirmationViewModel(ITasExplorerViewModel tasExplorerViewModel, IServiceProvider services) : base(services)
+        public AppDeletionConfirmationViewModel(ITanzuExplorerViewModel tanzuExplorerViewModel, IServiceProvider services) : base(services)
         {
             _errorDialogService = services.GetRequiredService<IErrorDialog>();
-            _tasExplorer = tasExplorerViewModel;
+            _tanzuExplorer = tanzuExplorerViewModel;
             var identifier = CfApp == null || CfApp.AppName == null || string.IsNullOrWhiteSpace(CfApp.AppName)
                 ? "this app"
                 : $"\"CfApp.AppName\"";
@@ -71,7 +71,7 @@ namespace Tanzu.Toolkit.ViewModels.AppDeletionConfirmation
         {
             try
             {
-                var deleteResult = await _tasExplorer.TasConnection.CfClient.DeleteAppAsync(CfApp, removeRoutes: DeleteRoutes);
+                var deleteResult = await _tanzuExplorer.CloudFoundryConnection.CfClient.DeleteAppAsync(CfApp, removeRoutes: DeleteRoutes);
                 if (!deleteResult.Succeeded)
                 {
                     Logger.Error(_deleteAppErrorMsg + " {AppName}. {DeleteResult}", CfApp.AppName, deleteResult.ToString());

@@ -60,7 +60,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     collection.Add(item);
                 });
 
-            MockTasExplorerViewModel.SetupGet(m => m.TasConnection).Returns(_fakeCfInstanceViewModel);
+            MockTasExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(_fakeCfInstanceViewModel);
 
             _fakeCfInstanceViewModel = new CfInstanceViewModel(_fakeCfInstance, MockTasExplorerViewModel.Object, Services, expanded: true);
             _fakeOrgViewModel = new OrgViewModel(_fakeCfOrg, _fakeCfInstanceViewModel, MockTasExplorerViewModel.Object, Services);
@@ -113,7 +113,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ctor")]
         public void Constructor_SetsParentTasExplorer()
         {
-            Assert.AreEqual(MockTasExplorerViewModel.Object, _sut.ParentTasExplorer);
+            Assert.AreEqual(MockTasExplorerViewModel.Object, _sut.ParentTanzuExplorer);
         }
 
         [TestMethod]

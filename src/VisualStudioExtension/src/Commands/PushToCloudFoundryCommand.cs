@@ -54,8 +54,8 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             _dialogService = services.GetRequiredService<IErrorDialog>();
             var loggingSvc = services.GetRequiredService<ILoggingService>();
             _logger = loggingSvc.Logger;
-            var menuCommandID = new CommandID(_commandSet, _commandId);
-            var menuItem = new MenuCommand(Execute, menuCommandID);
+            var menuCommandId = new CommandID(_commandSet, _commandId);
+            var menuItem = new MenuCommand(Execute, menuCommandId);
             commandService.AddCommand(menuItem);
         }
 

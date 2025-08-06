@@ -17,7 +17,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         private DetailedResult<string> _fakeRecentLogsResult;
         private DetailedResult<Process> _fakeLogsStreamResult;
         private FakeCfInstanceViewModel _fakeCfInstanceViewModel;
-        private ITasExplorerViewModel _fakeTasExplorerViewModel;
+        private ITanzuExplorerViewModel _fakeTanzuExplorerViewModel;
 
         [TestInitialize]
         public void TestInit()
@@ -37,13 +37,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             };
 
             _fakeCfInstanceViewModel = new FakeCfInstanceViewModel(_fakeCfInstance, Services);
-            _fakeTasExplorerViewModel = MockTasExplorerViewModel.Object;
+            _fakeTanzuExplorerViewModel = MockTasExplorerViewModel.Object;
 
-            MockTasExplorerViewModel.Setup(m => m.TasConnection).Returns(_fakeCfInstanceViewModel);
+            MockTasExplorerViewModel.Setup(m => m.CloudFoundryConnection).Returns(_fakeCfInstanceViewModel);
             MockCloudFoundryService.Setup(m => m.GetRecentLogsAsync(_fakeCfApp)).ReturnsAsync(_fakeRecentLogsResult);
             MockCloudFoundryService.Setup(m => m.StreamAppLogs(_fakeCfApp, _sut.AppendLine, _sut.AppendLine)).Returns(_fakeLogsStreamResult);
 
-            _sut = new OutputViewModel(_fakeTasExplorerViewModel, Services);
+            _sut = new OutputViewModel(_fakeTanzuExplorerViewModel, Services);
 
             _fakeOutputView = new FakeOutputView
             {

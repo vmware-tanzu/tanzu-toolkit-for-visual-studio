@@ -21,8 +21,8 @@ namespace Tanzu.Toolkit.ViewModels
         private volatile int _updatesInProgress = 0;
         private readonly object _loadingLock = new object();
 
-        public CfInstanceViewModel(CloudFoundryInstance cf, ITasExplorerViewModel parentTasExplorer, IServiceProvider services, bool expanded = false)
-            : base(null, parentTasExplorer, services, expanded: expanded)
+        public CfInstanceViewModel(CloudFoundryInstance cf, ITanzuExplorerViewModel parentTanzuExplorer, IServiceProvider services, bool expanded = false)
+            : base(null, parentTanzuExplorer, services, expanded: expanded)
         {
             _dialogService = services.GetRequiredService<IErrorDialog>();
             CfClient = services.GetRequiredService<ICloudFoundryService>();
@@ -102,7 +102,7 @@ namespace Tanzu.Toolkit.ViewModels
                                     {
                                         continue;
                                     }
-                                    var newOrg = new OrgViewModel(freshOrg, this, ParentTasExplorer, Services, expanded: false);
+                                    var newOrg = new OrgViewModel(freshOrg, this, ParentTanzuExplorer, Services, expanded: false);
                                     additionTasks.Add(ThreadingService.AddItemToCollectionOnUiThreadAsync(Children, newOrg));
                                 }
                             }
@@ -123,7 +123,7 @@ namespace Tanzu.Toolkit.ViewModels
                         else if (orgsResponse.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
                         {
                             IsExpanded = false;
-                            ParentTasExplorer.AuthenticationRequired = true;
+                            ParentTanzuExplorer.AuthenticationRequired = true;
                         }
                         else
                         {

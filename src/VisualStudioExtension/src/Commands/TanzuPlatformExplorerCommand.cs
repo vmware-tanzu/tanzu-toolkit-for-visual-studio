@@ -10,7 +10,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
     /// <summary>
     /// Command handler.
     /// </summary>
-    internal sealed class TanzuTasExplorerCommand
+    internal sealed class TanzuPlatformExplorerCommand
     {
         /// <summary>
         /// Command ID.
@@ -28,12 +28,12 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         private readonly AsyncPackage _package;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TanzuTasExplorerCommand"/> class.
+        /// Initializes a new instance of the <see cref="TanzuPlatformExplorerCommand"/> class.
         /// Adds our command handlers for menu (commands must exist in the command table file).
         /// </summary>
         /// <param name="package">Owner package, not null.</param>
         /// <param name="commandService">Command service to add command to, not null.</param>
-        private TanzuTasExplorerCommand(AsyncPackage package, OleMenuCommandService commandService)
+        private TanzuPlatformExplorerCommand(AsyncPackage package, OleMenuCommandService commandService)
         {
             _package = package ?? throw new ArgumentNullException(nameof(package));
             commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
@@ -46,7 +46,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         /// <summary>
         /// Gets the instance of the command.
         /// </summary>
-        public static TanzuTasExplorerCommand Instance
+        public static TanzuPlatformExplorerCommand Instance
         {
             get;
             private set;
@@ -63,7 +63,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
 
             var commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
-            Instance = new TanzuTasExplorerCommand(package, commandService);
+            Instance = new TanzuPlatformExplorerCommand(package, commandService);
         }
 
         /// <summary>

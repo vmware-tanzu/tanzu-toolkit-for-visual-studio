@@ -38,7 +38,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         protected Mock<IThreadingService> MockThreadingService { get; set; }
         protected Mock<IUiDispatcherService> MockUiDispatcherService { get; set; }
         protected Mock<IFileService> MockFileService { get; set; }
-        protected Mock<ITasExplorerViewModel> MockTasExplorerViewModel { get; set; }
+        protected Mock<ITanzuExplorerViewModel> MockTasExplorerViewModel { get; set; }
         protected Mock<ISerializationService> MockSerializationService { get; set; }
         protected Mock<IDataPersistenceService> MockDataPersistenceService { get; set; }
         protected Mock<IDotnetCliService> MockDotnetCliService { get; set; }
@@ -180,15 +180,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             }
         }
 
-        internal class FakeTasExplorerViewModel : ITasExplorerViewModel
+        internal class FakeTanzuExplorerViewModel : ITanzuExplorerViewModel
         {
-            public FakeTasExplorerViewModel()
+            public FakeTanzuExplorerViewModel()
             {
             }
 
             public bool AuthenticationRequired { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-            public CfInstanceViewModel TasConnection => throw new NotImplementedException();
+            public CfInstanceViewModel CloudFoundryConnection => throw new NotImplementedException();
 
             public object ActiveView { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
@@ -202,7 +202,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 throw new NotImplementedException();
             }
 
-            public bool CanLogOutTas(object arg)
+            public bool CanLogOutCloudFoundry(object arg)
             {
                 throw new NotImplementedException();
             }
@@ -232,12 +232,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 throw new NotImplementedException();
             }
 
-            public bool CanStartCfApp(object arg)
+            public bool CanStartCloudFoundryApp(object arg)
             {
                 throw new NotImplementedException();
             }
 
-            public bool CanStopCfApp(object arg)
+            public bool CanStopCloudFoundryApp(object arg)
             {
                 throw new NotImplementedException();
             }
@@ -247,7 +247,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 throw new NotImplementedException();
             }
 
-            public void LogOutTas(object arg)
+            public void LogOutCloudFoundry(object arg)
             {
                 throw new NotImplementedException();
             }
@@ -287,12 +287,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 throw new NotImplementedException();
             }
 
-            public Task StartCfApp(object arg)
+            public Task StartCloudFoundryApp(object arg)
             {
                 throw new NotImplementedException();
             }
 
-            public Task StopCfApp(object arg)
+            public Task StopCloudFoundryApp(object arg)
             {
                 throw new NotImplementedException();
             }
@@ -480,7 +480,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockThreadingService = new Mock<IThreadingService>();
             MockUiDispatcherService = new Mock<IUiDispatcherService>();
             MockFileService = new Mock<IFileService>();
-            MockTasExplorerViewModel = new Mock<ITasExplorerViewModel>();
+            MockTasExplorerViewModel = new Mock<ITanzuExplorerViewModel>();
             MockSerializationService = new Mock<ISerializationService>();
             MockDataPersistenceService = new Mock<IDataPersistenceService>();
             MockDotnetCliService = new Mock<IDotnetCliService>();

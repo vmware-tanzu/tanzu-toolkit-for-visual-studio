@@ -22,8 +22,8 @@ namespace Tanzu.Toolkit.ViewModels
 
         public CloudFoundryOrganization Org { get; }
 
-        public OrgViewModel(CloudFoundryOrganization org, CfInstanceViewModel parentCfInstanceViewModel, ITasExplorerViewModel parentTasExplorer, IServiceProvider services, bool expanded = false)
-            : base(parentCfInstanceViewModel, parentTasExplorer, services, expanded: expanded)
+        public OrgViewModel(CloudFoundryOrganization org, CfInstanceViewModel parentCfInstanceViewModel, ITanzuExplorerViewModel parentTanzuExplorer, IServiceProvider services, bool expanded = false)
+            : base(parentCfInstanceViewModel, parentTanzuExplorer, services, expanded: expanded)
         {
             _dialogService = services.GetRequiredService<IErrorDialog>();
 
@@ -55,7 +55,7 @@ namespace Tanzu.Toolkit.ViewModels
                     IsLoading = true;
                     try
                     {
-                        var spacesResponse = await ParentTasExplorer.TasConnection.CfClient.GetSpacesForOrgAsync(Org);
+                        var spacesResponse = await ParentTanzuExplorer.CloudFoundryConnection.CfClient.GetSpacesForOrgAsync(Org);
                         if (spacesResponse.Succeeded)
                         {
                             // make a working copy of children to avoid System.InvalidOperationException:
@@ -97,7 +97,7 @@ namespace Tanzu.Toolkit.ViewModels
                                     var spaceAlreadyExists = originalChildren.Any(child => child is SpaceViewModel extantSpace && extantSpace.Space.SpaceId == freshSpace.SpaceId);
                                     if (!spaceAlreadyExists)
                                     {
-                                        var newSpace = new SpaceViewModel(freshSpace, this, ParentTasExplorer, Services, expanded: false);
+                                        var newSpace = new SpaceViewModel(freshSpace, this, ParentTanzuExplorer, Services, expanded: false);
                                         additionTasks.Add(ThreadingService.AddItemToCollectionOnUiThreadAsync(Children, newSpace));
                                     }
                                 }
@@ -119,7 +119,7 @@ namespace Tanzu.Toolkit.ViewModels
                         else if (spacesResponse.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
                         {
                             IsExpanded = false;
-                            ParentTasExplorer.AuthenticationRequired = true;
+                            ParentTanzuExplorer.AuthenticationRequired = true;
                         }
                         else
                         {

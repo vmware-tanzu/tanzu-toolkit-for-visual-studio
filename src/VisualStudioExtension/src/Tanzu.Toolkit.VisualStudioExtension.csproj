@@ -50,6 +50,8 @@
   <ItemGroup>
     <Compile Include="Commands\RequestFeedbackCommand.cs" />
     <Compile Include="Commands\RemoteDebugCommand.cs" />
+    <Compile Include="Options\FolderEditor.cs" />
+    <Compile Include="Options\GeneralOptionsModel.cs" />
     <Compile Include="Services\ProjectService.cs" />
     <Compile Include="Services\VsdbgInstaller.cs" />
     <Compile Include="source.extension.cs">
@@ -100,7 +102,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TanzuToolkitForVisualStudioPackage.cs" />
     <Compile Include="VSToolWindows\TanzuCloudExplorerToolWindow.cs" />
-    <Compile Include="Commands\TanzuCloudExplorerCommand.cs" />
+    <Compile Include="Commands\TanzuPlatformExplorerCommand.cs" />
     <Compile Include="Views\DeploymentDialogView.xaml.cs">
       <DependentUpon>DeploymentDialogView.xaml</DependentUpon>
     </Compile>

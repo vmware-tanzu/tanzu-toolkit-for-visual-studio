@@ -26,9 +26,11 @@ using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.ViewModels.AppDeletionConfirmation;
 using Tanzu.Toolkit.ViewModels.RemoteDebug;
 using Tanzu.Toolkit.VisualStudio.Commands;
+using Tanzu.Toolkit.VisualStudio.Options;
 using Tanzu.Toolkit.VisualStudio.Services;
 using Tanzu.Toolkit.VisualStudio.Views;
 using Tanzu.Toolkit.VisualStudio.VSToolWindows;
+using static Tanzu.Toolkit.VisualStudio.Options.OptionsProvider;
 using Task = System.Threading.Tasks.Task;
 
 namespace Tanzu.Toolkit.VisualStudio
@@ -55,6 +57,7 @@ namespace Tanzu.Toolkit.VisualStudio
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [ProvideToolWindow(typeof(TanzuTasExplorerToolWindow))]
     [ProvideToolWindow(typeof(OutputToolWindow), MultiInstances = true, Transient = true)]
+    [ProvideOptionPage(typeof(General1Options), "Tanzu Toolkit", "General", 0, 0, true)]
     public sealed class TanzuToolkitForVisualStudioPackage : ToolkitPackage
     {
         /// <summary>
@@ -77,11 +80,18 @@ namespace Tanzu.Toolkit.VisualStudio
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
-            await TanzuTasExplorerCommand.InitializeAsync(this);
+            await TanzuPlatformExplorerCommand.InitializeAsync(this);
             await PushToCloudFoundryCommand.InitializeAsync(this, _serviceProvider);
             await OpenLogsCommand.InitializeAsync(this, _serviceProvider);
             await RequestFeedbackCommand.InitializeAsync(this);
             await RemoteDebugCommand.InitializeAsync(this, _serviceProvider);
+            GeneralOptionsModel.Saved += OnSettingsSaved;
+        }
+
+        private void OnSettingsSaved(GeneralOptionsModel obj)
+        {
+            var dataService = _serviceProvider.GetService<IDataPersistenceService>();
+            dataService.WriteStringData(nameof(obj.VsdbgPath), obj.VsdbgPath);
         }
 
         protected override object GetService(Type serviceType)
@@ -153,7 +163,7 @@ namespace Tanzu.Toolkit.VisualStudio
 
             /* View Models */
             services.AddTransient<IOutputViewModel, OutputViewModel>();
-            services.AddSingleton<ITasExplorerViewModel, TasExplorerViewModel>();
+            services.AddSingleton<ITanzuExplorerViewModel, TanzuExplorerViewModel>();
             services.AddSingleton<ILoginViewModel, LoginViewModel>();
             services.AddTransient<IDeploymentDialogViewModel, DeploymentDialogViewModel>();
             services.AddTransient<IRemoteDebugViewModel, RemoteDebugViewModel>();
