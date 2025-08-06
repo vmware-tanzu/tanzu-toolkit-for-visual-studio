@@ -41,18 +41,13 @@ steps:
     projects: '**/test/*.Tests.csproj'
     arguments: '--no-build --configuration $(buildConfiguration) --collect "XPlat Code Coverage" /p:CoverletOutputFormat=cobertura'
     
-- task: Palmmedia.reportgenerator.reportgenerator-build-release-task.reportgenerator@4
+- task: reportgenerator@5
   displayName: Build code coverage report
   inputs:
     reports: $(Agent.TempDirectory)/**/coverage.cobertura.xml
     targetdir: $(build.artifactstagingdirectory)/TestResults/
-    reporttypes: Cobertura
-
-- task: PublishCodeCoverageResults@1
-  displayName: Publish code coverage
-  inputs:
-    codeCoverageTool: cobertura
-    summaryFileLocation: $(build.artifactstagingdirectory)/TestResults/cobertura.xml
+    reporttypes: HtmlInline_AzurePipelines;Cobertura
+    publishCodeCoverageResults: true
 
 - pwsh: Rename-Item -Path "$(Build.SourcesDirectory)\src\VisualStudioExtension\src\bin\2022\$(buildConfiguration)\Tanzu.Toolkit.VisualStudio.2022.vsix" -NewName "Tanzu.Toolkit.VisualStudio.2022.$(Build.BuildNumber).vsix"
   displayName: Include version in vsix name
