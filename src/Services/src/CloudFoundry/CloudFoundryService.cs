@@ -633,11 +633,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 if (string.IsNullOrWhiteSpace(buildpack.Name))
                 {
-                    _logger.Error("CloudFoundryService.GetBuildpacksAsync encountered a buildpack without a name; omitting it from the returned list of buildpacks.");
+                    _logger.Debug($"{nameof(CloudFoundryService.GetBuildpacksAsync)} encountered a buildpack without a name; omitting it from the returned list of buildpacks.");
                 }
                 if (string.IsNullOrWhiteSpace(buildpack.Stack))
                 {
-                    _logger.Error("CloudFoundryService.GetBuildpacksAsync encountered a buildpack without a stack; omitting it from the returned list of buildpacks.");
+                    _logger.Debug($"{nameof(CloudFoundryService.GetBuildpacksAsync)} encountered a buildpack without a stack; omitting it from the returned list of buildpacks.");
                 }
                 else
                 {
