@@ -24,8 +24,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         internal static IHttpClientFactory _fakeHttpClientFactory = new FakeHttpClientFactory();
 
         internal static readonly string _fakeBasicInfoJsonResponse = JsonSerializer.Serialize(new FakeBasicInfoResponse(
-                loginHref: _fakeLoginAddress,
-                uaaHref: _fakeUaaAddress));
+            loginHref: _fakeLoginAddress,
+            uaaHref: _fakeUaaAddress));
 
         internal static readonly string _fakeOrgsJsonResponsePage1 = JsonSerializer.Serialize(new FakeOrgsResponse(
             apiAddress: _fakeCfApiAddress,

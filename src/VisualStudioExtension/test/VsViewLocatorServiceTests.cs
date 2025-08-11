@@ -90,9 +90,9 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
 
             Assert.IsNull(result);
             _mockLogger.Verify(m => m.Error(It.Is<string>(s => s.Contains("given type not classified as either modal or tool window")),
-                                            nameof(VsViewLocatorService),
-                                            nameof(_sut.GetViewByViewModelName),
-                                            _fakeViewModelName), Times.Once);
+                nameof(VsViewLocatorService),
+                nameof(_sut.GetViewByViewModelName),
+                _fakeViewModelName), Times.Once);
         }
 
         [TestMethod]
@@ -103,10 +103,7 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
             var fakeViewFromToolWindow = new FakeView();
             var fakeCaptionParam = "some caption";
 
-            _sut.TypeLookupOverrides = new Dictionary<string, Type>
-            {
-                { _fakeViewName, expectedViewType }
-            };
+            _sut.TypeLookupOverrides = new Dictionary<string, Type> { { _fakeViewName, expectedViewType } };
 
             _mockToolWindowService.Setup(m => m.CreateToolWindowForView(expectedViewType, fakeCaptionParam)).Returns(fakeViewFromToolWindow);
 
@@ -122,7 +119,8 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
     /// </summary>
     internal class TestVsViewLocatorService : VsViewLocatorService
     {
-        public TestVsViewLocatorService(IToolWindowService toolWindowService, ILoggingService loggingService, IServiceProvider serviceProvider) : base(toolWindowService, loggingService, serviceProvider)
+        public TestVsViewLocatorService(IToolWindowService toolWindowService, ILoggingService loggingService, IServiceProvider serviceProvider) : base(toolWindowService,
+            loggingService, serviceProvider)
         {
         }
 
@@ -161,6 +159,10 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
     {
         public IViewModel ViewModel => throw new NotImplementedException();
 
-        public Action DisplayView { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public Action DisplayView
+        {
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
+        }
     }
 }

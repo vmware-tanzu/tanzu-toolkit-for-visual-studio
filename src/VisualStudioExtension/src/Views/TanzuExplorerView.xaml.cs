@@ -26,22 +26,44 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         public ICommand StreamAppLogsCommand { get; }
         public IViewModel ViewModel { get; private set; }
 
-        public Brush ListItemMouseOverBrush { get { return (Brush)GetValue(_listItemMouseOverBrushProperty); } set { SetValue(_listItemMouseOverBrushProperty, value); } }
-        public Brush WizardFooterBrush { get { return (Brush)GetValue(_wizardFooterBrushProperty); } set { SetValue(_wizardFooterBrushProperty, value); } }
+        public Brush ListItemMouseOverBrush
+        {
+            get => (Brush)GetValue(_listItemMouseOverBrushProperty);
+            set => SetValue(_listItemMouseOverBrushProperty, value);
+        }
 
-        public Action DisplayView { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public Brush WizardFooterBrush
+        {
+            get => (Brush)GetValue(_wizardFooterBrushProperty);
+            set => SetValue(_wizardFooterBrushProperty, value);
+        }
 
-        public static readonly DependencyProperty _listItemMouseOverBrushProperty = DependencyProperty.Register("ListItemMouseOverBrush", typeof(Brush), typeof(TanzuExplorerView), new PropertyMetadata(default(Brush)));
-        public static readonly DependencyProperty _wizardFooterBrushProperty = DependencyProperty.Register("WizardFooterBrush", typeof(Brush), typeof(TanzuExplorerView), new PropertyMetadata(default(Brush)));
+        public Action DisplayView
+        {
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
+        }
+
+        public static readonly DependencyProperty _listItemMouseOverBrushProperty =
+            DependencyProperty.Register("ListItemMouseOverBrush", typeof(Brush), typeof(TanzuExplorerView),
+                new PropertyMetadata(default(Brush)));
+
+        public static readonly DependencyProperty _wizardFooterBrushProperty =
+            DependencyProperty.Register("WizardFooterBrush", typeof(Brush), typeof(TanzuExplorerView),
+                new PropertyMetadata(default(Brush)));
 
         public TanzuExplorerView()
         {
             InitializeComponent();
         }
 
-        public TanzuExplorerView(ITanzuExplorerViewModel viewModel, IThemeService themeService, IToolWindowService viewService)
+        public TanzuExplorerView(ITanzuExplorerViewModel viewModel, IThemeService themeService,
+            IToolWindowService viewService)
         {
-            bool alwaysTrue(object arg) { return true; }
+            bool alwaysTrue(object arg)
+            {
+                return true;
+            }
 
             ViewModel = viewModel;
 

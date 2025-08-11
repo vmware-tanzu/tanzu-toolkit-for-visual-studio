@@ -31,7 +31,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services
         {
             if (!(_viewLocatorService.GetViewByViewModelName(dialogName, parameter) is DependencyObject dialog))
             {
-                _logger?.Error("{ClassName} failed to show dialog for {DialogName}; {MethodName} returned null", nameof(DialogService), dialogName, nameof(_viewLocatorService.GetViewByViewModelName));
+                _logger?.Error("{ClassName} failed to show dialog for {DialogName}; {MethodName} returned null",
+                    nameof(DialogService), dialogName, nameof(_viewLocatorService.GetViewByViewModelName));
                 return null;
             }
 

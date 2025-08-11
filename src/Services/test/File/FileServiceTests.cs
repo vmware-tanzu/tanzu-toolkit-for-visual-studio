@@ -37,10 +37,7 @@ namespace Tanzu.Toolkit.Services.Tests.File
         public void FullPathToCfExe_ThrowsException_WhenExecutableFileNotFound()
         {
             var fakeAssemblyBaseDir = "/fake/path";
-            _sut = new FileService(fakeAssemblyBaseDir)
-            {
-                CliVersion = 7,
-            };
+            _sut = new FileService(fakeAssemblyBaseDir) { CliVersion = 7, };
 
             Exception expectedException = null;
 

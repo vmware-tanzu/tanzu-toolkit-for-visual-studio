@@ -66,8 +66,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var page4Identifier = "?page=4&per_page=3";
 
             var orgsRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
-                    .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
-                    .Respond("application/json", _fakeOrgsJsonResponsePage1);
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond("application/json", _fakeOrgsJsonResponsePage1);
 
             var orgsPage2Request = _mockHttp.Expect(_fakeCfApiAddress + expectedPath + page2Identifier)
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
@@ -123,8 +123,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var page3Identifier = "?page=3&per_page=3";
 
             var spacesRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
-                    .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
-                    .Respond("application/json", _fakeSpacesJsonResponsePage1);
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond("application/json", _fakeSpacesJsonResponsePage1);
 
             var spacesPage2Request = _mockHttp.Expect(_fakeCfApiAddress + expectedPath + page2Identifier)
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
@@ -175,8 +175,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var page3Identifier = "?page=3&per_page=50";
 
             var appsRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
-                    .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
-                    .Respond("application/json", _fakeAppsJsonResponsePage1);
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond("application/json", _fakeAppsJsonResponsePage1);
 
             var appsPage2Request = _mockHttp.Expect(_fakeCfApiAddress + expectedPath + page2Identifier)
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
@@ -226,8 +226,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var page3Identifier = "?page=3&per_page=50";
 
             var routesRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
-                    .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
-                    .Respond("application/json", _fakeRoutesJsonResponsePage1);
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond("application/json", _fakeRoutesJsonResponsePage1);
 
             var routesPage2Request = _mockHttp.Expect(_fakeCfApiAddress + expectedPath + page2Identifier)
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
@@ -254,8 +254,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Exception thrownException = null;
 
             var appsRequest = _mockHttp.Expect(expectedPath)
-               .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
-               .Respond(HttpStatusCode.Unauthorized);
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond(HttpStatusCode.Unauthorized);
 
             try
             {
@@ -279,7 +279,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Exception resultException = null;
 
             var cfStopAppRequest = _mockHttp.Expect(expectedPath)
-               .Respond("application/json", JsonSerializer.Serialize(new App { State = "STOPPED" }));
+                .Respond("application/json", JsonSerializer.Serialize(new App { State = "STOPPED" }));
 
             var stopResult = false;
             try
@@ -304,7 +304,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Exception resultException = null;
 
             var cfStopAppRequest = _mockHttp.Expect(expectedPath)
-               .Respond("application/json", JsonSerializer.Serialize(new App { State = "fake state != STOPPED" }));
+                .Respond("application/json", JsonSerializer.Serialize(new App { State = "fake state != STOPPED" }));
 
             var stopResult = true;
             try
@@ -329,7 +329,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Exception resultException = null;
 
             var cfStartAppRequest = _mockHttp.Expect(expectedPath)
-               .Respond("application/json", JsonSerializer.Serialize(new App { State = "STARTED" }));
+                .Respond("application/json", JsonSerializer.Serialize(new App { State = "STARTED" }));
 
             var startResult = false;
             try
@@ -354,7 +354,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Exception resultException = null;
 
             var cfStartAppRequest = _mockHttp.Expect(expectedPath)
-               .Respond("application/json", JsonSerializer.Serialize(new App { State = "fake state != STARTED" }));
+                .Respond("application/json", JsonSerializer.Serialize(new App { State = "fake state != STARTED" }));
 
             var startResult = true;
             try
@@ -379,8 +379,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Exception thrownException = null;
 
             var appsRequest = _mockHttp.Expect(expectedPath)
-               .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
-               .Respond(HttpStatusCode.Unauthorized);
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond(HttpStatusCode.Unauthorized);
 
             try
             {
@@ -403,7 +403,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var expectedPath = _fakeCfApiAddress + CfApiClient._deleteAppsPath + $"/{fakeAppGuid}";
 
             var cfDeleteAppRequest = _mockHttp.Expect(expectedPath)
-               .Respond(HttpStatusCode.Accepted);
+                .Respond(HttpStatusCode.Accepted);
 
             Exception resultException = null;
             var appWasDeleted = false;
@@ -429,7 +429,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var expectedPath = _fakeCfApiAddress + CfApiClient._deleteAppsPath + $"/{fakeAppGuid}";
 
             var cfDeleteAppRequest = _mockHttp.Expect(expectedPath)
-               .Respond(HttpStatusCode.BadRequest);
+                .Respond(HttpStatusCode.BadRequest);
 
             try
             {
@@ -478,8 +478,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var page4Identifier = "?page=4&per_page=3";
 
             var stacksRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
-                    .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
-                    .Respond("application/json", _fakeStacksJsonResponsePage1);
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond("application/json", _fakeStacksJsonResponsePage1);
 
             var stacksPage2Request = _mockHttp.Expect(_fakeCfApiAddress + expectedPath + page2Identifier)
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
@@ -512,8 +512,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var page3Identifier = "?page=3&per_page=50";
 
             var buildpacksRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
-                    .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
-                    .Respond("application/json", _fakeBuildpacksJsonResponsePage1);
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond("application/json", _fakeBuildpacksJsonResponsePage1);
 
             var buildpacksPage2Request = _mockHttp.Expect(_fakeCfApiAddress + expectedPath + page2Identifier)
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
@@ -566,8 +566,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var page3Identifier = "?page=3&per_page=50";
 
             var servicesRequest = _mockHttp.Expect(_fakeCfApiAddress + expectedPath)
-                    .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
-                    .Respond("application/json", _fakeServicesJsonResponsePage1);
+                .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
+                .Respond("application/json", _fakeServicesJsonResponsePage1);
 
             var servicesPage2Request = _mockHttp.Expect(_fakeCfApiAddress + expectedPath + page2Identifier)
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
@@ -629,10 +629,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             };
 
             var cfBasicInfoRequest = _mockHttp.Expect(_fakeCfApiAddress + "/")
-               .Respond("application/json", _fakeBasicInfoJsonResponse);
+                .Respond("application/json", _fakeBasicInfoJsonResponse);
 
             var loginServerInfoRequest = _mockHttp.Expect(_fakeLoginAddress + "/login")
-               .Respond("application/json", JsonSerializer.Serialize(fakeLoginServerInfo));
+                .Respond("application/json", JsonSerializer.Serialize(fakeLoginServerInfo));
 
             try
             {
@@ -658,7 +658,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var expectedException = new Exception("Pretending auth server could not be identified");
 
             var cfBasicInfoRequest = _mockHttp.Expect(_fakeCfApiAddress + "/")
-               .Throw(expectedException);
+                .Throw(expectedException);
 
             try
             {
@@ -681,10 +681,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Exception thrownException = null;
 
             var cfBasicInfoRequest = _mockHttp.Expect(_fakeCfApiAddress + "/")
-               .Respond("application/json", _fakeBasicInfoJsonResponse);
+                .Respond("application/json", _fakeBasicInfoJsonResponse);
 
             var loginServerInfoRequest = _mockHttp.Expect(_fakeLoginAddress + "/login")
-               .Respond("application/json", "this is fake response content that cannot be parsed as JSON! :)");
+                .Respond("application/json", "this is fake response content that cannot be parsed as JSON! :)");
 
             try
             {
@@ -708,7 +708,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Exception thrownException = null;
 
             var cfBasicInfoRequest = _mockHttp.Expect(_fakeCfApiAddress + "/")
-               .Respond("application/json", _fakeBasicInfoJsonResponse);
+                .Respond("application/json", _fakeBasicInfoJsonResponse);
 
             var loginServerInfoRequest = _mockHttp.Expect(_fakeLoginAddress + "/login")
                 .Respond(HttpStatusCode.Unauthorized);
@@ -737,7 +737,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var expectedPath = _fakeCfApiAddress + CfApiClient._deleteRoutesPath + $"/{fakeAppGuid}";
 
             var cfDeleteRouteRequest = _mockHttp.Expect(expectedPath)
-               .Respond(HttpStatusCode.Accepted);
+                .Respond(HttpStatusCode.Accepted);
 
             Exception resultException = null;
             var routeWasDeleted = false;
@@ -764,7 +764,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var expectedPath = _fakeCfApiAddress + CfApiClient._deleteRoutesPath + $"/{fakeAppGuid}";
 
             var cfDeleteRouteRequest = _mockHttp.Expect(expectedPath)
-               .Respond(HttpStatusCode.BadRequest);
+                .Respond(HttpStatusCode.BadRequest);
 
             try
             {

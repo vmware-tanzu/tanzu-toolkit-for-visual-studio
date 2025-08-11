@@ -33,7 +33,7 @@ namespace Tanzu.Toolkit.ViewModels.AppDeletionConfirmation
 
         public bool DeleteRoutes
         {
-            get { return _deleteRoutes; }
+            get => _deleteRoutes;
             set
             {
                 _deleteRoutes = value;
@@ -43,7 +43,7 @@ namespace Tanzu.Toolkit.ViewModels.AppDeletionConfirmation
 
         public string Message
         {
-            get { return _message; }
+            get => _message;
             set
             {
                 _message = value;
@@ -57,9 +57,11 @@ namespace Tanzu.Toolkit.ViewModels.AppDeletionConfirmation
             var dialog = DialogService.ShowModal(nameof(AppDeletionConfirmationViewModel));
             if (dialog == null)
             {
-                Logger?.Error("{ClassName}.{MethodName} encountered null DialogResult, indicating that something went wrong trying to construct the view.", nameof(AppDeletionConfirmation), nameof(ShowConfirmation));
+                Logger?.Error("{ClassName}.{MethodName} encountered null DialogResult, indicating that something went wrong trying to construct the view.",
+                    nameof(AppDeletionConfirmation), nameof(ShowConfirmation));
                 ErrorService.DisplayErrorDialog("Something went wrong while trying to display app deletion confirmation", "View construction failed");
             }
+
             CfApp = null;
         }
 

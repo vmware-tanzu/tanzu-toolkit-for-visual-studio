@@ -34,7 +34,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services
             {
                 if (!_readOnlySettingsStore.CollectionExists(_tasCollectionPath))
                 {
-                    _logger.Error($"Attempted to read user settings store value under \"{_tasCollectionPath}\" but no such collection path exists");
+                    _logger.Error(
+                        $"Attempted to read user settings store value under \"{_tasCollectionPath}\" but no such collection path exists");
 
                     return null;
                 }
@@ -49,7 +50,9 @@ namespace Tanzu.Toolkit.VisualStudio.Services
             }
             catch (Exception ex)
             {
-                _logger.Error("DataPersistenceService caught exception while trying to read string data: {DataPersistenceReadException}", ex);
+                _logger.Error(
+                    "DataPersistenceService caught exception while trying to read string data: {DataPersistenceReadException}",
+                    ex);
 
                 return null;
             }
@@ -71,11 +74,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services
                     return true;
                 }
 
-                throw new Exception($"Tried to write value \"{value}\" to user settings store property \"{key}\" but no such property existed after writing.");
+                throw new Exception(
+                    $"Tried to write value \"{value}\" to user settings store property \"{key}\" but no such property existed after writing.");
             }
             catch (Exception ex)
             {
-                _logger.Error("DataPersistenceService caught exception while trying to write string data: {DataPersistenceWriteException}", ex);
+                _logger.Error(
+                    "DataPersistenceService caught exception while trying to write string data: {DataPersistenceWriteException}",
+                    ex);
 
                 return false;
             }
@@ -95,7 +101,9 @@ namespace Tanzu.Toolkit.VisualStudio.Services
             }
             catch (Exception ex)
             {
-                _logger?.Error("DataPersistenceService caught exception while trying to determine if prior credentials were saved: {DataPersistenceCredsQueryException}", ex);
+                _logger?.Error(
+                    "DataPersistenceService caught exception while trying to determine if prior credentials were saved: {DataPersistenceCredsQueryException}",
+                    ex);
                 return false;
             }
         }

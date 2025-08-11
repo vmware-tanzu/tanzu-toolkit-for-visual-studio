@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -27,15 +27,9 @@ namespace Tanzu.Toolkit.ViewModels
             Space = space;
             DisplayText = Space.SpaceName;
 
-            LoadingPlaceholder = new PlaceholderViewModel(parent: this, services)
-            {
-                DisplayText = _loadingMsg,
-            };
+            LoadingPlaceholder = new PlaceholderViewModel(parent: this, services) { DisplayText = _loadingMsg, };
 
-            EmptyPlaceholder = new PlaceholderViewModel(parent: this, Services)
-            {
-                DisplayText = _emptyAppsPlaceholderMsg,
-            };
+            EmptyPlaceholder = new PlaceholderViewModel(parent: this, Services) { DisplayText = _emptyAppsPlaceholderMsg, };
         }
 
         protected internal override async Task UpdateAllChildren()
@@ -69,6 +63,7 @@ namespace Tanzu.Toolkit.ViewModels
                                 {
                                     removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, child));
                                 }
+
                                 additionTasks.Add(ThreadingService.AddItemToCollectionOnUiThreadAsync(Children, EmptyPlaceholder));
                             }
                             else
@@ -136,7 +131,7 @@ namespace Tanzu.Toolkit.ViewModels
                     catch (Exception ex)
                     {
                         Logger.Error("Caught exception trying to load apps in SpaceViewModel: {SpaceViewModelLoadingException}", ex);
-                        _dialogService.DisplayWarningDialog(_getAppsFailureMsg, "Something went wrong while loading apps; try disconnecting & logging in again.\nIf this issue persists, please contact dotnetdevx@groups.vmware.com");
+                        _dialogService.DisplayWarningDialog(_getAppsFailureMsg, "Something went wrong while loading apps; try disconnecting & logging in again.");
                     }
                     finally
                     {

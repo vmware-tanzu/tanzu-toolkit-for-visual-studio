@@ -22,11 +22,13 @@
     HasDialogFrame="False">
 
     <ui:DialogWindow.Resources>
-        <converters:VisibilityConverter x:Key="VisibilityConverter" ReserveSpace="False"/>
-        <converters:VisibilityConverter x:Key="VisibilityConverterReversed" ReserveSpace="False" Reversed="True"/>
-        <converters:NullVisibilityConverter x:Key="NullVisibilityConverter" ReserveSpace="False" Reversed="True"/>
-        <converters:StringNullVisibilityConverter x:Key="StringVisibilityConverter" ReserveSpace="False" Reversed="False"/>
-        <converters:StringNullVisibilityConverter x:Key="StringVisibilityConverterReversed" ReserveSpace="False" Reversed="True"/>
+        <converters:VisibilityConverter x:Key="VisibilityConverter" ReserveSpace="False" />
+        <converters:VisibilityConverter x:Key="VisibilityConverterReversed" ReserveSpace="False" Reversed="True" />
+        <converters:NullVisibilityConverter x:Key="NullVisibilityConverter" ReserveSpace="False" Reversed="True" />
+        <converters:StringNullVisibilityConverter x:Key="StringVisibilityConverter" ReserveSpace="False"
+                                                  Reversed="False" />
+        <converters:StringNullVisibilityConverter x:Key="StringVisibilityConverterReversed" ReserveSpace="False"
+                                                  Reversed="True" />
     </ui:DialogWindow.Resources>
 
     <DockPanel Margin="16">
@@ -37,46 +39,49 @@
                 Margin="4"
                 Grid.Row="0"
                 Grid.Column="0"
-                RenderOptions.BitmapScalingMode="Fant"/>
-            <TextBlock FontSize="24" Text="Remote Debug on Tanzu Platform" Margin="4" Grid.Row="0" Grid.Column="1"/>
+                RenderOptions.BitmapScalingMode="Fant" />
+            <TextBlock FontSize="24" Text="Remote Debug on Tanzu Platform" Margin="4" Grid.Row="0" Grid.Column="1" />
         </StackPanel>
 
         <Button
             DockPanel.Dock="Top"
             ToolTip="Login to Tanzu Platform"
             Visibility="{Binding IsLoggedIn, Converter={StaticResource VisibilityConverterReversed}}"
-            Command ="{ Binding ElementName=RemoteDebugViewElement, Path=OpenLoginViewCommand }">
+            Command="{ Binding ElementName=RemoteDebugViewElement, Path=OpenLoginViewCommand }">
 
-            <local:LoginPromptButton/>
+            <local:LoginPromptButton />
         </Button>
 
-        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Visibility="{Binding LoadingMessage, Converter={StaticResource StringVisibilityConverter}}">
-            <local:Spinner/>
-            <TextBlock Text="{Binding LoadingMessage}" VerticalAlignment="Center"/>
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top"
+                    Visibility="{Binding LoadingMessage, Converter={StaticResource StringVisibilityConverter}}">
+            <local:Spinner />
+            <TextBlock Text="{Binding LoadingMessage}" VerticalAlignment="Center" />
         </StackPanel>
 
-        <StackPanel DockPanel.Dock="Top" Visibility="{Binding IsLoggedIn, Converter={StaticResource VisibilityConverter}}">
-            <StackPanel Visibility="{Binding LoadingMessage, Converter={StaticResource StringVisibilityConverterReversed}}">
-                <TextBlock Text="{Binding DialogMessage}" TextWrapping="Wrap" MaxWidth="500" HorizontalAlignment="Left"/>
+        <StackPanel DockPanel.Dock="Top"
+                    Visibility="{Binding IsLoggedIn, Converter={StaticResource VisibilityConverter}}">
+            <StackPanel
+                Visibility="{Binding LoadingMessage, Converter={StaticResource StringVisibilityConverterReversed}}">
+                <TextBlock Text="{Binding DialogMessage}" TextWrapping="Wrap" MaxWidth="500" HorizontalAlignment="Left" />
 
-                <Separator Margin="8" Visibility="Hidden"/>
-          
+                <Separator Margin="8" Visibility="Hidden" />
+
                 <Grid Background="{Binding ElementName=RemoteDebugViewElement, Path=GridHeaderBrush}">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="180"/>
-                        <ColumnDefinition Width="180"/>
-                        <ColumnDefinition Width="180"/>
+                        <ColumnDefinition Width="180" />
+                        <ColumnDefinition Width="180" />
+                        <ColumnDefinition Width="180" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" Margin="8,6,0,8" Text="App" FontWeight="Bold"/>
-                    <TextBlock Grid.Column="1" Margin="8,6,0,8" Text="Space" FontWeight="Bold"/>
-                    <TextBlock Grid.Column="2" Margin="8,6,0,8" Text="Org" FontWeight="Bold"/>
+                    <TextBlock Grid.Column="0" Margin="8,6,0,8" Text="App" FontWeight="Bold" />
+                    <TextBlock Grid.Column="1" Margin="8,6,0,8" Text="Space" FontWeight="Bold" />
+                    <TextBlock Grid.Column="2" Margin="8,6,0,8" Text="Org" FontWeight="Bold" />
                 </Grid>
                 <ListView
                     ItemsSource="{Binding AccessibleApps}"
                     SelectedItem="{Binding SelectedApp}"
                     MaxHeight="200"
-                    VerticalContentAlignment="Top"  
+                    VerticalContentAlignment="Top"
                     ScrollViewer.VerticalScrollBarVisibility="Auto"
                     ScrollViewer.CanContentScroll="True">
                     <ListView.ItemContainerStyle>
@@ -85,24 +90,27 @@
                                 <Setter.Value>
                                     <ControlTemplate TargetType="{x:Type ListViewItem}">
                                         <Border Padding="{TemplateBinding Padding}"
-                                                        Background="{TemplateBinding Background}"
-                                                        BorderBrush="{TemplateBinding BorderBrush}"
-                                                        BorderThickness="{TemplateBinding BorderThickness}"
-                                                        SnapsToDevicePixels="true">
-                                            <GridViewRowPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                                                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                                Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                SnapsToDevicePixels="true">
+                                            <GridViewRowPresenter
+                                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
                                         </Border>
                                     </ControlTemplate>
                                 </Setter.Value>
                             </Setter>
                             <Style.Triggers>
                                 <Trigger Property="IsSelected" Value="True">
-                                    <Setter Property="FontWeight" Value="Bold"/>
-                                    <Setter Property="Background" Value="{Binding ElementName=RemoteDebugViewElement, Path=SelectedItemActiveBrush}"/>
+                                    <Setter Property="FontWeight" Value="Bold" />
+                                    <Setter Property="Background"
+                                            Value="{Binding ElementName=RemoteDebugViewElement, Path=SelectedItemActiveBrush}" />
                                 </Trigger>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="{Binding ElementName=RemoteDebugViewElement, Path=ListItemMouseOverBrush}"/>
+                                    <Setter Property="Background"
+                                            Value="{Binding ElementName=RemoteDebugViewElement, Path=ListItemMouseOverBrush}" />
                                 </Trigger>
                             </Style.Triggers>
                         </Style>
@@ -113,21 +121,22 @@
                                 <GridViewColumn Header="App" Width="180">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding AppName}" TextWrapping="Wrap"/>
+                                            <TextBlock Text="{Binding AppName}" TextWrapping="Wrap" />
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
                                 <GridViewColumn Header="Space" Width="180">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding ParentSpace.SpaceName}" TextWrapping="Wrap"/>
+                                            <TextBlock Text="{Binding ParentSpace.SpaceName}" TextWrapping="Wrap" />
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
                                 <GridViewColumn Header="Org" Width="180">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding ParentSpace.ParentOrg.OrgName}" TextWrapping="Wrap"/>
+                                            <TextBlock Text="{Binding ParentSpace.ParentOrg.OrgName}"
+                                                       TextWrapping="Wrap" />
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
@@ -137,21 +146,21 @@
                 </ListView>
             </StackPanel>
         </StackPanel>
-        
+
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Bottom" Margin="0,12,0,0">
             <Button Content="Cancel"
                     IsCancel="True"
                     Margin="4"
                     Command="{Binding ElementName=RemoteDebugViewElement, Path=CancelCommand}"
-                    HorizontalAlignment="Right"/>
+                    HorizontalAlignment="Right" />
             <Button Content="{Binding PushNewAppButtonText}" Margin="4"
                     Command="{Binding ElementName=RemoteDebugViewElement, Path=ShowDeploymentWindowCommand}"
-                    HorizontalAlignment="Right"/>
+                    HorizontalAlignment="Right" />
             <Button Content="OK"
                     Margin="4"
                     IsDefault="True"
                     Command="{Binding ElementName=RemoteDebugViewElement, Path=ResolveMissingAppCommand}"
-                    HorizontalAlignment="Right"/>
+                    HorizontalAlignment="Right" />
         </StackPanel>
     </DockPanel>
 </local:AbstractModal>

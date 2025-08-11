@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -30,15 +30,9 @@ namespace Tanzu.Toolkit.ViewModels
             Org = org;
             DisplayText = Org.OrgName;
 
-            LoadingPlaceholder = new PlaceholderViewModel(parent: this, services)
-            {
-                DisplayText = _loadingMsg,
-            };
+            LoadingPlaceholder = new PlaceholderViewModel(parent: this, services) { DisplayText = _loadingMsg, };
 
-            EmptyPlaceholder = new PlaceholderViewModel(parent: this, Services)
-            {
-                DisplayText = _emptySpacesPlaceholderMsg,
-            };
+            EmptyPlaceholder = new PlaceholderViewModel(parent: this, Services) { DisplayText = _emptySpacesPlaceholderMsg, };
         }
 
         protected internal override async Task UpdateAllChildren()
@@ -114,6 +108,7 @@ namespace Tanzu.Toolkit.ViewModels
                                     updateChildrenTasks.Add(ThreadingService.StartBackgroundTask(space.UpdateAllChildren));
                                 }
                             }
+
                             await Task.WhenAll(updateChildrenTasks);
                         }
                         else if (spacesResponse.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
@@ -130,7 +125,7 @@ namespace Tanzu.Toolkit.ViewModels
                     catch (Exception ex)
                     {
                         Logger.Error("Caught exception trying to load spaces in OrgViewModel: {OrgViewModelLoadingException}", ex);
-                        _dialogService.DisplayWarningDialog(_getSpacesFailureMsg, "Something went wrong while loading spaces; try disconnecting & logging in again.\nIf this issue persists, please contact dotnetdevx@groups.vmware.com");
+                        _dialogService.DisplayWarningDialog(_getSpacesFailureMsg, "Something went wrong while loading spaces; try disconnecting & logging in again.");
                     }
                     finally
                     {

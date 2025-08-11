@@ -1,4 +1,4 @@
-﻿using Serilog;
+using Serilog;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -9,7 +9,7 @@ namespace Tanzu.Toolkit.Services.DotnetCli
 {
     public class DotnetCliService : IDotnetCliService
     {
-        private const string _dotnetCliExecutable = "C:\\Program Files\\dotnet\\dotnet.exe";
+        private const string _dotnetCliExecutable = @"C:\Program Files\dotnet\dotnet.exe";
         private readonly ICommandProcessService _commandProcessService;
         private readonly ILogger _logger;
 
@@ -29,7 +29,8 @@ namespace Tanzu.Toolkit.Services.DotnetCli
         /// <param name="outputDirName"></param>
         /// 
         /// <returns></returns>
-        public async Task<bool> PublishProjectForRemoteDebuggingAsync(string projectDir, string targetFrameworkMoniker, string runtimeIdentifier, string configuration, string outputDirName, Action<string> StdOutCallback = null, Action<string> StdErrCallback = null)
+        public async Task<bool> PublishProjectForRemoteDebuggingAsync(string projectDir, string targetFrameworkMoniker, string runtimeIdentifier, string configuration,
+            string outputDirName, Action<string> StdOutCallback = null, Action<string> StdErrCallback = null)
         {
             try
             {
@@ -39,6 +40,7 @@ namespace Tanzu.Toolkit.Services.DotnetCli
                 {
                     Directory.Delete(publishDirPath, true); // clean before recreating
                 }
+
                 var publishArgs = $"publish -f {targetFrameworkMoniker} -r {runtimeIdentifier} -c {configuration} -o {outputDirName} --self-contained";
                 StdOutCallback.Invoke($"Executing \"dotnet {publishArgs}\" ...");
                 var publishProcess = _commandProcessService.StartProcess(_dotnetCliExecutable, publishArgs, projectDir, stdOutDelegate: StdOutCallback, stdErrDelegate: StdErrCallback);

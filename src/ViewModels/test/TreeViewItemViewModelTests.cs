@@ -82,7 +82,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
     internal class TestTreeViewItemViewModel : TreeViewItemViewModel
     {
-
         public TestTreeViewItemViewModel(IServiceProvider services) : base(null, null, services)
         {
         }

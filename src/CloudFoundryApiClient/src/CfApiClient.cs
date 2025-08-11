@@ -36,6 +36,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         private HttpClient _httpClient;
         private Uri _cfApiAddress;
         private bool _skipSslCertValidation;
+
         private readonly JsonSerializerOptions _deserializationOptions = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
@@ -58,7 +59,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
 
             private set
             {
-                if (_httpClient != null) throw new InvalidOperationException($"HttpClient has already been set for this instance; to target a different API address, create a new instance of {nameof(CfApiClient)}");
+                if (_httpClient != null)
+                    throw new InvalidOperationException($"HttpClient has already been set for this instance; to target a different API address, create a new instance of {nameof(CfApiClient)}");
                 _httpClient = value;
             }
         }
@@ -72,7 +74,9 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             }
             internal set
             {
-                if (_cfApiAddress != null) throw new InvalidOperationException($"{nameof(CfApiAddress)} has already been set for this instance; to target a different API address, create a new instance of {nameof(CfApiClient)}");
+                if (_cfApiAddress != null)
+                    throw new InvalidOperationException(
+                        $"{nameof(CfApiAddress)} has already been set for this instance; to target a different API address, create a new instance of {nameof(CfApiClient)}");
                 _cfApiAddress = value;
                 HttpClient.BaseAddress = _cfApiAddress;
             }
@@ -394,6 +398,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             {
                 throw new Exception($"Request for login server information was unsuccessful; request to {request.Method} {request.RequestUri} received {response.StatusCode}");
             }
+
             var jsonContent = await response.Content.ReadAsStringAsync();
             var deserializedResponse = JsonSerializer.Deserialize<LoginInfoResponse>(jsonContent, _deserializationOptions);
 

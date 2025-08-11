@@ -16,5 +16,4 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Models
         [JsonPropertyName("name")]
         public string Name { get; set; }
     }
-
 }

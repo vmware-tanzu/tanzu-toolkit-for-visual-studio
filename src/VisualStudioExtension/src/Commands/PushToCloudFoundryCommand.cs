@@ -46,7 +46,8 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         /// </summary>
         /// <param name="package">Owner package, not null.</param>
         /// <param name="commandService">Command service to add command to, not null.</param>
-        private PushToCloudFoundryCommand(AsyncPackage package, OleMenuCommandService commandService, IServiceProvider services)
+        private PushToCloudFoundryCommand(AsyncPackage package, OleMenuCommandService commandService,
+            IServiceProvider services)
         {
             _package = package ?? throw new ArgumentNullException(nameof(package));
             commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
@@ -62,11 +63,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         /// <summary>
         /// Gets the instance of the command.
         /// </summary>
-        public static PushToCloudFoundryCommand Instance
-        {
-            get;
-            private set;
-        }
+        public static PushToCloudFoundryCommand Instance { get; private set; }
 
         /// <summary>
         /// Initializes the singleton instance of the command.
@@ -90,7 +87,8 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         /// </summary>
         /// <param name="sender">Event sender.</param>
         /// <param name="e">Event args.</param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Method handles all exceptions.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods",
+            Justification = "Method handles all exceptions.")]
         private async void Execute(object sender, EventArgs e)
         {
             try
@@ -125,9 +123,11 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                                 "Proceeding with default target framework 'netstandard2.1'.");
                         }
 
-                        if (tfm.StartsWith(".NETFramework") && !File.Exists(Path.Combine(projectDirectory, "Web.config")))
+                        if (tfm.StartsWith(".NETFramework") &&
+                            !File.Exists(Path.Combine(projectDirectory, "Web.config")))
                         {
-                            var msg = $"This project appears to target .NET Framework; pushing it to Tanzu Platform requires a 'Web.config' file at it's base directory, but none was found in {projectDirectory}";
+                            var msg =
+                                $"This project appears to target .NET Framework; pushing it to Tanzu Platform requires a 'Web.config' file at it's base directory, but none was found in {projectDirectory}";
                             _dialogService.DisplayErrorDialog("Unable to push to Tanzu Platform", msg);
                         }
                         else
@@ -147,7 +147,8 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             catch (Exception ex)
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                _logger?.Error("{ClassName} caught exception in {MethodName}: {PushException}", nameof(PushToCloudFoundryCommand), nameof(Execute), ex);
+                _logger?.Error("{ClassName} caught exception in {MethodName}: {PushException}",
+                    nameof(PushToCloudFoundryCommand), nameof(Execute), ex);
                 var msg = $"Internal error: \"{ex.Message}\"";
                 _dialogService.DisplayErrorDialog("Unable to push to Tanzu Platform", msg);
             }

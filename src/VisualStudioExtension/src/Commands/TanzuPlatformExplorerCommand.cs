@@ -46,11 +46,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         /// <summary>
         /// Gets the instance of the command.
         /// </summary>
-        public static TanzuPlatformExplorerCommand Instance
-        {
-            get;
-            private set;
-        }
+        public static TanzuPlatformExplorerCommand Instance { get; private set; }
 
         /// <summary>
         /// Initializes the command.

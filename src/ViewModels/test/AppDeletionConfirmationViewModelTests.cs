@@ -26,10 +26,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut = new AppDeletionConfirmationViewModel(MockTanzuExplorerViewModel.Object, Services) { CfApp = _fakeCfApp };
             _receivedEvents = [];
 
-            _sut.PropertyChanged += (sender, e) =>
-            {
-                _receivedEvents.Add(e.PropertyName);
-            };
+            _sut.PropertyChanged += (sender, e) => { _receivedEvents.Add(e.PropertyName); };
         }
 
         [TestCleanup]
@@ -79,8 +76,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsNull(_sut.CfApp);
             MockDialogService.Verify(ds => ds.CloseDialog(_fakeConfirmationWindow, true), Times.Once);
-            MockLogger.Verify(m => m.Error(It.Is<string>(s => s.Contains(AppDeletionConfirmationViewModel._deleteAppErrorMsg)), It.Is<string>(s => s == _fakeCfApp.AppName), It.Is<string>(s => s == _fakeFailureDetailedResult.ToString())), Times.Once);
-            MockErrorDialogService.Verify(m => m.DisplayErrorDialog(It.Is<string>(s => s.Contains(AppDeletionConfirmationViewModel._deleteAppErrorMsg) && s.Contains(_fakeCfApp.AppName)), It.Is<string>(s => s.Contains(_fakeFailureDetailedResult.Explanation))), Times.Once);
+            MockLogger.Verify(
+                m => m.Error(It.Is<string>(s => s.Contains(AppDeletionConfirmationViewModel._deleteAppErrorMsg)), It.Is<string>(s => s == _fakeCfApp.AppName),
+                    It.Is<string>(s => s == _fakeFailureDetailedResult.ToString())), Times.Once);
+            MockErrorDialogService.Verify(
+                m => m.DisplayErrorDialog(It.Is<string>(s => s.Contains(AppDeletionConfirmationViewModel._deleteAppErrorMsg) && s.Contains(_fakeCfApp.AppName)),
+                    It.Is<string>(s => s.Contains(_fakeFailureDetailedResult.Explanation))), Times.Once);
         }
 
         [TestMethod]
@@ -101,8 +102,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsNull(_sut.CfApp);
             MockDialogService.Verify(ds => ds.CloseDialog(_fakeConfirmationWindow, true), Times.Once);
-            MockLogger.Verify(m => m.Error(It.Is<string>(s => s.Contains(AppDeletionConfirmationViewModel._deleteAppErrorMsg)), It.Is<string>(s => s == _fakeCfApp.AppName), It.Is<string>(s => s == fakeExceptionMsg)), Times.Once);
-            MockErrorDialogService.Verify(m => m.DisplayWarningDialog(It.Is<string>(title => title.Contains(AppDeletionConfirmationViewModel._deleteAppErrorMsg) && title.Contains(_fakeCfApp.AppName)), It.Is<string>(msg => msg.Contains("Something unexpected happened") && msg.Contains(_fakeCfApp.AppName))), Times.Once);
+            MockLogger.Verify(
+                m => m.Error(It.Is<string>(s => s.Contains(AppDeletionConfirmationViewModel._deleteAppErrorMsg)), It.Is<string>(s => s == _fakeCfApp.AppName),
+                    It.Is<string>(s => s == fakeExceptionMsg)), Times.Once);
+            MockErrorDialogService.Verify(
+                m => m.DisplayWarningDialog(It.Is<string>(title => title.Contains(AppDeletionConfirmationViewModel._deleteAppErrorMsg) && title.Contains(_fakeCfApp.AppName)),
+                    It.Is<string>(msg => msg.Contains("Something unexpected happened") && msg.Contains(_fakeCfApp.AppName))), Times.Once);
         }
     }
 }

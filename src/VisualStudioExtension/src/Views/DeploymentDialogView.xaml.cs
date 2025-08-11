@@ -31,21 +31,32 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             set => SetValue(_hyperlinkBrushProperty, value);
         }
 
-        public static readonly DependencyProperty _hyperlinkBrushProperty = DependencyProperty.Register("HyperlinkBrush", typeof(Brush), typeof(DeploymentDialogView), new PropertyMetadata(default(Brush)));
+        public static readonly DependencyProperty _hyperlinkBrushProperty =
+            DependencyProperty.Register("HyperlinkBrush", typeof(Brush), typeof(DeploymentDialogView),
+                new PropertyMetadata(default(Brush)));
+
         private readonly IDeploymentDialogViewModel _viewModel;
 
         public DeploymentDialogView(IDeploymentDialogViewModel viewModel, IThemeService themeService)
         {
             _viewModel = viewModel;
-            bool alwaysTrue(object arg) { return true; };
+
+            bool alwaysTrue(object arg)
+            {
+                return true;
+            }
+
+            ;
 
             UploadAppCommand = new DelegatingCommand(viewModel.DeployApp, viewModel.CanDeployApp);
             OpenLoginDialogCommand = new DelegatingCommand(viewModel.OpenLoginView, viewModel.CanOpenLoginView);
-            ToggleAdvancedOptionsCommand = new DelegatingCommand(viewModel.ToggleAdvancedOptions, viewModel.CanToggleAdvancedOptions);
+            ToggleAdvancedOptionsCommand =
+                new DelegatingCommand(viewModel.ToggleAdvancedOptions, viewModel.CanToggleAdvancedOptions);
             ClearServiceSelectionCommand = new DelegatingCommand(viewModel.ClearSelectedServices, alwaysTrue);
             ClearBuildpackSelectionCommand = new DelegatingCommand(viewModel.ClearSelectedBuildpacks, alwaysTrue);
             ClearManifestSelectionCommand = new DelegatingCommand(viewModel.ClearSelectedManifest, alwaysTrue);
-            ClearDeploymentDirectorySelectionCommand = new DelegatingCommand(viewModel.ClearSelectedDeploymentDirectory, alwaysTrue);
+            ClearDeploymentDirectorySelectionCommand =
+                new DelegatingCommand(viewModel.ClearSelectedDeploymentDirectory, alwaysTrue);
 
             themeService.SetTheme(this);
             DataContext = viewModel;
@@ -62,17 +73,14 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         private void CfOrgOptions_ComboBox_DropDownClosed(object sender, System.EventArgs e)
         {
-             _ = _viewModel.UpdateCfSpaceOptions();
+            _ = _viewModel.UpdateCfSpaceOptions();
         }
 
         private void SelectManifest(object sender, RoutedEventArgs e)
         {
             var openFileDialog = new OpenFileDialog
             {
-                InitialDirectory = _viewModel.PathToProjectRootDir,
-                Filter = "YAML files (*.yaml, *.yml)|*.yaml;*.yml",
-                FilterIndex = 2,
-                RestoreDirectory = true
+                InitialDirectory = _viewModel.PathToProjectRootDir, Filter = "YAML files (*.yaml, *.yml)|*.yaml;*.yml", FilterIndex = 2, RestoreDirectory = true
             };
 
             if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
@@ -83,10 +91,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         private void SelectPublishDirectory(object sender, RoutedEventArgs e)
         {
-            var openFolderDialog = new FolderBrowserDialog
-            {
-                SelectedPath = _viewModel.PathToProjectRootDir,
-            };
+            var openFolderDialog = new FolderBrowserDialog { SelectedPath = _viewModel.PathToProjectRootDir, };
 
             if (openFolderDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
@@ -134,11 +139,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         private void SaveManifestButton_Click(object sender, RoutedEventArgs e)
         {
-            var saveFileDialog = new SaveFileDialog()
-            {
-                DefaultExt = "yml",
-                InitialDirectory = _viewModel.PathToProjectRootDir,
-            };
+            var saveFileDialog = new SaveFileDialog() { DefaultExt = "yml", InitialDirectory = _viewModel.PathToProjectRootDir, };
 
             if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {

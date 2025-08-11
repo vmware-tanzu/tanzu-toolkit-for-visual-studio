@@ -78,27 +78,23 @@ namespace Tanzu.Toolkit.ViewModels
                         Logger.Information("Detected null Tanzu Platform connection in AbstractViewModel; prompting login");
                         DialogService.ShowModal(nameof(LoginViewModel));
                     }
+
                     _cfClient = TanzuExplorer.CloudFoundryConnection?.CfClient;
                     if (_cfClient == null)
                     {
                         Logger.Information("CF client still null after prompting login");
                     }
                 }
+
                 return _cfClient;
             }
 
-            set
-            {
-                _cfClient = value;
-            }
+            set => _cfClient = value;
         }
 
         public object ActiveView
         {
-            get
-            {
-                return _activeView;
-            }
+            get => _activeView;
 
             set
             {

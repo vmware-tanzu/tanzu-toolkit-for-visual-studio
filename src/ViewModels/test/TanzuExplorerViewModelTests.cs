@@ -23,24 +23,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             // set up mockUiDispatcherService to run whatever method is passed
             // to RunOnUiThread; do not delegate to the UI Dispatcher
-            MockUiDispatcherService.Setup(mock => mock.
-                RunOnUiThreadAsync(It.IsAny<Action>()))
-                    .Callback<Action>(action =>
-                    {
-                        action();
-                    });
+            MockUiDispatcherService.Setup(mock => mock.RunOnUiThreadAsync(It.IsAny<Action>()))
+                .Callback<Action>(action => { action(); });
 
             _receivedEvents = [];
             _fakeTanzuConnection = new FakeCfInstanceViewModel(_fakeCfInstance, Services);
 
-            _sut = new TanzuExplorerViewModel(Services)
-            {
-                CloudFoundryConnection = _fakeTanzuConnection,
-            };
-            _sut.PropertyChanged += (sender, e) =>
-            {
-                _receivedEvents.Add(e.PropertyName);
-            };
+            _sut = new TanzuExplorerViewModel(Services) { CloudFoundryConnection = _fakeTanzuConnection, };
+            _sut.PropertyChanged += (sender, e) => { _receivedEvents.Add(e.PropertyName); };
         }
 
         [TestCleanup]
@@ -223,27 +213,22 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             _sut.OpenLoginView(null);
 
-            MockErrorDialogService.Verify(m => m.
-                DisplayErrorDialog(TanzuExplorerViewModel._singleLoginErrorTitle,
-                                   It.Is<string>(s => s.Contains(TanzuExplorerViewModel._singleLoginErrorMessage1) && s.Contains(TanzuExplorerViewModel._singleLoginErrorMessage2))),
-                    Times.Once);
+            MockErrorDialogService.Verify(m => m.DisplayErrorDialog(TanzuExplorerViewModel._singleLoginErrorTitle,
+                    It.Is<string>(s => s.Contains(TanzuExplorerViewModel._singleLoginErrorMessage1) && s.Contains(TanzuExplorerViewModel._singleLoginErrorMessage2))),
+                Times.Once);
         }
 
         [TestMethod]
         [TestCategory("OpenLoginView")]
         public void OpenLoginView_DoesNotChangeAuthenticationRequired_WhenTasConnectionDoesNotGetSet()
         {
-            _sut = new TanzuExplorerViewModel(Services)
-            {
-                AuthenticationRequired = true
-            };
+            _sut = new TanzuExplorerViewModel(Services) { AuthenticationRequired = true };
 
-            MockDialogService.Setup(mock => mock.
-                ShowModal(typeof(LoginViewModel).Name, null))
-                    .Callback(() =>
-                    {
-                        // Simulate unsuccessful login by NOT setting CloudFoundryConnection as LoginView would've done on a successful login
-                    });
+            MockDialogService.Setup(mock => mock.ShowModal(typeof(LoginViewModel).Name, null))
+                .Callback(() =>
+                {
+                    // Simulate unsuccessful login by NOT setting CloudFoundryConnection as LoginView would've done on a successful login
+                });
 
             Assert.IsTrue(_sut.AuthenticationRequired);
             Assert.IsNull(_sut.CloudFoundryConnection);
@@ -303,17 +288,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
 
-            MockCloudFoundryService.Setup(mock => mock.
-                StopAppAsync(fakeApp, false, It.IsAny<int>()))
-                    .ReturnsAsync(_fakeFailureDetailedResult);
+            MockCloudFoundryService.Setup(mock => mock.StopAppAsync(fakeApp, false, It.IsAny<int>()))
+                .ReturnsAsync(_fakeFailureDetailedResult);
 
             await _sut.StopCloudFoundryApp(fakeApp);
 
             var expectedErrorTitle = $"{TanzuExplorerViewModel._stopAppErrorMsg} {fakeApp.AppName}.";
             var expectedErrorMsg = _fakeFailureDetailedResult.Explanation;
 
-            MockErrorDialogService.Verify(mock => mock.
-              DisplayErrorDialog(expectedErrorTitle, expectedErrorMsg),
+            MockErrorDialogService.Verify(mock => mock.DisplayErrorDialog(expectedErrorTitle, expectedErrorMsg),
                 Times.Once);
         }
 
@@ -323,9 +306,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
 
-            MockCloudFoundryService.Setup(mock => mock.
-                StopAppAsync(fakeApp, false, It.IsAny<int>()))
-                    .ReturnsAsync(_fakeFailureDetailedResult);
+            MockCloudFoundryService.Setup(mock => mock.StopAppAsync(fakeApp, false, It.IsAny<int>()))
+                .ReturnsAsync(_fakeFailureDetailedResult);
 
             await _sut.StopCloudFoundryApp(fakeApp);
 
@@ -333,9 +315,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var logPropVal2 = "{StopResult}";
             var expectedLogMsg = $"{TanzuExplorerViewModel._stopAppErrorMsg} {logPropVal1}. {logPropVal2}";
 
-            MockLogger.Verify(m => m.
-                Error(expectedLogMsg, fakeApp.AppName, _fakeFailureDetailedResult.ToString()),
-                    Times.Once);
+            MockLogger.Verify(m => m.Error(expectedLogMsg, fakeApp.AppName, _fakeFailureDetailedResult.ToString()),
+                Times.Once);
         }
 
         [TestMethod]
@@ -366,17 +347,15 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
 
-            MockCloudFoundryService.Setup(mock => mock.
-                StartAppAsync(fakeApp, false, It.IsAny<int>()))
-                    .ReturnsAsync(_fakeFailureDetailedResult);
+            MockCloudFoundryService.Setup(mock => mock.StartAppAsync(fakeApp, false, It.IsAny<int>()))
+                .ReturnsAsync(_fakeFailureDetailedResult);
 
             await _sut.StartCloudFoundryApp(fakeApp);
 
             var expectedErrorTitle = $"{TanzuExplorerViewModel._startAppErrorMsg} {fakeApp.AppName}.";
             var expectedErrorMsg = _fakeFailureDetailedResult.Explanation;
 
-            MockErrorDialogService.Verify(mock => mock.
-              DisplayErrorDialog(expectedErrorTitle, expectedErrorMsg),
+            MockErrorDialogService.Verify(mock => mock.DisplayErrorDialog(expectedErrorTitle, expectedErrorMsg),
                 Times.Once);
         }
 
@@ -386,9 +365,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
 
-            MockCloudFoundryService.Setup(mock => mock.
-                StartAppAsync(fakeApp, false, It.IsAny<int>()))
-                    .ReturnsAsync(_fakeFailureDetailedResult);
+            MockCloudFoundryService.Setup(mock => mock.StartAppAsync(fakeApp, false, It.IsAny<int>()))
+                .ReturnsAsync(_fakeFailureDetailedResult);
 
             await _sut.StartCloudFoundryApp(fakeApp);
 
@@ -396,9 +374,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var logPropVal2 = "{StartResult}";
             var expectedLogMsg = $"{TanzuExplorerViewModel._startAppErrorMsg} {logPropVal1}. {logPropVal2}";
 
-            MockLogger.Verify(m => m.
-                Error(expectedLogMsg, fakeApp.AppName, _fakeFailureDetailedResult.ToString()),
-                    Times.Once);
+            MockLogger.Verify(m => m.Error(expectedLogMsg, fakeApp.AppName, _fakeFailureDetailedResult.ToString()),
+                Times.Once);
         }
 
         [TestMethod]
@@ -433,10 +410,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("RefreshAllItems")]
         public void RefreshAllItems_SetsIsRefreshingAllFalse_WhenTasConnectionNull()
         {
-            _sut = new TanzuExplorerViewModel(Services)
-            {
-                IsRefreshingAll = true
-            };
+            _sut = new TanzuExplorerViewModel(Services) { IsRefreshingAll = true };
 
             Assert.IsNull(_sut.CloudFoundryConnection);
             Assert.IsTrue(_sut.IsRefreshingAll);
@@ -519,23 +493,19 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var fakeApp = new CloudFoundryApp("junk", "junk", null, "junk");
             var fakeLogsResult = new DetailedResult<string>(content: null, succeeded: false, explanation: ":(", cmdDetails: _fakeFailureCmdResult);
 
-            MockViewLocatorService.Setup(m => m.
-                GetViewByViewModelName(nameof(OutputViewModel), null))
-                    .Callback(() => Assert.Fail("Output view does not need to be retrieved."));
+            MockViewLocatorService.Setup(m => m.GetViewByViewModelName(nameof(OutputViewModel), null))
+                .Callback(() => Assert.Fail("Output view does not need to be retrieved."));
 
-            MockCloudFoundryService.Setup(m => m.
-                GetRecentLogsAsync(fakeApp))
-                    .ReturnsAsync(fakeLogsResult);
+            MockCloudFoundryService.Setup(m => m.GetRecentLogsAsync(fakeApp))
+                .ReturnsAsync(fakeLogsResult);
 
             await _sut.DisplayRecentAppLogs(fakeApp);
 
-            MockLogger.Verify(m => m.
-                Error(It.Is<string>(s => s.Contains(fakeLogsResult.Explanation))),
-                    Times.Once);
+            MockLogger.Verify(m => m.Error(It.Is<string>(s => s.Contains(fakeLogsResult.Explanation))),
+                Times.Once);
 
-            MockErrorDialogService.Verify(m => m.
-                DisplayWarningDialog(It.Is<string>(s => s.Contains(fakeApp.AppName)), It.Is<string>(s => s.Contains(fakeLogsResult.Explanation))),
-                    Times.Once);
+            MockErrorDialogService.Verify(m => m.DisplayWarningDialog(It.Is<string>(s => s.Contains(fakeApp.AppName)), It.Is<string>(s => s.Contains(fakeLogsResult.Explanation))),
+                Times.Once);
         }
 
         [TestMethod]
@@ -546,13 +516,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var fakeView = new FakeOutputView();
             var fakeLogsResult = new DetailedResult<string>(content: "fake logs", succeeded: true, explanation: null, cmdDetails: _fakeSuccessCmdResult);
 
-            MockViewLocatorService.Setup(m => m.
-                GetViewByViewModelName(nameof(OutputViewModel), It.IsAny<string>()))
-                    .Returns(fakeView);
+            MockViewLocatorService.Setup(m => m.GetViewByViewModelName(nameof(OutputViewModel), It.IsAny<string>()))
+                .Returns(fakeView);
 
-            MockCloudFoundryService.Setup(m => m.
-                GetRecentLogsAsync(fakeApp))
-                    .ReturnsAsync(fakeLogsResult);
+            MockCloudFoundryService.Setup(m => m.GetRecentLogsAsync(fakeApp))
+                .ReturnsAsync(fakeLogsResult);
 
             Assert.IsFalse(fakeView.ShowMethodWasCalled);
 
@@ -571,13 +539,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 FailureType = FailureType.InvalidRefreshToken
             };
 
-            MockViewLocatorService.Setup(m => m.
-                GetViewByViewModelName(nameof(OutputViewModel), null))
-                    .Callback(() => Assert.Fail("Output view does not need to be retrieved."));
+            MockViewLocatorService.Setup(m => m.GetViewByViewModelName(nameof(OutputViewModel), null))
+                .Callback(() => Assert.Fail("Output view does not need to be retrieved."));
 
-            MockCloudFoundryService.Setup(m => m.
-                GetRecentLogsAsync(fakeApp))
-                    .ReturnsAsync(invalidRefreshTokenResult);
+            MockCloudFoundryService.Setup(m => m.GetRecentLogsAsync(fakeApp))
+                .ReturnsAsync(invalidRefreshTokenResult);
 
             Assert.IsFalse(_sut.AuthenticationRequired);
 
@@ -585,9 +551,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsTrue(_sut.AuthenticationRequired);
 
-            MockErrorDialogService.Verify(m => m.
-                DisplayWarningDialog(It.Is<string>(s => s.Contains(fakeApp.AppName)), It.Is<string>(s => s.Contains(invalidRefreshTokenResult.Explanation))),
-                    Times.Once);
+            MockErrorDialogService.Verify(
+                m => m.DisplayWarningDialog(It.Is<string>(s => s.Contains(fakeApp.AppName)), It.Is<string>(s => s.Contains(invalidRefreshTokenResult.Explanation))),
+                Times.Once);
         }
 
         [TestMethod]
@@ -609,10 +575,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("AuthenticationRequired")]
         public void SettingAuthenticationRequiredToFalse_DoesNotExpandCfInstanceViewModel()
         {
-            _sut = new TanzuExplorerViewModel(Services)
-            {
-                AuthenticationRequired = true,
-            };
+            _sut = new TanzuExplorerViewModel(Services) { AuthenticationRequired = true, };
 
             _sut.CloudFoundryConnection = new FakeCfInstanceViewModel(_fakeCfInstance, Services, expanded: false);
 
@@ -682,14 +645,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("SetConnection")]
         public void SetConnection_SetsAuthenticationRequiredToFalse_WhenTasConnectionIsNull()
         {
-            _sut = new TanzuExplorerViewModel(Services)
-            {
-                AuthenticationRequired = true
-            };
-            _sut.PropertyChanged += (sender, e) =>
-            {
-                _receivedEvents.Add(e.PropertyName);
-            };
+            _sut = new TanzuExplorerViewModel(Services) { AuthenticationRequired = true };
+            _sut.PropertyChanged += (sender, e) => { _receivedEvents.Add(e.PropertyName); };
             _receivedEvents.Clear();
 
             Assert.IsNull(_sut.CloudFoundryConnection);
@@ -780,15 +737,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             var expectedViewTitle = $"Logs for {_fakeCfApp.AppName}";
             var fakeOutputViewModel = new FakeOutputViewModel();
-            var fakeView = new FakeOutputView()
-            {
-                ViewModel = fakeOutputViewModel,
-            };
-            var fakeRecentLogsResult = new DetailedResult<string>
-            {
-                Succeeded = true,
-                Content = "fake historical app logs",
-            };
+            var fakeView = new FakeOutputView() { ViewModel = fakeOutputViewModel, };
+            var fakeRecentLogsResult = new DetailedResult<string> { Succeeded = true, Content = "fake historical app logs", };
 
             MockViewLocatorService.Setup(m => m.GetViewByViewModelName(nameof(OutputViewModel), expectedViewTitle)).Returns(fakeView);
             Assert.IsFalse(fakeOutputViewModel.BeginStreamingAppLogsForAppAsyncWasCalled);
@@ -811,7 +761,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var fakeViewLocatorException = new Exception(":(");
 
             MockViewLocatorService.Setup(m => m.GetViewByViewModelName(nameof(OutputViewModel), expectedViewParam)).Throws(fakeViewLocatorException);
-            MockErrorDialogService.Setup(m => m.DisplayErrorDialog("Error displaying app logs", $"Something went wrong while trying to display logs for {_fakeCfApp.AppName}, please try again."));
+            MockErrorDialogService.Setup(m =>
+                m.DisplayErrorDialog("Error displaying app logs", $"Something went wrong while trying to display logs for {_fakeCfApp.AppName}, please try again."));
             MockLogger.Setup(m => m.Error("Caught exception trying to stream app logs for '{AppName}': {AppLogsException}", _fakeCfApp.AppName, fakeViewLocatorException));
 
             _sut.StreamAppLogs(_fakeCfApp);
