@@ -69,8 +69,8 @@ namespace Tanzu.Toolkit.Services.Tests
         protected static readonly string _fakeHttpProxy = "junk";
         protected static readonly bool _skipSsl = true;
         protected static readonly string _fakeValidAccessToken = "valid token";
-        protected static readonly string _fakeProjectPath = "this\\is\\a\\fake\\path";
-        protected static readonly string _fakeManifestPath = "this\\is\\a\\fake\\path";
+        protected static readonly string _fakeProjectPath = @"this\is\a\fake\path";
+        protected static readonly string _fakeManifestPath = @"this\is\a\fake\path";
         protected static readonly Action<string> _fakeOutCallback = content => { };
         protected static readonly Action<string> _fakeErrCallback = content => { };
 
@@ -90,7 +90,7 @@ namespace Tanzu.Toolkit.Services.Tests
          * "typ": "JWT",
          * "alg": "HS256"
          * }
-         * 
+         *
          * PAYLOAD:
          * {
          * "iss": "junk",
@@ -106,125 +106,116 @@ namespace Tanzu.Toolkit.Services.Tests
          * "Project Administrator"
          * ]
          * }
-         * 
+         *
          * SIGNING KEY:
          * "qwertyuiopasdfghjklzxcvbnm123456"
          */
-        internal static readonly string _fakeAccessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqdW5rIiwiaWF0IjoxNjIzMTYzOTM4LCJleHAiOjI1MzM3MDgxODMzOCwiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsIkdpdmVuTmFtZSI6IkpvaG5ueSIsIlN1cm5hbWUiOiJSb2NrZXQiLCJFbWFpbCI6Impyb2NrZXRAZXhhbXBsZS5jb20iLCJSb2xlIjpbIk1hbmFnZXIiLCJQcm9qZWN0IEFkbWluaXN0cmF0b3IiXX0.9ulEPk_mjvBivguELvlojZAUnrwkqUMnunFF6zlmKqc";
+        internal static readonly string _fakeAccessToken =
+            "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqdW5rIiwiaWF0IjoxNjIzMTYzOTM4LCJleHAiOjI1MzM3MDgxODMzOCwiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsIkdpdmVuTmFtZSI6IkpvaG5ueSIsIlN1cm5hbWUiOiJSb2NrZXQiLCJFbWFpbCI6Impyb2NrZXRAZXhhbXBsZS5jb20iLCJSb2xlIjpbIk1hbmFnZXIiLCJQcm9qZWN0IEFkbWluaXN0cmF0b3IiXX0.9ulEPk_mjvBivguELvlojZAUnrwkqUMnunFF6zlmKqc";
 
         /**
          * This is a real JWT from the Jamestown CF environment which expired on June 8th 2021
          */
-        internal static readonly string _expiredAccessToken = "eyJhbGciOiJSUzI1NiIsImprdSI6Imh0dHBzOi8vdWFhLnN5cy5qYW1lc3Rvd24uY2YtYXBwLmNvbS90b2tlbl9rZXlzIiwia2lkIjoia2V5LTEiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiIyNmY3ZGFhNTI5MDM0OGVmOWQyZTRkYTg4MmZiMWMyZiIsInN1YiI6IjY0NzljMjY0LWE3YTQtNGRiYS05MGFmLTk1MGE4YTMyODE5ZSIsInNjb3BlIjpbIm9wZW5pZCIsInJvdXRpbmcucm91dGVyX2dyb3Vwcy53cml0ZSIsIm5ldHdvcmsud3JpdGUiLCJzY2ltLnJlYWQiLCJjbG91ZF9jb250cm9sbGVyLmFkbWluIiwidWFhLnVzZXIiLCJyb3V0aW5nLnJvdXRlcl9ncm91cHMucmVhZCIsImNsb3VkX2NvbnRyb2xsZXIucmVhZCIsInBhc3N3b3JkLndyaXRlIiwiY2xvdWRfY29udHJvbGxlci53cml0ZSIsIm5ldHdvcmsuYWRtaW4iLCJkb3BwbGVyLmZpcmVob3NlIiwic2NpbS53cml0ZSJdLCJjbGllbnRfaWQiOiJjZiIsImNpZCI6ImNmIiwiYXpwIjoiY2YiLCJncmFudF90eXBlIjoicGFzc3dvcmQiLCJ1c2VyX2lkIjoiNjQ3OWMyNjQtYTdhNC00ZGJhLTkwYWYtOTUwYThhMzI4MTllIiwib3JpZ2luIjoidWFhIiwidXNlcl9uYW1lIjoiYWRtaW4iLCJlbWFpbCI6ImFkbWluIiwiYXV0aF90aW1lIjoxNjIzMTY0ODE2LCJyZXZfc2lnIjoiNDFkOTJiYiIsImlhdCI6MTYyMzE4MTEzNSwiZXhwIjoxNjIzMTg4MzM1LCJpc3MiOiJodHRwczovL3VhYS5zeXMuamFtZXN0b3duLmNmLWFwcC5jb20vb2F1dGgvdG9rZW4iLCJ6aWQiOiJ1YWEiLCJhdWQiOlsiY2xvdWRfY29udHJvbGxlciIsInNjaW0iLCJwYXNzd29yZCIsImNmIiwidWFhIiwib3BlbmlkIiwiZG9wcGxlciIsIm5ldHdvcmsiLCJyb3V0aW5nLnJvdXRlcl9ncm91cHMiXX0.qCfIxuJb2Xv21pq9idUO44PY50n4FY1cTwpmoWbjAmVs2Cu1smeD2L8gJFSZtg04MlKEJLspfSwfsAfu4YTbUB_iWyBmrZybnZFNrU335z8jReAnHTD5Nq5wVvPLNKdwVy3VyyhHTpD7BQ-oTPLDFaVTysoqR8C13ln0Sbr8jctOHVGRS8sOxJVedtRrLAhQUtZJUPpxbq4msFa0YWLQfXRwWTUc4boYOqtHx1jXg5T2qOJDcUF8MvvLE5ROnfsRciMEtCjCqJsteIEG2lfHcE7JwH3XXSJoiz1pIBoDw1DEUplHmNgQ1saK7tNQu-gg4RVWHFKvqhnGwT94buwHkA";
+        internal static readonly string _expiredAccessToken =
+            "eyJhbGciOiJSUzI1NiIsImprdSI6Imh0dHBzOi8vdWFhLnN5cy5qYW1lc3Rvd24uY2YtYXBwLmNvbS90b2tlbl9rZXlzIiwia2lkIjoia2V5LTEiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiIyNmY3ZGFhNTI5MDM0OGVmOWQyZTRkYTg4MmZiMWMyZiIsInN1YiI6IjY0NzljMjY0LWE3YTQtNGRiYS05MGFmLTk1MGE4YTMyODE5ZSIsInNjb3BlIjpbIm9wZW5pZCIsInJvdXRpbmcucm91dGVyX2dyb3Vwcy53cml0ZSIsIm5ldHdvcmsud3JpdGUiLCJzY2ltLnJlYWQiLCJjbG91ZF9jb250cm9sbGVyLmFkbWluIiwidWFhLnVzZXIiLCJyb3V0aW5nLnJvdXRlcl9ncm91cHMucmVhZCIsImNsb3VkX2NvbnRyb2xsZXIucmVhZCIsInBhc3N3b3JkLndyaXRlIiwiY2xvdWRfY29udHJvbGxlci53cml0ZSIsIm5ldHdvcmsuYWRtaW4iLCJkb3BwbGVyLmZpcmVob3NlIiwic2NpbS53cml0ZSJdLCJjbGllbnRfaWQiOiJjZiIsImNpZCI6ImNmIiwiYXpwIjoiY2YiLCJncmFudF90eXBlIjoicGFzc3dvcmQiLCJ1c2VyX2lkIjoiNjQ3OWMyNjQtYTdhNC00ZGJhLTkwYWYtOTUwYThhMzI4MTllIiwib3JpZ2luIjoidWFhIiwidXNlcl9uYW1lIjoiYWRtaW4iLCJlbWFpbCI6ImFkbWluIiwiYXV0aF90aW1lIjoxNjIzMTY0ODE2LCJyZXZfc2lnIjoiNDFkOTJiYiIsImlhdCI6MTYyMzE4MTEzNSwiZXhwIjoxNjIzMTg4MzM1LCJpc3MiOiJodHRwczovL3VhYS5zeXMuamFtZXN0b3duLmNmLWFwcC5jb20vb2F1dGgvdG9rZW4iLCJ6aWQiOiJ1YWEiLCJhdWQiOlsiY2xvdWRfY29udHJvbGxlciIsInNjaW0iLCJwYXNzd29yZCIsImNmIiwidWFhIiwib3BlbmlkIiwiZG9wcGxlciIsIm5ldHdvcmsiLCJyb3V0aW5nLnJvdXRlcl9ncm91cHMiXX0.qCfIxuJb2Xv21pq9idUO44PY50n4FY1cTwpmoWbjAmVs2Cu1smeD2L8gJFSZtg04MlKEJLspfSwfsAfu4YTbUB_iWyBmrZybnZFNrU335z8jReAnHTD5Nq5wVvPLNKdwVy3VyyhHTpD7BQ-oTPLDFaVTysoqR8C13ln0Sbr8jctOHVGRS8sOxJVedtRrLAhQUtZJUPpxbq4msFa0YWLQfXRwWTUc4boYOqtHx1jXg5T2qOJDcUF8MvvLE5ROnfsRciMEtCjCqJsteIEG2lfHcE7JwH3XXSJoiz1pIBoDw1DEUplHmNgQ1saK7tNQu-gg4RVWHFKvqhnGwT94buwHkA";
 
         internal readonly AppManifest _exampleManifest = new()
         {
             Version = 1,
             Applications =
-                [
-                    new() {
-                        Name = "app1",
-                        Buildpacks =
-                        [
-                            "ruby_buildpack",
-                            "java_buildpack",
-                        ],
-                        Env = new Dictionary<string, string>
-                        {
-                            {"my_snake_case_var_key", "my_snake_case_var_val" },
-                            {"my-kebab-case-var-key", "my-kebab-case-var-val" },
-                            {"myCamelCaseVarKey", "myCamelCaseVarVal" },
-                            {"MyPascalCaseVarKey", "MyPascalCaseVarVal" },
-                            {"MY_UPPER_CASE_VAR_KEY", "MY_UPPER_CASE_VAR_VAL" },
-                        },
-                        Routes =
-                        [
-                            new() {
-                                Route = "route.example.com",
-                            },
-                            new() {
-                                Route = "another-route.example.com",
-                                Protocol = "http2"
-                            },
-                        ],
-                        Services = [
-                            "my-service1",
-                            "my-service2",
-                        ],
-                        Stack = "cflinuxfs3",
-                        Metadata = new MetadataConfig
-                        {
-                            Annotations = new Dictionary<string, string>
-                            {
-                                { "contact", "bob@example.com jane@example.com" },
-                            },
-                            Labels = new Dictionary<string, string>
-                            {
-                                { "sensitive", "true" },
-                            },
-                        },
-                        Processes =
-                        [
-                            new() {
-                                Type = "web",
-                                Command = "start-web.sh",
-                                DiskQuota = "512M",
-                                HealthCheckHttpEndpoint = "/healthcheck",
-                                HealthCheckType = "http",
-                                HealthCheckInvocationTimeout = 10,
-                                Instances = 3,
-                                Memory = "500M",
-                                Timeout = 10,
-                            },
-                            new() {
-                                Type = "worker",
-                                Command = "start-worker.sh",
-                                DiskQuota = "1G",
-                                HealthCheckType = "process",
-                                Instances = 2,
-                                Memory = "256M",
-                                Timeout = 15,
-                            },
-                        ]
+            [
+                new()
+                {
+                    Name = "app1",
+                    Buildpacks =
+                    [
+                        "ruby_buildpack",
+                        "java_buildpack",
+                    ],
+                    Env = new Dictionary<string, string>
+                    {
+                        { "my_snake_case_var_key", "my_snake_case_var_val" },
+                        { "my-kebab-case-var-key", "my-kebab-case-var-val" },
+                        { "myCamelCaseVarKey", "myCamelCaseVarVal" },
+                        { "MyPascalCaseVarKey", "MyPascalCaseVarVal" },
+                        { "MY_UPPER_CASE_VAR_KEY", "MY_UPPER_CASE_VAR_VAL" },
                     },
-                    new() {
-                        Name = "app2",
-                        Env = new Dictionary<string, string>
+                    Routes =
+                    [
+                        new() { Route = "route.example.com", },
+                        new() { Route = "another-route.example.com", Protocol = "http2" },
+                    ],
+                    Services =
+                    [
+                        "my-service1",
+                        "my-service2",
+                    ],
+                    Stack = "cflinuxfs3",
+                    Metadata = new MetadataConfig
+                    {
+                        Annotations = new Dictionary<string, string> { { "contact", "bob@example.com jane@example.com" }, },
+                        Labels = new Dictionary<string, string> { { "sensitive", "true" }, },
+                    },
+                    Processes =
+                    [
+                        new()
                         {
-                            { "VAR1", "value1" },
+                            Type = "web",
+                            Command = "start-web.sh",
+                            DiskQuota = "512M",
+                            HealthCheckHttpEndpoint = "/healthcheck",
+                            HealthCheckType = "http",
+                            HealthCheckInvocationTimeout = 10,
+                            Instances = 3,
+                            Memory = "500M",
+                            Timeout = 10,
                         },
-                        Processes =
-                        [
-                            new() {
-                                Type = "web",
-                                Instances = 1,
-                                Memory = "256M",
-                            },
-                        ],
-                        Sidecars =
-                        [
-                            new() {
-                                Name = "authenticator",
-                                ProcessTypes =
-                                [
-                                    "web",
-                                    "worker",
-                                ],
-                                Command = "bundle exec run-authenticator",
-                                Memory = "800M",
-                            },
-                            new() {
-                                Name = "upcaser",
-                                ProcessTypes =
-                                [
-                                    "worker",
-                                ],
-                                Command = "./tr-server",
-                                Memory = "2G",
-                            }
-                        ]
-                    }
-                ]
+                        new()
+                        {
+                            Type = "worker",
+                            Command = "start-worker.sh",
+                            DiskQuota = "1G",
+                            HealthCheckType = "process",
+                            Instances = 2,
+                            Memory = "256M",
+                            Timeout = 15,
+                        },
+                    ]
+                },
+                new()
+                {
+                    Name = "app2",
+                    Env = new Dictionary<string, string> { { "VAR1", "value1" }, },
+                    Processes =
+                    [
+                        new() { Type = "web", Instances = 1, Memory = "256M", },
+                    ],
+                    Sidecars =
+                    [
+                        new()
+                        {
+                            Name = "authenticator",
+                            ProcessTypes =
+                            [
+                                "web",
+                                "worker",
+                            ],
+                            Command = "bundle exec run-authenticator",
+                            Memory = "800M",
+                        },
+                        new()
+                        {
+                            Name = "upcaser",
+                            ProcessTypes =
+                            [
+                                "worker",
+                            ],
+                            Command = "./tr-server",
+                            Memory = "2G",
+                        }
+                    ]
+                }
+            ]
         };
 
         internal readonly string _exampleManifestYaml = System.IO.File.ReadAllText("TestFakes/SampleManifest.yml");

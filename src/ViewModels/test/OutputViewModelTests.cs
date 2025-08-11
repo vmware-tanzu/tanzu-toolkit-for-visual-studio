@@ -25,16 +25,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             RenewMockServices();
             _receivedEvents = [];
             _fakeLogStreamProcess = new Process();
-            _fakeRecentLogsResult = new DetailedResult<string>
-            {
-                Succeeded = true,
-                Content = "pretend this is a recent log statement",
-            };
-            _fakeLogsStreamResult = new DetailedResult<Process>
-            {
-                Succeeded = true,
-                Content = _fakeLogStreamProcess,
-            };
+            _fakeRecentLogsResult = new DetailedResult<string> { Succeeded = true, Content = "pretend this is a recent log statement", };
+            _fakeLogsStreamResult = new DetailedResult<Process> { Succeeded = true, Content = _fakeLogStreamProcess, };
 
             _fakeCfInstanceViewModel = new FakeCfInstanceViewModel(_fakeCfInstance, Services);
             _fakeTanzuExplorerViewModel = MockTanzuExplorerViewModel.Object;
@@ -45,15 +37,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             _sut = new OutputViewModel(_fakeTanzuExplorerViewModel, Services);
 
-            _fakeOutputView = new FakeOutputView
-            {
-                ViewModel = _sut,
-            };
+            _fakeOutputView = new FakeOutputView { ViewModel = _sut, };
 
-            _sut.PropertyChanged += (sender, e) =>
-            {
-                _receivedEvents.Add(e.PropertyName);
-            };
+            _sut.PropertyChanged += (sender, e) => { _receivedEvents.Add(e.PropertyName); };
         }
 
         [TestCleanup]

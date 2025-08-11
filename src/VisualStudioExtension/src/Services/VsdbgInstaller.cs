@@ -36,16 +36,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services
             }
             catch (Exception ex)
             {
-                return new DetailedResult
-                {
-                    Succeeded = false,
-                    Explanation = ex.Message,
-                };
+                return new DetailedResult { Succeeded = false, Explanation = ex.Message, };
             }
 
-            var sshCmd = $"cd {_defaultCfAppDir} && curl -L https://aka.ms/getvsdbg{scriptExt} -o {_vsdbgInstallScriptName}.{scriptExt} && {startCmd}";
+            var sshCmd =
+                $"cd {_defaultCfAppDir} && curl -L https://aka.ms/getvsdbg{scriptExt} -o {_vsdbgInstallScriptName}.{scriptExt} && {startCmd}";
 
-            return await _cfClient.ExecuteSshCommand(app.AppName, app.ParentSpace.ParentOrg.OrgName, app.ParentSpace.SpaceName, sshCmd);
+            return await _cfClient.ExecuteSshCommand(app.AppName, app.ParentSpace.ParentOrg.OrgName,
+                app.ParentSpace.SpaceName, sshCmd);
         }
 
         private void SetArgsBasedOnStack(string stack, string vsVersion, out string scriptExt, out string startCmd)
@@ -55,13 +53,15 @@ namespace Tanzu.Toolkit.VisualStudio.Services
             if (stack != null && stack.Contains("windows"))
             {
                 scriptExt = "ps1";
-                startCmd = $"powershell -File {_vsdbgInstallScriptName}.{scriptExt} -Version {vsVersion} -RuntimeID {windowsRuntimeId} -InstallPath .\\{VsdbgDirName}";
+                startCmd =
+                    $"powershell -File {_vsdbgInstallScriptName}.{scriptExt} -Version {vsVersion} -RuntimeID {windowsRuntimeId} -InstallPath .\\{VsdbgDirName}";
             }
             else if (stack != null && stack.Contains("linux"))
             {
                 scriptExt = "sh";
                 var permissionGrant = $"chmod +x {_vsdbgInstallScriptName}.{scriptExt}";
-                startCmd = $"{permissionGrant} && ./{_vsdbgInstallScriptName}.{scriptExt} -v {vsVersion} -r {linuxRuntimeId} -l ./{VsdbgDirName}";
+                startCmd =
+                    $"{permissionGrant} && ./{_vsdbgInstallScriptName}.{scriptExt} -v {vsVersion} -r {linuxRuntimeId} -l ./{VsdbgDirName}";
             }
             else
             {

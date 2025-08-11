@@ -33,6 +33,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         /// VS Package that provides this command, not null.
         /// </summary>
         private readonly AsyncPackage _package;
+
         private static IErrorDialog _errorService;
         private static ICfCliService _cfCliService;
         private static ILogger _logger;
@@ -59,11 +60,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         /// <summary>
         /// Gets the instance of the command.
         /// </summary>
-        public static RemoteDebugCommand Instance
-        {
-            get;
-            private set;
-        }
+        public static RemoteDebugCommand Instance { get; private set; }
 
         /// <summary>
         /// Initializes the singleton instance of the command.
@@ -146,8 +143,8 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                             errorMsg,
                             errorTitle,
                             OLEMSGICON.OLEMSGICON_CRITICAL,
-                        OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                        OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                            OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                            OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
                     }
                     else if (tfm.StartsWith(".NETFramework,Version=v"))
                     {
@@ -158,8 +155,8 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                             errorMsg,
                             errorTitle,
                             OLEMSGICON.OLEMSGICON_CRITICAL,
-                        OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                        OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                            OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                            OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
                     }
                     else
                     {
@@ -172,21 +169,28 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                                 var targetOrgResult = _cfCliService.TargetOrg(orgName);
                                 if (!targetOrgResult.Succeeded)
                                 {
-                                    _logger.Error("Failed to target org '{OrgName}' before invoking DebugAdapterHost.Launch -- cf may not be able to find intended app.", orgName);
+                                    _logger.Error(
+                                        "Failed to target org '{OrgName}' before invoking DebugAdapterHost.Launch -- cf may not be able to find intended app.",
+                                        orgName);
                                 }
 
                                 var targetSpaceResult = _cfCliService.TargetSpace(spaceName);
                                 if (!targetSpaceResult.Succeeded)
                                 {
-                                    _logger.Error("Failed to target space '{SpaceName}' before invoking DebugAdapterHost.Launch -- cf may not be able to find intended app.", spaceName);
+                                    _logger.Error(
+                                        "Failed to target space '{SpaceName}' before invoking DebugAdapterHost.Launch -- cf may not be able to find intended app.",
+                                        spaceName);
                                 }
 
                                 dte.ExecuteCommand("DebugAdapterHost.Launch", $"/LaunchJson:\"{launchFilePath}\"");
                             }
                         });
 
-                        var remoteDebugViewModel = new RemoteDebugViewModel(projectName, projectDirectory, tfm, launchFilePath, initiateDebugCallback, services: _services) as IRemoteDebugViewModel;
-                        var view = new RemoteDebugView(remoteDebugViewModel, new ThemeService()) as Microsoft.VisualStudio.PlatformUI.DialogWindow;
+                        var remoteDebugViewModel = new RemoteDebugViewModel(projectName, projectDirectory, tfm,
+                            launchFilePath, initiateDebugCallback, services: _services) as IRemoteDebugViewModel;
+                        var view =
+                            new RemoteDebugView(remoteDebugViewModel, new ThemeService()) as
+                                Microsoft.VisualStudio.PlatformUI.DialogWindow;
                         remoteDebugViewModel.ViewOpener = view.Show;
                         remoteDebugViewModel.ViewCloser = view.Hide;
                         view.ShowModal(); // open & wait
@@ -196,7 +200,8 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             catch (Exception ex)
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                _logger?.Error("{ClassName} caught exception in {MethodName}: {RemoteDebugException}", nameof(RemoteDebugCommand), nameof(Execute), ex);
+                _logger?.Error("{ClassName} caught exception in {MethodName}: {RemoteDebugException}",
+                    nameof(RemoteDebugCommand), nameof(Execute), ex);
                 _errorService.DisplayErrorDialog("Unable to initiate remote debugging", ex.Message);
             }
         }

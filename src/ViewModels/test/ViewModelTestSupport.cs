@@ -73,8 +73,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         protected static readonly DetailedResult _fakeSuccessDetailedResult = new(true, null, _fakeSuccessCmdResult);
         protected static readonly DetailedResult _fakeFailureDetailedResult = new(false, "junk error", _fakeFailureCmdResult);
 
-        protected static readonly string _fakeProjectPath = "this\\is\\a\\fake\\path\\to\\a\\project\\directory";
-        protected static readonly string _fakeManifestPath = "this\\is\\a\\fake\\path\\to\\a\\manifest";
+        protected static readonly string _fakeProjectPath = @"this\is\a\fake\path\to\a\project\directory";
+        protected static readonly string _fakeManifestPath = @"this\is\a\fake\path\to\a\manifest";
         protected static readonly Action<string> _fakeOutCallback = content => { };
         protected static readonly Action<string> _fakeErrCallback = content => { };
 
@@ -142,10 +142,26 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             public bool BeginStreamingAppLogsForAppAsyncWasCalled { get; set; }
 
             public Process ActiveProcess { get; set; }
-            public object ActiveView { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+            public object ActiveView
+            {
+                get => throw new NotImplementedException();
+                set => throw new NotImplementedException();
+            }
+
             public List<string> AppendLineInvocationArgs { get; set; }
-            public bool OutputPaused { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-            public bool OutputIsAppLogs { get => throw new NotImplementedException(); set { } }
+
+            public bool OutputPaused
+            {
+                get => throw new NotImplementedException();
+                set => throw new NotImplementedException();
+            }
+
+            public bool OutputIsAppLogs
+            {
+                get => throw new NotImplementedException();
+                set { }
+            }
 
             public void AppendLine(string newContent)
             {
@@ -186,11 +202,19 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
             }
 
-            public bool AuthenticationRequired { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            public bool AuthenticationRequired
+            {
+                get => throw new NotImplementedException();
+                set => throw new NotImplementedException();
+            }
 
             public CfInstanceViewModel CloudFoundryConnection => throw new NotImplementedException();
 
-            public object ActiveView { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            public object ActiveView
+            {
+                get => throw new NotImplementedException();
+                set => throw new NotImplementedException();
+            }
 
             public bool CanDisplayRecentAppLogs(object arg)
             {
@@ -312,7 +336,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
             }
 
-            internal int NumUpdates { get => _numUpdates; private set => _numUpdates = value; }
+            internal int NumUpdates
+            {
+                get => _numUpdates;
+                private set => _numUpdates = value;
+            }
 
             protected internal override async Task UpdateAllChildren()
             {
@@ -329,7 +357,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
             }
 
-            internal int NumUpdates { get => _numUpdates; private set => _numUpdates = value; }
+            internal int NumUpdates
+            {
+                get => _numUpdates;
+                private set => _numUpdates = value;
+            }
 
             protected internal override async Task UpdateAllChildren()
             {
@@ -346,7 +378,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
             }
 
-            internal int NumUpdates { get => _numUpdates; private set => _numUpdates = value; }
+            internal int NumUpdates
+            {
+                get => _numUpdates;
+                private set => _numUpdates = value;
+            }
 
             protected internal override async Task UpdateAllChildren()
             {
@@ -358,109 +394,94 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             Version = 1,
             Applications =
-                [
-                    new() {
-                        Name = "app1",
-                        Buildpacks =
-                        [
-                            "ruby_buildpack",
-                            "java_buildpack",
-                            "my_cool_buildpack",
-                        ],
-                        Env = new Dictionary<string, string>
-                        {
-                            {"VAR1", "value1" },
-                            {"VAR2", "value2" },
-                        },
-                        Routes =
-                        [
-                            new() {
-                                Route = "route.example.com",
-                            },
-                            new() {
-                                Route = "another-route.example.com",
-                                Protocol = "http2"
-                            },
-                        ],
-                        Services = [
-                            "my-service1",
-                            "my-service2",
-                        ],
-                        Stack = "cflinuxfs3",
-                        Metadata = new MetadataConfig
-                        {
-                            Annotations = new Dictionary<string, string>
-                            {
-                                { "contact", "bob@example.com jane@example.com" },
-                            },
-                            Labels = new Dictionary<string, string>
-                            {
-                                { "sensitive", "true" },
-                            },
-                        },
-                        Processes =
-                        [
-                            new() {
-                                Type = "web",
-                                Command = "start-web.sh",
-                                DiskQuota = "512M",
-                                HealthCheckHttpEndpoint = "/healthcheck",
-                                HealthCheckType = "http",
-                                HealthCheckInvocationTimeout = 10,
-                                Instances = 3,
-                                Memory = "500M",
-                                Timeout = 10,
-                            },
-                            new() {
-                                Type = "worker",
-                                Command = "start-worker.sh",
-                                DiskQuota = "1G",
-                                HealthCheckType = "process",
-                                Instances = 2,
-                                Memory = "256M",
-                                Timeout = 15,
-                            },
-                        ],
-                        Path = "some//fake//path",
+            [
+                new()
+                {
+                    Name = "app1",
+                    Buildpacks =
+                    [
+                        "ruby_buildpack",
+                        "java_buildpack",
+                        "my_cool_buildpack",
+                    ],
+                    Env = new Dictionary<string, string> { { "VAR1", "value1" }, { "VAR2", "value2" }, },
+                    Routes =
+                    [
+                        new() { Route = "route.example.com", },
+                        new() { Route = "another-route.example.com", Protocol = "http2" },
+                    ],
+                    Services =
+                    [
+                        "my-service1",
+                        "my-service2",
+                    ],
+                    Stack = "cflinuxfs3",
+                    Metadata = new MetadataConfig
+                    {
+                        Annotations = new Dictionary<string, string> { { "contact", "bob@example.com jane@example.com" }, },
+                        Labels = new Dictionary<string, string> { { "sensitive", "true" }, },
                     },
-                    new() {
-                        Name = "app2",
-                        Env = new Dictionary<string, string>
+                    Processes =
+                    [
+                        new()
                         {
-                            { "VAR1", "value1" },
+                            Type = "web",
+                            Command = "start-web.sh",
+                            DiskQuota = "512M",
+                            HealthCheckHttpEndpoint = "/healthcheck",
+                            HealthCheckType = "http",
+                            HealthCheckInvocationTimeout = 10,
+                            Instances = 3,
+                            Memory = "500M",
+                            Timeout = 10,
                         },
-                        Processes =
-                        [
-                            new() {
-                                Type = "web",
-                                Instances = 1,
-                                Memory = "256M",
-                            },
-                        ],
-                        Sidecars =
-                        [
-                            new() {
-                                Name = "authenticator",
-                                ProcessTypes =
-                                [
-                                    "web",
-                                    "worker",
-                                ],
-                                Command = "bundle exec run-authenticator",
-                                Memory = "800M",
-                            },
-                            new() {
-                                Name = "upcaser",
-                                ProcessTypes =
-                                [
-                                    "worker",
-                                ],
-                                Command = "./tr-server",
-                                Memory = "2G",
-                            }
-                        ]
-                    }
-                ]
+                        new()
+                        {
+                            Type = "worker",
+                            Command = "start-worker.sh",
+                            DiskQuota = "1G",
+                            HealthCheckType = "process",
+                            Instances = 2,
+                            Memory = "256M",
+                            Timeout = 15,
+                        },
+                    ],
+                    Path = "some//fake//path",
+                },
+                new()
+                {
+                    Name = "app2",
+                    Env = new Dictionary<string, string> { { "VAR1", "value1" }, },
+                    Processes =
+                    [
+                        new() { Type = "web", Instances = 1, Memory = "256M", },
+                    ],
+                    Sidecars =
+                    [
+                        new()
+                        {
+                            Name = "authenticator",
+                            ProcessTypes =
+                            [
+                                "web",
+                                "worker",
+                            ],
+                            Command = "bundle exec run-authenticator",
+                            Memory = "800M",
+                        },
+                        new()
+                        {
+                            Name = "upcaser",
+                            ProcessTypes =
+                            [
+                                "worker",
+                            ],
+                            Command = "./tr-server",
+                            Memory = "2G",
+                        }
+                    ]
+                }
+            ]
         };
 
         protected ViewModelTestSupport()

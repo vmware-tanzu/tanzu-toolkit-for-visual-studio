@@ -24,7 +24,10 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
     {
         internal const string _emptyOutputDirMessage = "Unable to locate app files; project output directory is empty. (Has your project already been compiled?)";
         internal const string _ccApiVersionUndetectableErrTitle = "Unable to detect Cloud Controller API version.";
-        internal const string _ccApiVersionUndetectableErrMsg = "Failed to detect which version of the Cloud Controller API is being run on the provided instance; some features of this extension may not work properly.";
+
+        internal const string _ccApiVersionUndetectableErrMsg =
+            "Failed to detect which version of the Cloud Controller API is being run on the provided instance; some features of this extension may not work properly.";
+
         internal const string _loginFailureMessage = "Login failed.";
         internal const string _cfApiSsoPromptKey = "passcode";
         internal const string _routeDeletionErrorMsg = "Encountered error deleting certain routes";
@@ -67,11 +70,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
             catch (Exception ex)
             {
-                return new DetailedResult
-                {
-                    Succeeded = false,
-                    Explanation = ex.Message
-                };
+                return new DetailedResult { Succeeded = false, Explanation = ex.Message };
             }
         }
 
@@ -109,7 +108,8 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     if (authResult.FailureType != FailureType.InvalidCertificate)
                     {
-                        authResult.Explanation = _loginFailureMessage + Environment.NewLine + $"Unable to authenticate user \"{username}\"" + Environment.NewLine + authResult.CmdResult.StdErr;
+                        authResult.Explanation = _loginFailureMessage + Environment.NewLine + $"Unable to authenticate user \"{username}\"" + Environment.NewLine +
+                                                 authResult.CmdResult.StdErr;
                     }
 
                     return authResult;
@@ -117,11 +117,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 await MatchCliVersionToApiVersion();
 
-                return new DetailedResult
-                {
-                    Succeeded = true,
-                    Explanation = null
-                };
+                return new DetailedResult { Succeeded = true, Explanation = null };
             }
             catch (Exception e)
             {
@@ -129,11 +125,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 FormatExceptionMessage(e, errorMessages);
                 var errorMessage = string.Join(Environment.NewLine, errorMessages.ToArray());
 
-                return new DetailedResult
-                {
-                    Succeeded = false,
-                    Explanation = errorMessage
-                };
+                return new DetailedResult { Succeeded = false, Explanation = errorMessage };
             }
         }
 
@@ -147,27 +139,14 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     var ssoPasscodePrompt = loginServerInfo.Prompts[_cfApiSsoPromptKey][1];
 
-                    return new DetailedResult<string>
-                    {
-                        Succeeded = true,
-                        Content = ssoPasscodePrompt,
-                    };
+                    return new DetailedResult<string> { Succeeded = true, Content = ssoPasscodePrompt, };
                 }
 
-                return new DetailedResult<string>
-                {
-                    Succeeded = false,
-                    Explanation = "Unable to determine SSO URL.",
-                    FailureType = FailureType.MissingSsoPrompt,
-                };
+                return new DetailedResult<string> { Succeeded = false, Explanation = "Unable to determine SSO URL.", FailureType = FailureType.MissingSsoPrompt, };
             }
             catch (Exception ex)
             {
-                return new DetailedResult<string>
-                {
-                    Succeeded = false,
-                    Explanation = ex.Message,
-                };
+                return new DetailedResult<string> { Succeeded = false, Explanation = ex.Message, };
             }
         }
 
@@ -207,10 +186,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 return new DetailedResult<List<CloudFoundryOrganization>>
                 {
-                    Succeeded = false,
-                    Explanation = msg.Replace("{CfName}", cf.InstanceName),
-                    Content = null,
-                    FailureType = FailureType.InvalidRefreshToken,
+                    Succeeded = false, Explanation = msg.Replace("{CfName}", cf.InstanceName), Content = null, FailureType = FailureType.InvalidRefreshToken,
                 };
             }
 
@@ -220,8 +196,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 return new DetailedResult<List<CloudFoundryOrganization>>()
                 {
-                    Succeeded = false,
-                    Explanation = $"CloudFoundryService attempted to get orgs for '{apiAddress}' but was unable to look up an access token.",
+                    Succeeded = false, Explanation = $"CloudFoundryService attempted to get orgs for '{apiAddress}' but was unable to look up an access token.",
                 };
             }
 
@@ -234,7 +209,9 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 if (retryAmount > 0)
                 {
-                    _logger.Information("GetOrgsForCfInstanceAsync caught an exception when trying to retrieve orgs: {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).", originalException.Message, retryAmount);
+                    _logger.Information(
+                        "GetOrgsForCfInstanceAsync caught an exception when trying to retrieve orgs: {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).",
+                        originalException.Message, retryAmount);
                     _cfCliService.ClearCachedAccessToken();
                     retryAmount -= 1;
                     return await GetOrgsForCfInstanceAsync(cf, skipSsl, retryAmount);
@@ -243,11 +220,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     _logger.Error("GetOrgsForCfInstanceAsync encountered exception: {GetOrgsForCfInstanceAsyncException}", originalException);
 
-                    return new DetailedResult<List<CloudFoundryOrganization>>()
-                    {
-                        Succeeded = false,
-                        Explanation = originalException.Message,
-                    };
+                    return new DetailedResult<List<CloudFoundryOrganization>>() { Succeeded = false, Explanation = originalException.Message, };
                 }
             }
 
@@ -268,11 +241,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
             }
 
-            return new DetailedResult<List<CloudFoundryOrganization>>()
-            {
-                Succeeded = true,
-                Content = orgsToReturn,
-            };
+            return new DetailedResult<List<CloudFoundryOrganization>>() { Succeeded = true, Content = orgsToReturn, };
         }
 
         /// <summary>
@@ -319,8 +288,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 return new DetailedResult<List<CloudFoundrySpace>>()
                 {
-                    Succeeded = false,
-                    Explanation = $"CloudFoundryService attempted to get spaces for '{org.OrgName}' but was unable to look up an access token.",
+                    Succeeded = false, Explanation = $"CloudFoundryService attempted to get spaces for '{org.OrgName}' but was unable to look up an access token.",
                 };
             }
 
@@ -333,7 +301,8 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 if (retryAmount > 0)
                 {
-                    _logger.Information($"GetSpacesForOrgAsync caught an exception when trying to retrieve spaces: {originalException.Message}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).");
+                    _logger.Information(
+                        $"GetSpacesForOrgAsync caught an exception when trying to retrieve spaces: {originalException.Message}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).");
                     _cfCliService.ClearCachedAccessToken();
                     retryAmount -= 1;
                     return await GetSpacesForOrgAsync(org, skipSsl, retryAmount);
@@ -342,11 +311,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     _logger.Error("GetSpacesForOrgAsync encountered exception: {GetSpacesForOrgAsyncException}", originalException);
 
-                    return new DetailedResult<List<CloudFoundrySpace>>()
-                    {
-                        Succeeded = false,
-                        Explanation = originalException.Message,
-                    };
+                    return new DetailedResult<List<CloudFoundrySpace>>() { Succeeded = false, Explanation = originalException.Message, };
                 }
             }
 
@@ -367,11 +332,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
             }
 
-            return new DetailedResult<List<CloudFoundrySpace>>()
-            {
-                Succeeded = true,
-                Content = spacesToReturn,
-            };
+            return new DetailedResult<List<CloudFoundrySpace>>() { Succeeded = true, Content = spacesToReturn, };
         }
 
         /// <summary>
@@ -418,8 +379,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 return new DetailedResult<List<CloudFoundryApp>>()
                 {
-                    Succeeded = false,
-                    Explanation = $"CloudFoundryService attempted to get apps for '{space.SpaceName}' but was unable to look up an access token.",
+                    Succeeded = false, Explanation = $"CloudFoundryService attempted to get apps for '{space.SpaceName}' but was unable to look up an access token.",
                 };
             }
 
@@ -432,7 +392,9 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 if (retryAmount > 0)
                 {
-                    _logger.Information("GetAppsForSpaceAsync caught an exception when trying to retrieve apps: {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).", originalException.Message, retryAmount);
+                    _logger.Information(
+                        "GetAppsForSpaceAsync caught an exception when trying to retrieve apps: {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).",
+                        originalException.Message, retryAmount);
                     _cfCliService.ClearCachedAccessToken();
                     retryAmount -= 1;
                     return await GetAppsForSpaceAsync(space, skipSsl, retryAmount);
@@ -441,11 +403,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     _logger.Error("GetSpacesForOrgAsync encountered exception: {GetSpacesForOrgAsyncException}", originalException);
 
-                    return new DetailedResult<List<CloudFoundryApp>>()
-                    {
-                        Succeeded = false,
-                        Explanation = originalException.Message,
-                    };
+                    return new DetailedResult<List<CloudFoundryApp>>() { Succeeded = false, Explanation = originalException.Message, };
                 }
             }
 
@@ -464,7 +422,8 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     var cfApp = new CloudFoundryApp(app.Name, app.Guid, space, app.State.ToUpper())
                     {
-                        Stack = app.Lifecycle.Data.Stack, Buildpacks = app.Lifecycle.Data.Buildpacks != null
+                        Stack = app.Lifecycle.Data.Stack,
+                        Buildpacks = app.Lifecycle.Data.Buildpacks != null
                             ? new List<string>(app.Lifecycle.Data.Buildpacks)
                             : new List<string>()
                     };
@@ -479,11 +438,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
             }
 
-            return new DetailedResult<List<CloudFoundryApp>>()
-            {
-                Succeeded = true,
-                Content = appsToReturn,
-            };
+            return new DetailedResult<List<CloudFoundryApp>>() { Succeeded = true, Content = appsToReturn, };
         }
 
         public async Task<DetailedResult<List<CloudFoundryApp>>> ListAllAppsAsync(int retryAmount = 1)
@@ -500,10 +455,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 return new DetailedResult<List<CloudFoundryApp>>
                 {
-                    Succeeded = false,
-                    Explanation = msg,
-                    Content = null,
-                    FailureType = FailureType.InvalidRefreshToken,
+                    Succeeded = false, Explanation = msg, Content = null, FailureType = FailureType.InvalidRefreshToken,
                 };
             }
 
@@ -512,11 +464,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 const string msg = "CloudFoundryService attempted to list apps but was unable to look up an access token.";
                 _logger.Error(msg);
 
-                return new DetailedResult<List<CloudFoundryApp>>()
-                {
-                    Succeeded = false,
-                    Explanation = msg,
-                };
+                return new DetailedResult<List<CloudFoundryApp>>() { Succeeded = false, Explanation = msg, };
             }
 
             List<App> appsFromApi;
@@ -528,7 +476,9 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 if (retryAmount > 0)
                 {
-                    _logger.Information("ListAllAppsAsync caught an exception when trying to retrieve apps: {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).", originalException.Message, retryAmount);
+                    _logger.Information(
+                        "ListAllAppsAsync caught an exception when trying to retrieve apps: {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).",
+                        originalException.Message, retryAmount);
                     _cfCliService.ClearCachedAccessToken();
                     retryAmount -= 1;
                     return await ListAllAppsAsync(retryAmount);
@@ -537,11 +487,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     _logger.Error("GetSpacesForOrgAsync encountered exception: {GetSpacesForOrgAsyncException}", originalException);
 
-                    return new DetailedResult<List<CloudFoundryApp>>()
-                    {
-                        Succeeded = false,
-                        Explanation = originalException.Message,
-                    };
+                    return new DetailedResult<List<CloudFoundryApp>>() { Succeeded = false, Explanation = originalException.Message, };
                 }
             }
 
@@ -562,11 +508,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
             }
 
-            return new DetailedResult<List<CloudFoundryApp>>()
-            {
-                Succeeded = true,
-                Content = appsToReturn,
-            };
+            return new DetailedResult<List<CloudFoundryApp>>() { Succeeded = true, Content = appsToReturn, };
         }
 
         public async Task<DetailedResult<List<CfBuildpack>>> GetBuildpacksAsync(string apiAddress, int retryAmount = 1)
@@ -583,10 +525,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 return new DetailedResult<List<CfBuildpack>>
                 {
-                    Succeeded = false,
-                    Explanation = msg,
-                    Content = null,
-                    FailureType = FailureType.InvalidRefreshToken,
+                    Succeeded = false, Explanation = msg, Content = null, FailureType = FailureType.InvalidRefreshToken,
                 };
             }
 
@@ -596,8 +535,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 return new DetailedResult<List<CfBuildpack>>()
                 {
-                    Succeeded = false,
-                    Explanation = $"CloudFoundryService attempted to get buildpacks but was unable to look up an access token.",
+                    Succeeded = false, Explanation = $"CloudFoundryService attempted to get buildpacks but was unable to look up an access token.",
                 };
             }
 
@@ -610,7 +548,9 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 if (retryAmount > 0)
                 {
-                    _logger.Information("GetBuildpacksAsync caught an exception when trying to retrieve buildpacks: {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).", originalException.Message, retryAmount);
+                    _logger.Information(
+                        "GetBuildpacksAsync caught an exception when trying to retrieve buildpacks: {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).",
+                        originalException.Message, retryAmount);
                     _cfCliService.ClearCachedAccessToken();
                     retryAmount -= 1;
                     return await GetBuildpacksAsync(apiAddress, retryAmount);
@@ -619,11 +559,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     _logger.Error("GetSpacesForOrgAsync encountered exception: {GetSpacesForOrgAsyncException}", originalException);
 
-                    return new DetailedResult<List<CfBuildpack>>()
-                    {
-                        Succeeded = false,
-                        Explanation = originalException.Message,
-                    };
+                    return new DetailedResult<List<CfBuildpack>>() { Succeeded = false, Explanation = originalException.Message, };
                 }
             }
 
@@ -635,6 +571,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     _logger.Debug($"{nameof(CloudFoundryService.GetBuildpacksAsync)} encountered a buildpack without a name; omitting it from the returned list of buildpacks.");
                 }
+
                 if (string.IsNullOrWhiteSpace(buildpack.Stack))
                 {
                     _logger.Debug($"{nameof(CloudFoundryService.GetBuildpacksAsync)} encountered a buildpack without a stack; omitting it from the returned list of buildpacks.");
@@ -645,11 +582,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
             }
 
-            return new DetailedResult<List<CfBuildpack>>()
-            {
-                Succeeded = true,
-                Content = buildpacks,
-            };
+            return new DetailedResult<List<CfBuildpack>>() { Succeeded = true, Content = buildpacks, };
         }
 
         public async Task<DetailedResult<List<CfService>>> GetServicesAsync(string apiAddress, int retryAmount = 1)
@@ -666,10 +599,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 return new DetailedResult<List<CfService>>
                 {
-                    Succeeded = false,
-                    Explanation = msg,
-                    Content = null,
-                    FailureType = FailureType.InvalidRefreshToken,
+                    Succeeded = false, Explanation = msg, Content = null, FailureType = FailureType.InvalidRefreshToken,
                 };
             }
 
@@ -679,8 +609,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 return new DetailedResult<List<CfService>>()
                 {
-                    Succeeded = false,
-                    Explanation = $"CloudFoundryService attempted to get services but was unable to look up an access token.",
+                    Succeeded = false, Explanation = $"CloudFoundryService attempted to get services but was unable to look up an access token.",
                 };
             }
 
@@ -693,7 +622,9 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 if (retryAmount > 0)
                 {
-                    _logger.Information("GetServicesAsync caught an exception when trying to retrieve services: {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).", originalException.Message, retryAmount);
+                    _logger.Information(
+                        "GetServicesAsync caught an exception when trying to retrieve services: {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).",
+                        originalException.Message, retryAmount);
                     _cfCliService.ClearCachedAccessToken();
                     retryAmount -= 1;
                     return await GetServicesAsync(apiAddress, retryAmount);
@@ -702,11 +633,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     _logger.Error("GetServicesAsync encountered exception: {GetServicesAsyncException}", originalException);
 
-                    return new DetailedResult<List<CfService>>()
-                    {
-                        Succeeded = false,
-                        Explanation = originalException.Message,
-                    };
+                    return new DetailedResult<List<CfService>>() { Succeeded = false, Explanation = originalException.Message, };
                 }
             }
 
@@ -724,11 +651,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
             }
 
-            return new DetailedResult<List<CfService>>()
-            {
-                Succeeded = true,
-                Content = services,
-            };
+            return new DetailedResult<List<CfService>>() { Succeeded = true, Content = services, };
         }
 
         /// <summary>
@@ -774,8 +697,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 return new DetailedResult
                 {
-                    Succeeded = false,
-                    Explanation = $"CloudFoundryService attempted to stop app '{app.AppName}' but was unable to look up an access token.",
+                    Succeeded = false, Explanation = $"CloudFoundryService attempted to stop app '{app.AppName}' but was unable to look up an access token.",
                 };
             }
 
@@ -788,7 +710,9 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 if (retryAmount > 0)
                 {
-                    _logger.Information("StopAppAsync caught an exception when trying to stop app '{appName}': {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).", app.AppName, originalException.Message, retryAmount);
+                    _logger.Information(
+                        "StopAppAsync caught an exception when trying to stop app '{appName}': {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).",
+                        app.AppName, originalException.Message, retryAmount);
                     _cfCliService.ClearCachedAccessToken();
                     retryAmount -= 1;
                     return await StopAppAsync(app, skipSsl, retryAmount);
@@ -797,11 +721,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     _logger.Error("StopAppAsync encountered exception: {StopAppAsyncException}", originalException);
 
-                    return new DetailedResult
-                    {
-                        Succeeded = false,
-                        Explanation = originalException.Message,
-                    };
+                    return new DetailedResult { Succeeded = false, Explanation = originalException.Message, };
                 }
             }
 
@@ -809,18 +729,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 _logger.Error("Attempted to stop app '{appName}' but it hasn't been stopped.", app.AppName);
 
-                return new DetailedResult
-                {
-                    Succeeded = false,
-                    Explanation = $"Attempted to stop app '{app.AppName}' but it hasn't been stopped.",
-                };
+                return new DetailedResult { Succeeded = false, Explanation = $"Attempted to stop app '{app.AppName}' but it hasn't been stopped.", };
             }
 
             app.State = "STOPPED";
-            return new DetailedResult
-            {
-                Succeeded = true,
-            };
+            return new DetailedResult { Succeeded = true, };
         }
 
         /// <summary>
@@ -867,8 +780,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 return new DetailedResult
                 {
-                    Succeeded = false,
-                    Explanation = $"CloudFoundryService attempted to start app '{app.AppName}' but was unable to look up an access token.",
+                    Succeeded = false, Explanation = $"CloudFoundryService attempted to start app '{app.AppName}' but was unable to look up an access token.",
                 };
             }
 
@@ -881,7 +793,9 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 if (retryAmount > 0)
                 {
-                    _logger.Information("StartAppAsync caught an exception when trying to start app '{appName}': {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).", app.AppName, originalException.Message, retryAmount);
+                    _logger.Information(
+                        "StartAppAsync caught an exception when trying to start app '{appName}': {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).",
+                        app.AppName, originalException.Message, retryAmount);
                     _cfCliService.ClearCachedAccessToken();
                     retryAmount -= 1;
                     return await StartAppAsync(app, skipSsl, retryAmount);
@@ -890,11 +804,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     _logger.Error("StartAppAsync encountered exception: {StartAppAsyncException}", originalException);
 
-                    return new DetailedResult
-                    {
-                        Succeeded = false,
-                        Explanation = originalException.Message,
-                    };
+                    return new DetailedResult { Succeeded = false, Explanation = originalException.Message, };
                 }
             }
 
@@ -902,18 +812,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 _logger.Error("Attempted to start app '{appName}' but it hasn't been started.", app.AppName);
 
-                return new DetailedResult
-                {
-                    Succeeded = false,
-                    Explanation = $"Attempted to start app '{app.AppName}' but it hasn't been started.",
-                };
+                return new DetailedResult { Succeeded = false, Explanation = $"Attempted to start app '{app.AppName}' but it hasn't been started.", };
             }
 
             app.State = "STARTED";
-            return new DetailedResult
-            {
-                Succeeded = true,
-            };
+            return new DetailedResult { Succeeded = true, };
         }
 
         /// <summary>
@@ -962,8 +865,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 return new DetailedResult
                 {
-                    Succeeded = false,
-                    Explanation = $"CloudFoundryService attempted to delete app '{app.AppName}' but was unable to look up an access token.",
+                    Succeeded = false, Explanation = $"CloudFoundryService attempted to delete app '{app.AppName}' but was unable to look up an access token.",
                 };
             }
 
@@ -974,11 +876,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                     var routeDeletionResult = await DeleteAllRoutesForAppAsync(app);
                     if (!routeDeletionResult.Succeeded)
                     {
-                        return new DetailedResult
-                        {
-                            Succeeded = false,
-                            Explanation = $"{routeDeletionResult.Explanation}. Please try deleting '{app.AppName}' again",
-                        };
+                        return new DetailedResult { Succeeded = false, Explanation = $"{routeDeletionResult.Explanation}. Please try deleting '{app.AppName}' again", };
                     }
                 }
 
@@ -988,18 +886,16 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     _logger.Error("Attempted to delete app '{appName}' but it hasn't been deleted.", app.AppName);
 
-                    return new DetailedResult
-                    {
-                        Succeeded = false,
-                        Explanation = $"Attempted to delete app '{app.AppName}' but it hasn't been deleted.",
-                    };
+                    return new DetailedResult { Succeeded = false, Explanation = $"Attempted to delete app '{app.AppName}' but it hasn't been deleted.", };
                 }
             }
             catch (Exception originalException)
             {
                 if (retryAmount > 0)
                 {
-                    _logger.Information("StartAppAsync caught an exception when trying to start app '{appName}': {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).", app.AppName, originalException.Message, retryAmount);
+                    _logger.Information(
+                        "StartAppAsync caught an exception when trying to start app '{appName}': {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).",
+                        app.AppName, originalException.Message, retryAmount);
                     _cfCliService.ClearCachedAccessToken();
                     retryAmount -= 1;
                     return await DeleteAppAsync(app, skipSsl, removeRoutes, retryAmount);
@@ -1008,19 +904,12 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     _logger.Error("StartAppAsync encountered exception: {StartAppAsyncException}", originalException);
 
-                    return new DetailedResult
-                    {
-                        Succeeded = false,
-                        Explanation = originalException.Message,
-                    };
+                    return new DetailedResult { Succeeded = false, Explanation = originalException.Message, };
                 }
             }
 
             app.State = "DELETED";
-            return new DetailedResult
-            {
-                Succeeded = true,
-            };
+            return new DetailedResult { Succeeded = true, };
         }
 
         public async Task<DetailedResult<List<CloudFoundryRoute>>> GetRoutesForAppAsync(CloudFoundryApp app, int retryAmount = 1)
@@ -1051,8 +940,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 return new DetailedResult<List<CloudFoundryRoute>>()
                 {
-                    Succeeded = false,
-                    Explanation = $"CloudFoundryService attempted to get routes for '{app.AppName}' but was unable to look up an access token.",
+                    Succeeded = false, Explanation = $"CloudFoundryService attempted to get routes for '{app.AppName}' but was unable to look up an access token.",
                 };
             }
 
@@ -1065,7 +953,9 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 if (retryAmount > 0)
                 {
-                    _logger.Information("GetRoutesForAppAsync caught an exception when trying to retrieve routes: {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).", originalException.Message, retryAmount);
+                    _logger.Information(
+                        "GetRoutesForAppAsync caught an exception when trying to retrieve routes: {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).",
+                        originalException.Message, retryAmount);
                     _cfCliService.ClearCachedAccessToken();
                     retryAmount -= 1;
                     return await GetRoutesForAppAsync(app, retryAmount);
@@ -1074,11 +964,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     _logger.Error("GetRoutesForAppAsync encountered exception: {GetRoutesForAppAsyncException}", originalException);
 
-                    return new DetailedResult<List<CloudFoundryRoute>>()
-                    {
-                        Succeeded = false,
-                        Explanation = originalException.Message,
-                    };
+                    return new DetailedResult<List<CloudFoundryRoute>>() { Succeeded = false, Explanation = originalException.Message, };
                 }
             }
 
@@ -1096,11 +982,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
             }
 
-            return new DetailedResult<List<CloudFoundryRoute>>
-            {
-                Succeeded = true,
-                Content = routes,
-            };
+            return new DetailedResult<List<CloudFoundryRoute>> { Succeeded = true, Content = routes, };
         }
 
         public async Task<DetailedResult> DeleteAllRoutesForAppAsync(CloudFoundryApp app)
@@ -1131,8 +1013,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 return new DetailedResult()
                 {
-                    Succeeded = false,
-                    Explanation = $"CloudFoundryService attempted to get routes for '{app.AppName}' but was unable to look up an access token.",
+                    Succeeded = false, Explanation = $"CloudFoundryService attempted to get routes for '{app.AppName}' but was unable to look up an access token.",
                 };
             }
 
@@ -1167,42 +1048,28 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 _logger.Error("{RouteDeletionMessage}; {RouteDeletionException}", _routeDeletionErrorMsg, ex.Message);
 
-                return new DetailedResult
-                {
-                    Succeeded = false,
-                    Explanation = _routeDeletionErrorMsg,
-                };
+                return new DetailedResult { Succeeded = false, Explanation = _routeDeletionErrorMsg, };
             }
 
             if (allRouteDeletions.Status != TaskStatus.RanToCompletion)
             {
                 _logger.Error("Not all route deletion tasks ran to completion. {RouteDeletionMessage}", _routeDeletionErrorMsg);
 
-                return new DetailedResult
-                {
-                    Succeeded = false,
-                    Explanation = _routeDeletionErrorMsg,
-                };
+                return new DetailedResult { Succeeded = false, Explanation = _routeDeletionErrorMsg, };
             }
 
             if (failed > 0)
             {
                 _logger.Error("{RouteDeletionMessage}; {NumFailedRouteDeletions} routes were not deleted", _routeDeletionErrorMsg, failed);
 
-                return new DetailedResult
-                {
-                    Succeeded = false,
-                    Explanation = _routeDeletionErrorMsg,
-                };
+                return new DetailedResult { Succeeded = false, Explanation = _routeDeletionErrorMsg, };
             }
 
-            return new DetailedResult
-            {
-                Succeeded = true,
-            };
+            return new DetailedResult { Succeeded = true, };
         }
 
-        public async Task<DetailedResult> DeployAppAsync(AppManifest appManifest, string defaultAppPath, CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, Action<string> stdOutCallback, Action<string> stdErrCallback)
+        public async Task<DetailedResult> DeployAppAsync(AppManifest appManifest, string defaultAppPath, CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg,
+            CloudFoundrySpace targetSpace, Action<string> stdOutCallback, Action<string> stdErrCallback)
         {
             var app = appManifest.Applications[0];
 
@@ -1226,7 +1093,8 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             DetailedResult cfPushResult;
             try
             {
-                cfPushResult = await _cfCliService.PushAppAsync(newManifestPath, pathToDeploymentDirectory, targetOrg.OrgName, targetSpace.SpaceName, stdOutCallback, stdErrCallback);
+                cfPushResult = await _cfCliService.PushAppAsync(newManifestPath, pathToDeploymentDirectory, targetOrg.OrgName, targetSpace.SpaceName, stdOutCallback,
+                    stdErrCallback);
             }
             catch (InvalidRefreshTokenException)
             {
@@ -1247,7 +1115,8 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 _fileService.DeleteFile(newManifestPath);
 
-                _logger.Error("Successfully targeted org '{targetOrgName}' and space '{targetSpaceName}' but app deployment failed at the `cf push` stage.\n{cfPushResult}", targetOrg.OrgName, targetSpace.SpaceName, cfPushResult.Explanation);
+                _logger.Error("Successfully targeted org '{targetOrgName}' and space '{targetSpaceName}' but app deployment failed at the `cf push` stage.\n{cfPushResult}",
+                    targetOrg.OrgName, targetSpace.SpaceName, cfPushResult.Explanation);
                 return new DetailedResult(false, cfPushResult.Explanation);
             }
 
@@ -1271,10 +1140,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 return new DetailedResult<string>
                 {
-                    Succeeded = false,
-                    Explanation = msg.Replace("{AppName}", app.AppName),
-                    Content = null,
-                    FailureType = FailureType.InvalidRefreshToken,
+                    Succeeded = false, Explanation = msg.Replace("{AppName}", app.AppName), Content = null, FailureType = FailureType.InvalidRefreshToken,
                 };
             }
 
@@ -1294,19 +1160,12 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 return new DetailedResult<Process>
                 {
-                    Succeeded = false,
-                    Explanation = msg.Replace("{AppName}", app.AppName),
-                    Content = null,
-                    FailureType = FailureType.InvalidRefreshToken,
+                    Succeeded = false, Explanation = msg.Replace("{AppName}", app.AppName), Content = null, FailureType = FailureType.InvalidRefreshToken,
                 };
             }
             catch (Exception ex)
             {
-                return new DetailedResult<Process>
-                {
-                    Succeeded = false,
-                    Explanation = ex.Message,
-                };
+                return new DetailedResult<Process> { Succeeded = false, Explanation = ex.Message, };
             }
         }
 
@@ -1318,18 +1177,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 _fileService.WriteTextToFile(location, "---\n" + ymlContents);
 
-                return new DetailedResult
-                {
-                    Succeeded = true,
-                };
+                return new DetailedResult { Succeeded = true, };
             }
             catch (Exception ex)
             {
-                return new DetailedResult
-                {
-                    Succeeded = false,
-                    Explanation = ex.Message,
-                };
+                return new DetailedResult { Succeeded = false, Explanation = ex.Message, };
             }
         }
 
@@ -1349,10 +1201,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 return new DetailedResult<List<string>>
                 {
-                    Succeeded = false,
-                    Explanation = msg.Replace("{CfName}", cf.InstanceName),
-                    Content = null,
-                    FailureType = FailureType.InvalidRefreshToken,
+                    Succeeded = false, Explanation = msg.Replace("{CfName}", cf.InstanceName), Content = null, FailureType = FailureType.InvalidRefreshToken,
                 };
             }
 
@@ -1362,8 +1211,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 return new DetailedResult<List<string>>()
                 {
-                    Succeeded = false,
-                    Explanation = $"CloudFoundryService attempted to get stacks for '{apiAddress}' but was unable to look up an access token.",
+                    Succeeded = false, Explanation = $"CloudFoundryService attempted to get stacks for '{apiAddress}' but was unable to look up an access token.",
                 };
             }
 
@@ -1376,7 +1224,9 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 if (retryAmount > 0)
                 {
-                    _logger.Information("GetStackNamesAsync caught an exception when trying to retrieve stacks: {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).", originalException.Message, retryAmount);
+                    _logger.Information(
+                        "GetStackNamesAsync caught an exception when trying to retrieve stacks: {originalException}. About to clear the cached access token & try again ({retryAmount} retry attempts remaining).",
+                        originalException.Message, retryAmount);
                     _cfCliService.ClearCachedAccessToken();
                     retryAmount -= 1;
                     return await GetStackNamesAsync(cf, retryAmount);
@@ -1385,11 +1235,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     _logger.Error("GetStackNamesAsync encountered exception: {GetStackNamesAsyncException}", originalException);
 
-                    return new DetailedResult<List<string>>()
-                    {
-                        Succeeded = false,
-                        Explanation = originalException.Message,
-                    };
+                    return new DetailedResult<List<string>>() { Succeeded = false, Explanation = originalException.Message, };
                 }
             }
 
@@ -1406,11 +1252,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
             }
 
-            return new DetailedResult<List<string>>()
-            {
-                Succeeded = true,
-                Content = stackNamesToReturn,
-            };
+            return new DetailedResult<List<string>>() { Succeeded = true, Content = stackNamesToReturn, };
         }
 
         public void LogoutCfUser()

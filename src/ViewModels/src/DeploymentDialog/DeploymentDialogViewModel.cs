@@ -32,8 +32,13 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string _getServicesFailureMsg = "Unable to fetch services.";
         internal const string _getStacksFailureMsg = "Unable to fetch stacks.";
         internal const string _singleLoginErrorTitle = "Unable to add more Tanzu Platform connections.";
-        internal const string _singleLoginErrorMessage1 = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
-        internal const string _singleLoginErrorMessage2 = "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Platform Explorer & re-connecting to a new one.";
+
+        internal const string _singleLoginErrorMessage1 =
+            "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
+
+        internal const string _singleLoginErrorMessage2 =
+            "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Platform Explorer & re-connecting to a new one.";
+
         internal const string _fullFrameworkTFM = ".NETFramework";
         internal const string _manifestNotFoundTitle = "Unable to set manifest path";
         internal const string _manifestParsingErrorTitle = "Unable to parse app manifest";
@@ -112,15 +117,7 @@ namespace Tanzu.Toolkit.ViewModels
             ManifestModel = new AppManifest
             {
                 Version = 1,
-                Applications = new List<AppConfig>
-                {
-                    new AppConfig
-                    {
-                        Name = _projectService.ProjectName,
-                        Buildpacks = new List<string>(),
-                        Services = new List<string>(),
-                    }
-                }
+                Applications = new List<AppConfig> { new AppConfig { Name = _projectService.ProjectName, Buildpacks = new List<string>(), Services = new List<string>(), } }
             };
 
             if (_tanzuExplorerViewModel.CloudFoundryConnection != null)
@@ -132,15 +129,14 @@ namespace Tanzu.Toolkit.ViewModels
                 ThreadingService.StartBackgroundTask(UpdateBuildpackOptions);
                 ThreadingService.StartBackgroundTask(UpdateServiceOptions);
                 ThreadingService.StartBackgroundTask(UpdateStackOptions);
-
-                // delay calling SetManifestIfDefaultExists to give background update tasks time to complete
-                // -> should reduce false-positive "Unrecognized service" complaints
-                OnRendered = () => Task.Delay(_waitBeforeApplyingManifest).ContinueWith(_ => SetManifestIfDefaultExists());
             }
 
+            // delay calling SetManifestIfDefaultExists to give background update tasks time to complete
+            // -> should reduce false-positive "Unrecognized service" complaints
+            OnRendered = () => Task.Delay(_waitBeforeApplyingManifest).ContinueWith(_ => SetManifestIfDefaultExists());
             AppName = _projectService.ProjectName;
             Expanded = false;
-            
+
             OnClose = () =>
             {
                 DialogService.CloseDialogByName(nameof(DeploymentDialogViewModel));
@@ -522,6 +518,7 @@ namespace Tanzu.Toolkit.ViewModels
                     ConfigureForRemoteDebugging = false;
                     DeploymentDirectoryPath = null;
                 }
+
                 RaisePropertyChangedEvent("PublishBeforePushing");
             }
         }
@@ -537,6 +534,7 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     PublishBeforePushing = true;
                 }
+
                 RaisePropertyChangedEvent("ConfigureForRemoteDebugging");
             }
         }
@@ -587,10 +585,7 @@ namespace Tanzu.Toolkit.ViewModels
 
             if (_tanzuExplorerViewModel.CloudFoundryConnection != null)
             {
-                CfInstanceOptions = new List<CloudFoundryInstance>
-                {
-                    _tanzuExplorerViewModel.CloudFoundryConnection.CloudFoundryInstance,
-                };
+                CfInstanceOptions = new List<CloudFoundryInstance> { _tanzuExplorerViewModel.CloudFoundryConnection.CloudFoundryInstance, };
 
                 TargetName = _tanzuExplorerViewModel.CloudFoundryConnection.DisplayText;
                 IsLoggedIn = true;
@@ -672,7 +667,9 @@ namespace Tanzu.Toolkit.ViewModels
                 }
 
                 BuildpacksLoading = true;
-                var buildpacksResponse = await _tanzuExplorerViewModel.CloudFoundryConnection.CfClient.GetBuildpacksAsync(_tanzuExplorerViewModel.CloudFoundryConnection.CloudFoundryInstance.ApiAddress);
+                var buildpacksResponse =
+                    await _tanzuExplorerViewModel.CloudFoundryConnection.CfClient.GetBuildpacksAsync(_tanzuExplorerViewModel.CloudFoundryConnection.CloudFoundryInstance
+                        .ApiAddress);
 
                 if (buildpacksResponse.Succeeded)
                 {
@@ -695,12 +692,7 @@ namespace Tanzu.Toolkit.ViewModels
                         }
                         else
                         {
-                            var newBp = new BuildpackListItem
-                            {
-                                Name = bp.Name,
-                                ValidStacks = new List<string> { bp.Stack },
-                                IsSelected = nameSpecifiedInManifest,
-                            };
+                            var newBp = new BuildpackListItem { Name = bp.Name, ValidStacks = new List<string> { bp.Stack }, IsSelected = nameSpecifiedInManifest, };
 
                             newBp.EvalutateStackCompatibility(SelectedStack);
 
@@ -742,7 +734,8 @@ namespace Tanzu.Toolkit.ViewModels
                 }
 
                 ServicesLoading = true;
-                var servicesResponse = await _tanzuExplorerViewModel.CloudFoundryConnection.CfClient.GetServicesAsync(_tanzuExplorerViewModel.CloudFoundryConnection.CloudFoundryInstance.ApiAddress);
+                var servicesResponse =
+                    await _tanzuExplorerViewModel.CloudFoundryConnection.CfClient.GetServicesAsync(_tanzuExplorerViewModel.CloudFoundryConnection.CloudFoundryInstance.ApiAddress);
 
                 if (servicesResponse.Succeeded)
                 {
@@ -759,11 +752,7 @@ namespace Tanzu.Toolkit.ViewModels
                         }
                         else
                         {
-                            var newSv = new ServiceListItem
-                            {
-                                Name = sv.Name,
-                                IsSelected = nameSpecifiedInManifest,
-                            };
+                            var newSv = new ServiceListItem { Name = sv.Name, IsSelected = nameSpecifiedInManifest, };
 
                             serviceListItems.Add(newSv);
                         }
@@ -800,7 +789,8 @@ namespace Tanzu.Toolkit.ViewModels
                 }
 
                 StacksLoading = true;
-                var stacksResponse = await _tanzuExplorerViewModel.CloudFoundryConnection.CfClient.GetStackNamesAsync(_tanzuExplorerViewModel.CloudFoundryConnection.CloudFoundryInstance);
+                var stacksResponse =
+                    await _tanzuExplorerViewModel.CloudFoundryConnection.CfClient.GetStackNamesAsync(_tanzuExplorerViewModel.CloudFoundryConnection.CloudFoundryInstance);
 
                 if (stacksResponse.Succeeded)
                 {
@@ -905,6 +895,7 @@ namespace Tanzu.Toolkit.ViewModels
                     itemInOptions.IsSelected = false;
                 }
             }
+
             RemoveWarningIfAllSelectedServicesExist();
             RaisePropertyChangedEvent("SelectedServices");
         }
@@ -936,6 +927,7 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     runtimeIdentifier = "win-x64";
                 }
+
                 var publishConfiguration = ConfigureForRemoteDebugging ? "Debug" : "Release";
                 var publishSucceeded = await _dotnetCliService.PublishProjectForRemoteDebuggingAsync(
                     PathToProjectRootDir,
@@ -966,7 +958,7 @@ namespace Tanzu.Toolkit.ViewModels
                     if (!string.IsNullOrEmpty(vsdbgPath) && Directory.Exists(vsdbgPath))
                     {
                         _outputViewModel.AppendLine($"VsdbgPath is set to '{vsdbgPath}' in Visual Studio Options. Copying to publish output...");
-                        
+
                         var destinationPath = Path.Combine(PathToProjectRootDir, _publishDirName, "vsdbg");
 
                         // It looks weird now, but the script approach installs vsdbg at "app/vsdbg/vsdbg", so try to duplicate that here 
@@ -1135,7 +1127,6 @@ namespace Tanzu.Toolkit.ViewModels
                     }
                 }
             }
-
         }
 
         private void SetServicesFromManifest(AppManifest appManifest)
@@ -1169,6 +1160,7 @@ namespace Tanzu.Toolkit.ViewModels
                     unrecognizedSvcNames.Add(svName);
                 }
             }
+
             if (unrecognizedSvcNames.Count > 0)
             {
                 var svcStr = unrecognizedSvcNames.Aggregate("", (current, svcName) => current + $"{Environment.NewLine}    - {svcName}");
@@ -1182,7 +1174,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         private void ApplyUnrecognizedServiceWarning(string svName)
         {
-            ServiceNotRecognizedWarningMessage = string.IsNullOrWhiteSpace(ServiceNotRecognizedWarningMessage) 
+            ServiceNotRecognizedWarningMessage = string.IsNullOrWhiteSpace(ServiceNotRecognizedWarningMessage)
                 ? $"'{svName}' not recognized"
                 : "Multiple selected services not recognized";
         }

@@ -24,7 +24,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             set => _displayView = value;
         }
 
-        public IViewModel ViewModel { get => (IViewModel)DataContext; }
+        public IViewModel ViewModel => (IViewModel)DataContext;
 
         public void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {

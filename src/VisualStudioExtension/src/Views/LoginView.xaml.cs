@@ -27,15 +27,21 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             set => SetValue(_hyperlinkBrushProperty, value);
         }
 
-        public static readonly DependencyProperty _hyperlinkBrushProperty = DependencyProperty.Register("HyperlinkBrush", typeof(Brush), typeof(LoginView), new PropertyMetadata(default(Brush)));
+        public static readonly DependencyProperty _hyperlinkBrushProperty =
+            DependencyProperty.Register("HyperlinkBrush", typeof(Brush), typeof(LoginView),
+                new PropertyMetadata(default(Brush)));
 
         public LoginView(ILoginViewModel viewModel, IThemeService themeService)
         {
-            bool alwaysTrue(object arg) { return true; }
+            bool alwaysTrue(object arg)
+            {
+                return true;
+            }
 
             AddCloudCommand = new AsyncDelegatingCommand(viewModel.LogIn, viewModel.CanLogIn);
             SsoCommand = new DelegatingCommand(viewModel.ShowSsoLogin, alwaysTrue);
-            IncrementPageCommand = new AsyncDelegatingCommand(viewModel.ConnectToCf, viewModel.CanProceedToAuthentication);
+            IncrementPageCommand =
+                new AsyncDelegatingCommand(viewModel.ConnectToCf, viewModel.CanProceedToAuthentication);
             DecrementPageCommand = new DelegatingCommand(viewModel.NavigateToTargetPage, alwaysTrue);
             LogInWithPasscodeCommand = new AsyncDelegatingCommand(viewModel.LoginWithSsoPasscodeAsync, alwaysTrue);
 
@@ -54,6 +60,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             {
                 tbUrl.Text = viewModel.TargetApiAddress;
             }
+
             MouseDown += Window_MouseDown;
         }
 

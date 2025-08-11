@@ -42,10 +42,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 CfClient = MockCloudFoundryService.Object,
             };
 
-            _sut.PropertyChanged += (sender, e) =>
-            {
-                _receivedEvents.Add(e.PropertyName);
-            };
+            _sut.PropertyChanged += (sender, e) => { _receivedEvents.Add(e.PropertyName); };
 
             _sut.CfClient.ConfigureForCf(_fakeCfInstance);
         }
@@ -85,8 +82,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             _sut.TargetCf = _fakeCfInstance;
 
-            MockCloudFoundryService.Setup(mock => mock.
-              LoginWithCredentials(_fakeUsername, _fakeSecurePw))
+            MockCloudFoundryService.Setup(mock => mock.LoginWithCredentials(_fakeUsername, _fakeSecurePw))
                 .ReturnsAsync(new DetailedResult(true, null));
 
             MockTanzuExplorerViewModel.Setup(m => m.SetConnection(_sut.TargetCf)).Verifiable();
@@ -105,7 +101,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task LogIn_ClosesDialog_WhenLoginRequestSucceeds()
         {
             MockCloudFoundryService.Setup(mock => mock.LoginWithCredentials(_fakeUsername, _fakeSecurePw))
-               .ReturnsAsync(new DetailedResult(true, null));
+                .ReturnsAsync(new DetailedResult(true, null));
 
             await _sut.LogIn(null);
 
@@ -286,11 +282,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task ConnectToCf_SetsPageNumberTo2_AndSetsSsoEnabledOnTargetToTrue_WhenSsoPromptSuccessfullyRetrieved()
         {
             var fakeSsoPrompt = "some fake string that contains a properly-formatted uri like this: https://some.fake.address :) :) :)";
-            var fakeSsoPromptResult = new DetailedResult<string>
-            {
-                Succeeded = true,
-                Content = fakeSsoPrompt,
-            };
+            var fakeSsoPromptResult = new DetailedResult<string> { Succeeded = true, Content = fakeSsoPrompt, };
 
             MockCloudFoundryService.Setup(m => m.TargetCfApi(_sut.TargetApiAddress, _sut.SkipSsl))
                 .Returns(_fakeSuccessDetailedResult);
@@ -310,11 +302,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ConnectToCf")]
         public async Task ConnectToCf_SetsCertificateInvalidToTrue_WhenCertValidationFails()
         {
-            var fakeCertValidationResult = new DetailedResult
-            {
-                Succeeded = false,
-                FailureType = FailureType.InvalidCertificate,
-            };
+            var fakeCertValidationResult = new DetailedResult { Succeeded = false, FailureType = FailureType.InvalidCertificate, };
 
             MockCloudFoundryService.Setup(m => m.TargetCfApi(_sut.TargetApiAddress, _sut.SkipSsl))
                 .Returns(fakeCertValidationResult);
@@ -332,16 +320,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ConnectToCf")]
         public async Task ConnectToCf_SetsPageNumberTo2_AndSetsSsoEnabledOnTargetToFalse_WhenSsoPromptAbsentFromResponse()
         {
-            var fakeCertValidationResult = new DetailedResult
-            {
-                Succeeded = true,
-            };
+            var fakeCertValidationResult = new DetailedResult { Succeeded = true, };
 
-            var fakeSsoPromptResult = new DetailedResult<string>
-            {
-                Succeeded = false,
-                FailureType = FailureType.MissingSsoPrompt,
-            };
+            var fakeSsoPromptResult = new DetailedResult<string> { Succeeded = false, FailureType = FailureType.MissingSsoPrompt, };
 
             MockCloudFoundryService.Setup(m => m.TargetCfApi(_sut.TargetApiAddress, _sut.SkipSsl))
                 .Returns(fakeCertValidationResult);
@@ -361,16 +342,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ConnectToCf")]
         public async Task ConnectToCf_DoesNotChangePageNumber_AndSetsApiAddressError_WhenSsoPromptRequestFails()
         {
-            var fakeCertValidationResult = new DetailedResult
-            {
-                Succeeded = true,
-            };
+            var fakeCertValidationResult = new DetailedResult { Succeeded = true, };
 
-            var fakeSsoPromptResult = new DetailedResult<string>
-            {
-                Succeeded = false,
-                FailureType = FailureType.None,
-            };
+            var fakeSsoPromptResult = new DetailedResult<string> { Succeeded = false, FailureType = FailureType.None, };
 
             MockCloudFoundryService.Setup(m => m.TargetCfApi(_sut.TargetApiAddress, _sut.SkipSsl))
                 .Returns(fakeCertValidationResult);
@@ -427,11 +401,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.TargetApiAddress = apiAddressFromDialog;
             _sut.ConnectionName = connectionNameFromDialog;
             var fakeSsoPrompt = "junk";
-            var fakeSsoPromptResult = new DetailedResult<string>
-            {
-                Succeeded = true,
-                Content = fakeSsoPrompt,
-            };
+            var fakeSsoPromptResult = new DetailedResult<string> { Succeeded = true, Content = fakeSsoPrompt, };
 
             MockCloudFoundryService.Setup(m => m.TargetCfApi(_sut.TargetApiAddress, _sut.SkipSsl))
                 .Returns(_fakeSuccessDetailedResult);
@@ -456,11 +426,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             _sut.SkipSsl = skipSsl;
             var fakeSsoPrompt = "junk";
-            var fakeSsoPromptResult = new DetailedResult<string>
-            {
-                Succeeded = true,
-                Content = fakeSsoPrompt,
-            };
+            var fakeSsoPromptResult = new DetailedResult<string> { Succeeded = true, Content = fakeSsoPrompt, };
 
             MockCloudFoundryService.Setup(m => m.TargetCfApi(_sut.TargetApiAddress, _sut.SkipSsl))
                 .Returns(_fakeSuccessDetailedResult);
@@ -520,6 +486,5 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.IsApiAddressFormatValid = false;
             Assert.IsFalse(_sut.CanProceedToAuthentication());
         }
-
     }
 }

@@ -31,10 +31,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         public void IsStopped_ReturnsTrue_WhenAppStateIsSTOPPED()
         {
-            var fakeApp = new CloudFoundryApp("fake name", "fake guid", null, null)
-            {
-                State = "STOPPED",
-            };
+            var fakeApp = new CloudFoundryApp("fake name", "fake guid", null, null) { State = "STOPPED", };
 
             _sut = new AppViewModel(fakeApp, Services);
 
@@ -44,10 +41,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         public void IsStopped_ReturnsFalse_WhenAppStateIsNotSTOPPED()
         {
-            var fakeApp = new CloudFoundryApp("fake name", "fake guid", null, null)
-            {
-                State = "anything-other-than-STOPPED",
-            };
+            var fakeApp = new CloudFoundryApp("fake name", "fake guid", null, null) { State = "anything-other-than-STOPPED", };
 
             _sut = new AppViewModel(fakeApp, Services);
 
@@ -60,16 +54,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var fakeApp = new CloudFoundryApp("fake app name", "fake app guid", null, null);
             _sut = new AppViewModel(fakeApp, Services);
 
-            _sut.PropertyChanged += (sender, e) =>
-            {
-                _receivedEvents.Add(e.PropertyName);
-            };
+            _sut.PropertyChanged += (sender, e) => { _receivedEvents.Add(e.PropertyName); };
 
             _sut.RefreshAppState();
 
             Assert.AreEqual(1, _receivedEvents.Count);
             Assert.AreEqual("IsStopped", _receivedEvents[0]);
         }
-
     }
 }

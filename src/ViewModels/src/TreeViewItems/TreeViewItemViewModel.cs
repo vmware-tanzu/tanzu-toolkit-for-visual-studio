@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -28,15 +28,9 @@ namespace Tanzu.Toolkit.ViewModels
 
             if (!childless) // only create placeholder & assign children if this vm isn't a placeholder itself
             {
-                LoadingPlaceholder = new PlaceholderViewModel(parent: this, services)
-                {
-                    DisplayText = _defaultLoadingMsg,
-                };
+                LoadingPlaceholder = new PlaceholderViewModel(parent: this, services) { DisplayText = _defaultLoadingMsg, };
 
-                _children = new ObservableCollection<TreeViewItemViewModel>
-                {
-                    LoadingPlaceholder,
-                };
+                _children = new ObservableCollection<TreeViewItemViewModel> { LoadingPlaceholder, };
             }
 
             ParentTanzuExplorer = parentTanzuExplorer;
@@ -48,10 +42,7 @@ namespace Tanzu.Toolkit.ViewModels
         /// </summary>
         public string DisplayText
         {
-            get
-            {
-                return _text;
-            }
+            get => _text;
 
             set
             {
@@ -71,16 +62,14 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     if (Children.Count == 0)
                     {
-                        Children = new ObservableCollection<TreeViewItemViewModel>
-                        {
-                            LoadingPlaceholder,
-                        };
+                        Children = new ObservableCollection<TreeViewItemViewModel> { LoadingPlaceholder, };
                     }
                 }
                 else
                 {
                     ThreadingService.ExecuteInUIThread(() => Children.Remove(LoadingPlaceholder));
                 }
+
                 RaisePropertyChangedEvent("IsLoading");
             }
         }
@@ -91,10 +80,7 @@ namespace Tanzu.Toolkit.ViewModels
         /// </summary>
         public bool IsExpanded
         {
-            get
-            {
-                return _isExpanded;
-            }
+            get => _isExpanded;
 
             set
             {
@@ -106,6 +92,7 @@ namespace Tanzu.Toolkit.ViewModels
                         // Lazily load child items in a separate thread @ expansion time
                         _threadingService.StartBackgroundTask(UpdateAllChildren);
                     }
+
                     RaisePropertyChangedEvent("IsExpanded");
                 }
             }
@@ -113,10 +100,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public bool IsSelected
         {
-            get
-            {
-                return _isSelected;
-            }
+            get => _isSelected;
 
             set
             {
@@ -132,10 +116,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public TreeViewItemViewModel Parent
         {
-            get
-            {
-                return _parent;
-            }
+            get => _parent;
 
             set
             {

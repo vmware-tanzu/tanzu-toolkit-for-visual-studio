@@ -9,12 +9,12 @@
 
     <UserControl.Resources>
         <converters:VisibilityConverter x:Key="Visibility" />
-        <converters:VisibilityConverter x:Key="InverseVisibility" Reversed="True"/>
+        <converters:VisibilityConverter x:Key="InverseVisibility" Reversed="True" />
         <converters:VisibilityConverter x:Key="ExpansionConverter" ReserveSpace="False" />
         <converters:VisibilityConverter x:Key="ReverseExpansionConverter" ReserveSpace="False" Reversed="True" />
 
         <Style x:Key="RoundedButtonStyle" TargetType="{x:Type Button}">
-            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Background" Value="Transparent" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Button}">
@@ -24,19 +24,20 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-            <Setter Property="Width" Value="32px"/>
+            <Setter Property="Width" Value="32px" />
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{Binding ElementName=TanzuExplorerViewElement, Path=ListItemMouseOverBrush}"/>
+                    <Setter Property="Background"
+                            Value="{Binding ElementName=TanzuExplorerViewElement, Path=ListItemMouseOverBrush}" />
                 </Trigger>
             </Style.Triggers>
         </Style>
 
         <Style x:Key="RowItemStyle" TargetType="{x:Type Button}">
-            <Setter Property="Background" Value="{Binding ElementName=TanzuExplorerViewElement, Path=Background}"/>
-            <Setter Property="Foreground" Value="{Binding ElementName=TanzuExplorerViewElement, Path=Foreground}"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Background" Value="{Binding ElementName=TanzuExplorerViewElement, Path=Background}" />
+            <Setter Property="Foreground" Value="{Binding ElementName=TanzuExplorerViewElement, Path=Foreground}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Button}">
@@ -48,8 +49,10 @@
             </Setter>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{Binding ElementName=TanzuExplorerViewElement, Path=Foreground}"/>
-                    <Setter Property="Foreground" Value="{Binding ElementName=TanzuExplorerViewElement, Path=Background}"/>
+                    <Setter Property="Background"
+                            Value="{Binding ElementName=TanzuExplorerViewElement, Path=Foreground}" />
+                    <Setter Property="Foreground"
+                            Value="{Binding ElementName=TanzuExplorerViewElement, Path=Background}" />
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -58,7 +61,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition/>
+            <RowDefinition />
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
@@ -82,7 +85,7 @@
                         Width="16px"
                         Height="16px"
                         Margin="6"
-                        ToolTip="Log in to Tanzu Platform"/>
+                        ToolTip="Log in to Tanzu Platform" />
                 </Button>
 
                 <Button
@@ -96,44 +99,45 @@
                         Width="16px"
                         Height="16px"
                         Margin="6"
-                        ToolTip="Log out of Tanzu Platform"/>
+                        ToolTip="Log out of Tanzu Platform" />
                 </Button>
 
                 <Button
                     Style="{DynamicResource RoundedButtonStyle}"
-                    Command ="{ Binding ElementName=TanzuExplorerViewElement, Path=RefreshAllCommand }">
+                    Command="{ Binding ElementName=TanzuExplorerViewElement, Path=RefreshAllCommand }">
                     <Grid>
-                        <Image Source="Resources/Refresh_16x.png" 
-                           Grid.Row="0"
-                           Grid.Column="0"
-                           Stretch="Uniform" 
-                           Width="16px" 
-                           Height="16px"
-                           ToolTip="Refresh All" 
-                           RenderTransformOrigin="0.5 0.5"
-                           Visibility="{Binding IsRefreshingAll, Converter={StaticResource ExpansionConverter}}">
+                        <Image Source="Resources/Refresh_16x.png"
+                               Grid.Row="0"
+                               Grid.Column="0"
+                               Stretch="Uniform"
+                               Width="16px"
+                               Height="16px"
+                               ToolTip="Refresh All"
+                               RenderTransformOrigin="0.5 0.5"
+                               Visibility="{Binding IsRefreshingAll, Converter={StaticResource ExpansionConverter}}">
                             <Image.RenderTransform>
-                                <RotateTransform x:Name="Rotation" Angle="0"/>
+                                <RotateTransform x:Name="Rotation" Angle="0" />
                             </Image.RenderTransform>
                             <Image.Triggers>
                                 <EventTrigger RoutedEvent="Loaded">
                                     <BeginStoryboard>
                                         <Storyboard RepeatBehavior="Forever">
-                                            <DoubleAnimation Storyboard.TargetName="Rotation" Storyboard.TargetProperty="Angle" From="0" To="360"/>
+                                            <DoubleAnimation Storyboard.TargetName="Rotation"
+                                                             Storyboard.TargetProperty="Angle" From="0" To="360" />
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </EventTrigger>
                             </Image.Triggers>
                         </Image>
-                        <Image Source="Resources/Refresh_16x.png" 
-                           Grid.Row="0"
-                           Grid.Column="0"
-                           Stretch="Uniform" 
-                           Width="16px" 
-                           Height="16px"
-                           ToolTip="Refresh all"
-                           RenderTransformOrigin="0.5 0.5"
-                           Visibility="{Binding IsRefreshingAll, Converter={StaticResource InverseVisibility}}">
+                        <Image Source="Resources/Refresh_16x.png"
+                               Grid.Row="0"
+                               Grid.Column="0"
+                               Stretch="Uniform"
+                               Width="16px"
+                               Height="16px"
+                               ToolTip="Refresh all"
+                               RenderTransformOrigin="0.5 0.5"
+                               Visibility="{Binding IsRefreshingAll, Converter={StaticResource InverseVisibility}}">
                         </Image>
                     </Grid>
                 </Button>
@@ -144,7 +148,8 @@
                 Foreground="Black"
                 Background="#FFFFE2"
                 Command="{Binding ElementName=TanzuExplorerViewElement, Path=ReAuthenticateCommand}"
-                Visibility="{Binding AuthenticationRequired, Converter={StaticResource Visibility}}" Grid.ColumnSpan="3">
+                Visibility="{Binding AuthenticationRequired, Converter={StaticResource Visibility}}"
+                Grid.ColumnSpan="3">
                 <DockPanel
                     HorizontalAlignment="Stretch"
                     Width="285"
@@ -156,19 +161,20 @@
                         Width="275"
                         Foreground="Black"
                         FontSize="11"
-                        Height="24"/>
+                        Height="24" />
                     <Image
                         Stretch="Uniform"
                         DockPanel.Dock="Left"
                         VerticalAlignment="Center"
                         Source="Resources/StatusWarning.png"
                         Height="25"
-                        Width="11"/>
+                        Width="11" />
                 </DockPanel>
             </Button>
         </StackPanel>
 
-        <TreeView ItemsSource="{Binding TreeRoot}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="Transparent">
+        <TreeView ItemsSource="{Binding TreeRoot}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                  BorderBrush="Transparent">
             <TreeView.ItemContainerStyle>
                 <!-- This Style binds a TreeViewItem to a TreeViewItemViewModel. -->
                 <Style TargetType="{x:Type TreeViewItem}">
@@ -185,7 +191,7 @@
 
             <TreeView.Resources>
                 <!-- CLOUD FOUNDRY INSTANCES -->
-                <HierarchicalDataTemplate DataType="{x:Type ViewModels:CfInstanceViewModel}" 
+                <HierarchicalDataTemplate DataType="{x:Type ViewModels:CfInstanceViewModel}"
                                           ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                         <Image
@@ -194,8 +200,8 @@
                             Height="16px"
                             Width="16px"
                             Visibility="{Binding Path=IsLoading, Converter={StaticResource InverseVisibility}}"
-                            Margin="4"/>
-                        <local:Spinner Visibility="{Binding Path=IsLoading, Converter={StaticResource Visibility}}"/>
+                            Margin="4" />
+                        <local:Spinner Visibility="{Binding Path=IsLoading, Converter={StaticResource Visibility}}" />
                         <Button Content="{Binding DisplayText}"
                                 Style="{StaticResource RowItemStyle}">
                             <Button.ContextMenu>
@@ -203,7 +209,7 @@
                                     FontSize="{DynamicResource VsFont.EnvironmentFontSize}"
                                     FontFamily="{DynamicResource VsFont.EnvironmentFontFamily}">
                                     <MenuItem Header="Disconnect"
-                                              Click="Disconnect"/>
+                                              Click="Disconnect" />
                                 </ContextMenu>
                             </Button.ContextMenu>
                         </Button>
@@ -220,20 +226,20 @@
                             Height="16px"
                             Width="16px"
                             Visibility="{Binding Path=IsLoading, Converter={StaticResource InverseVisibility}}"
-                            Margin="4"/>
-                        <local:Spinner Visibility="{Binding Path=IsLoading, Converter={StaticResource Visibility}}"/>
-                        <Button Content="{Binding DisplayText}" 
+                            Margin="4" />
+                        <local:Spinner Visibility="{Binding Path=IsLoading, Converter={StaticResource Visibility}}" />
+                        <Button Content="{Binding DisplayText}"
                                 Style="{StaticResource RowItemStyle}"
                                 Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
                             <Button.ContextMenu>
                                 <ContextMenu
                                     FontSize="{DynamicResource VsFont.EnvironmentFontSize}"
                                     FontFamily="{DynamicResource VsFont.EnvironmentFontFamily}">
-                                    <MenuItem Header="Refresh Org" 
+                                    <MenuItem Header="Refresh Org"
                                               Command="{Binding PlacementTarget.Tag.RefreshOrgCommand, 
                                                                 RelativeSource={RelativeSource Mode=FindAncestor, 
                                                                 AncestorType=ContextMenu}}"
-                                              CommandParameter="{Binding Path=.}"/>
+                                              CommandParameter="{Binding Path=.}" />
                                 </ContextMenu>
                             </Button.ContextMenu>
                         </Button>
@@ -250,20 +256,20 @@
                             Height="16px"
                             Width="16px"
                             Visibility="{Binding Path=IsLoading, Converter={StaticResource InverseVisibility}}"
-                            Margin="4"/>
-                        <local:Spinner Visibility="{Binding Path=IsLoading, Converter={StaticResource Visibility}}"/>
-                        <Button Content="{Binding DisplayText}" 
+                            Margin="4" />
+                        <local:Spinner Visibility="{Binding Path=IsLoading, Converter={StaticResource Visibility}}" />
+                        <Button Content="{Binding DisplayText}"
                                 Style="{StaticResource RowItemStyle}"
                                 Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
                             <Button.ContextMenu>
                                 <ContextMenu
                                     FontSize="{DynamicResource VsFont.EnvironmentFontSize}"
                                     FontFamily="{DynamicResource VsFont.EnvironmentFontFamily}">
-                                    <MenuItem Header="Refresh Space" 
+                                    <MenuItem Header="Refresh Space"
                                               Command="{Binding PlacementTarget.Tag.RefreshSpaceCommand, 
                                                                 RelativeSource={RelativeSource Mode=FindAncestor, 
                                                                 AncestorType=ContextMenu}}"
-                                              CommandParameter="{Binding Path=.}"/>
+                                              CommandParameter="{Binding Path=.}" />
                                 </ContextMenu>
                             </Button.ContextMenu>
                         </Button>
@@ -283,56 +289,58 @@
                             <ColumnDefinition Width="20"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
 
-                        <Image Source="Resources/ApplicationRunning_16x.png" Stretch="Uniform" Height="16px" Width="16px" Margin="0,2,4,0"
-                               Grid.Row="0" Grid.Column="0" 
-                               Visibility="{Binding Path=IsStopped, Converter={StaticResource InverseVisibility}}"/>
-                        <Image Source="Resources/ApplicationStopped_16x.png" Stretch="Uniform" Height="16px" Width="16px" Margin="0,2,4,0"
-                               Grid.Row="0" Grid.Column="0" 
-                               Visibility="{Binding Path=IsStopped, Converter={StaticResource Visibility}}"/>
+                        <Image Source="Resources/ApplicationRunning_16x.png" Stretch="Uniform" Height="16px"
+                               Width="16px" Margin="0,2,4,0"
+                               Grid.Row="0" Grid.Column="0"
+                               Visibility="{Binding Path=IsStopped, Converter={StaticResource InverseVisibility}}" />
+                        <Image Source="Resources/ApplicationStopped_16x.png" Stretch="Uniform" Height="16px"
+                               Width="16px" Margin="0,2,4,0"
+                               Grid.Row="0" Grid.Column="0"
+                               Visibility="{Binding Path=IsStopped, Converter={StaticResource Visibility}}" />
 
                         <Button Content="{Binding DisplayText}"
                                 VerticalAlignment="Center"
-                                Grid.Row="0" Grid.Column="1" 
+                                Grid.Row="0" Grid.Column="1"
                                 Style="{StaticResource RowItemStyle}"
                                 Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
                             <Button.ContextMenu>
                                 <ContextMenu
                                     FontSize="{DynamicResource VsFont.EnvironmentFontSize}"
                                     FontFamily="{DynamicResource VsFont.EnvironmentFontFamily}">
-                                    <MenuItem Header="Start App" 
+                                    <MenuItem Header="Start App"
                                               Command="{Binding PlacementTarget.Tag.StartCfAppCommand, 
                                                                 RelativeSource={RelativeSource Mode=FindAncestor, 
                                                                 AncestorType=ContextMenu}}"
                                               CommandParameter="{Binding App}">
                                         <MenuItem.Icon>
-                                            <Image Source="Resources/StartApp.png" ></Image>
+                                            <Image Source="Resources/StartApp.png"></Image>
                                         </MenuItem.Icon>
                                     </MenuItem>
-                                    <MenuItem Header="Stop App" 
+                                    <MenuItem Header="Stop App"
                                               Command="{Binding PlacementTarget.Tag.StopCfAppCommand, 
                                                                 RelativeSource={RelativeSource Mode=FindAncestor, 
                                                                 AncestorType=ContextMenu}}"
                                               CommandParameter="{Binding App}">
                                         <MenuItem.Icon>
-                                            <Image Source="Resources/StopApp.png" ></Image>
+                                            <Image Source="Resources/StopApp.png"></Image>
                                         </MenuItem.Icon>
                                     </MenuItem>
-                                    <MenuItem Header="Delete App" 
+                                    <MenuItem Header="Delete App"
                                               Command="{Binding PlacementTarget.Tag.OpenDeletionViewCommand, 
                                                                 RelativeSource={RelativeSource Mode=FindAncestor, 
                                                                 AncestorType=ContextMenu}}"
                                               CommandParameter="{Binding App}">
                                         <MenuItem.Icon>
-                                            <Image Source="Resources/delete_app.png" ></Image>
+                                            <Image Source="Resources/delete_app.png"></Image>
                                         </MenuItem.Icon>
                                     </MenuItem>
-                                    <MenuItem Header="Monitor Logs" 
+                                    <MenuItem Header="Monitor Logs"
                                               Command="{Binding PlacementTarget.Tag.StreamAppLogsCommand, 
                                                                 RelativeSource={RelativeSource Mode=FindAncestor, 
                                                                 AncestorType=ContextMenu}}"
                                               CommandParameter="{Binding App}">
                                         <MenuItem.Icon>
-                                            <Image Source="Resources/Log.png" ></Image>
+                                            <Image Source="Resources/Log.png"></Image>
                                         </MenuItem.Icon>
                                     </MenuItem>
                                 </ContextMenu>
@@ -344,11 +352,11 @@
                 <!-- PLACEHOLDER TREE VIEW ITEMS -->
                 <DataTemplate DataType="{x:Type ViewModels:PlaceholderViewModel}">
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                        <TextBlock 
-                            Text="{Binding DisplayText}" 
-                            FontStyle="Italic" 
-                            VerticalAlignment="Bottom" 
-                            Foreground="{Binding ElementName=TanzuExplorerViewElement, Path=Foreground}"/>
+                        <TextBlock
+                            Text="{Binding DisplayText}"
+                            FontStyle="Italic"
+                            VerticalAlignment="Bottom"
+                            Foreground="{Binding ElementName=TanzuExplorerViewElement, Path=Foreground}" />
                     </StackPanel>
                 </DataTemplate>
 
@@ -356,7 +364,7 @@
                 <DataTemplate DataType="{x:Type ViewModels:LoginPromptViewModel}">
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                         <Button Command="{Binding ElementName=TanzuExplorerViewElement, Path=OpenLoginFormCommand}">
-                            <local:LoginPromptButton/>
+                            <local:LoginPromptButton />
                         </Button>
                     </StackPanel>
                 </DataTemplate>

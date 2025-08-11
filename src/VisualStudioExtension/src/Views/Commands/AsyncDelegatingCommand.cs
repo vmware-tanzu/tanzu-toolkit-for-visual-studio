@@ -53,7 +53,8 @@ namespace Tanzu.Toolkit.VisualStudio.Views.Commands
             return _canExecute == null || _canExecute(parameter);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "All exceptions handled (ignored); no risk of process crash")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods",
+            Justification = "All exceptions handled (ignored); no risk of process crash")]
         public async void Execute(object parameter)
         {
             IsExecuting = true;

@@ -52,11 +52,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
         /// <summary>
         /// Gets the instance of the command.
         /// </summary>
-        public static OpenLogsCommand Instance
-        {
-            get;
-            private set;
-        }
+        public static OpenLogsCommand Instance { get; private set; }
 
         /// <summary>
         /// Initializes the command.
@@ -115,7 +111,9 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error("An error occurred in OpenLogsCommand while trying to generate a tmp log file to display: {OpenLogsCommandException}", ex);
+                    _logger.Error(
+                        "An error occurred in OpenLogsCommand while trying to generate a tmp log file to display: {OpenLogsCommandException}",
+                        ex);
                     _dialogService.DisplayErrorDialog("Unable to open log file.", ex.Message);
                 }
 
@@ -135,7 +133,8 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                         }
                         catch (Exception ex)
                         {
-                            _logger.Error("Unable to delete tmp log file '{TmpFilePath}'.\n{CloseLogsWindowException}", tmpFilePath, ex);
+                            _logger.Error("Unable to delete tmp log file '{TmpFilePath}'.\n{CloseLogsWindowException}",
+                                tmpFilePath, ex);
                         }
                     }
                 }

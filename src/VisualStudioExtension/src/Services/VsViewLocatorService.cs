@@ -18,11 +18,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services
 
         public IServiceProvider ServiceProvider { get; }
 
-        public VsViewLocatorService(IToolWindowService toolWindowService, ILoggingService loggingService, IServiceProvider serviceProvider)
+        public VsViewLocatorService(IToolWindowService toolWindowService, ILoggingService loggingService,
+            IServiceProvider serviceProvider)
         {
             ServiceProvider = serviceProvider;
             var lastIndex = typeof(VsViewLocatorService).Namespace.LastIndexOf('.');
-            _viewNamespace = typeof(VsViewLocatorService).Namespace.Substring(0, lastIndex) + ".Views"; // Tanzu.Toolkit.VisualStudio.Services -> Tanzu.Toolkit.VisualStudio.Views
+            _viewNamespace =
+                typeof(VsViewLocatorService).Namespace.Substring(0, lastIndex) +
+                ".Views"; // Tanzu.Toolkit.VisualStudio.Services -> Tanzu.Toolkit.VisualStudio.Views
             _toolWindowService = toolWindowService;
             _logger = loggingService.Logger;
         }
@@ -47,19 +50,26 @@ namespace Tanzu.Toolkit.VisualStudio.Services
                     }
                     catch (Exception ex)
                     {
-                        _logger?.Error("Caught exception in {ClassName}.{MethodName}({ViewModelName}); either the service was unattainable or could not be cast as {CastType}: {ServiceException}", nameof(VsViewLocatorService), nameof(GetViewByViewModelName), viewModelName, nameof(IView), ex);
+                        _logger?.Error(
+                            "Caught exception in {ClassName}.{MethodName}({ViewModelName}); either the service was unattainable or could not be cast as {CastType}: {ServiceException}",
+                            nameof(VsViewLocatorService), nameof(GetViewByViewModelName), viewModelName, nameof(IView),
+                            ex);
                     }
                 }
                 else
                 {
-                    _logger?.Error("{ClassName}.{MethodName} given type not classified as either modal or tool window: {ViewModelName}", nameof(VsViewLocatorService), nameof(GetViewByViewModelName), viewModelName);
+                    _logger?.Error(
+                        "{ClassName}.{MethodName} given type not classified as either modal or tool window: {ViewModelName}",
+                        nameof(VsViewLocatorService), nameof(GetViewByViewModelName), viewModelName);
                 }
 
                 return view;
             }
             catch (Exception ex)
             {
-                _logger.Error("VsViewLocatorService encountered an error while looking for a view to match {ViewModelName}: {ViewLookupException}", viewModelName, ex);
+                _logger.Error(
+                    "VsViewLocatorService encountered an error while looking for a view to match {ViewModelName}: {ViewLookupException}",
+                    viewModelName, ex);
                 return view;
             }
         }
@@ -82,7 +92,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services
 
         internal string GetViewName(string viewModelName)
         {
-            return "I" + viewModelName.Substring(0, viewModelName.Length - 5);  // prepend I and remove "Model"
+            return "I" + viewModelName.Substring(0, viewModelName.Length - 5); // prepend I and remove "Model"
         }
     }
 }

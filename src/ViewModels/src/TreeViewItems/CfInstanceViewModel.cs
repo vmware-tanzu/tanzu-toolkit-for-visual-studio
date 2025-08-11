@@ -31,15 +31,9 @@ namespace Tanzu.Toolkit.ViewModels
             DisplayText = cf.InstanceName;
             CfClient.ConfigureForCf(cf);
 
-            LoadingPlaceholder = new PlaceholderViewModel(parent: this, services)
-            {
-                DisplayText = _loadingMsg,
-            };
+            LoadingPlaceholder = new PlaceholderViewModel(parent: this, services) { DisplayText = _loadingMsg, };
 
-            EmptyPlaceholder = new PlaceholderViewModel(parent: this, Services)
-            {
-                DisplayText = _emptyOrgsPlaceholderMsg,
-            };
+            EmptyPlaceholder = new PlaceholderViewModel(parent: this, Services) { DisplayText = _emptyOrgsPlaceholderMsg, };
         }
 
         public CloudFoundryInstance CloudFoundryInstance { get; }
@@ -102,6 +96,7 @@ namespace Tanzu.Toolkit.ViewModels
                                     {
                                         continue;
                                     }
+
                                     var newOrg = new OrgViewModel(freshOrg, this, ParentTanzuExplorer, Services, expanded: false);
                                     additionTasks.Add(ThreadingService.AddItemToCollectionOnUiThreadAsync(Children, newOrg));
                                 }
@@ -118,6 +113,7 @@ namespace Tanzu.Toolkit.ViewModels
                                     updateTasks.Add(ThreadingService.StartBackgroundTask(org.UpdateAllChildren));
                                 }
                             }
+
                             await Task.WhenAll(updateTasks);
                         }
                         else if (orgsResponse.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
@@ -134,7 +130,7 @@ namespace Tanzu.Toolkit.ViewModels
                     catch (Exception ex)
                     {
                         Logger.Error("Caught exception trying to load orgs in CfInstanceViewModel: {CfInstanceViewModelLoadingException}", ex);
-                        _dialogService.DisplayWarningDialog(_getOrgsFailureMsg, "Something went wrong while loading organizations; try disconnecting & logging in again.\nIf this issue persists, please contact dotnetdevx@groups.vmware.com");
+                        _dialogService.DisplayWarningDialog(_getOrgsFailureMsg, "Something went wrong while loading organizations; try disconnecting & logging in again.");
                     }
                     finally
                     {

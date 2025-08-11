@@ -36,8 +36,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Models.AppsResponse
          * "buildpack"
          * "docker"
          * "kpack"
-         * 
-         * The following "Data" object is structured according to the "buildpack" 
+         *
+         * The following "Data" object is structured according to the "buildpack"
          * type; deserialization may not succeed for different types.
          */
 

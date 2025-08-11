@@ -14,7 +14,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
     public class RemoteDebugViewModelTests : ViewModelTestSupport
     {
         private const string _fakeTargetFrameworkMoniker = "some fake tfm";
-        private const string _fakePathToLaunchFile = "fake\\path\\to\\launch\\file";
+        private const string _fakePathToLaunchFile = @"fake\path\to\launch\file";
         private RemoteDebugViewModel _sut;
 
         [TestInitialize]
@@ -50,6 +50,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
                 MockLoggedIn();
             }
+
             Assert.AreEqual(mockingLoggedIn, _sut.IsLoggedIn);
         }
 
@@ -71,14 +72,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ctor")]
         public void Constructor_PromptsAppSelection_WhenIsLoggedIn()
         {
-            var fakeOrgsResponse = new DetailedResult<List<CloudFoundryOrganization>>
-            {
-                Succeeded = true,
-                Content = _emptyListOfOrgs,
-            };
+            var fakeOrgsResponse = new DetailedResult<List<CloudFoundryOrganization>> { Succeeded = true, Content = _emptyListOfOrgs, };
 
             MockCloudFoundryService.Setup(m => m.GetOrgsForCfInstanceAsync(
-                It.IsAny<CloudFoundryInstance>(), It.IsAny<bool>(), It.IsAny<int>()))
+                    It.IsAny<CloudFoundryInstance>(), It.IsAny<bool>(), It.IsAny<int>()))
                 .ReturnsAsync(fakeOrgsResponse);
 
             MockLoggedIn();
@@ -100,7 +97,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsNull(_sut._tanzuExplorer.CloudFoundryConnection);
 
             MockCloudFoundryService.Verify(m => m.GetOrgsForCfInstanceAsync(It.IsAny<CloudFoundryInstance>(), It.IsAny<bool>(), It.IsAny<int>()), Times.Never);
-            
+
             Assert.IsNull(_sut.LoadingMessage);
             Assert.IsNull(_sut.DialogMessage);
         }

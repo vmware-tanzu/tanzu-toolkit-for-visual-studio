@@ -8,11 +8,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views.Converters
 {
     public class StringNullVisibilityConverter : IValueConverter
     {
-        private readonly List<string> _stringsToTreatAsEmpty = new List<string>
-        {
-            "<none selected>",
-            "<Default App Directory>",
-        };
+        private readonly List<string> _stringsToTreatAsEmpty = new List<string> { "<none selected>", "<Default App Directory>", };
 
         public bool Reversed { get; set; }
         public bool ReserveSpace { get; set; }
@@ -22,7 +18,9 @@ namespace Tanzu.Toolkit.VisualStudio.Views.Converters
             var str = value as string;
             return string.IsNullOrWhiteSpace(str) || _stringsToTreatAsEmpty.Contains(str)
                 ? Reversed ? Visibility.Visible : ReserveSpace ? Visibility.Hidden : (object)Visibility.Collapsed
-                : Reversed ? ReserveSpace ? Visibility.Hidden : (object)Visibility.Collapsed : Visibility.Visible;
+                : Reversed
+                    ? ReserveSpace ? Visibility.Hidden : (object)Visibility.Collapsed
+                    : Visibility.Visible;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

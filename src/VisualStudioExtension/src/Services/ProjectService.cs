@@ -23,6 +23,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services
 
             set => _projectName = value;
         }
+
         public string PathToProjectDirectory
         {
             get
@@ -36,6 +37,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services
             }
             set => _pathToProjectDirectory = value;
         }
+
         public string TargetFrameworkMoniker
         {
             get

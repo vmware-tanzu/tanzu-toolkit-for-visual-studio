@@ -79,16 +79,19 @@ namespace Tanzu.Toolkit.Services
                 return false;
 
             if (typeof(System.Collections.IEnumerable).IsAssignableFrom(value.Value.GetType()))
-            {   // We have a collection
+            {
+                // We have a collection
                 var enumerableObject = (System.Collections.IEnumerable)value.Value;
                 if (enumerableObject.GetEnumerator().MoveNext()) // Returns true if the collection is not empty.
-                {   // Don't skip this item - serialize it as normal.
+                {
+                    // Don't skip this item - serialize it as normal.
                     retVal = base.EnterMapping(key, value, context, serializer);
                 }
                 // Else we have an empty collection and the initialized return value of false is correct.
             }
             else
-            {   // Not a collection, normal serialization.
+            {
+                // Not a collection, normal serialization.
                 retVal = base.EnterMapping(key, value, context, serializer);
             }
 

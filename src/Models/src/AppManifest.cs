@@ -20,11 +20,7 @@ namespace Tanzu.Toolkit.Models
                 appsList.Add((AppConfig)app.Clone());
             }
 
-            return new AppManifest
-            {
-                Version = Version,
-                Applications = appsList,
-            };
+            return new AppManifest { Version = Version, Applications = appsList, };
         }
 
         [YamlIgnore]
@@ -89,8 +85,8 @@ namespace Tanzu.Toolkit.Models
 
                 newApp.Buildpacks = clonedBps;
             }
-            else 
-            { 
+            else
+            {
                 newApp.Buildpacks = new List<string>();
             }
 
@@ -112,11 +108,7 @@ namespace Tanzu.Toolkit.Models
 
             if (Docker != null)
             {
-                var clonedDockerConfig = new DockerConfig
-                {
-                    Image = Docker.Image,
-                    Username = Docker.Username,
-                };
+                var clonedDockerConfig = new DockerConfig { Image = Docker.Image, Username = Docker.Username, };
 
                 newApp.Docker = clonedDockerConfig;
             }
@@ -190,11 +182,7 @@ namespace Tanzu.Toolkit.Models
 
                 foreach (var route in Routes)
                 {
-                    newRoutesList.Add(new RouteConfig
-                    {
-                        Protocol = route.Protocol,
-                        Route = route.Route,
-                    });
+                    newRoutesList.Add(new RouteConfig { Protocol = route.Protocol, Route = route.Route, });
                 }
 
                 newApp.Routes = newRoutesList;
@@ -206,12 +194,7 @@ namespace Tanzu.Toolkit.Models
 
                 foreach (var sidecar in Sidecars)
                 {
-                    var newSidecar = new SidecarConfig
-                    {
-                        Name = sidecar.Name,
-                        Command = sidecar.Command,
-                        Memory = sidecar.Memory,
-                    };
+                    var newSidecar = new SidecarConfig { Name = sidecar.Name, Command = sidecar.Command, Memory = sidecar.Memory, };
 
                     if (sidecar.ProcessTypes != null)
                     {
