@@ -134,7 +134,7 @@ namespace Tanzu.Toolkit.VisualStudio
                 return new HttpClientHandler
                 {
                     // trust all certs
-                    ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => { return true; }
+                    ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => true
                 };
             });
             services.AddTransient<ICfApiClient, CfApiClient>();

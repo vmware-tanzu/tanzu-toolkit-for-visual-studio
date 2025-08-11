@@ -49,15 +49,11 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
         }
 
-        internal HttpClient HttpClient
+        private HttpClient HttpClient
         {
-            get
-            {
-                if (_httpClient == null) throw new InvalidOperationException($"HttpClient has not yet been set for this instance of {nameof(CfApiClient)}; to set it, first call {nameof(Configure)}");
-                return _httpClient;
-            }
+            get => _httpClient ?? throw new InvalidOperationException($"HttpClient has not yet been set for this instance of {nameof(CfApiClient)}; to set it, first call {nameof(Configure)}");
 
-            private set
+            set
             {
                 if (_httpClient != null)
                     throw new InvalidOperationException($"HttpClient has already been set for this instance; to target a different API address, create a new instance of {nameof(CfApiClient)}");
@@ -67,16 +63,11 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
 
         public Uri CfApiAddress
         {
-            get
-            {
-                if (_cfApiAddress == null) throw new ArgumentNullException(nameof(CfApiAddress));
-                return _cfApiAddress;
-            }
+            get => _cfApiAddress ?? throw new ArgumentNullException(nameof(CfApiAddress));
             internal set
             {
                 if (_cfApiAddress != null)
-                    throw new InvalidOperationException(
-                        $"{nameof(CfApiAddress)} has already been set for this instance; to target a different API address, create a new instance of {nameof(CfApiClient)}");
+                    throw new InvalidOperationException($"{nameof(CfApiAddress)} has already been set for this instance; to target a different API address, create a new instance of {nameof(CfApiClient)}");
                 _cfApiAddress = value;
                 HttpClient.BaseAddress = _cfApiAddress;
             }
@@ -266,12 +257,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             var resultContent = await response.Content.ReadAsStringAsync();
             var result = JsonSerializer.Deserialize<App>(resultContent, _deserializationOptions);
 
-            if (result.State == "STOPPED")
-            {
-                return true;
-            }
-
-            return false;
+            return result.State == "STOPPED";
         }
 
         /// <summary>
@@ -311,12 +297,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             var resultContent = await response.Content.ReadAsStringAsync();
             var result = JsonSerializer.Deserialize<App>(resultContent, _deserializationOptions);
 
-            if (result.State == "STARTED")
-            {
-                return true;
-            }
-
-            return false;
+            return result.State == "STARTED";
         }
 
         public async Task<bool> DeleteAppWithGuid(string cfTarget, string accessToken, string appGuid)
@@ -337,12 +318,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
                 throw new Exception($"Response from DELETE `{deleteAppPath}` was {response.StatusCode}");
             }
 
-            if (response.StatusCode == HttpStatusCode.Accepted)
-            {
-                return true;
-            }
-
-            return false;
+            return response.StatusCode == HttpStatusCode.Accepted;
         }
 
         public async Task<bool> DeleteRouteWithGuid(string cfTarget, string accessToken, string routeGuid)
@@ -363,12 +339,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
                 throw new Exception($"Response from DELETE `{deleteRoutePath}` was {response.StatusCode}");
             }
 
-            if (response.StatusCode == HttpStatusCode.Accepted)
-            {
-                return true;
-            }
-
-            return false;
+            return response.StatusCode == HttpStatusCode.Accepted;
         }
 
         public async Task<List<Stack>> ListStacks(string cfTarget, string accessToken)
@@ -441,89 +412,87 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         {
             Uri.TryCreate(uriString, UriKind.Absolute, out var uriResult);
 
-            if (uriResult == null)
-            {
-                throw new Exception(errorMessage);
-            }
-
-            return uriResult;
+            return uriResult ?? throw new Exception(errorMessage);
         }
 
         private async Task<List<TResourceType>> GetRemainingPagesForType<TResourceType>(HypertextReference pageAddress, string accessToken, List<TResourceType> resultsSoFar)
         {
-            if (pageAddress == null)
+            while (true)
             {
-                return resultsSoFar;
+                if (pageAddress == null)
+                {
+                    return resultsSoFar;
+                }
+
+                var request = new HttpRequestMessage(HttpMethod.Get, pageAddress.Href);
+                request.Headers.Add("Authorization", "Bearer " + accessToken);
+
+                var response = await HttpClient.SendAsync(request);
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception($"Response from GET `{pageAddress}` was {response.StatusCode}");
+                }
+
+                var resultContent = await response.Content.ReadAsStringAsync();
+
+                HypertextReference nextPageHref;
+
+                if (typeof(TResourceType) == typeof(Org))
+                {
+                    var results = JsonSerializer.Deserialize<OrgsResponse>(resultContent, _deserializationOptions);
+                    resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Orgs.ToList());
+
+                    nextPageHref = results.Pagination.Next;
+                }
+                else if (typeof(TResourceType) == typeof(Space))
+                {
+                    var results = JsonSerializer.Deserialize<SpacesResponse>(resultContent, _deserializationOptions);
+                    resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Spaces.ToList());
+
+                    nextPageHref = results.Pagination.Next;
+                }
+                else if (typeof(TResourceType) == typeof(App))
+                {
+                    var results = JsonSerializer.Deserialize<AppsResponse>(resultContent, _deserializationOptions);
+                    resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Apps.ToList());
+
+                    nextPageHref = results.Pagination.Next;
+                }
+                else if (typeof(TResourceType) == typeof(Buildpack))
+                {
+                    var results = JsonSerializer.Deserialize<BuildpacksResponse>(resultContent, _deserializationOptions);
+                    resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Buildpacks.ToList());
+
+                    nextPageHref = results.Pagination.Next;
+                }
+                else if (typeof(TResourceType) == typeof(Stack))
+                {
+                    var results = JsonSerializer.Deserialize<StacksResponse>(resultContent, _deserializationOptions);
+                    resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Stacks.ToList());
+
+                    nextPageHref = results.Pagination.Next;
+                }
+                else if (typeof(TResourceType) == typeof(Route))
+                {
+                    var results = JsonSerializer.Deserialize<RoutesResponse>(resultContent, _deserializationOptions);
+                    resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Routes.ToList());
+
+                    nextPageHref = results.Pagination.Next;
+                }
+                else if (typeof(TResourceType) == typeof(Service))
+                {
+                    var results = JsonSerializer.Deserialize<ServicesResponse>(resultContent, _deserializationOptions);
+                    resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Services.ToList());
+
+                    nextPageHref = results.Pagination.Next;
+                }
+                else
+                {
+                    throw new Exception($"ResourceType unknown: {typeof(TResourceType).Name}");
+                }
+
+                pageAddress = nextPageHref;
             }
-
-            var request = new HttpRequestMessage(HttpMethod.Get, pageAddress.Href);
-            request.Headers.Add("Authorization", "Bearer " + accessToken);
-
-            var response = await HttpClient.SendAsync(request);
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception($"Response from GET `{pageAddress}` was {response.StatusCode}");
-            }
-
-            var resultContent = await response.Content.ReadAsStringAsync();
-
-            HypertextReference nextPageHref;
-
-            if (typeof(TResourceType) == typeof(Org))
-            {
-                var results = JsonSerializer.Deserialize<OrgsResponse>(resultContent, _deserializationOptions);
-                resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Orgs.ToList());
-
-                nextPageHref = results.Pagination.Next;
-            }
-            else if (typeof(TResourceType) == typeof(Space))
-            {
-                var results = JsonSerializer.Deserialize<SpacesResponse>(resultContent, _deserializationOptions);
-                resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Spaces.ToList());
-
-                nextPageHref = results.Pagination.Next;
-            }
-            else if (typeof(TResourceType) == typeof(App))
-            {
-                var results = JsonSerializer.Deserialize<AppsResponse>(resultContent, _deserializationOptions);
-                resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Apps.ToList());
-
-                nextPageHref = results.Pagination.Next;
-            }
-            else if (typeof(TResourceType) == typeof(Buildpack))
-            {
-                var results = JsonSerializer.Deserialize<BuildpacksResponse>(resultContent, _deserializationOptions);
-                resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Buildpacks.ToList());
-
-                nextPageHref = results.Pagination.Next;
-            }
-            else if (typeof(TResourceType) == typeof(Stack))
-            {
-                var results = JsonSerializer.Deserialize<StacksResponse>(resultContent, _deserializationOptions);
-                resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Stacks.ToList());
-
-                nextPageHref = results.Pagination.Next;
-            }
-            else if (typeof(TResourceType) == typeof(Route))
-            {
-                var results = JsonSerializer.Deserialize<RoutesResponse>(resultContent, _deserializationOptions);
-                resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Routes.ToList());
-
-                nextPageHref = results.Pagination.Next;
-            }
-            else if (typeof(TResourceType) == typeof(Service))
-            {
-                var results = JsonSerializer.Deserialize<ServicesResponse>(resultContent, _deserializationOptions);
-                resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Services.ToList());
-
-                nextPageHref = results.Pagination.Next;
-            }
-            else
-            {
-                throw new Exception($"ResourceType unknown: {typeof(TResourceType).Name}");
-            }
-
-            return await GetRemainingPagesForType(nextPageHref, accessToken, resultsSoFar);
         }
     }
 }

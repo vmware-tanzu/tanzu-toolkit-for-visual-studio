@@ -11,15 +11,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         public Action DisplayView
         {
-            get
-            {
-                if (_displayView == null)
-                {
-                    _displayView = () => ShowModal();
-                }
-
-                return _displayView;
-            }
+            get => _displayView ?? (_displayView = () => ShowModal());
 
             set => _displayView = value;
         }

@@ -11,44 +11,26 @@ namespace Tanzu.Toolkit.VisualStudio.Services
 
         public string ProjectName
         {
-            get
-            {
-                if (string.IsNullOrEmpty(_projectName))
-                {
-                    throw new ArgumentException($"{nameof(ProjectName)} not set");
-                }
-
-                return _projectName;
-            }
+            get => string.IsNullOrEmpty(_projectName) ? throw new ArgumentException($"{nameof(ProjectName)} not set") : _projectName;
 
             set => _projectName = value;
         }
 
         public string PathToProjectDirectory
         {
-            get
-            {
-                if (string.IsNullOrEmpty(_pathToProjectDirectory))
-                {
-                    throw new ArgumentException($"{nameof(PathToProjectDirectory)} not set");
-                }
-
-                return _pathToProjectDirectory;
-            }
+            get =>
+                string.IsNullOrEmpty(_pathToProjectDirectory)
+                    ? throw new ArgumentException($"{nameof(PathToProjectDirectory)} not set")
+                    : _pathToProjectDirectory;
             set => _pathToProjectDirectory = value;
         }
 
         public string TargetFrameworkMoniker
         {
-            get
-            {
-                if (string.IsNullOrEmpty(_targetFrameworkMoniker))
-                {
-                    throw new ArgumentException($"{nameof(TargetFrameworkMoniker)} not set");
-                }
-
-                return _targetFrameworkMoniker;
-            }
+            get =>
+                string.IsNullOrEmpty(_targetFrameworkMoniker)
+                    ? throw new ArgumentException($"{nameof(TargetFrameworkMoniker)} not set")
+                    : _targetFrameworkMoniker;
             set => _targetFrameworkMoniker = value;
         }
     }
