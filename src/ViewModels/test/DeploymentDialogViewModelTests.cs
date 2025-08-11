@@ -1042,7 +1042,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
                 Applications =
                 [
-                    new() { Name = expectedAppName1, }
+                    new AppConfig { Name = expectedAppName1, }
                 ]
             };
 
@@ -1071,7 +1071,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
                 Applications =
                 [
-                    new() { Command = expectedStartCommand, }
+                    new AppConfig { Command = expectedStartCommand, }
                 ]
             };
 
@@ -1097,7 +1097,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
                 Applications =
                 [
-                    new() { Buildpack = null, }
+                    new AppConfig { Buildpack = null, }
                 ]
             };
 
@@ -1121,7 +1121,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
                 Applications =
                 [
-                    new() { Services = null, }
+                    new AppConfig { Services = null, }
                 ]
             };
 
@@ -1163,7 +1163,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
                 Applications =
                 [
-                    new() { }
+                    new AppConfig { }
                 ]
             };
 
@@ -1194,7 +1194,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
                 Applications =
                 [
-                    new() { Name = expectedAppName1, Stack = expectedFakeStackNameFromManifest, }
+                    new AppConfig { Name = expectedAppName1, Stack = expectedFakeStackNameFromManifest, }
                 ]
             };
 
@@ -1239,7 +1239,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
                 Applications =
                 [
-                    new()
+                    new AppConfig
                     {
                         Name = expectedAppName1,
                         Buildpacks =
@@ -1280,7 +1280,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
                 Applications =
                 [
-                    new()
+                    new AppConfig
                     {
                         Name = expectedAppName1,
                         Buildpacks =
@@ -1361,7 +1361,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
                 Applications =
                 [
-                    new()
+                    new AppConfig
                     {
                         Name = expectedAppName1,
                         Services =
@@ -1402,7 +1402,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
                 Applications =
                 [
-                    new()
+                    new AppConfig
                     {
                         Name = expectedAppName1,
                         Services =
@@ -1481,7 +1481,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
                 Applications =
                 [
-                    new() { Path = null, }
+                    new AppConfig { Path = null, }
                 ]
             };
 
@@ -1510,7 +1510,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
                 Applications =
                 [
-                    new() { Path = pathValInNewManifest, }
+                    new AppConfig { Path = pathValInNewManifest, }
                 ]
             };
 

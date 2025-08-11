@@ -1517,7 +1517,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             {
                 Applications =
                 [
-                    new(),
+                    new AppConfig(),
                 ]
             };
 
@@ -1548,7 +1548,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             {
                 Applications =
                 [
-                    new() { Path = @"manifest\app\path", },
+                    new AppConfig { Path = @"manifest\app\path", },
                 ]
             };
 
