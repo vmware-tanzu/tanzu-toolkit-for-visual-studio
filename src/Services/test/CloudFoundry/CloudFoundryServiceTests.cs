@@ -2255,10 +2255,10 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             var FakeOrg2 = new CloudFoundryOrganization("fake org 2", "fake org guid 2", null);
             var FakeSpace2 = new CloudFoundrySpace("fake space 2", "fake space guid 2", FakeOrg2);
             var FakeApp2 = new CloudFoundryApp("fake app 2", "fake app guid 2", FakeSpace2, null);
-            Action<string> fakeOutCallback = (string s) => { };
-            Action<string> fakeOutCallback2 = (string s) => { };
-            Action<string> fakeErrCallback = (string s) => { };
-            Action<string> fakeErrCallback2 = (string s) => { };
+            Action<string> fakeOutCallback = s => { };
+            Action<string> fakeOutCallback2 = s => { };
+            Action<string> fakeErrCallback = s => { };
+            Action<string> fakeErrCallback2 = s => { };
 
             yield return [_fakeApp, fakeOutCallback, fakeErrCallback];
             yield return [FakeApp2, fakeOutCallback2, fakeErrCallback2];

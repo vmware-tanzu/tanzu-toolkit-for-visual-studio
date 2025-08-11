@@ -249,7 +249,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
             var cancellationToken = _tokenSource.Token;
 
-            CancelDebugging = (object _) =>
+            CancelDebugging = _ =>
             {
                 _tokenSource.Cancel();
                 Close();
@@ -399,7 +399,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             LoadingMessage = null;
             IsLoggedIn = _tanzuExplorer != null && _tanzuExplorer.CloudFoundryConnection != null;
             CanCancel = true;
-            CancelDebugging = (object arg) => { Close(); };
+            CancelDebugging = arg => { Close(); };
         }
 
         private async Task<bool> CheckForVsdbg(string stack, CancellationToken ct)
