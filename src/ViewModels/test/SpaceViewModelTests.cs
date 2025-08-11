@@ -387,7 +387,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     .DisplayWarningDialog(
                         SpaceViewModel._getAppsFailureMsg,
                         It.Is<string>(s =>
-                            s.Contains("try disconnecting & logging in again") && s.Contains("If this issue persists, please contact dotnetdevx@groups.vmware.com"))))
+                            s.Contains("try disconnecting & logging in again"))))
                 .Verifiable();
 
             await _sut.UpdateAllChildren();

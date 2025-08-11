@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Security;
 using Tanzu.Toolkit.Models;
@@ -124,7 +124,7 @@ namespace Tanzu.Toolkit.Services.Tests
             Version = 1,
             Applications =
             [
-                new()
+                new AppConfig
                 {
                     Name = "app1",
                     Buildpacks =
@@ -142,8 +142,8 @@ namespace Tanzu.Toolkit.Services.Tests
                     },
                     Routes =
                     [
-                        new() { Route = "route.example.com", },
-                        new() { Route = "another-route.example.com", Protocol = "http2" },
+                        new RouteConfig { Route = "route.example.com", },
+                        new RouteConfig { Route = "another-route.example.com", Protocol = "http2" },
                     ],
                     Services =
                     [
@@ -158,7 +158,7 @@ namespace Tanzu.Toolkit.Services.Tests
                     },
                     Processes =
                     [
-                        new()
+                        new ProcessConfig
                         {
                             Type = "web",
                             Command = "start-web.sh",
@@ -170,7 +170,7 @@ namespace Tanzu.Toolkit.Services.Tests
                             Memory = "500M",
                             Timeout = 10,
                         },
-                        new()
+                        new ProcessConfig
                         {
                             Type = "worker",
                             Command = "start-worker.sh",
@@ -182,17 +182,17 @@ namespace Tanzu.Toolkit.Services.Tests
                         },
                     ]
                 },
-                new()
+                new AppConfig
                 {
                     Name = "app2",
                     Env = new Dictionary<string, string> { { "VAR1", "value1" }, },
                     Processes =
                     [
-                        new() { Type = "web", Instances = 1, Memory = "256M", },
+                        new ProcessConfig { Type = "web", Instances = 1, Memory = "256M", },
                     ],
                     Sidecars =
                     [
-                        new()
+                        new SidecarConfig
                         {
                             Name = "authenticator",
                             ProcessTypes =
@@ -203,7 +203,7 @@ namespace Tanzu.Toolkit.Services.Tests
                             Command = "bundle exec run-authenticator",
                             Memory = "800M",
                         },
-                        new()
+                        new SidecarConfig
                         {
                             Name = "upcaser",
                             ProcessTypes =
