@@ -161,7 +161,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                     else
                     {
                         var launchFilePath = Path.Combine(projectDirectory, RemoteDebugViewModel._launchFileName);
-                        var initiateDebugCallback = new Action<string, string>((string orgName, string spaceName) =>
+                        var initiateDebugCallback = new Action<string, string>((orgName, spaceName) =>
                         {
                             dte.ExecuteCommand("DebugAdapterHost.Logging /On /OutputWindow");
                             lock (_cfEnvironmentLock)
