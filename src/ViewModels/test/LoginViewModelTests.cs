@@ -176,7 +176,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public void CanLogIn_ReturnsFalse_WhenPasswordEmpty()
         {
             // mock out testimony from login view that password box is empty
-            _sut.PasswordEmpty = () => { return true; };
+            _sut.PasswordEmpty = () => true;
 
             Assert.IsNotNull(_sut.ConnectionName);
             Assert.IsNotNull(_sut.TargetApiAddress);

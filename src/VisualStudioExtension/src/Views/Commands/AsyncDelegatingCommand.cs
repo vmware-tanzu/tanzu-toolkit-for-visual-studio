@@ -45,12 +45,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views.Commands
 
         public bool CanExecute(object parameter)
         {
-            if (IsExecuting)
-            {
-                return false;
-            }
-
-            return _canExecute == null || _canExecute(parameter);
+            return IsExecuting ? false : _canExecute == null || _canExecute(parameter);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods",
