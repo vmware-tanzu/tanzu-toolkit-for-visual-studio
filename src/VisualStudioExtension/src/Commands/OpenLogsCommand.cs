@@ -1,12 +1,12 @@
+﻿using Community.VisualStudio.Toolkit;
+using Community.VisualStudio.Toolkit.DependencyInjection;
+using Community.VisualStudio.Toolkit.DependencyInjection.Core;
 using EnvDTE;
 using EnvDTE80;
-using Microsoft;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Shell;
 using Serilog;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.IO;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.File;
@@ -15,92 +15,34 @@ using Task = System.Threading.Tasks.Task;
 
 namespace Tanzu.Toolkit.VisualStudio.Commands
 {
-    /// <summary>
-    /// Command handler.
-    /// </summary>
-    internal sealed class OpenLogsCommand
+    [Command(PackageGuids.guidTanzuToolkitPackageCmdSetString, PackageIds.OpenLogsCommandId)]
+    internal sealed class OpenLogsCommand : BaseDICommand
     {
-        /// <summary>
-        /// Command ID.
-        /// </summary>
-        public const int _commandId = 259;
+        private readonly IFileService _fileService;
+        private readonly IErrorDialog _errorDialog;
+        private readonly ILogger _logger;
 
-        /// <summary>
-        /// Command menu group (command set GUID).
-        /// </summary>
-        public static readonly Guid _commandSet = new Guid("f91c88fb-6e17-42a6-878d-f4d16ead7625");
-
-        public static DTE2 Dte { get; private set; }
-        private static IFileService _fileService;
-        private static ILogger _logger;
-        private static IErrorDialog _dialogService;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="OpenLogsCommand"/> class.
-        /// Adds our command handlers for menu (commands must exist in the command table file).
-        /// </summary>
-        /// <param name="commandService">Command service to add command to, not null.</param>
-        /// 
-        private OpenLogsCommand(OleMenuCommandService commandService)
+        public OpenLogsCommand(DIToolkitPackage package, IFileService fileService, IErrorDialog errorDialog, ILoggingService loggingService)
+            : base(package)
         {
-            commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
-            var menuCommandId = new CommandID(_commandSet, _commandId);
-            var menuItem = new MenuCommand(this.Execute, menuCommandId);
-            commandService.AddCommand(menuItem);
+            _fileService = fileService;
+            _errorDialog = errorDialog;
+            _logger = loggingService.Logger;
         }
 
-        /// <summary>
-        /// Gets the instance of the command.
-        /// </summary>
-        public static OpenLogsCommand Instance { get; private set; }
-
-        /// <summary>
-        /// Initializes the command.
-        /// </summary>
-        /// <param name="package">Owner package, not null.</param>
-        /// <param name="services">IServiceProvider used to lookup auxiliary services.</param>
-        public static async Task InitializeAsync(AsyncPackage package, IServiceProvider services)
+        protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
         {
-            // Switch to the main thread - the call to AddCommand in OpenLogsCommand's constructor requires
-            // the UI thread.
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(Package.DisposalToken);
 
-            var commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
-            Instance = new OpenLogsCommand(commandService);
-
-            Dte = await package.GetServiceAsync(typeof(DTE)) as DTE2;
-            _fileService = services.GetRequiredService<IFileService>();
-            _dialogService = services.GetRequiredService<IErrorDialog>();
-            var logSvc = services.GetRequiredService<ILoggingService>();
-
-            Assumes.Present(Dte);
-            Assumes.Present(_fileService);
-            Assumes.Present(_dialogService);
-            Assumes.Present(logSvc);
-
-            _logger = logSvc.Logger;
-        }
-
-        /// <summary>
-        /// This function is the callback used to execute the command when the menu item is clicked.
-        /// See the constructor to see how the menu item is associated with this function using
-        /// OleMenuCommandService service and MenuCommand class.
-        /// </summary>
-        /// <param name="sender">Event sender.</param>
-        /// <param name="e">Event args.</param>
-        private void Execute(object sender, EventArgs e)
-        {
-            ThreadHelper.ThrowIfNotOnUIThread();
-
+            var dte = await ServiceProvider.GetGlobalServiceAsync(typeof(DTE)) as DTE2;
             var logFilePath = _fileService.PathToLogsFile;
             var tmpFilePath = GenerateTmpFileName(logFilePath);
 
-            var alreadyOpen = Dte.ItemOperations.IsFileOpen(tmpFilePath);
+            var alreadyOpen = dte.ItemOperations.IsFileOpen(tmpFilePath);
 
             if (alreadyOpen)
             {
-                var doc = Dte.Documents.Item(tmpFilePath);
-                var win = doc.ActiveWindow;
+                var doc = dte.Documents.Item(tmpFilePath);
                 doc.Activate();
             }
             else
@@ -111,18 +53,16 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(
-                        "An error occurred in OpenLogsCommand while trying to generate a tmp log file to display: {OpenLogsCommandException}",
-                        ex);
-                    _dialogService.DisplayErrorDialog("Unable to open log file.", ex.Message);
+                    _logger.Error("An error occurred in OpenLogsCommand while trying to generate a tmp log file to display: {OpenLogsCommandException}", ex);
+                    _errorDialog.DisplayErrorDialog("Unable to open log file.", ex.Message);
                 }
 
                 if (tmpFilePath != null)
                 {
-                    var logsWindow = Dte.ItemOperations.OpenFile(tmpFilePath);
+                    var logsWindow = dte.ItemOperations.OpenFile(tmpFilePath);
                     logsWindow.Document.ReadOnly = true;
 
-                    var windowEvents = Dte.Events.WindowEvents[logsWindow];
+                    var windowEvents = dte.Events.WindowEvents[logsWindow];
                     windowEvents.WindowClosing += OnWindowClosing;
 
                     void OnWindowClosing(Window window)
