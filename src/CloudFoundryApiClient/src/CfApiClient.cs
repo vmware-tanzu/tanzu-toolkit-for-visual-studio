@@ -67,7 +67,8 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             internal set
             {
                 if (_cfApiAddress != null)
-                    throw new InvalidOperationException($"{nameof(CfApiAddress)} has already been set for this instance; to target a different API address, create a new instance of {nameof(CfApiClient)}");
+                    throw new InvalidOperationException(
+                        $"{nameof(CfApiAddress)} has already been set for this instance; to target a different API address, create a new instance of {nameof(CfApiClient)}");
                 _cfApiAddress = value;
                 HttpClient.BaseAddress = _cfApiAddress;
             }
@@ -105,10 +106,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         {
             var uri = new UriBuilder(cfApiAddress)
             {
-                Path = _listOrgsPath,
+                Path = _listOrgsPath
             };
 
-            var firstPageHref = new HypertextReference() { Href = uri.ToString() };
+            var firstPageHref = new HypertextReference { Href = uri.ToString() };
 
             var visibleOrgs = await GetRemainingPagesForType(firstPageHref, accessToken, new List<Org>());
 
@@ -133,10 +134,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             var uri = new UriBuilder(cfApiAddress)
             {
                 Path = _listSpacesPath,
-                Query = $"organization_guids={orgGuid}",
+                Query = $"organization_guids={orgGuid}"
             };
 
-            var firstPageHref = new HypertextReference() { Href = uri.ToString() };
+            var firstPageHref = new HypertextReference { Href = uri.ToString() };
 
             return await GetRemainingPagesForType(firstPageHref, accessToken, new List<Space>());
         }
@@ -159,10 +160,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             var uri = new UriBuilder(cfTarget)
             {
                 Path = _listAppsPath,
-                Query = $"space_guids={spaceGuid}",
+                Query = $"space_guids={spaceGuid}"
             };
 
-            var firstPageHref = new HypertextReference() { Href = uri.ToString() };
+            var firstPageHref = new HypertextReference { Href = uri.ToString() };
 
             return await GetRemainingPagesForType(firstPageHref, accessToken, new List<App>());
         }
@@ -171,10 +172,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         {
             var uri = new UriBuilder(CfApiAddress)
             {
-                Path = _listAppsPath,
+                Path = _listAppsPath
             };
 
-            var firstPageHref = new HypertextReference() { Href = uri.ToString() };
+            var firstPageHref = new HypertextReference { Href = uri.ToString() };
 
             return await GetRemainingPagesForType(firstPageHref, accessToken, new List<App>());
         }
@@ -184,10 +185,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             var uri = new UriBuilder(cfTarget)
             {
                 Path = _listRoutesPath,
-                Query = $"app_guids={appGuid}",
+                Query = $"app_guids={appGuid}"
             };
 
-            var firstPageHref = new HypertextReference() { Href = uri.ToString() };
+            var firstPageHref = new HypertextReference { Href = uri.ToString() };
 
             return await GetRemainingPagesForType(firstPageHref, accessToken, new List<Route>());
         }
@@ -196,10 +197,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         {
             var uri = new UriBuilder(cfApiAddress)
             {
-                Path = _listBuildpacksPath,
+                Path = _listBuildpacksPath
             };
 
-            var firstPageHref = new HypertextReference() { Href = uri.ToString() };
+            var firstPageHref = new HypertextReference { Href = uri.ToString() };
 
             var visibleBuildpacks = await GetRemainingPagesForType(firstPageHref, accessToken, new List<Buildpack>());
 
@@ -210,10 +211,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         {
             var uri = new UriBuilder(cfApiAddress)
             {
-                Path = _listServicesPath,
+                Path = _listServicesPath
             };
 
-            var firstPageHref = new HypertextReference() { Href = uri.ToString() };
+            var firstPageHref = new HypertextReference { Href = uri.ToString() };
 
             var visibleServices = await GetRemainingPagesForType(firstPageHref, accessToken, new List<Service>());
 
@@ -242,7 +243,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
 
             var uri = new UriBuilder(cfApiAddress)
             {
-                Path = stopAppPath,
+                Path = stopAppPath
             };
 
             var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString());
@@ -282,7 +283,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
 
             var uri = new UriBuilder(cfApiAddress)
             {
-                Path = startAppPath,
+                Path = startAppPath
             };
 
             var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString());
@@ -306,7 +307,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
 
             var uri = new UriBuilder(cfTarget)
             {
-                Path = deleteAppPath,
+                Path = deleteAppPath
             };
 
             var request = new HttpRequestMessage(HttpMethod.Delete, uri.ToString());
@@ -327,7 +328,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
 
             var uri = new UriBuilder(cfTarget)
             {
-                Path = deleteRoutePath,
+                Path = deleteRoutePath
             };
 
             var request = new HttpRequestMessage(HttpMethod.Delete, uri.ToString());
@@ -346,10 +347,10 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         {
             var uri = new UriBuilder(cfTarget)
             {
-                Path = _listStacksPath,
+                Path = _listStacksPath
             };
 
-            var firstPageHref = new HypertextReference() { Href = uri.ToString() };
+            var firstPageHref = new HypertextReference { Href = uri.ToString() };
 
             return await GetRemainingPagesForType(firstPageHref, accessToken, new List<Stack>());
         }
@@ -359,7 +360,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             var loginServerUri = await GetAuthServerUriFromCfTarget(cfApiAddress);
             var uri = new UriBuilder(loginServerUri)
             {
-                Path = _loginInfoPath,
+                Path = _loginInfoPath
             };
             var request = new HttpRequestMessage(HttpMethod.Get, uri.ToString());
             request.Headers.Add("Accept", "application/json");
@@ -385,7 +386,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
                 var uri = new UriBuilder(cfApiAddress)
                 {
                     Path = "/",
-                    Port = -1,
+                    Port = -1
                 };
 
                 var request = new HttpRequestMessage(HttpMethod.Get, uri.ToString());

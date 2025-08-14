@@ -31,7 +31,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         public void IsStopped_ReturnsTrue_WhenAppStateIsSTOPPED()
         {
-            var fakeApp = new CloudFoundryApp("fake name", "fake guid", null, null) { State = "STOPPED", };
+            var fakeApp = new CloudFoundryApp("fake name", "fake guid", null, null) { State = "STOPPED" };
 
             _sut = new AppViewModel(fakeApp, Services);
 
@@ -41,7 +41,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         public void IsStopped_ReturnsFalse_WhenAppStateIsNotSTOPPED()
         {
-            var fakeApp = new CloudFoundryApp("fake name", "fake guid", null, null) { State = "anything-other-than-STOPPED", };
+            var fakeApp = new CloudFoundryApp("fake name", "fake guid", null, null) { State = "anything-other-than-STOPPED" };
 
             _sut = new AppViewModel(fakeApp, Services);
 

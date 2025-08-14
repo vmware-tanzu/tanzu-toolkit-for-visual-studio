@@ -30,9 +30,9 @@ namespace Tanzu.Toolkit.ViewModels
             Org = org;
             DisplayText = Org.OrgName;
 
-            LoadingPlaceholder = new PlaceholderViewModel(parent: this, services) { DisplayText = _loadingMsg, };
+            LoadingPlaceholder = new PlaceholderViewModel(parent: this, services) { DisplayText = _loadingMsg };
 
-            EmptyPlaceholder = new PlaceholderViewModel(parent: this, Services) { DisplayText = _emptySpacesPlaceholderMsg, };
+            EmptyPlaceholder = new PlaceholderViewModel(parent: this, Services) { DisplayText = _emptySpacesPlaceholderMsg };
         }
 
         protected internal override async Task UpdateAllChildren()

@@ -32,7 +32,7 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
         [DataRow("invalid stack")]
         public async Task InstallVsdbgForCFAppAsync_ReturnsFailedResult_WhenAppStackInvalid(string stack)
         {
-            var appWithInvalidStack = new CloudFoundryApp("fake app", "fake app guid", _fakeSpace, null) { Stack = stack, };
+            var appWithInvalidStack = new CloudFoundryApp("fake app", "fake app guid", _fakeSpace, null) { Stack = stack };
 
             var result = await _sut.InstallVsdbgForCFAppAsync(appWithInvalidStack);
 
@@ -46,7 +46,7 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
         [DataRow("windows")]
         public async Task InstallVsdbgForCFAppAsync_ReturnsFailedResult_WhenSshCmdFails(string stack)
         {
-            var app = new CloudFoundryApp("fake app", "fake app guid", _fakeSpace, null) { Stack = stack, };
+            var app = new CloudFoundryApp("fake app", "fake app guid", _fakeSpace, null) { Stack = stack };
             var sshFailure = new DetailedResult(false, "failed because we told it to!", new CommandResult("some output", "some error", 1));
 
             _mockCfCliService.Setup(m => m.ExecuteSshCommand(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(sshFailure);
@@ -63,7 +63,7 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
         [DataRow("windows")]
         public async Task InstallVsdbgForCFAppAsync_UsesOSSpecificValuesForVsdbgInstallation_BasedOnStack(string stack)
         {
-            var app = new CloudFoundryApp("fake app", "fake app guid", _fakeSpace, null) { Stack = stack, };
+            var app = new CloudFoundryApp("fake app", "fake app guid", _fakeSpace, null) { Stack = stack };
             var expectedVsVersion = "latest";
             var expectedStartCmd = stack == "windows"
                 ? $"powershell -File {VsdbgInstaller._vsdbgInstallScriptName}.ps1 -Version {expectedVsVersion} -RuntimeID win7-x64 -InstallPath .\\{_sut.VsdbgDirName}"

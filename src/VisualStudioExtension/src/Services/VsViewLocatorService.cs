@@ -1,6 +1,7 @@
-﻿using Serilog;
+using Serilog;
 using System;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.ViewLocator;
 using Tanzu.Toolkit.ViewModels;
@@ -14,18 +15,17 @@ namespace Tanzu.Toolkit.VisualStudio.Services
     {
         private readonly string _viewNamespace;
         private readonly IToolWindowService _toolWindowService;
+        private readonly IServiceProvider _serviceProvider;
         private readonly ILogger _logger;
 
-        public IServiceProvider ServiceProvider { get; }
-
-        public VsViewLocatorService(IToolWindowService toolWindowService, ILoggingService loggingService,
-            IServiceProvider serviceProvider)
+        public VsViewLocatorService(IToolWindowService toolWindowService, ILoggingService loggingService, IServiceProvider serviceProvider)
         {
-            ServiceProvider = serviceProvider;
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             var lastIndex = typeof(VsViewLocatorService).Namespace.LastIndexOf('.');
-            _viewNamespace =
-                typeof(VsViewLocatorService).Namespace.Substring(0, lastIndex) +
-                ".Views"; // Tanzu.Toolkit.VisualStudio.Services -> Tanzu.Toolkit.VisualStudio.Views
+
+            // Tanzu.Toolkit.VisualStudio.Services -> Tanzu.Toolkit.VisualStudio.Views
+            _viewNamespace = typeof(VsViewLocatorService).Namespace.Substring(0, lastIndex) + ".Views";
+
             _toolWindowService = toolWindowService;
             _logger = loggingService.Logger;
         }
@@ -46,11 +46,11 @@ namespace Tanzu.Toolkit.VisualStudio.Services
                 {
                     try
                     {
-                        view = ServiceProvider.GetService(type) as IView;
+                        view = _serviceProvider.GetService(type) as IView;
                     }
                     catch (Exception ex)
                     {
-                        _logger?.Error(
+                        _logger.Error(
                             "Caught exception in {ClassName}.{MethodName}({ViewModelName}); either the service was unattainable or could not be cast as {CastType}: {ServiceException}",
                             nameof(VsViewLocatorService), nameof(GetViewByViewModelName), viewModelName, nameof(IView),
                             ex);
@@ -58,7 +58,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services
                 }
                 else
                 {
-                    _logger?.Error(
+                    _logger.Error(
                         "{ClassName}.{MethodName} given type not classified as either modal or tool window: {ViewModelName}",
                         nameof(VsViewLocatorService), nameof(GetViewByViewModelName), viewModelName);
                 }

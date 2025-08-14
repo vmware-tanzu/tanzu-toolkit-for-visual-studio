@@ -8,7 +8,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views.Converters
 {
     public class StringNullVisibilityConverter : IValueConverter
     {
-        private readonly List<string> _stringsToTreatAsEmpty = new List<string> { "<none selected>", "<Default App Directory>", };
+        private readonly List<string> _stringsToTreatAsEmpty = new List<string> { "<none selected>", "<Default App Directory>" };
 
         public bool Reversed { get; set; }
         public bool ReserveSpace { get; set; }

@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -29,7 +29,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _receivedEvents = [];
             _fakeTanzuConnection = new FakeCfInstanceViewModel(_fakeCfInstance, Services);
 
-            _sut = new TanzuExplorerViewModel(Services) { CloudFoundryConnection = _fakeTanzuConnection, };
+            _sut = new TanzuExplorerViewModel(Services) { CloudFoundryConnection = _fakeTanzuConnection };
             _sut.PropertyChanged += (sender, e) => { _receivedEvents.Add(e.PropertyName); };
         }
 
@@ -200,7 +200,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             _sut.OpenLoginView(null);
 
-            MockDialogService.Verify(ds => ds.ShowModal(typeof(LoginViewModel).Name, null), Times.Once);
+            MockDialogService.Verify(ds => ds.ShowModal(nameof(LoginViewModel), null), Times.Once);
         }
 
         [TestMethod]
@@ -224,7 +224,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             _sut = new TanzuExplorerViewModel(Services) { AuthenticationRequired = true };
 
-            MockDialogService.Setup(mock => mock.ShowModal(typeof(LoginViewModel).Name, null))
+            MockDialogService.Setup(mock => mock.ShowModal(nameof(LoginViewModel), null))
                 .Callback(() =>
                 {
                     // Simulate unsuccessful login by NOT setting CloudFoundryConnection as LoginView would've done on a successful login
@@ -257,7 +257,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             _sut.OpenDeletionView(null);
 
-            MockDialogService.Verify(ds => ds.ShowModal(typeof(AppDeletionConfirmationViewModel).Name, null), Times.Never);
+            MockDialogService.Verify(ds => ds.ShowModal(nameof(AppDeletionConfirmationViewModel), null), Times.Never);
         }
 
         [TestMethod]
@@ -575,7 +575,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("AuthenticationRequired")]
         public void SettingAuthenticationRequiredToFalse_DoesNotExpandCfInstanceViewModel()
         {
-            _sut = new TanzuExplorerViewModel(Services) { AuthenticationRequired = true, };
+            _sut = new TanzuExplorerViewModel(Services) { AuthenticationRequired = true };
 
             _sut.CloudFoundryConnection = new FakeCfInstanceViewModel(_fakeCfInstance, Services, expanded: false);
 
@@ -737,8 +737,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             var expectedViewTitle = $"Logs for {_fakeCfApp.AppName}";
             var fakeOutputViewModel = new FakeOutputViewModel();
-            var fakeView = new FakeOutputView() { ViewModel = fakeOutputViewModel, };
-            var fakeRecentLogsResult = new DetailedResult<string> { Succeeded = true, Content = "fake historical app logs", };
+            var fakeView = new FakeOutputView { ViewModel = fakeOutputViewModel };
 
             MockViewLocatorService.Setup(m => m.GetViewByViewModelName(nameof(OutputViewModel), expectedViewTitle)).Returns(fakeView);
             Assert.IsFalse(fakeOutputViewModel.BeginStreamingAppLogsForAppAsyncWasCalled);
@@ -754,10 +753,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public void StreamAppLogs_DisplaysAndLogsError_ViewLocatorServiceThrowsException()
         {
             var expectedViewParam = $"Logs for {_fakeCfApp.AppName}"; // intended to be title of tool window
-            var fakeView = new FakeOutputView();
-            var fakeViewModel = fakeView.ViewModel as IOutputViewModel;
-            Action<string> expectedStdOutDelegate = fakeViewModel.AppendLine;
-            Action<string> expectedStdErrDelegate = fakeViewModel.AppendLine;
             var fakeViewLocatorException = new Exception(":(");
 
             MockViewLocatorService.Setup(m => m.GetViewByViewModelName(nameof(OutputViewModel), expectedViewParam)).Throws(fakeViewLocatorException);

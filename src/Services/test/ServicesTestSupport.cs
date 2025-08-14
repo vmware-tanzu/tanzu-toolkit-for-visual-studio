@@ -130,7 +130,7 @@ namespace Tanzu.Toolkit.Services.Tests
                     Buildpacks =
                     [
                         "ruby_buildpack",
-                        "java_buildpack",
+                        "java_buildpack"
                     ],
                     Env = new Dictionary<string, string>
                     {
@@ -138,23 +138,23 @@ namespace Tanzu.Toolkit.Services.Tests
                         { "my-kebab-case-var-key", "my-kebab-case-var-val" },
                         { "myCamelCaseVarKey", "myCamelCaseVarVal" },
                         { "MyPascalCaseVarKey", "MyPascalCaseVarVal" },
-                        { "MY_UPPER_CASE_VAR_KEY", "MY_UPPER_CASE_VAR_VAL" },
+                        { "MY_UPPER_CASE_VAR_KEY", "MY_UPPER_CASE_VAR_VAL" }
                     },
                     Routes =
                     [
-                        new RouteConfig { Route = "route.example.com", },
-                        new RouteConfig { Route = "another-route.example.com", Protocol = "http2" },
+                        new RouteConfig { Route = "route.example.com" },
+                        new RouteConfig { Route = "another-route.example.com", Protocol = "http2" }
                     ],
                     Services =
                     [
                         "my-service1",
-                        "my-service2",
+                        "my-service2"
                     ],
                     Stack = "cflinuxfs3",
                     Metadata = new MetadataConfig
                     {
-                        Annotations = new Dictionary<string, string> { { "contact", "bob@example.com jane@example.com" }, },
-                        Labels = new Dictionary<string, string> { { "sensitive", "true" }, },
+                        Annotations = new Dictionary<string, string> { { "contact", "bob@example.com jane@example.com" } },
+                        Labels = new Dictionary<string, string> { { "sensitive", "true" } }
                     },
                     Processes =
                     [
@@ -168,7 +168,7 @@ namespace Tanzu.Toolkit.Services.Tests
                             HealthCheckInvocationTimeout = 10,
                             Instances = 3,
                             Memory = "500M",
-                            Timeout = 10,
+                            Timeout = 10
                         },
                         new ProcessConfig
                         {
@@ -178,17 +178,17 @@ namespace Tanzu.Toolkit.Services.Tests
                             HealthCheckType = "process",
                             Instances = 2,
                             Memory = "256M",
-                            Timeout = 15,
-                        },
+                            Timeout = 15
+                        }
                     ]
                 },
                 new AppConfig
                 {
                     Name = "app2",
-                    Env = new Dictionary<string, string> { { "VAR1", "value1" }, },
+                    Env = new Dictionary<string, string> { { "VAR1", "value1" } },
                     Processes =
                     [
-                        new ProcessConfig { Type = "web", Instances = 1, Memory = "256M", },
+                        new ProcessConfig { Type = "web", Instances = 1, Memory = "256M" }
                     ],
                     Sidecars =
                     [
@@ -198,20 +198,20 @@ namespace Tanzu.Toolkit.Services.Tests
                             ProcessTypes =
                             [
                                 "web",
-                                "worker",
+                                "worker"
                             ],
                             Command = "bundle exec run-authenticator",
-                            Memory = "800M",
+                            Memory = "800M"
                         },
                         new SidecarConfig
                         {
                             Name = "upcaser",
                             ProcessTypes =
                             [
-                                "worker",
+                                "worker"
                             ],
                             Command = "./tr-server",
-                            Memory = "2G",
+                            Memory = "2G"
                         }
                     ]
                 }

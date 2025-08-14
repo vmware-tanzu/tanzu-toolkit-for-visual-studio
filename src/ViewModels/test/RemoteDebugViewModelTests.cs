@@ -72,7 +72,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ctor")]
         public void Constructor_PromptsAppSelection_WhenIsLoggedIn()
         {
-            var fakeOrgsResponse = new DetailedResult<List<CloudFoundryOrganization>> { Succeeded = true, Content = _emptyListOfOrgs, };
+            var fakeOrgsResponse = new DetailedResult<List<CloudFoundryOrganization>> { Succeeded = true, Content = _emptyListOfOrgs };
 
             MockCloudFoundryService.Setup(m => m.GetOrgsForCfInstanceAsync(
                     It.IsAny<CloudFoundryInstance>(), It.IsAny<bool>(), It.IsAny<int>()))

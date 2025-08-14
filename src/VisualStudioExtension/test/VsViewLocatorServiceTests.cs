@@ -119,8 +119,8 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
     /// </summary>
     internal class TestVsViewLocatorService : VsViewLocatorService
     {
-        public TestVsViewLocatorService(IToolWindowService toolWindowService, ILoggingService loggingService, IServiceProvider serviceProvider) : base(toolWindowService,
-            loggingService, serviceProvider)
+        public TestVsViewLocatorService(IToolWindowService toolWindowService, ILoggingService loggingService, IServiceProvider serviceProvider)
+            : base(toolWindowService, loggingService, serviceProvider)
         {
         }
 

@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Serilog;
 using System;
@@ -88,7 +88,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             new CloudFoundryOrganization("fakeOrg2", "fake-org-guid-2", _fakeCfInstance),
             new CloudFoundryOrganization("fakeOrg3", "fake-org-guid-3", _fakeCfInstance),
             new CloudFoundryOrganization("fakeOrg4", "fake-org-guid-4", _fakeCfInstance),
-            new CloudFoundryOrganization("fakeOrg5", "fake-org-guid-5", _fakeCfInstance),
+            new CloudFoundryOrganization("fakeOrg5", "fake-org-guid-5", _fakeCfInstance)
         ];
 
         protected static readonly List<CloudFoundrySpace> _fakeSpaces =
@@ -97,7 +97,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             new CloudFoundrySpace("fakeSpace2", "fake-space-guid-2", _fakeCfOrg),
             new CloudFoundrySpace("fakeSpace3", "fake-space-guid-3", _fakeCfOrg),
             new CloudFoundrySpace("fakeSpace4", "fake-space-guid-4", _fakeCfOrg),
-            new CloudFoundrySpace("fakeSpace5", "fake-space-guid-5", _fakeCfOrg),
+            new CloudFoundrySpace("fakeSpace5", "fake-space-guid-5", _fakeCfOrg)
         ];
 
         protected static readonly List<CloudFoundryApp> _fakeApps =
@@ -106,7 +106,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             new CloudFoundryApp("fakeApp2", "fake-app-guid-2", _fakeCfSpace, "junk state"),
             new CloudFoundryApp("fakeApp3", "fake-app-guid-3", _fakeCfSpace, "junk state"),
             new CloudFoundryApp("fakeApp4", "fake-app-guid-4", _fakeCfSpace, "junk state"),
-            new CloudFoundryApp("fakeApp5", "fake-app-guid-5", _fakeCfSpace, "junk state"),
+            new CloudFoundryApp("fakeApp5", "fake-app-guid-5", _fakeCfSpace, "junk state")
         ];
 
         internal static FakeOutputView _fakeOutputView = new();
@@ -402,24 +402,24 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     [
                         "ruby_buildpack",
                         "java_buildpack",
-                        "my_cool_buildpack",
+                        "my_cool_buildpack"
                     ],
-                    Env = new Dictionary<string, string> { { "VAR1", "value1" }, { "VAR2", "value2" }, },
+                    Env = new Dictionary<string, string> { { "VAR1", "value1" }, { "VAR2", "value2" } },
                     Routes =
                     [
-                        new RouteConfig { Route = "route.example.com", },
-                        new RouteConfig { Route = "another-route.example.com", Protocol = "http2" },
+                        new RouteConfig { Route = "route.example.com" },
+                        new RouteConfig { Route = "another-route.example.com", Protocol = "http2" }
                     ],
                     Services =
                     [
                         "my-service1",
-                        "my-service2",
+                        "my-service2"
                     ],
                     Stack = "cflinuxfs3",
                     Metadata = new MetadataConfig
                     {
-                        Annotations = new Dictionary<string, string> { { "contact", "bob@example.com jane@example.com" }, },
-                        Labels = new Dictionary<string, string> { { "sensitive", "true" }, },
+                        Annotations = new Dictionary<string, string> { { "contact", "bob@example.com jane@example.com" } },
+                        Labels = new Dictionary<string, string> { { "sensitive", "true" } }
                     },
                     Processes =
                     [
@@ -433,7 +433,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                             HealthCheckInvocationTimeout = 10,
                             Instances = 3,
                             Memory = "500M",
-                            Timeout = 10,
+                            Timeout = 10
                         },
                         new ProcessConfig
                         {
@@ -443,18 +443,18 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                             HealthCheckType = "process",
                             Instances = 2,
                             Memory = "256M",
-                            Timeout = 15,
-                        },
+                            Timeout = 15
+                        }
                     ],
-                    Path = "some//fake//path",
+                    Path = "some//fake//path"
                 },
                 new AppConfig
                 {
                     Name = "app2",
-                    Env = new Dictionary<string, string> { { "VAR1", "value1" }, },
+                    Env = new Dictionary<string, string> { { "VAR1", "value1" } },
                     Processes =
                     [
-                        new ProcessConfig { Type = "web", Instances = 1, Memory = "256M", },
+                        new ProcessConfig { Type = "web", Instances = 1, Memory = "256M" }
                     ],
                     Sidecars =
                     [
@@ -464,20 +464,20 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                             ProcessTypes =
                             [
                                 "web",
-                                "worker",
+                                "worker"
                             ],
                             Command = "bundle exec run-authenticator",
-                            Memory = "800M",
+                            Memory = "800M"
                         },
                         new SidecarConfig
                         {
                             Name = "upcaser",
                             ProcessTypes =
                             [
-                                "worker",
+                                "worker"
                             ],
                             Command = "./tr-server",
-                            Memory = "2G",
+                            Memory = "2G"
                         }
                     ]
                 }

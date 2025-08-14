@@ -139,14 +139,14 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     var ssoPasscodePrompt = loginServerInfo.Prompts[_cfApiSsoPromptKey][1];
 
-                    return new DetailedResult<string> { Succeeded = true, Content = ssoPasscodePrompt, };
+                    return new DetailedResult<string> { Succeeded = true, Content = ssoPasscodePrompt };
                 }
 
-                return new DetailedResult<string> { Succeeded = false, Explanation = "Unable to determine SSO URL.", FailureType = FailureType.MissingSsoPrompt, };
+                return new DetailedResult<string> { Succeeded = false, Explanation = "Unable to determine SSO URL.", FailureType = FailureType.MissingSsoPrompt };
             }
             catch (Exception ex)
             {
-                return new DetailedResult<string> { Succeeded = false, Explanation = ex.Message, };
+                return new DetailedResult<string> { Succeeded = false, Explanation = ex.Message };
             }
         }
 
@@ -186,7 +186,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 return new DetailedResult<List<CloudFoundryOrganization>>
                 {
-                    Succeeded = false, Explanation = msg.Replace("{CfName}", cf.InstanceName), Content = null, FailureType = FailureType.InvalidRefreshToken,
+                    Succeeded = false, Explanation = msg.Replace("{CfName}", cf.InstanceName), Content = null, FailureType = FailureType.InvalidRefreshToken
                 };
             }
 
@@ -194,9 +194,9 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 _logger.Error("CloudFoundryService attempted to get orgs for {apiAddress} but was unable to look up an access token.", apiAddress);
 
-                return new DetailedResult<List<CloudFoundryOrganization>>()
+                return new DetailedResult<List<CloudFoundryOrganization>>
                 {
-                    Succeeded = false, Explanation = $"CloudFoundryService attempted to get orgs for '{apiAddress}' but was unable to look up an access token.",
+                    Succeeded = false, Explanation = $"CloudFoundryService attempted to get orgs for '{apiAddress}' but was unable to look up an access token."
                 };
             }
 
@@ -220,7 +220,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     _logger.Error("GetOrgsForCfInstanceAsync encountered exception: {GetOrgsForCfInstanceAsyncException}", originalException);
 
-                    return new DetailedResult<List<CloudFoundryOrganization>>() { Succeeded = false, Explanation = originalException.Message, };
+                    return new DetailedResult<List<CloudFoundryOrganization>> { Succeeded = false, Explanation = originalException.Message };
                 }
             }
 
@@ -241,7 +241,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
             }
 
-            return new DetailedResult<List<CloudFoundryOrganization>>() { Succeeded = true, Content = orgsToReturn, };
+            return new DetailedResult<List<CloudFoundryOrganization>> { Succeeded = true, Content = orgsToReturn };
         }
 
         /// <summary>
@@ -278,7 +278,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                     Succeeded = false,
                     Explanation = msg.Replace("{OrgName}", org.OrgName).Replace("{CfName}", org.ParentCf.InstanceName),
                     Content = null,
-                    FailureType = FailureType.InvalidRefreshToken,
+                    FailureType = FailureType.InvalidRefreshToken
                 };
             }
 
@@ -286,9 +286,9 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 _logger.Error("CloudFoundryService attempted to get spaces for '{orgName}' but was unable to look up an access token.", org.OrgName);
 
-                return new DetailedResult<List<CloudFoundrySpace>>()
+                return new DetailedResult<List<CloudFoundrySpace>>
                 {
-                    Succeeded = false, Explanation = $"CloudFoundryService attempted to get spaces for '{org.OrgName}' but was unable to look up an access token.",
+                    Succeeded = false, Explanation = $"CloudFoundryService attempted to get spaces for '{org.OrgName}' but was unable to look up an access token."
                 };
             }
 
@@ -311,7 +311,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     _logger.Error("GetSpacesForOrgAsync encountered exception: {GetSpacesForOrgAsyncException}", originalException);
 
-                    return new DetailedResult<List<CloudFoundrySpace>>() { Succeeded = false, Explanation = originalException.Message, };
+                    return new DetailedResult<List<CloudFoundrySpace>> { Succeeded = false, Explanation = originalException.Message };
                 }
             }
 
@@ -332,7 +332,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
             }
 
-            return new DetailedResult<List<CloudFoundrySpace>>() { Succeeded = true, Content = spacesToReturn, };
+            return new DetailedResult<List<CloudFoundrySpace>> { Succeeded = true, Content = spacesToReturn };
         }
 
         /// <summary>
@@ -369,7 +369,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                     Succeeded = false,
                     Explanation = msg.Replace("{SpaceName}", space.SpaceName).Replace("CfName", space.ParentOrg.ParentCf.InstanceName),
                     Content = null,
-                    FailureType = FailureType.InvalidRefreshToken,
+                    FailureType = FailureType.InvalidRefreshToken
                 };
             }
 
@@ -377,9 +377,9 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 _logger.Error("CloudFoundryService attempted to get apps for '{spaceName}' but was unable to look up an access token.", space.SpaceName);
 
-                return new DetailedResult<List<CloudFoundryApp>>()
+                return new DetailedResult<List<CloudFoundryApp>>
                 {
-                    Succeeded = false, Explanation = $"CloudFoundryService attempted to get apps for '{space.SpaceName}' but was unable to look up an access token.",
+                    Succeeded = false, Explanation = $"CloudFoundryService attempted to get apps for '{space.SpaceName}' but was unable to look up an access token."
                 };
             }
 
@@ -403,7 +403,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     _logger.Error("GetSpacesForOrgAsync encountered exception: {GetSpacesForOrgAsyncException}", originalException);
 
-                    return new DetailedResult<List<CloudFoundryApp>>() { Succeeded = false, Explanation = originalException.Message, };
+                    return new DetailedResult<List<CloudFoundryApp>> { Succeeded = false, Explanation = originalException.Message };
                 }
             }
 
@@ -438,7 +438,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
             }
 
-            return new DetailedResult<List<CloudFoundryApp>>() { Succeeded = true, Content = appsToReturn, };
+            return new DetailedResult<List<CloudFoundryApp>> { Succeeded = true, Content = appsToReturn };
         }
 
         public async Task<DetailedResult<List<CloudFoundryApp>>> ListAllAppsAsync(int retryAmount = 1)
@@ -455,7 +455,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 return new DetailedResult<List<CloudFoundryApp>>
                 {
-                    Succeeded = false, Explanation = msg, Content = null, FailureType = FailureType.InvalidRefreshToken,
+                    Succeeded = false, Explanation = msg, Content = null, FailureType = FailureType.InvalidRefreshToken
                 };
             }
 
@@ -464,7 +464,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 const string msg = "CloudFoundryService attempted to list apps but was unable to look up an access token.";
                 _logger.Error(msg);
 
-                return new DetailedResult<List<CloudFoundryApp>>() { Succeeded = false, Explanation = msg, };
+                return new DetailedResult<List<CloudFoundryApp>> { Succeeded = false, Explanation = msg };
             }
 
             List<App> appsFromApi;
@@ -487,7 +487,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     _logger.Error("GetSpacesForOrgAsync encountered exception: {GetSpacesForOrgAsyncException}", originalException);
 
-                    return new DetailedResult<List<CloudFoundryApp>>() { Succeeded = false, Explanation = originalException.Message, };
+                    return new DetailedResult<List<CloudFoundryApp>> { Succeeded = false, Explanation = originalException.Message };
                 }
             }
 
@@ -508,7 +508,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
             }
 
-            return new DetailedResult<List<CloudFoundryApp>>() { Succeeded = true, Content = appsToReturn, };
+            return new DetailedResult<List<CloudFoundryApp>> { Succeeded = true, Content = appsToReturn };
         }
 
         public async Task<DetailedResult<List<CfBuildpack>>> GetBuildpacksAsync(string apiAddress, int retryAmount = 1)
@@ -525,7 +525,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 return new DetailedResult<List<CfBuildpack>>
                 {
-                    Succeeded = false, Explanation = msg, Content = null, FailureType = FailureType.InvalidRefreshToken,
+                    Succeeded = false, Explanation = msg, Content = null, FailureType = FailureType.InvalidRefreshToken
                 };
             }
 
@@ -533,9 +533,9 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 _logger.Error("CloudFoundryService attempted to get buildpacks but was unable to look up an access token.");
 
-                return new DetailedResult<List<CfBuildpack>>()
+                return new DetailedResult<List<CfBuildpack>>
                 {
-                    Succeeded = false, Explanation = $"CloudFoundryService attempted to get buildpacks but was unable to look up an access token.",
+                    Succeeded = false, Explanation = $"CloudFoundryService attempted to get buildpacks but was unable to look up an access token."
                 };
             }
 
@@ -559,7 +559,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     _logger.Error("GetSpacesForOrgAsync encountered exception: {GetSpacesForOrgAsyncException}", originalException);
 
-                    return new DetailedResult<List<CfBuildpack>>() { Succeeded = false, Explanation = originalException.Message, };
+                    return new DetailedResult<List<CfBuildpack>> { Succeeded = false, Explanation = originalException.Message };
                 }
             }
 
@@ -582,7 +582,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
             }
 
-            return new DetailedResult<List<CfBuildpack>>() { Succeeded = true, Content = buildpacks, };
+            return new DetailedResult<List<CfBuildpack>> { Succeeded = true, Content = buildpacks };
         }
 
         public async Task<DetailedResult<List<CfService>>> GetServicesAsync(string apiAddress, int retryAmount = 1)
@@ -599,7 +599,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 return new DetailedResult<List<CfService>>
                 {
-                    Succeeded = false, Explanation = msg, Content = null, FailureType = FailureType.InvalidRefreshToken,
+                    Succeeded = false, Explanation = msg, Content = null, FailureType = FailureType.InvalidRefreshToken
                 };
             }
 
@@ -607,9 +607,9 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 _logger.Error("CloudFoundryService attempted to get services but was unable to look up an access token.");
 
-                return new DetailedResult<List<CfService>>()
+                return new DetailedResult<List<CfService>>
                 {
-                    Succeeded = false, Explanation = $"CloudFoundryService attempted to get services but was unable to look up an access token.",
+                    Succeeded = false, Explanation = $"CloudFoundryService attempted to get services but was unable to look up an access token."
                 };
             }
 
@@ -633,7 +633,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     _logger.Error("GetServicesAsync encountered exception: {GetServicesAsyncException}", originalException);
 
-                    return new DetailedResult<List<CfService>>() { Succeeded = false, Explanation = originalException.Message, };
+                    return new DetailedResult<List<CfService>> { Succeeded = false, Explanation = originalException.Message };
                 }
             }
 
@@ -651,7 +651,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
             }
 
-            return new DetailedResult<List<CfService>>() { Succeeded = true, Content = services, };
+            return new DetailedResult<List<CfService>> { Succeeded = true, Content = services };
         }
 
         /// <summary>
@@ -687,7 +687,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     Succeeded = false,
                     Explanation = msg.Replace("{AppName}", app.AppName).Replace("CfName", app.ParentSpace.ParentOrg.ParentCf.InstanceName),
-                    FailureType = FailureType.InvalidRefreshToken,
+                    FailureType = FailureType.InvalidRefreshToken
                 };
             }
 
@@ -697,7 +697,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 return new DetailedResult
                 {
-                    Succeeded = false, Explanation = $"CloudFoundryService attempted to stop app '{app.AppName}' but was unable to look up an access token.",
+                    Succeeded = false, Explanation = $"CloudFoundryService attempted to stop app '{app.AppName}' but was unable to look up an access token."
                 };
             }
 
@@ -721,7 +721,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     _logger.Error("StopAppAsync encountered exception: {StopAppAsyncException}", originalException);
 
-                    return new DetailedResult { Succeeded = false, Explanation = originalException.Message, };
+                    return new DetailedResult { Succeeded = false, Explanation = originalException.Message };
                 }
             }
 
@@ -729,11 +729,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 _logger.Error("Attempted to stop app '{appName}' but it hasn't been stopped.", app.AppName);
 
-                return new DetailedResult { Succeeded = false, Explanation = $"Attempted to stop app '{app.AppName}' but it hasn't been stopped.", };
+                return new DetailedResult { Succeeded = false, Explanation = $"Attempted to stop app '{app.AppName}' but it hasn't been stopped." };
             }
 
             app.State = "STOPPED";
-            return new DetailedResult { Succeeded = true, };
+            return new DetailedResult { Succeeded = true };
         }
 
         /// <summary>
@@ -770,7 +770,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     Succeeded = false,
                     Explanation = msg.Replace("{AppName}", app.AppName).Replace("CfName", app.ParentSpace.ParentOrg.ParentCf.InstanceName),
-                    FailureType = FailureType.InvalidRefreshToken,
+                    FailureType = FailureType.InvalidRefreshToken
                 };
             }
 
@@ -780,7 +780,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 return new DetailedResult
                 {
-                    Succeeded = false, Explanation = $"CloudFoundryService attempted to start app '{app.AppName}' but was unable to look up an access token.",
+                    Succeeded = false, Explanation = $"CloudFoundryService attempted to start app '{app.AppName}' but was unable to look up an access token."
                 };
             }
 
@@ -804,7 +804,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     _logger.Error("StartAppAsync encountered exception: {StartAppAsyncException}", originalException);
 
-                    return new DetailedResult { Succeeded = false, Explanation = originalException.Message, };
+                    return new DetailedResult { Succeeded = false, Explanation = originalException.Message };
                 }
             }
 
@@ -812,11 +812,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 _logger.Error("Attempted to start app '{appName}' but it hasn't been started.", app.AppName);
 
-                return new DetailedResult { Succeeded = false, Explanation = $"Attempted to start app '{app.AppName}' but it hasn't been started.", };
+                return new DetailedResult { Succeeded = false, Explanation = $"Attempted to start app '{app.AppName}' but it hasn't been started." };
             }
 
             app.State = "STARTED";
-            return new DetailedResult { Succeeded = true, };
+            return new DetailedResult { Succeeded = true };
         }
 
         /// <summary>
@@ -855,7 +855,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     Succeeded = false,
                     Explanation = msg.Replace("{AppName}", app.AppName).Replace("CfName", app.ParentSpace.ParentOrg.ParentCf.InstanceName),
-                    FailureType = FailureType.InvalidRefreshToken,
+                    FailureType = FailureType.InvalidRefreshToken
                 };
             }
 
@@ -865,7 +865,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 return new DetailedResult
                 {
-                    Succeeded = false, Explanation = $"CloudFoundryService attempted to delete app '{app.AppName}' but was unable to look up an access token.",
+                    Succeeded = false, Explanation = $"CloudFoundryService attempted to delete app '{app.AppName}' but was unable to look up an access token."
                 };
             }
 
@@ -876,7 +876,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                     var routeDeletionResult = await DeleteAllRoutesForAppAsync(app);
                     if (!routeDeletionResult.Succeeded)
                     {
-                        return new DetailedResult { Succeeded = false, Explanation = $"{routeDeletionResult.Explanation}. Please try deleting '{app.AppName}' again", };
+                        return new DetailedResult { Succeeded = false, Explanation = $"{routeDeletionResult.Explanation}. Please try deleting '{app.AppName}' again" };
                     }
                 }
 
@@ -886,7 +886,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     _logger.Error("Attempted to delete app '{appName}' but it hasn't been deleted.", app.AppName);
 
-                    return new DetailedResult { Succeeded = false, Explanation = $"Attempted to delete app '{app.AppName}' but it hasn't been deleted.", };
+                    return new DetailedResult { Succeeded = false, Explanation = $"Attempted to delete app '{app.AppName}' but it hasn't been deleted." };
                 }
             }
             catch (Exception originalException)
@@ -904,12 +904,12 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     _logger.Error("StartAppAsync encountered exception: {StartAppAsyncException}", originalException);
 
-                    return new DetailedResult { Succeeded = false, Explanation = originalException.Message, };
+                    return new DetailedResult { Succeeded = false, Explanation = originalException.Message };
                 }
             }
 
             app.State = "DELETED";
-            return new DetailedResult { Succeeded = true, };
+            return new DetailedResult { Succeeded = true };
         }
 
         public async Task<DetailedResult<List<CloudFoundryRoute>>> GetRoutesForAppAsync(CloudFoundryApp app, int retryAmount = 1)
@@ -926,11 +926,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 const string msg = "Unable to retrieve routes for '{AppName}' because the connection to '{CfName}' has expired. Please log back in to re-authenticate.";
                 _logger.Information(msg, app.AppName, app.ParentSpace.ParentOrg.ParentCf.InstanceName);
 
-                return new DetailedResult<List<CloudFoundryRoute>>()
+                return new DetailedResult<List<CloudFoundryRoute>>
                 {
                     Succeeded = false,
                     Explanation = msg.Replace("{AppName}", app.AppName).Replace("CfName", app.ParentSpace.ParentOrg.ParentCf.InstanceName),
-                    FailureType = FailureType.InvalidRefreshToken,
+                    FailureType = FailureType.InvalidRefreshToken
                 };
             }
 
@@ -938,9 +938,9 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 _logger.Error("CloudFoundryService attempted to get routes for '{appName}' but was unable to look up an access token.", app.AppName);
 
-                return new DetailedResult<List<CloudFoundryRoute>>()
+                return new DetailedResult<List<CloudFoundryRoute>>
                 {
-                    Succeeded = false, Explanation = $"CloudFoundryService attempted to get routes for '{app.AppName}' but was unable to look up an access token.",
+                    Succeeded = false, Explanation = $"CloudFoundryService attempted to get routes for '{app.AppName}' but was unable to look up an access token."
                 };
             }
 
@@ -964,7 +964,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     _logger.Error("GetRoutesForAppAsync encountered exception: {GetRoutesForAppAsyncException}", originalException);
 
-                    return new DetailedResult<List<CloudFoundryRoute>>() { Succeeded = false, Explanation = originalException.Message, };
+                    return new DetailedResult<List<CloudFoundryRoute>> { Succeeded = false, Explanation = originalException.Message };
                 }
             }
 
@@ -982,7 +982,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
             }
 
-            return new DetailedResult<List<CloudFoundryRoute>> { Succeeded = true, Content = routes, };
+            return new DetailedResult<List<CloudFoundryRoute>> { Succeeded = true, Content = routes };
         }
 
         public async Task<DetailedResult> DeleteAllRoutesForAppAsync(CloudFoundryApp app)
@@ -999,11 +999,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 const string msg = "Unable to retrieve routes for '{AppName}' because the connection to '{CfName}' has expired. Please log back in to re-authenticate.";
                 _logger.Information(msg, app.AppName, app.ParentSpace.ParentOrg.ParentCf.InstanceName);
 
-                return new DetailedResult()
+                return new DetailedResult
                 {
                     Succeeded = false,
                     Explanation = msg.Replace("{AppName}", app.AppName).Replace("CfName", app.ParentSpace.ParentOrg.ParentCf.InstanceName),
-                    FailureType = FailureType.InvalidRefreshToken,
+                    FailureType = FailureType.InvalidRefreshToken
                 };
             }
 
@@ -1011,9 +1011,9 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 _logger.Error("CloudFoundryService attempted to get routes for '{appName}' but was unable to look up an access token.", app.AppName);
 
-                return new DetailedResult()
+                return new DetailedResult
                 {
-                    Succeeded = false, Explanation = $"CloudFoundryService attempted to get routes for '{app.AppName}' but was unable to look up an access token.",
+                    Succeeded = false, Explanation = $"CloudFoundryService attempted to get routes for '{app.AppName}' but was unable to look up an access token."
                 };
             }
 
@@ -1048,24 +1048,24 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 _logger.Error("{RouteDeletionMessage}; {RouteDeletionException}", _routeDeletionErrorMsg, ex.Message);
 
-                return new DetailedResult { Succeeded = false, Explanation = _routeDeletionErrorMsg, };
+                return new DetailedResult { Succeeded = false, Explanation = _routeDeletionErrorMsg };
             }
 
             if (allRouteDeletions.Status != TaskStatus.RanToCompletion)
             {
                 _logger.Error("Not all route deletion tasks ran to completion. {RouteDeletionMessage}", _routeDeletionErrorMsg);
 
-                return new DetailedResult { Succeeded = false, Explanation = _routeDeletionErrorMsg, };
+                return new DetailedResult { Succeeded = false, Explanation = _routeDeletionErrorMsg };
             }
 
             if (failed > 0)
             {
                 _logger.Error("{RouteDeletionMessage}; {NumFailedRouteDeletions} routes were not deleted", _routeDeletionErrorMsg, failed);
 
-                return new DetailedResult { Succeeded = false, Explanation = _routeDeletionErrorMsg, };
+                return new DetailedResult { Succeeded = false, Explanation = _routeDeletionErrorMsg };
             }
 
-            return new DetailedResult { Succeeded = true, };
+            return new DetailedResult { Succeeded = true };
         }
 
         public async Task<DetailedResult> DeployAppAsync(AppManifest appManifest, string defaultAppPath, CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg,
@@ -1107,7 +1107,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     Succeeded = false,
                     Explanation = msg.Replace("{AppName}", appName).Replace("{CfName}", targetCf.InstanceName),
-                    FailureType = FailureType.InvalidRefreshToken,
+                    FailureType = FailureType.InvalidRefreshToken
                 };
             }
 
@@ -1140,7 +1140,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 return new DetailedResult<string>
                 {
-                    Succeeded = false, Explanation = msg.Replace("{AppName}", app.AppName), Content = null, FailureType = FailureType.InvalidRefreshToken,
+                    Succeeded = false, Explanation = msg.Replace("{AppName}", app.AppName), Content = null, FailureType = FailureType.InvalidRefreshToken
                 };
             }
 
@@ -1160,12 +1160,12 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 return new DetailedResult<Process>
                 {
-                    Succeeded = false, Explanation = msg.Replace("{AppName}", app.AppName), Content = null, FailureType = FailureType.InvalidRefreshToken,
+                    Succeeded = false, Explanation = msg.Replace("{AppName}", app.AppName), Content = null, FailureType = FailureType.InvalidRefreshToken
                 };
             }
             catch (Exception ex)
             {
-                return new DetailedResult<Process> { Succeeded = false, Explanation = ex.Message, };
+                return new DetailedResult<Process> { Succeeded = false, Explanation = ex.Message };
             }
         }
 
@@ -1177,11 +1177,11 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 _fileService.WriteTextToFile(location, "---\n" + ymlContents);
 
-                return new DetailedResult { Succeeded = true, };
+                return new DetailedResult { Succeeded = true };
             }
             catch (Exception ex)
             {
-                return new DetailedResult { Succeeded = false, Explanation = ex.Message, };
+                return new DetailedResult { Succeeded = false, Explanation = ex.Message };
             }
         }
 
@@ -1201,7 +1201,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
                 return new DetailedResult<List<string>>
                 {
-                    Succeeded = false, Explanation = msg.Replace("{CfName}", cf.InstanceName), Content = null, FailureType = FailureType.InvalidRefreshToken,
+                    Succeeded = false, Explanation = msg.Replace("{CfName}", cf.InstanceName), Content = null, FailureType = FailureType.InvalidRefreshToken
                 };
             }
 
@@ -1209,9 +1209,9 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 _logger.Error("CloudFoundryService attempted to get stacks for {apiAddress} but was unable to look up an access token.", apiAddress);
 
-                return new DetailedResult<List<string>>()
+                return new DetailedResult<List<string>>
                 {
-                    Succeeded = false, Explanation = $"CloudFoundryService attempted to get stacks for '{apiAddress}' but was unable to look up an access token.",
+                    Succeeded = false, Explanation = $"CloudFoundryService attempted to get stacks for '{apiAddress}' but was unable to look up an access token."
                 };
             }
 
@@ -1235,7 +1235,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 {
                     _logger.Error("GetStackNamesAsync encountered exception: {GetStackNamesAsyncException}", originalException);
 
-                    return new DetailedResult<List<string>>() { Succeeded = false, Explanation = originalException.Message, };
+                    return new DetailedResult<List<string>> { Succeeded = false, Explanation = originalException.Message };
                 }
             }
 
@@ -1252,7 +1252,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                 }
             }
 
-            return new DetailedResult<List<string>>() { Succeeded = true, Content = stackNamesToReturn, };
+            return new DetailedResult<List<string>> { Succeeded = true, Content = stackNamesToReturn };
         }
 
         public void LogoutCfUser()

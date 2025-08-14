@@ -52,7 +52,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             _sut = new DeploymentDialogViewModel(Services)
             {
-                ManifestModel = _fakeManifestModel, SelectedBuildpacks = _fakeSelectedBuildpacks, SelectedServices = _fakeSelectedServices,
+                ManifestModel = _fakeManifestModel, SelectedBuildpacks = _fakeSelectedBuildpacks, SelectedServices = _fakeSelectedServices
             };
 
             _sut.PropertyChanged += (sender, e) => { _receivedEvents.Add(e.PropertyName); };
@@ -1042,11 +1042,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
                 Applications =
                 [
-                    new AppConfig { Name = expectedAppName1, }
+                    new AppConfig { Name = expectedAppName1 }
                 ]
             };
 
-            var fakeManifestParsingResponse = new DetailedResult<AppManifest> { Succeeded = true, Content = fakeAppManifest, };
+            var fakeManifestParsingResponse = new DetailedResult<AppManifest> { Succeeded = true, Content = fakeAppManifest };
 
             MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
             MockFileService.Setup(m => m.ReadFileContents(pathToFakeManifest)).Returns(fakeManifestContent);
@@ -1071,7 +1071,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
                 Applications =
                 [
-                    new AppConfig { Command = expectedStartCommand, }
+                    new AppConfig { Command = expectedStartCommand }
                 ]
             };
 
@@ -1097,7 +1097,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
                 Applications =
                 [
-                    new AppConfig { Buildpack = null, }
+                    new AppConfig { Buildpack = null }
                 ]
             };
 
@@ -1121,7 +1121,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
                 Applications =
                 [
-                    new AppConfig { Services = null, }
+                    new AppConfig { Services = null }
                 ]
             };
 
@@ -1167,7 +1167,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 ]
             };
 
-            var fakeManifestParsingResponse = new DetailedResult<AppManifest> { Succeeded = true, Content = fakeAppManifest, };
+            var fakeManifestParsingResponse = new DetailedResult<AppManifest> { Succeeded = true, Content = fakeAppManifest };
 
             MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
             MockFileService.Setup(m => m.ReadFileContents(pathToFakeManifest)).Returns(fakeManifestContent);
@@ -1194,11 +1194,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
                 Applications =
                 [
-                    new AppConfig { Name = expectedAppName1, Stack = expectedFakeStackNameFromManifest, }
+                    new AppConfig { Name = expectedAppName1, Stack = expectedFakeStackNameFromManifest }
                 ]
             };
 
-            var fakeManifestParsingResponse = new DetailedResult<AppManifest> { Succeeded = true, Content = fakeAppManifest, };
+            var fakeManifestParsingResponse = new DetailedResult<AppManifest> { Succeeded = true, Content = fakeAppManifest };
 
             MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
             MockFileService.Setup(m => m.ReadFileContents(pathToFakeManifest)).Returns(fakeManifestContent);
@@ -1244,13 +1244,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                         Name = expectedAppName1,
                         Buildpacks =
                         [
-                            expectedBuildpackName1,
+                            expectedBuildpackName1
                         ]
                     }
                 ]
             };
 
-            var fakeManifestParsingResponse = new DetailedResult<AppManifest> { Succeeded = true, Content = fakeAppManifest, };
+            var fakeManifestParsingResponse = new DetailedResult<AppManifest> { Succeeded = true, Content = fakeAppManifest };
 
             MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
             MockFileService.Setup(m => m.ReadFileContents(pathToFakeManifest)).Returns(fakeManifestContent);
@@ -1287,13 +1287,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                         [
                             expectedBuildpackName1,
                             expectedBuildpackName2,
-                            expectedBuildpackName3,
+                            expectedBuildpackName3
                         ]
                     }
                 ]
             };
 
-            var fakeManifestParsingResponse = new DetailedResult<AppManifest> { Succeeded = true, Content = fakeAppManifest, };
+            var fakeManifestParsingResponse = new DetailedResult<AppManifest> { Succeeded = true, Content = fakeAppManifest };
 
             MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
             MockFileService.Setup(m => m.ReadFileContents(pathToFakeManifest)).Returns(fakeManifestContent);
@@ -1366,13 +1366,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                         Name = expectedAppName1,
                         Services =
                         [
-                            expectedServiceName1,
+                            expectedServiceName1
                         ]
                     }
                 ]
             };
 
-            var fakeManifestParsingResponse = new DetailedResult<AppManifest> { Succeeded = true, Content = fakeAppManifest, };
+            var fakeManifestParsingResponse = new DetailedResult<AppManifest> { Succeeded = true, Content = fakeAppManifest };
 
             MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
             MockFileService.Setup(m => m.ReadFileContents(pathToFakeManifest)).Returns(fakeManifestContent);
@@ -1409,13 +1409,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                         [
                             expectedServiceName1,
                             expectedServiceName2,
-                            expectedServiceName3,
+                            expectedServiceName3
                         ]
                     }
                 ]
             };
 
-            var fakeManifestParsingResponse = new DetailedResult<AppManifest> { Succeeded = true, Content = fakeAppManifest, };
+            var fakeManifestParsingResponse = new DetailedResult<AppManifest> { Succeeded = true, Content = fakeAppManifest };
 
             MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
             MockFileService.Setup(m => m.ReadFileContents(pathToFakeManifest)).Returns(fakeManifestContent);
@@ -1481,7 +1481,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
                 Applications =
                 [
-                    new AppConfig { Path = null, }
+                    new AppConfig { Path = null }
                 ]
             };
 
@@ -1510,7 +1510,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
                 Applications =
                 [
-                    new AppConfig { Path = pathValInNewManifest, }
+                    new AppConfig { Path = pathValInNewManifest }
                 ]
             };
 
@@ -1621,13 +1621,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 compatibleDeselectedBpToBecomeIncompatibleAndStayDeselected,
                 compatibleDeselectedBpToStayCompatibleAndDeselected,
                 compatibleSelectedBpToBecomeIncompatibleAndDeselected,
-                compatibleSelectedBpToStayCompatibleAndSelected,
+                compatibleSelectedBpToStayCompatibleAndSelected
             ];
 
             _sut.SelectedBuildpacks =
             [
                 compatibleSelectedBpToBecomeIncompatibleAndDeselected.Name,
-                compatibleSelectedBpToStayCompatibleAndSelected.Name,
+                compatibleSelectedBpToStayCompatibleAndSelected.Name
             ];
 
             _receivedEvents.Clear();
@@ -1749,7 +1749,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             _sut.Expanded = expandedVal;
 
-            Assert.AreEqual(_sut.ExpansionButtonText, expectedButtonText);
+            Assert.AreEqual(expectedButtonText, _sut.ExpansionButtonText);
             Assert.AreEqual(2, _receivedEvents.Count);
             Assert.IsTrue(_receivedEvents.Contains("Expanded"));
             Assert.IsTrue(_receivedEvents.Contains("ExpansionButtonText"));
@@ -1780,11 +1780,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var fakeCf = new FakeCfInstanceViewModel(ViewModelTestSupport._fakeCfInstance, Services);
             var fakeBuildpacksContent = new List<CfBuildpack>
             {
-                new() { Name = "bp1", Stack = "stack1", },
-                new() { Name = "bp1", Stack = "stack2", },
-                new() { Name = "bp1", Stack = "stack3", },
-                new() { Name = "bp2", Stack = "stack1", },
-                new() { Name = "bp3", Stack = "stack2", },
+                new() { Name = "bp1", Stack = "stack1" },
+                new() { Name = "bp1", Stack = "stack2" },
+                new() { Name = "bp1", Stack = "stack3" },
+                new() { Name = "bp2", Stack = "stack1" },
+                new() { Name = "bp3", Stack = "stack2" }
             };
             var numUniqueBpNamesInFakeResponse = fakeBuildpacksContent.GroupBy(bp => bp.Name).Select(g => g.FirstOrDefault()).ToList().Count;
 
@@ -1873,11 +1873,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var fakeCf = new FakeCfInstanceViewModel(ViewModelTestSupport._fakeCfInstance, Services);
             var fakeServicesContent = new List<CfService>
             {
-                new() { Name = "sv1", },
-                new() { Name = "sv1", },
-                new() { Name = "sv1", },
-                new() { Name = "sv2", },
-                new() { Name = "sv3", },
+                new() { Name = "sv1" },
+                new() { Name = "sv1" },
+                new() { Name = "sv1" },
+                new() { Name = "sv2" },
+                new() { Name = "sv3" }
             };
             var numUniqueSvNamesInFakeResponse = fakeServicesContent.GroupBy(bp => bp.Name).Select(g => g.FirstOrDefault()).ToList().Count;
 
@@ -2269,7 +2269,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task UpdateStackOptions_SetsStackOptionsToQueryContent_WhenQuerySucceeds()
         {
             var fakeCf = new FakeCfInstanceViewModel(ViewModelTestSupport._fakeCfInstance, Services);
-            var fakeStacksContent = new List<string> { "cool_stack", "uncool_stack", "junk_stack", };
+            var fakeStacksContent = new List<string> { "cool_stack", "uncool_stack", "junk_stack" };
             var fakeStacksResponse = new DetailedResult<List<string>>(succeeded: true, content: fakeStacksContent);
 
             MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(fakeCf);

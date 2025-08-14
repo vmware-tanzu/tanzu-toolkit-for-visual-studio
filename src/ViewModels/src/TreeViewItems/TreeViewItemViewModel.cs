@@ -28,9 +28,9 @@ namespace Tanzu.Toolkit.ViewModels
 
             if (!childless) // only create placeholder & assign children if this vm isn't a placeholder itself
             {
-                LoadingPlaceholder = new PlaceholderViewModel(parent: this, services) { DisplayText = _defaultLoadingMsg, };
+                LoadingPlaceholder = new PlaceholderViewModel(parent: this, services) { DisplayText = _defaultLoadingMsg };
 
-                _children = new ObservableCollection<TreeViewItemViewModel> { LoadingPlaceholder, };
+                _children = new ObservableCollection<TreeViewItemViewModel> { LoadingPlaceholder };
             }
 
             ParentTanzuExplorer = parentTanzuExplorer;
@@ -62,7 +62,7 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     if (Children.Count == 0)
                     {
-                        Children = new ObservableCollection<TreeViewItemViewModel> { LoadingPlaceholder, };
+                        Children = new ObservableCollection<TreeViewItemViewModel> { LoadingPlaceholder };
                     }
                 }
                 else

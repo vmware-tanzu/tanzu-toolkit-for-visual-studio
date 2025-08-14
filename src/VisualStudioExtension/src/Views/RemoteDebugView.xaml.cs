@@ -50,21 +50,19 @@ namespace Tanzu.Toolkit.VisualStudio
 
         public RemoteDebugView(IRemoteDebugViewModel viewModel, IThemeService themeService)
         {
-            bool alwaysTrue(object arg)
-            {
-                return true;
-            }
-
             themeService.SetTheme(this);
             DataContext = viewModel;
             CancelCommand = new DelegatingCommand(viewModel.CancelDebugging, viewModel.CanCancelDebugging);
-            OpenLoginViewCommand = new DelegatingCommand(viewModel.OpenLoginView, alwaysTrue);
+            OpenLoginViewCommand = new DelegatingCommand(viewModel.OpenLoginView, AlwaysTrue);
             ResolveMissingAppCommand =
                 new AsyncDelegatingCommand(viewModel.StartDebuggingAppAsync, viewModel.CanStartDebuggingApp);
             ShowDeploymentWindowCommand =
                 new DelegatingCommand(viewModel.DisplayDeploymentWindow, viewModel.CanDisplayDeploymentWindow);
             MouseDown += Window_MouseDown;
             InitializeComponent();
+            return;
+
+            bool AlwaysTrue(object arg) => true;
         }
     }
 }

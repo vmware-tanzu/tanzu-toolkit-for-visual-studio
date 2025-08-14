@@ -23,7 +23,7 @@ namespace CfSshWrapper
                 {
                     FileName = pathToCfExe,
                     Arguments = $"ssh {appName} -c \"{sshCmd}\"",
-                    UseShellExecute = false,
+                    UseShellExecute = false
                 }
             };
 

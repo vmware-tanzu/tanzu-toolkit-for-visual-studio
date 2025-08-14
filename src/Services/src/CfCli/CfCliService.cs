@@ -40,7 +40,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         {
             "Invalid SSL Cert",
             "Use 'cf api --skip-ssl-validation' to continue with an insecure API endpoint",
-            "certificate has expired or is not yet valid",
+            "certificate has expired or is not yet valid"
         };
 
         private readonly IFileService _fileService;
@@ -408,21 +408,21 @@ namespace Tanzu.Toolkit.Services.CfCli
                 var targetOrgResult = TargetOrg(orgName);
                 if (!targetOrgResult.Succeeded)
                 {
-                    return new DetailedResult<Process> { Succeeded = false, Explanation = $"Unable to target org '{orgName}'", };
+                    return new DetailedResult<Process> { Succeeded = false, Explanation = $"Unable to target org '{orgName}'" };
                 }
 
                 var targetSpaceResult = TargetSpace(spaceName);
                 if (!targetSpaceResult.Succeeded)
                 {
-                    return new DetailedResult<Process> { Succeeded = false, Explanation = $"Unable to target space '{spaceName}'", };
+                    return new DetailedResult<Process> { Succeeded = false, Explanation = $"Unable to target space '{spaceName}'" };
                 }
 
                 logsProcess = StartCfProcess(args, stdOutCallback, stdErrCallback);
             }
 
             return logsProcess == null
-                ? new DetailedResult<Process> { Succeeded = false, Explanation = $"Failed to start logs stream process for app {appName}", }
-                : new DetailedResult<Process> { Succeeded = true, Content = logsProcess, };
+                ? new DetailedResult<Process> { Succeeded = false, Explanation = $"Failed to start logs stream process for app {appName}" }
+                : new DetailedResult<Process> { Succeeded = true, Content = logsProcess };
         }
 
         public async Task<DetailedResult> LoginWithSsoPasscode(string apiAddress, string passcode)

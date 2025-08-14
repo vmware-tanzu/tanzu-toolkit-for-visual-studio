@@ -31,9 +31,9 @@ namespace Tanzu.Toolkit.ViewModels
             DisplayText = cf.InstanceName;
             CfClient.ConfigureForCf(cf);
 
-            LoadingPlaceholder = new PlaceholderViewModel(parent: this, services) { DisplayText = _loadingMsg, };
+            LoadingPlaceholder = new PlaceholderViewModel(parent: this, services) { DisplayText = _loadingMsg };
 
-            EmptyPlaceholder = new PlaceholderViewModel(parent: this, Services) { DisplayText = _emptyOrgsPlaceholderMsg, };
+            EmptyPlaceholder = new PlaceholderViewModel(parent: this, Services) { DisplayText = _emptyOrgsPlaceholderMsg };
         }
 
         public CloudFoundryInstance CloudFoundryInstance { get; }

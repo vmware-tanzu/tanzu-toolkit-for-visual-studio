@@ -28,7 +28,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             [
                 _fakeApps[0],
                 _fakeApps[1],
-                _fakeApps[2],
+                _fakeApps[2]
             ]
         };
 
@@ -117,7 +117,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 new AppViewModel(_fakeApps[0], Services),
                 new AppViewModel(_fakeApps[1], Services),
                 new AppViewModel(_fakeApps[2], Services),
-                new AppViewModel(_fakeApps[3], Services),
+                new AppViewModel(_fakeApps[3], Services)
             ];
 
             /** mock retrieving all initial children except for FakeApps[3] */
@@ -146,7 +146,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.Children =
             [
                 new AppViewModel(_fakeApps[0], Services),
-                new AppViewModel(_fakeApps[1], Services),
+                new AppViewModel(_fakeApps[1], Services)
             ];
 
             /** mock retrieving all initial children plus FakeApps[2] */
@@ -178,7 +178,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 new AppViewModel(_fakeApps[0], Services),
                 new AppViewModel(new CloudFoundryApp(_fakeApps[1].AppName, _fakeApps[1].AppId, _fakeApps[1].ParentSpace, oldStateExpectedToChange), Services),
                 new AppViewModel(_fakeApps[3], Services),
-                new AppViewModel(_fakeApps[4], Services),
+                new AppViewModel(_fakeApps[4], Services)
             };
             _sut.Children = new ObservableCollection<TreeViewItemViewModel>(initialChildren);
 
@@ -233,7 +233,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             fakeNoAppsResponse.Content.Clear();
 
             /** mock 2 initial children */
-            var initialChildren = new ObservableCollection<TreeViewItemViewModel> { new AppViewModel(_fakeApps[0], Services), new AppViewModel(_fakeApps[1], Services), };
+            var initialChildren = new ObservableCollection<TreeViewItemViewModel> { new AppViewModel(_fakeApps[0], Services), new AppViewModel(_fakeApps[1], Services) };
             _sut.Children = new ObservableCollection<TreeViewItemViewModel>(initialChildren);
 
             MockCloudFoundryService.Setup(m => m
@@ -279,7 +279,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             _sut.Children =
             [
-                _sut.EmptyPlaceholder,
+                _sut.EmptyPlaceholder
             ];
 
             /** mock 3 new children */
@@ -307,7 +307,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.Children =
             [
                 new AppViewModel(_fakeApps[0], Services),
-                new AppViewModel(_fakeApps[1], Services),
+                new AppViewModel(_fakeApps[1], Services)
             ];
 
             MockCloudFoundryService.Setup(m => m
@@ -328,7 +328,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("UpdateAllChildren")]
         public async Task UpdateAllChildren_CollapsesSelf_AndSetsAuthRequiredTrue_WhenAppsRequestFailsWithInvalidRefreshToken()
         {
-            var fakeInvalidTokenResponse = new DetailedResult<List<CloudFoundryApp>> { Succeeded = false, Explanation = "junk", FailureType = FailureType.InvalidRefreshToken, };
+            var fakeInvalidTokenResponse = new DetailedResult<List<CloudFoundryApp>> { Succeeded = false, Explanation = "junk", FailureType = FailureType.InvalidRefreshToken };
 
             MockCloudFoundryService.Setup(m => m
                     .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
@@ -350,7 +350,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("UpdateAllChildren")]
         public async Task UpdateAllChildren_CollapsesSelf_AndLogsError_WhenAppsRequestFails()
         {
-            var fakeFailedAppsResponse = new DetailedResult<List<CloudFoundryApp>> { Succeeded = false, Explanation = "junk", };
+            var fakeFailedAppsResponse = new DetailedResult<List<CloudFoundryApp>> { Succeeded = false, Explanation = "junk" };
 
             MockCloudFoundryService.Setup(m => m
                     .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))

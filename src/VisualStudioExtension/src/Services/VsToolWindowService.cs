@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Serilog;
 using System;
@@ -37,7 +37,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services
                 }
 
                 var window = _package.FindToolWindow(toolWindowType, id, create: true);
-                if (window == null || window.Frame == null)
+                if (window?.Frame == null)
                 {
                     throw new NotSupportedException("Cannot create tool window");
                 }

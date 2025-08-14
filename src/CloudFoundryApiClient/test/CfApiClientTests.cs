@@ -624,7 +624,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                 Prompts = new System.Collections.Generic.Dictionary<string, string[]>
                 {
                     { "username", ["text", "Email"] },
-                    { "password", ["password", "Password"] },
+                    { "password", ["password", "Password"] }
                 }
             };
 
