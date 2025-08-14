@@ -27,9 +27,9 @@ namespace Tanzu.Toolkit.ViewModels
             Space = space;
             DisplayText = Space.SpaceName;
 
-            LoadingPlaceholder = new PlaceholderViewModel(parent: this, services) { DisplayText = _loadingMsg, };
+            LoadingPlaceholder = new PlaceholderViewModel(parent: this, services) { DisplayText = _loadingMsg };
 
-            EmptyPlaceholder = new PlaceholderViewModel(parent: this, Services) { DisplayText = _emptyAppsPlaceholderMsg, };
+            EmptyPlaceholder = new PlaceholderViewModel(parent: this, Services) { DisplayText = _emptyAppsPlaceholderMsg };
         }
 
         protected internal override async Task UpdateAllChildren()

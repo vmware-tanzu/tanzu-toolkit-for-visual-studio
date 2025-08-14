@@ -1,4 +1,4 @@
-﻿using EnvDTE;
+using EnvDTE;
 using EnvDTE80;
 using Microsoft;
 using Microsoft.Extensions.DependencyInjection;
@@ -133,8 +133,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                         }
                         catch (Exception ex)
                         {
-                            _logger.Error("Unable to delete tmp log file '{TmpFilePath}'.\n{CloseLogsWindowException}",
-                                tmpFilePath, ex);
+                            _logger.Error("Unable to delete tmp log file '{TmpFilePath}'.\n{CloseLogsWindowException}", tmpFilePath, ex);
                         }
                     }
                 }
@@ -162,7 +161,7 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
                 originalFilePath,
                 $"This file was created {DateTime.Now}; any logs recorded since then will not appear in this file.",
                 "This file will be deleted from the file system when this window is closed.",
-                "==========================",
+                "=========================="
             };
 
             // add explanation to the BEGINNING of the temp file

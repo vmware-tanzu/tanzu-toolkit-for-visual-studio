@@ -33,17 +33,12 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         public LoginView(ILoginViewModel viewModel, IThemeService themeService)
         {
-            bool alwaysTrue(object arg)
-            {
-                return true;
-            }
-
             AddCloudCommand = new AsyncDelegatingCommand(viewModel.LogIn, viewModel.CanLogIn);
-            SsoCommand = new DelegatingCommand(viewModel.ShowSsoLogin, alwaysTrue);
+            SsoCommand = new DelegatingCommand(viewModel.ShowSsoLogin, AlwaysTrue);
             IncrementPageCommand =
                 new AsyncDelegatingCommand(viewModel.ConnectToCf, viewModel.CanProceedToAuthentication);
-            DecrementPageCommand = new DelegatingCommand(viewModel.NavigateToTargetPage, alwaysTrue);
-            LogInWithPasscodeCommand = new AsyncDelegatingCommand(viewModel.LoginWithSsoPasscodeAsync, alwaysTrue);
+            DecrementPageCommand = new DelegatingCommand(viewModel.NavigateToTargetPage, AlwaysTrue);
+            LogInWithPasscodeCommand = new AsyncDelegatingCommand(viewModel.LoginWithSsoPasscodeAsync, AlwaysTrue);
 
             viewModel.GetPassword = GetPassword;
             viewModel.PasswordEmpty = PasswordBoxEmpty;
@@ -62,6 +57,9 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             }
 
             MouseDown += Window_MouseDown;
+            return;
+
+            bool AlwaysTrue(object arg) => true;
         }
 
         public SecureString GetPassword()

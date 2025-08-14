@@ -1,4 +1,4 @@
-﻿using Community.VisualStudio.Toolkit;
+using Community.VisualStudio.Toolkit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Shell;
 using System;
@@ -129,17 +129,14 @@ namespace Tanzu.Toolkit.VisualStudio
 
             /* Cloud Foundry API */
             services.AddHttpClient();
-            services.AddHttpClient("SslCertTruster", c => { }).ConfigurePrimaryHttpMessageHandler(() =>
+            services.AddHttpClient("SslCertTruster", c => { }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
             {
-                return new HttpClientHandler
-                {
-                    // trust all certs
-                    ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => true
-                };
+                // trust all certs
+                ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => true
             });
             services.AddTransient<ICfApiClient, CfApiClient>();
 
-            /* Services */
+            //Services
             services.AddTransient<ICloudFoundryService, CloudFoundryService>();
             services.AddSingleton<IViewLocatorService, VsViewLocatorService>();
             services.AddSingleton<IDialogService, DialogService>();
@@ -158,11 +155,11 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<IProjectService, ProjectService>();
             services.AddSingleton<IDebugAgentProvider, VsdbgInstaller>();
 
-            /* Tool Windows */
+            // Tool Windows
             services.AddTransient<TanzuExplorerToolWindow>();
             services.AddTransient<OutputToolWindow>();
 
-            /* View Models */
+            // View Models
             services.AddTransient<IOutputViewModel, OutputViewModel>();
             services.AddSingleton<ITanzuExplorerViewModel, TanzuExplorerViewModel>();
             services.AddSingleton<ILoginViewModel, LoginViewModel>();
@@ -171,7 +168,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddTransient<ILoginViewModel, LoginViewModel>();
             services.AddSingleton<IAppDeletionConfirmationViewModel, AppDeletionConfirmationViewModel>();
 
-            /* Views */
+            // Views
             services.AddTransient<IOutputView, OutputView>();
             services.AddSingleton<ILoginView, LoginView>();
             services.AddTransient<ITanzuExplorerView, TanzuExplorerView>();

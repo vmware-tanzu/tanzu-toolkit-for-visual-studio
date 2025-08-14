@@ -72,7 +72,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services
                 return _writableSettingsStore.PropertyExists(_tasCollectionPath, key)
                     ? true
                     : throw new Exception(
-                    $"Tried to write value \"{value}\" to user settings store property \"{key}\" but no such property existed after writing.");
+                        $"Tried to write value \"{value}\" to user settings store property \"{key}\" but no such property existed after writing.");
             }
             catch (Exception ex)
             {

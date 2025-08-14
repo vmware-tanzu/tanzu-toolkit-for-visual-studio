@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -79,7 +79,7 @@ namespace Tanzu.Toolkit.ViewModels
 
                 if (value == null)
                 {
-                    TreeRoot = new ObservableCollection<TreeViewItemViewModel> { new LoginPromptViewModel(Services), };
+                    TreeRoot = new ObservableCollection<TreeViewItemViewModel> { new LoginPromptViewModel(Services) };
                 }
                 else
                 {

@@ -36,7 +36,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services
             }
             catch (Exception ex)
             {
-                return new DetailedResult { Succeeded = false, Explanation = ex.Message, };
+                return new DetailedResult { Succeeded = false, Explanation = ex.Message };
             }
 
             var sshCmd =

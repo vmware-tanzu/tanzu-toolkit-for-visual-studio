@@ -79,7 +79,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             if (IsLoggedIn)
             {
                 _cfClient = _tanzuExplorer.CloudFoundryConnection.CfClient;
-                var _ = PromptAppSelectionAsync(expectedAppName);
+                _ = PromptAppSelectionAsync(expectedAppName);
             }
         }
 
@@ -302,8 +302,8 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                         adapter = FileService.PathToCfDebugAdapter,
                         adapterArgs = $"\"{FileService.VsixPackageBaseDir}\" \"{FileService.FullPathToCfExe}\" \"{AppToDebug.AppName}\" \"{sshCmd}\"",
                         languageMappings =
-                            new Languagemappings { CSharp = new CSharp { languageId = "3F5162F8-07C6-11D3-9053-00C04FA302A1", extensions = new string[] { "*" }, }, },
-                        exceptionCategoryMappings = new Exceptioncategorymappings { CLR = "449EC4CC-30D2-4032-9256-EE18EB41B62B", MDA = "6ECE07A9-0EDE-45C4-8296-818D8FC401D4", },
+                            new Languagemappings { CSharp = new CSharp { languageId = "3F5162F8-07C6-11D3-9053-00C04FA302A1", extensions = new string[] { "*" } } },
+                        exceptionCategoryMappings = new Exceptioncategorymappings { CLR = "449EC4CC-30D2-4032-9256-EE18EB41B62B", MDA = "6ECE07A9-0EDE-45C4-8296-818D8FC401D4" },
                         configurations = new[]
                         {
                             new Configuration
@@ -314,8 +314,8 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                                 request = "attach",
                                 justMyCode = false,
                                 cwd = _vsdbgInstallPath,
-                                logging = new Logging { engineLogging = true, },
-                            },
+                                logging = new Logging { engineLogging = true }
+                            }
                         }
                     };
                     var newLaunchFileContents = JsonSerializer.Serialize(launchFileConfig, _serializationOptions);
@@ -352,7 +352,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             if (view.ViewModel is IDeploymentDialogViewModel vm)
             {
                 vm.ConfigureForRemoteDebugging = true;
-                vm.OnClose += () => Close();
+                vm.OnClose += Close;
                 view.DisplayView();
             }
         }
@@ -397,7 +397,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         {
             AppToDebug = null;
             LoadingMessage = null;
-            IsLoggedIn = _tanzuExplorer != null && _tanzuExplorer.CloudFoundryConnection != null;
+            IsLoggedIn = _tanzuExplorer?.CloudFoundryConnection != null;
             CanCancel = true;
             CancelDebugging = arg => { Close(); };
         }

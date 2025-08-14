@@ -117,7 +117,7 @@ namespace Tanzu.Toolkit.ViewModels
             ManifestModel = new AppManifest
             {
                 Version = 1,
-                Applications = new List<AppConfig> { new AppConfig { Name = _projectService.ProjectName, Buildpacks = new List<string>(), Services = new List<string>(), } }
+                Applications = new List<AppConfig> { new AppConfig { Name = _projectService.ProjectName, Buildpacks = new List<string>(), Services = new List<string>() } }
             };
 
             if (_tanzuExplorerViewModel.CloudFoundryConnection != null)
@@ -585,7 +585,7 @@ namespace Tanzu.Toolkit.ViewModels
 
             if (_tanzuExplorerViewModel.CloudFoundryConnection != null)
             {
-                CfInstanceOptions = new List<CloudFoundryInstance> { _tanzuExplorerViewModel.CloudFoundryConnection.CloudFoundryInstance, };
+                CfInstanceOptions = new List<CloudFoundryInstance> { _tanzuExplorerViewModel.CloudFoundryConnection.CloudFoundryInstance };
 
                 TargetName = _tanzuExplorerViewModel.CloudFoundryConnection.DisplayText;
                 IsLoggedIn = true;
@@ -692,7 +692,7 @@ namespace Tanzu.Toolkit.ViewModels
                         }
                         else
                         {
-                            var newBp = new BuildpackListItem { Name = bp.Name, ValidStacks = new List<string> { bp.Stack }, IsSelected = nameSpecifiedInManifest, };
+                            var newBp = new BuildpackListItem { Name = bp.Name, ValidStacks = new List<string> { bp.Stack }, IsSelected = nameSpecifiedInManifest };
 
                             newBp.EvalutateStackCompatibility(SelectedStack);
 
@@ -752,7 +752,7 @@ namespace Tanzu.Toolkit.ViewModels
                         }
                         else
                         {
-                            var newSv = new ServiceListItem { Name = sv.Name, IsSelected = nameSpecifiedInManifest, };
+                            var newSv = new ServiceListItem { Name = sv.Name, IsSelected = nameSpecifiedInManifest };
 
                             serviceListItems.Add(newSv);
                         }

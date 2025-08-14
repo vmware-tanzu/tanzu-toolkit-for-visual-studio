@@ -27,7 +27,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             [
                 _fakeOrgs[0],
                 _fakeOrgs[1],
-                _fakeOrgs[2],
+                _fakeOrgs[2]
             ]
         };
 
@@ -105,7 +105,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 new OrgViewModel(_fakeOrgs[0], _sut, _fakeTanzuExplorerViewModel, Services),
                 new OrgViewModel(_fakeOrgs[1], _sut, _fakeTanzuExplorerViewModel, Services),
                 new OrgViewModel(_fakeOrgs[2], _sut, _fakeTanzuExplorerViewModel, Services),
-                new OrgViewModel(_fakeOrgs[3], _sut, _fakeTanzuExplorerViewModel, Services),
+                new OrgViewModel(_fakeOrgs[3], _sut, _fakeTanzuExplorerViewModel, Services)
             ];
 
             /** mock retrieving all initial children except for FakeOrgs[3] */
@@ -134,7 +134,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.Children =
             [
                 new OrgViewModel(_fakeOrgs[0], _sut, _fakeTanzuExplorerViewModel, Services),
-                new OrgViewModel(_fakeOrgs[1], _sut, _fakeTanzuExplorerViewModel, Services),
+                new OrgViewModel(_fakeOrgs[1], _sut, _fakeTanzuExplorerViewModel, Services)
             ];
 
             /** mock retrieving all initial children plus FakeOrgs[2] */
@@ -192,7 +192,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             /** mock 2 initial children */
             var initialChildren = new ObservableCollection<TreeViewItemViewModel>
             {
-                new OrgViewModel(_fakeOrgs[0], _sut, _fakeTanzuExplorerViewModel, Services), new OrgViewModel(_fakeOrgs[1], _sut, _fakeTanzuExplorerViewModel, Services),
+                new OrgViewModel(_fakeOrgs[0], _sut, _fakeTanzuExplorerViewModel, Services), new OrgViewModel(_fakeOrgs[1], _sut, _fakeTanzuExplorerViewModel, Services)
             };
             _sut.Children = new ObservableCollection<TreeViewItemViewModel>(initialChildren);
 
@@ -239,7 +239,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             _sut.Children =
             [
-                _sut.EmptyPlaceholder,
+                _sut.EmptyPlaceholder
             ];
 
             /** mock 3 new children */
@@ -267,7 +267,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.Children =
             [
                 new OrgViewModel(_fakeOrgs[0], _sut, _fakeTanzuExplorerViewModel, Services),
-                new OrgViewModel(_fakeOrgs[1], _sut, _fakeTanzuExplorerViewModel, Services),
+                new OrgViewModel(_fakeOrgs[1], _sut, _fakeTanzuExplorerViewModel, Services)
             ];
 
             MockCloudFoundryService.Setup(m => m
@@ -290,7 +290,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             var fakeInvalidTokenResponse = new DetailedResult<List<CloudFoundryOrganization>>
             {
-                Succeeded = false, Explanation = "junk", FailureType = FailureType.InvalidRefreshToken,
+                Succeeded = false, Explanation = "junk", FailureType = FailureType.InvalidRefreshToken
             };
 
             MockCloudFoundryService.Setup(m => m
@@ -311,7 +311,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("UpdateAllChildren")]
         public async Task UpdateAllChildren_CollapsesSelf_AndLogsError_WhenOrgsRequestFails()
         {
-            var fakeFailedOrgsResponse = new DetailedResult<List<CloudFoundryOrganization>> { Succeeded = false, Explanation = "junk", };
+            var fakeFailedOrgsResponse = new DetailedResult<List<CloudFoundryOrganization>> { Succeeded = false, Explanation = "junk" };
 
             MockCloudFoundryService.Setup(m => m
                     .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))

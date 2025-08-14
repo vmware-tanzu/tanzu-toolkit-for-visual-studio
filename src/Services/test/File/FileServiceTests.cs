@@ -27,23 +27,19 @@ namespace Tanzu.Toolkit.Services.Tests.File
         public void FullPathToCfExe_ReturnsV8Path_WhenCliVersionIs8()
         {
             _sut.CliVersion = 8;
-
-            var path = _sut.FullPathToCfExe;
-
-            Assert.IsTrue(path.Contains("cf8.exe"));
+            Assert.Contains("cf8.exe", _sut.FullPathToCfExe);
         }
 
         [TestMethod]
         public void FullPathToCfExe_ThrowsException_WhenExecutableFileNotFound()
         {
-            var fakeAssemblyBaseDir = "/fake/path";
-            _sut = new FileService(fakeAssemblyBaseDir) { CliVersion = 7, };
+            _sut = new FileService("/fake/path") { CliVersion = 8 };
 
             Exception expectedException = null;
 
             try
             {
-                var path = _sut.FullPathToCfExe;
+                _ = _sut.FullPathToCfExe;
             }
             catch (Exception ex)
             {
@@ -51,7 +47,7 @@ namespace Tanzu.Toolkit.Services.Tests.File
             }
 
             Assert.IsNotNull(expectedException);
-            Assert.IsTrue(expectedException.Message.Contains(_sut.CliVersion.ToString()));
+            Assert.Contains(_sut.CliVersion.ToString(), expectedException.Message);
         }
     }
 }

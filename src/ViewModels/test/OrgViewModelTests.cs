@@ -27,7 +27,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             [
                 _fakeSpaces[0],
                 _fakeSpaces[1],
-                _fakeSpaces[2],
+                _fakeSpaces[2]
             ]
         };
 
@@ -112,7 +112,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 new SpaceViewModel(_fakeSpaces[0], _sut, MockTanzuExplorerViewModel.Object, Services),
                 new SpaceViewModel(_fakeSpaces[1], _sut, MockTanzuExplorerViewModel.Object, Services),
                 new SpaceViewModel(_fakeSpaces[2], _sut, MockTanzuExplorerViewModel.Object, Services),
-                new SpaceViewModel(_fakeSpaces[3], _sut, MockTanzuExplorerViewModel.Object, Services),
+                new SpaceViewModel(_fakeSpaces[3], _sut, MockTanzuExplorerViewModel.Object, Services)
             ];
 
             /** mock retrieving all initial children except for FakeSpaces[3] */
@@ -140,7 +140,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.Children =
             [
                 new SpaceViewModel(_fakeSpaces[0], _sut, MockTanzuExplorerViewModel.Object, Services),
-                new SpaceViewModel(_fakeSpaces[1], _sut, MockTanzuExplorerViewModel.Object, Services),
+                new SpaceViewModel(_fakeSpaces[1], _sut, MockTanzuExplorerViewModel.Object, Services)
             ];
 
             /** mock retrieving all initial children plus FakeSpaces[2] */
@@ -195,7 +195,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var initialChildren = new ObservableCollection<TreeViewItemViewModel>
             {
                 new SpaceViewModel(_fakeSpaces[0], _sut, MockTanzuExplorerViewModel.Object, Services),
-                new SpaceViewModel(_fakeSpaces[1], _sut, MockTanzuExplorerViewModel.Object, Services),
+                new SpaceViewModel(_fakeSpaces[1], _sut, MockTanzuExplorerViewModel.Object, Services)
             };
             _sut.Children = new ObservableCollection<TreeViewItemViewModel>(initialChildren);
 
@@ -243,13 +243,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
                 Children =
                 [
-                    _sut.EmptyPlaceholder,
-                ],
+                    _sut.EmptyPlaceholder
+                ]
             };
 
             var fakeFailedResult = new DetailedResult<List<CloudFoundrySpace>>(succeeded: false, content: null, explanation: "junk", cmdDetails: _fakeFailureCmdResult)
             {
-                FailureType = FailureType.InvalidRefreshToken,
+                FailureType = FailureType.InvalidRefreshToken
             };
 
             /** mock 3 new children */
@@ -278,7 +278,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.Children =
             [
                 new SpaceViewModel(_fakeSpaces[0], _sut, MockTanzuExplorerViewModel.Object, Services),
-                new SpaceViewModel(_fakeSpaces[1], _sut, MockTanzuExplorerViewModel.Object, Services),
+                new SpaceViewModel(_fakeSpaces[1], _sut, MockTanzuExplorerViewModel.Object, Services)
             ];
 
             MockCloudFoundryService.Setup(m => m.GetSpacesForOrgAsync(_expectedOrg, _expectedSkipSslValue, _expectedRetryAmount))
@@ -298,7 +298,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("UpdateAllChildren")]
         public async Task UpdateAllChildren_CollapsesSelf_AndSetsAuthRequiredTrue_WhenSpacesRequestFailsWithInvalidRefreshToken()
         {
-            var fakeInvalidTokenResponse = new DetailedResult<List<CloudFoundrySpace>> { Succeeded = false, Explanation = "junk", FailureType = FailureType.InvalidRefreshToken, };
+            var fakeInvalidTokenResponse = new DetailedResult<List<CloudFoundrySpace>> { Succeeded = false, Explanation = "junk", FailureType = FailureType.InvalidRefreshToken };
 
             MockCloudFoundryService.Setup(m => m.GetSpacesForOrgAsync(_expectedOrg, _expectedSkipSslValue, _expectedRetryAmount))
                 .ReturnsAsync(fakeInvalidTokenResponse);
@@ -318,7 +318,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("UpdateAllChildren")]
         public async Task UpdateAllChildren_CollapsesSelf_AndLogsError_WhenSpacesRequestFails()
         {
-            var fakeFailedSpacesResponse = new DetailedResult<List<CloudFoundrySpace>> { Succeeded = false, Explanation = "junk", };
+            var fakeFailedSpacesResponse = new DetailedResult<List<CloudFoundrySpace>> { Succeeded = false, Explanation = "junk" };
 
             MockCloudFoundryService.Setup(m => m.GetSpacesForOrgAsync(_expectedOrg, _expectedSkipSslValue, _expectedRetryAmount))
                 .ReturnsAsync(fakeFailedSpacesResponse);

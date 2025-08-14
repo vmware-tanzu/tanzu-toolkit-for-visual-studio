@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
@@ -32,7 +30,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         }
 
         public static readonly DependencyProperty _hyperlinkBrushProperty =
-            DependencyProperty.Register("HyperlinkBrush", typeof(Brush), typeof(DeploymentDialogView),
+            DependencyProperty.Register(nameof(HyperlinkBrush), typeof(Brush), typeof(DeploymentDialogView),
                 new PropertyMetadata(default(Brush)));
 
         private readonly IDeploymentDialogViewModel _viewModel;
@@ -41,28 +39,24 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         {
             _viewModel = viewModel;
 
-            bool alwaysTrue(object arg)
-            {
-                return true;
-            }
-
-            ;
-
             UploadAppCommand = new DelegatingCommand(viewModel.DeployApp, viewModel.CanDeployApp);
             OpenLoginDialogCommand = new DelegatingCommand(viewModel.OpenLoginView, viewModel.CanOpenLoginView);
             ToggleAdvancedOptionsCommand =
                 new DelegatingCommand(viewModel.ToggleAdvancedOptions, viewModel.CanToggleAdvancedOptions);
-            ClearServiceSelectionCommand = new DelegatingCommand(viewModel.ClearSelectedServices, alwaysTrue);
-            ClearBuildpackSelectionCommand = new DelegatingCommand(viewModel.ClearSelectedBuildpacks, alwaysTrue);
-            ClearManifestSelectionCommand = new DelegatingCommand(viewModel.ClearSelectedManifest, alwaysTrue);
+            ClearServiceSelectionCommand = new DelegatingCommand(viewModel.ClearSelectedServices, AlwaysTrue);
+            ClearBuildpackSelectionCommand = new DelegatingCommand(viewModel.ClearSelectedBuildpacks, AlwaysTrue);
+            ClearManifestSelectionCommand = new DelegatingCommand(viewModel.ClearSelectedManifest, AlwaysTrue);
             ClearDeploymentDirectorySelectionCommand =
-                new DelegatingCommand(viewModel.ClearSelectedDeploymentDirectory, alwaysTrue);
+                new DelegatingCommand(viewModel.ClearSelectedDeploymentDirectory, AlwaysTrue);
 
             themeService.SetTheme(this);
             DataContext = viewModel;
             InitializeComponent();
 
             MouseDown += Window_MouseDown;
+            return;
+
+            bool AlwaysTrue(object arg) => true;
         }
 
         protected override void OnContentRendered(EventArgs e)
@@ -91,7 +85,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         private void SelectPublishDirectory(object sender, RoutedEventArgs e)
         {
-            var openFolderDialog = new FolderBrowserDialog { SelectedPath = _viewModel.PathToProjectRootDir, };
+            var openFolderDialog = new FolderBrowserDialog { SelectedPath = _viewModel.PathToProjectRootDir };
 
             if (openFolderDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
@@ -139,7 +133,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         private void SaveManifestButton_Click(object sender, RoutedEventArgs e)
         {
-            var saveFileDialog = new SaveFileDialog() { DefaultExt = "yml", InitialDirectory = _viewModel.PathToProjectRootDir, };
+            var saveFileDialog = new SaveFileDialog { DefaultExt = "yml", InitialDirectory = _viewModel.PathToProjectRootDir };
 
             if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
