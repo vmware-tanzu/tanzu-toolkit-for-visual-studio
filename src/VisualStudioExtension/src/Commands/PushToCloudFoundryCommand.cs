@@ -1,144 +1,86 @@
-﻿using EnvDTE;
+﻿using Community.VisualStudio.Toolkit;
+using Community.VisualStudio.Toolkit.DependencyInjection;
+using Community.VisualStudio.Toolkit.DependencyInjection.Core;
+using EnvDTE;
 using EnvDTE80;
 using Microsoft;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Shell;
 using Serilog;
 using System;
-using System.ComponentModel.Design;
 using System.IO;
 using Tanzu.Toolkit.Services.ErrorDialog;
-using Tanzu.Toolkit.Services.Project;
 using Tanzu.Toolkit.Services.Logging;
+using Tanzu.Toolkit.Services.Project;
 using Tanzu.Toolkit.ViewModels;
+using Tanzu.Toolkit.ViewModels.RemoteDebug;
+using Tanzu.Toolkit.VisualStudio.Services;
 using Tanzu.Toolkit.VisualStudio.Views;
+using Project = EnvDTE.Project;
 using Task = System.Threading.Tasks.Task;
 
 namespace Tanzu.Toolkit.VisualStudio.Commands
 {
-    /// <summary>
-    /// Command handler.
-    /// </summary>
-    internal sealed class PushToCloudFoundryCommand
+    [Command(PackageGuids.guidTanzuToolkitPackageCmdSetString, PackageIds.PushToCloudFoundryCommandId)]
+    internal sealed class PushToCloudFoundryCommand : BaseDICommand
     {
-        /// <summary>
-        /// Command ID.
-        /// </summary>
-        public const int _commandId = 257;
-
-        /// <summary>
-        /// Command menu group (command set GUID).
-        /// </summary>
-        public static readonly Guid _commandSet = new Guid("f91c88fb-6e17-42a6-878d-f4d16ead7625");
-
-        /// <summary>
-        /// VS Package that provides this command, not null.
-        /// </summary>
-        private readonly AsyncPackage _package;
-
-        private readonly IServiceProvider _services;
         private readonly IErrorDialog _dialogService;
+        private readonly IProjectService _projectService;
         private readonly ILogger _logger;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PushToCloudFoundryCommand"/> class.
-        /// Adds our command handlers for menu (commands must exist in the command table file).
-        /// </summary>
-        /// <param name="package">Owner package, not null.</param>
-        /// <param name="commandService">Command service to add command to, not null.</param>
-        private PushToCloudFoundryCommand(AsyncPackage package, OleMenuCommandService commandService,
-            IServiceProvider services)
+        public PushToCloudFoundryCommand(DIToolkitPackage package, IErrorDialog errorDialog, ILoggingService loggingService, IProjectService projectService)
+            : base(package)
         {
-            _package = package ?? throw new ArgumentNullException(nameof(package));
-            commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
-            _services = services;
-            _dialogService = services.GetRequiredService<IErrorDialog>();
-            var loggingSvc = services.GetRequiredService<ILoggingService>();
-            _logger = loggingSvc.Logger;
-            var menuCommandId = new CommandID(_commandSet, _commandId);
-            var menuItem = new MenuCommand(Execute, menuCommandId);
-            commandService.AddCommand(menuItem);
+            _dialogService = errorDialog;
+            _logger = loggingService.Logger;
+            _projectService = projectService;
         }
 
-        /// <summary>
-        /// Gets the instance of the command.
-        /// </summary>
-        public static PushToCloudFoundryCommand Instance { get; private set; }
-
-        /// <summary>
-        /// Initializes the singleton instance of the command.
-        /// </summary>
-        /// <param name="package">Owner package, not null.</param>
-        /// <param name="services"></param>
-        public static async Task InitializeAsync(AsyncPackage package, IServiceProvider services)
+        protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
         {
-            // Switch to the main thread - the call to AddCommand in PushToCloudFoundryCommand's constructor requires
-            // the UI thread.
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(Package.DisposalToken);
 
-            var commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
-            Instance = new PushToCloudFoundryCommand(package, commandService, services);
-        }
-
-        /// <summary>
-        /// This function is the callback used to execute the command when the menu item is clicked.
-        /// See the constructor to see how the menu item is associated with this function using
-        /// OleMenuCommandService service and MenuCommand class. 
-        /// </summary>
-        /// <param name="sender">Event sender.</param>
-        /// <param name="e">Event args.</param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods",
-            Justification = "Method handles all exceptions.")]
-        private async void Execute(object sender, EventArgs e)
-        {
             try
             {
-                // Ensure project file access happens on the main thread
-                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
-                var dte = (DTE2)await _package.GetServiceAsync(typeof(DTE));
+                var dte = await ServiceProvider.GetGlobalServiceAsync(typeof(DTE)) as DTE2;
                 Assumes.Present(dte);
 
                 var activeProjects = (Array)dte.ActiveSolutionProjects;
 
-                foreach (Project proj in activeProjects)
+                foreach (Project project in activeProjects)
                 {
-                    var projectDirectory = Path.GetDirectoryName(proj.FullName);
+                    var projectDirectory = Path.GetDirectoryName(project.FullName) ?? throw new Exception($"Unable to locate project directory from '{project.FullName}'");
 
-                    var tfm = "netstandard2.1"; // fallback value
+                    string frameworkMoniker = null;
                     try
                     {
-                        tfm = proj.Properties.Item("FriendlyTargetFramework").Value.ToString();
+                        frameworkMoniker = project.Properties.Item("FriendlyTargetFramework").Value.ToString();
                     }
                     catch (ArgumentException)
                     {
-                        tfm = proj.Properties.Item("TargetFrameworkMoniker").Value.ToString();
+                        frameworkMoniker = project.Properties.Item("TargetFrameworkMoniker").Value.ToString();
                     }
                     finally
                     {
-                        if (tfm == null)
+                        if (string.IsNullOrEmpty(frameworkMoniker))
                         {
-                            _dialogService.DisplayWarningDialog(
-                                "Unable to identify target framework",
-                                "Proceeding with default target framework 'netstandard2.1'.");
+                            _logger.Warning("Unable to identify target framework");
                         }
 
-                        if (tfm.StartsWith(".NETFramework") &&
-                            !File.Exists(Path.Combine(projectDirectory, "Web.config")))
+                        if (frameworkMoniker != null && frameworkMoniker.StartsWith(".NETFramework") && !File.Exists(Path.Combine(projectDirectory, "Web.config")))
                         {
-                            var msg =
-                                $"This project appears to target .NET Framework; pushing it to Tanzu Platform requires a 'Web.config' file at it's base directory, but none was found in {projectDirectory}";
-                            _dialogService.DisplayErrorDialog("Unable to push to Tanzu Platform", msg);
+                            _dialogService.DisplayErrorDialog("Unable to push to Tanzu Platform",
+                                $"This project appears to target .NET Framework; pushing it to Tanzu Platform requires a 'Web.config' file at it's base directory, but none was found in {projectDirectory}");
                         }
                         else
                         {
-                            var projSvc = _services.GetRequiredService<IProjectService>();
-                            projSvc.ProjectName = proj.Name;
-                            projSvc.PathToProjectDirectory = projectDirectory;
-                            projSvc.TargetFrameworkMoniker = tfm;
+                            _projectService.ProjectName = project.Name;
+                            _projectService.PathToProjectDirectory = projectDirectory;
+                            _projectService.TargetFrameworkMoniker = frameworkMoniker;
 
-                            var view = _services.GetRequiredService<IDeploymentDialogView>() as IView;
-                            var deploymentViewModel = view.ViewModel as IDeploymentDialogViewModel;
+                            var serviceProvider = await
+                                VS.GetServiceAsync<SToolkitServiceProvider<TanzuToolkitForVisualStudioPackage>, IToolkitServiceProvider<TanzuToolkitForVisualStudioPackage>>();
+                            IDeploymentDialogViewModel remoteDebugViewModel = new DeploymentDialogViewModel(serviceProvider);
+                            var view = new DeploymentDialogView(remoteDebugViewModel, new ThemeService());
                             view.DisplayView();
                         }
                     }
@@ -147,10 +89,9 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
             catch (Exception ex)
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                _logger?.Error("{ClassName} caught exception in {MethodName}: {PushException}",
+                _logger.Error("{ClassName} caught exception in {MethodName}: {PushException}",
                     nameof(PushToCloudFoundryCommand), nameof(Execute), ex);
-                var msg = $"Internal error: \"{ex.Message}\"";
-                _dialogService.DisplayErrorDialog("Unable to push to Tanzu Platform", msg);
+                _dialogService.DisplayErrorDialog("Unable to push to Tanzu Platform", $"Internal error: \"{ex.Message}\"");
             }
         }
     }

@@ -14,7 +14,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Tanzu.Toolkit.VisualStudio</RootNamespace>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
     <UseCodebase>true</UseCodebase>
     <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
@@ -100,7 +100,7 @@
     <Compile Include="VSToolWindows\OutputToolWindow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TanzuToolkitForVisualStudioPackage.cs" />
-    <Compile Include="VSToolWindows\TanzuCloudExplorerToolWindow.cs" />
+    <Compile Include="VSToolWindows\TanzuExplorerToolWindow.cs" />
     <Compile Include="Commands\TanzuPlatformExplorerCommand.cs" />
     <Compile Include="Views\DeploymentDialogView.xaml.cs">
       <DependentUpon>DeploymentDialogView.xaml</DependentUpon>
@@ -157,7 +157,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Community.VisualStudio.Toolkit.17">
-      <Version>17.0.533</Version>
+      <Version>17.0.527</Version>
+    </PackageReference>
+    <PackageReference Include="Community.VisualStudio.Toolkit.DependencyInjection.Microsoft.17">
+      <Version>17.0.27</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection">
       <Version>8.0.1</Version>
