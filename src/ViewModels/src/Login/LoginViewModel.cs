@@ -217,7 +217,7 @@ namespace Tanzu.Toolkit.ViewModels
                 return;
             }
 
-            var ssoPromptResult = await CfClient.GetSsoPrompt(TargetApiAddress, SkipSsl);
+            var ssoPromptResult = await CfClient.GetSSOPromptAsync(TargetApiAddress, SkipSsl);
             if (ssoPromptResult.Succeeded)
             {
                 try
@@ -271,7 +271,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 ApiAddressError = null;
                 IsApiAddressFormatValid = true;
-                DataPersistenceService.WriteStringData(apiAddress, "CloudFoundryApiEndpoint");
+                DataPersistenceService.WriteStringData("CloudFoundryApiEndpoint", apiAddress);
 
                 return true;
             }
@@ -319,7 +319,7 @@ namespace Tanzu.Toolkit.ViewModels
                 return;
             }
 
-            var result = await CfClient.LoginWithCredentials(Username, GetPassword());
+            var result = await CfClient.LoginWithCredentialsAsync(Username, GetPassword());
 
             if (result.Succeeded)
             {
@@ -349,7 +349,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
-                var loginResult = await CfClient.LoginWithSsoPasscode(TargetCf.ApiAddress, SsoPasscode);
+                var loginResult = await CfClient.LoginWithSSOPasscodeAsync(TargetCf.ApiAddress, SsoPasscode);
 
                 if (loginResult.Succeeded)
                 {

@@ -71,24 +71,9 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             DataContext = viewModel;
             ViewModel = viewModel as IViewModel;
 
-            bool alwaysTrue(object arg)
-            {
-                return true;
-            }
-
-            bool canPause(object arg)
-            {
-                return !viewModel.OutputPaused;
-            }
-
-            bool canResume(object arg)
-            {
-                return viewModel.OutputPaused;
-            }
-
-            ClearContentCommand = new DelegatingCommand(viewModel.ClearContent, alwaysTrue);
-            PauseOutputCommand = new DelegatingCommand(viewModel.PauseOutput, canPause);
-            ResumeOutputCommand = new DelegatingCommand(viewModel.ResumeOutput, canResume);
+            ClearContentCommand = new DelegatingCommand(viewModel.ClearContent, arg => true);
+            PauseOutputCommand = new DelegatingCommand(viewModel.PauseOutput, arg => !viewModel.OutputPaused);
+            ResumeOutputCommand = new DelegatingCommand(viewModel.ResumeOutput, arg => viewModel.OutputPaused);
 
             InitializeComponent();
             autoScrollToggleBtn.IsChecked = true;

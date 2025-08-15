@@ -39,7 +39,6 @@ namespace Tanzu.Toolkit.ViewModels
         private readonly IThreadingService _threadingService;
         private readonly IErrorDialog _errorDialogService;
         private readonly IDataPersistenceService _dataPersistenceService;
-        private readonly IViewLocatorService _viewLocatorService;
 
         public TanzuExplorerViewModel(IServiceProvider services)
             : base(services)
@@ -47,14 +46,13 @@ namespace Tanzu.Toolkit.ViewModels
             _errorDialogService = services.GetRequiredService<IErrorDialog>();
             _threadingService = services.GetRequiredService<IThreadingService>();
             _dataPersistenceService = services.GetRequiredService<IDataPersistenceService>();
-            _viewLocatorService = services.GetRequiredService<IViewLocatorService>();
 
-            var savedConnectionCredsExist = _dataPersistenceService.SavedCfCredsExist();
+            var cloudFoundryCredentialsExist = _dataPersistenceService.SavedCloudFoundryCredentialsExist();
             var existingSavedConnectionName = _dataPersistenceService.ReadStringData(_connectionNameKey);
             var existingSavedConnectionAddress = _dataPersistenceService.ReadStringData(_connectionAddressKey);
             var existingSavedConnectionSslPolicy = _dataPersistenceService.ReadStringData(_connectionSslPolicyKey);
 
-            if (!savedConnectionCredsExist || existingSavedConnectionName == null || existingSavedConnectionAddress == null)
+            if (!cloudFoundryCredentialsExist || existingSavedConnectionName == null || existingSavedConnectionAddress == null)
             {
                 CloudFoundryConnection = null;
             }
@@ -77,14 +75,9 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 _cloudFoundry = value;
 
-                if (value == null)
-                {
-                    TreeRoot = new ObservableCollection<TreeViewItemViewModel> { new LoginPromptViewModel(Services) };
-                }
-                else
-                {
-                    TreeRoot = new ObservableCollection<TreeViewItemViewModel> { value };
-                }
+                TreeRoot = value == null
+                    ? new ObservableCollection<TreeViewItemViewModel> { new LoginPromptViewModel(Services) }
+                    : new ObservableCollection<TreeViewItemViewModel> { value };
 
                 RaisePropertyChangedEvent("CloudFoundryConnection");
             }
@@ -138,7 +131,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 _authenticationRequired = value;
 
-                if (value == true)
+                if (value)
                 {
                     if (CloudFoundryConnection != null)
                     {
@@ -216,7 +209,6 @@ namespace Tanzu.Toolkit.ViewModels
             return IsLoggedIn;
         }
 
-
         public void OpenLoginView(object parent)
         {
             if (CloudFoundryConnection != null)
@@ -247,7 +239,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public async Task StopCloudFoundryApp(object app)
+        public async Task StopCloudFoundryAppAsync(object app)
         {
             if (app is CloudFoundryApp cfApp)
             {
@@ -260,7 +252,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public async Task StartCloudFoundryApp(object app)
+        public async Task StartCloudFoundryAppAsync(object app)
         {
             if (app is CloudFoundryApp cfApp)
             {
@@ -273,7 +265,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public async Task DisplayRecentAppLogs(object app)
+        public async Task DisplayRecentAppLogsAsync(object app)
         {
             if (app is CloudFoundryApp cfApp)
             {
@@ -301,7 +293,7 @@ namespace Tanzu.Toolkit.ViewModels
             else
             {
                 Logger.Error(
-                    $"{nameof(DisplayRecentAppLogs)} received expected argument 'app' to be of type '{typeof(CloudFoundryApp)}', but instead received type '{app.GetType()}'.");
+                    $"{nameof(DisplayRecentAppLogsAsync)} received expected argument 'app' to be of type '{typeof(CloudFoundryApp)}', but instead received type '{app.GetType()}'.");
             }
         }
 
@@ -326,7 +318,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public async Task RefreshSpace(object arg)
+        public async Task RefreshSpaceAsync(object arg)
         {
             if (arg is SpaceViewModel spaceViewModel)
             {
@@ -334,7 +326,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public async Task RefreshOrg(object arg)
+        public async Task RefreshOrgAsync(object arg)
         {
             if (arg is OrgViewModel orgViewModel)
             {
@@ -352,7 +344,7 @@ namespace Tanzu.Toolkit.ViewModels
             else if (!IsRefreshingAll)
             {
                 IsRefreshingAll = true;
-                _threadingService.StartBackgroundTask(UpdateAllTreeItems);
+                _threadingService.StartBackgroundTaskAsync(UpdateAllTreeItems);
             }
         }
 
@@ -371,7 +363,7 @@ namespace Tanzu.Toolkit.ViewModels
 
             if (!ThreadingService.IsPolling)
             {
-                ThreadingService.StartRecurrentUiTaskInBackground(RefreshAllItems, null, 10);
+                ThreadingService.StartRecurrentUITaskInBackground(RefreshAllItems, null, 10);
             }
 
             _dataPersistenceService.WriteStringData(_connectionNameKey, CloudFoundryConnection.CloudFoundryInstance.InstanceName);

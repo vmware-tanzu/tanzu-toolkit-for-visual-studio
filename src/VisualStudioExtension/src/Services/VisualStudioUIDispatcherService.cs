@@ -4,9 +4,9 @@ using Tanzu.Toolkit.Services;
 
 namespace Tanzu.Toolkit.VisualStudio.Services
 {
-    public class UiDispatcherService : IUiDispatcherService
+    public class VisualStudioUIDispatcherService : IUIDispatcherService
     {
-        public async Task RunOnUiThreadAsync(Action method)
+        public async Task RunOnUIThreadAsync(Action method)
         {
             await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             method.Invoke();

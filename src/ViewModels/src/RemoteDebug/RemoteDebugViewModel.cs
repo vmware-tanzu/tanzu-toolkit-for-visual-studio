@@ -16,6 +16,7 @@ using Tanzu.Toolkit.Services.DebugAgentProvider;
 using Tanzu.Toolkit.Services.DotnetCli;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Project;
+using Tanzu.Toolkit.Services.Serialization;
 
 [assembly: InternalsVisibleTo("Tanzu.Toolkit.ViewModels.Tests")]
 
@@ -257,7 +258,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
             try
             {
-                await ThreadingService.StartBackgroundTask(() => RemoteDebugAppAsync(cancellationToken), cancellationToken);
+                await ThreadingService.StartBackgroundTaskAsync(() => RemoteDebugAppAsync(cancellationToken), cancellationToken);
             }
             catch (OperationCanceledException ex)
             {
@@ -418,7 +419,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 pathSeparator = "\\";
             }
 
-            var sshResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
+            var sshResult = await _cfCliService.ExecuteSSHCommandAsync(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
             var vsdbExecutableListed = sshResult.CmdResult.StdOut.IndexOf(vsdbgDll, StringComparison.OrdinalIgnoreCase) >= 0;
             if (sshResult.Succeeded && vsdbExecutableListed)
             {
@@ -428,7 +429,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
             vsdbgSearchDirectory += "vsdbg";
             sshCommand += "vsdbg";
-            sshResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
+            sshResult = await _cfCliService.ExecuteSSHCommandAsync(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
             vsdbExecutableListed = sshResult.CmdResult.StdOut.IndexOf(vsdbgDll, StringComparison.OrdinalIgnoreCase) >= 0;
             if (sshResult.Succeeded && vsdbExecutableListed)
             {
