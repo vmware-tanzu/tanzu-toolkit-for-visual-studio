@@ -1,9 +1,6 @@
 trigger:
 - main
 
-pr:
-  drafts: false
-
 pool:
   vmImage: windows-latest
 variables:
@@ -52,6 +49,6 @@ steps:
 - pwsh: Rename-Item -Path "$(Build.SourcesDirectory)\src\VisualStudioExtension\src\bin\2022\$(buildConfiguration)\Tanzu.Toolkit.VisualStudio.2022.vsix" -NewName "Tanzu.Toolkit.VisualStudio.2022.$(Build.BuildNumber).vsix"
   displayName: Include version in vsix name
 
-- publish: src/VisualStudioExtension/src/bin/2022/$(buildConfiguration)/Tanzu.Toolkit.VisualStudio.2022.$(Build.BuildNumber).vsix
+- publish: '**/*.vsix'
   artifact: Tanzu.Toolkit.VS2022
   displayName: Publish vsix

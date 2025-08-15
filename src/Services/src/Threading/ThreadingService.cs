@@ -7,26 +7,26 @@ namespace Tanzu.Toolkit.Services.Threading
 {
     public class ThreadingService : IThreadingService
     {
-        private readonly IUiDispatcherService _dispatcherService;
+        private readonly IUIDispatcherService _dispatcherService;
 
-        public ThreadingService(IUiDispatcherService dispatcherService)
+        public ThreadingService(IUIDispatcherService dispatcherService)
         {
             _dispatcherService = dispatcherService;
         }
 
         public bool IsPolling { get; set; }
 
-        public Task StartBackgroundTask(Func<Task> method)
+        public Task StartBackgroundTaskAsync(Func<Task> method)
         {
             return method.Invoke();
         }
 
-        public Task StartBackgroundTask(Func<Task> method, CancellationToken cancellationToken)
+        public Task StartBackgroundTaskAsync(Func<Task> method, CancellationToken cancellationToken)
         {
             return Task.Run(method, cancellationToken);
         }
 
-        public void StartRecurrentUiTaskInBackground(Action<object> action, object param, int intervalInSeconds)
+        public void StartRecurrentUITaskInBackground(Action<object> action, object param, int intervalInSeconds)
         {
             if (IsPolling)
             {
@@ -47,27 +47,27 @@ namespace Tanzu.Toolkit.Services.Threading
 
         public void ExecuteInUIThread(Action method)
         {
-            _dispatcherService.RunOnUiThreadAsync(method);
+            _dispatcherService.RunOnUIThreadAsync(method);
         }
 
         public void ExecuteInUIThread(Action<object> method, object methodParam)
         {
-            _dispatcherService.RunOnUiThreadAsync(() => method.Invoke(methodParam));
+            _dispatcherService.RunOnUIThreadAsync(() => method.Invoke(methodParam));
         }
 
         public async Task ExecuteInUIThreadAsync(Action method)
         {
-            await _dispatcherService.RunOnUiThreadAsync(method);
+            await _dispatcherService.RunOnUIThreadAsync(method);
         }
 
-        public async Task AddItemToCollectionOnUiThreadAsync<T>(ObservableCollection<T> list, T item)
+        public async Task AddItemToCollectionOnUIThreadAsync<T>(ObservableCollection<T> list, T item)
         {
-            await _dispatcherService.RunOnUiThreadAsync(() => list.Add(item));
+            await _dispatcherService.RunOnUIThreadAsync(() => list.Add(item));
         }
 
-        public async Task RemoveItemFromCollectionOnUiThreadAsync<T>(ObservableCollection<T> list, T item)
+        public async Task RemoveItemFromCollectionOnUIThreadAsync<T>(ObservableCollection<T> list, T item)
         {
-            await _dispatcherService.RunOnUiThreadAsync(() => list.Remove(item));
+            await _dispatcherService.RunOnUIThreadAsync(() => list.Remove(item));
         }
     }
 }

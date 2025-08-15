@@ -90,7 +90,7 @@ namespace Tanzu.Toolkit.ViewModels
                     if (_isExpanded & !IsLoading)
                     {
                         // Lazily load child items in a separate thread @ expansion time
-                        _threadingService.StartBackgroundTask(UpdateAllChildren);
+                        _threadingService.StartBackgroundTaskAsync(UpdateAllChildren);
                     }
 
                     RaisePropertyChangedEvent("IsExpanded");

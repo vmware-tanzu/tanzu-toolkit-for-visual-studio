@@ -17,6 +17,7 @@ using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
+using Tanzu.Toolkit.Services.Serialization;
 
 namespace Tanzu.Toolkit.Services.CloudFoundry
 {
@@ -88,7 +89,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="ArgumentNullException"></exception>
-        public async Task<DetailedResult> LoginWithCredentials(string username, SecureString password)
+        public async Task<DetailedResult> LoginWithCredentialsAsync(string username, SecureString password)
         {
             if (string.IsNullOrEmpty(username))
             {
@@ -129,15 +130,15 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
         }
 
-        public async Task<DetailedResult<string>> GetSsoPrompt(string cfApiAddress, bool skipSsl = false)
+        public async Task<DetailedResult<string>> GetSSOPromptAsync(string cfApiAddress, bool skipSsl = false)
         {
             try
             {
-                var loginServerInfo = await _cfApiClient.GetLoginServerInformation(cfApiAddress, skipSsl);
+                var loginServerInfo = await _cfApiClient.GetLoginServerInformationAsync(cfApiAddress, skipSsl);
 
-                if (loginServerInfo.Prompts.ContainsKey(_cfApiSsoPromptKey))
+                if (loginServerInfo.Prompts.TryGetValue(_cfApiSsoPromptKey, out var serverPrompts))
                 {
-                    var ssoPasscodePrompt = loginServerInfo.Prompts[_cfApiSsoPromptKey][1];
+                    var ssoPasscodePrompt = serverPrompts[1];
 
                     return new DetailedResult<string> { Succeeded = true, Content = ssoPasscodePrompt };
                 }
@@ -150,9 +151,9 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             }
         }
 
-        public async Task<DetailedResult> LoginWithSsoPasscode(string cfApiAddress, string passcode)
+        public async Task<DetailedResult> LoginWithSSOPasscodeAsync(string cfApiAddress, string passcode)
         {
-            return await _cfCliService.LoginWithSsoPasscode(cfApiAddress, passcode);
+            return await _cfCliService.LoginWithSSOPasscodeAsync(cfApiAddress, passcode);
         }
 
         /// <summary>
@@ -203,7 +204,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             List<Org> orgsFromApi;
             try
             {
-                orgsFromApi = await _cfApiClient.ListOrgs(apiAddress, accessToken);
+                orgsFromApi = await _cfApiClient.ListOrgsAsync(apiAddress, accessToken);
             }
             catch (Exception originalException)
             {
@@ -295,7 +296,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             List<Space> spacesFromApi;
             try
             {
-                spacesFromApi = await _cfApiClient.ListSpacesForOrg(apiAddress, accessToken, org.OrgId);
+                spacesFromApi = await _cfApiClient.ListSpacesForOrgAsync(apiAddress, accessToken, org.OrgId);
             }
             catch (Exception originalException)
             {
@@ -386,7 +387,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             List<App> appsFromApi;
             try
             {
-                appsFromApi = await _cfApiClient.ListAppsForSpace(apiAddress, accessToken, space.SpaceId);
+                appsFromApi = await _cfApiClient.ListAppsForSpaceAsync(apiAddress, accessToken, space.SpaceId);
             }
             catch (Exception originalException)
             {
@@ -470,7 +471,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             List<App> appsFromApi;
             try
             {
-                appsFromApi = await _cfApiClient.ListAppsAsync(accessToken);
+                appsFromApi = await _cfApiClient.ListAppsAsyncAsync(accessToken);
             }
             catch (Exception originalException)
             {
@@ -542,7 +543,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             List<Buildpack> buildpacksFromApi;
             try
             {
-                buildpacksFromApi = await _cfApiClient.ListBuildpacks(apiAddress, accessToken);
+                buildpacksFromApi = await _cfApiClient.ListBuildpacksAsync(apiAddress, accessToken);
             }
             catch (Exception originalException)
             {
@@ -616,7 +617,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             List<Service> servicesFromApi;
             try
             {
-                servicesFromApi = await _cfApiClient.ListServices(apiAddress, accessToken);
+                servicesFromApi = await _cfApiClient.ListServicesAsync(apiAddress, accessToken);
             }
             catch (Exception originalException)
             {
@@ -704,7 +705,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             bool appWasStopped;
             try
             {
-                appWasStopped = await _cfApiClient.StopAppWithGuid(apiAddress, accessToken, app.AppId);
+                appWasStopped = await _cfApiClient.StopAppWithGuidAsync(apiAddress, accessToken, app.AppId);
             }
             catch (Exception originalException)
             {
@@ -787,7 +788,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             bool appWasStarted;
             try
             {
-                appWasStarted = await _cfApiClient.StartAppWithGuid(apiAddress, accessToken, app.AppId);
+                appWasStarted = await _cfApiClient.StartAppWithGuidAsync(apiAddress, accessToken, app.AppId);
             }
             catch (Exception originalException)
             {
@@ -880,7 +881,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
                     }
                 }
 
-                var appWasDeleted = await _cfApiClient.DeleteAppWithGuid(apiAddress, accessToken, app.AppId);
+                var appWasDeleted = await _cfApiClient.DeleteAppWithGuidAsync(apiAddress, accessToken, app.AppId);
 
                 if (!appWasDeleted)
                 {
@@ -947,7 +948,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             List<Route> routesFromApi;
             try
             {
-                routesFromApi = await _cfApiClient.ListRoutesForApp(apiAddress, accessToken, app.AppId);
+                routesFromApi = await _cfApiClient.ListRoutesForAppAsync(apiAddress, accessToken, app.AppId);
             }
             catch (Exception originalException)
             {
@@ -1030,7 +1031,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             {
                 routeDeletionTasks.Add(Task.Run(async () =>
                 {
-                    var routeWasDeleted = await _cfApiClient.DeleteRouteWithGuid(apiAddress, accessToken, route.RouteGuid);
+                    var routeWasDeleted = await _cfApiClient.DeleteRouteWithGuidAsync(apiAddress, accessToken, route.RouteGuid);
                     if (!routeWasDeleted)
                     {
                         Interlocked.Increment(ref failed);
@@ -1131,7 +1132,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
             try
             {
-                logsResult = await _cfCliService.GetRecentAppLogs(app.AppName, app.ParentSpace.ParentOrg.OrgName, app.ParentSpace.SpaceName);
+                logsResult = await _cfCliService.GetRecentAppLogsAsync(app.AppName, app.ParentSpace.ParentOrg.OrgName, app.ParentSpace.SpaceName);
             }
             catch (InvalidRefreshTokenException)
             {
@@ -1218,7 +1219,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
             List<Stack> stacksFromApi;
             try
             {
-                stacksFromApi = await _cfApiClient.ListStacks(apiAddress, accessToken);
+                stacksFromApi = await _cfApiClient.ListStacksAsync(apiAddress, accessToken);
             }
             catch (Exception originalException)
             {
@@ -1283,7 +1284,7 @@ namespace Tanzu.Toolkit.Services.CloudFoundry
 
         private async Task MatchCliVersionToApiVersion()
         {
-            var apiVersion = await _cfCliService.GetApiVersion();
+            var apiVersion = await _cfCliService.GetApiVersionAsync();
             if (apiVersion == null)
             {
                 _dialogService.DisplayErrorDialog(_ccApiVersionUndetectableErrTitle, _ccApiVersionUndetectableErrMsg);

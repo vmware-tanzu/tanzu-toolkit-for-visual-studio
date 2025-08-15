@@ -23,7 +23,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             // set up mockUiDispatcherService to run whatever method is passed
             // to RunOnUiThread; do not delegate to the UI Dispatcher
-            MockUiDispatcherService.Setup(mock => mock.RunOnUiThreadAsync(It.IsAny<Action>()))
+            MockUiDispatcherService.Setup(mock => mock.RunOnUIThreadAsync(It.IsAny<Action>()))
                 .Callback<Action>(action => { action(); });
 
             _receivedEvents = [];
@@ -46,7 +46,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             MockDataPersistenceService.Setup(m => m.ReadStringData(TanzuExplorerViewModel._connectionNameKey)).Returns((string)null);
             MockDataPersistenceService.Setup(m => m.ReadStringData(TanzuExplorerViewModel._connectionAddressKey)).Returns("junk non-null value");
-            MockDataPersistenceService.Setup(m => m.SavedCfCredsExist()).Returns(true);
+            MockDataPersistenceService.Setup(m => m.SavedCloudFoundryCredentialsExist()).Returns(true);
 
             _sut = new TanzuExplorerViewModel(Services);
 
@@ -59,7 +59,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             MockDataPersistenceService.Setup(m => m.ReadStringData(TanzuExplorerViewModel._connectionNameKey)).Returns("junk non-null value");
             MockDataPersistenceService.Setup(m => m.ReadStringData(TanzuExplorerViewModel._connectionAddressKey)).Returns((string)null);
-            MockDataPersistenceService.Setup(m => m.SavedCfCredsExist()).Returns(true);
+            MockDataPersistenceService.Setup(m => m.SavedCloudFoundryCredentialsExist()).Returns(true);
 
             _sut = new TanzuExplorerViewModel(Services);
 
@@ -70,7 +70,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("Ctor")]
         public void Ctor_SetsTasConnectionToNull_WhenAccessTokenIrretrievable()
         {
-            MockDataPersistenceService.Setup(m => m.SavedCfCredsExist()).Returns(false);
+            MockDataPersistenceService.Setup(m => m.SavedCloudFoundryCredentialsExist()).Returns(false);
             MockDataPersistenceService.Setup(m => m.ReadStringData(TanzuExplorerViewModel._connectionNameKey)).Returns("junk non-null value");
             MockDataPersistenceService.Setup(m => m.ReadStringData(TanzuExplorerViewModel._connectionAddressKey)).Returns("junk non-null value");
             MockDataPersistenceService.Setup(m => m.ReadStringData(TanzuExplorerViewModel._connectionSslPolicyKey)).Returns("junk non-null value");
@@ -91,7 +91,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var savedConnectionName = "junk";
             var savedConnectionAddress = "junk";
 
-            MockDataPersistenceService.Setup(m => m.SavedCfCredsExist()).Returns(true);
+            MockDataPersistenceService.Setup(m => m.SavedCloudFoundryCredentialsExist()).Returns(true);
             MockDataPersistenceService.Setup(m => m.ReadStringData(TanzuExplorerViewModel._connectionNameKey)).Returns(savedConnectionName);
             MockDataPersistenceService.Setup(m => m.ReadStringData(TanzuExplorerViewModel._connectionAddressKey)).Returns(savedConnectionAddress);
             MockDataPersistenceService.Setup(m => m.ReadStringData(TanzuExplorerViewModel._connectionSslPolicyKey)).Returns(savedSslPolicyValue);
@@ -261,7 +261,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("StopCloudFoundryApp")]
+        [TestCategory("StopCloudFoundryAppAsync")]
         public async Task StopCfApp_CallsStopCfAppAsync()
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
@@ -271,7 +271,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Exception shouldStayNull = null;
             try
             {
-                await _sut.StopCloudFoundryApp(fakeApp);
+                await _sut.StopCloudFoundryAppAsync(fakeApp);
             }
             catch (Exception e)
             {
@@ -283,7 +283,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("StopCloudFoundryApp")]
+        [TestCategory("StopCloudFoundryAppAsync")]
         public async Task StopCfApp_DisplaysErrorDialog_WhenStopAppAsyncFails()
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
@@ -291,7 +291,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockCloudFoundryService.Setup(mock => mock.StopAppAsync(fakeApp, false, It.IsAny<int>()))
                 .ReturnsAsync(_fakeFailureDetailedResult);
 
-            await _sut.StopCloudFoundryApp(fakeApp);
+            await _sut.StopCloudFoundryAppAsync(fakeApp);
 
             var expectedErrorTitle = $"{TanzuExplorerViewModel._stopAppErrorMsg} {fakeApp.AppName}.";
             var expectedErrorMsg = _fakeFailureDetailedResult.Explanation;
@@ -301,7 +301,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("StopCloudFoundryApp")]
+        [TestCategory("StopCloudFoundryAppAsync")]
         public async Task StopCfApp_LogsError_WhenStopAppAsyncFails()
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
@@ -309,7 +309,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockCloudFoundryService.Setup(mock => mock.StopAppAsync(fakeApp, false, It.IsAny<int>()))
                 .ReturnsAsync(_fakeFailureDetailedResult);
 
-            await _sut.StopCloudFoundryApp(fakeApp);
+            await _sut.StopCloudFoundryAppAsync(fakeApp);
 
             var logPropVal1 = "{AppName}";
             var logPropVal2 = "{StopResult}";
@@ -320,7 +320,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("StartCloudFoundryApp")]
+        [TestCategory("StartCloudFoundryAppAsync")]
         public async Task StartCfApp_CallsStartAppAsync()
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
@@ -330,7 +330,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Exception shouldStayNull = null;
             try
             {
-                await _sut.StartCloudFoundryApp(fakeApp);
+                await _sut.StartCloudFoundryAppAsync(fakeApp);
             }
             catch (Exception e)
             {
@@ -342,7 +342,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("StartCloudFoundryApp")]
+        [TestCategory("StartCloudFoundryAppAsync")]
         public async Task StartCfApp_DisplaysErrorDialog_WhenStartAppAsyncFails()
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
@@ -350,7 +350,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockCloudFoundryService.Setup(mock => mock.StartAppAsync(fakeApp, false, It.IsAny<int>()))
                 .ReturnsAsync(_fakeFailureDetailedResult);
 
-            await _sut.StartCloudFoundryApp(fakeApp);
+            await _sut.StartCloudFoundryAppAsync(fakeApp);
 
             var expectedErrorTitle = $"{TanzuExplorerViewModel._startAppErrorMsg} {fakeApp.AppName}.";
             var expectedErrorMsg = _fakeFailureDetailedResult.Explanation;
@@ -360,7 +360,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("StartCloudFoundryApp")]
+        [TestCategory("StartCloudFoundryAppAsync")]
         public async Task StartCfApp_LogsError_WhenStartAppAsyncFails()
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", parentSpace: null, null);
@@ -368,7 +368,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockCloudFoundryService.Setup(mock => mock.StartAppAsync(fakeApp, false, It.IsAny<int>()))
                 .ReturnsAsync(_fakeFailureDetailedResult);
 
-            await _sut.StartCloudFoundryApp(fakeApp);
+            await _sut.StartCloudFoundryAppAsync(fakeApp);
 
             var logPropVal1 = "{AppName}";
             var logPropVal2 = "{StartResult}";
@@ -379,7 +379,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("RefreshOrg")]
+        [TestCategory("RefreshOrgAsync")]
         public async Task RefreshOrg_CallsUpdateAllChildrenOnOrg_WhenArgIsOrgViewModel()
         {
             var ovm = new FakeOrgViewModel(_fakeCfOrg, Services);
@@ -387,13 +387,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsInstanceOfType<OrgViewModel>(ovm);
             Assert.AreEqual(0, ovm.NumUpdates);
 
-            await _sut.RefreshOrg(ovm);
+            await _sut.RefreshOrgAsync(ovm);
 
             Assert.AreEqual(1, ovm.NumUpdates);
         }
 
         [TestMethod]
-        [TestCategory("RefreshSpace")]
+        [TestCategory("RefreshSpaceAsync")]
         public async Task RefreshSpace_CallsUpdateAllChildrenOnSpace_WhenArgIsSpaceViewModel()
         {
             var svm = new FakeSpaceViewModel(_fakeCfSpace, Services);
@@ -401,7 +401,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsInstanceOfType<SpaceViewModel>(svm);
             Assert.AreEqual(0, svm.NumUpdates);
 
-            await _sut.RefreshSpace(svm);
+            await _sut.RefreshSpaceAsync(svm);
 
             Assert.AreEqual(1, svm.NumUpdates);
         }
@@ -455,14 +455,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             _sut.CloudFoundryConnection = _fakeTanzuConnection;
 
-            MockThreadingService.Setup(m => m.StartBackgroundTask(It.IsAny<Func<Task>>())).Verifiable();
+            MockThreadingService.Setup(m => m.StartBackgroundTaskAsync(It.IsAny<Func<Task>>())).Verifiable();
 
             Assert.IsNotNull(_sut.CloudFoundryConnection);
             Assert.IsFalse(_sut.IsRefreshingAll);
 
             _sut.RefreshAllItems();
 
-            MockThreadingService.Verify(m => m.StartBackgroundTask(_sut.UpdateAllTreeItems), Times.Once);
+            MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(_sut.UpdateAllTreeItems), Times.Once);
         }
 
         [TestMethod]
@@ -475,19 +475,19 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             _sut.RefreshAllItems(null);
 
-            MockThreadingService.Verify(m => m.StartBackgroundTask(It.IsAny<Func<Task>>()), Times.Never);
+            MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(It.IsAny<Func<Task>>()), Times.Never);
         }
 
         [TestMethod]
-        [TestCategory("DisplayRecentAppLogs")]
+        [TestCategory("DisplayRecentAppLogsAsync")]
         public async Task DisplayRecentAppLogs_LogsError_WhenArgumentTypeIsNotApp()
         {
-            await _sut.DisplayRecentAppLogs(new object());
+            await _sut.DisplayRecentAppLogsAsync(new object());
             MockLogger.Verify(m => m.Error(It.IsAny<string>()), Times.Once);
         }
 
         [TestMethod]
-        [TestCategory("DisplayRecentAppLogs")]
+        [TestCategory("DisplayRecentAppLogsAsync")]
         public async Task DisplayRecentAppLogs_DisplaysErrorDialog_WhenLogsCmdFails()
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", null, "junk");
@@ -499,7 +499,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockCloudFoundryService.Setup(m => m.GetRecentLogsAsync(fakeApp))
                 .ReturnsAsync(fakeLogsResult);
 
-            await _sut.DisplayRecentAppLogs(fakeApp);
+            await _sut.DisplayRecentAppLogsAsync(fakeApp);
 
             MockLogger.Verify(m => m.Error(It.Is<string>(s => s.Contains(fakeLogsResult.Explanation))),
                 Times.Once);
@@ -509,7 +509,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("DisplayRecentAppLogs")]
+        [TestCategory("DisplayRecentAppLogsAsync")]
         public async Task DisplayRecentAppLogs_CallsViewShowMethod_WhenLogsCmdSucceeds()
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", null, "junk");
@@ -524,13 +524,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsFalse(fakeView.ShowMethodWasCalled);
 
-            await _sut.DisplayRecentAppLogs(fakeApp);
+            await _sut.DisplayRecentAppLogsAsync(fakeApp);
 
             Assert.IsTrue(fakeView.ShowMethodWasCalled);
         }
 
         [TestMethod]
-        [TestCategory("DisplayRecentAppLogs")]
+        [TestCategory("DisplayRecentAppLogsAsync")]
         public async Task DisplayRecentAppLogs_SetsAuthenticationRequiredToTrue_WhenLogsCmdFailsDueToInvalidRefreshToken()
         {
             var fakeApp = new CloudFoundryApp("junk", "junk", null, "junk");
@@ -547,7 +547,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsFalse(_sut.AuthenticationRequired);
 
-            await _sut.DisplayRecentAppLogs(fakeApp);
+            await _sut.DisplayRecentAppLogsAsync(fakeApp);
 
             Assert.IsTrue(_sut.AuthenticationRequired);
 
@@ -670,7 +670,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             _sut.SetConnection(_fakeCfInstance);
 
-            MockThreadingService.Verify(m => m.StartRecurrentUiTaskInBackground(_sut.RefreshAllItems, null, It.IsAny<int>()), Times.Once);
+            MockThreadingService.Verify(m => m.StartRecurrentUITaskInBackground(_sut.RefreshAllItems, null, It.IsAny<int>()), Times.Once);
         }
 
         [TestMethod]

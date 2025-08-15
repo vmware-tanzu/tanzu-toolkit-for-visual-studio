@@ -36,7 +36,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views.Commands
 
         public void RaiseCanExecuteChanged()
         {
-            _eventHandler?.Invoke(this, new EventArgs());
+            _eventHandler?.Invoke(this, EventArgs.Empty);
         }
 
         public bool CanExecute(object parameter)

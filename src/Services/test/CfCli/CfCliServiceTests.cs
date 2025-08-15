@@ -1069,7 +1069,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         }
 
         [TestMethod]
-        [TestCategory("GetApiVersion")]
+        [TestCategory("GetApiVersionAsync")]
         public async Task GetApiVersion_ReturnsVersion_WhenApiCmdSucceeds()
         {
             var expectedArgs = "api";
@@ -1087,7 +1087,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
                 .Setup(m => m.RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(mockCmdResult);
 
-            var result = await _sut.GetApiVersion();
+            var result = await _sut.GetApiVersionAsync();
 
             Assert.AreEqual(result.Major, fakeMajorVersion);
             Assert.AreEqual(result.Minor, fakeMinorVersion);
@@ -1095,7 +1095,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         }
 
         [TestMethod]
-        [TestCategory("GetApiVersion")]
+        [TestCategory("GetApiVersionAsync")]
         public async Task GetApiVersion_ReturnsNull_WhenApiCmdFails()
         {
             var expectedArgs = "api";
@@ -1104,13 +1104,13 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
                 .Setup(m => m.RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeFailureCmdResult);
 
-            var result = await _sut.GetApiVersion();
+            var result = await _sut.GetApiVersionAsync();
 
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        [TestCategory("GetApiVersion")]
+        [TestCategory("GetApiVersionAsync")]
         public async Task GetApiVersion_ReturnsNull_WhenOutputParsingFails()
         {
             var expectedArgs = "api";
@@ -1122,13 +1122,13 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
                 .Setup(m => m.RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeFailureCmdResult);
 
-            var result = await _sut.GetApiVersion();
+            var result = await _sut.GetApiVersionAsync();
 
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        [TestCategory("GetRecentAppLogs")]
+        [TestCategory("GetRecentAppLogsAsync")]
         public async Task GetRecentAppLogs_ReturnsSuccessResult_WhenLogsCmdSucceeds()
         {
             var fakeAppName = "fake app name";
@@ -1152,7 +1152,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
                 .Setup(m => m.RunExecutable(_fakePathToCfExe, expectedLogsCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(mockCmdResult);
 
-            var result = await _sut.GetRecentAppLogs(fakeAppName, _fakeOrg.OrgName, _fakeSpace.SpaceName);
+            var result = await _sut.GetRecentAppLogsAsync(fakeAppName, _fakeOrg.OrgName, _fakeSpace.SpaceName);
 
             Assert.AreEqual(result.Content, fakeCmdOutput);
             Assert.IsTrue(result.Succeeded);
@@ -1161,7 +1161,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         }
 
         [TestMethod]
-        [TestCategory("GetRecentAppLogs")]
+        [TestCategory("GetRecentAppLogsAsync")]
         public async Task GetRecentAppLogs_ReturnsFailureResult_WhenLogsCmdExitCodeIsNotZero()
         {
             var fakeAppName = "fake app name";
@@ -1186,7 +1186,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
                 .Setup(m => m.RunExecutable(_fakePathToCfExe, expectedArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(mockCmdResult);
 
-            var result = await _sut.GetRecentAppLogs(fakeAppName, _fakeOrg.OrgName, _fakeSpace.SpaceName);
+            var result = await _sut.GetRecentAppLogsAsync(fakeAppName, _fakeOrg.OrgName, _fakeSpace.SpaceName);
 
             Assert.IsFalse(result.Succeeded);
             Assert.AreEqual(result.Content, fakeCmdOutput);
@@ -1195,7 +1195,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         }
 
         [TestMethod]
-        [TestCategory("GetRecentAppLogs")]
+        [TestCategory("GetRecentAppLogsAsync")]
         public async Task GetRecentAppLogs_ReturnsFailureResult_WhenTargetOrgFails()
         {
             var fakeAppName = "junk";
@@ -1206,7 +1206,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
                 .Setup(m => m.RunExecutable(_fakePathToCfExe, expectedTargetOrgCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeFailureCmdResult);
 
-            var result = await _sut.GetRecentAppLogs(fakeAppName, _fakeOrg.OrgName, _fakeSpace.SpaceName);
+            var result = await _sut.GetRecentAppLogsAsync(fakeAppName, _fakeOrg.OrgName, _fakeSpace.SpaceName);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNull(result.Content);
@@ -1215,7 +1215,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         }
 
         [TestMethod]
-        [TestCategory("GetRecentAppLogs")]
+        [TestCategory("GetRecentAppLogsAsync")]
         public async Task GetRecentAppLogs_ReturnsFailureResult_WhenTargetSpaceFails()
         {
             var fakeAppName = "junk";
@@ -1231,7 +1231,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
                 .Setup(m => m.RunExecutable(_fakePathToCfExe, expectedTargetSpaceCmdArgs, null, _defaultEnvVars, null, null, null))
                 .Returns(_fakeFailureCmdResult);
 
-            var result = await _sut.GetRecentAppLogs(fakeAppName, _fakeOrg.OrgName, _fakeSpace.SpaceName);
+            var result = await _sut.GetRecentAppLogsAsync(fakeAppName, _fakeOrg.OrgName, _fakeSpace.SpaceName);
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNull(result.Content);
@@ -1240,7 +1240,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         }
 
         [TestMethod]
-        [TestCategory("GetRecentAppLogs")]
+        [TestCategory("GetRecentAppLogsAsync")]
         public async Task GetRecentAppLogs_ThrowsInvalidRefreshTokenException_WhenTargetOrgReportsInvalidRefreshToken()
         {
             var fakeAppName = "my fake app";
@@ -1255,7 +1255,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             Exception thrownException = null;
             try
             {
-                await _sut.GetRecentAppLogs(fakeAppName, _fakeOrg.OrgName, _fakeSpace.SpaceName);
+                await _sut.GetRecentAppLogsAsync(fakeAppName, _fakeOrg.OrgName, _fakeSpace.SpaceName);
             }
             catch (Exception ex)
             {
@@ -1267,7 +1267,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         }
 
         [TestMethod]
-        [TestCategory("GetRecentAppLogs")]
+        [TestCategory("GetRecentAppLogsAsync")]
         public async Task GetRecentAppLogs_ThrowsInvalidRefreshTokenException_WhenTargetSpaceReportsInvalidRefreshToken()
         {
             var fakeAppName = "my fake app";
@@ -1287,7 +1287,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             Exception thrownException = null;
             try
             {
-                await _sut.GetRecentAppLogs(fakeAppName, _fakeOrg.OrgName, _fakeSpace.SpaceName);
+                await _sut.GetRecentAppLogsAsync(fakeAppName, _fakeOrg.OrgName, _fakeSpace.SpaceName);
             }
             catch (Exception ex)
             {
@@ -1299,7 +1299,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         }
 
         [TestMethod]
-        [TestCategory("GetRecentAppLogs")]
+        [TestCategory("GetRecentAppLogsAsync")]
         public async Task GetRecentAppLogs_ThrowsInvalidRefreshTokenException_WhenCfCmdFailsDueToInvalidRefreshToken()
         {
             var fakeAppName = "my fake app";
@@ -1323,7 +1323,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             Exception thrownException = null;
             try
             {
-                await _sut.GetRecentAppLogs(fakeAppName, _fakeOrg.OrgName, _fakeSpace.SpaceName);
+                await _sut.GetRecentAppLogsAsync(fakeAppName, _fakeOrg.OrgName, _fakeSpace.SpaceName);
             }
             catch (Exception ex)
             {
@@ -1335,7 +1335,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         }
 
         [TestMethod]
-        [TestCategory("LoginWithSsoPasscode")]
+        [TestCategory("LoginWithSSOPasscodeAsync")]
         public async Task LoginWithSsoPasscode_ReturnsSuccessResult_WhenLoginCommandSucceeds()
         {
             const string fakePasscode = "fake sso passcode";
@@ -1347,14 +1347,14 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
                     expectedProcessCancelTriggers))
                 .Returns(_fakeSuccessCmdResult);
 
-            var result = await _sut.LoginWithSsoPasscode(_fakeValidTarget, fakePasscode);
+            var result = await _sut.LoginWithSSOPasscodeAsync(_fakeValidTarget, fakePasscode);
 
             Assert.IsTrue(result.Succeeded);
             Assert.IsNull(result.Explanation);
         }
 
         [TestMethod]
-        [TestCategory("LoginWithSsoPasscode")]
+        [TestCategory("LoginWithSSOPasscodeAsync")]
         public async Task LoginWithSsoPasscode_ReturnsFailureResult_WhenLoginCommandFails()
         {
             const string fakePasscode = "fake sso passcode";
@@ -1366,7 +1366,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
                     expectedProcessCancelTriggers))
                 .Returns(_fakeFailureCmdResult);
 
-            var result = await _sut.LoginWithSsoPasscode(_fakeValidTarget, fakePasscode);
+            var result = await _sut.LoginWithSSOPasscodeAsync(_fakeValidTarget, fakePasscode);
 
             Assert.IsFalse(result.Succeeded);
             Assert.AreEqual(_fakeFailureCmdResult.StdErr, result.Explanation);

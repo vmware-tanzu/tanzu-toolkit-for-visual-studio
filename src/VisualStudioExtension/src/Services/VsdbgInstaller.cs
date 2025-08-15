@@ -42,7 +42,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services
             var sshCmd =
                 $"cd {_defaultCfAppDir} && curl -L https://aka.ms/getvsdbg{scriptExt} -o {_vsdbgInstallScriptName}.{scriptExt} && {startCmd}";
 
-            return await _cfClient.ExecuteSshCommand(app.AppName, app.ParentSpace.ParentOrg.OrgName,
+            return await _cfClient.ExecuteSSHCommandAsync(app.AppName, app.ParentSpace.ParentOrg.OrgName,
                 app.ParentSpace.SpaceName, sshCmd);
         }
 

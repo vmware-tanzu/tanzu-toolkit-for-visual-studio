@@ -168,7 +168,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut = new DeploymentDialogViewModel(Services);
 
             Assert.IsNotNull(_sut._tanzuExplorerViewModel.CloudFoundryConnection);
-            MockThreadingService.Verify(m => m.StartBackgroundTask(_sut.UpdateCfOrgOptions), Times.Once);
+            MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(_sut.UpdateCfOrgOptions), Times.Once);
         }
 
         [TestMethod]
@@ -181,7 +181,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut = new DeploymentDialogViewModel(Services);
 
             Assert.IsNotNull(_sut._tanzuExplorerViewModel.CloudFoundryConnection);
-            MockThreadingService.Verify(m => m.StartBackgroundTask(_sut.UpdateBuildpackOptions), Times.Once);
+            MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(_sut.UpdateBuildpackOptions), Times.Once);
         }
 
         [TestMethod]
@@ -194,7 +194,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut = new DeploymentDialogViewModel(Services);
 
             Assert.IsNotNull(_sut._tanzuExplorerViewModel.CloudFoundryConnection);
-            MockThreadingService.Verify(m => m.StartBackgroundTask(_sut.UpdateServiceOptions), Times.Once);
+            MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(_sut.UpdateServiceOptions), Times.Once);
         }
 
         [TestMethod]
@@ -207,7 +207,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut = new DeploymentDialogViewModel(Services);
 
             Assert.IsNotNull(_sut._tanzuExplorerViewModel.CloudFoundryConnection);
-            MockThreadingService.Verify(m => m.StartBackgroundTask(_sut.UpdateStackOptions), Times.Once);
+            MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(_sut.UpdateStackOptions), Times.Once);
         }
 
         [TestMethod]
@@ -396,7 +396,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsTrue(_sut.DeploymentInProgress);
 
             MockDialogService.Verify(mock => mock.CloseDialog(dw, true), Times.Once);
-            MockThreadingService.Verify(mock => mock.StartBackgroundTask(_sut.StartDeployment), Times.Once);
+            MockThreadingService.Verify(mock => mock.StartBackgroundTaskAsync(_sut.StartDeployment), Times.Once);
         }
 
         [TestMethod]
@@ -418,7 +418,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsFalse(_sut.DeploymentInProgress);
 
             MockDialogService.Verify(mock => mock.CloseDialog(dw, true), Times.Never);
-            MockThreadingService.Verify(mock => mock.StartBackgroundTask(_sut.StartDeployment), Times.Never);
+            MockThreadingService.Verify(mock => mock.StartBackgroundTaskAsync(_sut.StartDeployment), Times.Never);
         }
 
         [TestMethod]
@@ -904,7 +904,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.OpenLoginView(null);
 
             Assert.IsNotNull(_sut._tanzuExplorerViewModel.CloudFoundryConnection);
-            MockThreadingService.Verify(m => m.StartBackgroundTask(_sut.UpdateCfOrgOptions), Times.Once);
+            MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(_sut.UpdateCfOrgOptions), Times.Once);
         }
 
         [TestMethod]
@@ -927,7 +927,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.OpenLoginView(null);
 
             Assert.IsNotNull(_sut._tanzuExplorerViewModel.CloudFoundryConnection);
-            MockThreadingService.Verify(m => m.StartBackgroundTask(_sut.UpdateBuildpackOptions), Times.Once);
+            MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(_sut.UpdateBuildpackOptions), Times.Once);
         }
 
         [TestMethod]
@@ -950,7 +950,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.OpenLoginView(null);
 
             Assert.IsNotNull(_sut._tanzuExplorerViewModel.CloudFoundryConnection);
-            MockThreadingService.Verify(m => m.StartBackgroundTask(_sut.UpdateServiceOptions), Times.Once);
+            MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(_sut.UpdateServiceOptions), Times.Once);
         }
 
         [TestMethod]
@@ -973,7 +973,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.OpenLoginView(null);
 
             Assert.IsNotNull(_sut._tanzuExplorerViewModel.CloudFoundryConnection);
-            MockThreadingService.Verify(m => m.StartBackgroundTask(_sut.UpdateStackOptions), Times.Once);
+            MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(_sut.UpdateStackOptions), Times.Once);
         }
 
         [TestMethod]

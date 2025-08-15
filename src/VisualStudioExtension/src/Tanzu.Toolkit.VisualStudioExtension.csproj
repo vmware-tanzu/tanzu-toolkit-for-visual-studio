@@ -73,7 +73,7 @@
     <Compile Include="Services\ErrorDialogService.cs" />
     <Compile Include="Commands\OpenLogsCommand.cs" />
     <Compile Include="Commands\PushToCloudFoundryCommand.cs" />
-    <Compile Include="Services\UiDispatcherService.cs" />
+    <Compile Include="Services\VisualStudioUIDispatcherService.cs" />
     <Compile Include="Services\DialogService.cs" />
     <Compile Include="TanzuToolkitForVisualStudioPackage1.cs">
       <AutoGen>True</AutoGen>
