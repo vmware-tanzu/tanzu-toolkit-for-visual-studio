@@ -10,7 +10,9 @@ namespace Tanzu.Toolkit.VisualStudio.Views.Commands
         private readonly Predicate<object> _canExecute;
         private EventHandler _eventHandler;
 
-        public DelegatingCommand(Action<object> action) : this(action, null) { }
+        public DelegatingCommand(Action<object> action) : this(action, null)
+        {
+        }
 
         public DelegatingCommand(Action<object> action, Predicate<object> canExecute)
         {
@@ -34,7 +36,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views.Commands
 
         public void RaiseCanExecuteChanged()
         {
-            _eventHandler?.Invoke(this, new EventArgs());
+            _eventHandler?.Invoke(this, EventArgs.Empty);
         }
 
         public bool CanExecute(object parameter)

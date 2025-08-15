@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -35,11 +35,12 @@ namespace Tanzu.Toolkit.Services.CfCli
         internal const string _deleteAppCmd = "delete -f"; // -f avoids confirmation prompt
         internal const string _invalidRefreshTokenError = "The token expired, was revoked, or the token ID is incorrect. Please log back in to re-authenticate.";
         internal const string _logoutCmd = "logout";
+
         internal readonly List<string> _invalidSslCertCues = new List<string>
         {
             "Invalid SSL Cert",
             "Use 'cf api --skip-ssl-validation' to continue with an insecure API endpoint",
-            "certificate has expired or is not yet valid",
+            "certificate has expired or is not yet valid"
         };
 
         private readonly IFileService _fileService;
@@ -77,7 +78,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         /// <returns>
         /// <code>int[] versionNumbers</code>Array of integers: versionNumbers[0] = major version, versionNumbers[1] = minor, etc.
         /// </returns>
-        public async Task<Version> GetApiVersion()
+        public async Task<Version> GetApiVersionAsync()
         {
             var result = await RunCfCommandAsync(_getApiVersionCmd);
             if (!result.Succeeded)
@@ -204,7 +205,8 @@ namespace Tanzu.Toolkit.Services.CfCli
             return result;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0059:Unnecessary assignment of a value", Justification = "Null assigment is meant to clear plain text password from memory")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0059:Unnecessary assignment of a value",
+            Justification = "Null assigment is meant to clear plain text password from memory")]
         public async Task<DetailedResult> AuthenticateAsync(string username, SecureString password)
         {
             var passwordStr = new System.Net.NetworkCredential(string.Empty, password).Password;
@@ -320,7 +322,8 @@ namespace Tanzu.Toolkit.Services.CfCli
             return result;
         }
 
-        public async Task<DetailedResult> PushAppAsync(string manifestPath, string appDirPath, string orgName, string spaceName, Action<string> stdOutCallback, Action<string> stdErrCallback)
+        public async Task<DetailedResult> PushAppAsync(string manifestPath, string appDirPath, string orgName, string spaceName, Action<string> stdOutCallback,
+            Action<string> stdErrCallback)
         {
             var args = $"push -f \"{manifestPath}\"";
 
@@ -360,7 +363,7 @@ namespace Tanzu.Toolkit.Services.CfCli
             return deployResult;
         }
 
-        public async Task<DetailedResult<string>> GetRecentAppLogs(string appName, string orgName, string spaceName)
+        public async Task<DetailedResult<string>> GetRecentAppLogsAsync(string appName, string orgName, string spaceName)
         {
             var args = $"logs \"{appName}\" --recent";
 
@@ -405,40 +408,24 @@ namespace Tanzu.Toolkit.Services.CfCli
                 var targetOrgResult = TargetOrg(orgName);
                 if (!targetOrgResult.Succeeded)
                 {
-                    return new DetailedResult<Process>
-                    {
-                        Succeeded = false,
-                        Explanation = $"Unable to target org '{orgName}'",
-                    };
+                    return new DetailedResult<Process> { Succeeded = false, Explanation = $"Unable to target org '{orgName}'" };
                 }
 
                 var targetSpaceResult = TargetSpace(spaceName);
                 if (!targetSpaceResult.Succeeded)
                 {
-                    return new DetailedResult<Process>
-                    {
-                        Succeeded = false,
-                        Explanation = $"Unable to target space '{spaceName}'",
-                    };
+                    return new DetailedResult<Process> { Succeeded = false, Explanation = $"Unable to target space '{spaceName}'" };
                 }
 
                 logsProcess = StartCfProcess(args, stdOutCallback, stdErrCallback);
             }
 
             return logsProcess == null
-                ? new DetailedResult<Process>
-                {
-                    Succeeded = false,
-                    Explanation = $"Failed to start logs stream process for app {appName}",
-                }
-                : new DetailedResult<Process>
-                {
-                    Succeeded = true,
-                    Content = logsProcess,
-                };
+                ? new DetailedResult<Process> { Succeeded = false, Explanation = $"Failed to start logs stream process for app {appName}" }
+                : new DetailedResult<Process> { Succeeded = true, Content = logsProcess };
         }
 
-        public async Task<DetailedResult> LoginWithSsoPasscode(string apiAddress, string passcode)
+        public async Task<DetailedResult> LoginWithSSOPasscodeAsync(string apiAddress, string passcode)
         {
             var args = $"login -a \"{apiAddress}\" --sso-passcode \"{passcode}\"";
 
@@ -453,7 +440,7 @@ namespace Tanzu.Toolkit.Services.CfCli
             return await loginTask;
         }
 
-        public async Task<DetailedResult> ExecuteSshCommand(string appName, string orgName, string spaceName, string sshCommand)
+        public async Task<DetailedResult> ExecuteSSHCommandAsync(string appName, string orgName, string spaceName, string sshCommand)
         {
             var args = $"ssh {appName} -c \"{sshCommand.Replace("\"", "\\\"")}\"";
             Task<DetailedResult> sshTask;
@@ -473,6 +460,7 @@ namespace Tanzu.Toolkit.Services.CfCli
 
                 sshTask = Task.Run(async () => await RunCfCommandAsync(args));
             }
+
             var sshResult = await sshTask;
             ThrowIfResultIndicatesInvalidRefreshToken(sshResult);
             return sshResult;
@@ -500,10 +488,7 @@ namespace Tanzu.Toolkit.Services.CfCli
                 return new DetailedResult(false, _cfExePathErrorMsg);
             }
 
-            var envVars = new Dictionary<string, string>
-            {
-                { "CF_HOME", ConfigFilePath }
-            };
+            var envVars = new Dictionary<string, string> { { "CF_HOME", ConfigFilePath } };
 
             var cmdProcessService = Services.GetRequiredService<ICommandProcessService>();
             var result = cmdProcessService.RunExecutable(pathToCfExe, arguments, workingDir, envVars);
@@ -539,7 +524,8 @@ namespace Tanzu.Toolkit.Services.CfCli
         /// <param name="workingDir"></param>
         /// <param name="cancellationTriggers"></param>
         /// <returns>An awaitable <see cref="Task"/> which will return a <see cref="DetailedResult"/> containing the results of the CF command.</returns>
-        internal async Task<DetailedResult> RunCfCommandAsync(string arguments, Action<string> stdOutCallback = null, Action<string> stdErrCallback = null, string workingDir = null, List<string> cancellationTriggers = null)
+        internal async Task<DetailedResult> RunCfCommandAsync(string arguments, Action<string> stdOutCallback = null, Action<string> stdErrCallback = null,
+            string workingDir = null, List<string> cancellationTriggers = null)
         {
             var pathToCfExe = _fileService.FullPathToCfExe;
             if (string.IsNullOrEmpty(pathToCfExe))
@@ -547,13 +533,11 @@ namespace Tanzu.Toolkit.Services.CfCli
                 return new DetailedResult(false, $"Unable to locate cf.exe.");
             }
 
-            var envVars = new Dictionary<string, string>
-            {
-                { "CF_HOME", ConfigFilePath }
-            };
+            var envVars = new Dictionary<string, string> { { "CF_HOME", ConfigFilePath } };
 
             var cmdProcessService = Services.GetRequiredService<ICommandProcessService>();
-            var result = await Task.Run(() => cmdProcessService.RunExecutable(pathToCfExe, arguments, workingDir, envVars, stdOutCallback, stdErrCallback, processCancelTriggers: cancellationTriggers));
+            var result = await Task.Run(() =>
+                cmdProcessService.RunExecutable(pathToCfExe, arguments, workingDir, envVars, stdOutCallback, stdErrCallback, processCancelTriggers: cancellationTriggers));
 
             if (result.ExitCode == 0)
             {
@@ -576,7 +560,8 @@ namespace Tanzu.Toolkit.Services.CfCli
             return new DetailedResult(false, reason, cmdResult: result);
         }
 
-        private Process StartCfProcess(string arguments, Action<string> stdOutCallback = null, Action<string> stdErrCallback = null, string workingDir = null, List<string> cancellationTriggers = null)
+        private Process StartCfProcess(string arguments, Action<string> stdOutCallback = null, Action<string> stdErrCallback = null, string workingDir = null,
+            List<string> cancellationTriggers = null)
         {
             var pathToCfExe = _fileService.FullPathToCfExe;
             if (string.IsNullOrEmpty(pathToCfExe))
@@ -585,10 +570,7 @@ namespace Tanzu.Toolkit.Services.CfCli
                 return null;
             }
 
-            var envVars = new Dictionary<string, string>
-            {
-                { "CF_HOME", ConfigFilePath }
-            };
+            var envVars = new Dictionary<string, string> { { "CF_HOME", ConfigFilePath } };
 
             var cmdProcessService = Services.GetRequiredService<ICommandProcessService>();
             return cmdProcessService.StartProcess(

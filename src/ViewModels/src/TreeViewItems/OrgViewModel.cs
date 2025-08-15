@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -30,15 +30,9 @@ namespace Tanzu.Toolkit.ViewModels
             Org = org;
             DisplayText = Org.OrgName;
 
-            LoadingPlaceholder = new PlaceholderViewModel(parent: this, services)
-            {
-                DisplayText = _loadingMsg,
-            };
+            LoadingPlaceholder = new PlaceholderViewModel(parent: this, services) { DisplayText = _loadingMsg };
 
-            EmptyPlaceholder = new PlaceholderViewModel(parent: this, Services)
-            {
-                DisplayText = _emptySpacesPlaceholderMsg,
-            };
+            EmptyPlaceholder = new PlaceholderViewModel(parent: this, Services) { DisplayText = _emptySpacesPlaceholderMsg };
         }
 
         protected internal override async Task UpdateAllChildren()
@@ -69,8 +63,8 @@ namespace Tanzu.Toolkit.ViewModels
                             var freshSpaces = new ObservableCollection<CloudFoundrySpace>(spacesResponse.Content);
                             if (freshSpaces.Count < 1)
                             {
-                                removalTasks.AddRange(originalChildren.Select(child => ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, child)));
-                                additionTasks.Add(ThreadingService.AddItemToCollectionOnUiThreadAsync(Children, EmptyPlaceholder));
+                                removalTasks.AddRange(originalChildren.Select(child => ThreadingService.RemoveItemFromCollectionOnUIThreadAsync(Children, child)));
+                                additionTasks.Add(ThreadingService.AddItemToCollectionOnUIThreadAsync(Children, EmptyPlaceholder));
                             }
                             else
                             {
@@ -79,14 +73,14 @@ namespace Tanzu.Toolkit.ViewModels
                                 {
                                     if (priorChild is PlaceholderViewModel)
                                     {
-                                        removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, priorChild));
+                                        removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUIThreadAsync(Children, priorChild));
                                     }
                                     else if (priorChild is SpaceViewModel priorSpace)
                                     {
                                         var spaceStillExists = freshSpaces.Any(o => o is CloudFoundrySpace freshSpace && freshSpace != null && freshSpace.SpaceId == priorSpace.Space.SpaceId);
                                         if (!spaceStillExists)
                                         {
-                                            removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, priorSpace));
+                                            removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUIThreadAsync(Children, priorSpace));
                                         }
                                     }
                                 }
@@ -98,7 +92,7 @@ namespace Tanzu.Toolkit.ViewModels
                                     if (!spaceAlreadyExists)
                                     {
                                         var newSpace = new SpaceViewModel(freshSpace, this, ParentTanzuExplorer, Services, expanded: false);
-                                        additionTasks.Add(ThreadingService.AddItemToCollectionOnUiThreadAsync(Children, newSpace));
+                                        additionTasks.Add(ThreadingService.AddItemToCollectionOnUIThreadAsync(Children, newSpace));
                                     }
                                 }
                             }
@@ -111,9 +105,10 @@ namespace Tanzu.Toolkit.ViewModels
                             {
                                 if (updatedChild is SpaceViewModel space)
                                 {
-                                    updateChildrenTasks.Add(ThreadingService.StartBackgroundTask(space.UpdateAllChildren));
+                                    updateChildrenTasks.Add(ThreadingService.StartBackgroundTaskAsync(space.UpdateAllChildren));
                                 }
                             }
+
                             await Task.WhenAll(updateChildrenTasks);
                         }
                         else if (spacesResponse.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
@@ -130,7 +125,7 @@ namespace Tanzu.Toolkit.ViewModels
                     catch (Exception ex)
                     {
                         Logger.Error("Caught exception trying to load spaces in OrgViewModel: {OrgViewModelLoadingException}", ex);
-                        _dialogService.DisplayWarningDialog(_getSpacesFailureMsg, "Something went wrong while loading spaces; try disconnecting & logging in again.\nIf this issue persists, please contact dotnetdevx@groups.vmware.com");
+                        _dialogService.DisplayWarningDialog(_getSpacesFailureMsg, "Something went wrong while loading spaces; try disconnecting & logging in again.");
                     }
                     finally
                     {

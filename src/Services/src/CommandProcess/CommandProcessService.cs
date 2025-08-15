@@ -22,7 +22,8 @@ namespace Tanzu.Toolkit.Services.CommandProcess
             _logger = loggingService.Logger;
         }
 
-        public CommandResult RunExecutable(string executableFilePath, string arguments, string workingDir, Dictionary<string, string> envVars = null, Action<string> stdOutAction = null, Action<string> stdErrAction = null, List<string> processCancelTriggers = null)
+        public CommandResult RunExecutable(string executableFilePath, string arguments, string workingDir, Dictionary<string, string> envVars = null,
+            Action<string> stdOutAction = null, Action<string> stdErrAction = null, List<string> processCancelTriggers = null)
         {
             // Create Process
             _process = new Process();
@@ -78,7 +79,8 @@ namespace Tanzu.Toolkit.Services.CommandProcess
             return new CommandResult(_stdOutAggregator, _stdErrAggregator, exitCode);
         }
 
-        public Process StartProcess(string executableFilePath, string arguments, string workingDir, Dictionary<string, string> envVars = null, Action<string> stdOutAction = null, Action<string> stdErrAction = null, List<string> processCancelTriggers = null)
+        public Process StartProcess(string executableFilePath, string arguments, string workingDir, Dictionary<string, string> envVars = null, Action<string> stdOutAction = null,
+            Action<string> stdErrAction = null, List<string> processCancelTriggers = null)
         {
             try
             {

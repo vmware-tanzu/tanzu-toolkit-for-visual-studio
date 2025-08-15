@@ -39,13 +39,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 GetPassword = () => { return _fakeSecurePw; },
                 PasswordEmpty = () => { return false; },
                 SkipSsl = _skipSsl,
-                CfClient = MockCloudFoundryService.Object,
+                CfClient = MockCloudFoundryService.Object
             };
 
-            _sut.PropertyChanged += (sender, e) =>
-            {
-                _receivedEvents.Add(e.PropertyName);
-            };
+            _sut.PropertyChanged += (sender, e) => { _receivedEvents.Add(e.PropertyName); };
 
             _sut.CfClient.ConfigureForCf(_fakeCfInstance);
         }
@@ -69,7 +66,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             const string expectedErrorMessage = "my fake error message";
 
-            MockCloudFoundryService.Setup(mock => mock.LoginWithCredentials(_fakeUsername, _fakeSecurePw))
+            MockCloudFoundryService.Setup(mock => mock.LoginWithCredentialsAsync(_fakeUsername, _fakeSecurePw))
                 .ReturnsAsync(new DetailedResult(false, expectedErrorMessage));
 
             await _sut.LogIn();
@@ -85,8 +82,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             _sut.TargetCf = _fakeCfInstance;
 
-            MockCloudFoundryService.Setup(mock => mock.
-              LoginWithCredentials(_fakeUsername, _fakeSecurePw))
+            MockCloudFoundryService.Setup(mock => mock.LoginWithCredentialsAsync(_fakeUsername, _fakeSecurePw))
                 .ReturnsAsync(new DetailedResult(true, null));
 
             MockTanzuExplorerViewModel.Setup(m => m.SetConnection(_sut.TargetCf)).Verifiable();
@@ -104,8 +100,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("LogIn")]
         public async Task LogIn_ClosesDialog_WhenLoginRequestSucceeds()
         {
-            MockCloudFoundryService.Setup(mock => mock.LoginWithCredentials(_fakeUsername, _fakeSecurePw))
-               .ReturnsAsync(new DetailedResult(true, null));
+            MockCloudFoundryService.Setup(mock => mock.LoginWithCredentialsAsync(_fakeUsername, _fakeSecurePw))
+                .ReturnsAsync(new DetailedResult(true, null));
 
             await _sut.LogIn(null);
 
@@ -180,7 +176,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public void CanLogIn_ReturnsFalse_WhenPasswordEmpty()
         {
             // mock out testimony from login view that password box is empty
-            _sut.PasswordEmpty = () => { return true; };
+            _sut.PasswordEmpty = () => true;
 
             Assert.IsNotNull(_sut.ConnectionName);
             Assert.IsNotNull(_sut.TargetApiAddress);
@@ -234,7 +230,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.TargetCf = _fakeCfInstance;
             _sut.SsoPasscode = fakePasscode;
 
-            MockCloudFoundryService.Setup(m => m.LoginWithSsoPasscode(_sut.TargetCf.ApiAddress, fakePasscode))
+            MockCloudFoundryService.Setup(m => m.LoginWithSSOPasscodeAsync(_sut.TargetCf.ApiAddress, fakePasscode))
                 .ReturnsAsync(_fakeFailureDetailedResult);
 
             Assert.IsFalse(_sut.HasErrors);
@@ -257,7 +253,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.TargetCf = _fakeCfInstance;
             _sut.SsoPasscode = fakePasscode;
 
-            MockCloudFoundryService.Setup(m => m.LoginWithSsoPasscode(_sut.TargetCf.ApiAddress, fakePasscode))
+            MockCloudFoundryService.Setup(m => m.LoginWithSSOPasscodeAsync(_sut.TargetCf.ApiAddress, fakePasscode))
                 .ReturnsAsync(_fakeSuccessDetailedResult);
 
             Assert.IsFalse(_sut.HasErrors);
@@ -286,15 +282,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task ConnectToCf_SetsPageNumberTo2_AndSetsSsoEnabledOnTargetToTrue_WhenSsoPromptSuccessfullyRetrieved()
         {
             var fakeSsoPrompt = "some fake string that contains a properly-formatted uri like this: https://some.fake.address :) :) :)";
-            var fakeSsoPromptResult = new DetailedResult<string>
-            {
-                Succeeded = true,
-                Content = fakeSsoPrompt,
-            };
+            var fakeSsoPromptResult = new DetailedResult<string> { Succeeded = true, Content = fakeSsoPrompt };
 
             MockCloudFoundryService.Setup(m => m.TargetCfApi(_sut.TargetApiAddress, _sut.SkipSsl))
                 .Returns(_fakeSuccessDetailedResult);
-            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.TargetApiAddress, _sut.SkipSsl))
+            MockCloudFoundryService.Setup(m => m.GetSSOPromptAsync(_sut.TargetApiAddress, _sut.SkipSsl))
                 .ReturnsAsync(fakeSsoPromptResult);
             MockCloudFoundryService.Setup(m => m.ConfigureForCf(It.IsAny<CloudFoundryInstance>())).Returns(_fakeSuccessDetailedResult);
 
@@ -310,11 +302,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ConnectToCf")]
         public async Task ConnectToCf_SetsCertificateInvalidToTrue_WhenCertValidationFails()
         {
-            var fakeCertValidationResult = new DetailedResult
-            {
-                Succeeded = false,
-                FailureType = FailureType.InvalidCertificate,
-            };
+            var fakeCertValidationResult = new DetailedResult { Succeeded = false, FailureType = FailureType.InvalidCertificate };
 
             MockCloudFoundryService.Setup(m => m.TargetCfApi(_sut.TargetApiAddress, _sut.SkipSsl))
                 .Returns(fakeCertValidationResult);
@@ -332,20 +320,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ConnectToCf")]
         public async Task ConnectToCf_SetsPageNumberTo2_AndSetsSsoEnabledOnTargetToFalse_WhenSsoPromptAbsentFromResponse()
         {
-            var fakeCertValidationResult = new DetailedResult
-            {
-                Succeeded = true,
-            };
+            var fakeCertValidationResult = new DetailedResult { Succeeded = true };
 
-            var fakeSsoPromptResult = new DetailedResult<string>
-            {
-                Succeeded = false,
-                FailureType = FailureType.MissingSsoPrompt,
-            };
+            var fakeSsoPromptResult = new DetailedResult<string> { Succeeded = false, FailureType = FailureType.MissingSsoPrompt };
 
             MockCloudFoundryService.Setup(m => m.TargetCfApi(_sut.TargetApiAddress, _sut.SkipSsl))
                 .Returns(fakeCertValidationResult);
-            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.TargetApiAddress, _sut.SkipSsl))
+            MockCloudFoundryService.Setup(m => m.GetSSOPromptAsync(_sut.TargetApiAddress, _sut.SkipSsl))
                 .ReturnsAsync(fakeSsoPromptResult);
             MockCloudFoundryService.Setup(m => m.ConfigureForCf(It.IsAny<CloudFoundryInstance>())).Returns(_fakeSuccessDetailedResult);
 
@@ -361,20 +342,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("ConnectToCf")]
         public async Task ConnectToCf_DoesNotChangePageNumber_AndSetsApiAddressError_WhenSsoPromptRequestFails()
         {
-            var fakeCertValidationResult = new DetailedResult
-            {
-                Succeeded = true,
-            };
+            var fakeCertValidationResult = new DetailedResult { Succeeded = true };
 
-            var fakeSsoPromptResult = new DetailedResult<string>
-            {
-                Succeeded = false,
-                FailureType = FailureType.None,
-            };
+            var fakeSsoPromptResult = new DetailedResult<string> { Succeeded = false, FailureType = FailureType.None };
 
             MockCloudFoundryService.Setup(m => m.TargetCfApi(_sut.TargetApiAddress, _sut.SkipSsl))
                 .Returns(fakeCertValidationResult);
-            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.TargetApiAddress, _sut.SkipSsl))
+            MockCloudFoundryService.Setup(m => m.GetSSOPromptAsync(_sut.TargetApiAddress, _sut.SkipSsl))
                 .ReturnsAsync(fakeSsoPromptResult);
             MockCloudFoundryService.Setup(m => m.ConfigureForCf(It.IsAny<CloudFoundryInstance>())).Returns(_fakeSuccessDetailedResult);
 
@@ -427,15 +401,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.TargetApiAddress = apiAddressFromDialog;
             _sut.ConnectionName = connectionNameFromDialog;
             var fakeSsoPrompt = "junk";
-            var fakeSsoPromptResult = new DetailedResult<string>
-            {
-                Succeeded = true,
-                Content = fakeSsoPrompt,
-            };
+            var fakeSsoPromptResult = new DetailedResult<string> { Succeeded = true, Content = fakeSsoPrompt };
 
             MockCloudFoundryService.Setup(m => m.TargetCfApi(_sut.TargetApiAddress, _sut.SkipSsl))
                 .Returns(_fakeSuccessDetailedResult);
-            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.TargetApiAddress, _sut.SkipSsl))
+            MockCloudFoundryService.Setup(m => m.GetSSOPromptAsync(_sut.TargetApiAddress, _sut.SkipSsl))
                 .ReturnsAsync(fakeSsoPromptResult);
             MockCloudFoundryService.Setup(m => m.ConfigureForCf(It.IsAny<CloudFoundryInstance>()))
                 .Returns(_fakeSuccessDetailedResult);
@@ -456,15 +426,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             _sut.SkipSsl = skipSsl;
             var fakeSsoPrompt = "junk";
-            var fakeSsoPromptResult = new DetailedResult<string>
-            {
-                Succeeded = true,
-                Content = fakeSsoPrompt,
-            };
+            var fakeSsoPromptResult = new DetailedResult<string> { Succeeded = true, Content = fakeSsoPrompt };
 
             MockCloudFoundryService.Setup(m => m.TargetCfApi(_sut.TargetApiAddress, _sut.SkipSsl))
                 .Returns(_fakeSuccessDetailedResult);
-            MockCloudFoundryService.Setup(m => m.GetSsoPrompt(_sut.TargetApiAddress, _sut.SkipSsl))
+            MockCloudFoundryService.Setup(m => m.GetSSOPromptAsync(_sut.TargetApiAddress, _sut.SkipSsl))
                 .ReturnsAsync(fakeSsoPromptResult);
             MockCloudFoundryService.Setup(m => m.ConfigureForCf(It.IsAny<CloudFoundryInstance>()))
                 .Returns(_fakeSuccessDetailedResult);
@@ -520,6 +486,5 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.IsApiAddressFormatValid = false;
             Assert.IsFalse(_sut.CanProceedToAuthentication());
         }
-
     }
 }

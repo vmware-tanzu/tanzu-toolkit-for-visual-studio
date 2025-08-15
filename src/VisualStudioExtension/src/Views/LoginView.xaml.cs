@@ -27,17 +27,18 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             set => SetValue(_hyperlinkBrushProperty, value);
         }
 
-        public static readonly DependencyProperty _hyperlinkBrushProperty = DependencyProperty.Register("HyperlinkBrush", typeof(Brush), typeof(LoginView), new PropertyMetadata(default(Brush)));
+        public static readonly DependencyProperty _hyperlinkBrushProperty =
+            DependencyProperty.Register(nameof(HyperlinkBrush), typeof(Brush), typeof(LoginView),
+                new PropertyMetadata(default(Brush)));
 
         public LoginView(ILoginViewModel viewModel, IThemeService themeService)
         {
-            bool alwaysTrue(object arg) { return true; }
-
             AddCloudCommand = new AsyncDelegatingCommand(viewModel.LogIn, viewModel.CanLogIn);
-            SsoCommand = new DelegatingCommand(viewModel.ShowSsoLogin, alwaysTrue);
-            IncrementPageCommand = new AsyncDelegatingCommand(viewModel.ConnectToCf, viewModel.CanProceedToAuthentication);
-            DecrementPageCommand = new DelegatingCommand(viewModel.NavigateToTargetPage, alwaysTrue);
-            LogInWithPasscodeCommand = new AsyncDelegatingCommand(viewModel.LoginWithSsoPasscodeAsync, alwaysTrue);
+            SsoCommand = new DelegatingCommand(viewModel.ShowSsoLogin, AlwaysTrue);
+            IncrementPageCommand =
+                new AsyncDelegatingCommand(viewModel.ConnectToCf, viewModel.CanProceedToAuthentication);
+            DecrementPageCommand = new DelegatingCommand(viewModel.NavigateToTargetPage, AlwaysTrue);
+            LogInWithPasscodeCommand = new AsyncDelegatingCommand(viewModel.LoginWithSsoPasscodeAsync, AlwaysTrue);
 
             viewModel.GetPassword = GetPassword;
             viewModel.PasswordEmpty = PasswordBoxEmpty;
@@ -54,7 +55,11 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             {
                 tbUrl.Text = viewModel.TargetApiAddress;
             }
+
             MouseDown += Window_MouseDown;
+            return;
+
+            bool AlwaysTrue(object arg) => true;
         }
 
         public SecureString GetPassword()

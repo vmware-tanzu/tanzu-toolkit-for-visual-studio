@@ -17,12 +17,12 @@ namespace Tanzu.Toolkit.ViewModels
         bool CanRefreshOrg(object arg);
         bool CanInitiateFullRefresh(object arg);
         bool CanDisplayRecentAppLogs(object arg);
-        Task StopCloudFoundryApp(object arg);
-        Task StartCloudFoundryApp(object arg);
-        Task RefreshSpace(object arg);
-        Task RefreshOrg(object arg);
+        Task StopCloudFoundryAppAsync(object arg);
+        Task StartCloudFoundryAppAsync(object arg);
+        Task RefreshSpaceAsync(object arg);
+        Task RefreshOrgAsync(object arg);
         void RefreshAllItems(object arg);
-        Task DisplayRecentAppLogs(object app);
+        Task DisplayRecentAppLogsAsync(object app);
         bool CanReAuthenticate(object arg);
         void ReAuthenticate(object cf);
         void SetConnection(CloudFoundryInstance cf);

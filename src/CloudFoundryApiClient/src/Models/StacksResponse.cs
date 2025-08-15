@@ -19,6 +19,5 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Models.StacksResponse
 
         [JsonPropertyName("name")]
         public string Name { get; set; }
-
     }
 }

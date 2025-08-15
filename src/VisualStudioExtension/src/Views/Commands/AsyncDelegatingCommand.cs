@@ -38,22 +38,18 @@ namespace Tanzu.Toolkit.VisualStudio.Views.Commands
 
         public void RaiseCanExecuteChanged()
         {
-            _eventHandler?.Invoke(this, new EventArgs());
+            _eventHandler?.Invoke(this, EventArgs.Empty);
         }
 
         internal bool IsExecuting { get; set; }
 
         public bool CanExecute(object parameter)
         {
-            if (IsExecuting)
-            {
-                return false;
-            }
-
-            return _canExecute == null || _canExecute(parameter);
+            return !IsExecuting && (_canExecute == null || _canExecute(parameter));
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "All exceptions handled (ignored); no risk of process crash")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods",
+            Justification = "All exceptions handled (ignored); no risk of process crash")]
         public async void Execute(object parameter)
         {
             IsExecuting = true;

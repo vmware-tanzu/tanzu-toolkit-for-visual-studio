@@ -1,8 +1,8 @@
-﻿using Community.VisualStudio.Toolkit;
+using Community.VisualStudio.Toolkit;
+using Community.VisualStudio.Toolkit.DependencyInjection.Microsoft;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Shell;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Runtime.InteropServices;
@@ -20,6 +20,7 @@ using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.Project;
+using Tanzu.Toolkit.Services.Serialization;
 using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
 using Tanzu.Toolkit.ViewModels;
@@ -33,6 +34,8 @@ using Tanzu.Toolkit.VisualStudio.VSToolWindows;
 using static Tanzu.Toolkit.VisualStudio.Options.OptionsProvider;
 using Task = System.Threading.Tasks.Task;
 
+[assembly: ProvideBindingRedirection(AssemblyName = "Microsoft.Extensions.DependencyInjection", NewVersion = "8.0.0.1", OldVersionLowerBound = "0.0.0.0", OldVersionUpperBound = "5.0.0.2", PublicKeyToken = "adb9793829ddae60")]
+[assembly: ProvideBindingRedirection(AssemblyName = "Microsoft.Extensions.DependencyInjection.Abstractions", NewVersion = "8.0.0.2", OldVersionLowerBound = "0.0.0.0", OldVersionUpperBound = "5.0.0.2", PublicKeyToken = "adb9793829ddae60")]
 namespace Tanzu.Toolkit.VisualStudio
 {
     /// <summary>
@@ -55,90 +58,48 @@ namespace Tanzu.Toolkit.VisualStudio
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [Guid(_packageGuidString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
-    [ProvideToolWindow(typeof(TanzuExplorerToolWindow))]
+    [ProvideToolWindow(typeof(TanzuExplorerToolWindow.Pane))]
     [ProvideToolWindow(typeof(OutputToolWindow), MultiInstances = true, Transient = true)]
     [ProvideOptionPage(typeof(General1Options), "Tanzu Toolkit", "General", 0, 0, true)]
-    public sealed class TanzuToolkitForVisualStudioPackage : ToolkitPackage
+    public sealed class TanzuToolkitForVisualStudioPackage : MicrosoftDIToolkitPackage<TanzuToolkitForVisualStudioPackage>
     {
         /// <summary>
         /// TanzuToolkitPackage GUID string.
         /// </summary>
         public const string _packageGuidString = "9419e55b-9e82-4d87-8ee5-70871b01b7cc";
 
-        private IServiceProvider _serviceProvider;
-
-        /// <summary>
-        /// Initialization of the package; this method is called right after the package is sited, so this is the place
-        /// where you can put all the initialization code that rely on services provided by VisualStudio.
-        /// </summary>
-        /// <param name="cancellationToken">A cancellation token to monitor for initialization cancellation, which can occur when VS is shutting down.</param>
-        /// <param name="progress">A provider for progress updates.</param>
-        /// <returns>A task representing the async work of package initialization, or an already completed task if there is none. Do not return null from this method.</returns>
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
-            // When initialized asynchronously, the current thread may be a background thread at this point.
-            // Do any initialization that requires the UI thread after switching to the UI thread.
-            await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-
-            await TanzuPlatformExplorerCommand.InitializeAsync(this);
-            await PushToCloudFoundryCommand.InitializeAsync(this, _serviceProvider);
-            await OpenLogsCommand.InitializeAsync(this, _serviceProvider);
-            await RemoteDebugCommand.InitializeAsync(this, _serviceProvider);
+            await base.InitializeAsync(cancellationToken, progress);
+            TanzuExplorerToolWindow.Initialize(this);
+            //OutputToolWindow.Initialize(this);
+            //await PushToCloudFoundryCommand.InitializeAsync(this, _serviceProvider);
+            //await OpenLogsCommand.InitializeAsync(this, _serviceProvider);
+            //await RemoteDebugCommand.InitializeAsync(this, _serviceProvider);
             GeneralOptionsModel.Saved += OnSettingsSaved;
         }
 
         private void OnSettingsSaved(GeneralOptionsModel obj)
         {
-            var dataService = _serviceProvider.GetService<IDataPersistenceService>();
+            var dataService = ServiceProvider.GetService<IDataPersistenceService>();
             dataService.WriteStringData(nameof(obj.VsdbgLinuxPath), obj.VsdbgLinuxPath);
             dataService.WriteStringData(nameof(obj.VsdbgWindowsPath), obj.VsdbgWindowsPath);
         }
 
-        protected override object GetService(Type serviceType)
-        {
-            try
-            {
-                if (_serviceProvider == null)
-                {
-                    var collection = new ServiceCollection();
-                    ConfigureServices(collection);
-                    _serviceProvider = collection.BuildServiceProvider(true);
-                }
-
-                var result = _serviceProvider.GetService(serviceType);
-                return result ?? base.GetService(serviceType);
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-        }
-
-        protected override WindowPane InstantiateToolWindow(Type toolWindowType)
-        {
-            return GetService(toolWindowType) as WindowPane;
-        }
-
-        private void ConfigureServices(IServiceCollection services)
+        protected override void InitializeServices(IServiceCollection services)
         {
             var assemblyBasePath = Path.GetDirectoryName(GetType().Assembly.Location);
 
-            /* VSIX package */
-            services.AddSingleton<AsyncPackage>(this);
-
-            /* Cloud Foundry API */
+            // Cloud Foundry API
             services.AddHttpClient();
-            services.AddHttpClient("SslCertTruster", c => { }).ConfigurePrimaryHttpMessageHandler(() =>
+            services.AddHttpClient("SslCertTruster", c => { }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
             {
-                return new HttpClientHandler
-                {
-                    // trust all certs
-                    ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => { return true; }
-                };
+                // trust all certs
+                ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => true
             });
             services.AddTransient<ICfApiClient, CfApiClient>();
 
-            /* Services */
+            //Services
             services.AddTransient<ICloudFoundryService, CloudFoundryService>();
             services.AddSingleton<IViewLocatorService, VsViewLocatorService>();
             services.AddSingleton<IDialogService, DialogService>();
@@ -148,7 +109,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<IToolWindowService, VsToolWindowService>();
             services.AddSingleton<IThreadingService, ThreadingService>();
             services.AddSingleton<IErrorDialog, ErrorDialogService>();
-            services.AddSingleton<IUiDispatcherService, UiDispatcherService>();
+            services.AddSingleton<IUIDispatcherService, VisualStudioUIDispatcherService>();
             services.AddSingleton<IThemeService>(new ThemeService());
             services.AddTransient<ICommandProcessService, CommandProcessService>();
             services.AddSingleton<ISerializationService, SerializationService>();
@@ -157,11 +118,11 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<IProjectService, ProjectService>();
             services.AddSingleton<IDebugAgentProvider, VsdbgInstaller>();
 
-            /* Tool Windows */
+            // Tool Windows
             services.AddTransient<TanzuExplorerToolWindow>();
             services.AddTransient<OutputToolWindow>();
 
-            /* View Models */
+            // View Models
             services.AddTransient<IOutputViewModel, OutputViewModel>();
             services.AddSingleton<ITanzuExplorerViewModel, TanzuExplorerViewModel>();
             services.AddSingleton<ILoginViewModel, LoginViewModel>();
@@ -170,13 +131,16 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddTransient<ILoginViewModel, LoginViewModel>();
             services.AddSingleton<IAppDeletionConfirmationViewModel, AppDeletionConfirmationViewModel>();
 
-            /* Views */
+            // Views
             services.AddTransient<IOutputView, OutputView>();
             services.AddSingleton<ILoginView, LoginView>();
             services.AddTransient<ITanzuExplorerView, TanzuExplorerView>();
             services.AddTransient<IDeploymentDialogView, DeploymentDialogView>();
             services.AddTransient<IRemoteDebugView, RemoteDebugView>();
             services.AddTransient<IAppDeletionConfirmationView, AppDeletionConfirmationView>();
+
+            // Commands
+            services.RegisterCommands(ServiceLifetime.Singleton);
         }
     }
 }

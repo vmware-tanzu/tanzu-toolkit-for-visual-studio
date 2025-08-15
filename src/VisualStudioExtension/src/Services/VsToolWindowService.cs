@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Serilog;
 using System;
@@ -28,7 +28,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services
             try
             {
                 var id = _largestId;
-                _largestId += 1; // this might cause a problem after this instance of VsToolWindowService has constructed its 2,147,483,647th tool window
+                _largestId +=
+                    1; // this might cause a problem after this instance of VsToolWindowService has constructed its 2,147,483,647th tool window
 
                 if (viewType == typeof(OutputView) || viewType == typeof(IOutputView))
                 {
@@ -36,10 +37,11 @@ namespace Tanzu.Toolkit.VisualStudio.Services
                 }
 
                 var window = _package.FindToolWindow(toolWindowType, id, create: true);
-                if (window == null || window.Frame == null)
+                if (window?.Frame == null)
                 {
                     throw new NotSupportedException("Cannot create tool window");
                 }
+
                 view = window.Content as IView;
                 window.Caption = caption;
 
@@ -55,7 +57,9 @@ namespace Tanzu.Toolkit.VisualStudio.Services
             }
             catch (Exception ex)
             {
-                _logger.Error("VsToolWindowService tried to open a tool window of type {ViewType} but something went wrong: {ToolWindowDisplayException}", viewType, ex);
+                _logger.Error(
+                    "VsToolWindowService tried to open a tool window of type {ViewType} but something went wrong: {ToolWindowDisplayException}",
+                    viewType, ex);
                 return view;
             }
         }

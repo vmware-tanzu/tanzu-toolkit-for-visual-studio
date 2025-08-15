@@ -19,6 +19,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         private CloudFoundryInstance _expectedCf;
         private readonly bool _expectedSkipSslValue = false;
         private readonly int _expectedRetryAmount = 1;
+
         private readonly DetailedResult<List<CloudFoundryOrganization>> _fakeOrgsResponse = new()
         {
             Succeeded = true,
@@ -26,7 +27,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             [
                 _fakeOrgs[0],
                 _fakeOrgs[1],
-                _fakeOrgs[2],
+                _fakeOrgs[2]
             ]
         };
 
@@ -35,37 +36,27 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             RenewMockServices();
 
-            MockUiDispatcherService.Setup(mock => mock.
-                RunOnUiThreadAsync(It.IsAny<Action>()))
-                    .Callback<Action>(action =>
-                    {
-                        // Run whatever method is passed to MockUiDispatcherService.RunOnUiThread; do not delegate to the UI Dispatcher
-                        action();
-                    });
-
-            MockThreadingService.Setup(m => m
-              .RemoveItemFromCollectionOnUiThreadAsync(It.IsAny<ObservableCollection<TreeViewItemViewModel>>(), It.IsAny<TreeViewItemViewModel>()))
-                .Callback<ObservableCollection<TreeViewItemViewModel>, TreeViewItemViewModel>((collection, item) =>
+            MockUiDispatcherService.Setup(mock => mock.RunOnUIThreadAsync(It.IsAny<Action>()))
+                .Callback<Action>(action =>
                 {
-                    collection.Remove(item);
+                    // Run whatever method is passed to MockUiDispatcherService.RunOnUiThread; do not delegate to the UI Dispatcher
+                    action();
                 });
 
             MockThreadingService.Setup(m => m
-              .AddItemToCollectionOnUiThreadAsync(It.IsAny<ObservableCollection<TreeViewItemViewModel>>(), It.IsAny<TreeViewItemViewModel>()))
-                .Callback<ObservableCollection<TreeViewItemViewModel>, TreeViewItemViewModel>((collection, item) =>
-                {
-                    collection.Add(item);
-                });
+                    .RemoveItemFromCollectionOnUIThreadAsync(It.IsAny<ObservableCollection<TreeViewItemViewModel>>(), It.IsAny<TreeViewItemViewModel>()))
+                .Callback<ObservableCollection<TreeViewItemViewModel>, TreeViewItemViewModel>((collection, item) => { collection.Remove(item); });
+
+            MockThreadingService.Setup(m => m
+                    .AddItemToCollectionOnUIThreadAsync(It.IsAny<ObservableCollection<TreeViewItemViewModel>>(), It.IsAny<TreeViewItemViewModel>()))
+                .Callback<ObservableCollection<TreeViewItemViewModel>, TreeViewItemViewModel>((collection, item) => { collection.Add(item); });
 
             _fakeTanzuExplorerViewModel = new TanzuExplorerViewModel(Services);
             _sut = new CfInstanceViewModel(_fakeCfInstance, _fakeTanzuExplorerViewModel, Services);
             _sut = new CfInstanceViewModel(_fakeCfInstance, _fakeTanzuExplorerViewModel, Services, expanded: true);
 
             _receivedEvents = [];
-            _sut.PropertyChanged += (sender, e) =>
-            {
-                _receivedEvents.Add(e.PropertyName);
-            };
+            _sut.PropertyChanged += (sender, e) => { _receivedEvents.Add(e.PropertyName); };
 
             _expectedCf = _sut.CloudFoundryInstance;
         }
@@ -114,12 +105,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 new OrgViewModel(_fakeOrgs[0], _sut, _fakeTanzuExplorerViewModel, Services),
                 new OrgViewModel(_fakeOrgs[1], _sut, _fakeTanzuExplorerViewModel, Services),
                 new OrgViewModel(_fakeOrgs[2], _sut, _fakeTanzuExplorerViewModel, Services),
-                new OrgViewModel(_fakeOrgs[3], _sut, _fakeTanzuExplorerViewModel, Services),
+                new OrgViewModel(_fakeOrgs[3], _sut, _fakeTanzuExplorerViewModel, Services)
             ];
 
             /** mock retrieving all initial children except for FakeOrgs[3] */
             MockCloudFoundryService.Setup(m => m
-              .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
+                    .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
                 .ReturnsAsync(_fakeOrgsResponse);
 
             await _sut.UpdateAllChildren();
@@ -131,7 +122,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsFalse(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == _fakeOrgs[3].OrgName));
 
             MockThreadingService.Verify(m => m
-              .RemoveItemFromCollectionOnUiThreadAsync(_sut.Children, It.Is<OrgViewModel>((ovm) => ovm.Org == _fakeOrgs[3])),
+                    .RemoveItemFromCollectionOnUIThreadAsync(_sut.Children, It.Is<OrgViewModel>((ovm) => ovm.Org == _fakeOrgs[3])),
                 Times.Once);
         }
 
@@ -143,12 +134,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.Children =
             [
                 new OrgViewModel(_fakeOrgs[0], _sut, _fakeTanzuExplorerViewModel, Services),
-                new OrgViewModel(_fakeOrgs[1], _sut, _fakeTanzuExplorerViewModel, Services),
+                new OrgViewModel(_fakeOrgs[1], _sut, _fakeTanzuExplorerViewModel, Services)
             ];
 
             /** mock retrieving all initial children plus FakeOrgs[2] */
             MockCloudFoundryService.Setup(m => m
-              .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
+                    .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
                 .ReturnsAsync(_fakeOrgsResponse);
 
             await _sut.UpdateAllChildren();
@@ -159,7 +150,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsTrue(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == _fakeOrgs[2].OrgName));
 
             MockThreadingService.Verify(m => m
-              .AddItemToCollectionOnUiThreadAsync(_sut.Children, It.Is<OrgViewModel>((ovm) => ovm.Org == _fakeOrgs[2])),
+                    .AddItemToCollectionOnUIThreadAsync(_sut.Children, It.Is<OrgViewModel>((ovm) => ovm.Org == _fakeOrgs[2])),
                 Times.Once);
         }
 
@@ -168,11 +159,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task UpdateAllChildren_CallsUpdateOnAllChildren_WhenOrgsRequestSucceeds()
         {
             MockCloudFoundryService.Setup(m => m
-              .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
+                    .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
                 .ReturnsAsync(_fakeOrgsResponse);
 
             MockThreadingService.Setup(m => m
-              .StartBackgroundTask(It.IsAny<Func<Task>>()))
+                    .StartBackgroundTaskAsync(It.IsAny<Func<Task>>()))
                 .Verifiable();
 
             await _sut.UpdateAllChildren();
@@ -182,7 +173,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 if (child is OrgViewModel org)
                 {
                     MockThreadingService.Verify(m => m
-                      .StartBackgroundTask(org.UpdateAllChildren), Times.Once);
+                        .StartBackgroundTaskAsync(org.UpdateAllChildren), Times.Once);
                 }
                 else
                 {
@@ -201,13 +192,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             /** mock 2 initial children */
             var initialChildren = new ObservableCollection<TreeViewItemViewModel>
             {
-                new OrgViewModel(_fakeOrgs[0], _sut, _fakeTanzuExplorerViewModel, Services),
-                new OrgViewModel(_fakeOrgs[1], _sut, _fakeTanzuExplorerViewModel, Services),
+                new OrgViewModel(_fakeOrgs[0], _sut, _fakeTanzuExplorerViewModel, Services), new OrgViewModel(_fakeOrgs[1], _sut, _fakeTanzuExplorerViewModel, Services)
             };
             _sut.Children = new ObservableCollection<TreeViewItemViewModel>(initialChildren);
 
             MockCloudFoundryService.Setup(m => m
-              .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
+                    .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
                 .ReturnsAsync(fakeNoOrgsResponse);
 
             Assert.IsFalse(_sut.Children.Any(child => child is PlaceholderViewModel));
@@ -218,9 +208,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsTrue(_sut.Children[0].Equals(_sut.EmptyPlaceholder));
             foreach (var child in initialChildren)
             {
-                MockThreadingService.Verify(m => m.RemoveItemFromCollectionOnUiThreadAsync(_sut.Children, child), Times.Once);
+                MockThreadingService.Verify(m => m.RemoveItemFromCollectionOnUIThreadAsync(_sut.Children, child), Times.Once);
             }
-            MockThreadingService.Verify(m => m.AddItemToCollectionOnUiThreadAsync(_sut.Children, _sut.EmptyPlaceholder), Times.Once);
+
+            MockThreadingService.Verify(m => m.AddItemToCollectionOnUIThreadAsync(_sut.Children, _sut.EmptyPlaceholder), Times.Once);
         }
 
         [TestMethod]
@@ -248,12 +239,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             _sut.Children =
             [
-                _sut.EmptyPlaceholder,
+                _sut.EmptyPlaceholder
             ];
 
             /** mock 3 new children */
             MockCloudFoundryService.Setup(m => m
-              .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
+                    .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
                 .ReturnsAsync(_fakeOrgsResponse);
 
             Assert.AreEqual(1, _sut.Children.Count);
@@ -276,17 +267,16 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.Children =
             [
                 new OrgViewModel(_fakeOrgs[0], _sut, _fakeTanzuExplorerViewModel, Services),
-                new OrgViewModel(_fakeOrgs[1], _sut, _fakeTanzuExplorerViewModel, Services),
+                new OrgViewModel(_fakeOrgs[1], _sut, _fakeTanzuExplorerViewModel, Services)
             ];
 
             MockCloudFoundryService.Setup(m => m
-              .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
+                    .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
                 .Callback(() =>
                 {
                     // ensure loading placeholder present at time of loading fresh children
                     Assert.IsTrue(_sut.IsLoading);
                     Assert.IsTrue(_sut.Children.Contains(_sut.LoadingPlaceholder));
-
                 }).ReturnsAsync(fakeNoOrgsResponse);
 
             await _sut.UpdateAllChildren();
@@ -300,13 +290,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             var fakeInvalidTokenResponse = new DetailedResult<List<CloudFoundryOrganization>>
             {
-                Succeeded = false,
-                Explanation = "junk",
-                FailureType = FailureType.InvalidRefreshToken,
+                Succeeded = false, Explanation = "junk", FailureType = FailureType.InvalidRefreshToken
             };
 
             MockCloudFoundryService.Setup(m => m
-              .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
+                    .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
                 .ReturnsAsync(fakeInvalidTokenResponse);
 
             Assert.IsTrue(_sut.IsExpanded);
@@ -323,18 +311,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("UpdateAllChildren")]
         public async Task UpdateAllChildren_CollapsesSelf_AndLogsError_WhenOrgsRequestFails()
         {
-            var fakeFailedOrgsResponse = new DetailedResult<List<CloudFoundryOrganization>>
-            {
-                Succeeded = false,
-                Explanation = "junk",
-            };
+            var fakeFailedOrgsResponse = new DetailedResult<List<CloudFoundryOrganization>> { Succeeded = false, Explanation = "junk" };
 
             MockCloudFoundryService.Setup(m => m
-              .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
+                    .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
                 .ReturnsAsync(fakeFailedOrgsResponse);
 
             MockLogger.Setup(m => m
-              .Error(It.Is<string>(s => s.Contains("CfInstanceViewModel failed to load orgs")), fakeFailedOrgsResponse.Explanation))
+                    .Error(It.Is<string>(s => s.Contains("CfInstanceViewModel failed to load orgs")), fakeFailedOrgsResponse.Explanation))
                 .Verifiable();
 
             Assert.IsTrue(_sut.IsExpanded);
@@ -353,17 +337,18 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var fakeException = new Exception(":(");
 
             MockCloudFoundryService.Setup(m => m
-              .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
+                    .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
                 .Throws(fakeException);
 
             MockLogger.Setup(m => m
-              .Error(It.Is<string>(s => s.Contains("Caught exception trying to load orgs in CfInstanceViewModel")), fakeException))
+                    .Error(It.Is<string>(s => s.Contains("Caught exception trying to load orgs in CfInstanceViewModel")), fakeException))
                 .Verifiable();
 
             MockErrorDialogService.Setup(m => m
-              .DisplayWarningDialog(
-                CfInstanceViewModel._getOrgsFailureMsg,
-                It.Is<string>(s => s.Contains("try disconnecting & logging in again") && s.Contains("If this issue persists, please contact dotnetdevx@groups.vmware.com"))))
+                    .DisplayWarningDialog(
+                        CfInstanceViewModel._getOrgsFailureMsg,
+                        It.Is<string>(s =>
+                            s.Contains("try disconnecting & logging in again"))))
                 .Verifiable();
 
             await _sut.UpdateAllChildren();

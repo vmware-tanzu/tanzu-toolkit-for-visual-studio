@@ -20,15 +20,45 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         public ICommand StopProcessCommand { get; set; }
         public IViewModel ViewModel { get; private set; }
 
-        public static readonly DependencyProperty _listItemMouseOverBrushProperty = DependencyProperty.Register("ListItemMouseOverBrush", typeof(Brush), typeof(OutputView), new PropertyMetadata(default(Brush)));
-        public static readonly DependencyProperty _windowButtonDownBorderBrushProperty = DependencyProperty.Register("WindowButtonDownBorderBrush", typeof(Brush), typeof(OutputView), new PropertyMetadata(default(Brush)));
-        public static readonly DependencyProperty _windowButtonDownHoverBrushProperty = DependencyProperty.Register("WindowButtonDownHoverBrush", typeof(Brush), typeof(OutputView), new PropertyMetadata(default(Brush)));
-        public static readonly DependencyProperty _windowPanelBrushProperty = DependencyProperty.Register("WindowPanelBrush", typeof(Brush), typeof(OutputView), new PropertyMetadata(default(Brush)));
+        public static readonly DependencyProperty _listItemMouseOverBrushProperty =
+            DependencyProperty.Register("ListItemMouseOverBrush", typeof(Brush), typeof(OutputView),
+                new PropertyMetadata(default(Brush)));
 
-        public Brush ListItemMouseOverBrush { get { return (Brush)GetValue(_listItemMouseOverBrushProperty); } set { SetValue(_listItemMouseOverBrushProperty, value); } }
-        public Brush WindowButtonDownBorderBrush { get { return (Brush)GetValue(_windowButtonDownBorderBrushProperty); } set { SetValue(_windowButtonDownBorderBrushProperty, value); } }
-        public Brush WindowButtonDownHoverBrush { get { return (Brush)GetValue(_windowButtonDownHoverBrushProperty); } set { SetValue(_windowButtonDownHoverBrushProperty, value); } }
-        public Brush WindowPanelBrush { get { return (Brush)GetValue(_windowPanelBrushProperty); } set { SetValue(_windowPanelBrushProperty, value); } }
+        public static readonly DependencyProperty _windowButtonDownBorderBrushProperty =
+            DependencyProperty.Register("WindowButtonDownBorderBrush", typeof(Brush), typeof(OutputView),
+                new PropertyMetadata(default(Brush)));
+
+        public static readonly DependencyProperty _windowButtonDownHoverBrushProperty =
+            DependencyProperty.Register("WindowButtonDownHoverBrush", typeof(Brush), typeof(OutputView),
+                new PropertyMetadata(default(Brush)));
+
+        public static readonly DependencyProperty _windowPanelBrushProperty =
+            DependencyProperty.Register("WindowPanelBrush", typeof(Brush), typeof(OutputView),
+                new PropertyMetadata(default(Brush)));
+
+        public Brush ListItemMouseOverBrush
+        {
+            get => (Brush)GetValue(_listItemMouseOverBrushProperty);
+            set => SetValue(_listItemMouseOverBrushProperty, value);
+        }
+
+        public Brush WindowButtonDownBorderBrush
+        {
+            get => (Brush)GetValue(_windowButtonDownBorderBrushProperty);
+            set => SetValue(_windowButtonDownBorderBrushProperty, value);
+        }
+
+        public Brush WindowButtonDownHoverBrush
+        {
+            get => (Brush)GetValue(_windowButtonDownHoverBrushProperty);
+            set => SetValue(_windowButtonDownHoverBrushProperty, value);
+        }
+
+        public Brush WindowPanelBrush
+        {
+            get => (Brush)GetValue(_windowPanelBrushProperty);
+            set => SetValue(_windowPanelBrushProperty, value);
+        }
 
         public OutputView()
         {
@@ -41,13 +71,9 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             DataContext = viewModel;
             ViewModel = viewModel as IViewModel;
 
-            bool alwaysTrue(object arg) { return true; }
-            bool canPause(object arg) { return !viewModel.OutputPaused; }
-            bool canResume(object arg) { return viewModel.OutputPaused; }
-
-            ClearContentCommand = new DelegatingCommand(viewModel.ClearContent, alwaysTrue);
-            PauseOutputCommand = new DelegatingCommand(viewModel.PauseOutput, canPause);
-            ResumeOutputCommand = new DelegatingCommand(viewModel.ResumeOutput, canResume);
+            ClearContentCommand = new DelegatingCommand(viewModel.ClearContent, arg => true);
+            PauseOutputCommand = new DelegatingCommand(viewModel.PauseOutput, arg => !viewModel.OutputPaused);
+            ResumeOutputCommand = new DelegatingCommand(viewModel.ResumeOutput, arg => viewModel.OutputPaused);
 
             InitializeComponent();
             autoScrollToggleBtn.IsChecked = true;
@@ -82,7 +108,8 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         private void OutputScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            var scrollBarAtBottom = OutputScrollViewer.VerticalOffset == (OutputScrollViewer.ExtentHeight - OutputScrollViewer.ViewportHeight);
+            var scrollBarAtBottom = OutputScrollViewer.VerticalOffset ==
+                                    (OutputScrollViewer.ExtentHeight - OutputScrollViewer.ViewportHeight);
             autoScrollToggleBtn.IsChecked = scrollBarAtBottom;
         }
     }

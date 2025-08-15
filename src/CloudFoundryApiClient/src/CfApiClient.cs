@@ -36,6 +36,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         private HttpClient _httpClient;
         private Uri _cfApiAddress;
         private bool _skipSslCertValidation;
+
         private readonly JsonSerializerOptions _deserializationOptions = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
@@ -48,31 +49,26 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
         }
 
-        internal HttpClient HttpClient
+        private HttpClient HttpClient
         {
-            get
-            {
-                if (_httpClient == null) throw new InvalidOperationException($"HttpClient has not yet been set for this instance of {nameof(CfApiClient)}; to set it, first call {nameof(Configure)}");
-                return _httpClient;
-            }
+            get => _httpClient ?? throw new InvalidOperationException($"HttpClient has not yet been set for this instance of {nameof(CfApiClient)}; to set it, first call {nameof(Configure)}");
 
-            private set
+            set
             {
-                if (_httpClient != null) throw new InvalidOperationException($"HttpClient has already been set for this instance; to target a different API address, create a new instance of {nameof(CfApiClient)}");
+                if (_httpClient != null)
+                    throw new InvalidOperationException($"HttpClient has already been set for this instance; to target a different API address, create a new instance of {nameof(CfApiClient)}");
                 _httpClient = value;
             }
         }
 
         public Uri CfApiAddress
         {
-            get
-            {
-                if (_cfApiAddress == null) throw new ArgumentNullException(nameof(CfApiAddress));
-                return _cfApiAddress;
-            }
+            get => _cfApiAddress ?? throw new ArgumentNullException(nameof(CfApiAddress));
             internal set
             {
-                if (_cfApiAddress != null) throw new InvalidOperationException($"{nameof(CfApiAddress)} has already been set for this instance; to target a different API address, create a new instance of {nameof(CfApiClient)}");
+                if (_cfApiAddress != null)
+                    throw new InvalidOperationException(
+                        $"{nameof(CfApiAddress)} has already been set for this instance; to target a different API address, create a new instance of {nameof(CfApiClient)}");
                 _cfApiAddress = value;
                 HttpClient.BaseAddress = _cfApiAddress;
             }
@@ -106,14 +102,14 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         /// <param name="cfApiAddress"></param>
         /// <param name="accessToken"></param>
         /// <returns>List of <see cref="Org"/>s.</returns>
-        public async Task<List<Org>> ListOrgs(string cfApiAddress, string accessToken)
+        public async Task<List<Org>> ListOrgsAsync(string cfApiAddress, string accessToken)
         {
             var uri = new UriBuilder(cfApiAddress)
             {
-                Path = _listOrgsPath,
+                Path = _listOrgsPath
             };
 
-            var firstPageHref = new HypertextReference() { Href = uri.ToString() };
+            var firstPageHref = new HypertextReference { Href = uri.ToString() };
 
             var visibleOrgs = await GetRemainingPagesForType(firstPageHref, accessToken, new List<Org>());
 
@@ -133,15 +129,15 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         /// <param name="accessToken"></param>
         /// <param name="orgGuid"></param>
         /// <returns>List of <see cref="Space"/>s.</returns>
-        public async Task<List<Space>> ListSpacesForOrg(string cfApiAddress, string accessToken, string orgGuid)
+        public async Task<List<Space>> ListSpacesForOrgAsync(string cfApiAddress, string accessToken, string orgGuid)
         {
             var uri = new UriBuilder(cfApiAddress)
             {
                 Path = _listSpacesPath,
-                Query = $"organization_guids={orgGuid}",
+                Query = $"organization_guids={orgGuid}"
             };
 
-            var firstPageHref = new HypertextReference() { Href = uri.ToString() };
+            var firstPageHref = new HypertextReference { Href = uri.ToString() };
 
             return await GetRemainingPagesForType(firstPageHref, accessToken, new List<Space>());
         }
@@ -159,66 +155,66 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         /// <param name="accessToken"></param>
         /// <param name="spaceGuid"></param>
         /// <returns>List of <see cref="App"/>s.</returns>
-        public async Task<List<App>> ListAppsForSpace(string cfTarget, string accessToken, string spaceGuid)
+        public async Task<List<App>> ListAppsForSpaceAsync(string cfTarget, string accessToken, string spaceGuid)
         {
             var uri = new UriBuilder(cfTarget)
             {
                 Path = _listAppsPath,
-                Query = $"space_guids={spaceGuid}",
+                Query = $"space_guids={spaceGuid}"
             };
 
-            var firstPageHref = new HypertextReference() { Href = uri.ToString() };
+            var firstPageHref = new HypertextReference { Href = uri.ToString() };
 
             return await GetRemainingPagesForType(firstPageHref, accessToken, new List<App>());
         }
 
-        public async Task<List<App>> ListAppsAsync(string accessToken)
+        public async Task<List<App>> ListAppsAsyncAsync(string accessToken)
         {
             var uri = new UriBuilder(CfApiAddress)
             {
-                Path = _listAppsPath,
+                Path = _listAppsPath
             };
 
-            var firstPageHref = new HypertextReference() { Href = uri.ToString() };
+            var firstPageHref = new HypertextReference { Href = uri.ToString() };
 
             return await GetRemainingPagesForType(firstPageHref, accessToken, new List<App>());
         }
 
-        public async Task<List<Route>> ListRoutesForApp(string cfTarget, string accessToken, string appGuid)
+        public async Task<List<Route>> ListRoutesForAppAsync(string cfTarget, string accessToken, string appGuid)
         {
             var uri = new UriBuilder(cfTarget)
             {
                 Path = _listRoutesPath,
-                Query = $"app_guids={appGuid}",
+                Query = $"app_guids={appGuid}"
             };
 
-            var firstPageHref = new HypertextReference() { Href = uri.ToString() };
+            var firstPageHref = new HypertextReference { Href = uri.ToString() };
 
             return await GetRemainingPagesForType(firstPageHref, accessToken, new List<Route>());
         }
 
-        public async Task<List<Buildpack>> ListBuildpacks(string cfApiAddress, string accessToken)
+        public async Task<List<Buildpack>> ListBuildpacksAsync(string cfApiAddress, string accessToken)
         {
             var uri = new UriBuilder(cfApiAddress)
             {
-                Path = _listBuildpacksPath,
+                Path = _listBuildpacksPath
             };
 
-            var firstPageHref = new HypertextReference() { Href = uri.ToString() };
+            var firstPageHref = new HypertextReference { Href = uri.ToString() };
 
             var visibleBuildpacks = await GetRemainingPagesForType(firstPageHref, accessToken, new List<Buildpack>());
 
             return visibleBuildpacks;
         }
 
-        public async Task<List<Service>> ListServices(string cfApiAddress, string accessToken)
+        public async Task<List<Service>> ListServicesAsync(string cfApiAddress, string accessToken)
         {
             var uri = new UriBuilder(cfApiAddress)
             {
-                Path = _listServicesPath,
+                Path = _listServicesPath
             };
 
-            var firstPageHref = new HypertextReference() { Href = uri.ToString() };
+            var firstPageHref = new HypertextReference { Href = uri.ToString() };
 
             var visibleServices = await GetRemainingPagesForType(firstPageHref, accessToken, new List<Service>());
 
@@ -241,13 +237,13 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         /// True if response status code indicates success and response contains an app state of "STOPPED".
         /// <para>False otherwise.</para>
         /// </returns>
-        public async Task<bool> StopAppWithGuid(string cfApiAddress, string accessToken, string appGuid)
+        public async Task<bool> StopAppWithGuidAsync(string cfApiAddress, string accessToken, string appGuid)
         {
             var stopAppPath = _listAppsPath + $"/{appGuid}/actions/stop";
 
             var uri = new UriBuilder(cfApiAddress)
             {
-                Path = stopAppPath,
+                Path = stopAppPath
             };
 
             var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString());
@@ -262,12 +258,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             var resultContent = await response.Content.ReadAsStringAsync();
             var result = JsonSerializer.Deserialize<App>(resultContent, _deserializationOptions);
 
-            if (result.State == "STOPPED")
-            {
-                return true;
-            }
-
-            return false;
+            return result.State == "STOPPED";
         }
 
         /// <summary>
@@ -286,13 +277,13 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         /// True if response status code indicates success and response contains an app state of "STARTED".
         /// <para>False otherwise.</para>
         /// </returns>
-        public async Task<bool> StartAppWithGuid(string cfApiAddress, string accessToken, string appGuid)
+        public async Task<bool> StartAppWithGuidAsync(string cfApiAddress, string accessToken, string appGuid)
         {
             var startAppPath = _listAppsPath + $"/{appGuid}/actions/start";
 
             var uri = new UriBuilder(cfApiAddress)
             {
-                Path = startAppPath,
+                Path = startAppPath
             };
 
             var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString());
@@ -307,21 +298,16 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             var resultContent = await response.Content.ReadAsStringAsync();
             var result = JsonSerializer.Deserialize<App>(resultContent, _deserializationOptions);
 
-            if (result.State == "STARTED")
-            {
-                return true;
-            }
-
-            return false;
+            return result.State == "STARTED";
         }
 
-        public async Task<bool> DeleteAppWithGuid(string cfTarget, string accessToken, string appGuid)
+        public async Task<bool> DeleteAppWithGuidAsync(string cfTarget, string accessToken, string appGuid)
         {
             var deleteAppPath = _deleteAppsPath + $"/{appGuid}";
 
             var uri = new UriBuilder(cfTarget)
             {
-                Path = deleteAppPath,
+                Path = deleteAppPath
             };
 
             var request = new HttpRequestMessage(HttpMethod.Delete, uri.ToString());
@@ -333,21 +319,16 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
                 throw new Exception($"Response from DELETE `{deleteAppPath}` was {response.StatusCode}");
             }
 
-            if (response.StatusCode == HttpStatusCode.Accepted)
-            {
-                return true;
-            }
-
-            return false;
+            return response.StatusCode == HttpStatusCode.Accepted;
         }
 
-        public async Task<bool> DeleteRouteWithGuid(string cfTarget, string accessToken, string routeGuid)
+        public async Task<bool> DeleteRouteWithGuidAsync(string cfTarget, string accessToken, string routeGuid)
         {
             var deleteRoutePath = _deleteRoutesPath + $"/{routeGuid}";
 
             var uri = new UriBuilder(cfTarget)
             {
-                Path = deleteRoutePath,
+                Path = deleteRoutePath
             };
 
             var request = new HttpRequestMessage(HttpMethod.Delete, uri.ToString());
@@ -359,32 +340,27 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
                 throw new Exception($"Response from DELETE `{deleteRoutePath}` was {response.StatusCode}");
             }
 
-            if (response.StatusCode == HttpStatusCode.Accepted)
-            {
-                return true;
-            }
-
-            return false;
+            return response.StatusCode == HttpStatusCode.Accepted;
         }
 
-        public async Task<List<Stack>> ListStacks(string cfTarget, string accessToken)
+        public async Task<List<Stack>> ListStacksAsync(string cfTarget, string accessToken)
         {
             var uri = new UriBuilder(cfTarget)
             {
-                Path = _listStacksPath,
+                Path = _listStacksPath
             };
 
-            var firstPageHref = new HypertextReference() { Href = uri.ToString() };
+            var firstPageHref = new HypertextReference { Href = uri.ToString() };
 
             return await GetRemainingPagesForType(firstPageHref, accessToken, new List<Stack>());
         }
 
-        public async Task<LoginInfoResponse> GetLoginServerInformation(string cfApiAddress, bool trustAllCerts = false)
+        public async Task<LoginInfoResponse> GetLoginServerInformationAsync(string cfApiAddress, bool trustAllCerts = false)
         {
             var loginServerUri = await GetAuthServerUriFromCfTarget(cfApiAddress);
             var uri = new UriBuilder(loginServerUri)
             {
-                Path = _loginInfoPath,
+                Path = _loginInfoPath
             };
             var request = new HttpRequestMessage(HttpMethod.Get, uri.ToString());
             request.Headers.Add("Accept", "application/json");
@@ -394,6 +370,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             {
                 throw new Exception($"Request for login server information was unsuccessful; request to {request.Method} {request.RequestUri} received {response.StatusCode}");
             }
+
             var jsonContent = await response.Content.ReadAsStringAsync();
             var deserializedResponse = JsonSerializer.Deserialize<LoginInfoResponse>(jsonContent, _deserializationOptions);
 
@@ -409,7 +386,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
                 var uri = new UriBuilder(cfApiAddress)
                 {
                     Path = "/",
-                    Port = -1,
+                    Port = -1
                 };
 
                 var request = new HttpRequestMessage(HttpMethod.Get, uri.ToString());
@@ -436,89 +413,87 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         {
             Uri.TryCreate(uriString, UriKind.Absolute, out var uriResult);
 
-            if (uriResult == null)
-            {
-                throw new Exception(errorMessage);
-            }
-
-            return uriResult;
+            return uriResult ?? throw new Exception(errorMessage);
         }
 
         private async Task<List<TResourceType>> GetRemainingPagesForType<TResourceType>(HypertextReference pageAddress, string accessToken, List<TResourceType> resultsSoFar)
         {
-            if (pageAddress == null)
+            while (true)
             {
-                return resultsSoFar;
+                if (pageAddress == null)
+                {
+                    return resultsSoFar;
+                }
+
+                var request = new HttpRequestMessage(HttpMethod.Get, pageAddress.Href);
+                request.Headers.Add("Authorization", "Bearer " + accessToken);
+
+                var response = await HttpClient.SendAsync(request);
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception($"Response from GET `{pageAddress}` was {response.StatusCode}");
+                }
+
+                var resultContent = await response.Content.ReadAsStringAsync();
+
+                HypertextReference nextPageHref;
+
+                if (typeof(TResourceType) == typeof(Org))
+                {
+                    var results = JsonSerializer.Deserialize<OrgsResponse>(resultContent, _deserializationOptions);
+                    resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Orgs.ToList());
+
+                    nextPageHref = results.Pagination.Next;
+                }
+                else if (typeof(TResourceType) == typeof(Space))
+                {
+                    var results = JsonSerializer.Deserialize<SpacesResponse>(resultContent, _deserializationOptions);
+                    resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Spaces.ToList());
+
+                    nextPageHref = results.Pagination.Next;
+                }
+                else if (typeof(TResourceType) == typeof(App))
+                {
+                    var results = JsonSerializer.Deserialize<AppsResponse>(resultContent, _deserializationOptions);
+                    resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Apps.ToList());
+
+                    nextPageHref = results.Pagination.Next;
+                }
+                else if (typeof(TResourceType) == typeof(Buildpack))
+                {
+                    var results = JsonSerializer.Deserialize<BuildpacksResponse>(resultContent, _deserializationOptions);
+                    resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Buildpacks.ToList());
+
+                    nextPageHref = results.Pagination.Next;
+                }
+                else if (typeof(TResourceType) == typeof(Stack))
+                {
+                    var results = JsonSerializer.Deserialize<StacksResponse>(resultContent, _deserializationOptions);
+                    resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Stacks.ToList());
+
+                    nextPageHref = results.Pagination.Next;
+                }
+                else if (typeof(TResourceType) == typeof(Route))
+                {
+                    var results = JsonSerializer.Deserialize<RoutesResponse>(resultContent, _deserializationOptions);
+                    resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Routes.ToList());
+
+                    nextPageHref = results.Pagination.Next;
+                }
+                else if (typeof(TResourceType) == typeof(Service))
+                {
+                    var results = JsonSerializer.Deserialize<ServicesResponse>(resultContent, _deserializationOptions);
+                    resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Services.ToList());
+
+                    nextPageHref = results.Pagination.Next;
+                }
+                else
+                {
+                    throw new Exception($"ResourceType unknown: {typeof(TResourceType).Name}");
+                }
+
+                pageAddress = nextPageHref;
             }
-
-            var request = new HttpRequestMessage(HttpMethod.Get, pageAddress.Href);
-            request.Headers.Add("Authorization", "Bearer " + accessToken);
-
-            var response = await HttpClient.SendAsync(request);
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception($"Response from GET `{pageAddress}` was {response.StatusCode}");
-            }
-
-            var resultContent = await response.Content.ReadAsStringAsync();
-
-            HypertextReference nextPageHref;
-
-            if (typeof(TResourceType) == typeof(Org))
-            {
-                var results = JsonSerializer.Deserialize<OrgsResponse>(resultContent, _deserializationOptions);
-                resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Orgs.ToList());
-
-                nextPageHref = results.Pagination.Next;
-            }
-            else if (typeof(TResourceType) == typeof(Space))
-            {
-                var results = JsonSerializer.Deserialize<SpacesResponse>(resultContent, _deserializationOptions);
-                resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Spaces.ToList());
-
-                nextPageHref = results.Pagination.Next;
-            }
-            else if (typeof(TResourceType) == typeof(App))
-            {
-                var results = JsonSerializer.Deserialize<AppsResponse>(resultContent, _deserializationOptions);
-                resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Apps.ToList());
-
-                nextPageHref = results.Pagination.Next;
-            }
-            else if (typeof(TResourceType) == typeof(Buildpack))
-            {
-                var results = JsonSerializer.Deserialize<BuildpacksResponse>(resultContent, _deserializationOptions);
-                resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Buildpacks.ToList());
-
-                nextPageHref = results.Pagination.Next;
-            }
-            else if (typeof(TResourceType) == typeof(Stack))
-            {
-                var results = JsonSerializer.Deserialize<StacksResponse>(resultContent, _deserializationOptions);
-                resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Stacks.ToList());
-
-                nextPageHref = results.Pagination.Next;
-            }
-            else if (typeof(TResourceType) == typeof(Route))
-            {
-                var results = JsonSerializer.Deserialize<RoutesResponse>(resultContent, _deserializationOptions);
-                resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Routes.ToList());
-
-                nextPageHref = results.Pagination.Next;
-            }
-            else if (typeof(TResourceType) == typeof(Service))
-            {
-                var results = JsonSerializer.Deserialize<ServicesResponse>(resultContent, _deserializationOptions);
-                resultsSoFar.AddRange((IEnumerable<TResourceType>)results.Services.ToList());
-
-                nextPageHref = results.Pagination.Next;
-            }
-            else
-            {
-                throw new Exception($"ResourceType unknown: {typeof(TResourceType).Name}");
-            }
-
-            return await GetRemainingPagesForType(nextPageHref, accessToken, resultsSoFar);
         }
     }
 }

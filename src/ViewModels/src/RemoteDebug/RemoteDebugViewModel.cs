@@ -16,6 +16,7 @@ using Tanzu.Toolkit.Services.DebugAgentProvider;
 using Tanzu.Toolkit.Services.DotnetCli;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Project;
+using Tanzu.Toolkit.Services.Serialization;
 
 [assembly: InternalsVisibleTo("Tanzu.Toolkit.ViewModels.Tests")]
 
@@ -53,12 +54,10 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private const string _appDirWindows = @"c:\Users\vcap\app";
         private string _vsdbgInstallPath;
         public static readonly string _launchFileName = "launch.json";
-        private readonly JsonSerializerOptions _serializationOptions = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        };
+        private readonly JsonSerializerOptions _serializationOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
-        public RemoteDebugViewModel(string expectedAppName, string pathToProjectRootDir, string targetFrameworkMoniker, string expectedPathToLaunchFile, Action<string, string> initiateDebugCallback, IServiceProvider services) : base(services)
+        public RemoteDebugViewModel(string expectedAppName, string pathToProjectRootDir, string targetFrameworkMoniker, string expectedPathToLaunchFile, Action<string, string> initiateDebugCallback,
+            IServiceProvider services) : base(services)
         {
             _projectName = expectedAppName;
             _pathToProjectRootDir = pathToProjectRootDir;
@@ -81,7 +80,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             if (IsLoggedIn)
             {
                 _cfClient = _tanzuExplorer.CloudFoundryConnection.CfClient;
-                var _ = PromptAppSelectionAsync(expectedAppName);
+                _ = PromptAppSelectionAsync(expectedAppName);
             }
         }
 
@@ -93,7 +92,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         public bool IsLoggedIn
         {
-            get { return _isLoggedIn; }
+            get => _isLoggedIn;
             set
             {
                 _isLoggedIn = value;
@@ -146,6 +145,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 {
                     _debugExistingApp = false;
                 }
+
                 RaisePropertyChangedEvent("DebugExistingApp");
             }
         }
@@ -164,6 +164,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 {
                     _pushNewAppToDebug = false;
                 }
+
                 RaisePropertyChangedEvent("PushNewAppToDebug");
             }
         }
@@ -221,7 +222,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             {
                 Logger.Error("Caught exception thrown by {MethodName}: {AppFetchException}.", nameof(PopulateAccessibleAppsAsync), ex);
                 ErrorService.DisplayErrorDialog("Unable to start debugging", $"Something went wrong while fetching apps: \n{ex.Message}\n\n" +
-                    "It may help to try disconnecting and signing into Tanzu Platform again.");
+                                                                             "It may help to try disconnecting and signing into Tanzu Platform again.");
                 Close();
                 return;
             }
@@ -236,8 +237,9 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             if (AppToDebug == null)
             {
                 ErrorService.DisplayErrorDialog("Unable to start debugging", "Empty selection; please select app to debug.\n\n" +
-                    "This is unexpected; it may help to sign out of Tanzu Platform & try debugging again after logging back in.");
-                Logger.Error("{ClassName} encountered an error in {MethodName}: {PropertyName} was null when it shouldn't have been.", nameof(RemoteDebugViewModel), nameof(StartDebuggingAppAsync), nameof(AppToDebug));
+                                                                             "This is unexpected; it may help to sign out of Tanzu Platform & try debugging again after logging back in.");
+                Logger.Error("{ClassName} encountered an error in {MethodName}: {PropertyName} was null when it shouldn't have been.", nameof(RemoteDebugViewModel),
+                    nameof(StartDebuggingAppAsync), nameof(AppToDebug));
                 return;
             }
 
@@ -245,9 +247,10 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             {
                 _tokenSource = new CancellationTokenSource();
             }
+
             var cancellationToken = _tokenSource.Token;
 
-            CancelDebugging = (object _) =>
+            CancelDebugging = _ =>
             {
                 _tokenSource.Cancel();
                 Close();
@@ -255,7 +258,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
             try
             {
-                await ThreadingService.StartBackgroundTask(() => RemoteDebugAppAsync(cancellationToken), cancellationToken);
+                await ThreadingService.StartBackgroundTaskAsync(() => RemoteDebugAppAsync(cancellationToken), cancellationToken);
             }
             catch (OperationCanceledException ex)
             {
@@ -299,19 +302,9 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                         version = "0.2.0",
                         adapter = FileService.PathToCfDebugAdapter,
                         adapterArgs = $"\"{FileService.VsixPackageBaseDir}\" \"{FileService.FullPathToCfExe}\" \"{AppToDebug.AppName}\" \"{sshCmd}\"",
-                        languageMappings = new Languagemappings
-                        {
-                            CSharp = new CSharp
-                            {
-                                languageId = "3F5162F8-07C6-11D3-9053-00C04FA302A1",
-                                extensions = new string[] { "*" },
-                            },
-                        },
-                        exceptionCategoryMappings = new Exceptioncategorymappings
-                        {
-                            CLR = "449EC4CC-30D2-4032-9256-EE18EB41B62B",
-                            MDA = "6ECE07A9-0EDE-45C4-8296-818D8FC401D4",
-                        },
+                        languageMappings =
+                            new Languagemappings { CSharp = new CSharp { languageId = "3F5162F8-07C6-11D3-9053-00C04FA302A1", extensions = new string[] { "*" } } },
+                        exceptionCategoryMappings = new Exceptioncategorymappings { CLR = "449EC4CC-30D2-4032-9256-EE18EB41B62B", MDA = "6ECE07A9-0EDE-45C4-8296-818D8FC401D4" },
                         configurations = new[]
                         {
                             new Configuration
@@ -322,24 +315,22 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                                 request = "attach",
                                 justMyCode = false,
                                 cwd = _vsdbgInstallPath,
-                                logging = new Logging
-                                {
-                                    engineLogging = true,
-                                },
-                            },
+                                logging = new Logging { engineLogging = true }
+                            }
                         }
                     };
                     var newLaunchFileContents = JsonSerializer.Serialize(launchFileConfig, _serializationOptions);
                     Logger.Information("About to try attaching to remote debugger with this configuration: {RemoteDebugConfig}", newLaunchFileContents);
                     _fileService.WriteTextToFile(_expectedPathToLaunchFile, newLaunchFileContents);
                 }
+
                 _launchFileExists = true;
             }
             catch (Exception ex)
             {
                 Logger.Error("Failed to create launch file for remote debugging: {FileCreationException}", ex);
                 ErrorService.DisplayErrorDialog("Unable to attach to remote debugging agent.", $"Failed to specify launch configuration \"{_launchFileName}\".\n" +
-                    "It may help to try disconnecting & signing into Tanzu Platform again.");
+                                                                                               "It may help to try disconnecting & signing into Tanzu Platform again.");
                 _launchFileExists = false;
             }
         }
@@ -362,7 +353,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             if (view.ViewModel is IDeploymentDialogViewModel vm)
             {
                 vm.ConfigureForRemoteDebugging = true;
-                vm.OnClose += () => Close();
+                vm.OnClose += Close;
                 view.DisplayView();
             }
         }
@@ -407,12 +398,9 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         {
             AppToDebug = null;
             LoadingMessage = null;
-            IsLoggedIn = _tanzuExplorer != null && _tanzuExplorer.CloudFoundryConnection != null;
+            IsLoggedIn = _tanzuExplorer?.CloudFoundryConnection != null;
             CanCancel = true;
-            CancelDebugging = (object arg) =>
-            {
-                Close();
-            };
+            CancelDebugging = arg => { Close(); };
         }
 
         private async Task<bool> CheckForVsdbg(string stack, CancellationToken ct)
@@ -431,7 +419,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 pathSeparator = "\\";
             }
 
-            var sshResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
+            var sshResult = await _cfCliService.ExecuteSSHCommandAsync(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
             var vsdbExecutableListed = sshResult.CmdResult.StdOut.IndexOf(vsdbgDll, StringComparison.OrdinalIgnoreCase) >= 0;
             if (sshResult.Succeeded && vsdbExecutableListed)
             {
@@ -441,7 +429,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
             vsdbgSearchDirectory += "vsdbg";
             sshCommand += "vsdbg";
-            sshResult = await _cfCliService.ExecuteSshCommand(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
+            sshResult = await _cfCliService.ExecuteSSHCommandAsync(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
             vsdbExecutableListed = sshResult.CmdResult.StdOut.IndexOf(vsdbgDll, StringComparison.OrdinalIgnoreCase) >= 0;
             if (sshResult.Succeeded && vsdbExecutableListed)
             {
@@ -461,7 +449,8 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             if (!orgsResult.Succeeded)
             {
                 var title = "Unable to initiate remote debugging";
-                var msg = $"Something went wrong while querying apps on {_tanzuExplorer.CloudFoundryConnection.CloudFoundryInstance.InstanceName}.\nIt may help to try disconnecting & signing into Tanzu Platform again.";
+                var msg =
+                    $"Something went wrong while querying apps on {_tanzuExplorer.CloudFoundryConnection.CloudFoundryInstance.InstanceName}.\nIt may help to try disconnecting & signing into Tanzu Platform again.";
                 Logger.Error(title + "; " + "orgs request failed: {OrgsError}", orgsResult.Explanation);
                 ErrorService.DisplayErrorDialog(title, msg);
                 Close();
@@ -494,16 +483,19 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                                 }
                                 else
                                 {
-                                    Logger.Error("Apps request failed for space {SpaceName} while trying to query apps for remote debugging: {AppsError}", space.SpaceName, appsResult.Explanation);
+                                    Logger.Error("Apps request failed for space {SpaceName} while trying to query apps for remote debugging: {AppsError}", space.SpaceName,
+                                        appsResult.Explanation);
                                 }
                             });
                             appTasks.Add(getAppsForSpaceTask);
                         }
+
                         await Task.WhenAll(appTasks);
                     }
                     else
                     {
-                        Logger.Error("Spaces request failed for org {OrgName} while trying to query apps for remote debugging: {SpacesError}", org.OrgName, spacesResult.Explanation);
+                        Logger.Error("Spaces request failed for org {OrgName} while trying to query apps for remote debugging: {SpacesError}", org.OrgName,
+                            spacesResult.Explanation);
                     }
                 });
                 spaceTasks.Add(getSpacesForOrgTask);

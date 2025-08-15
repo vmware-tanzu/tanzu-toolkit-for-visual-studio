@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
@@ -127,7 +127,9 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     AppendLine(recentLines);
                 }
-                AppendLine($"\n*** End of recent logs, beginning live log stream for \"{cfApp.AppName}\" in org \"{cfApp.ParentSpace.ParentOrg.OrgName}\" and space {cfApp.ParentSpace.SpaceName}...***");
+
+                AppendLine(
+                    $"\n*** End of recent logs, beginning live log stream for \"{cfApp.AppName}\" in org \"{cfApp.ParentSpace.ParentOrg.OrgName}\" and space {cfApp.ParentSpace.SpaceName}...***");
             }
             else
             {
@@ -155,6 +157,7 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     _tanzuExplorerViewModel.AuthenticationRequired = true;
                 }
+
                 ErrorService.DisplayErrorDialog("Error displaying app logs", $"Something went wrong while trying to display logs for {cfApp.AppName}. Please try again.");
             }
         }

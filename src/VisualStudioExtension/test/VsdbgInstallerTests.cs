@@ -32,16 +32,13 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
         [DataRow("invalid stack")]
         public async Task InstallVsdbgForCFAppAsync_ReturnsFailedResult_WhenAppStackInvalid(string stack)
         {
-            var appWithInvalidStack = new CloudFoundryApp("fake app", "fake app guid", _fakeSpace, null)
-            {
-                Stack = stack,
-            };
+            var appWithInvalidStack = new CloudFoundryApp("fake app", "fake app guid", _fakeSpace, null) { Stack = stack };
 
             var result = await _sut.InstallVsdbgForCFAppAsync(appWithInvalidStack);
 
             Assert.IsFalse(result.Succeeded);
             Assert.AreEqual($"Unexpected stack: '{stack}'", result.Explanation);
-            _mockCfCliService.Verify(m => m.ExecuteSshCommand(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _mockCfCliService.Verify(m => m.ExecuteSSHCommandAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
         [TestMethod]
@@ -49,13 +46,10 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
         [DataRow("windows")]
         public async Task InstallVsdbgForCFAppAsync_ReturnsFailedResult_WhenSshCmdFails(string stack)
         {
-            var app = new CloudFoundryApp("fake app", "fake app guid", _fakeSpace, null)
-            {
-                Stack = stack,
-            };
+            var app = new CloudFoundryApp("fake app", "fake app guid", _fakeSpace, null) { Stack = stack };
             var sshFailure = new DetailedResult(false, "failed because we told it to!", new CommandResult("some output", "some error", 1));
 
-            _mockCfCliService.Setup(m => m.ExecuteSshCommand(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(sshFailure);
+            _mockCfCliService.Setup(m => m.ExecuteSSHCommandAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(sshFailure);
 
             var result = await _sut.InstallVsdbgForCFAppAsync(app);
 
@@ -69,19 +63,17 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
         [DataRow("windows")]
         public async Task InstallVsdbgForCFAppAsync_UsesOSSpecificValuesForVsdbgInstallation_BasedOnStack(string stack)
         {
-            var app = new CloudFoundryApp("fake app", "fake app guid", _fakeSpace, null)
-            {
-                Stack = stack,
-            };
+            var app = new CloudFoundryApp("fake app", "fake app guid", _fakeSpace, null) { Stack = stack };
             var expectedVsVersion = "latest";
-            var expectedStartCmd = stack == "windows" 
-                ? $"powershell -File {VsdbgInstaller._vsdbgInstallScriptName}.ps1 -Version {expectedVsVersion} -RuntimeID win7-x64 -InstallPath .\\{_sut.VsdbgDirName}" 
+            var expectedStartCmd = stack == "windows"
+                ? $"powershell -File {VsdbgInstaller._vsdbgInstallScriptName}.ps1 -Version {expectedVsVersion} -RuntimeID win7-x64 -InstallPath .\\{_sut.VsdbgDirName}"
                 : $"chmod +x {VsdbgInstaller._vsdbgInstallScriptName}.sh && ./{VsdbgInstaller._vsdbgInstallScriptName}.sh -v {expectedVsVersion} -r linux-x64 -l ./{_sut.VsdbgDirName}";
-            var expectedSshCmd = $"cd app && curl -L https://aka.ms/getvsdbg{(stack == "windows" ? "ps1" : "sh")} -o GetVsDbg.{(stack == "windows" ? "ps1" : "sh")} && {expectedStartCmd}";
+            var expectedSshCmd =
+                $"cd app && curl -L https://aka.ms/getvsdbg{(stack == "windows" ? "ps1" : "sh")} -o GetVsDbg.{(stack == "windows" ? "ps1" : "sh")} && {expectedStartCmd}";
 
             var result = await _sut.InstallVsdbgForCFAppAsync(app);
 
-            _mockCfCliService.Verify(m => m.ExecuteSshCommand(app.AppName, app.ParentSpace.ParentOrg.OrgName, app.ParentSpace.SpaceName, expectedSshCmd), Times.Once);
+            _mockCfCliService.Verify(m => m.ExecuteSSHCommandAsync(app.AppName, app.ParentSpace.ParentOrg.OrgName, app.ParentSpace.SpaceName, expectedSshCmd), Times.Once);
         }
     }
 }

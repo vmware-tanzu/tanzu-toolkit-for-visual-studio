@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -26,35 +26,51 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         public ICommand StreamAppLogsCommand { get; }
         public IViewModel ViewModel { get; private set; }
 
-        public Brush ListItemMouseOverBrush { get { return (Brush)GetValue(_listItemMouseOverBrushProperty); } set { SetValue(_listItemMouseOverBrushProperty, value); } }
-        public Brush WizardFooterBrush { get { return (Brush)GetValue(_wizardFooterBrushProperty); } set { SetValue(_wizardFooterBrushProperty, value); } }
+        public Brush ListItemMouseOverBrush
+        {
+            get => (Brush)GetValue(_listItemMouseOverBrushProperty);
+            set => SetValue(_listItemMouseOverBrushProperty, value);
+        }
 
-        public Action DisplayView { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public Brush WizardFooterBrush
+        {
+            get => (Brush)GetValue(_wizardFooterBrushProperty);
+            set => SetValue(_wizardFooterBrushProperty, value);
+        }
 
-        public static readonly DependencyProperty _listItemMouseOverBrushProperty = DependencyProperty.Register("ListItemMouseOverBrush", typeof(Brush), typeof(TanzuExplorerView), new PropertyMetadata(default(Brush)));
-        public static readonly DependencyProperty _wizardFooterBrushProperty = DependencyProperty.Register("WizardFooterBrush", typeof(Brush), typeof(TanzuExplorerView), new PropertyMetadata(default(Brush)));
+        public Action DisplayView
+        {
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
+        }
+
+        public static readonly DependencyProperty _listItemMouseOverBrushProperty =
+            DependencyProperty.Register(nameof(ListItemMouseOverBrush), typeof(Brush), typeof(TanzuExplorerView),
+                new PropertyMetadata(default(Brush)));
+
+        public static readonly DependencyProperty _wizardFooterBrushProperty =
+            DependencyProperty.Register(nameof(WizardFooterBrush), typeof(Brush), typeof(TanzuExplorerView),
+                new PropertyMetadata(default(Brush)));
 
         public TanzuExplorerView()
         {
             InitializeComponent();
         }
 
-        public TanzuExplorerView(ITanzuExplorerViewModel viewModel, IThemeService themeService, IToolWindowService viewService)
+        public TanzuExplorerView(ITanzuExplorerViewModel viewModel, IThemeService themeService)
         {
-            bool alwaysTrue(object arg) { return true; }
-
             ViewModel = viewModel;
 
             OpenLoginFormCommand = new DelegatingCommand(viewModel.OpenLoginView, viewModel.CanOpenLoginView);
-            StopCfAppCommand = new AsyncDelegatingCommand(viewModel.StopCloudFoundryApp, viewModel.CanStopCloudFoundryApp);
-            StartCfAppCommand = new AsyncDelegatingCommand(viewModel.StartCloudFoundryApp, viewModel.CanStartCloudFoundryApp);
+            StopCfAppCommand = new AsyncDelegatingCommand(viewModel.StopCloudFoundryAppAsync, viewModel.CanStopCloudFoundryApp);
+            StartCfAppCommand = new AsyncDelegatingCommand(viewModel.StartCloudFoundryAppAsync, viewModel.CanStartCloudFoundryApp);
             OpenDeletionViewCommand = new DelegatingCommand(viewModel.OpenDeletionView, viewModel.CanOpenDeletionView);
-            RefreshSpaceCommand = new AsyncDelegatingCommand(viewModel.RefreshSpace, viewModel.CanRefreshSpace);
-            RefreshOrgCommand = new AsyncDelegatingCommand(viewModel.RefreshOrg, viewModel.CanRefreshOrg);
+            RefreshSpaceCommand = new AsyncDelegatingCommand(viewModel.RefreshSpaceAsync, viewModel.CanRefreshSpace);
+            RefreshOrgCommand = new AsyncDelegatingCommand(viewModel.RefreshOrgAsync, viewModel.CanRefreshOrg);
             RefreshAllCommand = new DelegatingCommand(viewModel.RefreshAllItems, viewModel.CanInitiateFullRefresh);
             DeleteConnectionCommand = new DelegatingCommand(viewModel.LogOutCloudFoundry, viewModel.CanLogOutCloudFoundry);
             ReAuthenticateCommand = new DelegatingCommand(viewModel.ReAuthenticate, viewModel.CanReAuthenticate);
-            StreamAppLogsCommand = new DelegatingCommand(viewModel.StreamAppLogs, alwaysTrue);
+            StreamAppLogsCommand = new DelegatingCommand(viewModel.StreamAppLogs, arg => true);
 
             themeService.SetTheme(this);
 

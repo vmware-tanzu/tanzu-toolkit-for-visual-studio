@@ -39,13 +39,10 @@ namespace Tanzu.Toolkit.Services.File
             get
             {
                 if (_cliVersion != 8) throw new Exception($"Unable to locate cf.exe for CLI version {_cliVersion}.");
-                
-                if (System.IO.File.Exists(_pathToCf8Exe))
-                {
-                    return _pathToCf8Exe;
-                }
 
-                throw new Exception($"Unable to locate cf.exe for CLI version {_cliVersion}.");
+                return System.IO.File.Exists(_pathToCf8Exe)
+                    ? _pathToCf8Exe
+                    : throw new Exception($"Unable to locate cf.exe for CLI version {_cliVersion}.");
             }
         }
 

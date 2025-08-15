@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -17,8 +17,13 @@ namespace Tanzu.Toolkit.ViewModels
         internal const string _stopAppErrorMsg = "Encountered an error while stopping app";
         internal const string _startAppErrorMsg = "Encountered an error while starting app";
         internal const string _singleLoginErrorTitle = "Unable to add more Tanzu Platform connections.";
-        internal const string _singleLoginErrorMessage1 = "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
-        internal const string _singleLoginErrorMessage2 = "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Platform Explorer & re-connecting to a new one.";
+
+        internal const string _singleLoginErrorMessage1 =
+            "This version of Tanzu Toolkit for Visual Studio only supports 1 cloud connection at a time; multi-cloud connections will be supported in the future.";
+
+        internal const string _singleLoginErrorMessage2 =
+            "If you want to connect to a different cloud, please delete this one by right-clicking on it in the Tanzu Platform Explorer & re-connecting to a new one.";
+
         internal const string _connectionNameKey = "connection-name";
         internal const string _connectionAddressKey = "connection-api-address";
         internal const string _connectionSslPolicyKey = "connection-should-skip-ssl-cert-validation";
@@ -34,7 +39,6 @@ namespace Tanzu.Toolkit.ViewModels
         private readonly IThreadingService _threadingService;
         private readonly IErrorDialog _errorDialogService;
         private readonly IDataPersistenceService _dataPersistenceService;
-        private readonly IViewLocatorService _viewLocatorService;
 
         public TanzuExplorerViewModel(IServiceProvider services)
             : base(services)
@@ -42,14 +46,13 @@ namespace Tanzu.Toolkit.ViewModels
             _errorDialogService = services.GetRequiredService<IErrorDialog>();
             _threadingService = services.GetRequiredService<IThreadingService>();
             _dataPersistenceService = services.GetRequiredService<IDataPersistenceService>();
-            _viewLocatorService = services.GetRequiredService<IViewLocatorService>();
 
-            var savedConnectionCredsExist = _dataPersistenceService.SavedCfCredsExist();
+            var cloudFoundryCredentialsExist = _dataPersistenceService.SavedCloudFoundryCredentialsExist();
             var existingSavedConnectionName = _dataPersistenceService.ReadStringData(_connectionNameKey);
             var existingSavedConnectionAddress = _dataPersistenceService.ReadStringData(_connectionAddressKey);
             var existingSavedConnectionSslPolicy = _dataPersistenceService.ReadStringData(_connectionSslPolicyKey);
 
-            if (!savedConnectionCredsExist || existingSavedConnectionName == null || existingSavedConnectionAddress == null)
+            if (!cloudFoundryCredentialsExist || existingSavedConnectionName == null || existingSavedConnectionAddress == null)
             {
                 CloudFoundryConnection = null;
             }
@@ -72,20 +75,9 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 _cloudFoundry = value;
 
-                if (value == null)
-                {
-                    TreeRoot = new ObservableCollection<TreeViewItemViewModel>
-                    {
-                        new LoginPromptViewModel(Services),
-                    };
-                }
-                else
-                {
-                    TreeRoot = new ObservableCollection<TreeViewItemViewModel>
-                    {
-                        value
-                    };
-                }
+                TreeRoot = value == null
+                    ? new ObservableCollection<TreeViewItemViewModel> { new LoginPromptViewModel(Services) }
+                    : new ObservableCollection<TreeViewItemViewModel> { value };
 
                 RaisePropertyChangedEvent("CloudFoundryConnection");
             }
@@ -123,6 +115,7 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     _isRefreshingAll = value;
                 }
+
                 RaisePropertyChangedEvent("IsRefreshingAll");
             }
         }
@@ -138,7 +131,7 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 _authenticationRequired = value;
 
-                if (value == true)
+                if (value)
                 {
                     if (CloudFoundryConnection != null)
                     {
@@ -216,7 +209,6 @@ namespace Tanzu.Toolkit.ViewModels
             return IsLoggedIn;
         }
 
-
         public void OpenLoginView(object parent)
         {
             if (CloudFoundryConnection != null)
@@ -229,7 +221,8 @@ namespace Tanzu.Toolkit.ViewModels
             {
                 if (DialogService.ShowModal(nameof(LoginViewModel)) == null)
                 {
-                    Logger?.Error("{ClassName}.{MethodName} encountered null DialogResult, indicating that something went wrong trying to construct the view.", nameof(TanzuExplorerViewModel), nameof(OpenLoginView));
+                    Logger?.Error("{ClassName}.{MethodName} encountered null DialogResult, indicating that something went wrong trying to construct the view.",
+                        nameof(TanzuExplorerViewModel), nameof(OpenLoginView));
                     var title = "Something went wrong while trying to display login window";
                     var msg = "View construction failed";
                     ErrorService.DisplayErrorDialog(title, msg);
@@ -246,7 +239,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public async Task StopCloudFoundryApp(object app)
+        public async Task StopCloudFoundryAppAsync(object app)
         {
             if (app is CloudFoundryApp cfApp)
             {
@@ -259,7 +252,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public async Task StartCloudFoundryApp(object app)
+        public async Task StartCloudFoundryAppAsync(object app)
         {
             if (app is CloudFoundryApp cfApp)
             {
@@ -272,7 +265,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public async Task DisplayRecentAppLogs(object app)
+        public async Task DisplayRecentAppLogsAsync(object app)
         {
             if (app is CloudFoundryApp cfApp)
             {
@@ -299,7 +292,8 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
-                Logger.Error($"{nameof(DisplayRecentAppLogs)} received expected argument 'app' to be of type '{typeof(CloudFoundryApp)}', but instead received type '{app.GetType()}'.");
+                Logger.Error(
+                    $"{nameof(DisplayRecentAppLogsAsync)} received expected argument 'app' to be of type '{typeof(CloudFoundryApp)}', but instead received type '{app.GetType()}'.");
             }
         }
 
@@ -324,7 +318,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public async Task RefreshSpace(object arg)
+        public async Task RefreshSpaceAsync(object arg)
         {
             if (arg is SpaceViewModel spaceViewModel)
             {
@@ -332,7 +326,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public async Task RefreshOrg(object arg)
+        public async Task RefreshOrgAsync(object arg)
         {
             if (arg is OrgViewModel orgViewModel)
             {
@@ -350,7 +344,7 @@ namespace Tanzu.Toolkit.ViewModels
             else if (!IsRefreshingAll)
             {
                 IsRefreshingAll = true;
-                _threadingService.StartBackgroundTask(UpdateAllTreeItems);
+                _threadingService.StartBackgroundTaskAsync(UpdateAllTreeItems);
             }
         }
 
@@ -369,7 +363,7 @@ namespace Tanzu.Toolkit.ViewModels
 
             if (!ThreadingService.IsPolling)
             {
-                ThreadingService.StartRecurrentUiTaskInBackground(RefreshAllItems, null, 10);
+                ThreadingService.StartRecurrentUITaskInBackground(RefreshAllItems, null, 10);
             }
 
             _dataPersistenceService.WriteStringData(_connectionNameKey, CloudFoundryConnection.CloudFoundryInstance.InstanceName);

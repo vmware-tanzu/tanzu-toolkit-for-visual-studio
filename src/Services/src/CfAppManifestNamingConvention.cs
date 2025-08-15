@@ -15,7 +15,7 @@ namespace Tanzu.Toolkit.Services
                 "disk-quota" => "disk_quota",
                 "binding-name" => "binding_name",
                 "process-types" => "process_types",
-                _ => hyphenatedString,
+                _ => hyphenatedString
             };
         }
 

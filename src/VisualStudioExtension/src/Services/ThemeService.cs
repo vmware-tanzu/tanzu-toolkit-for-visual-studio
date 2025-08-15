@@ -17,17 +17,27 @@ namespace Tanzu.Toolkit.VisualStudio.Services
                 control.SetResourceReference(Control.BackgroundProperty, ThemedDialogColors.WindowPanelBrushKey);
                 control.SetResourceReference(Control.ForegroundProperty, ThemedDialogColors.WindowPanelTextBrushKey);
                 control.SetResourceReference(Control.BorderBrushProperty, ThemedDialogColors.WindowBorderBrushKey);
-                control.SetResourceReference(TanzuExplorerView._listItemMouseOverBrushProperty, ThemedDialogColors.ListItemMouseOverBrushKey);
-                control.SetResourceReference(TanzuExplorerView._wizardFooterBrushProperty, ThemedDialogColors.WizardFooterBrushKey);
-                control.SetResourceReference(DeploymentDialogView._hyperlinkBrushProperty, ThemedDialogColors.HyperlinkBrushKey);
+                control.SetResourceReference(TanzuExplorerView._listItemMouseOverBrushProperty,
+                    ThemedDialogColors.ListItemMouseOverBrushKey);
+                control.SetResourceReference(TanzuExplorerView._wizardFooterBrushProperty,
+                    ThemedDialogColors.WizardFooterBrushKey);
+                control.SetResourceReference(DeploymentDialogView._hyperlinkBrushProperty,
+                    ThemedDialogColors.HyperlinkBrushKey);
                 control.SetResourceReference(LoginView._hyperlinkBrushProperty, ThemedDialogColors.HyperlinkBrushKey);
-                control.SetResourceReference(OutputView._listItemMouseOverBrushProperty, ThemedDialogColors.ListItemMouseOverBrushKey);
-                control.SetResourceReference(OutputView._windowButtonDownBorderBrushProperty, ThemedDialogColors.WindowButtonDownBorderBrushKey);
-                control.SetResourceReference(OutputView._windowButtonDownHoverBrushProperty, ThemedDialogColors.WindowButtonHoverBrushKey);
-                control.SetResourceReference(OutputView._windowPanelBrushProperty, ThemedDialogColors.WindowPanelBrushKey);
-                control.SetResourceReference(RemoteDebugView._listItemMouseOverBrushProperty, ThemedDialogColors.ListItemMouseOverBrushKey);
-                control.SetResourceReference(RemoteDebugView._selectedItemActiveBrushProperty, ThemedDialogColors.SelectedItemActiveBrushKey);
-                control.SetResourceReference(RemoteDebugView._gridHeaderBrushProperty, ThemedDialogColors.GridLineBrushKey);
+                control.SetResourceReference(OutputView._listItemMouseOverBrushProperty,
+                    ThemedDialogColors.ListItemMouseOverBrushKey);
+                control.SetResourceReference(OutputView._windowButtonDownBorderBrushProperty,
+                    ThemedDialogColors.WindowButtonDownBorderBrushKey);
+                control.SetResourceReference(OutputView._windowButtonDownHoverBrushProperty,
+                    ThemedDialogColors.WindowButtonHoverBrushKey);
+                control.SetResourceReference(OutputView._windowPanelBrushProperty,
+                    ThemedDialogColors.WindowPanelBrushKey);
+                control.SetResourceReference(RemoteDebugView._listItemMouseOverBrushProperty,
+                    ThemedDialogColors.ListItemMouseOverBrushKey);
+                control.SetResourceReference(RemoteDebugView._selectedItemActiveBrushProperty,
+                    ThemedDialogColors.SelectedItemActiveBrushKey);
+                control.SetResourceReference(RemoteDebugView._gridHeaderBrushProperty,
+                    ThemedDialogColors.GridLineBrushKey);
             }
 
             ThemedDialogStyleLoader.SetUseDefaultThemedDialogStyles(element, true);
@@ -57,6 +67,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services
                 dictionaries.Add(ThemeResources);
             }
         }
+
         private static ResourceDictionary ThemeResources { get; } = BuildThemeResources();
 
         public static object InputPaddingKey { get; } = "Toolkit" + nameof(InputPaddingKey);
@@ -75,20 +86,14 @@ namespace Tanzu.Toolkit.VisualStudio.Services
                 {
                     TargetType = typeof(TextBox),
                     BasedOn = (Style)Application.Current.FindResource(VsResourceKeys.TextBoxStyleKey),
-                    Setters =
-                    {
-                        new Setter(Control.PaddingProperty, new DynamicResourceExtension(InputPaddingKey))
-                    }
+                    Setters = { new Setter(Control.PaddingProperty, new DynamicResourceExtension(InputPaddingKey)) }
                 };
 
                 resources[typeof(ComboBox)] = new Style
                 {
                     TargetType = typeof(ComboBox),
                     BasedOn = (Style)Application.Current.FindResource(VsResourceKeys.ComboBoxStyleKey),
-                    Setters =
-                    {
-                        new Setter(Control.PaddingProperty, new DynamicResourceExtension(InputPaddingKey))
-                    }
+                    Setters = { new Setter(Control.PaddingProperty, new DynamicResourceExtension(InputPaddingKey)) }
                 };
             }
             catch (Exception ex) when (!ErrorHandler.IsCriticalException(ex))

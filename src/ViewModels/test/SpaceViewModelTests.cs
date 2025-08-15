@@ -20,6 +20,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         private CloudFoundrySpace _expectedSpace;
         private readonly bool _expectedSkipSslValue = false;
         private readonly int _expectedRetryAmount = 1;
+
         private readonly DetailedResult<List<CloudFoundryApp>> _fakeAppsResponse = new()
         {
             Succeeded = true,
@@ -27,7 +28,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             [
                 _fakeApps[0],
                 _fakeApps[1],
-                _fakeApps[2],
+                _fakeApps[2]
             ]
         };
 
@@ -38,27 +39,20 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             _fakeCfInstanceViewModel = new CfInstanceViewModel(_fakeCfInstance, MockTanzuExplorerViewModel.Object, Services, expanded: true);
 
-            MockUiDispatcherService.Setup(mock => mock.
-                RunOnUiThreadAsync(It.IsAny<Action>()))
-                    .Callback<Action>(action =>
-                    {
-                        // Run whatever method is passed to MockUiDispatcherService.RunOnUiThread; do not delegate to the UI Dispatcher
-                        action();
-                    });
-
-            MockThreadingService.Setup(m => m
-              .RemoveItemFromCollectionOnUiThreadAsync(It.IsAny<ObservableCollection<TreeViewItemViewModel>>(), It.IsAny<TreeViewItemViewModel>()))
-                .Callback<ObservableCollection<TreeViewItemViewModel>, TreeViewItemViewModel>((collection, item) =>
+            MockUiDispatcherService.Setup(mock => mock.RunOnUIThreadAsync(It.IsAny<Action>()))
+                .Callback<Action>(action =>
                 {
-                    collection.Remove(item);
+                    // Run whatever method is passed to MockUiDispatcherService.RunOnUiThread; do not delegate to the UI Dispatcher
+                    action();
                 });
 
             MockThreadingService.Setup(m => m
-              .AddItemToCollectionOnUiThreadAsync(It.IsAny<ObservableCollection<TreeViewItemViewModel>>(), It.IsAny<TreeViewItemViewModel>()))
-                .Callback<ObservableCollection<TreeViewItemViewModel>, TreeViewItemViewModel>((collection, item) =>
-                {
-                    collection.Add(item);
-                });
+                    .RemoveItemFromCollectionOnUIThreadAsync(It.IsAny<ObservableCollection<TreeViewItemViewModel>>(), It.IsAny<TreeViewItemViewModel>()))
+                .Callback<ObservableCollection<TreeViewItemViewModel>, TreeViewItemViewModel>((collection, item) => { collection.Remove(item); });
+
+            MockThreadingService.Setup(m => m
+                    .AddItemToCollectionOnUIThreadAsync(It.IsAny<ObservableCollection<TreeViewItemViewModel>>(), It.IsAny<TreeViewItemViewModel>()))
+                .Callback<ObservableCollection<TreeViewItemViewModel>, TreeViewItemViewModel>((collection, item) => { collection.Add(item); });
 
             MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(_fakeCfInstanceViewModel);
 
@@ -67,10 +61,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut = new SpaceViewModel(_fakeCfSpace, _fakeOrgViewModel, MockTanzuExplorerViewModel.Object, Services, expanded: true);
 
             _receivedEvents = [];
-            _sut.PropertyChanged += (sender, e) =>
-            {
-                _receivedEvents.Add(e.PropertyName);
-            };
+            _sut.PropertyChanged += (sender, e) => { _receivedEvents.Add(e.PropertyName); };
 
             _expectedSpace = _sut.Space;
         }
@@ -126,12 +117,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 new AppViewModel(_fakeApps[0], Services),
                 new AppViewModel(_fakeApps[1], Services),
                 new AppViewModel(_fakeApps[2], Services),
-                new AppViewModel(_fakeApps[3], Services),
+                new AppViewModel(_fakeApps[3], Services)
             ];
 
             /** mock retrieving all initial children except for FakeApps[3] */
             MockCloudFoundryService.Setup(m => m
-              .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
+                    .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
                 .ReturnsAsync(_fakeAppsResponse);
 
             await _sut.UpdateAllChildren();
@@ -143,7 +134,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsFalse(_sut.Children.Any(child => child is AppViewModel app && app.App.AppName == _fakeApps[3].AppName));
 
             MockThreadingService.Verify(m => m
-              .RemoveItemFromCollectionOnUiThreadAsync(_sut.Children, It.Is<AppViewModel>((ovm) => ovm.App == _fakeApps[3])),
+                    .RemoveItemFromCollectionOnUIThreadAsync(_sut.Children, It.Is<AppViewModel>((ovm) => ovm.App == _fakeApps[3])),
                 Times.Once);
         }
 
@@ -155,12 +146,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.Children =
             [
                 new AppViewModel(_fakeApps[0], Services),
-                new AppViewModel(_fakeApps[1], Services),
+                new AppViewModel(_fakeApps[1], Services)
             ];
 
             /** mock retrieving all initial children plus FakeApps[2] */
             MockCloudFoundryService.Setup(m => m
-              .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
+                    .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
                 .ReturnsAsync(_fakeAppsResponse);
 
             await _sut.UpdateAllChildren();
@@ -171,7 +162,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsTrue(_sut.Children.Any(child => child is AppViewModel app && app.App.AppName == _fakeApps[2].AppName));
 
             MockThreadingService.Verify(m => m
-              .AddItemToCollectionOnUiThreadAsync(_sut.Children, It.Is<AppViewModel>((ovm) => ovm.App == _fakeApps[2])),
+                    .AddItemToCollectionOnUIThreadAsync(_sut.Children, It.Is<AppViewModel>((ovm) => ovm.App == _fakeApps[2])),
                 Times.Once);
         }
 
@@ -187,7 +178,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 new AppViewModel(_fakeApps[0], Services),
                 new AppViewModel(new CloudFoundryApp(_fakeApps[1].AppName, _fakeApps[1].AppId, _fakeApps[1].ParentSpace, oldStateExpectedToChange), Services),
                 new AppViewModel(_fakeApps[3], Services),
-                new AppViewModel(_fakeApps[4], Services),
+                new AppViewModel(_fakeApps[4], Services)
             };
             _sut.Children = new ObservableCollection<TreeViewItemViewModel>(initialChildren);
 
@@ -198,11 +189,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
              * initial children FakeApps[3] & FakeApps[4] have been lost
              */
             MockCloudFoundryService.Setup(m => m
-              .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
+                    .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
                 .ReturnsAsync(_fakeAppsResponse);
 
             MockThreadingService.Setup(m => m
-              .StartBackgroundTask(It.IsAny<Func<Task>>()))
+                    .StartBackgroundTaskAsync(It.IsAny<Func<Task>>()))
                 .Verifiable();
 
             await _sut.UpdateAllChildren();
@@ -242,15 +233,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             fakeNoAppsResponse.Content.Clear();
 
             /** mock 2 initial children */
-            var initialChildren = new ObservableCollection<TreeViewItemViewModel>
-            {
-                new AppViewModel(_fakeApps[0], Services),
-                new AppViewModel(_fakeApps[1], Services),
-            };
+            var initialChildren = new ObservableCollection<TreeViewItemViewModel> { new AppViewModel(_fakeApps[0], Services), new AppViewModel(_fakeApps[1], Services) };
             _sut.Children = new ObservableCollection<TreeViewItemViewModel>(initialChildren);
 
             MockCloudFoundryService.Setup(m => m
-              .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
+                    .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
                 .ReturnsAsync(fakeNoAppsResponse);
 
             Assert.IsFalse(_sut.Children.Any(child => child is PlaceholderViewModel));
@@ -261,9 +248,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsTrue(_sut.Children[0].Equals(_sut.EmptyPlaceholder));
             foreach (var child in initialChildren)
             {
-                MockThreadingService.Verify(m => m.RemoveItemFromCollectionOnUiThreadAsync(_sut.Children, child), Times.Once);
+                MockThreadingService.Verify(m => m.RemoveItemFromCollectionOnUIThreadAsync(_sut.Children, child), Times.Once);
             }
-            MockThreadingService.Verify(m => m.AddItemToCollectionOnUiThreadAsync(_sut.Children, _sut.EmptyPlaceholder), Times.Once);
+
+            MockThreadingService.Verify(m => m.AddItemToCollectionOnUIThreadAsync(_sut.Children, _sut.EmptyPlaceholder), Times.Once);
         }
 
         [TestMethod]
@@ -291,12 +279,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             _sut.Children =
             [
-                _sut.EmptyPlaceholder,
+                _sut.EmptyPlaceholder
             ];
 
             /** mock 3 new children */
             MockCloudFoundryService.Setup(m => m
-              .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
+                    .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
                 .ReturnsAsync(_fakeAppsResponse);
 
             Assert.AreEqual(1, _sut.Children.Count);
@@ -319,17 +307,16 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.Children =
             [
                 new AppViewModel(_fakeApps[0], Services),
-                new AppViewModel(_fakeApps[1], Services),
+                new AppViewModel(_fakeApps[1], Services)
             ];
 
             MockCloudFoundryService.Setup(m => m
-              .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
+                    .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
                 .Callback(() =>
                 {
                     // ensure loading placeholder present at time of loading fresh children
                     Assert.IsTrue(_sut.IsLoading);
                     Assert.IsTrue(_sut.Children.Contains(_sut.LoadingPlaceholder));
-
                 }).ReturnsAsync(fakeNoAppsResponse);
 
             await _sut.UpdateAllChildren();
@@ -341,15 +328,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("UpdateAllChildren")]
         public async Task UpdateAllChildren_CollapsesSelf_AndSetsAuthRequiredTrue_WhenAppsRequestFailsWithInvalidRefreshToken()
         {
-            var fakeInvalidTokenResponse = new DetailedResult<List<CloudFoundryApp>>
-            {
-                Succeeded = false,
-                Explanation = "junk",
-                FailureType = FailureType.InvalidRefreshToken,
-            };
+            var fakeInvalidTokenResponse = new DetailedResult<List<CloudFoundryApp>> { Succeeded = false, Explanation = "junk", FailureType = FailureType.InvalidRefreshToken };
 
             MockCloudFoundryService.Setup(m => m
-              .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
+                    .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
                 .ReturnsAsync(fakeInvalidTokenResponse);
             MockTanzuExplorerViewModel.SetupSet(m => m.AuthenticationRequired = true)
                 .Verifiable();
@@ -368,18 +350,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("UpdateAllChildren")]
         public async Task UpdateAllChildren_CollapsesSelf_AndLogsError_WhenAppsRequestFails()
         {
-            var fakeFailedAppsResponse = new DetailedResult<List<CloudFoundryApp>>
-            {
-                Succeeded = false,
-                Explanation = "junk",
-            };
+            var fakeFailedAppsResponse = new DetailedResult<List<CloudFoundryApp>> { Succeeded = false, Explanation = "junk" };
 
             MockCloudFoundryService.Setup(m => m
-              .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
+                    .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
                 .ReturnsAsync(fakeFailedAppsResponse);
 
             MockLogger.Setup(m => m
-              .Error(It.Is<string>(s => s.Contains("SpaceViewModel failed to load apps")), fakeFailedAppsResponse.Explanation))
+                    .Error(It.Is<string>(s => s.Contains("SpaceViewModel failed to load apps")), fakeFailedAppsResponse.Explanation))
                 .Verifiable();
 
             Assert.IsTrue(_sut.IsExpanded);
@@ -398,17 +376,18 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var fakeException = new Exception(":(");
 
             MockCloudFoundryService.Setup(m => m
-              .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
+                    .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
                 .Throws(fakeException);
 
             MockLogger.Setup(m => m
-              .Error(It.Is<string>(s => s.Contains("Caught exception trying to load apps in SpaceViewModel")), fakeException))
+                    .Error(It.Is<string>(s => s.Contains("Caught exception trying to load apps in SpaceViewModel")), fakeException))
                 .Verifiable();
 
             MockErrorDialogService.Setup(m => m
-              .DisplayWarningDialog(
-                SpaceViewModel._getAppsFailureMsg,
-                It.Is<string>(s => s.Contains("try disconnecting & logging in again") && s.Contains("If this issue persists, please contact dotnetdevx@groups.vmware.com"))))
+                    .DisplayWarningDialog(
+                        SpaceViewModel._getAppsFailureMsg,
+                        It.Is<string>(s =>
+                            s.Contains("try disconnecting & logging in again"))))
                 .Verifiable();
 
             await _sut.UpdateAllChildren();

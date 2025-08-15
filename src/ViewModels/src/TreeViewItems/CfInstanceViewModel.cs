@@ -31,15 +31,9 @@ namespace Tanzu.Toolkit.ViewModels
             DisplayText = cf.InstanceName;
             CfClient.ConfigureForCf(cf);
 
-            LoadingPlaceholder = new PlaceholderViewModel(parent: this, services)
-            {
-                DisplayText = _loadingMsg,
-            };
+            LoadingPlaceholder = new PlaceholderViewModel(parent: this, services) { DisplayText = _loadingMsg };
 
-            EmptyPlaceholder = new PlaceholderViewModel(parent: this, Services)
-            {
-                DisplayText = _emptyOrgsPlaceholderMsg,
-            };
+            EmptyPlaceholder = new PlaceholderViewModel(parent: this, Services) { DisplayText = _emptyOrgsPlaceholderMsg };
         }
 
         public CloudFoundryInstance CloudFoundryInstance { get; }
@@ -72,8 +66,8 @@ namespace Tanzu.Toolkit.ViewModels
                             var freshOrgs = new ObservableCollection<CloudFoundryOrganization>(orgsResponse.Content);
                             if (freshOrgs.Count < 1)
                             {
-                                removalTasks.AddRange(originalChildren.Select(child => ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, child)));
-                                additionTasks.Add(ThreadingService.AddItemToCollectionOnUiThreadAsync(Children, EmptyPlaceholder));
+                                removalTasks.AddRange(originalChildren.Select(child => ThreadingService.RemoveItemFromCollectionOnUIThreadAsync(Children, child)));
+                                additionTasks.Add(ThreadingService.AddItemToCollectionOnUIThreadAsync(Children, EmptyPlaceholder));
                             }
                             else
                             {
@@ -82,14 +76,14 @@ namespace Tanzu.Toolkit.ViewModels
                                 {
                                     if (priorChild is PlaceholderViewModel)
                                     {
-                                        removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, priorChild));
+                                        removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUIThreadAsync(Children, priorChild));
                                     }
                                     else if (priorChild is OrgViewModel priorOrg)
                                     {
                                         var orgStillExists = freshOrgs.Any(o => o != null && o.OrgId == priorOrg.Org.OrgId);
                                         if (!orgStillExists)
                                         {
-                                            removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, priorOrg));
+                                            removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUIThreadAsync(Children, priorOrg));
                                         }
                                     }
                                 }
@@ -102,8 +96,9 @@ namespace Tanzu.Toolkit.ViewModels
                                     {
                                         continue;
                                     }
+
                                     var newOrg = new OrgViewModel(freshOrg, this, ParentTanzuExplorer, Services, expanded: false);
-                                    additionTasks.Add(ThreadingService.AddItemToCollectionOnUiThreadAsync(Children, newOrg));
+                                    additionTasks.Add(ThreadingService.AddItemToCollectionOnUIThreadAsync(Children, newOrg));
                                 }
                             }
 
@@ -115,9 +110,10 @@ namespace Tanzu.Toolkit.ViewModels
                             {
                                 if (child is OrgViewModel org)
                                 {
-                                    updateTasks.Add(ThreadingService.StartBackgroundTask(org.UpdateAllChildren));
+                                    updateTasks.Add(ThreadingService.StartBackgroundTaskAsync(org.UpdateAllChildren));
                                 }
                             }
+
                             await Task.WhenAll(updateTasks);
                         }
                         else if (orgsResponse.FailureType == Toolkit.Services.FailureType.InvalidRefreshToken)
@@ -134,7 +130,7 @@ namespace Tanzu.Toolkit.ViewModels
                     catch (Exception ex)
                     {
                         Logger.Error("Caught exception trying to load orgs in CfInstanceViewModel: {CfInstanceViewModelLoadingException}", ex);
-                        _dialogService.DisplayWarningDialog(_getOrgsFailureMsg, "Something went wrong while loading organizations; try disconnecting & logging in again.\nIf this issue persists, please contact dotnetdevx@groups.vmware.com");
+                        _dialogService.DisplayWarningDialog(_getOrgsFailureMsg, "Something went wrong while loading organizations; try disconnecting & logging in again.");
                     }
                     finally
                     {

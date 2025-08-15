@@ -12,14 +12,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views.Converters
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value as bool? != Reversed)
-            {
-                return Visibility.Visible;
-            }
-            else
-            {
-                return ReserveSpace ? Visibility.Hidden : (object)Visibility.Collapsed;
-            }
+            return value as bool? != Reversed ? Visibility.Visible : ReserveSpace ? Visibility.Hidden : (object)Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

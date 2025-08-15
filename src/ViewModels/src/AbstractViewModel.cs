@@ -9,6 +9,7 @@ using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
+using Tanzu.Toolkit.Services.Serialization;
 using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
 
@@ -22,7 +23,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public AbstractViewModel(IServiceProvider services)
+        protected AbstractViewModel(IServiceProvider services)
         {
             Services = services;
 
@@ -33,7 +34,7 @@ namespace Tanzu.Toolkit.ViewModels
                 DialogService = services.GetRequiredService<IDialogService>();
                 ViewLocatorService = services.GetRequiredService<IViewLocatorService>();
                 ThreadingService = services.GetRequiredService<IThreadingService>();
-                UiDispatcherService = services.GetRequiredService<IUiDispatcherService>();
+                UIDispatcherService = services.GetRequiredService<IUIDispatcherService>();
                 FileService = services.GetRequiredService<IFileService>();
                 SerializationService = services.GetRequiredService<ISerializationService>();
                 ErrorService = services.GetRequiredService<IErrorDialog>();
@@ -51,7 +52,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public IThreadingService ThreadingService { get; }
 
-        public IUiDispatcherService UiDispatcherService { get; }
+        public IUIDispatcherService UIDispatcherService { get; }
 
         public IDialogService DialogService { get; }
 
@@ -78,27 +79,23 @@ namespace Tanzu.Toolkit.ViewModels
                         Logger.Information("Detected null Tanzu Platform connection in AbstractViewModel; prompting login");
                         DialogService.ShowModal(nameof(LoginViewModel));
                     }
+
                     _cfClient = TanzuExplorer.CloudFoundryConnection?.CfClient;
                     if (_cfClient == null)
                     {
                         Logger.Information("CF client still null after prompting login");
                     }
                 }
+
                 return _cfClient;
             }
 
-            set
-            {
-                _cfClient = value;
-            }
+            set => _cfClient = value;
         }
 
         public object ActiveView
         {
-            get
-            {
-                return _activeView;
-            }
+            get => _activeView;
 
             set
             {

@@ -19,14 +19,13 @@ namespace Tanzu.Toolkit.VisualStudio.Services
             /* Ensure dialog is displayed in UI thread */
 
             VsShellUtilities.ShowMessageBox(
-                  _asyncServiceProvider,
-                  msg,
-                  title,
-                  OLEMSGICON.OLEMSGICON_CRITICAL,
-                  OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                  OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST
-             );
-
+                _asyncServiceProvider,
+                msg,
+                title,
+                OLEMSGICON.OLEMSGICON_CRITICAL,
+                OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST
+            );
         }
 
         public void DisplayWarningDialog(string title, string msg)
@@ -34,16 +33,13 @@ namespace Tanzu.Toolkit.VisualStudio.Services
             /* Ensure dialog is displayed in UI thread */
 
             VsShellUtilities.ShowMessageBox(
-                  _asyncServiceProvider,
-                  msg,
-                  title,
-                  OLEMSGICON.OLEMSGICON_WARNING,
-                  OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                  OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST
-             );
-
+                _asyncServiceProvider,
+                msg,
+                title,
+                OLEMSGICON.OLEMSGICON_WARNING,
+                OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST
+            );
         }
     }
 }
-
-

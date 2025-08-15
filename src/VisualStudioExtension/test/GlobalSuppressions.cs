@@ -5,4 +5,6 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Style", "VSTHRD200:Use \"Async\" suffix for async methods", Justification = "These are test methods & will never be called explicitly; the 'Async' just makes these long method names even longer", Scope = "module")]
+[assembly:
+    SuppressMessage("Style", "VSTHRD200:Use \"Async\" suffix for async methods",
+        Justification = "These are test methods & will never be called explicitly; the 'Async' just makes these long method names even longer", Scope = "module")]

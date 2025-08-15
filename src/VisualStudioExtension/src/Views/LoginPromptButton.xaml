@@ -4,14 +4,14 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    mc:Ignorable="d" >
+    mc:Ignorable="d">
 
     <StackPanel Orientation="Horizontal">
         <Image
             Source="Resources/tanzu_nc_dark.png"
             Width="16"
             UseLayoutRounding="True"
-            VerticalAlignment="Center"/>
-        <Label Content="Disconnected: Click here to login"/>
+            VerticalAlignment="Center" />
+        <Label Content="Disconnected: Click here to login" />
     </StackPanel>
 </UserControl>
