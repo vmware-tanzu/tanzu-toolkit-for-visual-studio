@@ -66,8 +66,8 @@ namespace Tanzu.Toolkit.ViewModels
                             var freshOrgs = new ObservableCollection<CloudFoundryOrganization>(orgsResponse.Content);
                             if (freshOrgs.Count < 1)
                             {
-                                removalTasks.AddRange(originalChildren.Select(child => ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, child)));
-                                additionTasks.Add(ThreadingService.AddItemToCollectionOnUiThreadAsync(Children, EmptyPlaceholder));
+                                removalTasks.AddRange(originalChildren.Select(child => ThreadingService.RemoveItemFromCollectionOnUIThreadAsync(Children, child)));
+                                additionTasks.Add(ThreadingService.AddItemToCollectionOnUIThreadAsync(Children, EmptyPlaceholder));
                             }
                             else
                             {
@@ -76,14 +76,14 @@ namespace Tanzu.Toolkit.ViewModels
                                 {
                                     if (priorChild is PlaceholderViewModel)
                                     {
-                                        removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, priorChild));
+                                        removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUIThreadAsync(Children, priorChild));
                                     }
                                     else if (priorChild is OrgViewModel priorOrg)
                                     {
                                         var orgStillExists = freshOrgs.Any(o => o != null && o.OrgId == priorOrg.Org.OrgId);
                                         if (!orgStillExists)
                                         {
-                                            removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, priorOrg));
+                                            removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUIThreadAsync(Children, priorOrg));
                                         }
                                     }
                                 }
@@ -98,7 +98,7 @@ namespace Tanzu.Toolkit.ViewModels
                                     }
 
                                     var newOrg = new OrgViewModel(freshOrg, this, ParentTanzuExplorer, Services, expanded: false);
-                                    additionTasks.Add(ThreadingService.AddItemToCollectionOnUiThreadAsync(Children, newOrg));
+                                    additionTasks.Add(ThreadingService.AddItemToCollectionOnUIThreadAsync(Children, newOrg));
                                 }
                             }
 
@@ -110,7 +110,7 @@ namespace Tanzu.Toolkit.ViewModels
                             {
                                 if (child is OrgViewModel org)
                                 {
-                                    updateTasks.Add(ThreadingService.StartBackgroundTask(org.UpdateAllChildren));
+                                    updateTasks.Add(ThreadingService.StartBackgroundTaskAsync(org.UpdateAllChildren));
                                 }
                             }
 

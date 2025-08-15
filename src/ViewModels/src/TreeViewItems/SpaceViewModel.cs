@@ -61,10 +61,10 @@ namespace Tanzu.Toolkit.ViewModels
                             {
                                 foreach (var child in originalChildren)
                                 {
-                                    removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, child));
+                                    removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUIThreadAsync(Children, child));
                                 }
 
-                                additionTasks.Add(ThreadingService.AddItemToCollectionOnUiThreadAsync(Children, EmptyPlaceholder));
+                                additionTasks.Add(ThreadingService.AddItemToCollectionOnUIThreadAsync(Children, EmptyPlaceholder));
                             }
                             else
                             {
@@ -73,14 +73,14 @@ namespace Tanzu.Toolkit.ViewModels
                                 {
                                     if (priorChild is PlaceholderViewModel)
                                     {
-                                        removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, priorChild));
+                                        removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUIThreadAsync(Children, priorChild));
                                     }
                                     else if (priorChild is AppViewModel priorApp)
                                     {
                                         var appStillExists = freshApps.Any(o => o is CloudFoundryApp freshApp && freshApp != null && freshApp.AppId == priorApp.App.AppId);
                                         if (!appStillExists)
                                         {
-                                            removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUiThreadAsync(Children, priorApp));
+                                            removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUIThreadAsync(Children, priorApp));
                                         }
                                     }
                                 }
@@ -94,7 +94,7 @@ namespace Tanzu.Toolkit.ViewModels
                                     {
                                         case 0: // no existing apps match fresh app's id; add it
                                             var newApp = new AppViewModel(freshApp, Services);
-                                            additionTasks.Add(ThreadingService.AddItemToCollectionOnUiThreadAsync(Children, newApp));
+                                            additionTasks.Add(ThreadingService.AddItemToCollectionOnUIThreadAsync(Children, newApp));
                                             break;
                                         case 1: // found matching app; keep it but update state with fresh info
                                             var extantApp = (AppViewModel)appsWithSameId.First();

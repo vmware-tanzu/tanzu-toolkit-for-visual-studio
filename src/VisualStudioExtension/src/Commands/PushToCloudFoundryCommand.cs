@@ -12,7 +12,6 @@ using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.Project;
 using Tanzu.Toolkit.ViewModels;
-using Tanzu.Toolkit.ViewModels.RemoteDebug;
 using Tanzu.Toolkit.VisualStudio.Services;
 using Tanzu.Toolkit.VisualStudio.Views;
 using Project = EnvDTE.Project;

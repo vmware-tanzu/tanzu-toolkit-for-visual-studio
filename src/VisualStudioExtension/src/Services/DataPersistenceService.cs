@@ -89,7 +89,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services
             return _writableSettingsStore.DeleteProperty(_tasCollectionPath, propertyName);
         }
 
-        public bool SavedCfCredsExist()
+        public bool SavedCloudFoundryCredentialsExist()
         {
             try
             {

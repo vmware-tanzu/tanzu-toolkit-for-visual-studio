@@ -45,7 +45,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Exception thrownException = null;
             try
             {
-                var result = await _sut.ListOrgs(_fakeCfApiAddress, _fakeAccessToken);
+                var result = await _sut.ListOrgsAsync(_fakeCfApiAddress, _fakeAccessToken);
             }
             catch (Exception ex)
             {
@@ -81,7 +81,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
                 .Respond("application/json", _fakeOrgsJsonResponsePage4);
 
-            var result = await _sut.ListOrgs(_fakeCfApiAddress, _fakeAccessToken);
+            var result = await _sut.ListOrgsAsync(_fakeCfApiAddress, _fakeAccessToken);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(10, result.Count);
@@ -103,7 +103,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Exception thrownException = null;
             try
             {
-                var result = await _sut.ListSpacesForOrg(_fakeCfApiAddress, _fakeAccessToken, "orgGuid");
+                var result = await _sut.ListSpacesForOrgAsync(_fakeCfApiAddress, _fakeAccessToken, "orgGuid");
             }
             catch (Exception ex)
             {
@@ -134,7 +134,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
                 .Respond("application/json", _fakeSpacesJsonResponsePage3);
 
-            var result = await _sut.ListSpacesForOrg(_fakeCfApiAddress, _fakeAccessToken, "fake guid");
+            var result = await _sut.ListSpacesForOrgAsync(_fakeCfApiAddress, _fakeAccessToken, "fake guid");
 
             Assert.IsNotNull(result);
             Assert.AreEqual(7, result.Count);
@@ -155,7 +155,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Exception thrownException = null;
             try
             {
-                var result = await _sut.ListAppsForSpace(_fakeCfApiAddress, _fakeAccessToken, "spaceGuid");
+                var result = await _sut.ListAppsForSpaceAsync(_fakeCfApiAddress, _fakeAccessToken, "spaceGuid");
             }
             catch (Exception ex)
             {
@@ -186,7 +186,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
                 .Respond("application/json", _fakeAppsJsonResponsePage3);
 
-            var result = await _sut.ListAppsForSpace(_fakeCfApiAddress, _fakeAccessToken, "fake guid");
+            var result = await _sut.ListAppsForSpaceAsync(_fakeCfApiAddress, _fakeAccessToken, "fake guid");
 
             Assert.IsNotNull(result);
             Assert.AreEqual(125, result.Count);
@@ -207,7 +207,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Exception expectedException = null;
             try
             {
-                var result = await _sut.ListRoutesForApp(_fakeCfApiAddress, _fakeAccessToken, "appGuid");
+                var result = await _sut.ListRoutesForAppAsync(_fakeCfApiAddress, _fakeAccessToken, "appGuid");
             }
             catch (Exception ex)
             {
@@ -237,7 +237,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
                 .Respond("application/json", _fakeRoutesJsonResponsePage3);
 
-            var result = await _sut.ListRoutesForApp(_fakeCfApiAddress, _fakeAccessToken, "fake guid");
+            var result = await _sut.ListRoutesForAppAsync(_fakeCfApiAddress, _fakeAccessToken, "fake guid");
 
             Assert.IsNotNull(result);
             Assert.AreEqual(125, result.Count);
@@ -259,7 +259,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 
             try
             {
-                await _sut.StopAppWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
+                await _sut.StopAppWithGuidAsync(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
             }
             catch (Exception e)
             {
@@ -284,7 +284,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var stopResult = false;
             try
             {
-                stopResult = await _sut.StopAppWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
+                stopResult = await _sut.StopAppWithGuidAsync(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
             }
             catch (Exception e)
             {
@@ -309,7 +309,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var stopResult = true;
             try
             {
-                stopResult = await _sut.StopAppWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
+                stopResult = await _sut.StopAppWithGuidAsync(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
             }
             catch (Exception e)
             {
@@ -334,7 +334,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var startResult = false;
             try
             {
-                startResult = await _sut.StartAppWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
+                startResult = await _sut.StartAppWithGuidAsync(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
             }
             catch (Exception e)
             {
@@ -359,7 +359,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var startResult = true;
             try
             {
-                startResult = await _sut.StartAppWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
+                startResult = await _sut.StartAppWithGuidAsync(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
             }
             catch (Exception e)
             {
@@ -384,7 +384,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 
             try
             {
-                await _sut.StartAppWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
+                await _sut.StartAppWithGuidAsync(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
             }
             catch (Exception e)
             {
@@ -409,7 +409,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var appWasDeleted = false;
             try
             {
-                appWasDeleted = await _sut.DeleteAppWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
+                appWasDeleted = await _sut.DeleteAppWithGuidAsync(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
             }
             catch (Exception e)
             {
@@ -433,7 +433,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 
             try
             {
-                await _sut.DeleteAppWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
+                await _sut.DeleteAppWithGuidAsync(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
             }
             catch (Exception e)
             {
@@ -457,7 +457,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Exception thrownException = null;
             try
             {
-                var result = await _sut.ListStacks(_fakeCfApiAddress, _fakeAccessToken);
+                var result = await _sut.ListStacksAsync(_fakeCfApiAddress, _fakeAccessToken);
             }
             catch (Exception ex)
             {
@@ -493,7 +493,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
                 .Respond("application/json", _fakeStacksJsonResponsePage4);
 
-            var result = await _sut.ListStacks(_fakeCfApiAddress, _fakeAccessToken);
+            var result = await _sut.ListStacksAsync(_fakeCfApiAddress, _fakeAccessToken);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(10, result.Count);
@@ -504,7 +504,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         }
 
         [TestMethod]
-        [TestCategory("ListBuildpacks")]
+        [TestCategory("ListBuildpacksAsync")]
         public async Task ListBuildpacks_ReturnsListOfBuildpacks_WhenResponseContainsMultiplePages()
         {
             var expectedPath = CfApiClient._listBuildpacksPath;
@@ -523,7 +523,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
                 .Respond("application/json", _fakeBuildpacksJsonResponsePage3);
 
-            var result = await _sut.ListBuildpacks(_fakeCfApiAddress, _fakeAccessToken);
+            var result = await _sut.ListBuildpacksAsync(_fakeCfApiAddress, _fakeAccessToken);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(125, result.Count);
@@ -533,7 +533,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         }
 
         [TestMethod]
-        [TestCategory("ListBuildpacks")]
+        [TestCategory("ListBuildpacksAsync")]
         public async Task ListBuildpacks_ThrowsException_WhenStatusCodeIsNotASuccess()
         {
             var expectedPath = CfApiClient._listBuildpacksPath;
@@ -545,7 +545,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Exception thrownException = null;
             try
             {
-                var result = await _sut.ListBuildpacks(_fakeCfApiAddress, _fakeAccessToken);
+                var result = await _sut.ListBuildpacksAsync(_fakeCfApiAddress, _fakeAccessToken);
             }
             catch (Exception ex)
             {
@@ -558,7 +558,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         }
 
         [TestMethod]
-        [TestCategory("ListServices")]
+        [TestCategory("ListServicesAsync")]
         public async Task ListServices_ReturnsListOfServices_WhenResponseContainsMultiplePages()
         {
             var expectedPath = CfApiClient._listServicesPath;
@@ -577,7 +577,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
                 .WithHeaders("Authorization", $"Bearer {_fakeAccessToken}")
                 .Respond("application/json", _fakeServicesJsonResponsePage3);
 
-            var result = await _sut.ListServices(_fakeCfApiAddress, _fakeAccessToken);
+            var result = await _sut.ListServicesAsync(_fakeCfApiAddress, _fakeAccessToken);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(125, result.Count);
@@ -587,7 +587,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         }
 
         [TestMethod]
-        [TestCategory("ListServices")]
+        [TestCategory("ListServicesAsync")]
         public async Task ListServices_ThrowsException_WhenStatusCodeIsNotASuccess()
         {
             var expectedPath = CfApiClient._listServicesPath;
@@ -599,7 +599,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             Exception thrownException = null;
             try
             {
-                var result = await _sut.ListServices(_fakeCfApiAddress, _fakeAccessToken);
+                var result = await _sut.ListServicesAsync(_fakeCfApiAddress, _fakeAccessToken);
             }
             catch (Exception ex)
             {
@@ -612,7 +612,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         }
 
         [TestMethod]
-        [TestCategory("GetLoginServerInformation")]
+        [TestCategory("GetLoginServerInformationAsync")]
         public async Task GetLoginServerInformation_ReturnsLoginInfoResponse_WhenRequestsSucceed()
         {
             Exception thrownException = null;
@@ -636,7 +636,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 
             try
             {
-                var result = await _sut.GetLoginServerInformation(_fakeCfApiAddress);
+                var result = await _sut.GetLoginServerInformationAsync(_fakeCfApiAddress);
             }
             catch (Exception ex)
             {
@@ -650,7 +650,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         }
 
         [TestMethod]
-        [TestCategory("GetLoginServerInformation")]
+        [TestCategory("GetLoginServerInformationAsync")]
         public async Task GetLoginServerInformation_ThrowsException_WhenAuthServerAddressLookupFails()
         {
             Exception thrownException = null;
@@ -662,7 +662,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 
             try
             {
-                var result = await _sut.GetLoginServerInformation(_fakeCfApiAddress);
+                var result = await _sut.GetLoginServerInformationAsync(_fakeCfApiAddress);
             }
             catch (Exception ex)
             {
@@ -675,7 +675,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         }
 
         [TestMethod]
-        [TestCategory("GetLoginServerInformation")]
+        [TestCategory("GetLoginServerInformationAsync")]
         public async Task GetLoginServerInformation_ThrowsException_WhenJsonResponseParsingFails()
         {
             Exception thrownException = null;
@@ -688,7 +688,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 
             try
             {
-                var result = await _sut.GetLoginServerInformation(_fakeCfApiAddress);
+                var result = await _sut.GetLoginServerInformationAsync(_fakeCfApiAddress);
             }
             catch (Exception ex)
             {
@@ -702,7 +702,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         }
 
         [TestMethod]
-        [TestCategory("GetLoginServerInformation")]
+        [TestCategory("GetLoginServerInformationAsync")]
         public async Task GetLoginServerInformation_ThrowsException_WhenInfoRequestStatusCodeIsNotASuccess()
         {
             Exception thrownException = null;
@@ -715,7 +715,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 
             try
             {
-                var result = await _sut.GetLoginServerInformation(_fakeCfApiAddress);
+                var result = await _sut.GetLoginServerInformationAsync(_fakeCfApiAddress);
             }
             catch (Exception ex)
             {
@@ -730,7 +730,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 
 
         [TestMethod]
-        [TestCategory("DeleteRouteWithGuid")]
+        [TestCategory("DeleteRouteWithGuidAsync")]
         public async Task DeleteRouteWithGuid_ReturnsTrue_WhenStatusCodeIs202()
         {
             var fakeAppGuid = "my fake guid";
@@ -743,7 +743,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var routeWasDeleted = false;
             try
             {
-                routeWasDeleted = await _sut.DeleteRouteWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
+                routeWasDeleted = await _sut.DeleteRouteWithGuidAsync(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
             }
             catch (Exception e)
             {
@@ -756,7 +756,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         }
 
         [TestMethod]
-        [TestCategory("DeleteRouteWithGuid")]
+        [TestCategory("DeleteRouteWithGuidAsync")]
         public async Task DeleteRouteWithGuid_ThrowsException_WhenStatusCodeIsNot202()
         {
             Exception expectedException = null;
@@ -768,7 +768,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
 
             try
             {
-                await _sut.DeleteRouteWithGuid(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
+                await _sut.DeleteRouteWithGuidAsync(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
             }
             catch (Exception e)
             {

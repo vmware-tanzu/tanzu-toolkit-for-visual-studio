@@ -39,17 +39,17 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _fakeCfInstanceViewModel = new CfInstanceViewModel(_fakeCfInstance, MockTanzuExplorerViewModel.Object, Services, expanded: true);
             _receivedEvents = [];
 
-            MockUiDispatcherService.Setup(mock => mock.RunOnUiThreadAsync(It.IsAny<Action>()))
+            MockUiDispatcherService.Setup(mock => mock.RunOnUIThreadAsync(It.IsAny<Action>()))
                 .Callback<Action>(action =>
                 {
                     // Run whatever method is passed to MockUiDispatcherService.RunOnUiThread; do not delegate to the UI Dispatcher
                     action();
                 });
 
-            MockThreadingService.Setup(m => m.RemoveItemFromCollectionOnUiThreadAsync(It.IsAny<ObservableCollection<TreeViewItemViewModel>>(), It.IsAny<TreeViewItemViewModel>()))
+            MockThreadingService.Setup(m => m.RemoveItemFromCollectionOnUIThreadAsync(It.IsAny<ObservableCollection<TreeViewItemViewModel>>(), It.IsAny<TreeViewItemViewModel>()))
                 .Callback<ObservableCollection<TreeViewItemViewModel>, TreeViewItemViewModel>((collection, item) => { collection.Remove(item); });
 
-            MockThreadingService.Setup(m => m.AddItemToCollectionOnUiThreadAsync(It.IsAny<ObservableCollection<TreeViewItemViewModel>>(), It.IsAny<TreeViewItemViewModel>()))
+            MockThreadingService.Setup(m => m.AddItemToCollectionOnUIThreadAsync(It.IsAny<ObservableCollection<TreeViewItemViewModel>>(), It.IsAny<TreeViewItemViewModel>()))
                 .Callback<ObservableCollection<TreeViewItemViewModel>, TreeViewItemViewModel>((collection, item) => { collection.Add(item); });
 
             MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(_fakeCfInstanceViewModel);
@@ -128,7 +128,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsTrue(_sut.Children.Any(child => child is SpaceViewModel space && space.Space.SpaceName == _fakeSpaces[2].SpaceName));
             Assert.IsFalse(_sut.Children.Any(child => child is SpaceViewModel space && space.Space.SpaceName == _fakeSpaces[3].SpaceName));
 
-            MockThreadingService.Verify(m => m.RemoveItemFromCollectionOnUiThreadAsync(_sut.Children, It.Is<SpaceViewModel>((ovm) => ovm.Space == _fakeSpaces[3])),
+            MockThreadingService.Verify(m => m.RemoveItemFromCollectionOnUIThreadAsync(_sut.Children, It.Is<SpaceViewModel>((ovm) => ovm.Space == _fakeSpaces[3])),
                 Times.Once);
         }
 
@@ -155,7 +155,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsTrue(_sut.Children.Any(child => child is SpaceViewModel space && space.Space.SpaceName == _fakeSpaces[2].SpaceName));
 
             MockThreadingService.Verify(m => m
-                    .AddItemToCollectionOnUiThreadAsync(_sut.Children, It.Is<SpaceViewModel>((ovm) => ovm.Space == _fakeSpaces[2])),
+                    .AddItemToCollectionOnUIThreadAsync(_sut.Children, It.Is<SpaceViewModel>((ovm) => ovm.Space == _fakeSpaces[2])),
                 Times.Once);
         }
 
@@ -166,7 +166,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockCloudFoundryService.Setup(m => m.GetSpacesForOrgAsync(_expectedOrg, _expectedSkipSslValue, _expectedRetryAmount))
                 .ReturnsAsync(_fakeSpacesResponse);
 
-            MockThreadingService.Setup(m => m.StartBackgroundTask(It.IsAny<Func<Task>>()))
+            MockThreadingService.Setup(m => m.StartBackgroundTaskAsync(It.IsAny<Func<Task>>()))
                 .Verifiable();
 
             await _sut.UpdateAllChildren();
@@ -175,7 +175,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
                 if (child is SpaceViewModel space)
                 {
-                    MockThreadingService.Verify(m => m.StartBackgroundTask(space.UpdateAllChildren), Times.Once);
+                    MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(space.UpdateAllChildren), Times.Once);
                 }
                 else
                 {
@@ -210,10 +210,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsTrue(_sut.Children[0].Equals(_sut.EmptyPlaceholder));
             foreach (var child in initialChildren)
             {
-                MockThreadingService.Verify(m => m.RemoveItemFromCollectionOnUiThreadAsync(_sut.Children, child), Times.Once);
+                MockThreadingService.Verify(m => m.RemoveItemFromCollectionOnUIThreadAsync(_sut.Children, child), Times.Once);
             }
 
-            MockThreadingService.Verify(m => m.AddItemToCollectionOnUiThreadAsync(_sut.Children, _sut.EmptyPlaceholder), Times.Once);
+            MockThreadingService.Verify(m => m.AddItemToCollectionOnUIThreadAsync(_sut.Children, _sut.EmptyPlaceholder), Times.Once);
         }
 
         [TestMethod]

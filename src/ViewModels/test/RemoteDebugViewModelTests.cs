@@ -21,7 +21,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public void TestInit()
         {
             MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns((CfInstanceViewModel)null);
-            MockThreadingService.Setup(m => m.StartBackgroundTask(It.IsAny<Func<Task>>(), It.IsAny<CancellationToken>())).Verifiable();
+            MockThreadingService.Setup(m => m.StartBackgroundTaskAsync(It.IsAny<Func<Task>>(), It.IsAny<CancellationToken>())).Verifiable();
 
             _sut = new RemoteDebugViewModel(_fakeAppName, _fakeProjectPath, _fakeTargetFrameworkMoniker, _fakePathToLaunchFile, null, Services);
         }

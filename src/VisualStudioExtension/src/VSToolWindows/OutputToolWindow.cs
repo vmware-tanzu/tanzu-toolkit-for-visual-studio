@@ -1,10 +1,9 @@
-﻿using Community.VisualStudio.Toolkit;
-using Community.VisualStudio.Toolkit.DependencyInjection.Core;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Shell;
 using System.Runtime.InteropServices;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.VisualStudio.Views;
+using ServiceProvider = Microsoft.Extensions.DependencyInjection.ServiceProvider;
 
 namespace Tanzu.Toolkit.VisualStudio.VSToolWindows
 {
@@ -13,10 +12,9 @@ namespace Tanzu.Toolkit.VisualStudio.VSToolWindows
     {
         private readonly IOutputView _view;
 
-        public OutputToolWindow() : base(null)
+        public OutputToolWindow(ServiceProvider serviceProvider) : base(serviceProvider)
         {
             Caption = "Tanzu Platform Output";
-            var serviceProvider = VS.GetRequiredService<SToolkitServiceProvider<TanzuToolkitForVisualStudioPackage>, IToolkitServiceProvider<TanzuToolkitForVisualStudioPackage>>();
             _view = serviceProvider.GetRequiredService<IOutputView>();
             Content = _view;
         }

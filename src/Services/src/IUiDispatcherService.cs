@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 
 namespace Tanzu.Toolkit.Services
 {
-    public interface IUiDispatcherService
+    public interface IUIDispatcherService
     {
-        Task RunOnUiThreadAsync(Action method);
+        Task RunOnUIThreadAsync(Action method);
     }
 }

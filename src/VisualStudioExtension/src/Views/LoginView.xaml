@@ -87,7 +87,7 @@
                 </Grid.RowDefinitions>
 
                 <TextBox
-                    Text="{Binding Target}"
+                    Text="{Binding TargetCf}"
                     Name="tbUrl"
                     Grid.Row="0"
                     Grid.Column="0"

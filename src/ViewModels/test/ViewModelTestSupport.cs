@@ -19,6 +19,7 @@ using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.Project;
+using Tanzu.Toolkit.Services.Serialization;
 using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
 using Tanzu.Toolkit.ViewModels.AppDeletionConfirmation;
@@ -36,7 +37,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         protected Mock<ILoggingService> MockLoggingService { get; set; }
         protected Mock<ILogger> MockLogger { get; set; }
         protected Mock<IThreadingService> MockThreadingService { get; set; }
-        protected Mock<IUiDispatcherService> MockUiDispatcherService { get; set; }
+        protected Mock<IUIDispatcherService> MockUiDispatcherService { get; set; }
         protected Mock<IFileService> MockFileService { get; set; }
         protected Mock<ITanzuExplorerViewModel> MockTanzuExplorerViewModel { get; set; }
         protected Mock<ISerializationService> MockSerializationService { get; set; }
@@ -266,7 +267,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 throw new NotImplementedException();
             }
 
-            public Task DisplayRecentAppLogs(object app)
+            public Task DisplayRecentAppLogsAsync(object app)
             {
                 throw new NotImplementedException();
             }
@@ -296,12 +297,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 throw new NotImplementedException();
             }
 
-            public Task RefreshOrg(object arg)
+            public Task RefreshOrgAsync(object arg)
             {
                 throw new NotImplementedException();
             }
 
-            public Task RefreshSpace(object arg)
+            public Task RefreshSpaceAsync(object arg)
             {
                 throw new NotImplementedException();
             }
@@ -311,12 +312,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 throw new NotImplementedException();
             }
 
-            public Task StartCloudFoundryApp(object arg)
+            public Task StartCloudFoundryAppAsync(object arg)
             {
                 throw new NotImplementedException();
             }
 
-            public Task StopCloudFoundryApp(object arg)
+            public Task StopCloudFoundryAppAsync(object arg)
             {
                 throw new NotImplementedException();
             }
@@ -499,7 +500,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockViewLocatorService = new Mock<IViewLocatorService>();
             MockLoggingService = new Mock<ILoggingService>();
             MockThreadingService = new Mock<IThreadingService>();
-            MockUiDispatcherService = new Mock<IUiDispatcherService>();
+            MockUiDispatcherService = new Mock<IUIDispatcherService>();
             MockFileService = new Mock<IFileService>();
             MockTanzuExplorerViewModel = new Mock<ITanzuExplorerViewModel>();
             MockSerializationService = new Mock<ISerializationService>();

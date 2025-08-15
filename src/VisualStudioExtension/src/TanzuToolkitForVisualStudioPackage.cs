@@ -20,6 +20,7 @@ using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.Services.Project;
+using Tanzu.Toolkit.Services.Serialization;
 using Tanzu.Toolkit.Services.Threading;
 using Tanzu.Toolkit.Services.ViewLocator;
 using Tanzu.Toolkit.ViewModels;
@@ -108,7 +109,7 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddSingleton<IToolWindowService, VsToolWindowService>();
             services.AddSingleton<IThreadingService, ThreadingService>();
             services.AddSingleton<IErrorDialog, ErrorDialogService>();
-            services.AddSingleton<IUiDispatcherService, UiDispatcherService>();
+            services.AddSingleton<IUIDispatcherService, VisualStudioUIDispatcherService>();
             services.AddSingleton<IThemeService>(new ThemeService());
             services.AddTransient<ICommandProcessService, CommandProcessService>();
             services.AddSingleton<ISerializationService, SerializationService>();

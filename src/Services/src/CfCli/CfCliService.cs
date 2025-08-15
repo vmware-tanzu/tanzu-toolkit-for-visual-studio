@@ -78,7 +78,7 @@ namespace Tanzu.Toolkit.Services.CfCli
         /// <returns>
         /// <code>int[] versionNumbers</code>Array of integers: versionNumbers[0] = major version, versionNumbers[1] = minor, etc.
         /// </returns>
-        public async Task<Version> GetApiVersion()
+        public async Task<Version> GetApiVersionAsync()
         {
             var result = await RunCfCommandAsync(_getApiVersionCmd);
             if (!result.Succeeded)
@@ -363,7 +363,7 @@ namespace Tanzu.Toolkit.Services.CfCli
             return deployResult;
         }
 
-        public async Task<DetailedResult<string>> GetRecentAppLogs(string appName, string orgName, string spaceName)
+        public async Task<DetailedResult<string>> GetRecentAppLogsAsync(string appName, string orgName, string spaceName)
         {
             var args = $"logs \"{appName}\" --recent";
 
@@ -425,7 +425,7 @@ namespace Tanzu.Toolkit.Services.CfCli
                 : new DetailedResult<Process> { Succeeded = true, Content = logsProcess };
         }
 
-        public async Task<DetailedResult> LoginWithSsoPasscode(string apiAddress, string passcode)
+        public async Task<DetailedResult> LoginWithSSOPasscodeAsync(string apiAddress, string passcode)
         {
             var args = $"login -a \"{apiAddress}\" --sso-passcode \"{passcode}\"";
 
@@ -440,7 +440,7 @@ namespace Tanzu.Toolkit.Services.CfCli
             return await loginTask;
         }
 
-        public async Task<DetailedResult> ExecuteSshCommand(string appName, string orgName, string spaceName, string sshCommand)
+        public async Task<DetailedResult> ExecuteSSHCommandAsync(string appName, string orgName, string spaceName, string sshCommand)
         {
             var args = $"ssh {appName} -c \"{sshCommand.Replace("\"", "\\\"")}\"";
             Task<DetailedResult> sshTask;

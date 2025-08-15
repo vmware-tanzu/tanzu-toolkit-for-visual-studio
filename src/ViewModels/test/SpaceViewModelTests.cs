@@ -39,7 +39,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             _fakeCfInstanceViewModel = new CfInstanceViewModel(_fakeCfInstance, MockTanzuExplorerViewModel.Object, Services, expanded: true);
 
-            MockUiDispatcherService.Setup(mock => mock.RunOnUiThreadAsync(It.IsAny<Action>()))
+            MockUiDispatcherService.Setup(mock => mock.RunOnUIThreadAsync(It.IsAny<Action>()))
                 .Callback<Action>(action =>
                 {
                     // Run whatever method is passed to MockUiDispatcherService.RunOnUiThread; do not delegate to the UI Dispatcher
@@ -47,11 +47,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 });
 
             MockThreadingService.Setup(m => m
-                    .RemoveItemFromCollectionOnUiThreadAsync(It.IsAny<ObservableCollection<TreeViewItemViewModel>>(), It.IsAny<TreeViewItemViewModel>()))
+                    .RemoveItemFromCollectionOnUIThreadAsync(It.IsAny<ObservableCollection<TreeViewItemViewModel>>(), It.IsAny<TreeViewItemViewModel>()))
                 .Callback<ObservableCollection<TreeViewItemViewModel>, TreeViewItemViewModel>((collection, item) => { collection.Remove(item); });
 
             MockThreadingService.Setup(m => m
-                    .AddItemToCollectionOnUiThreadAsync(It.IsAny<ObservableCollection<TreeViewItemViewModel>>(), It.IsAny<TreeViewItemViewModel>()))
+                    .AddItemToCollectionOnUIThreadAsync(It.IsAny<ObservableCollection<TreeViewItemViewModel>>(), It.IsAny<TreeViewItemViewModel>()))
                 .Callback<ObservableCollection<TreeViewItemViewModel>, TreeViewItemViewModel>((collection, item) => { collection.Add(item); });
 
             MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(_fakeCfInstanceViewModel);
@@ -134,7 +134,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsFalse(_sut.Children.Any(child => child is AppViewModel app && app.App.AppName == _fakeApps[3].AppName));
 
             MockThreadingService.Verify(m => m
-                    .RemoveItemFromCollectionOnUiThreadAsync(_sut.Children, It.Is<AppViewModel>((ovm) => ovm.App == _fakeApps[3])),
+                    .RemoveItemFromCollectionOnUIThreadAsync(_sut.Children, It.Is<AppViewModel>((ovm) => ovm.App == _fakeApps[3])),
                 Times.Once);
         }
 
@@ -162,7 +162,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsTrue(_sut.Children.Any(child => child is AppViewModel app && app.App.AppName == _fakeApps[2].AppName));
 
             MockThreadingService.Verify(m => m
-                    .AddItemToCollectionOnUiThreadAsync(_sut.Children, It.Is<AppViewModel>((ovm) => ovm.App == _fakeApps[2])),
+                    .AddItemToCollectionOnUIThreadAsync(_sut.Children, It.Is<AppViewModel>((ovm) => ovm.App == _fakeApps[2])),
                 Times.Once);
         }
 
@@ -193,7 +193,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 .ReturnsAsync(_fakeAppsResponse);
 
             MockThreadingService.Setup(m => m
-                    .StartBackgroundTask(It.IsAny<Func<Task>>()))
+                    .StartBackgroundTaskAsync(It.IsAny<Func<Task>>()))
                 .Verifiable();
 
             await _sut.UpdateAllChildren();
@@ -248,10 +248,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsTrue(_sut.Children[0].Equals(_sut.EmptyPlaceholder));
             foreach (var child in initialChildren)
             {
-                MockThreadingService.Verify(m => m.RemoveItemFromCollectionOnUiThreadAsync(_sut.Children, child), Times.Once);
+                MockThreadingService.Verify(m => m.RemoveItemFromCollectionOnUIThreadAsync(_sut.Children, child), Times.Once);
             }
 
-            MockThreadingService.Verify(m => m.AddItemToCollectionOnUiThreadAsync(_sut.Children, _sut.EmptyPlaceholder), Times.Once);
+            MockThreadingService.Verify(m => m.AddItemToCollectionOnUIThreadAsync(_sut.Children, _sut.EmptyPlaceholder), Times.Once);
         }
 
         [TestMethod]

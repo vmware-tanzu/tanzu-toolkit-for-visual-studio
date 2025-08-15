@@ -4,7 +4,7 @@ using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.ObjectGraphVisitors;
 
-namespace Tanzu.Toolkit.Services
+namespace Tanzu.Toolkit.Services.Serialization
 {
     public class SerializationService : ISerializationService
     {

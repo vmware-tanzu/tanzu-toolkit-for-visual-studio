@@ -12,19 +12,33 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
     public interface ICfApiClient
     {
         string AccessToken { get; }
-        Task<List<Org>> ListOrgs(string cfTarget, string accessToken);
-        Task<List<Space>> ListSpacesForOrg(string cfTarget, string accessToken, string orgGuid);
-        Task<List<App>> ListAppsForSpace(string cfTarget, string accessToken, string spaceGuid);
-        Task<bool> StopAppWithGuid(string cfTarget, string accessToken, string appGuid);
-        Task<bool> StartAppWithGuid(string cfTarget, string accessToken, string appGuid);
-        Task<bool> DeleteAppWithGuid(string cfTarget, string accessToken, string appGuid);
-        Task<List<Buildpack>> ListBuildpacks(string cfApiAddress, string accessToken);
-        Task<List<Stack>> ListStacks(string cfTarget, string accessToken);
-        Task<LoginInfoResponse> GetLoginServerInformation(string cfApiAddress, bool trustAllCerts = false);
-        Task<List<Route>> ListRoutesForApp(string cfTarget, string accessToken, string appGuid);
-        Task<bool> DeleteRouteWithGuid(string cfTarget, string accessToken, string routeGuid);
+
+        Task<List<Org>> ListOrgsAsync(string cfTarget, string accessToken);
+
+        Task<List<Space>> ListSpacesForOrgAsync(string cfTarget, string accessToken, string orgGuid);
+
+        Task<List<App>> ListAppsForSpaceAsync(string cfTarget, string accessToken, string spaceGuid);
+
+        Task<bool> StopAppWithGuidAsync(string cfTarget, string accessToken, string appGuid);
+
+        Task<bool> StartAppWithGuidAsync(string cfTarget, string accessToken, string appGuid);
+
+        Task<bool> DeleteAppWithGuidAsync(string cfTarget, string accessToken, string appGuid);
+
+        Task<List<Buildpack>> ListBuildpacksAsync(string cfApiAddress, string accessToken);
+
+        Task<List<Stack>> ListStacksAsync(string cfTarget, string accessToken);
+
+        Task<LoginInfoResponse> GetLoginServerInformationAsync(string cfApiAddress, bool trustAllCerts = false);
+
+        Task<List<Route>> ListRoutesForAppAsync(string cfTarget, string accessToken, string appGuid);
+
+        Task<bool> DeleteRouteWithGuidAsync(string cfTarget, string accessToken, string routeGuid);
+
         void Configure(Uri cfApiAddress, bool skipSslCertValidation);
-        Task<List<Service>> ListServices(string cfApiAddress, string accessToken);
-        Task<List<App>> ListAppsAsync(string accessToken);
+
+        Task<List<Service>> ListServicesAsync(string cfApiAddress, string accessToken);
+
+        Task<List<App>> ListAppsAsyncAsync(string accessToken);
     }
 }

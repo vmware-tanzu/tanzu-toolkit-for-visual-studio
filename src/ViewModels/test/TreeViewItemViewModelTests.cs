@@ -51,7 +51,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public void Expansion_BeginsUpdatingChildrenOnBackgroundThread_WhenNotAlreadyLoading()
         {
             var sut = _collpasedTvivm;
-            MockThreadingService.Setup(m => m.StartBackgroundTask(It.IsAny<Func<Task>>())).Verifiable();
+            MockThreadingService.Setup(m => m.StartBackgroundTaskAsync(It.IsAny<Func<Task>>())).Verifiable();
 
             Assert.IsFalse(sut.IsExpanded);
             Assert.IsFalse(sut.IsLoading);
@@ -59,7 +59,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             sut.IsExpanded = true;
 
             Assert.IsTrue(sut.IsExpanded);
-            MockThreadingService.Verify(m => m.StartBackgroundTask(sut.UpdateAllChildren), Times.Once);
+            MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(sut.UpdateAllChildren), Times.Once);
         }
 
         [TestMethod]
@@ -68,7 +68,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var sut = _collpasedTvivm;
             sut.IsLoading = true;
 
-            MockThreadingService.Setup(m => m.StartBackgroundTask(It.IsAny<Func<Task>>())).Verifiable();
+            MockThreadingService.Setup(m => m.StartBackgroundTaskAsync(It.IsAny<Func<Task>>())).Verifiable();
 
             Assert.IsFalse(sut.IsExpanded);
             Assert.IsTrue(sut.IsLoading);
@@ -76,7 +76,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             sut.IsExpanded = true;
 
             Assert.IsTrue(sut.IsExpanded);
-            MockThreadingService.Verify(m => m.StartBackgroundTask(It.IsAny<Func<Task>>()), Times.Never);
+            MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(It.IsAny<Func<Task>>()), Times.Never);
         }
     }
 

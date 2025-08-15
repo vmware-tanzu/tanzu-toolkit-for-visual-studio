@@ -125,10 +125,10 @@ namespace Tanzu.Toolkit.ViewModels
                 TargetName = _tanzuExplorerViewModel.CloudFoundryConnection.DisplayText;
                 IsLoggedIn = true;
 
-                ThreadingService.StartBackgroundTask(UpdateCfOrgOptions);
-                ThreadingService.StartBackgroundTask(UpdateBuildpackOptions);
-                ThreadingService.StartBackgroundTask(UpdateServiceOptions);
-                ThreadingService.StartBackgroundTask(UpdateStackOptions);
+                ThreadingService.StartBackgroundTaskAsync(UpdateCfOrgOptions);
+                ThreadingService.StartBackgroundTaskAsync(UpdateBuildpackOptions);
+                ThreadingService.StartBackgroundTaskAsync(UpdateServiceOptions);
+                ThreadingService.StartBackgroundTaskAsync(UpdateStackOptions);
             }
 
             // delay calling SetManifestIfDefaultExists to give background update tasks time to complete
@@ -563,7 +563,7 @@ namespace Tanzu.Toolkit.ViewModels
             if (CanDeployApp(null))
             {
                 DeploymentInProgress = true;
-                var _ = ThreadingService.StartBackgroundTask(StartDeployment);
+                var _ = ThreadingService.StartBackgroundTaskAsync(StartDeployment);
                 DialogService.CloseDialog(dialogWindow, true);
                 OnClose();
             }
@@ -590,10 +590,10 @@ namespace Tanzu.Toolkit.ViewModels
                 TargetName = _tanzuExplorerViewModel.CloudFoundryConnection.DisplayText;
                 IsLoggedIn = true;
 
-                ThreadingService.StartBackgroundTask(UpdateCfOrgOptions);
-                ThreadingService.StartBackgroundTask(UpdateBuildpackOptions);
-                ThreadingService.StartBackgroundTask(UpdateServiceOptions);
-                ThreadingService.StartBackgroundTask(UpdateStackOptions);
+                ThreadingService.StartBackgroundTaskAsync(UpdateCfOrgOptions);
+                ThreadingService.StartBackgroundTaskAsync(UpdateBuildpackOptions);
+                ThreadingService.StartBackgroundTaskAsync(UpdateServiceOptions);
+                ThreadingService.StartBackgroundTaskAsync(UpdateStackOptions);
             }
         }
 

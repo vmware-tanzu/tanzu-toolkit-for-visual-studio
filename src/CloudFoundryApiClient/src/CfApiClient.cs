@@ -102,7 +102,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         /// <param name="cfApiAddress"></param>
         /// <param name="accessToken"></param>
         /// <returns>List of <see cref="Org"/>s.</returns>
-        public async Task<List<Org>> ListOrgs(string cfApiAddress, string accessToken)
+        public async Task<List<Org>> ListOrgsAsync(string cfApiAddress, string accessToken)
         {
             var uri = new UriBuilder(cfApiAddress)
             {
@@ -129,7 +129,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         /// <param name="accessToken"></param>
         /// <param name="orgGuid"></param>
         /// <returns>List of <see cref="Space"/>s.</returns>
-        public async Task<List<Space>> ListSpacesForOrg(string cfApiAddress, string accessToken, string orgGuid)
+        public async Task<List<Space>> ListSpacesForOrgAsync(string cfApiAddress, string accessToken, string orgGuid)
         {
             var uri = new UriBuilder(cfApiAddress)
             {
@@ -155,7 +155,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         /// <param name="accessToken"></param>
         /// <param name="spaceGuid"></param>
         /// <returns>List of <see cref="App"/>s.</returns>
-        public async Task<List<App>> ListAppsForSpace(string cfTarget, string accessToken, string spaceGuid)
+        public async Task<List<App>> ListAppsForSpaceAsync(string cfTarget, string accessToken, string spaceGuid)
         {
             var uri = new UriBuilder(cfTarget)
             {
@@ -168,7 +168,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             return await GetRemainingPagesForType(firstPageHref, accessToken, new List<App>());
         }
 
-        public async Task<List<App>> ListAppsAsync(string accessToken)
+        public async Task<List<App>> ListAppsAsyncAsync(string accessToken)
         {
             var uri = new UriBuilder(CfApiAddress)
             {
@@ -180,7 +180,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             return await GetRemainingPagesForType(firstPageHref, accessToken, new List<App>());
         }
 
-        public async Task<List<Route>> ListRoutesForApp(string cfTarget, string accessToken, string appGuid)
+        public async Task<List<Route>> ListRoutesForAppAsync(string cfTarget, string accessToken, string appGuid)
         {
             var uri = new UriBuilder(cfTarget)
             {
@@ -193,7 +193,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             return await GetRemainingPagesForType(firstPageHref, accessToken, new List<Route>());
         }
 
-        public async Task<List<Buildpack>> ListBuildpacks(string cfApiAddress, string accessToken)
+        public async Task<List<Buildpack>> ListBuildpacksAsync(string cfApiAddress, string accessToken)
         {
             var uri = new UriBuilder(cfApiAddress)
             {
@@ -207,7 +207,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             return visibleBuildpacks;
         }
 
-        public async Task<List<Service>> ListServices(string cfApiAddress, string accessToken)
+        public async Task<List<Service>> ListServicesAsync(string cfApiAddress, string accessToken)
         {
             var uri = new UriBuilder(cfApiAddress)
             {
@@ -237,7 +237,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         /// True if response status code indicates success and response contains an app state of "STOPPED".
         /// <para>False otherwise.</para>
         /// </returns>
-        public async Task<bool> StopAppWithGuid(string cfApiAddress, string accessToken, string appGuid)
+        public async Task<bool> StopAppWithGuidAsync(string cfApiAddress, string accessToken, string appGuid)
         {
             var stopAppPath = _listAppsPath + $"/{appGuid}/actions/stop";
 
@@ -277,7 +277,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
         /// True if response status code indicates success and response contains an app state of "STARTED".
         /// <para>False otherwise.</para>
         /// </returns>
-        public async Task<bool> StartAppWithGuid(string cfApiAddress, string accessToken, string appGuid)
+        public async Task<bool> StartAppWithGuidAsync(string cfApiAddress, string accessToken, string appGuid)
         {
             var startAppPath = _listAppsPath + $"/{appGuid}/actions/start";
 
@@ -301,7 +301,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             return result.State == "STARTED";
         }
 
-        public async Task<bool> DeleteAppWithGuid(string cfTarget, string accessToken, string appGuid)
+        public async Task<bool> DeleteAppWithGuidAsync(string cfTarget, string accessToken, string appGuid)
         {
             var deleteAppPath = _deleteAppsPath + $"/{appGuid}";
 
@@ -322,7 +322,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             return response.StatusCode == HttpStatusCode.Accepted;
         }
 
-        public async Task<bool> DeleteRouteWithGuid(string cfTarget, string accessToken, string routeGuid)
+        public async Task<bool> DeleteRouteWithGuidAsync(string cfTarget, string accessToken, string routeGuid)
         {
             var deleteRoutePath = _deleteRoutesPath + $"/{routeGuid}";
 
@@ -343,7 +343,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             return response.StatusCode == HttpStatusCode.Accepted;
         }
 
-        public async Task<List<Stack>> ListStacks(string cfTarget, string accessToken)
+        public async Task<List<Stack>> ListStacksAsync(string cfTarget, string accessToken)
         {
             var uri = new UriBuilder(cfTarget)
             {
@@ -355,7 +355,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient
             return await GetRemainingPagesForType(firstPageHref, accessToken, new List<Stack>());
         }
 
-        public async Task<LoginInfoResponse> GetLoginServerInformation(string cfApiAddress, bool trustAllCerts = false)
+        public async Task<LoginInfoResponse> GetLoginServerInformationAsync(string cfApiAddress, bool trustAllCerts = false)
         {
             var loginServerUri = await GetAuthServerUriFromCfTarget(cfApiAddress);
             var uri = new UriBuilder(loginServerUri)
