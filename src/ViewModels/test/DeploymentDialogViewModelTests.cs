@@ -30,6 +30,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         private readonly CloudFoundrySpace _fakeSpace = new("", "", _fakeOrg);
         private DeploymentDialogViewModel _sut;
         private List<string> _receivedEvents;
+        private const int _backgroundTaskMs = 100;
 
         [TestInitialize]
         public void TestInit()
@@ -77,7 +78,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var vm = new DeploymentDialogViewModel(Services);
 
             Assert.IsNotNull(vm.CfOrgOptions);
-            Assert.AreEqual(0, vm.CfOrgOptions.Count);
+            Assert.IsEmpty(vm.CfOrgOptions);
         }
 
         [TestMethod]
@@ -87,7 +88,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var vm = new DeploymentDialogViewModel(Services);
 
             Assert.IsNotNull(vm.CfSpaceOptions);
-            Assert.AreEqual(0, vm.CfSpaceOptions.Count);
+            Assert.IsEmpty(vm.CfSpaceOptions);
         }
 
         [TestMethod]
@@ -166,7 +167,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(new FakeCfInstanceViewModel(_fakeCfInstance, Services));
 
             _sut = new DeploymentDialogViewModel(Services);
-
+            Thread.Sleep(_backgroundTaskMs);
             Assert.IsNotNull(_sut._tanzuExplorerViewModel.CloudFoundryConnection);
             MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(_sut.UpdateCfOrgOptionsAsync), Times.Once);
         }
@@ -179,7 +180,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(new FakeCfInstanceViewModel(_fakeCfInstance, Services));
 
             _sut = new DeploymentDialogViewModel(Services);
-
+            Thread.Sleep(_backgroundTaskMs);
             Assert.IsNotNull(_sut._tanzuExplorerViewModel.CloudFoundryConnection);
             MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(_sut.UpdateBuildpackOptionsAsync), Times.Once);
         }
@@ -192,7 +193,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(new FakeCfInstanceViewModel(_fakeCfInstance, Services));
 
             _sut = new DeploymentDialogViewModel(Services);
-
+            Thread.Sleep(_backgroundTaskMs);
             Assert.IsNotNull(_sut._tanzuExplorerViewModel.CloudFoundryConnection);
             MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(_sut.UpdateServiceOptionsAsync), Times.Once);
         }
@@ -205,7 +206,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(new FakeCfInstanceViewModel(_fakeCfInstance, Services));
 
             _sut = new DeploymentDialogViewModel(Services);
-
+            Thread.Sleep(_backgroundTaskMs);
             Assert.IsNotNull(_sut._tanzuExplorerViewModel.CloudFoundryConnection);
             MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(_sut.UpdateStackOptionsAsync), Times.Once);
         }
@@ -593,14 +594,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 .ReturnsAsync(fakeSuccessfulOrgsResponse);
 
 
-            Assert.AreEqual(0, _sut.CfOrgOptions.Count);
+            Assert.IsEmpty(_sut.CfOrgOptions);
 
             await _sut.UpdateCfOrgOptionsAsync();
 
-            Assert.AreEqual(1, _sut.CfOrgOptions.Count);
+            Assert.HasCount(1, _sut.CfOrgOptions);
             Assert.AreEqual(_fakeCfOrg, _sut.CfOrgOptions[0]);
 
-            Assert.IsTrue(_receivedEvents.Contains("CfOrgOptions"));
+            Assert.Contains("CfOrgOptions", _receivedEvents);
         }
 
         [TestMethod]
@@ -613,9 +614,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             await _sut.UpdateCfOrgOptionsAsync();
 
-            Assert.AreEqual(0, _sut.CfOrgOptions.Count);
+            Assert.IsEmpty(_sut.CfOrgOptions);
 
-            Assert.IsTrue(_receivedEvents.Contains("CfOrgOptions"));
+            Assert.Contains("CfOrgOptions", _receivedEvents);
         }
 
         [TestMethod]
@@ -692,14 +693,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             _sut.SelectedOrg = _fakeCfOrg;
 
-            Assert.AreEqual(0, _sut.CfSpaceOptions.Count);
+            Assert.IsEmpty(_sut.CfSpaceOptions);
 
             await _sut.UpdateCfSpaceOptionsAsync();
 
-            Assert.AreEqual(1, _sut.CfSpaceOptions.Count);
+            Assert.HasCount(1, _sut.CfSpaceOptions);
             Assert.AreEqual(_fakeCfSpace, _sut.CfSpaceOptions[0]);
 
-            Assert.IsTrue(_receivedEvents.Contains("CfSpaceOptions"));
+            Assert.Contains("CfSpaceOptions", _receivedEvents);
         }
 
         [TestMethod]
@@ -707,9 +708,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         {
             await _sut.UpdateCfSpaceOptionsAsync();
 
-            Assert.AreEqual(0, _sut.CfSpaceOptions.Count);
+            Assert.IsEmpty(_sut.CfSpaceOptions);
 
-            Assert.IsTrue(_receivedEvents.Contains("CfSpaceOptions"));
+            Assert.Contains("CfSpaceOptions", _receivedEvents);
         }
 
         [TestMethod]
@@ -719,9 +720,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             await _sut.UpdateCfSpaceOptionsAsync();
 
-            Assert.AreEqual(0, _sut.CfSpaceOptions.Count);
+            Assert.IsEmpty(_sut.CfSpaceOptions);
 
-            Assert.IsTrue(_receivedEvents.Contains("CfSpaceOptions"));
+            Assert.Contains("CfSpaceOptions", _receivedEvents);
         }
 
         [TestMethod]
@@ -809,11 +810,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                         .Returns(new CfInstanceViewModel(_fakeCfInstance, null, Services));
                 });
 
-            Assert.AreEqual(0, _sut.CfInstanceOptions.Count);
+            Assert.IsEmpty(_sut.CfInstanceOptions);
 
             await _sut.OpenLoginViewAsync(fakeArg);
 
-            Assert.AreEqual(1, _sut.CfInstanceOptions.Count);
+            Assert.HasCount(1, _sut.CfInstanceOptions);
             Assert.AreEqual(_fakeCfInstance, _sut.CfInstanceOptions[0]);
         }
 
@@ -830,11 +831,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                         .Returns((CfInstanceViewModel)null);
                 });
 
-            Assert.AreEqual(0, _sut.CfInstanceOptions.Count);
+            Assert.IsEmpty(_sut.CfInstanceOptions);
 
             await _sut.OpenLoginViewAsync(fakeArg);
 
-            Assert.AreEqual(0, _sut.CfInstanceOptions.Count);
+            Assert.IsEmpty(_sut.CfInstanceOptions);
         }
 
         [TestMethod]
@@ -1009,25 +1010,25 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut = new DeploymentDialogViewModel(Services);
             _sut.PropertyChanged += (sender, e) => { _receivedEvents.Add(e.PropertyName); };
 
-            Assert.AreEqual(0, _receivedEvents.Count);
+            Assert.IsEmpty(_receivedEvents);
             Assert.IsFalse(_sut.IsLoggedIn);
 
             _sut.IsLoggedIn = true;
 
-            Assert.AreEqual(1, _receivedEvents.Count);
-            Assert.IsTrue(_receivedEvents.Contains("IsLoggedIn"));
+            Assert.HasCount(1, _receivedEvents);
+            Assert.Contains("IsLoggedIn", _receivedEvents);
         }
 
         [TestMethod]
         [TestCategory("TargetName")]
         public void TargetName_SetterRaisesPropChangedEvent()
         {
-            Assert.AreEqual(0, _receivedEvents.Count);
+            Assert.IsEmpty(_receivedEvents);
 
             _sut.TargetName = "new name";
 
-            Assert.AreEqual(1, _receivedEvents.Count);
-            Assert.IsTrue(_receivedEvents.Contains("TargetName"));
+            Assert.HasCount(1, _receivedEvents);
+            Assert.Contains("TargetName", _receivedEvents);
         }
 
         [TestMethod]
@@ -1546,7 +1547,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.AreEqual(stackVal, _sut.SelectedStack);
             Assert.AreEqual(stackVal, _sut.ManifestModel.Applications[0].Stack);
-            Assert.AreEqual(1, _receivedEvents.Count);
+            Assert.HasCount(1, _receivedEvents);
             Assert.AreEqual("SelectedStack", _receivedEvents[0]);
         }
 
@@ -1647,12 +1648,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsTrue(compatibleSelectedBpToStayCompatibleAndSelected.IsSelected);
             Assert.IsTrue(compatibleSelectedBpToStayCompatibleAndSelected.CompatibleWithStack);
 
-            Assert.AreEqual(0, _receivedEvents.Count);
+            Assert.IsEmpty(_receivedEvents);
 
             _sut.SelectedStack = newStackVal;
 
             Assert.AreEqual(newStackVal, _sut.SelectedStack);
-            Assert.AreEqual(2, _receivedEvents.Count);
+            Assert.HasCount(2, _receivedEvents);
             CollectionAssert.Contains(_receivedEvents, "SelectedStack");
             CollectionAssert.Contains(_receivedEvents, "SelectedBuildpacks");
 
@@ -1669,7 +1670,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsTrue(compatibleSelectedBpToStayCompatibleAndSelected.IsSelected);
             Assert.IsTrue(compatibleSelectedBpToStayCompatibleAndSelected.CompatibleWithStack);
 
-            Assert.AreEqual(1, _sut.SelectedBuildpacks.Count);
+            Assert.HasCount(1, _sut.SelectedBuildpacks);
             CollectionAssert.Contains(_sut.SelectedBuildpacks, compatibleSelectedBpToStayCompatibleAndSelected.Name);
         }
 
@@ -1750,9 +1751,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.Expanded = expandedVal;
 
             Assert.AreEqual(expectedButtonText, _sut.ExpansionButtonText);
-            Assert.AreEqual(2, _receivedEvents.Count);
-            Assert.IsTrue(_receivedEvents.Contains("Expanded"));
-            Assert.IsTrue(_receivedEvents.Contains("ExpansionButtonText"));
+            Assert.HasCount(2, _receivedEvents);
+            Assert.Contains("Expanded", _receivedEvents);
+            Assert.Contains("ExpansionButtonText", _receivedEvents);
         }
 
         [TestMethod]
@@ -2212,7 +2213,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.AreEqual(nameVal, _sut.AppName);
             Assert.AreEqual(nameVal, _sut.ManifestModel.Applications[0].Name);
-            Assert.AreEqual(1, _receivedEvents.Count);
+            Assert.HasCount(1, _receivedEvents);
             Assert.AreEqual("AppName", _receivedEvents[0]);
         }
 
@@ -2230,7 +2231,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.AreEqual(nameVal, _sut.StartCommand);
             Assert.AreEqual(nameVal, _sut.ManifestModel.Applications[0].Command);
-            Assert.AreEqual(1, _receivedEvents.Count);
+            Assert.HasCount(1, _receivedEvents);
             Assert.AreEqual("StartCommand", _receivedEvents[0]);
         }
 
@@ -2238,12 +2239,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("StartCommand")]
         public void StartCommand_SetterRaisesPropChangedEvent()
         {
-            Assert.AreEqual(0, _receivedEvents.Count);
+            Assert.IsEmpty(_receivedEvents);
 
             _sut.StartCommand = "new start command";
 
-            Assert.AreEqual(1, _receivedEvents.Count);
-            Assert.IsTrue(_receivedEvents.Contains("StartCommand"));
+            Assert.HasCount(1, _receivedEvents);
+            Assert.Contains("StartCommand", _receivedEvents);
         }
 
         [TestMethod]

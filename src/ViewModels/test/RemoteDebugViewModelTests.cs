@@ -81,6 +81,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockLoggedIn();
 
             Assert.IsTrue(_sut.IsLoggedIn);
+            Thread.Sleep(200);
             Assert.AreEqual("Select app to debug:", _sut.DialogMessage);
             Assert.IsNull(_sut.LoadingMessage);
         }

@@ -115,7 +115,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             await _sut.UpdateAllChildren();
 
-            Assert.AreEqual(3, _sut.Children.Count);
+            Assert.HasCount(3, _sut.Children);
             Assert.IsTrue(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == _fakeOrgs[0].OrgName));
             Assert.IsTrue(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == _fakeOrgs[1].OrgName));
             Assert.IsTrue(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == _fakeOrgs[2].OrgName));
@@ -144,7 +144,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             await _sut.UpdateAllChildren();
 
-            Assert.AreEqual(3, _sut.Children.Count);
+            Assert.HasCount(3, _sut.Children);
             Assert.IsTrue(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == _fakeOrgs[0].OrgName));
             Assert.IsTrue(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == _fakeOrgs[1].OrgName));
             Assert.IsTrue(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == _fakeOrgs[2].OrgName));
@@ -186,10 +186,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("UpdateAllChildren")]
         public async Task UpdateAllChildren_AssignsEmptyPlaceholder_WhenOrgsRequestReturnsNoOrgs()
         {
-            var fakeNoOrgsResponse = _fakeOrgsResponse;
-            fakeNoOrgsResponse.Content.Clear();
+            _fakeOrgsResponse.Content.Clear();
 
-            /** mock 2 initial children */
             var initialChildren = new ObservableCollection<TreeViewItemViewModel>
             {
                 new OrgViewModel(_fakeOrgs[0], _sut, _fakeTanzuExplorerViewModel, Services), new OrgViewModel(_fakeOrgs[1], _sut, _fakeTanzuExplorerViewModel, Services)
@@ -198,13 +196,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             MockCloudFoundryService.Setup(m => m
                     .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
-                .ReturnsAsync(fakeNoOrgsResponse);
+                .ReturnsAsync(_fakeOrgsResponse);
 
             Assert.IsFalse(_sut.Children.Any(child => child is PlaceholderViewModel));
 
             await _sut.UpdateAllChildren();
 
-            Assert.AreEqual(1, _sut.Children.Count);
+            Assert.HasCount(1, _sut.Children);
             Assert.IsTrue(_sut.Children[0].Equals(_sut.EmptyPlaceholder));
             foreach (var child in initialChildren)
             {
@@ -221,7 +219,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockCloudFoundryService.Setup(m => m.GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
                 .Callback(() =>
                 {
-                    // ensure IsLoading was set to true by the time orgs were queried
                     Assert.IsTrue(_sut.IsLoading);
                 }).ReturnsAsync(_fakeOrgsResponse);
 
@@ -242,17 +239,16 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 _sut.EmptyPlaceholder
             ];
 
-            /** mock 3 new children */
             MockCloudFoundryService.Setup(m => m
                     .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
                 .ReturnsAsync(_fakeOrgsResponse);
 
-            Assert.AreEqual(1, _sut.Children.Count);
+            Assert.HasCount(1, _sut.Children);
             Assert.IsTrue(_sut.Children[0].Equals(_sut.EmptyPlaceholder));
 
             await _sut.UpdateAllChildren();
 
-            Assert.AreEqual(3, _sut.Children.Count);
+            Assert.HasCount(3, _sut.Children);
             Assert.IsFalse(_sut.Children.Any(child => child is PlaceholderViewModel));
         }
 
@@ -260,10 +256,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("UpdateAllChildren")]
         public async Task UpdateAllChildren_RemovesLoadingPlaceholder_WhenOrgsRequestReturnsOrgs()
         {
-            var fakeNoOrgsResponse = _fakeOrgsResponse;
-            fakeNoOrgsResponse.Content.Clear();
+            _fakeOrgsResponse.Content.Clear();
 
-            /** mock 2 initial children */
             _sut.Children =
             [
                 new OrgViewModel(_fakeOrgs[0], _sut, _fakeTanzuExplorerViewModel, Services),
@@ -276,12 +270,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 {
                     // ensure loading placeholder present at time of loading fresh children
                     Assert.IsTrue(_sut.IsLoading);
-                    Assert.IsTrue(_sut.Children.Contains(_sut.LoadingPlaceholder));
-                }).ReturnsAsync(fakeNoOrgsResponse);
+                    Assert.Contains(_sut.LoadingPlaceholder, _sut.Children);
+                }).ReturnsAsync(_fakeOrgsResponse);
 
             await _sut.UpdateAllChildren();
 
-            Assert.IsFalse(_sut.Children.Contains(_sut.LoadingPlaceholder));
+            Assert.DoesNotContain(_sut.LoadingPlaceholder, _sut.Children);
         }
 
         [TestMethod]

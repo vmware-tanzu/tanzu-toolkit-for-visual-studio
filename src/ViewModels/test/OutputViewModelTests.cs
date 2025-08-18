@@ -86,7 +86,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             }
             finally
             {
-                Assert.IsTrue(_sut.OutputContent.Contains(_fakeRecentLogsResult.Content));
+                Assert.Contains(_fakeRecentLogsResult.Content, _sut.OutputContent);
                 Assert.IsNull(_sut.ActiveProcess); // ensure logs stream didn't succeed
             }
         }
@@ -104,7 +104,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             await _sut.BeginStreamingAppLogsForAppAsync(_fakeCfApp, _fakeOutputView);
 
-            Assert.IsTrue(_sut.OutputContent.Contains(expectedFailureMsg));
+            Assert.Contains(expectedFailureMsg, _sut.OutputContent);
             MockLogger.Verify(m => m.Error(It.Is<string>(s => s.Contains(_fakeCfApp.AppName) && s.Contains(_fakeRecentLogsResult.Explanation))));
         }
 

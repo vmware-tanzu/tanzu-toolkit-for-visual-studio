@@ -34,7 +34,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.AreEqual(TreeViewItemViewModel._defaultLoadingMsg, sut.LoadingPlaceholder.DisplayText);
 
             /* children set to loading placeholder */
-            Assert.AreEqual(1, sut.Children.Count);
+            Assert.HasCount(1, sut.Children);
             Assert.AreEqual(sut.LoadingPlaceholder, sut.Children[0]);
         }
 

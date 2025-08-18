@@ -58,7 +58,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             _sut.RefreshAppState();
 
-            Assert.AreEqual(1, _receivedEvents.Count);
+            Assert.HasCount(1, _receivedEvents);
             Assert.AreEqual("IsStopped", _receivedEvents[0]);
         }
     }
