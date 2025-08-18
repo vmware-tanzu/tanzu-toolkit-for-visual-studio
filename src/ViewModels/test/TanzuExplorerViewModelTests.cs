@@ -2,6 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
@@ -112,13 +113,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut = new TanzuExplorerViewModel(Services);
 
             Assert.IsNull(_sut.CloudFoundryConnection);
-            Assert.AreEqual(1, _sut.TreeRoot.Count);
+            Assert.HasCount(1, _sut.TreeRoot);
             Assert.IsTrue(_sut.TreeRoot[0] is LoginPromptViewModel);
 
             _sut.CloudFoundryConnection = new CfInstanceViewModel(_fakeCfInstance, _sut, Services);
 
             Assert.IsNotNull(_sut.CloudFoundryConnection);
-            Assert.AreEqual(1, _sut.TreeRoot.Count);
+            Assert.HasCount(1, _sut.TreeRoot);
             Assert.AreEqual(_sut.TreeRoot[0], _sut.CloudFoundryConnection);
         }
 
@@ -130,13 +131,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.CloudFoundryConnection = _fakeTanzuConnection;
 
             Assert.IsNotNull(_sut.CloudFoundryConnection);
-            Assert.AreEqual(1, _sut.TreeRoot.Count);
+            Assert.HasCount(1, _sut.TreeRoot);
             Assert.AreEqual(_sut.TreeRoot[0], _sut.CloudFoundryConnection);
 
             _sut.CloudFoundryConnection = null;
 
             Assert.IsNull(_sut.CloudFoundryConnection);
-            Assert.AreEqual(1, _sut.TreeRoot.Count);
+            Assert.HasCount(1, _sut.TreeRoot);
             Assert.IsTrue(_sut.TreeRoot[0] is LoginPromptViewModel);
         }
 
@@ -461,7 +462,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsFalse(_sut.IsRefreshingAll);
 
             _sut.BackgroundRefreshAllItems();
-
+            Thread.Sleep(100);
             MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(_sut.UpdateAllTreeItems), Times.Once);
         }
 
@@ -653,7 +654,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsNull(_sut.CloudFoundryConnection);
             Assert.IsTrue(_sut.AuthenticationRequired);
 
-            Assert.AreEqual(0, _receivedEvents.Count);
+            Assert.IsEmpty(_receivedEvents);
 
             _sut.SetConnection(_fakeCfInstance);
 

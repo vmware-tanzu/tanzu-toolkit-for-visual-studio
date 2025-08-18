@@ -113,7 +113,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             var result = await _sut.LoginWithCredentialsAsync(_fakeValidUsername, _fakeValidPassword);
 
             Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.Explanation.Contains(CloudFoundryService._loginFailureMessage));
+            Assert.Contains(CloudFoundryService._loginFailureMessage, result.Explanation);
         }
 
         [TestMethod]
@@ -130,9 +130,9 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             var result = await _sut.LoginWithCredentialsAsync(_fakeValidUsername, _fakeValidPassword);
 
-            Assert.IsTrue(result.Explanation.Contains(baseMessage));
-            Assert.IsTrue(result.Explanation.Contains(innerMessage));
-            Assert.IsTrue(result.Explanation.Contains(outerMessage));
+            Assert.Contains(baseMessage, result.Explanation);
+            Assert.Contains(innerMessage, result.Explanation);
+            Assert.Contains(outerMessage, result.Explanation);
         }
 
         [TestMethod]
@@ -240,7 +240,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
+            Assert.Contains(_fakeException.Message, result.Explanation);
             Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
@@ -375,7 +375,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
+            Assert.Contains(_fakeException.Message, result.Explanation);
             Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
@@ -397,7 +397,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
+            Assert.Contains(_fakeException.Message, result.Explanation);
             Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
@@ -550,7 +550,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
+            Assert.Contains(_fakeException.Message, result.Explanation);
             Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
@@ -572,7 +572,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
+            Assert.Contains(_fakeException.Message, result.Explanation);
             Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
@@ -755,7 +755,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
+            Assert.Contains(_fakeException.Message, result.Explanation);
             Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
@@ -819,7 +819,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
+            Assert.Contains(_fakeException.Message, result.Explanation);
             Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
@@ -903,7 +903,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
+            Assert.Contains(_fakeException.Message, result.Explanation);
             Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
@@ -962,7 +962,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
+            Assert.Contains(_fakeException.Message, result.Explanation);
             Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
@@ -1043,7 +1043,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
+            Assert.Contains(_fakeException.Message, result.Explanation);
             Assert.IsNull(result.CmdResult);
 
             _mockLogger.Verify(m => m.Error(It.IsAny<string>(), _fakeException), Times.Once);
@@ -1091,7 +1091,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
+            Assert.Contains(_fakeException.Message, result.Explanation);
             Assert.IsNull(result.CmdResult);
 
             _mockLogger.Verify(m => m.Error(It.IsAny<string>(), _fakeException), Times.Once);
@@ -1165,7 +1165,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
+            Assert.Contains(_fakeException.Message, result.Explanation);
             Assert.IsNull(result.CmdResult);
 
             _mockLogger.Verify(m => m.Error(It.IsAny<string>(), _fakeException), Times.Once);
@@ -1213,7 +1213,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
+            Assert.Contains(_fakeException.Message, result.Explanation);
             Assert.IsNull(result.CmdResult);
 
             _mockLogger.Verify(m => m.Error(It.IsAny<string>(), _fakeException), Times.Once);
@@ -1315,7 +1315,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
+            Assert.Contains(_fakeException.Message, result.Explanation);
             Assert.IsNull(result.CmdResult);
 
             _mockLogger.Verify(m => m.Error(It.IsAny<string>(), _fakeException), Times.Once);
@@ -1391,8 +1391,8 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(CloudFoundryService._routeDeletionErrorMsg));
-            Assert.IsTrue(result.Explanation.Contains($"Please try deleting '{_fakeApp.AppName}' again"));
+            Assert.Contains(CloudFoundryService._routeDeletionErrorMsg, result.Explanation);
+            Assert.Contains($"Please try deleting '{_fakeApp.AppName}' again", result.Explanation);
 
             // ensure app does not get deleted if routes could not be deleted
             _mockCfApiClient.Verify(m => m.DeleteAppWithGuidAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
@@ -1420,7 +1420,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             var result = await _sut.DeployAppAsync(_exampleManifest, null, _fakeCfInstance, _fakeOrg, _fakeSpace, _fakeOutCallback, _fakeErrCallback);
 
             Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.Explanation.Contains(fakeFailureExplanation));
+            Assert.Contains(fakeFailureExplanation, result.Explanation);
 
             _mockFileService.Verify(m => m.DeleteFile(_fakeManifestPath), Times.Once); // ensure temp manifest was deleted
         }
@@ -1443,7 +1443,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             var result = await _sut.DeployAppAsync(_exampleManifest, null, _fakeCfInstance, _fakeOrg, _fakeSpace, _fakeOutCallback, _fakeErrCallback);
 
             Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.Explanation.Contains(fakeManifestCreationException.Message));
+            Assert.Contains(fakeManifestCreationException.Message, result.Explanation);
         }
 
         [TestMethod]
@@ -1478,7 +1478,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             var result = await _sut.DeployAppAsync(_exampleManifest, null, _fakeCfInstance, _fakeOrg, _fakeSpace, _fakeOutCallback, _fakeErrCallback);
 
             Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.Explanation.Contains(CloudFoundryService._emptyOutputDirMessage));
+            Assert.Contains(CloudFoundryService._emptyOutputDirMessage, result.Explanation);
 
             // ensure temp manifest was never created
             _mockFileService.Verify(mock => mock.GetUniquePathForTempFile(It.IsAny<string>()), Times.Never);
@@ -1624,9 +1624,9 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
 
             Assert.IsNull(result.Content);
             Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.Explanation.Contains("Unable to retrieve app logs"));
-            Assert.IsTrue(result.Explanation.Contains(_fakeApp.AppName));
-            Assert.IsTrue(result.Explanation.Contains("Please log back in to re-authenticate"));
+            Assert.Contains("Unable to retrieve app logs", result.Explanation);
+            Assert.Contains(_fakeApp.AppName, result.Explanation);
+            Assert.Contains("Please log back in to re-authenticate", result.Explanation);
             Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
         }
 
@@ -1742,7 +1742,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
+            Assert.Contains(_fakeException.Message, result.Explanation);
             Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
@@ -1968,7 +1968,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
+            Assert.Contains(_fakeException.Message, result.Explanation);
             Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
 
@@ -2022,7 +2022,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(_fakeApp.AppName));
+            Assert.Contains(_fakeApp.AppName, result.Explanation);
             Assert.IsNull(result.CmdResult);
             Assert.IsNull(result.Content);
             Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
@@ -2063,9 +2063,9 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             var result = await _sut.DeleteAllRoutesForAppAsync(_fakeApp);
 
             Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.Explanation.Contains("Unable to retrieve routes"));
-            Assert.IsTrue(result.Explanation.Contains(_fakeApp.AppName));
-            Assert.IsTrue(result.Explanation.Contains("Please log back in to re-authenticate"));
+            Assert.Contains("Unable to retrieve routes", result.Explanation);
+            Assert.Contains(_fakeApp.AppName, result.Explanation);
+            Assert.Contains("Please log back in to re-authenticate", result.Explanation);
             Assert.AreEqual(FailureType.InvalidRefreshToken, result.FailureType);
         }
 
@@ -2104,7 +2104,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(_fakeException.Message));
+            Assert.Contains(_fakeException.Message, result.Explanation);
             Assert.IsNull(result.CmdResult);
 
             _mockLogger.Verify(m => m.Error(It.IsAny<string>(), _fakeException), Times.Once);
@@ -2129,7 +2129,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(CloudFoundryService._routeDeletionErrorMsg));
+            Assert.Contains(CloudFoundryService._routeDeletionErrorMsg, result.Explanation);
             Assert.IsNull(result.CmdResult);
         }
 
@@ -2153,7 +2153,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(CloudFoundryService._routeDeletionErrorMsg));
+            Assert.Contains(CloudFoundryService._routeDeletionErrorMsg, result.Explanation);
             Assert.IsNull(result.CmdResult);
         }
 
@@ -2175,7 +2175,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(CloudFoundryService._routeDeletionErrorMsg));
+            Assert.Contains(CloudFoundryService._routeDeletionErrorMsg, result.Explanation);
             Assert.IsNull(result.CmdResult);
         }
 
@@ -2199,7 +2199,7 @@ namespace Tanzu.Toolkit.Services.Tests.CloudFoundry
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Succeeded);
             Assert.IsNotNull(result.Explanation);
-            Assert.IsTrue(result.Explanation.Contains(CloudFoundryService._routeDeletionErrorMsg));
+            Assert.Contains(CloudFoundryService._routeDeletionErrorMsg, result.Explanation);
             Assert.IsNull(result.CmdResult);
         }
 

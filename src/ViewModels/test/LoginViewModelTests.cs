@@ -373,7 +373,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.ValidateApiAddressFormat(apiAddr);
             Assert.AreEqual(expectedValidity, _sut.IsApiAddressFormatValid);
             Assert.AreEqual(expectedError, _sut.ApiAddressError);
-            Assert.IsTrue(_receivedEvents.Contains("IsApiAddressFormatValid"));
+            Assert.Contains("IsApiAddressFormatValid", _receivedEvents);
         }
 
         [TestMethod]

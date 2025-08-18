@@ -77,7 +77,7 @@ namespace Tanzu.Toolkit.ViewModels
                                     }
                                     else if (priorChild is AppViewModel priorApp)
                                     {
-                                        var appStillExists = freshApps.Any(o => o is CloudFoundryApp freshApp && freshApp != null && freshApp.AppId == priorApp.App.AppId);
+                                        var appStillExists = freshApps.Any(o => o is CloudFoundryApp && o != null && o.AppId == priorApp.App.AppId);
                                         if (!appStillExists)
                                         {
                                             removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUIThreadAsync(Children, priorApp));

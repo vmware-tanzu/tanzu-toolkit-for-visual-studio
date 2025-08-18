@@ -122,7 +122,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             await _sut.UpdateAllChildren();
 
-            Assert.AreEqual(3, _sut.Children.Count);
+            Assert.HasCount(3, _sut.Children);
             Assert.IsTrue(_sut.Children.Any(child => child is SpaceViewModel space && space.Space.SpaceName == _fakeSpaces[0].SpaceName));
             Assert.IsTrue(_sut.Children.Any(child => child is SpaceViewModel space && space.Space.SpaceName == _fakeSpaces[1].SpaceName));
             Assert.IsTrue(_sut.Children.Any(child => child is SpaceViewModel space && space.Space.SpaceName == _fakeSpaces[2].SpaceName));
@@ -149,7 +149,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             await _sut.UpdateAllChildren();
 
-            Assert.AreEqual(3, _sut.Children.Count);
+            Assert.HasCount(3, _sut.Children);
             Assert.IsTrue(_sut.Children.Any(child => child is SpaceViewModel space && space.Space.SpaceName == _fakeSpaces[0].SpaceName));
             Assert.IsTrue(_sut.Children.Any(child => child is SpaceViewModel space && space.Space.SpaceName == _fakeSpaces[1].SpaceName));
             Assert.IsTrue(_sut.Children.Any(child => child is SpaceViewModel space && space.Space.SpaceName == _fakeSpaces[2].SpaceName));
@@ -188,8 +188,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("UpdateAllChildren")]
         public async Task UpdateAllChildren_AssignsEmptyPlaceholder_WhenSpacesRequestReturnsNoSpaces()
         {
-            var fakeNoSpacesResponse = _fakeSpacesResponse;
-            fakeNoSpacesResponse.Content.Clear();
+            _fakeSpacesResponse.Content.Clear();
 
             /** mock 2 initial children */
             var initialChildren = new ObservableCollection<TreeViewItemViewModel>
@@ -200,13 +199,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.Children = new ObservableCollection<TreeViewItemViewModel>(initialChildren);
 
             MockCloudFoundryService.Setup(m => m.GetSpacesForOrgAsync(_expectedOrg, _expectedSkipSslValue, _expectedRetryAmount))
-                .ReturnsAsync(fakeNoSpacesResponse);
+                .ReturnsAsync(_fakeSpacesResponse);
 
             Assert.IsFalse(_sut.Children.Any(child => child is PlaceholderViewModel));
 
             await _sut.UpdateAllChildren();
 
-            Assert.AreEqual(1, _sut.Children.Count);
+            Assert.HasCount(1, _sut.Children);
             Assert.IsTrue(_sut.Children[0].Equals(_sut.EmptyPlaceholder));
             foreach (var child in initialChildren)
             {
@@ -256,14 +255,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockCloudFoundryService.Setup(m => m.GetSpacesForOrgAsync(_expectedOrg, _expectedSkipSslValue, _expectedRetryAmount))
                 .ReturnsAsync(_fakeSpacesResponse);
 
-            Assert.AreEqual(1, _sut.Children.Count);
+            Assert.HasCount(1, _sut.Children);
             Assert.AreEqual(typeof(PlaceholderViewModel), _sut.Children[0].GetType());
             Assert.AreEqual(_sut.EmptyPlaceholder.GetType(), _sut.Children[0].GetType());
             Assert.AreEqual(_sut.EmptyPlaceholder.DisplayText, _sut.Children[0].DisplayText);
 
             await _sut.UpdateAllChildren();
 
-            Assert.AreEqual(3, _sut.Children.Count);
+            Assert.HasCount(3, _sut.Children);
             Assert.IsFalse(_sut.Children.Any(child => child is PlaceholderViewModel));
         }
 
@@ -271,8 +270,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("UpdateAllChildren")]
         public async Task UpdateAllChildren_RemovesLoadingPlaceholder_WhenSpacesRequestReturnsSpaces()
         {
-            var fakeNoSpacesResponse = _fakeSpacesResponse;
-            fakeNoSpacesResponse.Content.Clear();
+            _fakeSpacesResponse.Content.Clear();
 
             // mock 2 initial children
             _sut.Children =
@@ -286,12 +284,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 {
                     // ensure loading placeholder present at time of loading fresh children
                     Assert.IsTrue(_sut.IsLoading);
-                    Assert.IsTrue(_sut.Children.Contains(_sut.LoadingPlaceholder));
-                }).ReturnsAsync(fakeNoSpacesResponse);
+                    Assert.Contains(_sut.LoadingPlaceholder, _sut.Children);
+                }).ReturnsAsync(_fakeSpacesResponse);
 
             await _sut.UpdateAllChildren();
 
-            Assert.IsFalse(_sut.Children.Contains(_sut.LoadingPlaceholder));
+            Assert.DoesNotContain(_sut.LoadingPlaceholder, _sut.Children);
         }
 
         [TestMethod]

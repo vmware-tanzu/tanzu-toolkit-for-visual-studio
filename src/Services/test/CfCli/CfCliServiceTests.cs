@@ -80,9 +80,9 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
 
             Assert.IsTrue(result.Succeeded);
             Assert.IsNull(result.Explanation);
-            Assert.IsTrue(result.CmdResult.ExitCode == 0);
-            Assert.IsTrue(result.CmdResult.StdOut == _fakeStdOut);
-            Assert.IsTrue(result.CmdResult.StdErr == _fakeStdErr);
+            Assert.AreEqual(0, result.CmdResult.ExitCode);
+            Assert.AreEqual(_fakeStdOut, result.CmdResult.StdOut);
+            Assert.AreEqual(_fakeStdErr, result.CmdResult.StdErr);
         }
 
         [TestMethod]
@@ -96,10 +96,10 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var result = await _sut.RunCfCommandAsync(_fakeArguments, _fakeOutCallback, _fakeErrCallback, null);
 
             Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.Explanation.Contains(_fakeStdErr));
-            Assert.IsTrue(result.CmdResult.ExitCode == 1);
-            Assert.IsTrue(result.CmdResult.StdOut == _fakeStdOut);
-            Assert.IsTrue(result.CmdResult.StdErr == _fakeStdErr);
+            Assert.Contains(_fakeStdErr, result.Explanation);
+            Assert.AreEqual(1, result.CmdResult.ExitCode);
+            Assert.AreEqual(_fakeStdOut, result.CmdResult.StdOut);
+            Assert.AreEqual(_fakeStdErr, result.CmdResult.StdErr);
         }
 
         [TestMethod]
@@ -115,10 +115,10 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var result = await _sut.RunCfCommandAsync(_fakeArguments, _fakeOutCallback, _fakeErrCallback, null);
 
             Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.Explanation.Contains(mockStdOutContainingFailedSubstring));
-            Assert.IsTrue(result.CmdResult.ExitCode == 1);
-            Assert.IsTrue(result.CmdResult.StdOut == mockStdOutContainingFailedSubstring);
-            Assert.IsTrue(result.CmdResult.StdErr == string.Empty);
+            Assert.Contains(mockStdOutContainingFailedSubstring, result.Explanation);
+            Assert.AreEqual(1, result.CmdResult.ExitCode);
+            Assert.AreEqual(mockStdOutContainingFailedSubstring, result.CmdResult.StdOut);
+            Assert.AreEqual(string.Empty, result.CmdResult.StdErr);
         }
 
         [TestMethod]
@@ -132,10 +132,10 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var result = await _sut.RunCfCommandAsync(_fakeArguments, _fakeOutCallback, _fakeErrCallback, null);
 
             Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.Explanation.Contains($"Unable to execute `cf {_fakeArguments}`."));
-            Assert.IsTrue(result.CmdResult.ExitCode == 1);
-            Assert.IsTrue(result.CmdResult.StdOut == _fakeStdOut);
-            Assert.IsTrue(result.CmdResult.StdErr == string.Empty);
+            Assert.Contains($"Unable to execute `cf {_fakeArguments}`.", result.Explanation);
+            Assert.AreEqual(1, result.CmdResult.ExitCode);
+            Assert.AreEqual(_fakeStdOut, result.CmdResult.StdOut);
+            Assert.AreEqual(string.Empty, result.CmdResult.StdErr);
         }
 
         [TestMethod]
@@ -147,7 +147,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var result = await _sut.RunCfCommandAsync(_fakeArguments, null);
 
             Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.Explanation.Contains("Unable to locate cf.exe"));
+            Assert.Contains("Unable to locate cf.exe", result.Explanation);
         }
 
         [TestMethod]
@@ -209,9 +209,9 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var result = _sut.ExecuteCfCliCommand(_fakeArguments);
 
             Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.Explanation.Contains(_fakeFailureResult.StdErr));
+            Assert.Contains(_fakeFailureResult.StdErr, result.Explanation);
             Assert.AreEqual(_fakeFailureResult, result.CmdResult);
-            Assert.IsTrue(result.CmdResult.StdErr == _fakeFailureResult.StdErr);
+            Assert.AreEqual(_fakeFailureResult.StdErr, result.CmdResult.StdErr);
         }
 
         [TestMethod]
@@ -227,9 +227,9 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var result = _sut.ExecuteCfCliCommand(_fakeArguments);
 
             Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.Explanation.Contains(fakeFailedResult.StdOut));
+            Assert.Contains(fakeFailedResult.StdOut, result.Explanation);
             Assert.AreEqual(fakeFailedResult, result.CmdResult);
-            Assert.IsTrue(result.CmdResult.StdErr == string.Empty);
+            Assert.AreEqual(string.Empty, result.CmdResult.StdErr);
         }
 
         [TestMethod]
@@ -244,9 +244,9 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var result = _sut.ExecuteCfCliCommand(_fakeArguments);
 
             Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.Explanation.Contains($"Unable to execute `cf {_fakeArguments}`."));
+            Assert.Contains($"Unable to execute `cf {_fakeArguments}`.", result.Explanation);
             Assert.AreEqual(fakeFailedResult, result.CmdResult);
-            Assert.IsTrue(result.CmdResult.StdErr == string.Empty);
+            Assert.AreEqual(string.Empty, result.CmdResult.StdErr);
         }
 
         [TestMethod]
@@ -284,7 +284,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
                 .Returns(new CommandResult(_fakeRealisticTokenOutput, _fakeStdErr, exitCode: 0));
 
             var token = _sut.GetOAuthToken();
-            Assert.IsFalse(token.Contains("bearer"));
+            Assert.DoesNotContain("bearer", token);
         }
 
         [TestMethod]
@@ -297,7 +297,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
 
             var token = _sut.GetOAuthToken();
 
-            Assert.IsFalse(token.Contains("\n"));
+            Assert.DoesNotContain("\n", token);
         }
 
         [TestMethod]
@@ -312,17 +312,17 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
 
             var firstResult = _sut.GetOAuthToken();
             Assert.AreEqual(_fakeAccessToken, firstResult);
-            Assert.AreEqual(1, _mockCommandProcessService.Invocations.Count);
+            Assert.HasCount(1, _mockCommandProcessService.Invocations);
             _mockCommandProcessService.Verify(m => m.RunExecutable(_fakePathToCfExe, It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null, _defaultEnvVars, null, null, null),
                 Times.Once);
 
             _mockCommandProcessService.Invocations.Clear();
             _mockCommandProcessService.Reset();
-            Assert.AreEqual(0, _mockCommandProcessService.Invocations.Count);
+            Assert.IsEmpty(_mockCommandProcessService.Invocations);
 
             var secondResult = _sut.GetOAuthToken();
             Assert.AreEqual(_fakeAccessToken, secondResult);
-            Assert.AreEqual(0, _mockCommandProcessService.Invocations.Count);
+            Assert.IsEmpty(_mockCommandProcessService.Invocations);
         }
 
         [TestMethod]
@@ -387,17 +387,17 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
 
             var firstResult = _sut.GetOAuthToken();
             Assert.AreEqual(_fakeAccessToken, firstResult);
-            Assert.AreEqual(1, _mockCommandProcessService.Invocations.Count);
+            Assert.HasCount(1, _mockCommandProcessService.Invocations);
             _mockCommandProcessService.Verify(m => m.RunExecutable(_fakePathToCfExe, It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null, _defaultEnvVars, null, null, null),
                 Times.Once);
 
             _mockCommandProcessService.Invocations.Clear();
             _mockCommandProcessService.Reset();
-            Assert.AreEqual(0, _mockCommandProcessService.Invocations.Count);
+            Assert.IsEmpty(_mockCommandProcessService.Invocations);
 
             var secondResult = _sut.GetOAuthToken();
             Assert.AreEqual(_fakeAccessToken, secondResult);
-            Assert.AreEqual(0, _mockCommandProcessService.Invocations.Count);
+            Assert.IsEmpty(_mockCommandProcessService.Invocations);
 
             // Now a token has been cached -- clear cache & expect CommandProcessService to be invoked again to get a fresh oauth-token.
             _mockCommandProcessService.Invocations.Clear();
@@ -407,7 +407,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
 
             var thirdResult = _sut.GetOAuthToken();
             Assert.AreEqual(_fakeAccessToken, secondResult);
-            Assert.AreEqual(1, _mockCommandProcessService.Invocations.Count);
+            Assert.HasCount(1, _mockCommandProcessService.Invocations);
             _mockCommandProcessService.Verify(m => m.RunExecutable(_fakePathToCfExe, It.Is<string>(s => s.Contains(CfCliService._getOAuthTokenCmd)), null, _defaultEnvVars, null, null, null),
                 Times.Once);
         }
@@ -432,7 +432,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var result = _sut.TargetApi(fakeApiAddress, fakeSkipSslCertValue);
 
             Assert.IsTrue(result.Succeeded);
-            Assert.IsTrue(result.CmdResult.ExitCode == 0);
+            Assert.AreEqual(0, result.CmdResult.ExitCode);
             Assert.IsNull(result.Explanation);
             Assert.AreEqual(_fakeStdOut, result.CmdResult.StdOut);
             Assert.AreEqual(_fakeStdErr, result.CmdResult.StdErr);
@@ -458,7 +458,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var result = _sut.TargetApi(fakeApiAddress, fakeSkipSslCertValue);
 
             Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.CmdResult.ExitCode == 1);
+            Assert.AreEqual(1, result.CmdResult.ExitCode);
             Assert.IsNotNull(result.Explanation);
             Assert.AreEqual(_fakeStdOut, result.CmdResult.StdOut);
             Assert.AreEqual(_fakeStdErr, result.CmdResult.StdErr);
@@ -501,7 +501,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var result = await _sut.AuthenticateAsync(fakeUsername, fakePw);
 
             Assert.IsTrue(result.Succeeded);
-            Assert.IsTrue(result.CmdResult.ExitCode == 0);
+            Assert.AreEqual(0, result.CmdResult.ExitCode);
             Assert.IsNull(result.Explanation);
             Assert.AreEqual(_fakeStdOut, result.CmdResult.StdOut);
             Assert.AreEqual(_fakeStdErr, result.CmdResult.StdErr);
@@ -523,7 +523,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var result = await _sut.AuthenticateAsync(fakeUsername, fakePw);
 
             Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.CmdResult.ExitCode == 1);
+            Assert.AreEqual(1, result.CmdResult.ExitCode);
             Assert.IsNotNull(result.Explanation);
             Assert.AreEqual(_fakeStdOut, result.CmdResult.StdOut);
             Assert.AreEqual(_fakeStdErr, result.CmdResult.StdErr);
@@ -544,7 +544,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var result = _sut.TargetOrg(fakeOrgName);
 
             Assert.IsTrue(result.Succeeded);
-            Assert.IsTrue(result.CmdResult.ExitCode == 0);
+            Assert.AreEqual(0, result.CmdResult.ExitCode);
             Assert.IsNull(result.Explanation);
             Assert.AreEqual(_fakeStdOut, result.CmdResult.StdOut);
             Assert.AreEqual(_fakeStdErr, result.CmdResult.StdErr);
@@ -565,7 +565,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var result = _sut.TargetOrg(fakeOrgName);
 
             Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.CmdResult.ExitCode == 1);
+            Assert.AreEqual(1, result.CmdResult.ExitCode);
             Assert.IsNotNull(result.Explanation);
             Assert.AreEqual(_fakeStdOut, result.CmdResult.StdOut);
             Assert.AreEqual(_fakeStdErr, result.CmdResult.StdErr);
@@ -612,7 +612,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var result = _sut.TargetSpace(fakeSpaceName);
 
             Assert.IsTrue(result.Succeeded);
-            Assert.IsTrue(result.CmdResult.ExitCode == 0);
+            Assert.AreEqual(0, result.CmdResult.ExitCode);
             Assert.IsNull(result.Explanation);
             Assert.AreEqual(_fakeStdOut, result.CmdResult.StdOut);
             Assert.AreEqual(_fakeStdErr, result.CmdResult.StdErr);
@@ -633,7 +633,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var result = _sut.TargetSpace(fakeSpaceName);
 
             Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.CmdResult.ExitCode == 1);
+            Assert.AreEqual(1, result.CmdResult.ExitCode);
             Assert.IsNotNull(result.Explanation);
             Assert.AreEqual(_fakeStdOut, result.CmdResult.StdOut);
             Assert.AreEqual(_fakeStdErr, result.CmdResult.StdErr);
@@ -680,7 +680,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var result = await _sut.StopAppByNameAsync(fakeAppName);
 
             Assert.IsTrue(result.Succeeded);
-            Assert.IsTrue(result.CmdResult.ExitCode == 0);
+            Assert.AreEqual(0, result.CmdResult.ExitCode);
             Assert.IsNull(result.Explanation);
             Assert.AreEqual(_fakeStdOut, result.CmdResult.StdOut);
             Assert.AreEqual(_fakeStdErr, result.CmdResult.StdErr);
@@ -701,7 +701,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var result = await _sut.StopAppByNameAsync(fakeAppName);
 
             Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.CmdResult.ExitCode == 1);
+            Assert.AreEqual(1, result.CmdResult.ExitCode);
             Assert.IsNotNull(result.Explanation);
             Assert.AreEqual(_fakeStdOut, result.CmdResult.StdOut);
             Assert.AreEqual(_fakeStdErr, result.CmdResult.StdErr);
@@ -722,7 +722,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var result = await _sut.StartAppByNameAsync(fakeAppName);
 
             Assert.IsTrue(result.Succeeded);
-            Assert.IsTrue(result.CmdResult.ExitCode == 0);
+            Assert.AreEqual(0, result.CmdResult.ExitCode);
             Assert.IsNull(result.Explanation);
             Assert.AreEqual(_fakeStdOut, result.CmdResult.StdOut);
             Assert.AreEqual(_fakeStdErr, result.CmdResult.StdErr);
@@ -743,7 +743,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var result = await _sut.StartAppByNameAsync(fakeAppName);
 
             Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.CmdResult.ExitCode == 1);
+            Assert.AreEqual(1, result.CmdResult.ExitCode);
             Assert.IsNotNull(result.Explanation);
             Assert.AreEqual(_fakeStdOut, result.CmdResult.StdOut);
             Assert.AreEqual(_fakeStdErr, result.CmdResult.StdErr);
@@ -764,7 +764,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var result = await _sut.DeleteAppByNameAsync(fakeAppName);
 
             Assert.IsTrue(result.Succeeded);
-            Assert.IsTrue(result.CmdResult.ExitCode == 0);
+            Assert.AreEqual(0, result.CmdResult.ExitCode);
             Assert.IsNull(result.Explanation);
             Assert.AreEqual(_fakeStdOut, result.CmdResult.StdOut);
             Assert.AreEqual(_fakeStdErr, result.CmdResult.StdErr);
@@ -785,7 +785,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var result = await _sut.DeleteAppByNameAsync(fakeAppName);
 
             Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.CmdResult.ExitCode == 1);
+            Assert.AreEqual(1, result.CmdResult.ExitCode);
             Assert.IsNotNull(result.Explanation);
             Assert.AreEqual(_fakeStdOut, result.CmdResult.StdOut);
             Assert.AreEqual(_fakeStdErr, result.CmdResult.StdErr);
@@ -878,10 +878,10 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var result = await _sut.PushAppAsync(_fakeManifestPath, _fakeProjectPath, _fakeOrg.OrgName, _fakeSpace.SpaceName, _fakeOutCallback, _fakeErrCallback);
 
             Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.Explanation.Contains("Unable to deploy app from"));
-            Assert.IsTrue(result.Explanation.Contains(_fakeManifestPath));
-            Assert.IsTrue(result.Explanation.Contains("failed to target org"));
-            Assert.IsTrue(result.Explanation.Contains(_fakeOrg.OrgName));
+            Assert.Contains("Unable to deploy app from", result.Explanation);
+            Assert.Contains(_fakeManifestPath, result.Explanation);
+            Assert.Contains("failed to target org", result.Explanation);
+            Assert.Contains(_fakeOrg.OrgName, result.Explanation);
             Assert.AreEqual(_fakeFailureCmdResult, result.CmdResult);
         }
 
@@ -906,10 +906,10 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
             var result = await _sut.PushAppAsync(_fakeManifestPath, _fakeProjectPath, _fakeOrg.OrgName, _fakeSpace.SpaceName, _fakeOutCallback, _fakeErrCallback);
 
             Assert.IsFalse(result.Succeeded);
-            Assert.IsTrue(result.Explanation.Contains("Unable to deploy app from"));
-            Assert.IsTrue(result.Explanation.Contains(_fakeManifestPath));
-            Assert.IsTrue(result.Explanation.Contains("failed to target space"));
-            Assert.IsTrue(result.Explanation.Contains(_fakeSpace.SpaceName));
+            Assert.Contains("Unable to deploy app from", result.Explanation);
+            Assert.Contains(_fakeManifestPath, result.Explanation);
+            Assert.Contains("failed to target space", result.Explanation);
+            Assert.Contains(_fakeSpace.SpaceName, result.Explanation);
             Assert.AreEqual(_fakeFailureCmdResult, result.CmdResult);
         }
 

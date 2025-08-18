@@ -53,7 +53,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             }
 
             Assert.IsNotNull(thrownException);
-            Assert.IsTrue(thrownException.Message.Contains(CfApiClient._listOrgsPath));
+            Assert.Contains(CfApiClient._listOrgsPath, thrownException.Message);
             Assert.AreEqual(1, _mockHttp.GetMatchCount(orgsRequest));
         }
 
@@ -84,7 +84,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var result = await _sut.ListOrgsAsync(_fakeCfApiAddress, _fakeAccessToken);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(10, result.Count);
+            Assert.HasCount(10, result);
             Assert.AreEqual(1, _mockHttp.GetMatchCount(orgsRequest));
             Assert.AreEqual(1, _mockHttp.GetMatchCount(orgsPage2Request));
             Assert.AreEqual(1, _mockHttp.GetMatchCount(orgsPage3Request));
@@ -111,7 +111,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             }
 
             Assert.IsNotNull(thrownException);
-            Assert.IsTrue(thrownException.Message.Contains(CfApiClient._listSpacesPath));
+            Assert.Contains(CfApiClient._listSpacesPath, thrownException.Message);
             Assert.AreEqual(1, _mockHttp.GetMatchCount(spacesRequest));
         }
 
@@ -137,7 +137,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var result = await _sut.ListSpacesForOrgAsync(_fakeCfApiAddress, _fakeAccessToken, "fake guid");
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(7, result.Count);
+            Assert.HasCount(7, result);
             Assert.AreEqual(1, _mockHttp.GetMatchCount(spacesRequest));
             Assert.AreEqual(1, _mockHttp.GetMatchCount(spacesPage2Request));
             Assert.AreEqual(1, _mockHttp.GetMatchCount(spacesPage3Request));
@@ -163,7 +163,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             }
 
             Assert.IsNotNull(thrownException);
-            Assert.IsTrue(thrownException.Message.Contains(CfApiClient._listAppsPath));
+            Assert.Contains(CfApiClient._listAppsPath, thrownException.Message);
             Assert.AreEqual(1, _mockHttp.GetMatchCount(appsRequest));
         }
 
@@ -189,7 +189,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var result = await _sut.ListAppsForSpaceAsync(_fakeCfApiAddress, _fakeAccessToken, "fake guid");
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(125, result.Count);
+            Assert.HasCount(125, result);
             Assert.AreEqual(1, _mockHttp.GetMatchCount(appsRequest));
             Assert.AreEqual(1, _mockHttp.GetMatchCount(appsPage2Request));
             Assert.AreEqual(1, _mockHttp.GetMatchCount(appsPage3Request));
@@ -240,7 +240,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var result = await _sut.ListRoutesForAppAsync(_fakeCfApiAddress, _fakeAccessToken, "fake guid");
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(125, result.Count);
+            Assert.HasCount(125, result);
             Assert.AreEqual(1, _mockHttp.GetMatchCount(routesRequest));
             Assert.AreEqual(1, _mockHttp.GetMatchCount(routesPage2Request));
             Assert.AreEqual(1, _mockHttp.GetMatchCount(routesPage3Request));
@@ -267,7 +267,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             }
 
             Assert.IsNotNull(thrownException);
-            Assert.IsTrue(thrownException.Message.Contains(CfApiClient._listAppsPath));
+            Assert.Contains(CfApiClient._listAppsPath, thrownException.Message);
             Assert.AreEqual(1, _mockHttp.GetMatchCount(appsRequest));
         }
 
@@ -392,7 +392,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             }
 
             Assert.IsNotNull(thrownException);
-            Assert.IsTrue(thrownException.Message.Contains(CfApiClient._listAppsPath));
+            Assert.Contains(CfApiClient._listAppsPath, thrownException.Message);
             Assert.AreEqual(1, _mockHttp.GetMatchCount(appsRequest));
         }
 
@@ -441,7 +441,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             }
 
             Assert.AreEqual(1, _mockHttp.GetMatchCount(cfDeleteAppRequest));
-            Assert.IsTrue(thrownException.Message.Contains(CfApiClient._deleteAppsPath));
+            Assert.Contains(CfApiClient._deleteAppsPath, thrownException.Message);
             Assert.IsNotNull(thrownException);
         }
 
@@ -465,7 +465,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             }
 
             Assert.IsNotNull(thrownException);
-            Assert.IsTrue(thrownException.Message.Contains(CfApiClient._listStacksPath));
+            Assert.Contains(CfApiClient._listStacksPath, thrownException.Message);
             Assert.AreEqual(1, _mockHttp.GetMatchCount(stacksRequest));
         }
 
@@ -496,7 +496,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var result = await _sut.ListStacksAsync(_fakeCfApiAddress, _fakeAccessToken);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(10, result.Count);
+            Assert.HasCount(10, result);
             Assert.AreEqual(1, _mockHttp.GetMatchCount(stacksRequest));
             Assert.AreEqual(1, _mockHttp.GetMatchCount(stacksPage2Request));
             Assert.AreEqual(1, _mockHttp.GetMatchCount(stacksPage3Request));
@@ -526,7 +526,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var result = await _sut.ListBuildpacksAsync(_fakeCfApiAddress, _fakeAccessToken);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(125, result.Count);
+            Assert.HasCount(125, result);
             Assert.AreEqual(1, _mockHttp.GetMatchCount(buildpacksRequest));
             Assert.AreEqual(1, _mockHttp.GetMatchCount(buildpacksPage2Request));
             Assert.AreEqual(1, _mockHttp.GetMatchCount(buildpacksPage3Request));
@@ -553,7 +553,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             }
 
             Assert.IsNotNull(thrownException);
-            Assert.IsTrue(thrownException.Message.Contains(CfApiClient._listBuildpacksPath));
+            Assert.Contains(CfApiClient._listBuildpacksPath, thrownException.Message);
             Assert.AreEqual(1, _mockHttp.GetMatchCount(buildpacksRequest));
         }
 
@@ -580,7 +580,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             var result = await _sut.ListServicesAsync(_fakeCfApiAddress, _fakeAccessToken);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(125, result.Count);
+            Assert.HasCount(125, result);
             Assert.AreEqual(1, _mockHttp.GetMatchCount(servicesRequest));
             Assert.AreEqual(1, _mockHttp.GetMatchCount(servicesPage2Request));
             Assert.AreEqual(1, _mockHttp.GetMatchCount(servicesPage3Request));
@@ -607,7 +607,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
             }
 
             Assert.IsNotNull(thrownException);
-            Assert.IsTrue(thrownException.Message.Contains(CfApiClient._listServicesPath));
+            Assert.Contains(CfApiClient._listServicesPath, thrownException.Message);
             Assert.AreEqual(1, _mockHttp.GetMatchCount(servicesRequest));
         }
 
@@ -617,7 +617,7 @@ namespace Tanzu.Toolkit.CloudFoundryApiClient.Tests
         {
             Exception thrownException = null;
 
-            Assert.IsTrue(_fakeBasicInfoJsonResponse.Contains(_fakeLoginAddress));
+            Assert.Contains(_fakeLoginAddress, _fakeBasicInfoJsonResponse);
 
             var fakeLoginServerInfo = new LoginInfoResponse
             {

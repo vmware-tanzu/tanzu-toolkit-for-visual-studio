@@ -127,7 +127,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             await _sut.UpdateAllChildren();
 
-            Assert.AreEqual(3, _sut.Children.Count);
+            Assert.HasCount(3, _sut.Children);
             Assert.IsTrue(_sut.Children.Any(child => child is AppViewModel app && app.App.AppName == _fakeApps[0].AppName));
             Assert.IsTrue(_sut.Children.Any(child => child is AppViewModel app && app.App.AppName == _fakeApps[1].AppName));
             Assert.IsTrue(_sut.Children.Any(child => child is AppViewModel app && app.App.AppName == _fakeApps[2].AppName));
@@ -156,7 +156,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             await _sut.UpdateAllChildren();
 
-            Assert.AreEqual(3, _sut.Children.Count);
+            Assert.HasCount(3, _sut.Children);
             Assert.IsTrue(_sut.Children.Any(child => child is AppViewModel app && app.App.AppName == _fakeApps[0].AppName));
             Assert.IsTrue(_sut.Children.Any(child => child is AppViewModel app && app.App.AppName == _fakeApps[1].AppName));
             Assert.IsTrue(_sut.Children.Any(child => child is AppViewModel app && app.App.AppName == _fakeApps[2].AppName));
@@ -198,7 +198,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             await _sut.UpdateAllChildren();
 
-            Assert.AreEqual(3, _sut.Children.Count);
+            Assert.HasCount(3, _sut.Children);
 
             // ensure app didn't change
             var firstOldApp = initialChildren[0] as AppViewModel;
@@ -210,7 +210,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var secondFreshApp = _sut.Children[1] as AppViewModel;
             var secondOldApp = initialChildren[1] as AppViewModel;
             Assert.AreEqual(secondFreshApp.App.AppId, secondOldApp.App.AppId);
-            Assert.AreNotEqual(secondFreshApp.App.State, oldStateExpectedToChange);
+            Assert.AreNotEqual(oldStateExpectedToChange, secondFreshApp.App.State);
 
             // ensure app was added
             var thirdFreshApp = _sut.Children[2] as AppViewModel;
@@ -229,22 +229,20 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("UpdateAllChildren")]
         public async Task UpdateAllChildren_AssignsEmptyPlaceholder_WhenAppsRequestReturnsNoApps()
         {
-            var fakeNoAppsResponse = _fakeAppsResponse;
-            fakeNoAppsResponse.Content.Clear();
+            _fakeAppsResponse.Content.Clear();
 
-            /** mock 2 initial children */
             var initialChildren = new ObservableCollection<TreeViewItemViewModel> { new AppViewModel(_fakeApps[0], Services), new AppViewModel(_fakeApps[1], Services) };
             _sut.Children = new ObservableCollection<TreeViewItemViewModel>(initialChildren);
 
             MockCloudFoundryService.Setup(m => m
                     .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
-                .ReturnsAsync(fakeNoAppsResponse);
+                .ReturnsAsync(_fakeAppsResponse);
 
             Assert.IsFalse(_sut.Children.Any(child => child is PlaceholderViewModel));
 
             await _sut.UpdateAllChildren();
 
-            Assert.AreEqual(1, _sut.Children.Count);
+            Assert.HasCount(1, _sut.Children);
             Assert.IsTrue(_sut.Children[0].Equals(_sut.EmptyPlaceholder));
             foreach (var child in initialChildren)
             {
@@ -282,17 +280,16 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 _sut.EmptyPlaceholder
             ];
 
-            /** mock 3 new children */
             MockCloudFoundryService.Setup(m => m
                     .GetAppsForSpaceAsync(_expectedSpace, _expectedSkipSslValue, _expectedRetryAmount))
                 .ReturnsAsync(_fakeAppsResponse);
 
-            Assert.AreEqual(1, _sut.Children.Count);
+            Assert.HasCount(1, _sut.Children);
             Assert.IsTrue(_sut.Children[0].Equals(_sut.EmptyPlaceholder));
 
             await _sut.UpdateAllChildren();
 
-            Assert.AreEqual(3, _sut.Children.Count);
+            Assert.HasCount(3, _sut.Children);
             Assert.IsFalse(_sut.Children.Any(child => child is PlaceholderViewModel));
         }
 
@@ -300,10 +297,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("UpdateAllChildren")]
         public async Task UpdateAllChildren_RemovesLoadingPlaceholder_WhenAppsRequestReturnsApps()
         {
-            var fakeNoAppsResponse = _fakeAppsResponse;
-            fakeNoAppsResponse.Content.Clear();
+            _fakeAppsResponse.Content.Clear();
 
-            /** mock 2 initial children */
             _sut.Children =
             [
                 new AppViewModel(_fakeApps[0], Services),
@@ -316,12 +311,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 {
                     // ensure loading placeholder present at time of loading fresh children
                     Assert.IsTrue(_sut.IsLoading);
-                    Assert.IsTrue(_sut.Children.Contains(_sut.LoadingPlaceholder));
-                }).ReturnsAsync(fakeNoAppsResponse);
+                    Assert.Contains(_sut.LoadingPlaceholder, _sut.Children);
+                }).ReturnsAsync(_fakeAppsResponse);
 
             await _sut.UpdateAllChildren();
 
-            Assert.IsFalse(_sut.Children.Contains(_sut.LoadingPlaceholder));
+            Assert.DoesNotContain(_sut.LoadingPlaceholder, _sut.Children);
         }
 
         [TestMethod]

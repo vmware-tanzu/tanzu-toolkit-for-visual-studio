@@ -77,7 +77,7 @@ namespace Tanzu.Toolkit.ViewModels
                                     }
                                     else if (priorChild is SpaceViewModel priorSpace)
                                     {
-                                        var spaceStillExists = freshSpaces.Any(o => o is CloudFoundrySpace freshSpace && freshSpace != null && freshSpace.SpaceId == priorSpace.Space.SpaceId);
+                                        var spaceStillExists = freshSpaces.Any(o => o is CloudFoundrySpace && o != null && o.SpaceId == priorSpace.Space.SpaceId);
                                         if (!spaceStillExists)
                                         {
                                             removalTasks.Add(ThreadingService.RemoveItemFromCollectionOnUIThreadAsync(Children, priorSpace));

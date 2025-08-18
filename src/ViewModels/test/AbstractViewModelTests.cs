@@ -23,10 +23,5 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
     }
 
-    internal class TestAbstractViewModel : AbstractViewModel
-    {
-        public TestAbstractViewModel(IServiceProvider services) : base(services)
-        {
-        }
-    }
+    internal class TestAbstractViewModel(IServiceProvider services) : AbstractViewModel(services);
 }
