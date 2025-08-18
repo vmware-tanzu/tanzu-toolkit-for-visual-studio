@@ -46,9 +46,9 @@ steps:
     reporttypes: HtmlInline_AzurePipelines;Cobertura
     publishCodeCoverageResults: true
 
-- pwsh: Rename-Item -Path "$(Build.SourcesDirectory)\src\VisualStudioExtension\src\bin\2022\$(buildConfiguration)\Tanzu.Toolkit.VisualStudio.2022.vsix" -NewName "Tanzu.Toolkit.VisualStudio.2022.$(Build.BuildNumber).vsix"
+- pwsh: Rename-Item -Path "$(Build.SourcesDirectory)\src\VisualStudioExtension\src\bin\2022\$(buildConfiguration)\Tanzu.Toolkit.VisualStudio.2022.vsix" -NewName "Tanzu.Toolkit.VisualStudio.2022.$(Build.BuildNumber).vsix" -PassThru
   displayName: Include version in vsix name
 
-- publish: '**/*.vsix'
+- publish: $(Build.SourcesDirectory)\src\VisualStudioExtension\src\bin\2022\$(buildConfiguration)\Tanzu.Toolkit.VisualStudio.2022.$(Build.BuildNumber).vsix
   artifact: Tanzu.Toolkit.VS2022
   displayName: Publish vsix
