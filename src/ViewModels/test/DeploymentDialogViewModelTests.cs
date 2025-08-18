@@ -30,7 +30,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         private readonly CloudFoundrySpace _fakeSpace = new("", "", _fakeOrg);
         private DeploymentDialogViewModel _sut;
         private List<string> _receivedEvents;
-        private const int _backgroundTaskMs = 100;
+        private const int _backgroundTaskMs = 200;
 
         [TestInitialize]
         public void TestInit()
