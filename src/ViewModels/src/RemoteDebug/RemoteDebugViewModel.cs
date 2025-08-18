@@ -8,15 +8,11 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
-using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.CfCli;
 using Tanzu.Toolkit.Services.CloudFoundry;
-using Tanzu.Toolkit.Services.DataPersistence;
 using Tanzu.Toolkit.Services.DebugAgentProvider;
-using Tanzu.Toolkit.Services.DotnetCli;
 using Tanzu.Toolkit.Services.File;
 using Tanzu.Toolkit.Services.Project;
-using Tanzu.Toolkit.Services.Serialization;
 
 [assembly: InternalsVisibleTo("Tanzu.Toolkit.ViewModels.Tests")]
 
@@ -24,16 +20,11 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 {
     public class RemoteDebugViewModel : AbstractViewModel, IRemoteDebugViewModel
     {
-        internal ITanzuExplorerViewModel _tanzuExplorer;
+        internal readonly ITanzuExplorerViewModel _tanzuExplorer;
         private ICloudFoundryService _cfClient;
         private readonly ICfCliService _cfCliService;
-        private readonly IDotnetCliService _dotnetCliService;
         private readonly IFileService _fileService;
-        private readonly ISerializationService _serializationService;
-        private readonly IDataPersistenceService _dataPersistenceService;
         private readonly IDebugAgentProvider _vsdbgInstaller;
-        private readonly IView _outputView;
-        private readonly IOutputViewModel _outputViewModel;
         private readonly string _projectName;
         private readonly string _pathToProjectRootDir;
         private readonly string _targetFrameworkMoniker;
@@ -53,7 +44,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private const string _appDirLinux = "/home/vcap/app";
         private const string _appDirWindows = @"c:\Users\vcap\app";
         private string _vsdbgInstallPath;
-        public static readonly string _launchFileName = "launch.json";
+        public const string _launchFileName = "launch.json";
         private readonly JsonSerializerOptions _serializationOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
         public RemoteDebugViewModel(string expectedAppName, string pathToProjectRootDir, string targetFrameworkMoniker, string expectedPathToLaunchFile, Action<string, string> initiateDebugCallback,
@@ -66,21 +57,15 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             _initiateDebugCallback = initiateDebugCallback;
             _tanzuExplorer = services.GetRequiredService<ITanzuExplorerViewModel>();
             _cfCliService = services.GetRequiredService<ICfCliService>();
-            _dotnetCliService = services.GetRequiredService<IDotnetCliService>();
             _fileService = services.GetRequiredService<IFileService>();
-            _serializationService = services.GetRequiredService<ISerializationService>();
             _vsdbgInstaller = services.GetRequiredService<IDebugAgentProvider>();
-            _dataPersistenceService = services.GetRequiredService<IDataPersistenceService>();
-
-            _outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel), $"Remote Debug Output (\"{_projectName}\")") as IView;
-            _outputViewModel = _outputView?.ViewModel as IOutputViewModel;
 
             ResetState();
 
             if (IsLoggedIn)
             {
                 _cfClient = _tanzuExplorer.CloudFoundryConnection.CfClient;
-                _ = PromptAppSelectionAsync(expectedAppName);
+                Task.Run(() => PromptAppSelectionAsync(expectedAppName));
             }
         }
 
@@ -199,15 +184,15 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
 
         // Methods //
 
-        public void OpenLoginView(object arg = null)
+        public async Task OpenLoginViewAsync(object arg = null)
         {
-            _tanzuExplorer.OpenLoginView(arg);
+            await _tanzuExplorer.OpenLoginViewAsync(arg);
 
             if (_tanzuExplorer?.CloudFoundryConnection != null)
             {
                 IsLoggedIn = true;
                 _cfClient = _tanzuExplorer.CloudFoundryConnection.CfClient;
-                _ = PromptAppSelectionAsync(_projectName);
+                await PromptAppSelectionAsync(_projectName);
             }
         }
 
@@ -341,14 +326,14 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             ThreadingService.ExecuteInUIThread(() => ViewCloser?.Invoke());
         }
 
-        public void DisplayDeploymentWindow(object arg = null)
+        public async Task DisplayDeploymentWindowAsync(object arg = null)
         {
             var projSvc = Services.GetRequiredService<IProjectService>();
             projSvc.ProjectName = _projectName;
             projSvc.PathToProjectDirectory = _pathToProjectRootDir;
             projSvc.TargetFrameworkMoniker = _targetFrameworkMoniker;
 
-            var view = ViewLocatorService.GetViewByViewModelName(nameof(DeploymentDialogViewModel)) as IView;
+            var view = await ViewLocatorService.GetViewByViewModelNameAsync(nameof(DeploymentDialogViewModel)) as IView;
 
             if (view.ViewModel is IDeploymentDialogViewModel vm)
             {
@@ -362,13 +347,13 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         {
             LoadingMessage = $"Checking for debugging agent on {AppToDebug.AppName}...";
 
-            _debugAgentInstalled = await CheckForVsdbg(AppToDebug.Stack, ct);
+            _debugAgentInstalled = await CheckForVsdbgAsync(AppToDebug.Stack, ct);
             if (!_debugAgentInstalled)
             {
                 // TODO: install vsdbg from path set in options
                 LoadingMessage = $"Installing debugging agent for {AppToDebug.AppName}...";
                 var installationResult = await _vsdbgInstaller.InstallVsdbgForCFAppAsync(AppToDebug);
-                _debugAgentInstalled = await CheckForVsdbg(AppToDebug.Stack, ct);
+                _debugAgentInstalled = await CheckForVsdbgAsync(AppToDebug.Stack, ct);
                 if (!_debugAgentInstalled)
                 {
                     Logger.Error("Failed to install or start debugging agent for app '{AppName}': {DebugFailureMsg}", AppToDebug.AppName, installationResult.Explanation);
@@ -403,7 +388,7 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
             CancelDebugging = arg => { Close(); };
         }
 
-        private async Task<bool> CheckForVsdbg(string stack, CancellationToken ct)
+        private async Task<bool> CheckForVsdbgAsync(string stack, CancellationToken ct)
         {
             StopDebuggingAndCloseIfCancelled(ct);
 

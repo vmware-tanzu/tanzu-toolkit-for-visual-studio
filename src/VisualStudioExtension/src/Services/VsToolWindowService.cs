@@ -1,7 +1,10 @@
+using Community.VisualStudio.Toolkit.DependencyInjection;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Serilog;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.VisualStudio.Views;
@@ -15,13 +18,13 @@ namespace Tanzu.Toolkit.VisualStudio.Services
         private readonly ILogger _logger;
         private int _largestId = 1;
 
-        public VsToolWindowService(AsyncPackage package, ILoggingService loggingService)
+        public VsToolWindowService(DIToolkitPackage package, ILoggingService loggingService)
         {
             _package = package;
             _logger = loggingService.Logger;
         }
 
-        public IView CreateToolWindowForView(Type viewType, string caption)
+        public async Task<IView> CreateToolWindowForViewAsync(Type viewType, string caption)
         {
             IView view = null;
             Type toolWindowType = null;
@@ -33,16 +36,19 @@ namespace Tanzu.Toolkit.VisualStudio.Services
 
                 if (viewType == typeof(OutputView) || viewType == typeof(IOutputView))
                 {
-                    toolWindowType = typeof(OutputToolWindow);
+                    toolWindowType = typeof(OutputToolWindow.Pane);
                 }
-
-                var window = _package.FindToolWindow(toolWindowType, id, create: true);
+                var window = await _package.FindToolWindowAsync(toolWindowType, id, true, CancellationToken.None);
                 if (window?.Frame == null)
                 {
                     throw new NotSupportedException("Cannot create tool window");
                 }
 
-                view = window.Content as IView;
+                if (view == null)
+                {
+                    view = window.Content as IView;
+                }
+
                 window.Caption = caption;
 
                 // give view a way to display its corresponding tool window

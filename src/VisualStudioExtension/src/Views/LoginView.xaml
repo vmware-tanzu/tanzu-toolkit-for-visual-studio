@@ -42,13 +42,6 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
-
-        <Style x:Key="BoldTextButton" TargetType="{x:Type Button}">
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Foreground" Value="{Binding ElementName=LoginViewElement, Path=HyperlinkBrush}" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="FontWeight" Value="DemiBold" />
-        </Style>
     </ui:DialogWindow.Resources>
 
     <StackPanel>
@@ -279,7 +272,6 @@
 
                 <Button
                     Content="Sign in with SSO"
-                    Style="{StaticResource BoldTextButton}"
                     Grid.Row="1"
                     Grid.ColumnSpan="3"
                     Command="{Binding ElementName=LoginViewElement, Path=SsoCommand}" />

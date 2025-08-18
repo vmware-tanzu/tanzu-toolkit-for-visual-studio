@@ -1,7 +1,9 @@
-﻿namespace Tanzu.Toolkit.Services.ViewLocator
+﻿using System.Threading.Tasks;
+
+namespace Tanzu.Toolkit.Services.ViewLocator
 {
     public interface IViewLocatorService
     {
-        object GetViewByViewModelName(string viewModelName, object parameter = null);
+        Task<object> GetViewByViewModelNameAsync(string viewModelName, object parameter = null);
     }
 }

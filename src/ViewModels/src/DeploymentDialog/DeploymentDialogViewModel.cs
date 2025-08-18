@@ -11,7 +11,6 @@ using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
 using Tanzu.Toolkit.Services.DataPersistence;
 using Tanzu.Toolkit.Services.DotnetCli;
-using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.Project;
 
 [assembly: InternalsVisibleTo("Tanzu.Toolkit.ViewModels.Tests")]
@@ -47,7 +46,6 @@ namespace Tanzu.Toolkit.ViewModels
         internal const int _waitBeforeApplyingManifest = 2000;
         private string _appName;
         internal readonly bool _fullFrameworkDeployment;
-        private readonly IErrorDialog _errorDialogService;
         private readonly IDotnetCliService _dotnetCliService;
         internal IView _outputView;
         internal IOutputViewModel _outputViewModel;
@@ -85,13 +83,13 @@ namespace Tanzu.Toolkit.ViewModels
 
         public DeploymentDialogViewModel(IServiceProvider services) : base(services)
         {
-            _errorDialogService = services.GetRequiredService<IErrorDialog>();
             _dotnetCliService = services.GetRequiredService<IDotnetCliService>();
             _tanzuExplorerViewModel = services.GetRequiredService<ITanzuExplorerViewModel>();
             _projectService = services.GetRequiredService<IProjectService>();
             _dataPersistenceService = services.GetRequiredService<IDataPersistenceService>();
 
-            _outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel), $"Tanzu Push Output (\"{_projectService.ProjectName}\")") as IView;
+            var windowTitle = $"Tanzu Push Output (\"{_projectService.ProjectName}\")";
+            _outputView = (ViewLocatorService.GetViewByViewModelNameAsync(nameof(OutputViewModel), windowTitle).GetAwaiter().GetResult()) as IView;
             _outputViewModel = _outputView?.ViewModel as IOutputViewModel;
 
             DeploymentInProgress = false;
@@ -125,10 +123,10 @@ namespace Tanzu.Toolkit.ViewModels
                 TargetName = _tanzuExplorerViewModel.CloudFoundryConnection.DisplayText;
                 IsLoggedIn = true;
 
-                ThreadingService.StartBackgroundTaskAsync(UpdateCfOrgOptions);
-                ThreadingService.StartBackgroundTaskAsync(UpdateBuildpackOptions);
-                ThreadingService.StartBackgroundTaskAsync(UpdateServiceOptions);
-                ThreadingService.StartBackgroundTaskAsync(UpdateStackOptions);
+                Task.Run(() => ThreadingService.StartBackgroundTaskAsync(UpdateCfOrgOptionsAsync));
+                Task.Run(() => ThreadingService.StartBackgroundTaskAsync(UpdateBuildpackOptionsAsync));
+                Task.Run(() => ThreadingService.StartBackgroundTaskAsync(UpdateServiceOptionsAsync));
+                Task.Run(() => ThreadingService.StartBackgroundTaskAsync(UpdateStackOptionsAsync));
             }
 
             // delay calling SetManifestIfDefaultExists to give background update tasks time to complete
@@ -139,7 +137,7 @@ namespace Tanzu.Toolkit.ViewModels
 
             OnClose = () =>
             {
-                DialogService.CloseDialogByName(nameof(DeploymentDialogViewModel));
+                DialogService.CloseDialogByNameAsync(nameof(DeploymentDialogViewModel)).GetAwaiter().GetResult();
                 if (DeploymentInProgress) // don't open tool window if modal was closed via "X" button
                 {
                     DisplayDeploymentOutput();
@@ -215,12 +213,12 @@ namespace Tanzu.Toolkit.ViewModels
                     }
                     catch (Exception ex)
                     {
-                        _errorDialogService.DisplayErrorDialog(_manifestParsingErrorTitle, ex.Message);
+                        ErrorService.DisplayErrorDialog(_manifestParsingErrorTitle, ex.Message);
                     }
                 }
                 else
                 {
-                    _errorDialogService.DisplayWarningDialog(_manifestNotFoundTitle, $"'{value}' does not appear to be a valid path to a manifest.");
+                    ErrorService.DisplayWarningDialog(_manifestNotFoundTitle, $"'{value}' does not appear to be a valid path to a manifest.");
                 }
             }
         }
@@ -253,7 +251,7 @@ namespace Tanzu.Toolkit.ViewModels
                 {
                     if (value != null)
                     {
-                        _errorDialogService.DisplayWarningDialog(_directoryNotFoundTitle, $"'{value}' does not appear to be a valid path to a directory.");
+                        ErrorService.DisplayWarningDialog(_directoryNotFoundTitle, $"'{value}' does not appear to be a valid path to a directory.");
 
                         ManifestModel.Applications[0].Path = null;
                     }
@@ -313,7 +311,7 @@ namespace Tanzu.Toolkit.ViewModels
 
                 foreach (var b in BuildpackOptions)
                 {
-                    b.EvalutateStackCompatibility(value);
+                    b.EvaluateStackCompatibility(value);
                     if (!b.CompatibleWithStack && b.IsSelected)
                     {
                         b.IsSelected = false;
@@ -563,7 +561,7 @@ namespace Tanzu.Toolkit.ViewModels
             if (CanDeployApp(null))
             {
                 DeploymentInProgress = true;
-                var _ = ThreadingService.StartBackgroundTaskAsync(StartDeployment);
+                Task.Run(() => ThreadingService.StartBackgroundTaskAsync(StartDeploymentAsync));
                 DialogService.CloseDialog(dialogWindow, true);
                 OnClose();
             }
@@ -579,9 +577,9 @@ namespace Tanzu.Toolkit.ViewModels
             return true;
         }
 
-        public void OpenLoginView(object arg)
+        public async Task OpenLoginViewAsync(object arg)
         {
-            _tanzuExplorerViewModel.OpenLoginView(arg);
+            await _tanzuExplorerViewModel.OpenLoginViewAsync(arg);
 
             if (_tanzuExplorerViewModel.CloudFoundryConnection != null)
             {
@@ -590,16 +588,16 @@ namespace Tanzu.Toolkit.ViewModels
                 TargetName = _tanzuExplorerViewModel.CloudFoundryConnection.DisplayText;
                 IsLoggedIn = true;
 
-                ThreadingService.StartBackgroundTaskAsync(UpdateCfOrgOptions);
-                ThreadingService.StartBackgroundTaskAsync(UpdateBuildpackOptions);
-                ThreadingService.StartBackgroundTaskAsync(UpdateServiceOptions);
-                ThreadingService.StartBackgroundTaskAsync(UpdateStackOptions);
+                _ = ThreadingService.StartBackgroundTaskAsync(UpdateCfOrgOptionsAsync);
+                _ = ThreadingService.StartBackgroundTaskAsync(UpdateBuildpackOptionsAsync);
+                _ = ThreadingService.StartBackgroundTaskAsync(UpdateServiceOptionsAsync);
+                _ = ThreadingService.StartBackgroundTaskAsync(UpdateStackOptionsAsync);
             }
         }
 
         private DateTime _lastUpdatedCfOrgOptions = DateTime.Now;
 
-        public async Task UpdateCfOrgOptions()
+        public async Task UpdateCfOrgOptionsAsync()
         {
             if (_tanzuExplorerViewModel.CloudFoundryConnection == null)
             {
@@ -623,12 +621,12 @@ namespace Tanzu.Toolkit.ViewModels
                 else
                 {
                     Logger.Error($"{_getOrgsFailureMsg}. {orgsResponse}");
-                    _errorDialogService.DisplayErrorDialog(_getOrgsFailureMsg, orgsResponse.Explanation);
+                    ErrorService.DisplayErrorDialog(_getOrgsFailureMsg, orgsResponse.Explanation);
                 }
             }
         }
 
-        public async Task UpdateCfSpaceOptions()
+        public async Task UpdateCfSpaceOptionsAsync()
         {
             if (SelectedOrg == null || _tanzuExplorerViewModel.CloudFoundryConnection == null)
             {
@@ -646,14 +644,14 @@ namespace Tanzu.Toolkit.ViewModels
                 else
                 {
                     Logger.Error($"{_getSpacesFailureMsg}. {spacesResponse}");
-                    _errorDialogService.DisplayErrorDialog(_getSpacesFailureMsg, spacesResponse.Explanation);
+                    ErrorService.DisplayErrorDialog(_getSpacesFailureMsg, spacesResponse.Explanation);
                 }
             }
         }
 
         private DateTime _lastUpdatedBuildpackOptions = DateTime.Now;
 
-        public async Task UpdateBuildpackOptions()
+        public async Task UpdateBuildpackOptionsAsync()
         {
             if (_tanzuExplorerViewModel.CloudFoundryConnection == null)
             {
@@ -694,7 +692,7 @@ namespace Tanzu.Toolkit.ViewModels
                         {
                             var newBp = new BuildpackListItem { Name = bp.Name, ValidStacks = new List<string> { bp.Stack }, IsSelected = nameSpecifiedInManifest };
 
-                            newBp.EvalutateStackCompatibility(SelectedStack);
+                            newBp.EvaluateStackCompatibility(SelectedStack);
 
                             buildpacks.Add(newBp);
                         }
@@ -710,14 +708,14 @@ namespace Tanzu.Toolkit.ViewModels
                     BuildpacksLoading = false;
 
                     Logger.Error(_getBuildpacksFailureMsg + " {BuildpacksResponseError}", buildpacksResponse.Explanation);
-                    _errorDialogService.DisplayErrorDialog(_getBuildpacksFailureMsg, buildpacksResponse.Explanation);
+                    ErrorService.DisplayErrorDialog(_getBuildpacksFailureMsg, buildpacksResponse.Explanation);
                 }
             }
         }
 
         private DateTime _lastUpdatedServiceOptions = DateTime.Now;
 
-        public async Task UpdateServiceOptions()
+        public async Task UpdateServiceOptionsAsync()
         {
             if (_tanzuExplorerViewModel.CloudFoundryConnection == null)
             {
@@ -768,14 +766,14 @@ namespace Tanzu.Toolkit.ViewModels
                     ServicesLoading = false;
 
                     Logger.Error(_getServicesFailureMsg + " {ServicesResponseError}", servicesResponse.Explanation);
-                    _errorDialogService.DisplayErrorDialog(_getServicesFailureMsg, servicesResponse.Explanation);
+                    ErrorService.DisplayErrorDialog(_getServicesFailureMsg, servicesResponse.Explanation);
                 }
             }
         }
 
         private DateTime _lastUpdatedStacks = DateTime.Now;
 
-        public async Task UpdateStackOptions()
+        public async Task UpdateStackOptionsAsync()
         {
             if (_tanzuExplorerViewModel.CloudFoundryConnection == null)
             {
@@ -804,7 +802,7 @@ namespace Tanzu.Toolkit.ViewModels
                     StacksLoading = false;
 
                     Logger.Error(_getStacksFailureMsg + " {StacksResponseError}", stacksResponse.Explanation);
-                    _errorDialogService.DisplayErrorDialog(_getStacksFailureMsg, stacksResponse.Explanation);
+                    ErrorService.DisplayErrorDialog(_getStacksFailureMsg, stacksResponse.Explanation);
                 }
             }
         }
@@ -914,11 +912,11 @@ namespace Tanzu.Toolkit.ViewModels
 
                 Logger.Error(errorMsg + ex.StackTrace);
 
-                _errorDialogService.DisplayErrorDialog("Unable to save manifest file", errorMsg);
+                ErrorService.DisplayErrorDialog("Unable to save manifest file", errorMsg);
             }
         }
 
-        internal async Task StartDeployment()
+        internal async Task StartDeploymentAsync()
         {
             if (PublishBeforePushing)
             {
@@ -940,7 +938,7 @@ namespace Tanzu.Toolkit.ViewModels
 
                 if (!publishSucceeded)
                 {
-                    _errorDialogService.DisplayErrorDialog("Unable to publish project with these parameters:\n",
+                    ErrorService.DisplayErrorDialog("Unable to publish project with these parameters:\n",
                         $"Project path: {PathToProjectRootDir}\n" +
                         $"Target framework: {_targetFrameworkMoniker}\n" +
                         $"Runtime: {runtimeIdentifier}\n" +
@@ -1010,7 +1008,7 @@ namespace Tanzu.Toolkit.ViewModels
                     SelectedSpace.SpaceName,
                     deploymentResult.ToString());
 
-                _errorDialogService.DisplayErrorDialog(errorTitle, errorMsg);
+                ErrorService.DisplayErrorDialog(errorTitle, errorMsg);
             }
 
             DeploymentInProgress = false;
@@ -1123,7 +1121,7 @@ namespace Tanzu.Toolkit.ViewModels
                     if (existingBpOption != null)
                     {
                         existingBpOption.IsSelected = true;
-                        existingBpOption.EvalutateStackCompatibility(stack);
+                        existingBpOption.EvaluateStackCompatibility(stack);
                     }
                 }
             }
@@ -1240,12 +1238,12 @@ namespace Tanzu.Toolkit.ViewModels
 
         public List<string> ValidStacks { get; set; }
 
-        public void EvalutateStackCompatibility(string stackName)
+        public void EvaluateStackCompatibility(string stackName)
         {
             CompatibleWithStack = ValidStacks.Contains(stackName) || stackName == null;
         }
 
-        protected void RaisePropertyChangedEvent(string propertyName)
+        private void RaisePropertyChangedEvent(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
@@ -1269,7 +1267,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        protected void RaisePropertyChangedEvent(string propertyName)
+        private void RaisePropertyChangedEvent(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

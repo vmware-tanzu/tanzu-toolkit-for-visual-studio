@@ -61,16 +61,16 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         {
             ViewModel = viewModel;
 
-            OpenLoginFormCommand = new DelegatingCommand(viewModel.OpenLoginView, viewModel.CanOpenLoginView);
+            OpenLoginFormCommand = new AsyncDelegatingCommand(viewModel.OpenLoginViewAsync, viewModel.CanOpenLoginView);
             StopCfAppCommand = new AsyncDelegatingCommand(viewModel.StopCloudFoundryAppAsync, viewModel.CanStopCloudFoundryApp);
             StartCfAppCommand = new AsyncDelegatingCommand(viewModel.StartCloudFoundryAppAsync, viewModel.CanStartCloudFoundryApp);
-            OpenDeletionViewCommand = new DelegatingCommand(viewModel.OpenDeletionView, viewModel.CanOpenDeletionView);
+            OpenDeletionViewCommand = new AsyncDelegatingCommand(viewModel.OpenDeletionViewAsync, viewModel.CanOpenDeletionView);
             RefreshSpaceCommand = new AsyncDelegatingCommand(viewModel.RefreshSpaceAsync, viewModel.CanRefreshSpace);
             RefreshOrgCommand = new AsyncDelegatingCommand(viewModel.RefreshOrgAsync, viewModel.CanRefreshOrg);
-            RefreshAllCommand = new DelegatingCommand(viewModel.RefreshAllItems, viewModel.CanInitiateFullRefresh);
+            RefreshAllCommand = new DelegatingCommand(viewModel.BackgroundRefreshAllItems, viewModel.CanInitiateFullRefresh);
             DeleteConnectionCommand = new DelegatingCommand(viewModel.LogOutCloudFoundry, viewModel.CanLogOutCloudFoundry);
-            ReAuthenticateCommand = new DelegatingCommand(viewModel.ReAuthenticate, viewModel.CanReAuthenticate);
-            StreamAppLogsCommand = new DelegatingCommand(viewModel.StreamAppLogs, arg => true);
+            ReAuthenticateCommand = new AsyncDelegatingCommand(viewModel.ReAuthenticateAsync, viewModel.CanReAuthenticate);
+            StreamAppLogsCommand = new AsyncDelegatingCommand(viewModel.StreamAppLogsAsync, arg => true);
 
             themeService.SetTheme(this);
 

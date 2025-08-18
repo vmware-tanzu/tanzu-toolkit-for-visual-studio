@@ -36,8 +36,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 ConnectionName = _fakeConnectionName,
                 TargetApiAddress = _fakeTarget,
                 Username = _fakeUsername,
-                GetPassword = () => { return _fakeSecurePw; },
-                PasswordEmpty = () => { return false; },
+                GetPassword = () => _fakeSecurePw,
+                PasswordEmpty = () => false,
                 SkipSsl = _skipSsl,
                 CfClient = MockCloudFoundryService.Object
             };
@@ -61,7 +61,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("LogIn")]
+        [TestCategory("LogInAsync")]
         public async Task LogIn_SetsErrorMessage_WhenLoginRequestFails()
         {
             const string expectedErrorMessage = "my fake error message";
@@ -69,7 +69,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockCloudFoundryService.Setup(mock => mock.LoginWithCredentialsAsync(_fakeUsername, _fakeSecurePw))
                 .ReturnsAsync(new DetailedResult(false, expectedErrorMessage));
 
-            await _sut.LogIn();
+            await _sut.LogInAsync();
 
             Assert.IsTrue(_sut.HasErrors);
             Assert.AreEqual(expectedErrorMessage, _sut.ErrorMessage);
@@ -77,7 +77,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("LogIn")]
+        [TestCategory("LogInAsync")]
         public async Task LogIn_SetsConnectionOnTanzuExplorer_WhenLoginRequestSucceeds()
         {
             _sut.TargetCf = _fakeCfInstance;
@@ -87,7 +87,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             MockTanzuExplorerViewModel.Setup(m => m.SetConnection(_sut.TargetCf)).Verifiable();
 
-            await _sut.LogIn();
+            await _sut.LogInAsync();
 
             Assert.IsFalse(_sut.HasErrors);
             MockDialogService.Verify(mock => mock.CloseDialog(It.IsAny<object>(), It.IsAny<bool>()), Times.Once);
@@ -97,13 +97,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("LogIn")]
+        [TestCategory("LogInAsync")]
         public async Task LogIn_ClosesDialog_WhenLoginRequestSucceeds()
         {
             MockCloudFoundryService.Setup(mock => mock.LoginWithCredentialsAsync(_fakeUsername, _fakeSecurePw))
                 .ReturnsAsync(new DetailedResult(true, null));
 
-            await _sut.LogIn(null);
+            await _sut.LogInAsync(null);
 
             Assert.IsFalse(_sut.HasErrors);
             MockDialogService.Verify(mock => mock.CloseDialog(It.IsAny<object>(), It.IsAny<bool>()), Times.Once);
@@ -197,8 +197,8 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             _sut.ShowSsoLogin();
 
-            Assert.IsNull(_sut.SsoPasscode);
             Assert.AreEqual(3, _sut.PageNum);
+            Assert.IsNull(_sut.SsoPasscode);
         }
 
 
@@ -265,20 +265,20 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsNull(_sut.ErrorMessage);
 
             MockTanzuExplorerViewModel.Verify(m => m.SetConnection(_sut.TargetCf), Times.Once);
-            MockDialogService.Verify(m => m.CloseDialogByName(nameof(LoginViewModel), null), Times.Once);
+            MockDialogService.Verify(m => m.CloseDialogByNameAsync(nameof(LoginViewModel), null), Times.Once);
         }
 
         [TestMethod]
-        [TestCategory("CloseDialog")]
-        public void CloseDialog_WrapsDialogServiceCloseDialogByName()
+        [TestCategory("CloseDialogAsync")]
+        public async Task CloseDialog_WrapsDialogServiceCloseDialogByName()
         {
-            _sut.CloseDialog();
+            await _sut.CloseDialogAsync();
 
-            MockDialogService.Verify(m => m.CloseDialogByName(nameof(LoginViewModel), null), Times.Once);
+            MockDialogService.Verify(m => m.CloseDialogByNameAsync(nameof(LoginViewModel), null), Times.Once);
         }
 
         [TestMethod]
-        [TestCategory("ConnectToCf")]
+        [TestCategory("ConnectToCloudFoundryAsync")]
         public async Task ConnectToCf_SetsPageNumberTo2_AndSetsSsoEnabledOnTargetToTrue_WhenSsoPromptSuccessfullyRetrieved()
         {
             var fakeSsoPrompt = "some fake string that contains a properly-formatted uri like this: https://some.fake.address :) :) :)";
@@ -292,14 +292,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.AreEqual(1, _sut.PageNum);
 
-            await _sut.ConnectToCf();
+            await _sut.ConnectToCloudFoundryAsync();
 
             Assert.AreEqual(2, _sut.PageNum);
             Assert.IsTrue(_sut.SsoEnabledOnTarget);
         }
 
         [TestMethod]
-        [TestCategory("ConnectToCf")]
+        [TestCategory("ConnectToCloudFoundryAsync")]
         public async Task ConnectToCf_SetsCertificateInvalidToTrue_WhenCertValidationFails()
         {
             var fakeCertValidationResult = new DetailedResult { Succeeded = false, FailureType = FailureType.InvalidCertificate };
@@ -310,14 +310,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.AreEqual(1, _sut.PageNum);
 
-            await _sut.ConnectToCf();
+            await _sut.ConnectToCloudFoundryAsync();
 
             Assert.AreEqual(1, _sut.PageNum);
             Assert.IsTrue(_sut.CertificateInvalid);
         }
 
         [TestMethod]
-        [TestCategory("ConnectToCf")]
+        [TestCategory("ConnectToCloudFoundryAsync")]
         public async Task ConnectToCf_SetsPageNumberTo2_AndSetsSsoEnabledOnTargetToFalse_WhenSsoPromptAbsentFromResponse()
         {
             var fakeCertValidationResult = new DetailedResult { Succeeded = true };
@@ -332,14 +332,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.AreEqual(1, _sut.PageNum);
 
-            await _sut.ConnectToCf();
+            await _sut.ConnectToCloudFoundryAsync();
 
             Assert.AreEqual(2, _sut.PageNum);
             Assert.IsFalse(_sut.SsoEnabledOnTarget);
         }
 
         [TestMethod]
-        [TestCategory("ConnectToCf")]
+        [TestCategory("ConnectToCloudFoundryAsync")]
         public async Task ConnectToCf_DoesNotChangePageNumber_AndSetsApiAddressError_WhenSsoPromptRequestFails()
         {
             var fakeCertValidationResult = new DetailedResult { Succeeded = true };
@@ -354,7 +354,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.AreEqual(1, _sut.PageNum);
 
-            await _sut.ConnectToCf();
+            await _sut.ConnectToCloudFoundryAsync();
 
             Assert.AreEqual(1, _sut.PageNum);
             Assert.IsFalse(_sut.IsApiAddressFormatValid);
@@ -363,7 +363,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
 
         [TestMethod]
-        [TestCategory("ConnectToCf")]
+        [TestCategory("ConnectToCloudFoundryAsync")]
         [DataRow("_", false, LoginViewModel._targetInvalidFormatMessage)]
         [DataRow("www.api.com", false, LoginViewModel._targetInvalidFormatMessage)]
         [DataRow("http://www.api.com", true, null)]
@@ -377,7 +377,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("ConnectToCf")]
+        [TestCategory("ConnectToCloudFoundryAsync")]
         [DataRow("https://www.api.com", "My Cool Tanzu Platform", "My Cool Tanzu Platform")]
         [DataRow("https://www.api.com", "asdf1234", "asdf1234")]
         [DataRow("https://www.api.com", "", "www.api.com")]
@@ -412,7 +412,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsNull(_sut.TargetCf);
 
-            await _sut.ConnectToCf();
+            await _sut.ConnectToCloudFoundryAsync();
 
             Assert.IsNotNull(_sut.TargetCf);
             Assert.AreEqual(expectedCfName, _sut.TargetCf.InstanceName);
@@ -437,7 +437,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsNull(_sut.TargetCf);
 
-            await _sut.ConnectToCf();
+            await _sut.ConnectToCloudFoundryAsync();
 
             Assert.IsNotNull(_sut.TargetCf);
             Assert.AreEqual(skipSsl, _sut.TargetCf.SkipSslCertValidation);

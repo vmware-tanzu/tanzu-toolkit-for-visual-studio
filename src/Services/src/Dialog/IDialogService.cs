@@ -1,11 +1,13 @@
-﻿namespace Tanzu.Toolkit.Services.Dialog
+﻿using System.Threading.Tasks;
+
+namespace Tanzu.Toolkit.Services.Dialog
 {
     public interface IDialogService
     {
         void CloseDialog(object dialogWindow, bool result);
 
-        void CloseDialogByName(string dialogName, object parameter = null);
+        Task CloseDialogByNameAsync(string dialogName, object parameter = null);
 
-        IDialogResult ShowModal(string dialogName, object parameter = null);
+        Task<IDialogResult> ShowModalAsync(string dialogName, object parameter = null);
     }
 }

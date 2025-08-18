@@ -193,9 +193,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        // Methods //
-
-        public async Task ConnectToCf(object arg = null)
+        public async Task ConnectToCloudFoundryAsync(object arg = null)
         {
             ConnectingToCf = true;
             SsoEnabledOnTarget = false;
@@ -310,7 +308,7 @@ namespace Tanzu.Toolkit.ViewModels
         /// </summary>
         /// <param name="arg"></param>
         /// <returns></returns>
-        public async Task LogIn(object arg = null)
+        public async Task LogInAsync(object arg = null)
         {
             HasErrors = false;
 
@@ -354,7 +352,7 @@ namespace Tanzu.Toolkit.ViewModels
                 if (loginResult.Succeeded)
                 {
                     TanzuExplorer.SetConnection(TargetCf);
-                    CloseDialog();
+                    await CloseDialogAsync();
                 }
                 else
                 {
@@ -363,9 +361,9 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public void CloseDialog()
+        public async Task CloseDialogAsync()
         {
-            DialogService.CloseDialogByName(nameof(LoginViewModel));
+            await DialogService.CloseDialogByNameAsync(nameof(LoginViewModel));
         }
 
         public void ResetTargetDependentFields()

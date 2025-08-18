@@ -75,8 +75,15 @@ namespace Tanzu.Toolkit.ViewModels
 
         public void CancelActiveProcess(object arg = null)
         {
-            ActiveProcess?.Kill();
-            ActiveProcess?.Dispose();
+            try
+            {
+                ActiveProcess?.Kill();
+                ActiveProcess?.Dispose();
+            }
+            catch (InvalidOperationException ex)
+            {
+                Logger.Error(ex, "Error cancelling Active Process");
+            }
         }
 
         public void ClearContent(object arg = null)
@@ -95,13 +102,12 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public void ResumeOutput(object arg = null)
+        public async Task ResumeOutputAsync(object arg = null)
         {
             OutputPaused = false;
             if (OutputIsAppLogs)
             {
-                // start streaming app logs
-                var _ = BeginStreamingAppLogsForAppAsync(_app, _view);
+                await BeginStreamingAppLogsForAppAsync(_app, _view);
             }
         }
 
@@ -120,7 +126,7 @@ namespace Tanzu.Toolkit.ViewModels
                 var recentLines = recentLogsResult.Content;
                 if (!string.IsNullOrWhiteSpace(_lastLinePrinted) && recentLines.Contains(_lastLinePrinted))
                 {
-                    var newerLines = recentLines.Substring(recentLines.IndexOf(_lastLinePrinted) + _lastLinePrinted.Length);
+                    var newerLines = recentLines.Substring(recentLines.IndexOf(_lastLinePrinted, StringComparison.Ordinal) + _lastLinePrinted.Length);
                     AppendLine(newerLines);
                 }
                 else
@@ -136,7 +142,7 @@ namespace Tanzu.Toolkit.ViewModels
                 if (recentLogsResult.FailureType == FailureType.InvalidRefreshToken)
                 {
                     _tanzuExplorerViewModel.AuthenticationRequired = true;
-                    AppendLine("\n*** Unable to fetch recent logs; authentication requied. Please log in to Tanzu Platform and try again. ***\n");
+                    AppendLine("\n*** Unable to fetch recent logs; authentication required. Please log in to Tanzu Platform and try again. ***\n");
                     return;
                 }
                 else

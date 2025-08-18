@@ -17,7 +17,6 @@ namespace Tanzu.Toolkit.VisualStudio.Commands
 
         protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
         {
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(Package.DisposalToken);
             await TanzuExplorerToolWindow.ShowAsync();
         }
     }

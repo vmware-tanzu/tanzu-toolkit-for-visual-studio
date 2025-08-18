@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.PlatformUI;
 using Serilog;
 using System;
+using System.Threading.Tasks;
 using System.Windows;
 using Tanzu.Toolkit.Services.Dialog;
 using Tanzu.Toolkit.Services.Logging;
@@ -27,12 +28,12 @@ namespace Tanzu.Toolkit.VisualStudio.Services
             asWindows?.Hide();
         }
 
-        public IDialogResult ShowModal(string dialogName, object parameter = null)
+        public async Task<IDialogResult> ShowModalAsync(string dialogName, object parameter = null)
         {
-            if (!(_viewLocatorService.GetViewByViewModelName(dialogName, parameter) is DependencyObject dialog))
+            if (!(await _viewLocatorService.GetViewByViewModelNameAsync(dialogName, parameter) is DependencyObject dialog))
             {
                 _logger?.Error("{ClassName} failed to show dialog for {DialogName}; {MethodName} returned null",
-                    nameof(DialogService), dialogName, nameof(_viewLocatorService.GetViewByViewModelName));
+                    nameof(DialogService), dialogName, nameof(_viewLocatorService.GetViewByViewModelNameAsync));
                 return null;
             }
 
@@ -45,9 +46,9 @@ namespace Tanzu.Toolkit.VisualStudio.Services
             return null;
         }
 
-        public void CloseDialogByName(string dialogName, object parameter = null)
+        public async Task CloseDialogByNameAsync(string dialogName, object parameter = null)
         {
-            var dialog = _viewLocatorService.GetViewByViewModelName(dialogName, parameter) as DependencyObject;
+            var dialog = await _viewLocatorService.GetViewByViewModelNameAsync(dialogName, parameter) as DependencyObject;
             var dialogWindow = Window.GetWindow(dialog);
             dialogWindow?.Hide();
         }

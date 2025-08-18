@@ -36,7 +36,6 @@ namespace Tanzu.Toolkit.VisualStudio
     {
         public const int TanzuExplorerCommandId = 0x0100;
         public const int PushToCloudFoundryCommandId = 0x0101;
-        public const int RequestFeedbackCommandId = 0x0102;
         public const int OpenLogsCommandId = 0x0103;
         public const int RemoteDebugId = 0x0104;
         public const int ProjContextMenuGroup = 0x03E9;

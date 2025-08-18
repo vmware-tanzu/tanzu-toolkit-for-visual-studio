@@ -16,12 +16,19 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         Action<object> CancelDebugging { get; set; }
 
         bool CanStartDebuggingApp(object arg = null);
+
         Task StartDebuggingAppAsync(object arg = null);
+
         void CreateLaunchFileIfNonexistent(string stack, CancellationToken ct);
+
         Task PromptAppSelectionAsync(string appName);
-        void OpenLoginView(object arg = null);
-        void DisplayDeploymentWindow(object arg = null);
+
+        Task OpenLoginViewAsync(object arg = null);
+
+        Task DisplayDeploymentWindowAsync(object arg = null);
+
         bool CanDisplayDeploymentWindow(object arg = null);
+
         bool CanCancelDebugging(object arg = null);
     }
 }
