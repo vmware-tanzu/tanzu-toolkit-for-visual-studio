@@ -13,6 +13,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
     [TestClass]
     public class TanzuExplorerViewModelTests : ViewModelTestSupport
     {
+        private const int _backgroundTaskMs = 200;
         private TanzuExplorerViewModel _sut;
         private List<string> _receivedEvents;
         private CfInstanceViewModel _fakeTanzuConnection;
@@ -462,7 +463,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsFalse(_sut.IsRefreshingAll);
 
             _sut.BackgroundRefreshAllItems();
-            Thread.Sleep(100);
+            Thread.Sleep(_backgroundTaskMs);
             MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(_sut.UpdateAllTreeItems), Times.Once);
         }
 
