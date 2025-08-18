@@ -26,7 +26,6 @@ using Tanzu.Toolkit.Services.ViewLocator;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.ViewModels.AppDeletionConfirmation;
 using Tanzu.Toolkit.ViewModels.RemoteDebug;
-using Tanzu.Toolkit.VisualStudio.Commands;
 using Tanzu.Toolkit.VisualStudio.Options;
 using Tanzu.Toolkit.VisualStudio.Services;
 using Tanzu.Toolkit.VisualStudio.Views;
@@ -55,11 +54,12 @@ namespace Tanzu.Toolkit.VisualStudio
     /// To get loaded into VS, the package must be referred by &lt;Asset Type="Microsoft.VisualStudio.VsPackage" ...&gt; in .vsixmanifest file.
     /// </para>
     /// </remarks>
-    [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [Guid(_packageGuidString)]
+    [InstalledProductRegistration(Vsix.Name, Vsix.Description, Vsix.Version)]
+    [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [ProvideToolWindow(typeof(TanzuExplorerToolWindow.Pane))]
-    [ProvideToolWindow(typeof(OutputToolWindow), MultiInstances = true, Transient = true)]
+    [ProvideToolWindow(typeof(OutputToolWindow.Pane), MultiInstances = true, Transient = true)]
     [ProvideOptionPage(typeof(General1Options), "Tanzu Toolkit", "General", 0, 0, true)]
     public sealed class TanzuToolkitForVisualStudioPackage : MicrosoftDIToolkitPackage<TanzuToolkitForVisualStudioPackage>
     {
@@ -71,11 +71,10 @@ namespace Tanzu.Toolkit.VisualStudio
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
             await base.InitializeAsync(cancellationToken, progress);
-            TanzuExplorerToolWindow.Initialize(this);
-            //OutputToolWindow.Initialize(this);
-            //await PushToCloudFoundryCommand.InitializeAsync(this, _serviceProvider);
-            //await OpenLogsCommand.InitializeAsync(this, _serviceProvider);
-            //await RemoteDebugCommand.InitializeAsync(this, _serviceProvider);
+
+            this.RegisterToolWindows();
+            await this.RegisterCommandsAsync();
+
             GeneralOptionsModel.Saved += OnSettingsSaved;
         }
 

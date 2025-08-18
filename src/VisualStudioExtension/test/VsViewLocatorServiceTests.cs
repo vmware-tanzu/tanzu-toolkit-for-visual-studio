@@ -3,6 +3,7 @@ using Moq;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Tanzu.Toolkit.Services.Logging;
 using Tanzu.Toolkit.ViewModels;
 using Tanzu.Toolkit.VisualStudio.Services;
@@ -40,8 +41,8 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
         }
 
         [TestMethod]
-        [TestCategory("GetViewByViewModelName")]
-        public void GetViewByViewModelName_ReturnsView_OfTypeMatchingProvidedViewModel_ForToolWindowTypes()
+        [TestCategory("GetViewByViewModelNameAsync")]
+        public async Task GetViewByViewModelName_ReturnsView_OfTypeMatchingProvidedViewModel_ForToolWindowTypesAsync()
         {
             var dummyToolWindowViewType = typeof(IOutputView);
             Assert.IsTrue(_sut.ViewShownAsToolWindow(dummyToolWindowViewType)); // ensure this type is characterized as a tool window view
@@ -49,17 +50,17 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
             Assert.AreEqual(_sut.GetViewName(_fakeViewModelName), _fakeViewName);
             _sut.TypeLookupOverrides[_fakeViewName] = dummyToolWindowViewType;
 
-            _mockToolWindowService.Setup(m => m.CreateToolWindowForView(dummyToolWindowViewType, It.IsAny<string>())).Returns(_fakeView);
+            _mockToolWindowService.Setup(m => m.CreateToolWindowForViewAsync(dummyToolWindowViewType, It.IsAny<string>())).ReturnsAsync(_fakeView);
 
-            var result = _sut.GetViewByViewModelName(_fakeViewModelName);
+            var result = await _sut.GetViewByViewModelNameAsync(_fakeViewModelName);
 
             Assert.AreEqual(_fakeView, result);
             _mockToolWindowService.VerifyAll();
         }
 
         [TestMethod]
-        [TestCategory("GetViewByViewModelName")]
-        public void GetViewByViewModelName_ReturnsView_OfTypeMatchingProvidedViewModel_ForModalTypes()
+        [TestCategory("GetViewByViewModelNameAsync")]
+        public async Task GetViewByViewModelName_ReturnsView_OfTypeMatchingProvidedViewModel_ForModalTypesAsync()
         {
             var dummyToolWindowViewType = typeof(ILoginView);
             Assert.IsTrue(_sut.ViewShownAsModal(dummyToolWindowViewType)); // ensure this type is characterized as a modal view
@@ -67,7 +68,7 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
             Assert.AreEqual(_sut.GetViewName(_fakeViewModelName), _fakeViewName);
             _sut.TypeLookupOverrides[_fakeViewName] = dummyToolWindowViewType;
 
-            var result = _sut.GetViewByViewModelName(_fakeViewModelName);
+            var result = await _sut.GetViewByViewModelNameAsync(_fakeViewModelName);
 
             Assert.AreEqual(_fakeView, result);
 
@@ -77,8 +78,8 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
         }
 
         [TestMethod]
-        [TestCategory("GetViewByViewModelName")]
-        public void GetViewByViewModelName_ReturnsNull_AndLogsError_WhenTypeNotModalNorToolWindow()
+        [TestCategory("GetViewByViewModelNameAsync")]
+        public async Task GetViewByViewModelName_ReturnsNull_AndLogsError_WhenTypeNotModalNorToolWindowAsync()
         {
             var dummyToolWindowViewType = GetType(); // some arbitrary type to return
             _sut.TypeLookupOverrides.Add(_fakeViewName, dummyToolWindowViewType);
@@ -86,18 +87,18 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
             Assert.IsFalse(_sut.ViewShownAsToolWindow(dummyToolWindowViewType));
             Assert.IsFalse(_sut.ViewShownAsModal(dummyToolWindowViewType));
 
-            var result = _sut.GetViewByViewModelName(_fakeViewModelName);
+            var result = await _sut.GetViewByViewModelNameAsync(_fakeViewModelName);
 
             Assert.IsNull(result);
             _mockLogger.Verify(m => m.Error(It.Is<string>(s => s.Contains("given type not classified as either modal or tool window")),
                 nameof(VsViewLocatorService),
-                nameof(_sut.GetViewByViewModelName),
+                nameof(_sut.GetViewByViewModelNameAsync),
                 _fakeViewModelName), Times.Once);
         }
 
         [TestMethod]
-        [TestCategory("GetViewByViewModelName")]
-        public void GetViewByViewModelName_CreatesToolWindow_AndReturnsView_WhenInterpretedViewTypeIsIOutputView()
+        [TestCategory("GetViewByViewModelNameAsync")]
+        public async Task GetViewByViewModelName_CreatesToolWindow_AndReturnsView_WhenInterpretedViewTypeIsIOutputViewAsync()
         {
             var expectedViewType = typeof(IOutputView);
             var fakeViewFromToolWindow = new FakeView();
@@ -105,9 +106,9 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
 
             _sut.TypeLookupOverrides = new Dictionary<string, Type> { { _fakeViewName, expectedViewType } };
 
-            _mockToolWindowService.Setup(m => m.CreateToolWindowForView(expectedViewType, fakeCaptionParam)).Returns(fakeViewFromToolWindow);
+            _mockToolWindowService.Setup(m => m.CreateToolWindowForViewAsync(expectedViewType, fakeCaptionParam)).ReturnsAsync(fakeViewFromToolWindow);
 
-            var result = _sut.GetViewByViewModelName(_fakeViewModelName, fakeCaptionParam);
+            var result = await _sut.GetViewByViewModelNameAsync(_fakeViewModelName, fakeCaptionParam);
 
             Assert.AreEqual(fakeViewFromToolWindow, result);
             _mockToolWindowService.VerifyAll();
@@ -133,7 +134,7 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
         }
     }
 
-    class FakeServiceProvider : IServiceProvider
+    internal class FakeServiceProvider : IServiceProvider
     {
         public FakeServiceProvider(object fakeServiceToReturn)
         {
@@ -141,7 +142,7 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
             FakeServiceToReturn = fakeServiceToReturn;
         }
 
-        public object FakeServiceToReturn { get; set; }
+        private object FakeServiceToReturn { get; set; }
 
         public bool GetServiceWasCalled { get; private set; }
 
@@ -155,7 +156,7 @@ namespace Tanzu.Toolkit.VisualStudioExtension.Tests
         }
     }
 
-    class FakeView : IView
+    internal class FakeView : IView
     {
         public IViewModel ViewModel => throw new NotImplementedException();
 

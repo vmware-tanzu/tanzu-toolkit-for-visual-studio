@@ -191,7 +191,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 throw new NotImplementedException();
             }
 
-            public void ResumeOutput(object arg = null)
+            public Task ResumeOutputAsync(object arg = null)
             {
                 throw new NotImplementedException();
             }
@@ -199,10 +199,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         internal class FakeTanzuExplorerViewModel : ITanzuExplorerViewModel
         {
-            public FakeTanzuExplorerViewModel()
-            {
-            }
-
             public bool AuthenticationRequired
             {
                 get => throw new NotImplementedException();
@@ -277,22 +273,22 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 throw new NotImplementedException();
             }
 
-            public void OpenDeletionView(object app)
+            public Task OpenDeletionViewAsync(object app)
             {
                 throw new NotImplementedException();
             }
 
-            public void OpenLoginView(object arg)
+            public Task OpenLoginViewAsync(object arg)
             {
                 throw new NotImplementedException();
             }
 
-            public void ReAuthenticate(object cf)
+            public Task ReAuthenticateAsync(object cf)
             {
                 throw new NotImplementedException();
             }
 
-            public void RefreshAllItems(object arg)
+            public void BackgroundRefreshAllItems(object arg)
             {
                 throw new NotImplementedException();
             }
@@ -322,7 +318,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 throw new NotImplementedException();
             }
 
-            public void StreamAppLogs(object app)
+            public Task StreamAppLogsAsync(object app)
             {
                 throw new NotImplementedException();
             }

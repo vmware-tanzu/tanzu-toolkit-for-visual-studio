@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Tanzu.Toolkit.ViewModels;
 
 namespace Tanzu.Toolkit.VisualStudio.Services
 {
     public interface IToolWindowService
     {
-        IView CreateToolWindowForView(Type viewType, string caption);
+        Task<IView> CreateToolWindowForViewAsync(Type viewType, string caption);
     }
 }

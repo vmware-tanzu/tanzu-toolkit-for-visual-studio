@@ -13,7 +13,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         public AppDeletionConfirmationView(IAppDeletionConfirmationViewModel viewModel)
         {
-            DeleteAppCommand = new AsyncDelegatingCommand(viewModel.DeleteApp, viewModel.CanDeleteApp);
+            DeleteAppCommand = new AsyncDelegatingCommand(viewModel.DeleteAppAsync, viewModel.CanDeleteApp);
             DataContext = viewModel;
             MouseDown += Window_MouseDown;
             InitializeComponent();

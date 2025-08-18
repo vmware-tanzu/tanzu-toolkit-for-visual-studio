@@ -18,15 +18,24 @@ namespace Tanzu.Toolkit.ViewModels
         Action ClearPassword { get; set; }
         CloudFoundryInstance TargetCf { get; set; }
 
-        Task LogIn(object arg);
+        Task LogInAsync(object arg);
+
         bool CanLogIn(object arg);
+
         bool ValidateApiAddressFormat(string apiAddress);
+
         void ShowSsoLogin(object apiAddress = null);
-        void CloseDialog();
+
+        Task CloseDialogAsync();
+
         void NavigateToTargetPage(object arg = null);
-        Task ConnectToCf(object arg = null);
+
+        Task ConnectToCloudFoundryAsync(object arg = null);
+
         bool CanProceedToAuthentication(object arg = null);
+
         void ResetTargetDependentFields();
+
         Task LoginWithSsoPasscodeAsync(object arg = null);
     }
 }

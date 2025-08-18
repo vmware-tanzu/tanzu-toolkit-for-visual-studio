@@ -36,11 +36,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("ShowConfirmation")]
-        public void ShowConfirmation_RecordsAppValue_AndDisplaysDeletionConfirmationDialog()
+        public async Task ShowConfirmation_RecordsAppValue_AndDisplaysDeletionConfirmationDialog()
         {
-            _sut.ShowConfirmation(_fakeCfApp);
+            await _sut.ShowConfirmationAsync(_fakeCfApp);
 
-            MockDialogService.Verify(ds => ds.ShowModal(nameof(AppDeletionConfirmationViewModel), null), Times.Once);
+            MockDialogService.Verify(ds => ds.ShowModalAsync(nameof(AppDeletionConfirmationViewModel), null), Times.Once);
         }
 
         [TestMethod]
@@ -54,7 +54,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.AreEqual(_fakeCfApp, _sut.CfApp);
             _sut.DeleteRoutes = deleteRoutes;
 
-            await _sut.DeleteApp(_fakeConfirmationWindow);
+            await _sut.DeleteAppAsync(_fakeConfirmationWindow);
 
             Assert.IsNull(_sut.CfApp);
             MockDialogService.Verify(ds => ds.CloseDialog(_fakeConfirmationWindow, true), Times.Once);
@@ -72,7 +72,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.AreEqual(_fakeCfApp, _sut.CfApp);
             _sut.DeleteRoutes = deleteRoutes;
 
-            await _sut.DeleteApp(_fakeConfirmationWindow);
+            await _sut.DeleteAppAsync(_fakeConfirmationWindow);
 
             Assert.IsNull(_sut.CfApp);
             MockDialogService.Verify(ds => ds.CloseDialog(_fakeConfirmationWindow, true), Times.Once);
@@ -98,7 +98,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.AreEqual(_fakeCfApp, _sut.CfApp);
             _sut.DeleteRoutes = deleteRoutes;
 
-            await _sut.DeleteApp(_fakeConfirmationWindow);
+            await _sut.DeleteAppAsync(_fakeConfirmationWindow);
 
             Assert.IsNull(_sut.CfApp);
             MockDialogService.Verify(ds => ds.CloseDialog(_fakeConfirmationWindow, true), Times.Once);

@@ -21,19 +21,19 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         public IViewModel ViewModel { get; private set; }
 
         public static readonly DependencyProperty _listItemMouseOverBrushProperty =
-            DependencyProperty.Register("ListItemMouseOverBrush", typeof(Brush), typeof(OutputView),
+            DependencyProperty.Register(nameof(ListItemMouseOverBrush), typeof(Brush), typeof(OutputView),
                 new PropertyMetadata(default(Brush)));
 
         public static readonly DependencyProperty _windowButtonDownBorderBrushProperty =
-            DependencyProperty.Register("WindowButtonDownBorderBrush", typeof(Brush), typeof(OutputView),
+            DependencyProperty.Register(nameof(WindowButtonDownBorderBrush), typeof(Brush), typeof(OutputView),
                 new PropertyMetadata(default(Brush)));
 
         public static readonly DependencyProperty _windowButtonDownHoverBrushProperty =
-            DependencyProperty.Register("WindowButtonDownHoverBrush", typeof(Brush), typeof(OutputView),
+            DependencyProperty.Register(nameof(WindowButtonDownHoverBrush), typeof(Brush), typeof(OutputView),
                 new PropertyMetadata(default(Brush)));
 
         public static readonly DependencyProperty _windowPanelBrushProperty =
-            DependencyProperty.Register("WindowPanelBrush", typeof(Brush), typeof(OutputView),
+            DependencyProperty.Register(nameof(WindowPanelBrush), typeof(Brush), typeof(OutputView),
                 new PropertyMetadata(default(Brush)));
 
         public Brush ListItemMouseOverBrush
@@ -73,7 +73,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
             ClearContentCommand = new DelegatingCommand(viewModel.ClearContent, arg => true);
             PauseOutputCommand = new DelegatingCommand(viewModel.PauseOutput, arg => !viewModel.OutputPaused);
-            ResumeOutputCommand = new DelegatingCommand(viewModel.ResumeOutput, arg => viewModel.OutputPaused);
+            ResumeOutputCommand = new AsyncDelegatingCommand(viewModel.ResumeOutputAsync, arg => viewModel.OutputPaused);
 
             InitializeComponent();
             autoScrollToggleBtn.IsChecked = true;

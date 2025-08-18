@@ -97,11 +97,11 @@
 
       <Button guid="guidTanzuToolkitPackageCmdSet" id="RemoteDebugId" priority="0x0100" type="Button">
         <Parent guid="guidTanzuToolkitPackageCmdSet" id="ProjContextMenuGroup" />
+        <Icon guid="ImageCatalogGuid" id="RemoteDebugger" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
         <Strings>
           <ButtonText>Remote Debug on Tanzu Platform</ButtonText>
         </Strings>
-        <Icon guid="ImageCatalogGuid" id="RemoteDebugger" />
-        <CommandFlag>IconIsMoniker</CommandFlag>
       </Button>
     </Buttons>
 
@@ -126,7 +126,6 @@
 
       <IDSymbol name="TanzuExplorerCommandId" value="256" />
       <IDSymbol name="PushToCloudFoundryCommandId" value="257" />
-      <IDSymbol name="RequestFeedbackCommandId" value="258" />
       <IDSymbol name="OpenLogsCommandId" value="259" />
       <IDSymbol name="RemoteDebugId" value="260" />
 

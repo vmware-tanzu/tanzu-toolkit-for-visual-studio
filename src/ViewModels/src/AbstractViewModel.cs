@@ -77,7 +77,7 @@ namespace Tanzu.Toolkit.ViewModels
                     if (TanzuExplorer.CloudFoundryConnection == null)
                     {
                         Logger.Information("Detected null Tanzu Platform connection in AbstractViewModel; prompting login");
-                        DialogService.ShowModal(nameof(LoginViewModel));
+                        DialogService.ShowModalAsync(nameof(LoginViewModel)).GetAwaiter().GetResult();
                     }
 
                     _cfClient = TanzuExplorer.CloudFoundryConnection?.CfClient;

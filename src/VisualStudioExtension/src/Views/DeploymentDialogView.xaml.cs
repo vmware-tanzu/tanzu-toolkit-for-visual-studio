@@ -21,7 +21,6 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         public DelegatingCommand ClearManifestSelectionCommand { get; }
         public DelegatingCommand ClearDeploymentDirectorySelectionCommand { get; }
         public ICommand ClearServiceSelectionCommand { get; }
-        public string PlaceholderText { get; set; }
 
         public Brush HyperlinkBrush
         {
@@ -40,7 +39,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
             _viewModel = viewModel;
 
             UploadAppCommand = new DelegatingCommand(viewModel.DeployApp, viewModel.CanDeployApp);
-            OpenLoginDialogCommand = new DelegatingCommand(viewModel.OpenLoginView, viewModel.CanOpenLoginView);
+            OpenLoginDialogCommand = new AsyncDelegatingCommand(viewModel.OpenLoginViewAsync, viewModel.CanOpenLoginView);
             ToggleAdvancedOptionsCommand =
                 new DelegatingCommand(viewModel.ToggleAdvancedOptions, viewModel.CanToggleAdvancedOptions);
             ClearServiceSelectionCommand = new DelegatingCommand(viewModel.ClearSelectedServices, AlwaysTrue);
@@ -67,7 +66,7 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         private void CfOrgOptions_ComboBox_DropDownClosed(object sender, System.EventArgs e)
         {
-            _ = _viewModel.UpdateCfSpaceOptions();
+            _ = _viewModel.UpdateCfSpaceOptionsAsync();
         }
 
         private void SelectManifest(object sender, RoutedEventArgs e)

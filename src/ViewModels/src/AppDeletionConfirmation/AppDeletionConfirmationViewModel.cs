@@ -51,21 +51,21 @@ namespace Tanzu.Toolkit.ViewModels.AppDeletionConfirmation
             }
         }
 
-        public void ShowConfirmation(CloudFoundryApp app)
+        public async Task ShowConfirmationAsync(CloudFoundryApp app)
         {
             CfApp = app;
-            var dialog = DialogService.ShowModal(nameof(AppDeletionConfirmationViewModel));
+            var dialog = await DialogService.ShowModalAsync(nameof(AppDeletionConfirmationViewModel));
             if (dialog == null)
             {
                 Logger?.Error("{ClassName}.{MethodName} encountered null DialogResult, indicating that something went wrong trying to construct the view.",
-                    nameof(AppDeletionConfirmation), nameof(ShowConfirmation));
+                    nameof(AppDeletionConfirmation), nameof(ShowConfirmationAsync));
                 ErrorService.DisplayErrorDialog("Something went wrong while trying to display app deletion confirmation", "View construction failed");
             }
 
             CfApp = null;
         }
 
-        public async Task DeleteApp(object window = null)
+        public async Task DeleteAppAsync(object window = null)
         {
             try
             {

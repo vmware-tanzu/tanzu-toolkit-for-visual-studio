@@ -33,10 +33,10 @@ namespace Tanzu.Toolkit.VisualStudio.Views
 
         public LoginView(ILoginViewModel viewModel, IThemeService themeService)
         {
-            AddCloudCommand = new AsyncDelegatingCommand(viewModel.LogIn, viewModel.CanLogIn);
+            AddCloudCommand = new AsyncDelegatingCommand(viewModel.LogInAsync, viewModel.CanLogIn);
             SsoCommand = new DelegatingCommand(viewModel.ShowSsoLogin, AlwaysTrue);
             IncrementPageCommand =
-                new AsyncDelegatingCommand(viewModel.ConnectToCf, viewModel.CanProceedToAuthentication);
+                new AsyncDelegatingCommand(viewModel.ConnectToCloudFoundryAsync, viewModel.CanProceedToAuthentication);
             DecrementPageCommand = new DelegatingCommand(viewModel.NavigateToTargetPage, AlwaysTrue);
             LogInWithPasscodeCommand = new AsyncDelegatingCommand(viewModel.LoginWithSsoPasscodeAsync, AlwaysTrue);
 

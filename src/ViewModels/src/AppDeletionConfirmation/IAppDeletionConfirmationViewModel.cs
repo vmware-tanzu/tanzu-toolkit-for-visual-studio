@@ -6,8 +6,11 @@ namespace Tanzu.Toolkit.ViewModels.AppDeletionConfirmation
     public interface IAppDeletionConfirmationViewModel
     {
         bool DeleteRoutes { get; set; }
+
         bool CanDeleteApp(object arg);
-        Task DeleteApp(object arg);
-        void ShowConfirmation(CloudFoundryApp app);
+
+        Task DeleteAppAsync(object arg);
+
+        Task ShowConfirmationAsync(CloudFoundryApp app);
     }
 }

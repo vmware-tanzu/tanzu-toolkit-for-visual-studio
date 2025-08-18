@@ -37,11 +37,11 @@ namespace Tanzu.Toolkit.VisualStudio
         }
 
         public static readonly DependencyProperty _listItemMouseOverBrushProperty =
-            DependencyProperty.Register("ListItemMouseOverBrush", typeof(Brush), typeof(RemoteDebugView),
+            DependencyProperty.Register(nameof(ListItemMouseOverBrush), typeof(Brush), typeof(RemoteDebugView),
                 new PropertyMetadata(default(Brush)));
 
         public static readonly DependencyProperty _selectedItemActiveBrushProperty =
-            DependencyProperty.Register("SelectedItemActiveBrush", typeof(Brush), typeof(RemoteDebugView),
+            DependencyProperty.Register(nameof(SelectedItemActiveBrush), typeof(Brush), typeof(RemoteDebugView),
                 new PropertyMetadata(default(Brush)));
 
         public static readonly DependencyProperty _gridHeaderBrushProperty =
@@ -53,11 +53,11 @@ namespace Tanzu.Toolkit.VisualStudio
             themeService.SetTheme(this);
             DataContext = viewModel;
             CancelCommand = new DelegatingCommand(viewModel.CancelDebugging, viewModel.CanCancelDebugging);
-            OpenLoginViewCommand = new DelegatingCommand(viewModel.OpenLoginView, arg => true);
+            OpenLoginViewCommand = new AsyncDelegatingCommand(viewModel.OpenLoginViewAsync, arg => true);
             ResolveMissingAppCommand =
                 new AsyncDelegatingCommand(viewModel.StartDebuggingAppAsync, viewModel.CanStartDebuggingApp);
             ShowDeploymentWindowCommand =
-                new DelegatingCommand(viewModel.DisplayDeploymentWindow, viewModel.CanDisplayDeploymentWindow);
+                new AsyncDelegatingCommand(viewModel.DisplayDeploymentWindowAsync, viewModel.CanDisplayDeploymentWindow);
             MouseDown += Window_MouseDown;
             InitializeComponent();
         }

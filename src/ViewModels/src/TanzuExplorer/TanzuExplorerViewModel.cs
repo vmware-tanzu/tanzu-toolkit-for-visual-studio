@@ -6,7 +6,6 @@ using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services.DataPersistence;
 using Tanzu.Toolkit.Services.ErrorDialog;
 using Tanzu.Toolkit.Services.Threading;
-using Tanzu.Toolkit.Services.ViewLocator;
 using Tanzu.Toolkit.ViewModels.AppDeletionConfirmation;
 
 namespace Tanzu.Toolkit.ViewModels
@@ -209,7 +208,7 @@ namespace Tanzu.Toolkit.ViewModels
             return IsLoggedIn;
         }
 
-        public void OpenLoginView(object parent)
+        public async Task OpenLoginViewAsync(object parent)
         {
             if (CloudFoundryConnection != null)
             {
@@ -219,10 +218,10 @@ namespace Tanzu.Toolkit.ViewModels
             }
             else
             {
-                if (DialogService.ShowModal(nameof(LoginViewModel)) == null)
+                if (await DialogService.ShowModalAsync(nameof(LoginViewModel)) == null)
                 {
                     Logger?.Error("{ClassName}.{MethodName} encountered null DialogResult, indicating that something went wrong trying to construct the view.",
-                        nameof(TanzuExplorerViewModel), nameof(OpenLoginView));
+                        nameof(TanzuExplorerViewModel), nameof(OpenLoginViewAsync));
                     var title = "Something went wrong while trying to display login window";
                     var msg = "View construction failed";
                     ErrorService.DisplayErrorDialog(title, msg);
@@ -230,12 +229,12 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public void OpenDeletionView(object app)
+        public async Task OpenDeletionViewAsync(object app)
         {
             if (app is CloudFoundryApp cfApp)
             {
                 var appDeletionConfirmationViewModel = Services.GetRequiredService<IAppDeletionConfirmationViewModel>();
-                appDeletionConfirmationViewModel.ShowConfirmation(cfApp);
+                await appDeletionConfirmationViewModel.ShowConfirmationAsync(cfApp);
             }
         }
 
@@ -282,7 +281,7 @@ namespace Tanzu.Toolkit.ViewModels
                 }
                 else
                 {
-                    var outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel), $"\"{cfApp.AppName}\" Logs") as IView;
+                    var outputView = await ViewLocatorService.GetViewByViewModelNameAsync(nameof(OutputViewModel), $"\"{cfApp.AppName}\" Logs") as IView;
                     var outputViewModel = outputView?.ViewModel as IOutputViewModel;
 
                     outputView?.DisplayView();
@@ -297,7 +296,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public void StreamAppLogs(object app)
+        public async Task StreamAppLogsAsync(object app)
         {
             if (!(app is CloudFoundryApp cfApp))
             {
@@ -307,7 +306,7 @@ namespace Tanzu.Toolkit.ViewModels
             try
             {
                 var viewTitle = $"Logs for {cfApp.AppName}";
-                var outputView = ViewLocatorService.GetViewByViewModelName(nameof(OutputViewModel), viewTitle) as IView;
+                var outputView = await ViewLocatorService.GetViewByViewModelNameAsync(nameof(OutputViewModel), viewTitle) as IView;
                 var outputViewModel = outputView?.ViewModel as IOutputViewModel;
                 _ = outputViewModel?.BeginStreamingAppLogsForAppAsync(cfApp, outputView);
             }
@@ -334,7 +333,7 @@ namespace Tanzu.Toolkit.ViewModels
             }
         }
 
-        public void RefreshAllItems(object arg = null)
+        public void BackgroundRefreshAllItems(object arg = null)
         {
             if (CloudFoundryConnection == null)
             {
@@ -344,7 +343,7 @@ namespace Tanzu.Toolkit.ViewModels
             else if (!IsRefreshingAll)
             {
                 IsRefreshingAll = true;
-                _threadingService.StartBackgroundTaskAsync(UpdateAllTreeItems);
+                Task.Run(() => _threadingService.StartBackgroundTaskAsync(UpdateAllTreeItems));
             }
         }
 
@@ -363,7 +362,7 @@ namespace Tanzu.Toolkit.ViewModels
 
             if (!ThreadingService.IsPolling)
             {
-                ThreadingService.StartRecurrentUITaskInBackground(RefreshAllItems, null, 10);
+                ThreadingService.StartRecurrentUITaskInBackground(BackgroundRefreshAllItems, null, 10);
             }
 
             _dataPersistenceService.WriteStringData(_connectionNameKey, CloudFoundryConnection.CloudFoundryInstance.InstanceName);
@@ -384,10 +383,10 @@ namespace Tanzu.Toolkit.ViewModels
             CloudFoundryConnection = null;
         }
 
-        public void ReAuthenticate(object arg)
+        public async Task ReAuthenticateAsync(object arg)
         {
             LogOutCloudFoundry(CloudFoundryConnection);
-            OpenLoginView(null);
+            await OpenLoginViewAsync(null);
         }
 
         internal async Task UpdateAllTreeItems()
