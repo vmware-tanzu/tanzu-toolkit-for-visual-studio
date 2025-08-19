@@ -59,7 +59,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             sut.IsExpanded = true;
 
             Assert.IsTrue(sut.IsExpanded);
-            MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(sut.UpdateAllChildren), Times.Once);
+            MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(sut.UpdateAllChildrenAsync), Times.Once);
         }
 
         [TestMethod]

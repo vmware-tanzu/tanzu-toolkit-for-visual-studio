@@ -38,7 +38,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public CloudFoundryInstance CloudFoundryInstance { get; }
 
-        protected internal override async Task UpdateAllChildren()
+        protected internal override async Task UpdateAllChildrenAsync()
         {
             if (IsExpanded && !IsLoading)
             {
@@ -110,7 +110,7 @@ namespace Tanzu.Toolkit.ViewModels
                             {
                                 if (child is OrgViewModel org)
                                 {
-                                    updateTasks.Add(ThreadingService.StartBackgroundTaskAsync(org.UpdateAllChildren));
+                                    updateTasks.Add(ThreadingService.StartBackgroundTaskAsync(org.UpdateAllChildrenAsync));
                                 }
                             }
 

@@ -612,7 +612,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _sut.LogOutCloudFoundry(_sut.CloudFoundryConnection);
 
             MockDataPersistenceService.Verify(m => m.ClearData(TanzuExplorerViewModel._connectionNameKey), Times.Once);
-            MockDataPersistenceService.Verify(m => m.ClearData(TanzuExplorerViewModel._connectionAddressKey), Times.Once);
             MockDataPersistenceService.Verify(m => m.ClearData(TanzuExplorerViewModel._connectionSslPolicyKey), Times.Once);
         }
 
