@@ -2,7 +2,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using Tanzu.Toolkit.Models;
 using Tanzu.Toolkit.Services;
@@ -13,7 +12,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
     [TestClass]
     public class TanzuExplorerViewModelTests : ViewModelTestSupport
     {
-        private const int _backgroundTaskMs = 200;
         private TanzuExplorerViewModel _sut;
         private List<string> _receivedEvents;
         private CfInstanceViewModel _fakeTanzuConnection;
@@ -32,7 +30,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _fakeTanzuConnection = new FakeCfInstanceViewModel(_fakeCfInstance, Services);
 
             _sut = new TanzuExplorerViewModel(Services) { CloudFoundryConnection = _fakeTanzuConnection };
-            _sut.PropertyChanged += (sender, e) => { _receivedEvents.Add(e.PropertyName); };
+            _sut.PropertyChanged += (_, e) => { _receivedEvents.Add(e.PropertyName); };
         }
 
         [TestCleanup]
@@ -44,7 +42,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("Ctor")]
-        public void Ctor_SetsTasConnectionToNull_WhenSavedConnectionNameNull()
+        public void Ctor_SetsConnectionToNull_WhenSavedConnectionNameNull()
         {
             MockDataPersistenceService.Setup(m => m.ReadStringData(TanzuExplorerViewModel._connectionNameKey)).Returns((string)null);
             MockDataPersistenceService.Setup(m => m.ReadStringData(TanzuExplorerViewModel._connectionAddressKey)).Returns("junk non-null value");
@@ -57,7 +55,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("Ctor")]
-        public void Ctor_SetsTasConnectionToNull_WhenSavedConnectionAddressNull()
+        public void Ctor_SetsConnectionToNull_WhenSavedConnectionAddressNull()
         {
             MockDataPersistenceService.Setup(m => m.ReadStringData(TanzuExplorerViewModel._connectionNameKey)).Returns("junk non-null value");
             MockDataPersistenceService.Setup(m => m.ReadStringData(TanzuExplorerViewModel._connectionAddressKey)).Returns((string)null);
@@ -70,7 +68,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("Ctor")]
-        public void Ctor_SetsTasConnectionToNull_WhenAccessTokenIrretrievable()
+        public void Ctor_SetsConnectionToNull_WhenAccessTokenIrretrievable()
         {
             MockDataPersistenceService.Setup(m => m.SavedCloudFoundryCredentialsExist()).Returns(false);
             MockDataPersistenceService.Setup(m => m.ReadStringData(TanzuExplorerViewModel._connectionNameKey)).Returns("junk non-null value");
@@ -88,7 +86,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [DataRow(TanzuExplorerViewModel._validateSslCertsValue, false)]
         [DataRow("unexpected value", false)]
         [DataRow(null, false)]
-        public void Ctor_RestoresTasConnection_WhenSavedConnectionNameAddressAndTokenExist(string savedSslPolicyValue, bool expectedSkipSslValue)
+        public void Ctor_RestoresConnection_WhenSavedConnectionNameAddressAndTokenExist(string savedSslPolicyValue, bool expectedSkipSslValue)
         {
             var savedConnectionName = "junk";
             var savedConnectionAddress = "junk";
@@ -109,7 +107,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         [TestCategory("CloudFoundryConnection")]
         [TestCategory("TreeRoot")]
-        public void SettingTasConnection_PopulatesTreeRoot()
+        public void SettingConnection_PopulatesTreeRoot()
         {
             _sut = new TanzuExplorerViewModel(Services);
 
@@ -127,7 +125,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         [TestCategory("CloudFoundryConnection")]
         [TestCategory("TreeRoot")]
-        public void SettingTasConnectionToNull_ClearsTreeRoot()
+        public void SettingConnectionToNull_ClearsTreeRoot()
         {
             _sut.CloudFoundryConnection = _fakeTanzuConnection;
 
@@ -194,7 +192,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("OpenLoginViewAsync")]
-        public async Task OpenLoginView_DisplaysLoginDialog_WhenTasConnectionIsNullAsync()
+        public async Task OpenLoginView_DisplaysLoginDialog_WhenConnectionIsNullAsync()
         {
             _sut = new TanzuExplorerViewModel(Services);
 
@@ -207,7 +205,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("OpenLoginViewAsync")]
-        public async Task OpenLoginView_DisplaysErrorDialog_WhenTasConnectionIsNotNullAsync()
+        public async Task OpenLoginView_DisplaysErrorDialog_WhenConnectionIsNotNullAsync()
         {
             _sut.CloudFoundryConnection = _fakeTanzuConnection;
 
@@ -222,7 +220,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("OpenLoginViewAsync")]
-        public async Task OpenLoginView_DoesNotChangeAuthenticationRequired_WhenTasConnectionDoesNotGetSetAsync()
+        public async Task OpenLoginView_DoesNotChangeAuthenticationRequired_WhenConnectionDoesNotGetSetAsync()
         {
             _sut = new TanzuExplorerViewModel(Services) { AuthenticationRequired = true };
 
@@ -410,7 +408,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("BackgroundRefreshAllItems")]
-        public void RefreshAllItems_SetsIsRefreshingAllFalse_WhenTasConnectionNull()
+        public void RefreshAllItems_SetsIsRefreshingAllFalse_WhenConnectionNull()
         {
             _sut = new TanzuExplorerViewModel(Services) { IsRefreshingAll = true };
 
@@ -424,7 +422,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("BackgroundRefreshAllItems")]
-        public void RefreshAllItems_SetsThreadServiceIsPollingFalse_WhenTasConnectionNull()
+        public void RefreshAllItems_SetsThreadServiceIsPollingFalse_WhenConnectionNull()
         {
             _sut = new TanzuExplorerViewModel(Services);
 
@@ -439,7 +437,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("BackgroundRefreshAllItems")]
-        public void RefreshAllItems_SetsIsRefreshingAllTrue_WhenNotPreviouslyRefreshingAll_AndTasConnectionNotNull()
+        public void RefreshAllItems_SetsIsRefreshingAllTrue_WhenNotPreviouslyRefreshingAll_AndConnectionNotNull()
         {
             _sut.CloudFoundryConnection = _fakeTanzuConnection;
 
@@ -453,7 +451,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("BackgroundRefreshAllItems")]
-        public void RefreshAllItems_StartsBackgroundTaskToRefreshAllItems_WhenNotPreviouslyRefreshingAll_AndTasConnectionNotNull()
+        public void RefreshAllItems_StartsBackgroundTaskToRefreshAllItems_WhenNotPreviouslyRefreshingAll_AndConnectionNotNull()
         {
             _sut.CloudFoundryConnection = _fakeTanzuConnection;
 
@@ -463,7 +461,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsFalse(_sut.IsRefreshingAll);
 
             _sut.BackgroundRefreshAllItems();
-            Thread.Sleep(_backgroundTaskMs);
             MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(_sut.UpdateAllTreeItems), Times.Once);
         }
 
@@ -475,7 +472,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsTrue(_sut.IsRefreshingAll);
 
-            _sut.BackgroundRefreshAllItems(null);
+            _sut.BackgroundRefreshAllItems();
 
             MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(It.IsAny<Func<Task>>()), Times.Never);
         }
@@ -593,7 +590,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("LogOutCloudFoundry")]
-        public void LogOutTas_SetsTasConnectionToNull_AndSetsIsLoggedInToFalse()
+        public void LogOutTas_SetsConnectionToNull_AndSetsIsLoggedInToFalse()
         {
             _sut.CloudFoundryConnection = _fakeTanzuConnection;
             _sut.IsLoggedIn = true;
@@ -632,7 +629,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("SetConnection")]
-        public void SetConnection_UpdatesTasConnection_WithNewCfInfo_WhenTasConnectionIsNull()
+        public void SetConnection_UpdatesConnection_WithNewCfInfo_WhenConnectionIsNull()
         {
             _sut = new TanzuExplorerViewModel(Services);
 
@@ -646,10 +643,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("SetConnection")]
-        public void SetConnection_SetsAuthenticationRequiredToFalse_WhenTasConnectionIsNull()
+        public void SetConnection_SetsAuthenticationRequiredToFalse_WhenConnectionIsNull()
         {
             _sut = new TanzuExplorerViewModel(Services) { AuthenticationRequired = true };
-            _sut.PropertyChanged += (sender, e) => { _receivedEvents.Add(e.PropertyName); };
+            _sut.PropertyChanged += (_, e) => { _receivedEvents.Add(e.PropertyName); };
             _receivedEvents.Clear();
 
             Assert.IsNull(_sut.CloudFoundryConnection);
@@ -665,7 +662,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("SetConnection")]
-        public void SetConnection_StartsBackgroundRefreshTask_WhenTasConnectionIsNull()
+        public void SetConnection_StartsBackgroundRefreshTask_WhenConnectionIsNull()
         {
             _sut = new TanzuExplorerViewModel(Services);
 
@@ -678,7 +675,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("SetConnection")]
-        public void SetConnection_SavesConnectionName_WhenTasConnectionIsNull()
+        public void SetConnection_SavesConnectionName_WhenConnectionIsNull()
         {
             _sut = new TanzuExplorerViewModel(Services);
 
@@ -691,7 +688,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("SetConnection")]
-        public void SetConnection_SavesConnectionApiAddress_WhenTasConnectionIsNull()
+        public void SetConnection_SavesConnectionApiAddress_WhenConnectionIsNull()
         {
             _sut = new TanzuExplorerViewModel(Services);
 
@@ -706,7 +703,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("SetConnection")]
         [DataRow(true, TanzuExplorerViewModel._skipCertValidationValue)]
         [DataRow(false, TanzuExplorerViewModel._validateSslCertsValue)]
-        public void SetConnection_SavesConnectionSslCertValidationPolicy_WhenTasConnectionIsNull(bool skipSslValue, string expectedSavedSslPolicyValue)
+        public void SetConnection_SavesConnectionSslCertValidationPolicy_WhenConnectionIsNull(bool skipSslValue, string expectedSavedSslPolicyValue)
         {
             _sut = new TanzuExplorerViewModel(Services);
 
@@ -720,7 +717,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("SetConnection")]
-        public void SetConnection_DoesNotChangeTasConnection_WhenTasConnectionIsNotNull()
+        public void SetConnection_DoesNotChangeConnection_WhenConnectionIsNotNull()
         {
             _sut.CloudFoundryConnection = new CfInstanceViewModel(_fakeCfInstance, _sut, Services);
 

@@ -343,7 +343,7 @@ namespace Tanzu.Toolkit.ViewModels
             else if (!IsRefreshingAll)
             {
                 IsRefreshingAll = true;
-                Task.Run(() => _threadingService.StartBackgroundTaskAsync(UpdateAllTreeItems));
+                _ = _threadingService.StartBackgroundTaskAsync(UpdateAllTreeItems);
             }
         }
 

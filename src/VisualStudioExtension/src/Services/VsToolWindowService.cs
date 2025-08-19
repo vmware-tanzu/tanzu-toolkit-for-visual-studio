@@ -38,6 +38,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services
                 {
                     toolWindowType = typeof(OutputToolWindow.Pane);
                 }
+
                 var window = await _package.FindToolWindowAsync(toolWindowType, id, true, CancellationToken.None);
                 if (window?.Frame == null)
                 {

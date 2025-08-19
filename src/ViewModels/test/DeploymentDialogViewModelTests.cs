@@ -30,7 +30,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         private readonly CloudFoundrySpace _fakeSpace = new("", "", _fakeOrg);
         private DeploymentDialogViewModel _sut;
         private List<string> _receivedEvents;
-        private const int _backgroundTaskMs = 200;
 
         [TestInitialize]
         public void TestInit()
@@ -40,12 +39,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             _receivedEvents = [];
             _fakeSelectedBuildpacks = [_fakeBuildpackName1, _fakeBuildpackName2, _fakeBuildpackName3];
             _fakeSelectedServices = [_fakeServiceName1, _fakeServiceName2, _fakeServiceName3];
-            var fakeTasConnection = new FakeCfInstanceViewModel(_fakeCfInstance, Services);
+            var fakeConnection = new FakeCfInstanceViewModel(_fakeCfInstance, Services);
 
             MockFileService.Setup(m => m.FileExists(_fakeManifestPath)).Returns(true);
             MockFileService.Setup(m => m.DirectoryExists(_fakeProjectPath)).Returns(true);
             MockFileService.Setup(m => m.DirContainsFiles(_fakeProjectPath)).Returns(true);
-            MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(fakeTasConnection);
+            MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(fakeConnection);
             MockProjectService.SetupGet(m => m.ProjectName).Returns(_fakeProjName);
             MockProjectService.SetupGet(m => m.PathToProjectDirectory).Returns(_fakeProjectPath);
             MockProjectService.SetupGet(m => m.TargetFrameworkMoniker).Returns(_fakeTargetFrameworkMoniker);
@@ -56,7 +55,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 ManifestModel = _fakeManifestModel, SelectedBuildpacks = _fakeSelectedBuildpacks, SelectedServices = _fakeSelectedServices
             };
 
-            _sut.PropertyChanged += (sender, e) => { _receivedEvents.Add(e.PropertyName); };
+            _sut.PropertyChanged += (_, e) => { _receivedEvents.Add(e.PropertyName); };
         }
 
         [TestCleanup]
@@ -120,25 +119,25 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [DataRow("fake cf name")]
         [DataRow("junk name")]
         [DataRow("asdf")]
-        public void Constructor_SetsTargetNameToTasConnectionDisplayText_WhenTasConnectionIsNotNull(string connectionName)
+        public void Constructor_SetsTargetNameToConnectionDisplayText_WhenConnectionIsNotNull(string connectionName)
         {
-            var fakeCf = new CloudFoundryInstance(connectionName, _fakeCfApiAddress, false);
-            var fakeTasConnection = new FakeCfInstanceViewModel(fakeCf, Services);
-            MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(fakeTasConnection);
+            var fakeCf = new CloudFoundryInstance(connectionName, _fakeCfApiAddress);
+            var fakeConnection = new FakeCfInstanceViewModel(fakeCf, Services);
+            MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(fakeConnection);
 
             _sut = new DeploymentDialogViewModel(Services);
 
             // sanity check
             Assert.IsNotNull(_sut._tanzuExplorerViewModel.CloudFoundryConnection);
-            Assert.AreEqual(connectionName, fakeTasConnection.DisplayText);
+            Assert.AreEqual(connectionName, fakeConnection.DisplayText);
 
             Assert.IsNotNull(_sut.TargetName);
-            Assert.AreEqual(fakeTasConnection.DisplayText, _sut.TargetName);
+            Assert.AreEqual(fakeConnection.DisplayText, _sut.TargetName);
         }
 
         [TestMethod]
         [TestCategory("ctor")]
-        public void Constructor_SetsIsLoggedInToTrue_WhenTasConnectionIsNotNull()
+        public void Constructor_SetsIsLoggedInToTrue_WhenConnectionIsNotNull()
         {
             MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(new FakeCfInstanceViewModel(_fakeCfInstance, Services));
 
@@ -149,7 +148,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("ctor")]
-        public void Constructor_SetsTargetNameToNull_WhenTasConnectionIsNull()
+        public void Constructor_SetsTargetNameToNull_WhenConnectionIsNull()
         {
             MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns((CfInstanceViewModel)null);
 
@@ -162,12 +161,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("ctor")]
-        public void Constructor_UpdatesCfOrgOptions_WhenTasConnectionIsNotNull()
+        public void Constructor_UpdatesCfOrgOptions_WhenConnectionIsNotNull()
         {
             MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(new FakeCfInstanceViewModel(_fakeCfInstance, Services));
 
             _sut = new DeploymentDialogViewModel(Services);
-            Thread.Sleep(_backgroundTaskMs);
             Assert.IsNotNull(_sut._tanzuExplorerViewModel.CloudFoundryConnection);
             MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(_sut.UpdateCfOrgOptionsAsync), Times.Once);
         }
@@ -175,12 +173,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         [TestCategory("ctor")]
         [TestCategory("BuildpackOptions")]
-        public void Constructor_UpdatesBuildpackOptions_WhenTasConnectionIsNotNull()
+        public void Constructor_UpdatesBuildpackOptions_WhenConnectionIsNotNull()
         {
             MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(new FakeCfInstanceViewModel(_fakeCfInstance, Services));
 
             _sut = new DeploymentDialogViewModel(Services);
-            Thread.Sleep(_backgroundTaskMs);
             Assert.IsNotNull(_sut._tanzuExplorerViewModel.CloudFoundryConnection);
             MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(_sut.UpdateBuildpackOptionsAsync), Times.Once);
         }
@@ -188,12 +185,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         [TestCategory("ctor")]
         [TestCategory("ServiceOptions")]
-        public void Constructor_UpdatesServiceOptions_WhenTasConnectionIsNotNull()
+        public void Constructor_UpdatesServiceOptions_WhenConnectionIsNotNull()
         {
             MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(new FakeCfInstanceViewModel(_fakeCfInstance, Services));
 
             _sut = new DeploymentDialogViewModel(Services);
-            Thread.Sleep(_backgroundTaskMs);
             Assert.IsNotNull(_sut._tanzuExplorerViewModel.CloudFoundryConnection);
             MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(_sut.UpdateServiceOptionsAsync), Times.Once);
         }
@@ -201,12 +197,11 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         [TestCategory("ctor")]
         [TestCategory("StackOptions")]
-        public void Constructor_UpdatesStackOptions_WhenTasConnectionIsNotNull()
+        public void Constructor_UpdatesStackOptions_WhenConnectionIsNotNull()
         {
             MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(new FakeCfInstanceViewModel(_fakeCfInstance, Services));
 
             _sut = new DeploymentDialogViewModel(Services);
-            Thread.Sleep(_backgroundTaskMs);
             Assert.IsNotNull(_sut._tanzuExplorerViewModel.CloudFoundryConnection);
             MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(_sut.UpdateStackOptionsAsync), Times.Once);
         }
@@ -293,7 +288,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestCategory("DeploymentDirectoryPathLabel")]
         public void Constructor_SetsDeploymentDirectoryPathAndDirectoryPathLabel_ToPathValue_WhenManifestSpecifiesPath()
         {
-            var fakeAppPath = _fakeProjectPath;
             var expectedDefaultManifestPath = Path.Combine(_fakeProjectPath, "manifest.yml");
             var expectedPathValue = _fakeManifestModel.Applications[0].Path;
             var fakeManifestContent = "some yaml";
@@ -578,9 +572,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         public async Task UpdateCfOrgOptions_RaisesPropertyChangedEvent_WhenOrgsRequestSucceeds()
         {
-            var fakeCf = new CloudFoundryInstance("junk name", _fakeCfApiAddress, false);
-            var fakeTasConnection = new FakeCfInstanceViewModel(fakeCf, Services);
-            MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(fakeTasConnection);
+            var fakeCf = new CloudFoundryInstance("junk name", _fakeCfApiAddress);
+            var fakeConnection = new FakeCfInstanceViewModel(fakeCf, Services);
+            MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(fakeConnection);
 
             var fakeOrgsList = new List<CloudFoundryOrganization> { _fakeCfOrg };
 
@@ -605,12 +599,12 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        public async Task UpdateCfOrgOptions_SetsCfOrgOptionsToEmptyList_WhenTasConnectionIsNull()
+        public async Task UpdateCfOrgOptions_SetsCfOrgOptionsToEmptyList_WhenConnectionIsNull()
         {
             MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns((CfInstanceViewModel)null);
 
             _sut = new DeploymentDialogViewModel(Services);
-            _sut.PropertyChanged += (sender, e) => { _receivedEvents.Add(e.PropertyName); };
+            _sut.PropertyChanged += (_, e) => { _receivedEvents.Add(e.PropertyName); };
 
             await _sut.UpdateCfOrgOptionsAsync();
 
@@ -622,9 +616,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         public async Task UpdateCfOrgOptions_DisplaysErrorDialog_WhenOrgsResponseReportsFailure()
         {
-            var fakeCf = new CloudFoundryInstance("fake junk name", _fakeCfApiAddress, false);
-            var fakeTasConnection = new FakeCfInstanceViewModel(fakeCf, Services);
-            MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(fakeTasConnection);
+            var fakeCf = new CloudFoundryInstance("fake junk name", _fakeCfApiAddress);
+            var fakeConnection = new FakeCfInstanceViewModel(fakeCf, Services);
+            MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(fakeConnection);
 
             var fakeExplanation = "junk";
 
@@ -650,9 +644,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         public async Task UpdateCfOrgOptions_LogsError_WhenOrgsResponseReportsFailure()
         {
-            var fakeCf = new CloudFoundryInstance("fake junk name", _fakeCfApiAddress, false);
-            var fakeTasConnection = new FakeCfInstanceViewModel(fakeCf, Services);
-            MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(fakeTasConnection);
+            var fakeCf = new CloudFoundryInstance("fake junk name", _fakeCfApiAddress);
+            var fakeConnection = new FakeCfInstanceViewModel(fakeCf, Services);
+            MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(fakeConnection);
 
             var fakeExplanation = "junk";
 
@@ -666,8 +660,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 .ReturnsAsync(fakeFailedOrgsResponse);
 
             MockErrorDialogService.Setup(mock => mock.DisplayErrorDialog(DeploymentDialogViewModel._getOrgsFailureMsg, fakeExplanation));
-
-            var initialOrgOptions = _sut.CfOrgOptions;
 
             await _sut.UpdateCfOrgOptionsAsync();
 
@@ -744,7 +736,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockErrorDialogService.Setup(mock => mock.DisplayErrorDialog(DeploymentDialogViewModel._getSpacesFailureMsg, fakeExplanation));
 
             _sut.SelectedOrg = _fakeCfOrg;
-            var initialSpaceOptions = _sut.CfSpaceOptions;
 
             await _sut.UpdateCfSpaceOptionsAsync();
 
@@ -799,7 +790,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("OpenLoginViewAsync")]
-        public async Task OpenLoginView_SetsCfInstanceOptions_WhenTasConnectionGetsSet()
+        public async Task OpenLoginView_SetsCfInstanceOptions_WhenConnectionGetsSet()
         {
             var fakeArg = new object();
 
@@ -820,7 +811,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("OpenLoginViewAsync")]
-        public async Task OpenLoginView_DoesNotChangeCfInstanceOptions_WhenTasConnectionDoesNotGetSet()
+        public async Task OpenLoginView_DoesNotChangeCfInstanceOptions_WhenConnectionDoesNotGetSet()
         {
             var fakeArg = new object();
 
@@ -840,7 +831,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("OpenLoginViewAsync")]
-        public async Task OpenLoginView_SetsIsLoggedInPropertyToTrue_WhenTasConnectionGetsSet()
+        public async Task OpenLoginView_SetsIsLoggedInPropertyToTrue_WhenConnectionGetsSet()
         {
             MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns((CfInstanceViewModel)null);
             MockTanzuExplorerViewModel.Setup(m => m.OpenLoginViewAsync(null))
@@ -863,7 +854,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("OpenLoginViewAsync")]
-        public async Task OpenLoginView_SetsTargetName_WhenTasConnectionIsNotNull()
+        public async Task OpenLoginView_SetsTargetName_WhenConnectionIsNotNull()
         {
             MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns((CfInstanceViewModel)null);
             MockTanzuExplorerViewModel.Setup(m => m.OpenLoginViewAsync(null))
@@ -888,7 +879,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("OpenLoginViewAsync")]
-        public async Task OpenLoginView_UpdatesCfOrgOptions_WhenTasConnectionGetsSet()
+        public async Task OpenLoginView_UpdatesCfOrgOptions_WhenConnectionGetsSet()
         {
             MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns((CfInstanceViewModel)null);
             MockTanzuExplorerViewModel.Setup(m => m.OpenLoginViewAsync(null))
@@ -911,7 +902,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         [TestCategory("OpenLoginViewAsync")]
         [TestCategory("BuildpackOptions")]
-        public async Task OpenLoginView_UpdatesBuildpackOptions_WhenTasConnectionGetsSet()
+        public async Task OpenLoginView_UpdatesBuildpackOptions_WhenConnectionGetsSet()
         {
             MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns((CfInstanceViewModel)null);
             MockTanzuExplorerViewModel.Setup(m => m.OpenLoginViewAsync(null))
@@ -934,7 +925,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         [TestCategory("OpenLoginViewAsync")]
         [TestCategory("ServiceOptions")]
-        public async Task OpenLoginView_UpdatesServiceOptions_WhenTasConnectionGetsSet()
+        public async Task OpenLoginView_UpdatesServiceOptions_WhenConnectionGetsSet()
         {
             MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns((CfInstanceViewModel)null);
             MockTanzuExplorerViewModel.Setup(m => m.OpenLoginViewAsync(null))
@@ -957,7 +948,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         [TestMethod]
         [TestCategory("OpenLoginViewAsync")]
         [TestCategory("StackOptions")]
-        public async Task OpenLoginView_UpdatesStackOptions_WhenTasConnectionGetsSet()
+        public async Task OpenLoginView_UpdatesStackOptions_WhenConnectionGetsSet()
         {
             MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns((CfInstanceViewModel)null);
             MockTanzuExplorerViewModel.Setup(m => m.OpenLoginViewAsync(null))
@@ -979,7 +970,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("IsLoggedIn")]
-        public void IsLoggedIn_ReturnsTrue_WhenTasConnectionIsNotNull()
+        public void IsLoggedIn_ReturnsTrue_WhenConnectionIsNotNull()
         {
             MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns(new FakeCfInstanceViewModel(_fakeCfInstance, Services));
 
@@ -991,7 +982,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
         [TestMethod]
         [TestCategory("IsLoggedIn")]
-        public void IsLoggedIn_ReturnsFalse_WhenTasConnectionIsNull()
+        public void IsLoggedIn_ReturnsFalse_WhenConnectionIsNull()
         {
             MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns((CfInstanceViewModel)null);
 
@@ -1008,7 +999,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns((CfInstanceViewModel)null);
 
             _sut = new DeploymentDialogViewModel(Services);
-            _sut.PropertyChanged += (sender, e) => { _receivedEvents.Add(e.PropertyName); };
+            _sut.PropertyChanged += (_, e) => { _receivedEvents.Add(e.PropertyName); };
 
             Assert.IsEmpty(_receivedEvents);
             Assert.IsFalse(_sut.IsLoggedIn);
@@ -1046,8 +1037,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     new AppConfig { Name = expectedAppName1 }
                 ]
             };
-
-            var fakeManifestParsingResponse = new DetailedResult<AppManifest> { Succeeded = true, Content = fakeAppManifest };
 
             MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
             MockFileService.Setup(m => m.ReadFileContents(pathToFakeManifest)).Returns(fakeManifestContent);
@@ -1164,11 +1153,9 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             {
                 Applications =
                 [
-                    new AppConfig { }
+                    new AppConfig()
                 ]
             };
-
-            var fakeManifestParsingResponse = new DetailedResult<AppManifest> { Succeeded = true, Content = fakeAppManifest };
 
             MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
             MockFileService.Setup(m => m.ReadFileContents(pathToFakeManifest)).Returns(fakeManifestContent);
@@ -1198,8 +1185,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     new AppConfig { Name = expectedAppName1, Stack = expectedFakeStackNameFromManifest }
                 ]
             };
-
-            var fakeManifestParsingResponse = new DetailedResult<AppManifest> { Succeeded = true, Content = fakeAppManifest };
 
             MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
             MockFileService.Setup(m => m.ReadFileContents(pathToFakeManifest)).Returns(fakeManifestContent);
@@ -1251,8 +1236,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 ]
             };
 
-            var fakeManifestParsingResponse = new DetailedResult<AppManifest> { Succeeded = true, Content = fakeAppManifest };
-
             MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
             MockFileService.Setup(m => m.ReadFileContents(pathToFakeManifest)).Returns(fakeManifestContent);
             MockSerializationService.Setup(m => m.ParseCfAppManifest(fakeManifestContent)).Returns(fakeAppManifest);
@@ -1293,8 +1276,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     }
                 ]
             };
-
-            var fakeManifestParsingResponse = new DetailedResult<AppManifest> { Succeeded = true, Content = fakeAppManifest };
 
             MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
             MockFileService.Setup(m => m.ReadFileContents(pathToFakeManifest)).Returns(fakeManifestContent);
@@ -1373,8 +1354,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 ]
             };
 
-            var fakeManifestParsingResponse = new DetailedResult<AppManifest> { Succeeded = true, Content = fakeAppManifest };
-
             MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
             MockFileService.Setup(m => m.ReadFileContents(pathToFakeManifest)).Returns(fakeManifestContent);
             MockSerializationService.Setup(m => m.ParseCfAppManifest(fakeManifestContent)).Returns(fakeAppManifest);
@@ -1415,8 +1394,6 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     }
                 ]
             };
-
-            var fakeManifestParsingResponse = new DetailedResult<AppManifest> { Succeeded = true, Content = fakeAppManifest };
 
             MockFileService.Setup(m => m.FileExists(pathToFakeManifest)).Returns(true);
             MockFileService.Setup(m => m.ReadFileContents(pathToFakeManifest)).Returns(fakeManifestContent);
@@ -1559,25 +1536,24 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             var newStackVal = "windows";
             var initialStackInManifestModel = _sut.ManifestModel.Applications[0].Stack;
 
-            /** Matrix: all possible buildpack selection / stack compatibility changes when changing selectedStack value
-             * 	oldComp	oldSelected	newComp	newSelected
-             * 	0	    0		    0	    0	    incompatibleDeselectedBpToStayIncompatibleAndDeselected
-             * 	0	    0		    0	    1	    N/A - no spontaneous selection
-             * 	0	    0		    1	    0	    incompatibleDeselectedBpToBecomeCompatibleAndStayDeselected
-             * 	0	    0		    1	    1	    N/A - no spontaneous selection
-             * 	0	    1		    0	    0	    N/A - can't start compatible and selected
-             * 	0	    1		    0	    1	    N/A - can't start compatible and selected
-             * 	0	    1		    1	    0	    N/A - can't start compatible and selected
-             * 	0	    1		    1	    1	    N/A - can't start compatible and selected
-             * 	1	    0		    0	    0	    compatibleDeselectedBpToBecomeIncompatibleAndStayDeselected
-             * 	1	    0		    0	    1	    N/A - no spontaneous selection
-             * 	1	    0		    1	    0	    compatibleDeselectedBpToStayCompatibleAndDeselected
-             * 	1	    0		    1	    1	    N/A - no spontaneous selection
-             * 	1	    1		    0	    0	    compatibleSelectedBpToBecomeIncompatibleAndDeselected
-             * 	1	    1		    0	    1	    N/A - can't be selected if not compatible
-             * 	1	    1		    1	    0   	N/A - should say selected if compatible with both new & old stacks
-             * 	1	    1		    1	    1	    compatibleSelectedBpToStayCompatibleAndSelected
-             */
+            // Matrix: all possible buildpack selection / stack compatibility changes when changing selectedStack value
+            // 	oldComp	oldSelected	newComp	newSelected
+            // 	0	    0		    0	    0	    incompatibleDeselectedBpToStayIncompatibleAndDeselected
+            // 	0	    0		    0	    1	    N/A - no spontaneous selection
+            // 	0	    0		    1	    0	    incompatibleDeselectedBpToBecomeCompatibleAndStayDeselected
+            // 	0	    0		    1	    1	    N/A - no spontaneous selection
+            // 	0	    1		    0	    0	    N/A - can't start compatible and selected
+            // 	0	    1		    0	    1	    N/A - can't start compatible and selected
+            // 	0	    1		    1	    0	    N/A - can't start compatible and selected
+            // 	0	    1		    1	    1	    N/A - can't start compatible and selected
+            // 	1	    0		    0	    0	    compatibleDeselectedBpToBecomeIncompatibleAndStayDeselected
+            // 	1	    0		    0	    1	    N/A - no spontaneous selection
+            // 	1	    0		    1	    0	    compatibleDeselectedBpToStayCompatibleAndDeselected
+            // 	1	    0		    1	    1	    N/A - no spontaneous selection
+            // 	1	    1		    0	    0	    compatibleSelectedBpToBecomeIncompatibleAndDeselected
+            // 	1	    1		    0	    1	    N/A - can't be selected if not compatible
+            // 	1	    1		    1	    0   	N/A - should say selected if compatible with both new & old stacks
+            // 	1	    1		    1	    1	    compatibleSelectedBpToStayCompatibleAndSelected
 
             var incompatibleDeselectedBpToStayIncompatibleAndDeselected = new FakeBuildpackListItem(
                 "incompatibleDeselectedBpToStayIncompatibleAndDeselected",
@@ -1763,7 +1739,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns((CfInstanceViewModel)null);
 
             _sut = new DeploymentDialogViewModel(Services);
-            _sut.PropertyChanged += (sender, e) => { _receivedEvents.Add(e.PropertyName); };
+            _sut.PropertyChanged += (_, e) => { _receivedEvents.Add(e.PropertyName); };
 
             Assert.IsNull(_sut._tanzuExplorerViewModel.CloudFoundryConnection);
             CollectionAssert.DoesNotContain(_receivedEvents, "BuildpackOptions");
@@ -1857,7 +1833,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns((CfInstanceViewModel)null);
 
             _sut = new DeploymentDialogViewModel(Services);
-            _sut.PropertyChanged += (sender, e) => { _receivedEvents.Add(e.PropertyName); };
+            _sut.PropertyChanged += (_, e) => { _receivedEvents.Add(e.PropertyName); };
 
             Assert.IsNull(_sut._tanzuExplorerViewModel.CloudFoundryConnection);
             CollectionAssert.DoesNotContain(_receivedEvents, "ServiceOptions");
@@ -2254,7 +2230,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockTanzuExplorerViewModel.SetupGet(m => m.CloudFoundryConnection).Returns((CfInstanceViewModel)null);
 
             _sut = new DeploymentDialogViewModel(Services);
-            _sut.PropertyChanged += (sender, e) => { _receivedEvents.Add(e.PropertyName); };
+            _sut.PropertyChanged += (_, e) => { _receivedEvents.Add(e.PropertyName); };
 
             Assert.IsNull(_sut._tanzuExplorerViewModel.CloudFoundryConnection);
             CollectionAssert.DoesNotContain(_receivedEvents, "StackOptions");

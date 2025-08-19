@@ -217,10 +217,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         public async Task UpdateAllChildren_SetsIsLoadingTrueAtStart_AndSetsIsLoadingFalseAtEnd()
         {
             MockCloudFoundryService.Setup(m => m.GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
-                .Callback(() =>
-                {
-                    Assert.IsTrue(_sut.IsLoading);
-                }).ReturnsAsync(_fakeOrgsResponse);
+                .Callback(() => { Assert.IsTrue(_sut.IsLoading); }).ReturnsAsync(_fakeOrgsResponse);
 
             Assert.IsFalse(_sut.IsLoading);
             Assert.IsTrue(_sut.IsExpanded);

@@ -12,7 +12,9 @@ namespace Tanzu.Toolkit.VisualStudio.Views.Converters
         {
             return !(value is ObservableCollection<string> valueList)
                 ? string.Empty
-                : valueList.Count == 0 ? EmptyListMessage : string.Join(", ", valueList);
+                : valueList.Count == 0
+                    ? EmptyListMessage
+                    : string.Join(", ", valueList);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter,

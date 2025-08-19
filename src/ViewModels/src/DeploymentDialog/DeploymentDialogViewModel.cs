@@ -123,10 +123,10 @@ namespace Tanzu.Toolkit.ViewModels
                 TargetName = _tanzuExplorerViewModel.CloudFoundryConnection.DisplayText;
                 IsLoggedIn = true;
 
-                Task.Run(() => ThreadingService.StartBackgroundTaskAsync(UpdateCfOrgOptionsAsync));
-                Task.Run(() => ThreadingService.StartBackgroundTaskAsync(UpdateBuildpackOptionsAsync));
-                Task.Run(() => ThreadingService.StartBackgroundTaskAsync(UpdateServiceOptionsAsync));
-                Task.Run(() => ThreadingService.StartBackgroundTaskAsync(UpdateStackOptionsAsync));
+                _ = ThreadingService.StartBackgroundTaskAsync(UpdateCfOrgOptionsAsync);
+                _ = ThreadingService.StartBackgroundTaskAsync(UpdateBuildpackOptionsAsync);
+                _ = ThreadingService.StartBackgroundTaskAsync(UpdateServiceOptionsAsync);
+                _ = ThreadingService.StartBackgroundTaskAsync(UpdateStackOptionsAsync);
             }
 
             // delay calling SetManifestIfDefaultExists to give background update tasks time to complete
@@ -561,7 +561,7 @@ namespace Tanzu.Toolkit.ViewModels
             if (CanDeployApp(null))
             {
                 DeploymentInProgress = true;
-                Task.Run(() => ThreadingService.StartBackgroundTaskAsync(StartDeploymentAsync));
+                _ = ThreadingService.StartBackgroundTaskAsync(StartDeploymentAsync);
                 DialogService.CloseDialog(dialogWindow, true);
                 OnClose();
             }
