@@ -2,7 +2,9 @@ using Community.VisualStudio.Toolkit;
 using Community.VisualStudio.Toolkit.DependencyInjection.Microsoft;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Net.Http;
 using System.Runtime.InteropServices;
@@ -33,8 +35,6 @@ using Tanzu.Toolkit.VisualStudio.VSToolWindows;
 using static Tanzu.Toolkit.VisualStudio.Options.OptionsProvider;
 using Task = System.Threading.Tasks.Task;
 
-[assembly: ProvideBindingRedirection(AssemblyName = "Microsoft.Extensions.DependencyInjection", NewVersion = "8.0.0.1", OldVersionLowerBound = "0.0.0.0", OldVersionUpperBound = "5.0.0.2", PublicKeyToken = "adb9793829ddae60")]
-[assembly: ProvideBindingRedirection(AssemblyName = "Microsoft.Extensions.DependencyInjection.Abstractions", NewVersion = "8.0.0.2", OldVersionLowerBound = "0.0.0.0", OldVersionUpperBound = "5.0.0.2", PublicKeyToken = "adb9793829ddae60")]
 namespace Tanzu.Toolkit.VisualStudio
 {
     /// <summary>
@@ -66,7 +66,7 @@ namespace Tanzu.Toolkit.VisualStudio
         /// <summary>
         /// TanzuToolkitPackage GUID string.
         /// </summary>
-        public const string _packageGuidString = "9419e55b-9e82-4d87-8ee5-70871b01b7cc";
+        private const string _packageGuidString = "9419e55b-9e82-4d87-8ee5-70871b01b7cc";
 
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
@@ -88,6 +88,18 @@ namespace Tanzu.Toolkit.VisualStudio
         protected override void InitializeServices(IServiceCollection services)
         {
             var assemblyBasePath = Path.GetDirectoryName(GetType().Assembly.Location);
+
+            if (string.IsNullOrEmpty(assemblyBasePath))
+            {
+                if (GetService(typeof(SVsActivityLog)) is IVsActivityLog log)
+                {
+                    _ = log.LogEntry((uint)__ACTIVITYLOG_ENTRYTYPE.ALE_ERROR,
+                    ToString(),
+                    string.Format(CultureInfo.CurrentCulture, "Path.GetDirectoryName failed to find directory from the assembly location '{0}'", GetType().Assembly.Location));
+                }
+
+                throw new InvalidOperationException("Extension installation directory could not be determined.");
+            }
 
             // Cloud Foundry API
             services.AddHttpClient();
