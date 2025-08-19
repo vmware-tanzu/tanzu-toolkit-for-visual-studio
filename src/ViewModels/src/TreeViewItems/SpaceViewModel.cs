@@ -32,7 +32,7 @@ namespace Tanzu.Toolkit.ViewModels
             EmptyPlaceholder = new PlaceholderViewModel(parent: this, Services) { DisplayText = _emptyAppsPlaceholderMsg };
         }
 
-        protected internal override async Task UpdateAllChildren()
+        protected internal override async Task UpdateAllChildrenAsync()
         {
             if (IsExpanded && !IsLoading)
             {
@@ -46,6 +46,13 @@ namespace Tanzu.Toolkit.ViewModels
                     IsLoading = true;
                     try
                     {
+                        if (ParentTanzuExplorer.CloudFoundryConnection is null)
+                        {
+                            IsLoading = false;
+                            Logger.Information("Early exit from {0} due to null CloudFoundryConnection", nameof(UpdateAllChildrenAsync));
+                            return;
+                        }
+
                         var appsResponse = await ParentTanzuExplorer.CloudFoundryConnection.CfClient.GetAppsForSpaceAsync(Space);
                         if (appsResponse.Succeeded)
                         {

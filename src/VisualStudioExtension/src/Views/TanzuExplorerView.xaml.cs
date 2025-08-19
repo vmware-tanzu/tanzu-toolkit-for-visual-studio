@@ -82,5 +82,27 @@ namespace Tanzu.Toolkit.VisualStudio.Views
         {
             DeleteConnectionCommand.Execute(null);
         }
+
+        // https://stackoverflow.com/a/594662/761468
+        private void FocusOnParentTreeViewItem(object sender, MouseButtonEventArgs e)
+        {
+            var treeViewItem = VisualUpwardSearch(e.OriginalSource as DependencyObject);
+
+            if (treeViewItem != null)
+            {
+                treeViewItem.Focus();
+                e.Handled = true;
+            }
+        }
+
+        private static TreeViewItem VisualUpwardSearch(DependencyObject source)
+        {
+            while (source != null && !(source is TreeViewItem))
+            {
+                source = VisualTreeHelper.GetParent(source);
+            }
+
+            return source as TreeViewItem;
+        }
     }
 }

@@ -299,6 +299,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         public void ShowSsoLogin(object arg = null)
         {
+            ErrorMessage = null;
             SsoPasscode = null; // clear previous entry
             PageNum = 3;
         }
@@ -351,6 +352,7 @@ namespace Tanzu.Toolkit.ViewModels
 
                 if (loginResult.Succeeded)
                 {
+                    SsoPasscode = null;
                     TanzuExplorer.SetConnection(TargetCf);
                     await CloseDialogAsync();
                 }

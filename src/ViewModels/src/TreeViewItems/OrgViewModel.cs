@@ -35,7 +35,7 @@ namespace Tanzu.Toolkit.ViewModels
             EmptyPlaceholder = new PlaceholderViewModel(parent: this, Services) { DisplayText = _emptySpacesPlaceholderMsg };
         }
 
-        protected internal override async Task UpdateAllChildren()
+        protected internal override async Task UpdateAllChildrenAsync()
         {
             if (IsExpanded && !IsLoading)
             {
@@ -105,7 +105,7 @@ namespace Tanzu.Toolkit.ViewModels
                             {
                                 if (updatedChild is SpaceViewModel space)
                                 {
-                                    updateChildrenTasks.Add(ThreadingService.StartBackgroundTaskAsync(space.UpdateAllChildren));
+                                    updateChildrenTasks.Add(ThreadingService.StartBackgroundTaskAsync(space.UpdateAllChildrenAsync));
                                 }
                             }
 

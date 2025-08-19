@@ -321,7 +321,7 @@ namespace Tanzu.Toolkit.ViewModels
         {
             if (arg is SpaceViewModel spaceViewModel)
             {
-                await spaceViewModel.UpdateAllChildren();
+                await spaceViewModel.UpdateAllChildrenAsync();
             }
         }
 
@@ -329,7 +329,7 @@ namespace Tanzu.Toolkit.ViewModels
         {
             if (arg is OrgViewModel orgViewModel)
             {
-                await orgViewModel.UpdateAllChildren();
+                await orgViewModel.UpdateAllChildrenAsync();
             }
         }
 
@@ -375,10 +375,10 @@ namespace Tanzu.Toolkit.ViewModels
         {
             IsRefreshingAll = false;
             ThreadingService.IsPolling = false;
-            CloudFoundryConnection.CfClient.LogoutCfUser();
+            CloudFoundryConnection?.CfClient.LogoutCfUser();
             _dataPersistenceService.ClearData(_connectionNameKey);
-            _dataPersistenceService.ClearData(_connectionAddressKey);
             _dataPersistenceService.ClearData(_connectionSslPolicyKey);
+            AuthenticationRequired = true;
             IsLoggedIn = false;
             CloudFoundryConnection = null;
         }
@@ -391,7 +391,7 @@ namespace Tanzu.Toolkit.ViewModels
 
         internal async Task UpdateAllTreeItems()
         {
-            await TreeRoot[0].UpdateAllChildren();
+            await TreeRoot[0].UpdateAllChildrenAsync();
             if (TreeRoot.Count < 1)
             {
                 IsRefreshingAll = false;

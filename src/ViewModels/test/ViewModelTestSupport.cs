@@ -339,9 +339,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 private set => _numUpdates = value;
             }
 
-            protected internal override async Task UpdateAllChildren()
+            protected internal override Task UpdateAllChildrenAsync()
             {
-                await Task.Run(() => _numUpdates += 1); // await task to suppress CS1998
+                _numUpdates += 1;
+                return Task.CompletedTask;
             }
         }
 
@@ -360,9 +361,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 private set => _numUpdates = value;
             }
 
-            protected internal override async Task UpdateAllChildren()
+            protected internal override Task UpdateAllChildrenAsync()
             {
-                await Task.Run(() => _numUpdates += 1); // await task to suppress CS1998
+                _numUpdates += 1;
+                return Task.CompletedTask;
             }
         }
 
@@ -381,9 +383,10 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 private set => _numUpdates = value;
             }
 
-            protected internal override async Task UpdateAllChildren()
+            protected internal override Task UpdateAllChildrenAsync()
             {
-                await Task.Run(() => _numUpdates += 1); // await task to suppress CS1998
+                _numUpdates += 1;
+                return Task.CompletedTask;
             }
         }
 

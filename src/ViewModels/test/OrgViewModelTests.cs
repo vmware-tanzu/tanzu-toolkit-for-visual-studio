@@ -103,7 +103,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("UpdateAllChildren")]
+        [TestCategory("UpdateAllChildrenAsync")]
         public async Task UpdateAllChildren_RemovesStaleChildrenOnUiThread_WhenSpacesRequestSucceeds()
         {
             /** mock 4 initial children */
@@ -120,7 +120,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     .GetSpacesForOrgAsync(_expectedOrg, _expectedSkipSslValue, _expectedRetryAmount))
                 .ReturnsAsync(_fakeSpacesResponse);
 
-            await _sut.UpdateAllChildren();
+            await _sut.UpdateAllChildrenAsync();
 
             Assert.HasCount(3, _sut.Children);
             Assert.IsTrue(_sut.Children.Any(child => child is SpaceViewModel space && space.Space.SpaceName == _fakeSpaces[0].SpaceName));
@@ -133,7 +133,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("UpdateAllChildren")]
+        [TestCategory("UpdateAllChildrenAsync")]
         public async Task UpdateAllChildren_AddsNewChildrenOnUiThread_WhenSpacesRequestSucceeds()
         {
             /** mock 2 initial children */
@@ -147,7 +147,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockCloudFoundryService.Setup(m => m.GetSpacesForOrgAsync(_expectedOrg, _expectedSkipSslValue, _expectedRetryAmount))
                 .ReturnsAsync(_fakeSpacesResponse);
 
-            await _sut.UpdateAllChildren();
+            await _sut.UpdateAllChildrenAsync();
 
             Assert.HasCount(3, _sut.Children);
             Assert.IsTrue(_sut.Children.Any(child => child is SpaceViewModel space && space.Space.SpaceName == _fakeSpaces[0].SpaceName));
@@ -160,7 +160,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("UpdateAllChildren")]
+        [TestCategory("UpdateAllChildrenAsync")]
         public async Task UpdateAllChildren_CallsUpdateOnAllChildren_WhenSpacesRequestSucceeds()
         {
             MockCloudFoundryService.Setup(m => m.GetSpacesForOrgAsync(_expectedOrg, _expectedSkipSslValue, _expectedRetryAmount))
@@ -169,13 +169,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             MockThreadingService.Setup(m => m.StartBackgroundTaskAsync(It.IsAny<Func<Task>>()))
                 .Verifiable();
 
-            await _sut.UpdateAllChildren();
+            await _sut.UpdateAllChildrenAsync();
 
             foreach (var child in _sut.Children)
             {
                 if (child is SpaceViewModel space)
                 {
-                    MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(space.UpdateAllChildren), Times.Once);
+                    MockThreadingService.Verify(m => m.StartBackgroundTaskAsync(space.UpdateAllChildrenAsync), Times.Once);
                 }
                 else
                 {
@@ -185,7 +185,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("UpdateAllChildren")]
+        [TestCategory("UpdateAllChildrenAsync")]
         public async Task UpdateAllChildren_AssignsEmptyPlaceholder_WhenSpacesRequestReturnsNoSpaces()
         {
             _fakeSpacesResponse.Content.Clear();
@@ -203,7 +203,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsFalse(_sut.Children.Any(child => child is PlaceholderViewModel));
 
-            await _sut.UpdateAllChildren();
+            await _sut.UpdateAllChildrenAsync();
 
             Assert.HasCount(1, _sut.Children);
             Assert.IsTrue(_sut.Children[0].Equals(_sut.EmptyPlaceholder));
@@ -216,7 +216,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("UpdateAllChildren")]
+        [TestCategory("UpdateAllChildrenAsync")]
         public async Task UpdateAllChildren_SetsIsLoadingTrueAtStart_AndSetsIsLoadingFalseAtEnd()
         {
             MockCloudFoundryService.Setup(m => m.GetSpacesForOrgAsync(_expectedOrg, _expectedSkipSslValue, _expectedRetryAmount))
@@ -229,13 +229,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsFalse(_sut.IsLoading);
             Assert.IsTrue(_sut.IsExpanded);
 
-            await _sut.UpdateAllChildren();
+            await _sut.UpdateAllChildrenAsync();
 
             Assert.IsFalse(_sut.IsLoading);
         }
 
         [TestMethod]
-        [TestCategory("UpdateAllChildren")]
+        [TestCategory("UpdateAllChildrenAsync")]
         public async Task UpdateAllChildren_RemovesEmptyPlaceholder_WhenSpacesRequestReturnsSpaces()
         {
             _sut = new OrgViewModel(_fakeCfOrg, _fakeCfInstanceViewModel, MockTanzuExplorerViewModel.Object, Services, expanded: true)
@@ -260,14 +260,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.AreEqual(_sut.EmptyPlaceholder.GetType(), _sut.Children[0].GetType());
             Assert.AreEqual(_sut.EmptyPlaceholder.DisplayText, _sut.Children[0].DisplayText);
 
-            await _sut.UpdateAllChildren();
+            await _sut.UpdateAllChildrenAsync();
 
             Assert.HasCount(3, _sut.Children);
             Assert.IsFalse(_sut.Children.Any(child => child is PlaceholderViewModel));
         }
 
         [TestMethod]
-        [TestCategory("UpdateAllChildren")]
+        [TestCategory("UpdateAllChildrenAsync")]
         public async Task UpdateAllChildren_RemovesLoadingPlaceholder_WhenSpacesRequestReturnsSpaces()
         {
             _fakeSpacesResponse.Content.Clear();
@@ -287,13 +287,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     Assert.Contains(_sut.LoadingPlaceholder, _sut.Children);
                 }).ReturnsAsync(_fakeSpacesResponse);
 
-            await _sut.UpdateAllChildren();
+            await _sut.UpdateAllChildrenAsync();
 
             Assert.DoesNotContain(_sut.LoadingPlaceholder, _sut.Children);
         }
 
         [TestMethod]
-        [TestCategory("UpdateAllChildren")]
+        [TestCategory("UpdateAllChildrenAsync")]
         public async Task UpdateAllChildren_CollapsesSelf_AndSetsAuthRequiredTrue_WhenSpacesRequestFailsWithInvalidRefreshToken()
         {
             var fakeInvalidTokenResponse = new DetailedResult<List<CloudFoundrySpace>> { Succeeded = false, Explanation = "junk", FailureType = FailureType.InvalidRefreshToken };
@@ -305,7 +305,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsTrue(_sut.IsExpanded);
             Assert.IsFalse(_sut.ParentTanzuExplorer.AuthenticationRequired);
 
-            await _sut.UpdateAllChildren();
+            await _sut.UpdateAllChildrenAsync();
 
             Assert.IsFalse(_sut.IsLoading);
             Assert.IsFalse(_sut.IsExpanded);
@@ -313,7 +313,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("UpdateAllChildren")]
+        [TestCategory("UpdateAllChildrenAsync")]
         public async Task UpdateAllChildren_CollapsesSelf_AndLogsError_WhenSpacesRequestFails()
         {
             var fakeFailedSpacesResponse = new DetailedResult<List<CloudFoundrySpace>> { Succeeded = false, Explanation = "junk" };
@@ -326,7 +326,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsTrue(_sut.IsExpanded);
 
-            await _sut.UpdateAllChildren();
+            await _sut.UpdateAllChildrenAsync();
 
             Assert.IsFalse(_sut.IsLoading);
             Assert.IsFalse(_sut.IsExpanded);
@@ -334,7 +334,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("UpdateAllChildren")]
+        [TestCategory("UpdateAllChildrenAsync")]
         public async Task UpdateAllChildren_DisplaysWarning_AndLogsError_ForAllCaughtExceptions()
         {
             var fakeException = new Exception(":(");
@@ -351,7 +351,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                 .Setup(m => m.DisplayWarningDialog(OrgViewModel._getSpacesFailureMsg, It.Is<string>(s => s.Contains("try disconnecting & logging in again"))))
                 .Verifiable();
 
-            await _sut.UpdateAllChildren();
+            await _sut.UpdateAllChildrenAsync();
 
             MockLogger.VerifyAll();
             MockErrorDialogService.VerifyAll();

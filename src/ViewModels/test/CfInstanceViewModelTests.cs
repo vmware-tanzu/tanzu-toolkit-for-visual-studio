@@ -96,7 +96,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("UpdateAllChildren")]
+        [TestCategory("UpdateAllChildrenAsync")]
         public async Task UpdateAllChildren_RemovesStaleChildrenOnUiThread_WhenOrgsRequestSucceeds()
         {
             /** mock 4 initial children */
@@ -113,7 +113,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
                 .ReturnsAsync(_fakeOrgsResponse);
 
-            await _sut.UpdateAllChildren();
+            await _sut.UpdateAllChildrenAsync();
 
             Assert.HasCount(3, _sut.Children);
             Assert.IsTrue(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == _fakeOrgs[0].OrgName));
@@ -127,7 +127,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("UpdateAllChildren")]
+        [TestCategory("UpdateAllChildrenAsync")]
         public async Task UpdateAllChildren_AddsNewChildrenOnUiThread_WhenOrgsRequestSucceeds()
         {
             /** mock 2 initial children */
@@ -142,7 +142,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     .GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
                 .ReturnsAsync(_fakeOrgsResponse);
 
-            await _sut.UpdateAllChildren();
+            await _sut.UpdateAllChildrenAsync();
 
             Assert.HasCount(3, _sut.Children);
             Assert.IsTrue(_sut.Children.Any(child => child is OrgViewModel org && org.Org.OrgName == _fakeOrgs[0].OrgName));
@@ -155,7 +155,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("UpdateAllChildren")]
+        [TestCategory("UpdateAllChildrenAsync")]
         public async Task UpdateAllChildren_CallsUpdateOnAllChildren_WhenOrgsRequestSucceeds()
         {
             MockCloudFoundryService.Setup(m => m
@@ -166,14 +166,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     .StartBackgroundTaskAsync(It.IsAny<Func<Task>>()))
                 .Verifiable();
 
-            await _sut.UpdateAllChildren();
+            await _sut.UpdateAllChildrenAsync();
 
             foreach (var child in _sut.Children)
             {
                 if (child is OrgViewModel org)
                 {
                     MockThreadingService.Verify(m => m
-                        .StartBackgroundTaskAsync(org.UpdateAllChildren), Times.Once);
+                        .StartBackgroundTaskAsync(org.UpdateAllChildrenAsync), Times.Once);
                 }
                 else
                 {
@@ -183,7 +183,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("UpdateAllChildren")]
+        [TestCategory("UpdateAllChildrenAsync")]
         public async Task UpdateAllChildren_AssignsEmptyPlaceholder_WhenOrgsRequestReturnsNoOrgs()
         {
             _fakeOrgsResponse.Content.Clear();
@@ -200,7 +200,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsFalse(_sut.Children.Any(child => child is PlaceholderViewModel));
 
-            await _sut.UpdateAllChildren();
+            await _sut.UpdateAllChildrenAsync();
 
             Assert.HasCount(1, _sut.Children);
             Assert.IsTrue(_sut.Children[0].Equals(_sut.EmptyPlaceholder));
@@ -213,7 +213,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("UpdateAllChildren")]
+        [TestCategory("UpdateAllChildrenAsync")]
         public async Task UpdateAllChildren_SetsIsLoadingTrueAtStart_AndSetsIsLoadingFalseAtEnd()
         {
             MockCloudFoundryService.Setup(m => m.GetOrgsForCfInstanceAsync(_expectedCf, _expectedSkipSslValue, _expectedRetryAmount))
@@ -222,13 +222,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsFalse(_sut.IsLoading);
             Assert.IsTrue(_sut.IsExpanded);
 
-            await _sut.UpdateAllChildren();
+            await _sut.UpdateAllChildrenAsync();
 
             Assert.IsFalse(_sut.IsLoading);
         }
 
         [TestMethod]
-        [TestCategory("UpdateAllChildren")]
+        [TestCategory("UpdateAllChildrenAsync")]
         public async Task UpdateAllChildren_RemovesEmptyPlaceholder_WhenOrgsRequestReturnsOrgs()
         {
             _sut.Children =
@@ -243,14 +243,14 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.HasCount(1, _sut.Children);
             Assert.IsTrue(_sut.Children[0].Equals(_sut.EmptyPlaceholder));
 
-            await _sut.UpdateAllChildren();
+            await _sut.UpdateAllChildrenAsync();
 
             Assert.HasCount(3, _sut.Children);
             Assert.IsFalse(_sut.Children.Any(child => child is PlaceholderViewModel));
         }
 
         [TestMethod]
-        [TestCategory("UpdateAllChildren")]
+        [TestCategory("UpdateAllChildrenAsync")]
         public async Task UpdateAllChildren_RemovesLoadingPlaceholder_WhenOrgsRequestReturnsOrgs()
         {
             _fakeOrgsResponse.Content.Clear();
@@ -270,13 +270,13 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                     Assert.Contains(_sut.LoadingPlaceholder, _sut.Children);
                 }).ReturnsAsync(_fakeOrgsResponse);
 
-            await _sut.UpdateAllChildren();
+            await _sut.UpdateAllChildrenAsync();
 
             Assert.DoesNotContain(_sut.LoadingPlaceholder, _sut.Children);
         }
 
         [TestMethod]
-        [TestCategory("UpdateAllChildren")]
+        [TestCategory("UpdateAllChildrenAsync")]
         public async Task UpdateAllChildren_CollapsesSelf_AndSetsAuthRequiredTrue_WhenOrgsRequestFailsWithInvalidRefreshToken()
         {
             var fakeInvalidTokenResponse = new DetailedResult<List<CloudFoundryOrganization>>
@@ -291,7 +291,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
             Assert.IsTrue(_sut.IsExpanded);
             Assert.IsFalse(_sut.ParentTanzuExplorer.AuthenticationRequired);
 
-            await _sut.UpdateAllChildren();
+            await _sut.UpdateAllChildrenAsync();
 
             Assert.IsFalse(_sut.IsLoading);
             Assert.IsFalse(_sut.IsExpanded);
@@ -299,7 +299,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("UpdateAllChildren")]
+        [TestCategory("UpdateAllChildrenAsync")]
         public async Task UpdateAllChildren_CollapsesSelf_AndLogsError_WhenOrgsRequestFails()
         {
             var fakeFailedOrgsResponse = new DetailedResult<List<CloudFoundryOrganization>> { Succeeded = false, Explanation = "junk" };
@@ -314,7 +314,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
 
             Assert.IsTrue(_sut.IsExpanded);
 
-            await _sut.UpdateAllChildren();
+            await _sut.UpdateAllChildrenAsync();
 
             Assert.IsFalse(_sut.IsLoading);
             Assert.IsFalse(_sut.IsExpanded);
@@ -322,7 +322,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
         }
 
         [TestMethod]
-        [TestCategory("UpdateAllChildren")]
+        [TestCategory("UpdateAllChildrenAsync")]
         public async Task UpdateAllChildren_DisplaysWarning_AndLogsError_ForAllCaughtExceptions()
         {
             var fakeException = new Exception(":(");
@@ -342,7 +342,7 @@ namespace Tanzu.Toolkit.ViewModels.Tests
                             s.Contains("try disconnecting & logging in again"))))
                 .Verifiable();
 
-            await _sut.UpdateAllChildren();
+            await _sut.UpdateAllChildrenAsync();
 
             MockLogger.VerifyAll();
             MockErrorDialogService.VerifyAll();

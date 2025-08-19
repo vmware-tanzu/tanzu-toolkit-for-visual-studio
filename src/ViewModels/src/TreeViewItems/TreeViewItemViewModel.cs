@@ -90,7 +90,7 @@ namespace Tanzu.Toolkit.ViewModels
                     if (_isExpanded & !IsLoading)
                     {
                         // Lazily load child items in a separate thread @ expansion time
-                        _threadingService.StartBackgroundTaskAsync(UpdateAllChildren);
+                        _threadingService.StartBackgroundTaskAsync(UpdateAllChildrenAsync);
                     }
 
                     RaisePropertyChangedEvent("IsExpanded");
@@ -139,10 +139,10 @@ namespace Tanzu.Toolkit.ViewModels
 
         public virtual PlaceholderViewModel EmptyPlaceholder { get; protected set; }
 
-        protected internal virtual async Task UpdateAllChildren()
+        protected internal virtual Task UpdateAllChildrenAsync()
         {
-            // await to suppress aync warning
-            await Task.Run(() => Logger.Error("TreeViewItemViewModel.UpdateAllChildren was called; this method should only ever be run by classes that inherit from TreeViewItemViewModel."));
+            Logger.Error("{0} was called; this method should only ever be run by classes that inherit from TreeViewItemViewModel.", nameof(UpdateAllChildrenAsync));
+            return Task.CompletedTask;
         }
     }
 }
