@@ -94,8 +94,8 @@ namespace Tanzu.Toolkit.VisualStudio
                 if (GetService(typeof(SVsActivityLog)) is IVsActivityLog log)
                 {
                     _ = log.LogEntry((uint)__ACTIVITYLOG_ENTRYTYPE.ALE_ERROR,
-                    ToString(),
-                    string.Format(CultureInfo.CurrentCulture, "Path.GetDirectoryName failed to find directory from the assembly location '{0}'", GetType().Assembly.Location));
+                        ToString(),
+                        string.Format(CultureInfo.CurrentCulture, "Path.GetDirectoryName failed to find directory from the assembly location '{0}'", GetType().Assembly.Location));
                 }
 
                 throw new InvalidOperationException("Extension installation directory could not be determined.");
