@@ -1339,7 +1339,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         public async Task LoginWithSsoPasscode_ReturnsSuccessResult_WhenLoginCommandSucceeds()
         {
             const string fakePasscode = "fake sso passcode";
-            var expectedArgs = $"login -a \"{_fakeValidTarget}\" --sso-passcode \"{fakePasscode}\"";
+            var expectedArgs = $"login -a \"\"\"{_fakeValidTarget}\"\"\" --sso-passcode \"\"\"{fakePasscode}\"\"\"";
             var expectedProcessCancelTriggers = new List<string> { "OK", "Invalid passcode" };
 
             _mockCommandProcessService
@@ -1358,7 +1358,7 @@ namespace Tanzu.Toolkit.Services.Tests.CfCli
         public async Task LoginWithSsoPasscode_ReturnsFailureResult_WhenLoginCommandFails()
         {
             const string fakePasscode = "fake sso passcode";
-            var expectedArgs = $"login -a \"{_fakeValidTarget}\" --sso-passcode \"{fakePasscode}\"";
+            var expectedArgs = $"login -a \"\"\"{_fakeValidTarget}\"\"\" --sso-passcode \"\"\"{fakePasscode}\"\"\"";
             var expectedProcessCancelTriggers = new List<string> { "OK", "Invalid passcode" };
 
             _mockCommandProcessService
