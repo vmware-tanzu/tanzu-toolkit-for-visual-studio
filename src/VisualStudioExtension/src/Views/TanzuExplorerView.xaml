@@ -18,7 +18,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Button}">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="2" Margin="2,2,2,2">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="2" Margin="2">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                     </ControlTemplate>
@@ -48,7 +48,13 @@
                 </Setter.Value>
             </Setter>
         </Style>
-</UserControl.Resources>
+
+        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent" />
+        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="Transparent" />
+        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Transparent" />
+        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="Transparent"/>
+
+    </UserControl.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -68,9 +74,9 @@
                 Background="{Binding ElementName=TanzuExplorerViewElement, Path=WizardFooterBrush}">
                 <Button
                     Style="{DynamicResource RoundedButtonStyle}"
-                    Command="{ Binding ElementName=TanzuExplorerViewElement, Path=OpenLoginFormCommand }"
-                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
-                    Visibility="{Binding IsLoggedIn, Converter={StaticResource ReverseExpansionConverter}}">
+                        Command="{ Binding ElementName=TanzuExplorerViewElement, Path=OpenLoginFormCommand }"
+                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                        Visibility="{Binding IsLoggedIn, Converter={StaticResource ReverseExpansionConverter}}">
                     <Image
                         Source="Resources/tanzu_nc_dark.png"
                         Stretch="Uniform"
@@ -82,9 +88,9 @@
 
                 <Button
                     Style="{DynamicResource RoundedButtonStyle}"
-                    Command="{ Binding ElementName=TanzuExplorerViewElement, Path=DeleteConnectionCommand }"
-                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
-                    Visibility="{Binding IsLoggedIn, Converter={StaticResource ExpansionConverter}}">
+                        Command="{ Binding ElementName=TanzuExplorerViewElement, Path=DeleteConnectionCommand }"
+                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                        Visibility="{Binding IsLoggedIn, Converter={StaticResource ExpansionConverter}}">
                     <Image
                         Source="Resources/blue_logout.png"
                         Stretch="Uniform"
@@ -96,7 +102,7 @@
 
                 <Button
                     Style="{DynamicResource RoundedButtonStyle}"
-                    Command="{ Binding ElementName=TanzuExplorerViewElement, Path=RefreshAllCommand }">
+                        Command="{ Binding ElementName=TanzuExplorerViewElement, Path=RefreshAllCommand }">
                     <Grid>
                         <Image Source="Resources/Refresh_16x.png"
                                Grid.Row="0"
@@ -143,6 +149,8 @@
                     <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
                     <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
                     <Setter Property="FontWeight" Value="Normal" />
+                    <Setter Property="BorderThickness" Value="1" />
+                    <Setter Property="BorderBrush" Value="Transparent" />
                     <Style.Triggers>
                         <Trigger Property="IsSelected" Value="True">
                             <Setter Property="FontWeight" Value="Bold" />
@@ -152,16 +160,18 @@
             </TreeView.ItemContainerStyle>
 
             <TreeView.Resources>
+
                 <!-- CLOUD FOUNDRY INSTANCES -->
                 <HierarchicalDataTemplate DataType="{x:Type ViewModels:CfInstanceViewModel}" ItemsSource="{Binding Children}">
-                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                    <StackPanel Orientation="Horizontal" Margin="1">
                         <Image
                             Source="Resources/tas_16px.png"
                             Stretch="Uniform"
                             Height="16px"
                             Width="16px"
+                            Margin="4"
                             Visibility="{Binding Path=IsLoading, Converter={StaticResource InverseVisibility}}"
-                            Margin="4" />
+                            MouseDown="FocusOnParentTreeViewItem" PreviewMouseLeftButtonUp="FocusOnParentTreeViewItem" />
                         <local:Spinner Visibility="{Binding Path=IsLoading, Converter={StaticResource Visibility}}" />
                         <Button Content="{Binding DisplayText}"
                                 MouseDown="FocusOnParentTreeViewItem" PreviewMouseLeftButtonUp="FocusOnParentTreeViewItem"
@@ -179,14 +189,15 @@
 
                 <!-- CLOUD FOUNDRY ORGS -->
                 <HierarchicalDataTemplate DataType="{x:Type ViewModels:OrgViewModel}" ItemsSource="{Binding Children}">
-                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                    <StackPanel Orientation="Horizontal" Margin="1">
                         <Image
                             Source="Resources/cf_org_16x.png"
                             Stretch="Uniform"
                             Height="16px"
                             Width="16px"
+                            Margin="4"
                             Visibility="{Binding Path=IsLoading, Converter={StaticResource InverseVisibility}}"
-                            Margin="4" />
+                            MouseDown="FocusOnParentTreeViewItem" PreviewMouseLeftButtonUp="FocusOnParentTreeViewItem" />
                         <local:Spinner Visibility="{Binding Path=IsLoading, Converter={StaticResource Visibility}}" />
                         <Button Content="{Binding DisplayText}"
                                 MouseDown="FocusOnParentTreeViewItem" PreviewMouseLeftButtonUp="FocusOnParentTreeViewItem"
@@ -209,18 +220,18 @@
 
                 <!-- CLOUD FOUNDRY SPACES -->
                 <HierarchicalDataTemplate DataType="{x:Type ViewModels:SpaceViewModel}" ItemsSource="{Binding Children}">
-                    <StackPanel Orientation="Horizontal" Margin="0,2,0,1">
+                    <StackPanel Orientation="Horizontal" Margin="1">
                         <Image
                             Source="Resources/cf_space_16x.png"
                             Stretch="Uniform"
                             Height="16px"
                             Width="16px"
+                            Margin="4"
                             Visibility="{Binding Path=IsLoading, Converter={StaticResource InverseVisibility}}"
-                            Margin="4" />
+                            MouseDown="FocusOnParentTreeViewItem" PreviewMouseLeftButtonUp="FocusOnParentTreeViewItem" />
                         <local:Spinner Visibility="{Binding Path=IsLoading, Converter={StaticResource Visibility}}" />
-                        <Button Content="{Binding DisplayText}"
+                        <Button Content="{Binding DisplayText}" Style="{StaticResource RowItemStyle}"
                                 MouseDown="FocusOnParentTreeViewItem" PreviewMouseLeftButtonUp="FocusOnParentTreeViewItem"
-                                Style="{StaticResource RowItemStyle}"
                                 Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
                             <Button.ContextMenu>
                                 <ContextMenu
@@ -239,30 +250,16 @@
 
                 <!-- CLOUD FOUNDRY APPS -->
                 <DataTemplate DataType="{x:Type ViewModels:AppViewModel}">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="auto"></RowDefinition>
-                        </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal" Margin="1">
 
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="20"></ColumnDefinition>
-                            <ColumnDefinition Width="*"></ColumnDefinition>
-                            <ColumnDefinition Width="20"></ColumnDefinition>
-                        </Grid.ColumnDefinitions>
+                        <Image Source="Resources/ApplicationRunning_16x.png" Stretch="Uniform" Height="16px" Width="16px" Margin="2"
+                               Visibility="{Binding Path=IsStopped, Converter={StaticResource InverseVisibility}}"
+                               MouseDown="FocusOnParentTreeViewItem" PreviewMouseLeftButtonUp="FocusOnParentTreeViewItem" />
+                        <Image Source="Resources/ApplicationStopped_16x.png" Stretch="Uniform" Height="16px" Width="16px" Margin="2"
+                               Visibility="{Binding Path=IsStopped, Converter={StaticResource Visibility}}"
+                               MouseDown="FocusOnParentTreeViewItem" PreviewMouseLeftButtonUp="FocusOnParentTreeViewItem" />
 
-                        <Image Source="Resources/ApplicationRunning_16x.png" Stretch="Uniform" Height="16px"
-                               Width="16px" Margin="0,2,4,0"
-                               Grid.Row="0" Grid.Column="0"
-                               Visibility="{Binding Path=IsStopped, Converter={StaticResource InverseVisibility}}" />
-                        <Image Source="Resources/ApplicationStopped_16x.png" Stretch="Uniform" Height="16px"
-                               Width="16px" Margin="0,2,4,0"
-                               Grid.Row="0" Grid.Column="0"
-                               Visibility="{Binding Path=IsStopped, Converter={StaticResource Visibility}}" />
-
-                        <Button Content="{Binding Path=DisplayText, StringFormat=\{0\}}"
-                                VerticalAlignment="Center"
-                                Grid.Row="0" Grid.Column="1"
-                                Style="{StaticResource RowItemStyle}"
+                        <Button Content="{Binding Path=DisplayText}" Style="{StaticResource RowItemStyle}"
                                 Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
                                 MouseDown="FocusOnParentTreeViewItem" PreviewMouseLeftButtonUp="FocusOnParentTreeViewItem">
                             <Button.ContextMenu>
@@ -308,17 +305,17 @@
                                 </ContextMenu>
                             </Button.ContextMenu>
                         </Button>
-                    </Grid>
+                    </StackPanel>
                 </DataTemplate>
 
                 <!-- PLACEHOLDER TREE VIEW ITEMS -->
                 <DataTemplate DataType="{x:Type ViewModels:PlaceholderViewModel}">
-                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                    <StackPanel Orientation="Horizontal" Margin="1">
                         <TextBlock
                             Text="{Binding DisplayText}"
                             FontStyle="Italic"
                             VerticalAlignment="Bottom"
-                            Foreground="{Binding ElementName=TanzuExplorerViewElement, Path=Foreground}" />
+                                   Foreground="{Binding ElementName=TanzuExplorerViewElement, Path=Foreground}" />
                     </StackPanel>
                 </DataTemplate>
 
