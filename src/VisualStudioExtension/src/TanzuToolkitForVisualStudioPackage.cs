@@ -1,3 +1,4 @@
+//#define OFFLINEMODE
 using Community.VisualStudio.Toolkit;
 using Community.VisualStudio.Toolkit.DependencyInjection.Microsoft;
 using Microsoft.Extensions.DependencyInjection;
@@ -111,17 +112,22 @@ namespace Tanzu.Toolkit.VisualStudio
             services.AddTransient<ICfApiClient, CfApiClient>();
 
             //Services
+#if OFFLINEMODE
+            services.AddTransient<ICloudFoundryService, OfflineCloudFoundryService>();
+            services.AddTransient<ICfCliService, OfflineCfCliService>();
+#else
             services.AddTransient<ICloudFoundryService, CloudFoundryService>();
+            services.AddSingleton<ICfCliService>(provider => new CfCliService(assemblyBasePath, provider));
+#endif
             services.AddSingleton<IViewLocatorService, VsViewLocatorService>();
             services.AddSingleton<IDialogService, DialogService>();
-            services.AddSingleton<ICfCliService>(provider => new CfCliService(assemblyBasePath, provider));
             services.AddSingleton<IFileService>(new FileService(assemblyBasePath));
             services.AddSingleton<ILoggingService, LoggingService>();
             services.AddSingleton<IToolWindowService, VsToolWindowService>();
             services.AddSingleton<IThreadingService, ThreadingService>();
             services.AddSingleton<IErrorDialog, ErrorDialogService>();
             services.AddSingleton<IUIDispatcherService, VisualStudioUIDispatcherService>();
-            services.AddSingleton<IThemeService>(new ThemeService());
+            services.AddSingleton<IThemeService, ThemeService>();
             services.AddTransient<ICommandProcessService, CommandProcessService>();
             services.AddSingleton<ISerializationService, SerializationService>();
             services.AddSingleton<IDataPersistenceService>(provider => new DataPersistenceService(this, provider));
