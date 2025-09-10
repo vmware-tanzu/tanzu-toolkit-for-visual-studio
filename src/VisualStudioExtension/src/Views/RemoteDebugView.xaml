@@ -1,4 +1,4 @@
-﻿<local:AbstractModal
+<local:AbstractModal
     x:Class="Tanzu.Toolkit.VisualStudio.RemoteDebugView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -148,18 +148,20 @@
         </StackPanel>
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Bottom" Margin="0,12,0,0">
-            <Button Content="Cancel"
-                    IsCancel="True"
-                    Margin="4"
-                    Command="{Binding ElementName=RemoteDebugViewElement, Path=CancelCommand}"
-                    HorizontalAlignment="Right" />
-            <Button Content="{Binding PushNewAppButtonText}" Margin="4"
-                    Command="{Binding ElementName=RemoteDebugViewElement, Path=ShowDeploymentWindowCommand}"
-                    HorizontalAlignment="Right" />
             <Button Content="OK"
                     Margin="4"
                     IsDefault="True"
                     Command="{Binding ElementName=RemoteDebugViewElement, Path=ResolveMissingAppCommand}"
+                    HorizontalAlignment="Right" />
+
+            <Button Content="{Binding PushNewAppButtonText}" Margin="4"
+                    Command="{Binding ElementName=RemoteDebugViewElement, Path=ShowDeploymentWindowCommand}"
+                    HorizontalAlignment="Right" />
+            
+            <Button Content="Cancel"
+                    IsCancel="True"
+                    Margin="4"
+                    Command="{Binding ElementName=RemoteDebugViewElement, Path=CancelCommand}"
                     HorizontalAlignment="Right" />
         </StackPanel>
     </DockPanel>

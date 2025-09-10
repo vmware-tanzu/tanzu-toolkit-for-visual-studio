@@ -61,7 +61,7 @@
 
         <StackPanel Name="Page1"
                     Visibility="{Binding PageNum, Converter={StaticResource Page1Displayer}}"
-                    Margin="52,0">
+                    Margin="50,0">
 
             <Label Content="API Address" />
 
@@ -185,29 +185,20 @@
                         Content="Next"
                         IsDefault="{Binding PageNum, Converter={StaticResource IntIs1}}"
                         Margin="4"
-                        Padding="4,0"
+                        Padding="4"
                         HorizontalAlignment="Right"
                         Visibility="{Binding ConnectingToCf, Converter={StaticResource InverseCollapsedVisibility}}"
                         Command="{Binding ElementName=LoginViewElement, Path=IncrementPageCommand}" />
-
                     <Button
                         Content="Verifying..."
                         IsEnabled="False"
                         Margin="4"
-                        Padding="4,0"
+                        Padding="4"
                         HorizontalAlignment="Right"
                         Visibility="{Binding ConnectingToCf, Converter={StaticResource CollapsedVisibility}}" />
-                </StackPanel>
-
-                <StackPanel
-                    Orientation="Horizontal"
-                    Margin="0,8"
-                    Height="auto"
-                    HorizontalAlignment="Left">
-
                     <Button
                         Margin="4"
-                        Padding="4,0"
+                        Padding="4"
                         Click="Close"
                         IsCancel="{Binding PageNum, Converter={StaticResource IntIs1}}"
                         Content="Cancel" />
@@ -217,7 +208,7 @@
 
         <StackPanel Name="Page2"
                     Visibility="{Binding PageNum, Converter={StaticResource Page2Displayer}}"
-                    Margin="52,0">
+                    Margin="50,0">
 
             <Label Content="Username" />
             <TextBox
@@ -260,46 +251,45 @@
                 </Grid.RowDefinitions>
 
                 <Separator Grid.Column="0" Grid.Row="0" />
-                <TextBlock Text="or" Grid.Column="1" Grid.Row="0" Margin="8,8,8,8" HorizontalAlignment="Center" />
+                <TextBlock Text="or" Grid.Column="1" Grid.Row="0" Margin="16" HorizontalAlignment="Center" />
                 <Separator Grid.Column="2" Grid.Row="0" />
 
                 <Button
                     Content="Sign in with SSO"
                     Grid.Row="1"
                     Grid.ColumnSpan="3"
+                    Padding="6"
                     Command="{Binding ElementName=LoginViewElement, Path=SsoCommand}" />
             </Grid>
 
-            <Grid Name="Page2Buttons" Margin="0,8,0,8">
+            <Grid Name="Page2Buttons" Margin="0">
                 <StackPanel
                     Orientation="Horizontal"
-                    Margin="0,8"
+                    Margin="0,16"
                     Height="auto"
-                    HorizontalAlignment="Right">
+                    HorizontalAlignment="Left">
 
                     <Button
-                        Margin="4"
-                        Padding="4,0"
+                        Margin="5"
+                        Padding="4"
                         Command="{Binding ElementName=LoginViewElement, Path=DecrementPageCommand}"
                         Content="Back" />
+                </StackPanel>
+                
+                <StackPanel
+                    Orientation="Horizontal"
+                    Margin="0,16"
+                    Height="auto"
+                    HorizontalAlignment="Right">
 
                     <Button
                         Content="Log In"
                         IsDefault="{Binding PageNum, Converter={StaticResource IntIs2}}"
                         IsEnabled="{Binding IsApiAddressFormatValid}"
                         Margin="4"
-                        Padding="4,0"
-                        HorizontalAlignment="Right"
+                        Padding="4"
                         Command="{ Binding ElementName=LoginViewElement, Path=AddCloudCommand }"
                         CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" />
-                </StackPanel>
-
-                <StackPanel
-                    Orientation="Horizontal"
-                    Margin="0,8"
-                    Height="auto"
-                    HorizontalAlignment="Left">
-
                     <Button
                         Margin="4"
                         Padding="4,0"
@@ -335,33 +325,37 @@
 
                 <StackPanel
                     Orientation="Horizontal"
-                    Margin="0,12"
-                    Height="auto"
-                    HorizontalAlignment="Right">
-
-                    <Button
-                        Content="Back"
-                        Margin="0,0,8,0"
-                        Command="{Binding ElementName=LoginViewElement, Path=DecrementPageCommand}" />
-
-                    <Button
-                        Content="Log In"
-                        IsDefault="{Binding PageNum, Converter={StaticResource IntIs3}}"
-                        HorizontalAlignment="Right"
-                        Command="{ Binding ElementName=LoginViewElement, Path=LogInWithPasscodeCommand }"
-                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" />
-                </StackPanel>
-
-                <StackPanel
-                    Orientation="Horizontal"
-                    Margin="0,12"
+                    Margin="0,8"
                     Height="auto"
                     HorizontalAlignment="Left">
 
                     <Button
+                        Content="Back"
+                        Margin="4"
+                        Padding="4"
+                        Command="{Binding ElementName=LoginViewElement, Path=DecrementPageCommand}" />
+                </StackPanel>
+
+                <StackPanel
+                    Orientation="Horizontal"
+                    Margin="0,8"
+                    Height="auto"
+                    HorizontalAlignment="Right">
+
+                    <Button
+                        Content="Log In"
+                        Margin="4"
+                        Padding="4"
+                        IsDefault="{Binding PageNum, Converter={StaticResource IntIs3}}"
+                        Command="{ Binding ElementName=LoginViewElement, Path=LogInWithPasscodeCommand }"
+                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" />
+                    <Button
+                        Margin="4"
+                        Padding="4,0"
                         Click="Close"
                         IsCancel="{Binding PageNum, Converter={StaticResource IntIs3}}"
                         Content="Cancel" />
+
                 </StackPanel>
             </Grid>
         </StackPanel>

@@ -427,7 +427,7 @@ namespace Tanzu.Toolkit.Services.CfCli
 
         public async Task<DetailedResult> LoginWithSSOPasscodeAsync(string apiAddress, string passcode)
         {
-            var args = $"login -a \"{apiAddress}\" --sso-passcode \"{passcode}\"";
+            var args = $"login -a \"\"\"{apiAddress}\"\"\" --sso-passcode \"\"\"{passcode}\"\"\"";
 
             var processCancellationTriggers = new List<string> { "OK", "Invalid passcode" };
 
@@ -530,7 +530,7 @@ namespace Tanzu.Toolkit.Services.CfCli
             var pathToCfExe = _fileService.FullPathToCfExe;
             if (string.IsNullOrEmpty(pathToCfExe))
             {
-                return new DetailedResult(false, $"Unable to locate cf.exe.");
+                return new DetailedResult(false, "Unable to locate cf.exe.");
             }
 
             var envVars = new Dictionary<string, string> { { "CF_HOME", ConfigFilePath } };

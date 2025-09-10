@@ -353,6 +353,7 @@ namespace Tanzu.Toolkit.ViewModels
                 if (loginResult.Succeeded)
                 {
                     SsoPasscode = null;
+                    PageNum = 1;
                     TanzuExplorer.SetConnection(TargetCf);
                     await CloseDialogAsync();
                 }
