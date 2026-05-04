@@ -12,7 +12,7 @@ namespace Tanzu.Toolkit.VisualStudio
         public const string Name = "Tanzu Toolkit for Visual Studio 2022";
         public const string Description = @"Deploy, debug and manage your apps on Tanzu Platform from within Visual Studio.";
         public const string Language = "en-US";
-        public const string Version = "1.1.0";
+        public const string Version = "1.1.1";
         public const string Author = "VMware Tanzu .NET Experience";
         public const string Tags = "";
         public const bool IsPreview = false;
