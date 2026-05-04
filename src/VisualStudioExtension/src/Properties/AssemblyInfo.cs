@@ -11,3 +11,6 @@ using System.Runtime.InteropServices;
 [assembly:
     ProvideBindingRedirection(AssemblyName = "Microsoft.Extensions.DependencyInjection.Abstractions", NewVersion = "8.0.0.2", OldVersionLowerBound = "0.0.0.0", OldVersionUpperBound = "5.0.0.2",
         PublicKeyToken = "adb9793829ddae60")]
+[assembly:
+    ProvideBindingRedirection(AssemblyName = "Microsoft.Extensions.Http", NewVersion = "8.0.0.1", OldVersionLowerBound = "0.0.0.0", OldVersionUpperBound = "8.0.0.1",
+        PublicKeyToken = "adb9793829ddae60")]
