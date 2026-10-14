@@ -71,12 +71,28 @@ namespace Tanzu.Toolkit.VisualStudio
 
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
-            await base.InitializeAsync(cancellationToken, progress);
+            try
+            {
+                await base.InitializeAsync(cancellationToken, progress);
 
-            this.RegisterToolWindows();
-            await this.RegisterCommandsAsync();
+                this.RegisterToolWindows();
+                await this.RegisterCommandsAsync();
 
-            GeneralOptionsModel.Saved += OnSettingsSaved;
+                GeneralOptionsModel.Saved += OnSettingsSaved;
+            }
+            catch (Exception ex)
+            {
+                // Log to Activity Log for debugging
+                if (await GetServiceAsync(typeof(SVsActivityLog)) is IVsActivityLog log)
+                {
+                    _ = log.LogEntry((uint)__ACTIVITYLOG_ENTRYTYPE.ALE_ERROR,
+                        ToString(),
+                        string.Format(CultureInfo.CurrentCulture, 
+                            "TanzuToolkitForVisualStudioPackage.InitializeAsync failed: {0}\n{1}", 
+                            ex.Message, ex.StackTrace));
+                }
+                throw;
+            }
         }
 
         private void OnSettingsSaved(GeneralOptionsModel obj)

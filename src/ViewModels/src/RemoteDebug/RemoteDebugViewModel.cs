@@ -41,7 +41,9 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
         private bool _debugAgentInstalled;
         private bool _launchFileExists;
         private CancellationTokenSource _tokenSource;
+        private bool _isV3Buildpack;
         private const string _appDirLinux = "/home/vcap/app";
+        private const string _appDirLinuxV3 = "/home/vcap/workspace";
         private const string _appDirWindows = @"c:\Users\vcap\app";
         private string _vsdbgInstallPath;
         public const string _launchFileName = "launch.json";
@@ -278,9 +280,25 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                         }
                     }
 
-                    var sshCmd = stack.Contains("win")
-                        ? $"{_vsdbgInstallPath}"
-                        : $"/tmp/lifecycle/shell {_appDirLinux} {_vsdbgInstallPath}";
+                    var appPath = _isV3Buildpack ? _appDirLinuxV3 : _appDirLinux;
+                    string sshCmd;
+                    if (stack.Contains("win"))
+                    {
+                        sshCmd = $"{_vsdbgInstallPath}";
+                    }
+                    else if (_isV3Buildpack)
+                    {
+                        // For CNB (V3 buildpacks), use standard shell since /tmp/lifecycle/shell isn't available
+                        // Use /bin/sh which is POSIX compliant and universally available in CNB containers
+                        // Use single quotes to avoid quote escaping issues when wrapped by CfSshWrapper
+                        sshCmd = $"/bin/sh -c 'cd {appPath} && {_vsdbgInstallPath}'";
+                    }
+                    else
+                    {
+                        // For V2 buildpacks, use the lifecycle shell
+                        var shellPath = "/tmp/lifecycle/shell";
+                        sshCmd = $"{shellPath} {appPath} {_vsdbgInstallPath}";
+                    }
 
                     var launchFileConfig = new RemoteDebugLaunchConfig
                     {
@@ -403,12 +421,23 @@ namespace Tanzu.Toolkit.ViewModels.RemoteDebug
                 sshCommand = $"dir {vsdbgSearchDirectory}";
                 pathSeparator = "\\";
             }
+            else
+            {
+                // detect v2 vs v3
+                var lsResult = await _cfCliService.ExecuteSSHCommandAsync(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, "ls");
+                if (lsResult.Succeeded && lsResult.CmdResult.StdOut.Contains("workspace"))
+                {
+                    _isV3Buildpack = true;
+                    vsdbgSearchDirectory = "/home/vcap/layers/tanzu-buildpacks_vsdbg/vsdbg";
+                    sshCommand = $"ls {vsdbgSearchDirectory}";
+                }
+            }
 
             var sshResult = await _cfCliService.ExecuteSSHCommandAsync(AppToDebug.AppName, AppToDebug.ParentSpace.ParentOrg.OrgName, AppToDebug.ParentSpace.SpaceName, sshCommand);
             var vsdbExecutableListed = sshResult.CmdResult.StdOut.IndexOf(vsdbgDll, StringComparison.OrdinalIgnoreCase) >= 0;
             if (sshResult.Succeeded && vsdbExecutableListed)
             {
-                _vsdbgInstallPath = vsdbgSearchDirectory + "vsdbg";
+                _vsdbgInstallPath = vsdbgSearchDirectory + pathSeparator + "vsdbg";
                 return true;
             }
 
